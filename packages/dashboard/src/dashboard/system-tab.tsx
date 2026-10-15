@@ -1,19 +1,18 @@
-import { Play, Square } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Boxes, SquareKanban } from "lucide-react";
+import { Fragment, useState } from "react";
 
 import { messageOf, type PartView, post } from "@/api";
+import { Accent } from "@/components/accent";
 import { ProblemBox } from "@/components/problem-box";
+import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
 
-const AREAS: { area: PartView["area"]; title: string }[] = [
-  { area: "products", title: "Your products" },
-  { area: "factory", title: "The factory" },
-];
-
-// Every part with its light and buttons, the products first.
+// The system as a map: the products in columns, each after the products it
+// needs, joined by arrows; the factory's own parts beside them; the lights'
+// legend below.
 export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const press = (path: string) => {
@@ -22,48 +21,232 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
       setProblem(messageOf(error));
     });
   };
+  const products = state.parts.filter((part) => part.area === "products");
+  const factory = state.parts.filter((part) => part.area === "factory");
   return (
-    <div className="grid gap-6">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          onClick={() => {
-            press("/api/start-all");
-          }}
-        >
-          <Play aria-hidden /> Start all
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            press("/api/stop-all");
-          }}
-        >
-          <Square aria-hidden /> Stop all
-        </Button>
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-3 px-1 pt-2">
+        <h1 className="text-[30px] font-medium tracking-[-0.02em]">
+          <Heading parts={state.parts} />
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="h-11 rounded-xl border-0 px-4"
+            onClick={() => {
+              press("/api/stop-all");
+            }}
+          >
+            Stop all
+          </Button>
+          <Button
+            className="h-11 rounded-xl px-4"
+            onClick={() => {
+              press("/api/start-all");
+            }}
+          >
+            Start all
+          </Button>
+        </div>
       </div>
       {problem && <ProblemBox title="That did not work" text={problem} />}
-      {AREAS.map(({ area, title }) => {
-        const parts = state.parts.filter((part) => part.area === area);
-        if (parts.length === 0) return null;
-        return (
-          <section key={area} className="grid gap-3" aria-label={title}>
-            <h2 className="text-sm font-semibold text-muted-foreground">
-              {title}
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {parts.map((part) => (
-                <PartCard key={part.id} part={part} onPress={press} />
+      <div className="flex flex-wrap gap-5">
+        <section
+          aria-label="Your products"
+          className="flex min-w-0 flex-[999_1_640px] flex-col gap-[18px] rounded-3xl bg-card p-6"
+        >
+          <span className="text-[13px] text-muted-foreground">
+            Your products
+          </span>
+          {products.length === 0 ? (
+            <p className="py-8 text-center text-muted-foreground">
+              No products yet — add them on the{" "}
+              <a
+                href="#products"
+                className="text-foreground underline underline-offset-2"
+              >
+                Products
+              </a>{" "}
+              tab.
+            </p>
+          ) : (
+            <ProductMap parts={products} onPress={press} />
+          )}
+        </section>
+        <SidePanel state={state} factory={factory} onPress={press} />
+      </div>
+      <div className="flex flex-wrap gap-[18px] px-1 text-[13px] text-muted-foreground">
+        {LIGHTS.map((light) => (
+          <span key={light} className="inline-flex items-center gap-2">
+            <StatusLight light={light} /> {LABEL[light]}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Beside the map, on a glow: what is left to set up, then the factory's own
+// parts.
+function SidePanel({
+  state,
+  factory,
+  onPress,
+}: Readonly<{
+  state: FactoryState;
+  factory: PartView[];
+  onPress: (path: string) => void;
+}>) {
+  const steps = nextSteps(state);
+  if (steps.length === 0 && factory.length === 0) return null;
+  return (
+    <aside className="glow-card flex min-w-0 flex-[1_1_300px] flex-col gap-3 rounded-3xl p-6">
+      {steps.length > 0 && (
+        <section aria-label="Next steps" className="grid gap-3">
+          <span className="text-[13px] text-muted-foreground">Next steps</span>
+          {steps.map((step) => (
+            <a
+              key={step.href}
+              href={step.href}
+              className="flex items-center gap-3 rounded-2xl border border-border-soft bg-card px-4 py-3.5 hover:border-foreground/40"
+            >
+              <span className="flex size-8 flex-none items-center justify-center rounded-lg bg-surface-2 text-muted-foreground [&_svg]:size-4">
+                {step.icon}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[15px] font-medium">{step.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {step.text}
+                </span>
+              </span>
+              <ArrowRight
+                className="size-4 text-muted-foreground"
+                aria-hidden
+              />
+            </a>
+          ))}
+        </section>
+      )}
+      {factory.length > 0 && (
+        <section aria-label="The factory" className="grid gap-3">
+          <span className="text-[13px] text-muted-foreground">The factory</span>
+          {factory.map((part) => (
+            <PartCard key={part.id} part={part} onPress={onPress} />
+          ))}
+        </section>
+      )}
+    </aside>
+  );
+}
+
+// What is left to set up; each step goes once it is done.
+function nextSteps(state: FactoryState) {
+  const steps = [];
+  if (state.products.length === 0)
+    steps.push({
+      href: "#products",
+      icon: <Boxes aria-hidden />,
+      title: "Add your products",
+      text: "Make something new, or bring existing code.",
+    });
+  if (state.company.tracker === "none")
+    steps.push({
+      href: "#settings",
+      icon: <SquareKanban aria-hidden />,
+      title: "Connect Jira or GitHub",
+      text: "Where your work is tracked.",
+    });
+  return steps;
+}
+
+function Heading({ parts }: Readonly<{ parts: PartView[] }>) {
+  const lit = parts.filter((part) => part.light !== "none");
+  if (lit.some((part) => part.light === "problem"))
+    return (
+      <>
+        Something needs <Accent>you</Accent>
+      </>
+    );
+  if (lit.length > 0 && lit.every((part) => part.light === "running"))
+    return (
+      <>
+        Everything <Accent>running</Accent>
+      </>
+    );
+  return (
+    <>
+      Your <Accent>system</Accent>
+    </>
+  );
+}
+
+// Each product one column after the deepest product it needs.
+export function columnsOf(parts: PartView[]): PartView[][] {
+  const byId = new Map(parts.map((part) => [part.id, part]));
+  const depth = new Map<string, number>();
+  const depthOf = (part: PartView, seen: Set<string>): number => {
+    const known = depth.get(part.id);
+    if (known !== undefined) return known;
+    const below = part.dependsOn
+      .map((id) => byId.get(id))
+      .filter(
+        (other): other is PartView =>
+          other !== undefined && !seen.has(other.id),
+      )
+      .map((other) => depthOf(other, new Set([...seen, part.id])));
+    const found = below.length === 0 ? 0 : 1 + Math.max(...below);
+    depth.set(part.id, found);
+    return found;
+  };
+  const columns: PartView[][] = [];
+  for (const part of parts) {
+    const at = depthOf(part, new Set([part.id]));
+    columns[at] = [...(columns[at] ?? []), part];
+  }
+  return columns.filter(Boolean);
+}
+
+function ProductMap({
+  parts,
+  onPress,
+}: Readonly<{ parts: PartView[]; onPress: (path: string) => void }>) {
+  const columns = columnsOf(parts);
+  return (
+    <div className="overflow-x-auto">
+      <div
+        className="flex items-center gap-3"
+        style={{ minWidth: `${String(columns.length * 260)}px` }}
+      >
+        {columns.map((column, index) => (
+          <Fragment key={column[0]?.id ?? index}>
+            {index > 0 && <Arrow />}
+            <div className="flex flex-1 flex-col gap-3">
+              {column.map((part) => (
+                <PartCard key={part.id} part={part} onPress={onPress} />
               ))}
             </div>
-          </section>
-        );
-      })}
-      {state.parts.length === 0 && (
-        <p className="text-muted-foreground">
-          Nothing to start yet: a product shows here once a kit knows how to run
-          it.
-        </p>
-      )}
+          </Fragment>
+        ))}
+      </div>
     </div>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg
+      className="flex-none text-arrow"
+      width="28"
+      height="16"
+      viewBox="0 0 28 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M2 8h22M18 3l6 5-6 5" />
+    </svg>
   );
 }

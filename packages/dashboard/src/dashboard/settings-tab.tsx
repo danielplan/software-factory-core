@@ -1,13 +1,15 @@
 import { useState } from "react";
 
 import { type GroupView, messageOf, post } from "@/api";
+import { Accent } from "@/components/accent";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Field } from "@/setup/company-step";
+import { Field } from "@/components/field";
 import { TRACKER_NAMES } from "@/setup/draft";
 
 import type { FactoryState } from "./dashboard";
+import { TrackerPanel } from "./tracker-panel";
 
 // A secret the server says is set; its value is never sent to the page.
 const SECRET_SET = "(set)";
@@ -16,8 +18,11 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const { company } = state;
   return (
     <div className="grid gap-5">
+      <h1 className="px-1 pt-2 text-[30px] font-medium tracking-[-0.02em]">
+        Your <Accent>settings</Accent>
+      </h1>
       <section
-        className="grid gap-2 rounded-xl border bg-card p-4"
+        className="glow-card grid gap-2 rounded-3xl p-6"
         aria-label="Company"
       >
         <h2 className="font-semibold">{company.name}</h2>
@@ -31,6 +36,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
           <dd className="break-all">{state.root}</dd>
         </dl>
       </section>
+      <TrackerPanel state={state} />
       {state.settings.map((group) => (
         <GroupForm key={group.id} group={group} />
       ))}
@@ -42,7 +48,7 @@ function GroupForm({ group }: Readonly<{ group: GroupView }>) {
   const form = useGroupForm(group.id);
   return (
     <section
-      className="grid gap-4 rounded-xl border bg-card p-4"
+      className="grid gap-4 rounded-3xl bg-card p-6"
       aria-label={group.name}
     >
       <header className="grid gap-1">
@@ -128,7 +134,7 @@ function SettingInput({
       {field.kind === "choice" ? (
         <select
           id={id}
-          className="h-9 rounded-md border bg-background px-2 text-sm"
+          className="h-10 rounded-[10px] border border-input bg-card px-2 text-sm"
           value={shown}
           onChange={(event) => {
             onType(event.target.value);

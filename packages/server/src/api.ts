@@ -76,11 +76,14 @@ export type SetupProduct = {
   isNew: boolean;
 };
 
-export type FinishSetup = {
-  company: { name: string; about: string; tracker: Company["tracker"] };
-  // The factory folder; when empty, a new one in the factories folder.
-  folder?: string;
-  products: SetupProduct[];
-  // The tracker's settings (the GitHub board's, or Jira's).
+// Setting up as part of the dashboard, one step at a time: the company
+// first (its factory folder), then products whenever, then the tracker.
+export type CreateCompany = { name: string; about: string; folder?: string };
+
+export type AddProducts = { products: SetupProduct[] };
+
+export type ChooseTracker = {
+  tracker: Company["tracker"];
+  // The chosen tracker's settings (the GitHub board's, or Jira's).
   settings?: Record<string, string>;
 };

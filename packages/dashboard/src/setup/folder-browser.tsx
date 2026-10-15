@@ -13,7 +13,7 @@ export function FolderBrowser({
 }: Readonly<{ path: string; onPath: (path: string) => void }>) {
   const list = useFolderList(path, onPath);
   return (
-    <div className="grid gap-2 rounded-xl border bg-card p-3">
+    <div className="grid gap-2 rounded-[14px] border border-border-soft bg-card p-3">
       <PathBar path={list?.path ?? path} list={list} onPath={onPath} />
       <ul
         className="grid max-h-56 gap-0.5 overflow-y-auto"

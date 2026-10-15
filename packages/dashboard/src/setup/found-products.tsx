@@ -135,7 +135,7 @@ function FoundList({
           return (
             <li
               key={candidate.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3"
+              className="flex flex-wrap items-center gap-3 rounded-[14px] border border-border-soft bg-card p-3"
             >
               <input
                 type="checkbox"

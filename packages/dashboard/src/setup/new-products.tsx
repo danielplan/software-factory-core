@@ -1,24 +1,27 @@
-import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { AppWindow, Box, Plus, Server, Smartphone, Trash2 } from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 import type { KitView, SetupProduct } from "@/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { ChoiceCard } from "@/components/choice-card";
 
-import { Field } from "./company-step";
+import { Field } from "@/components/field";
 import { freeId, freePort, inside } from "./draft";
 
-// Greenfield: the products to make, each of a kind a kit can make.
+// Something new: the products to make, each of a kind a kit can make, with
+// ids and ports no product has yet (`existing` are the factory's own).
 export function NewProducts({
   kits,
   products,
+  existing,
   factory,
   onChange,
 }: Readonly<{
   kits: KitView[];
   products: SetupProduct[];
+  existing: { id: string; port: number | null }[];
   factory: string;
   onChange: (products: SetupProduct[]) => void;
 }>) {
@@ -26,7 +29,8 @@ export function NewProducts({
   const [kind, setKind] = useState(makers[0]?.kind ?? "");
   const [name, setName] = useState("");
   const add = () => {
-    const id = freeId(name, products);
+    const taken = [...existing, ...products];
+    const id = freeId(name, taken);
     onChange([
       ...products,
       {
@@ -35,7 +39,7 @@ export function NewProducts({
         kind,
         folder: inside(factory, "code", id),
         about: "",
-        port: freePort(kind, products),
+        port: freePort(kind, taken),
         isNew: true,
       },
     ]);
@@ -43,8 +47,8 @@ export function NewProducts({
   };
   return (
     <div className="grid gap-6">
-      <div className="grid gap-3 rounded-xl border bg-card p-4">
-        <p className="font-medium">Add a product</p>
+      <div className="grid gap-4">
+        <p className="text-[22px] font-medium">What do you want to make?</p>
         <KindPicker kits={makers} kind={kind} onKind={setKind} />
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-48 flex-1">
@@ -84,31 +88,31 @@ function KindPicker({
 }>) {
   return (
     <div
-      className="grid gap-2 sm:grid-cols-3"
+      className="grid gap-4 sm:grid-cols-2"
       role="radiogroup"
       aria-label="Kind"
     >
       {kits.map((kit) => (
-        <button
+        <ChoiceCard
           key={kit.id}
-          type="button"
-          role="radio"
-          aria-checked={kit.kind === kind}
-          onClick={() => {
+          chosen={kit.kind === kind}
+          icon={ICONS[kit.kind] ?? <Box aria-hidden />}
+          title={kit.name}
+          text={kit.about}
+          onChoose={() => {
             onKind(kit.kind);
           }}
-          className={cn(
-            "grid gap-1 rounded-lg border p-3 text-left text-sm transition hover:border-primary",
-            kit.kind === kind && "border-primary bg-secondary",
-          )}
-        >
-          <span className="font-semibold">{kit.name}</span>
-          <span className="text-muted-foreground">{kit.about}</span>
-        </button>
+        />
       ))}
     </div>
   );
 }
+
+const ICONS: Record<string, ReactNode> = {
+  "react-web-app": <AppWindow aria-hidden />,
+  "expo-app": <Smartphone aria-hidden />,
+  "nestjs-backend": <Server aria-hidden />,
+};
 
 function ProductList({
   products,
@@ -133,7 +137,7 @@ function ProductList({
       {products.map((product) => (
         <li
           key={product.id}
-          className="grid gap-2 rounded-xl border bg-card p-4"
+          className="grid gap-2 rounded-[14px] border border-border-soft bg-card p-4"
         >
           <div className="flex items-center gap-2">
             <span className="font-semibold">{product.name}</span>

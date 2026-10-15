@@ -15,7 +15,7 @@ import { defineKit } from "@software-factory/core";
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/method";
 
-import type { FinishSetup, State } from "../src/api.ts";
+import type { State } from "../src/api.ts";
 import { PAGE_HEADER, startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
 import { trackers } from "../src/trackers.ts";
@@ -75,7 +75,7 @@ async function stage() {
   return { home, session, server, base, post };
 }
 
-test("brownfield and greenfield in one: found products, a new one, the tracker, then the factory", async () => {
+test("setup in the dashboard: the company first, then products found and made, then the tracker", async () => {
   const { home, session, server, base, post } = await stage();
   try {
     const code = join(home, "code");
@@ -87,54 +87,59 @@ test("brownfield and greenfield in one: found products, a new one, the tracker, 
       state.kits.map((k) => [k.id, k.canCreate]),
       [["web-kit", true]],
     );
+    // Nothing but the company can come first.
+    assert.deepEqual(
+      await (await post("/api/products", { products: [] })).json(),
+      { error: "Name your company first." },
+    );
+
+    const created = await post("/api/company", {
+      name: "Acme Garden",
+      about: "Garden tools.",
+    });
+    const root = join(home, "Factories", "acme-garden");
+    assert.equal(await created.json(), root);
+    const empty = session.state();
+    assert.ok(empty.mode === "factory");
+    assert.deepEqual(empty.products, []);
+    assert.equal(empty.company.tracker, "none");
+    assert.equal(
+      (await post("/api/company", { name: "Again", about: "" })).status,
+      409,
+    );
 
     const detected = (await (
       await post("/api/setup/detect", { folder: code })
-    ).json()) as {
-      candidates: { id: string; name: string; port?: number }[];
-    };
+    ).json()) as { candidates: { id: string; name: string; port?: number }[] };
     assert.deepEqual(
       detected.candidates.map((c) => [c.id, c.name, c.port]),
       [["shop", "Found app", 5173]],
     );
-
-    const request: FinishSetup = {
-      company: { name: "Acme Garden", about: "Garden tools.", tracker: "jira" },
-      products: [
-        {
-          id: "shop",
-          name: "Shop",
-          kind: "web-app",
-          folder: join(code, "shop"),
-          about: "",
-          port: 5173,
-          isNew: false,
-        },
-        {
-          id: "blog",
-          name: "Blog",
-          kind: "web-app",
-          folder: join(code, "blog"),
-          about: "News.",
-          port: 5174,
-          isNew: true,
-        },
-      ],
-      settings: { JIRA_SITE: "acme.atlassian.net", JIRA_TOKEN: "secret-1" },
+    const shop = {
+      id: "shop",
+      name: "Shop",
+      kind: "web-app",
+      folder: join(code, "shop"),
+      about: "",
+      port: 5173,
+      isNew: false,
     };
-    const finished = await post("/api/setup/finish", request);
-    assert.equal(finished.status, 200);
-    const root = join(home, "Factories", "acme-garden");
-    assert.equal(await finished.json(), root);
-    assert.ok(existsSync(join(code, "blog")));
-    assert.match(
-      readFileSync(join(root, "settings", "tracker.env"), "utf8"),
-      /JIRA_TOKEN=secret-1/,
+    const blog = {
+      id: "blog",
+      name: "Blog",
+      kind: "web-app",
+      folder: join(code, "blog"),
+      about: "News.",
+      port: 5174,
+      isNew: true,
+    };
+    assert.equal(
+      (await post("/api/products", { products: [shop, blog] })).status,
+      200,
     );
-
+    assert.ok(existsSync(join(code, "blog")));
     const open = session.state();
     assert.ok(open.mode === "factory");
-    assert.equal(open.company.tracker, "jira");
     assert.deepEqual(open.company.kits, ["web-kit"]);
     assert.deepEqual(
       open.products.map((p) => p.id),
@@ -145,21 +150,47 @@ test("brownfield and greenfield in one: found products, a new one, the tracker, 
       open.jobs.map((j) => [j.id, j.state]),
       [["blog", "done"]],
     );
+    assert.deepEqual(
+      await (await post("/api/products", { products: [shop] })).json(),
+      { error: 'There is a product "shop" already.' },
+    );
+
+    // The tracker: a wrong value refuses all of it; then it is saved.
+    const wrong = (await (
+      await post("/api/company/tracker", {
+        tracker: "jira",
+        settings: { JIRA_PROJECT: "lowercase" },
+      })
+    ).json()) as { refused: Record<string, string> };
+    assert.match(wrong.refused.JIRA_PROJECT ?? "", /does not look right/);
+    await post("/api/company/tracker", {
+      tracker: "jira",
+      settings: { JIRA_SITE: "acme.atlassian.net", JIRA_TOKEN: "secret-1" },
+    });
+    assert.match(
+      readFileSync(join(root, "settings", "tracker.env"), "utf8"),
+      /JIRA_TOKEN=secret-1/,
+    );
+    const tracked = session.state();
+    assert.ok(tracked.mode === "factory");
+    assert.equal(tracked.company.tracker, "jira");
     // The secret is never sent back, only that it is set.
-    const jira = open.settings.find((g) => g.id === "jira");
+    const jira = tracked.settings.find((g) => g.id === "jira");
     assert.equal(
       jira?.fields.find((f) => f.key === "JIRA_TOKEN")?.value,
       "(set)",
     );
-
+    assert.equal(
+      (await post("/api/company/tracker", { tracker: "slack" })).status,
+      409,
+    );
     const saved = (await (
       await post("/api/settings", {
         group: "jira",
-        values: { JIRA_PROJECT: "lowercase" },
+        values: { JIRA_PROJECT: "ACME" },
       })
     ).json()) as { refused: Record<string, string> };
-    assert.match(saved.refused.JIRA_PROJECT ?? "", /does not look right/);
-    assert.equal((await post("/api/setup/finish", request)).status, 409);
+    assert.deepEqual(saved.refused, {});
   } finally {
     session.close();
     server.close();
@@ -192,11 +223,8 @@ test("only this computer, and only the factory's page, may press its buttons", a
       (await post("/api/setup/detect", { folder: "/no/such/folder" })).status,
       409,
     );
-    const finish = await post("/api/setup/finish", {
-      company: { name: " ", about: "", tracker: "none" },
-      products: [],
-    });
-    assert.deepEqual(await finish.json(), {
+    const nameless = await post("/api/company", { name: " ", about: "" });
+    assert.deepEqual(await nameless.json(), {
       error: "Give the company a name.",
     });
     const folders = (await (

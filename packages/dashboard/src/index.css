@@ -3,68 +3,88 @@
 /* Dark mode follows the computer's setting. */
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
+/* Modern minimal: a cool grey ground, white panels with soft shadows,
+   near-black actions, pastel glows, and the lights as the only colour. */
 :root {
-  --background: #f2f2f2;
-  --foreground: #000519;
-  --card: #fff;
-  --card-foreground: #000519;
-  --popover: #fff;
-  --popover-foreground: #000519;
-  --primary: #3833fc;
-  --primary-foreground: #fff;
-  --secondary: #eeeeff;
-  --secondary-foreground: #2924bc;
-  --muted: #f4f5f7;
-  --muted-foreground: #596174;
-  --accent: #eeeeff;
-  --accent-foreground: #000519;
-  --destructive: #b42318;
-  --border: #e2e5ec;
-  --input: #c8cdd8;
-  --ring: #3833fc;
-  --radius: 0.65rem;
-  --navy: #000519;
-  --link: #3833fc;
-  --success: #12805c;
-  --warning: #b45309;
-  --glow: rgb(56 51 252 / 0.16);
-  --brand-soft: #8f8cff;
-  --brand: #3833fc;
+  --ground: #dfe3ee;
+  --background: #dfe3ee;
+  --foreground: #1b1f2a;
+  --card: #ffffff;
+  --card-foreground: #1b1f2a;
+  --popover: #ffffff;
+  --popover-foreground: #1b1f2a;
+  --primary: #1b1f2a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f8;
+  --secondary-foreground: #1b1f2a;
+  --muted: #f7f8fc;
+  --muted-foreground: #5b6475;
+  --accent: #f1f3f8;
+  --accent-foreground: #1b1f2a;
+  --destructive: #d9534f;
+  --border: #e3e7f0;
+  --border-soft: #eceef4;
+  --input: #e3e7f0;
+  --ring: #5b6475;
+  --link: #1b1f2a;
+  --success: #2fb47c;
+  --warning: #e2a13c;
+  --stopped: #a3aabb;
+  --arrow: #b5bccb;
+  --surface: #f7f8fc;
+  --surface-2: #f1f3f8;
+  --glow-a: #dff5ec;
+  --glow-b: #f1def6;
+  --glow-c: #e3e8fb;
+  --glow-base: #f4f6fb;
+  --shadow-big: 0 30px 60px -30px rgb(40 52 90 / 0.35);
+  --shadow-soft: 0 1px 3px rgb(27 31 42 / 0.08);
+  --radius: 0.625rem;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  /* Greys with a hint of blue, and a softer indigo for buttons and links. */
   :root {
-    --background: #121419;
-    --foreground: #e4e5e9;
-    --card: #191c23;
-    --card-foreground: #e4e5e9;
-    --popover: #191c23;
-    --popover-foreground: #e4e5e9;
-    --primary: #4f4bf0;
-    --primary-foreground: #fff;
-    --secondary: #252935;
-    --secondary-foreground: #c4c6d6;
-    --muted: #1f222b;
-    --muted-foreground: #9a9da8;
-    --accent: #252935;
-    --accent-foreground: #e4e5e9;
-    --destructive: #e08a8a;
-    --border: #2b2f3a;
-    --input: #3a3f4c;
-    --ring: #9094ec;
-    --navy: #0c0e12;
-    --link: #b0b3f2;
-    --brand-soft: #b0b3f2;
-    --success: #6cc2a0;
-    --warning: #d9b067;
-    --glow: rgb(110 106 248 / 0.22);
+    --ground: #0f1218;
+    --background: #0f1218;
+    --foreground: #e9ecf2;
+    --card: #171b23;
+    --card-foreground: #e9ecf2;
+    --popover: #171b23;
+    --popover-foreground: #e9ecf2;
+    --primary: #e9ecf2;
+    --primary-foreground: #171b23;
+    --secondary: #1e232d;
+    --secondary-foreground: #e9ecf2;
+    --muted: #1e232d;
+    --muted-foreground: #9aa3b5;
+    --accent: #252b37;
+    --accent-foreground: #e9ecf2;
+    --destructive: #e8726e;
+    --border: #2a303c;
+    --border-soft: #242a35;
+    --input: #2f3542;
+    --ring: #9aa3b5;
+    --link: #e9ecf2;
+    --success: #3cc68c;
+    --warning: #e8b058;
+    --stopped: #6f778a;
+    --arrow: #4a5263;
+    --surface: #1e232d;
+    --surface-2: #242a35;
+    --glow-a: rgb(47 180 124 / 0.12);
+    --glow-b: rgb(176 108 196 / 0.12);
+    --glow-c: rgb(96 116 214 / 0.14);
+    --glow-base: #1a1f28;
+    --shadow-big: 0 30px 60px -30px rgb(0 0 0 / 0.6);
+    --shadow-soft: 0 1px 3px rgb(0 0 0 / 0.4);
     color-scheme: dark;
   }
 }
 
 @theme inline {
-  --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
+  --font-sans: Onest, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --color-ground: var(--ground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -81,29 +101,48 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-navy: var(--navy);
   --color-link: var(--link);
-  --color-brand-soft: var(--brand-soft);
-  --color-brand: var(--brand);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --color-glow: var(--glow);
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
+  --color-stopped: var(--stopped);
+  --color-arrow: var(--arrow);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --shadow-big: var(--shadow-big);
+  --shadow-soft: var(--shadow-soft);
   --radius-sm: calc(var(--radius) - 4px);
-  --radius-xl: calc(var(--radius) + 4px);
-  --animate-breathe: breathe 2.4s ease-in-out infinite;
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --animate-breathe: breathe 1.6s ease-in-out infinite;
   @keyframes breathe {
     50% {
-      box-shadow: 0 0 0 7px var(--glow);
+      opacity: 0.45;
     }
   }
 }
 
-/* Element rules sit in the base layer, so Tailwind classes (border-primary…)
-   win over them. */
+/* The pastel glows behind a side panel. */
+@utility glow-panel {
+  background:
+    radial-gradient(circle at 15% 10%, var(--glow-a) 0, transparent 45%),
+    radial-gradient(circle at 10% 95%, var(--glow-b) 0, transparent 50%),
+    radial-gradient(circle at 90% 55%, var(--glow-c) 0, transparent 55%),
+    var(--glow-base);
+}
+@utility glow-card {
+  background:
+    radial-gradient(circle at 20% 10%, var(--glow-a) 0, transparent 50%),
+    radial-gradient(circle at 85% 95%, var(--glow-b) 0, transparent 55%),
+    var(--card);
+}
+
+/* Element rules sit in the base layer, so Tailwind classes win over them. */
 @layer base {
   * {
     border-color: var(--border);
@@ -119,7 +158,7 @@
     font-size: 14px;
     line-height: 1.5;
     color: var(--foreground);
-    background: var(--background);
+    background: var(--ground);
   }
   button:not(:disabled) {
     cursor: pointer;

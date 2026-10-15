@@ -38,6 +38,15 @@ export class Launcher {
     }, options.everyMs ?? 3000);
   }
 
+  // The factory changed (a product added): the new list of parts. Parts
+  // already known keep their state, so what runs keeps running.
+  setParts(parts: Part[]): void {
+    this.parts = parts;
+    for (const part of parts)
+      if (!this.inner.has(part.id)) this.inner.set(part.id, newPartLight(part));
+    this.notify();
+  }
+
   state(): PartView[] {
     return this.parts.map((part) =>
       viewOf(part, this.get(part.id), linkOf(part, this.parts, this.root)),

@@ -1,22 +1,26 @@
-import { Factory } from "lucide-react";
+import type { ReactNode } from "react";
 
-// The navy bar along the top: the product's name, and the company's once
-// it is set up.
-export function TopBar({ company }: Readonly<{ company: string | null }>) {
+import { LogoTile } from "./logo";
+
+// The white bar along the top: the mark and the company's name, the tabs in
+// the middle, and a status at the right.
+export function TopBar({
+  company,
+  tabs,
+  status,
+}: Readonly<{ company: string; tabs?: ReactNode; status?: ReactNode }>) {
   return (
-    <header className="bg-navy text-white">
-      <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4 sm:px-6">
-        <Factory className="size-5 text-brand-soft" aria-hidden />
-        <span className="font-semibold">Software factory</span>
-        {company && (
-          <>
-            <span className="text-white/40" aria-hidden>
-              /
-            </span>
-            <span className="truncate text-brand-soft">{company}</span>
-          </>
-        )}
+    <header className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] bg-card py-2.5 pr-2.5 pl-5">
+      <div className="flex items-center gap-3 font-medium">
+        <LogoTile small />
+        <span className="truncate">{company}</span>
       </div>
+      {tabs}
+      {status && (
+        <span className="inline-flex items-center gap-2 pr-2.5 text-[13px] text-muted-foreground">
+          {status}
+        </span>
+      )}
     </header>
   );
 }

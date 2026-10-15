@@ -4,6 +4,7 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { partSchema, type Part } from "@software-factory/core";
 
@@ -212,8 +213,15 @@ test("a part already running elsewhere is shown as running, not started twice, a
     // Once it stops elsewhere, the light follows.
     await outside.launcher.stop("api");
     await until(() => light("api")?.light === "stopped");
-    await launcher.start("checked");
-    assert.match(light("checked")?.problem?.title ?? "", /isn't running/);
+    // The port can answer a moment longer than the program runs: checking
+    // again until it has gone.
+    const missing = () =>
+      /isn't running/.test(light("checked")?.problem?.title ?? "");
+    for (let tries = 0; tries < 20 && !missing(); tries += 1) {
+      await launcher.start("checked");
+      if (!missing()) await sleep(100);
+    }
+    assert.ok(missing(), light("checked")?.problem?.title);
   } finally {
     await launcher.stopAll();
     launcher.close();

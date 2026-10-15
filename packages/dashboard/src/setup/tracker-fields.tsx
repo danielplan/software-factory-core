@@ -2,14 +2,13 @@ import { Ban, GitBranch, SquareKanban } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { Company } from "@/api";
+import { ChoiceCard } from "@/components/choice-card";
+import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 
-import { Field } from "./company-step";
-import { type Draft, TRACKER_NAMES } from "./draft";
-import { StepFrame } from "./step-frame";
+import { TRACKER_NAMES } from "./draft";
 
-type Tracker = Company["tracker"];
+export type Tracker = Company["tracker"];
 
 // The fields of each tracker, as the server saves them
 // (packages/server/src/trackers.ts).
@@ -62,60 +61,46 @@ const ICONS: Record<Tracker, ReactNode> = {
 };
 
 const ABOUT: Record<Tracker, string> = {
-  none: "Just the factory for now. You can choose later in Settings.",
+  none: "Just the factory for now. You can choose later.",
   github: "Ideas become cards on a GitHub board.",
   jira: "Ideas become issues in a Jira Cloud project.",
 };
 
-export function TrackerStep({
-  draft,
-  onChange,
-  onBack,
-  onNext,
+// The three choices, and the chosen tracker's fields.
+export function TrackerFields({
+  tracker,
+  values,
+  onTracker,
+  onValues,
 }: Readonly<{
-  draft: Draft;
-  onChange: (change: Partial<Draft>) => void;
-  onBack: () => void;
-  onNext: () => void;
+  tracker: Tracker;
+  values: Record<string, string>;
+  onTracker: (tracker: Tracker) => void;
+  onValues: (values: Record<string, string>) => void;
 }>) {
   return (
-    <StepFrame
-      step={2}
-      title="Where is your work tracked?"
-      about="Where the ideas you agree with the factory become work to build. The factory does not work on the board yet: this is saved for the runner, which comes next."
-      onBack={onBack}
-      onNext={onNext}
-    >
+    <div className="grid gap-5">
       <div
-        className="grid gap-3 sm:grid-cols-3"
+        className="grid gap-4 sm:grid-cols-3"
         role="radiogroup"
         aria-label="Tracker"
       >
-        {(Object.keys(TRACKER_NAMES) as Tracker[]).map((tracker) => (
-          <button
-            key={tracker}
-            type="button"
-            role="radio"
-            aria-checked={draft.tracker === tracker}
-            onClick={() => {
-              onChange({ tracker });
+        {(Object.keys(TRACKER_NAMES) as Tracker[]).map((one) => (
+          <ChoiceCard
+            key={one}
+            chosen={tracker === one}
+            icon={ICONS[one]}
+            title={TRACKER_NAMES[one]}
+            text={ABOUT[one]}
+            onChoose={() => {
+              onTracker(one);
             }}
-            className={cn(
-              "grid gap-2 rounded-xl border bg-card p-4 text-left transition hover:border-primary [&_svg]:size-5",
-              draft.tracker === tracker && "border-primary bg-secondary",
-            )}
-          >
-            {ICONS[tracker]}
-            <span className="font-semibold">{TRACKER_NAMES[tracker]}</span>
-            <span className="text-sm text-muted-foreground">
-              {ABOUT[tracker]}
-            </span>
-          </button>
+          />
         ))}
       </div>
-      {FIELDS[draft.tracker].length > 0 && (
+      {FIELDS[tracker].length > 0 && (
         <div className="grid max-w-xl gap-4">
-          {FIELDS[draft.tracker].map((field) => (
+          {FIELDS[tracker].map((field) => (
             <Field
               key={field.key}
               label={field.label}
@@ -126,30 +111,28 @@ export function TrackerStep({
                 id={field.key}
                 type={field.secret ? "password" : "text"}
                 autoComplete="off"
-                value={draft.settings[field.key] ?? ""}
+                value={values[field.key] ?? ""}
                 onChange={(event) => {
-                  onChange({
-                    settings: {
-                      ...draft.settings,
-                      [field.key]: event.target.value,
-                    },
-                  });
+                  onValues({ ...values, [field.key]: event.target.value });
                 }}
               />
             </Field>
           ))}
         </div>
       )}
-    </StepFrame>
+    </div>
   );
 }
 
 // Only the chosen tracker's values, and none left empty.
-export function trackerSettings(draft: Draft): Record<string, string> {
-  const values: Record<string, string> = {};
-  for (const field of FIELDS[draft.tracker]) {
-    const value = draft.settings[field.key]?.trim() ?? "";
-    if (value !== "") values[field.key] = value;
+export function trackerValues(
+  tracker: Tracker,
+  values: Record<string, string>,
+): Record<string, string> {
+  const kept: Record<string, string> = {};
+  for (const field of FIELDS[tracker]) {
+    const value = values[field.key]?.trim() ?? "";
+    if (value !== "") kept[field.key] = value;
   }
-  return values;
+  return kept;
 }

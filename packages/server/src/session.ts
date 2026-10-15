@@ -9,21 +9,30 @@ import { join } from "node:path";
 import {
   type Available,
   checkChanges,
-  type Company,
   detectProducts,
   type Factory,
   groupView,
   hasFactory,
   loadFactory,
+  saveCompany,
   saveGroup,
   type Templates,
+  TRACKERS,
 } from "@software-factory/core";
 import { Launcher } from "@software-factory/launcher";
 
-import type { FinishSetup, Job, KitView, ProductView, State } from "./api.ts";
+import type {
+  AddProducts,
+  ChooseTracker,
+  CreateCompany,
+  Job,
+  KitView,
+  ProductView,
+  State,
+} from "./api.ts";
 import { createProducts } from "./create-products.ts";
 import { Refused } from "./refused.ts";
-import { writeFactory } from "./write-factory.ts";
+import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
   // The factory folder to open; none, or one without a factory: setup.
@@ -75,16 +84,21 @@ export class Session {
     return { candidates: detectProducts(folder, this.options.available.kits) };
   }
 
-  // Writes the factory folder, makes the new products, then opens it and
-  // starts what starts by itself.
-  async finish(request: FinishSetup): Promise<string> {
-    if (this.root) throw new Refused("This factory is set up already.");
-    const root = writeFactory(request, {
-      factoriesFolder: this.options.factoriesFolder,
-      kits: this.options.available.kits,
-      templates: this.options.templates,
-    });
-    this.saveTracker(root, request);
+  // The first step: the company and its factory folder, which opens with
+  // no products yet.
+  createCompany(request: CreateCompany): string {
+    if (this.root) throw new Refused("This factory has its company already.");
+    const root = writeCompany(request, this.place());
+    this.open(root);
+    return root;
+  }
+
+  // Products added on the Products tab: their descriptions, then the new
+  // ones made with their kits' starters, then they start.
+  async addProducts(request: AddProducts): Promise<void> {
+    const root = this.rootOrRefuse();
+    writeProducts(root, request.products, this.options.available.kits);
+    this.reload();
     const made = await createProducts(
       request.products.filter((p) => p.isNew),
       this.options.available.kits,
@@ -93,9 +107,29 @@ export class Session {
         this.options.onChange();
       },
     );
-    this.open(root);
-    if (made) await this.launcher?.startAll();
-    return root;
+    const launcher = this.launcher;
+    if (!made || !launcher) return;
+    // The new products that run (a kit may make no part for one).
+    const parts = new Set(launcher.state().map((part) => part.id));
+    const starting = request.products.filter((p) => parts.has(p.id));
+    await Promise.allSettled(starting.map((p) => launcher.start(p.id)));
+  }
+
+  // Where work is tracked, with that tracker's settings.
+  chooseTracker(request: ChooseTracker) {
+    const root = this.rootOrRefuse();
+    if (!this.factory) throw new Refused("There is no factory open.");
+    if (!TRACKERS.includes(request.tracker))
+      throw new Refused("Choose where work is tracked.");
+    const group = this.factory.settings.find((g) => g.id === request.tracker);
+    const { changes, refused } = group
+      ? checkChanges(group, request.settings ?? {})
+      : { changes: {}, refused: {} };
+    if (Object.keys(refused).length > 0) return { refused };
+    if (group) saveGroup(group, root, changes);
+    saveCompany(root, { ...this.factory.company, tracker: request.tracker });
+    this.reload();
+    return { refused };
   }
 
   // A settings group's new values; the refused ones say why.
@@ -130,14 +164,27 @@ export class Session {
     this.options.onChange();
   }
 
-  private saveTracker(root: string, request: FinishSetup): void {
-    const tracker: Company["tracker"] = request.company.tracker;
-    const group = this.options.available.extensions
-      .flatMap((extension) => extension.settings)
-      .find((g) => g.id === tracker);
-    if (!group || !request.settings) return;
-    const { changes } = checkChanges(group, request.settings);
-    saveGroup(group, root, changes);
+  private rootOrRefuse(): string {
+    if (!this.root) throw new Refused("Name your company first.");
+    return this.root;
+  }
+
+  private place() {
+    return {
+      factoriesFolder: this.options.factoriesFolder,
+      kits: this.options.available.kits,
+      templates: this.options.templates,
+    };
+  }
+
+  // The factory's files changed: read again; what runs keeps running.
+  private reload(): void {
+    const root = this.rootOrRefuse();
+    const loaded = loadFactory(root, this.options.available);
+    if ("problem" in loaded) throw new Refused(loaded.problem);
+    this.factory = loaded;
+    this.launcher?.setParts(loaded.parts);
+    this.options.onChange();
   }
 
   private kits(): KitView[] {

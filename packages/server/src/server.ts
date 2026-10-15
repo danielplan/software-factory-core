@@ -59,8 +59,12 @@ function routesFor(session: Session): Record<string, Route> {
     "GET /api/folders": (_body, url) =>
       listFolders(url.searchParams.get("path")),
     "POST /api/setup/detect": (body) => session.detect(text(body, "folder")),
-    "POST /api/setup/finish": (body) =>
-      session.finish(body as Parameters<Session["finish"]>[0]),
+    "POST /api/company": (body) =>
+      session.createCompany(body as Parameters<Session["createCompany"]>[0]),
+    "POST /api/products": (body) =>
+      session.addProducts(body as Parameters<Session["addProducts"]>[0]),
+    "POST /api/company/tracker": (body) =>
+      session.chooseTracker(body as Parameters<Session["chooseTracker"]>[0]),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
     "POST /api/parts/start": (_b, url) => launcher().start(part(url)),

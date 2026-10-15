@@ -1,47 +1,12 @@
-// What the owner has said so far in the setup flow, and the defaults the
-// page proposes from it.
+// Helpers for adding a company's products: paths, free ids and ports, and
+// the trackers' names.
 
-import {
-  type Company,
-  idFrom,
-  type SetupProduct,
-  withoutEndSlashes,
-} from "@/api";
-
-export type Door = "new" | "existing";
-
-export type Draft = {
-  door: Door;
-  name: string;
-  about: string;
-  // The factory's folder as the owner wrote it; empty: the default.
-  folder: string;
-  products: SetupProduct[];
-  tracker: Company["tracker"];
-  settings: Record<string, string>;
-};
-
-export const emptyDraft = (door: Door): Draft => ({
-  door,
-  name: "",
-  about: "",
-  folder: "",
-  products: [],
-  tracker: "none",
-  settings: {},
-});
+import { type Company, idFrom, withoutEndSlashes } from "@/api";
 
 // A path inside a folder, written the way that folder is.
 export function inside(folder: string, ...names: string[]): string {
   const separator = folder.includes("\\") && !folder.includes("/") ? "\\" : "/";
   return [withoutEndSlashes(folder), ...names].join(separator);
-}
-
-export function factoryFolder(draft: Draft, factoriesFolder: string): string {
-  return (
-    draft.folder.trim() ||
-    inside(factoriesFolder, idFrom(draft.name || "my-company"))
-  );
 }
 
 // The kits' usual ports, for a new product.
@@ -52,7 +17,10 @@ const PORTS: Record<string, number> = {
 };
 
 // The kind's usual port, moved up past the ports other products have.
-export function freePort(kind: string, products: SetupProduct[]): number {
+export function freePort(
+  kind: string,
+  products: { port?: number | null }[],
+): number {
   const taken = new Set(products.map((p) => p.port));
   let port = PORTS[kind] ?? 4000;
   while (taken.has(port)) port += 1;
@@ -60,7 +28,7 @@ export function freePort(kind: string, products: SetupProduct[]): number {
 }
 
 // An id from the name that no other product has.
-export function freeId(name: string, products: SetupProduct[]): string {
+export function freeId(name: string, products: { id: string }[]): string {
   const base = idFrom(name);
   const taken = new Set(products.map((p) => p.id));
   let n = 1;
