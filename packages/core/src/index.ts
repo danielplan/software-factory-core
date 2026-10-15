@@ -6,11 +6,13 @@ export {
   COMPANY_FILE,
   companySchema,
   readCompany,
+  TRACKERS,
   type Company,
 } from "./company/company.ts";
 export {
   defineExtension,
   defineKit,
+  type Detected,
   type Extension,
   type ExtensionFile,
   type Guide,
@@ -39,7 +41,24 @@ export {
   type Area,
   type Part,
 } from "./parts/part.ts";
-export { findProducts, PRODUCT_FILE } from "./products/find-products.ts";
+export {
+  findProducts,
+  PRODUCT_FILE,
+  PRODUCTS_FOLDER,
+} from "./products/find-products.ts";
+export {
+  detectProducts,
+  idFrom,
+  withFreePorts,
+  type Candidate,
+} from "./setup/detect.ts";
+export {
+  addProduct,
+  createFactoryFolder,
+  hasFactory,
+  saveCompany,
+  type Templates,
+} from "./setup/factory-folder.ts";
 export {
   productSchema,
   readProduct,
@@ -52,6 +71,7 @@ export {
   checkGroups,
   groupView,
   saveGroup,
+  SECRET_SET,
   settingGroupSchema,
   type Changes,
   type GroupView,

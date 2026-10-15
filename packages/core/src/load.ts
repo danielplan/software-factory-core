@@ -19,7 +19,7 @@ export function loadFactory(
 ): Factory | { problem: string } {
   const read = readCompany(join(root, COMPANY_FILE));
   if ("problem" in read) return read;
-  const found = findProducts(root, read.company.products);
+  const found = findProducts(root);
   const factory = assembleFactory(read.company, found.products, available);
   return { ...factory, problems: [...found.problems, ...factory.problems] };
 }

@@ -36,19 +36,34 @@ company is here: only what is true for any company.
 See [the architecture](docs/architecture.md) for the extension points and how
 companies update.
 
+## Try it
+
+```sh
+npm install
+node packages/server/bin/software-factory.ts
+```
+
+It opens <http://localhost:4300>: the setup page, to start something new or
+bring existing code, then the dashboard (System, Products, Settings). A new
+factory's folder goes in `~/Factories/<company>`; give a folder as the first
+argument to open that factory instead.
+
 ## What is here so far
 
-| Folder                     | What                                                                                                                        | State         |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `packages/core/`           | Product descriptions, the company file, the extension registry, parts, settings groups, running Claude Code, working copies | first version |
-| `packages/method/`         | The method the agents follow: the factory loop and its skills, ground rules for a company                                   | first version |
-| `packages/knowledge-base/` | The knowledge base's structure and its checks                                                                               | first version |
-| `examples/acme/`           | An example company with two products, used by the tests                                                                     | first version |
+| Folder                     | What                                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/core/`           | Product descriptions, the company file, the extension registry, parts, settings groups, recognising products in existing code, making a factory folder, running Claude Code, working copies |
+| `packages/kits/`           | React web app, NestJS backend and Expo app: recognise, start and create each kind of product, with their rules                                                                              |
+| `packages/launcher/`       | Starts, watches and stops the parts                                                                                                                                                         |
+| `packages/server/`         | The local web server and the `software-factory` command; the trackers' settings (GitHub board, Jira Cloud)                                                                                  |
+| `packages/dashboard/`      | The web interface: the setup flow and the dashboard                                                                                                                                         |
+| `packages/method/`         | The method the agents follow, and ground rules for a company                                                                                                                                |
+| `packages/knowledge-base/` | The knowledge base's template and its checks                                                                                                                                                |
+| `examples/acme/`           | An example company's factory folder, used by the tests                                                                                                                                      |
 
-Next: product descriptions kept in the company's factory folder, the launcher
-and the dashboard shell, the setup page (greenfield and brownfield), then the
-core extensions (System and Factory tabs, the runner with GitHub and Jira
-Cloud, the Ideas tab and prototypes), then the kits and add-ons.
+Next: drafting each product's blueprint and the knowledge pages from the code
+for review, the runner on the GitHub board and Jira, the Ideas tab and
+prototypes, and an upgrade command.
 
 ## Working on the core
 

@@ -20,5 +20,6 @@
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
     "packages/*/bin/**/*.ts"
-  ]
+  ],
+  "exclude": ["packages/dashboard"]
 }

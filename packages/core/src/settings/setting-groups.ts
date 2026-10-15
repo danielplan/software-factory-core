@@ -16,7 +16,8 @@ export const settingFieldSchema = z.object({
   key: z.string().regex(/^[A-Z][A-Z0-9_]*$/, "capitals, digits and _"),
   label: z.string().min(1),
   help: z.string().min(1),
-  kind: z.enum(["text", "number", "choice"]),
+  // secret: text that is saved but never shown again (an API token).
+  kind: z.enum(["text", "number", "choice", "secret"]),
   // What the program uses when its file does not set the value.
   default: z.string().optional(),
   // text: the value must match this.
@@ -61,7 +62,7 @@ export function groupView(group: SettingGroup, root: string): GroupView {
     ...group,
     fields: group.fields.map((field) => ({
       ...field,
-      value: values[field.key] ?? null,
+      value: shown(field, values[field.key]),
     })),
   };
 }
@@ -164,4 +165,11 @@ function numberProblem(field: SettingField, value: string): string | null {
   return /^\d+$/.test(value) && number >= min && number <= max
     ? null
     : `Write a whole number from ${String(min)} to ${String(max)}.`;
+}
+
+// What the Settings tab may show of a value: a secret only says it is set.
+export const SECRET_SET = "(set)";
+function shown(field: SettingField, value: string | undefined): string | null {
+  if (value === undefined) return null;
+  return field.kind === "secret" && value !== "" ? SECRET_SET : value;
 }

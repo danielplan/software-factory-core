@@ -1,0 +1,13 @@
+{
+  "name": "orders",
+  "private": true,
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nestjs/core": "11.1.0",
+    "@nestjs/common": "11.1.0"
+  }
+}

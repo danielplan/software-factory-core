@@ -2,6 +2,7 @@
   "id": "shop",
   "name": "Shop",
   "kind": "react-web-app",
+  "code": "../../code/shop",
   "about": "Where customers find products, order them and follow their orders.",
   "users": [
     {

@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 import sonarjs from "eslint-plugin-sonarjs";
 import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 // One set of checks for every package. Tighten them freely; loosen them only
@@ -24,7 +25,13 @@ const limits = {
 };
 
 export default tseslint.config(
-  { ignores: ["**/node_modules/**", "coverage/**"] },
+  {
+    ignores: [
+      "**/node_modules/**",
+      "coverage/**",
+      "packages/dashboard/dist/**",
+    ],
+  },
   {
     linterOptions: {
       noInlineConfig: true,
@@ -81,8 +88,46 @@ export default tseslint.config(
     },
   },
   {
-    files: ["packages/*/src/**/*.ts", "packages/*/bin/**/*.ts"],
+    // The web interface runs in the browser, with its own TypeScript
+    // settings, and follows React's rules of hooks.
+    files: ["packages/dashboard/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    languageOptions: {
+      globals: globals.browser,
+      parserOptions: {
+        projectService: false,
+        project: "packages/dashboard/tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: reactHooks.configs.recommended.rules,
+  },
+  {
+    files: ["packages/*/src/**/*.{ts,tsx}", "packages/*/bin/**/*.ts"],
     rules: limits,
+  },
+  {
+    // Markup puts one attribute per line, so a component passes 60 lines
+    // while still doing one thing: functions in .tsx files get 80.
+    files: ["packages/dashboard/src/**/*.tsx"],
+    ignores: ["packages/dashboard/src/components/ui/**"],
+    rules: {
+      "max-lines-per-function": [
+        "error",
+        { max: 80, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
+    // shadcn's generated pieces (npx shadcn add): kept as generated, so later
+    // updates stay easy to compare.
+    files: ["packages/dashboard/src/components/ui/**/*.tsx"],
+    rules: {
+      "sonarjs/prefer-read-only-props": "off",
+      "sonarjs/function-return-type": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      eqeqeq: "off",
+    },
   },
   {
     // Command-line programs tell the person in the terminal what happens.

@@ -1,9 +1,11 @@
 # Acme, an example company
 
-A made-up company that uses the core, with two products: the **Shop**, a
-web app for customers (`apps/shop/`), and the **Orders service** it needs
-(`services/orders/`). Each describes itself in its `product.json`; the
-company file, `factory.json`, says where the products are and which kits the
-factory uses. The core's tests load this company.
+A made-up company's factory folder, as the core makes one: the company file
+(`factory.json`), a description of each product (`products/<id>/`, with its
+`product.json` and `BLUEPRINT.md`), the knowledge base (`context/`) and the
+history (`runs/`).
 
-There is no real code in the products: only what the factory reads.
+Its two products are the **Shop**, a web app for customers, and the **Orders
+service** the shop needs. Their code is in `code/`, and holds only a
+`package.json`: just enough for the kits to recognise each kind of product.
+The core's tests load this company.

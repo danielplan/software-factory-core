@@ -10,6 +10,7 @@ import {
   checkGroups,
   groupView,
   saveGroup,
+  SECRET_SET,
   type SettingGroup,
 } from "../src/index.ts";
 import { runner } from "./stand-ins.ts";
@@ -111,4 +112,30 @@ test("a broken settings list is reported", () => {
     'the setting "A" is listed twice',
     'the settings "x" are listed twice',
   ]);
+});
+
+test("a secret is saved but never shown again, only that it is set", () => {
+  const group: SettingGroup = {
+    id: "jira",
+    name: "Jira",
+    about: "Where work is tracked.",
+    file: "settings/jira.env",
+    usedBy: [],
+    fields: [
+      {
+        key: "JIRA_TOKEN",
+        label: "API token",
+        help: "From Atlassian.",
+        kind: "secret",
+      },
+    ],
+  };
+  const root = mkdtempSync(join(tmpdir(), "settings-"));
+  assert.equal(groupView(group, root).fields[0]?.value, null);
+  saveGroup(group, root, checkChanges(group, { JIRA_TOKEN: "abc123" }).changes);
+  assert.equal(groupView(group, root).fields[0]?.value, SECRET_SET);
+  assert.match(
+    readFileSync(join(root, "settings", "jira.env"), "utf8"),
+    /JIRA_TOKEN=abc123/,
+  );
 });

@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+// software-factory [folder] [--port <port>] [--no-open]
+//
+// Starts the factory on this computer and opens it in the browser: the
+// factory in `folder`, or, where there is none yet, the setup page (a new
+// factory then goes in `folder`, or in ~/Factories/<company>).
+
+import { spawn } from "node:child_process";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
+import { parseArgs } from "node:util";
+
+import { allKits } from "@software-factory/kits";
+import { templateFolder } from "@software-factory/knowledge-base";
+import { templatesFolder } from "@software-factory/method";
+
+import { startServer } from "../src/server.ts";
+import { defaultFactoriesFolder, Session } from "../src/session.ts";
+import { trackers } from "../src/trackers.ts";
+
+const { values, positionals } = parseArgs({
+  allowPositionals: true,
+  options: {
+    port: { type: "string", default: "4300" },
+    "no-open": { type: "boolean", default: false },
+  },
+});
+const port = Number(values.port);
+const root = positionals[0] ? resolve(positionals[0]) : null;
+const page = join(import.meta.dirname, "..", "..", "dashboard", "dist");
+
+let changed = () => {};
+const session = new Session({
+  root,
+  factoriesFolder: defaultFactoriesFolder(homedir()),
+  available: { extensions: [trackers], kits: allKits },
+  templates: {
+    knowledgeBase: templateFolder,
+    agents: join(templatesFolder, "AGENTS.md"),
+  },
+  onChange: () => {
+    changed();
+  },
+});
+const started = startServer({ session, page, port });
+changed = started.changed;
+
+const address = `http://localhost:${String(port)}`;
+console.log(`The software factory: ${address}`);
+console.log(
+  "Keep this window open. Closing it stops what the factory started.",
+);
+if (!values["no-open"]) openInBrowser(address);
+
+for (const signal of ["SIGINT", "SIGTERM"] as const)
+  process.on(signal, () => {
+    session.close();
+    process.exit(0);
+  });
+
+// The command that opens an address in the default browser.
+const OPENER: Partial<Record<NodeJS.Platform, string>> = {
+  darwin: "open",
+  win32: "explorer",
+};
+
+function openInBrowser(url: string): void {
+  const command = OPENER[process.platform] ?? "xdg-open";
+  spawn(command, [url], { stdio: "ignore", detached: true }).unref();
+}

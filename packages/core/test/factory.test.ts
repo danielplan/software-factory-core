@@ -26,8 +26,8 @@ test("the example company: its products, their kits, the parts and settings they
   assert.deepEqual(
     factory.products.map((p) => [p.id, p.kit]),
     [
-      ["shop", "react-web-app"],
       ["orders", "nestjs-backend"],
+      ["shop", "react-web-app"],
     ],
   );
   // The kit's usual commands, with the product's own winning.
@@ -36,7 +36,7 @@ test("the example company: its products, their kits, the parts and settings they
     verify: "npm run verify",
     start: "npm run start:dev",
   });
-  assert.equal(orders.folder, join(ACME, "services", "orders"));
+  assert.equal(orders.folder, join(ACME, "code", "orders"));
   // A part per product (from its kit), each after what it needs, then the
   // core extensions' parts.
   assert.deepEqual(
@@ -80,10 +80,10 @@ test("what does not fit is said in plain words before anything starts", () => {
     kits: ["react-web-app", "cobol-app"],
   });
   const root = companyWith({
-    "apps/site": { id: "site", kind: "react-web-app", dependsOn: ["api"] },
-    "apps/tool": { id: "tool", kind: "rust-app" },
+    site: { kind: "react-web-app", dependsOn: ["api"] },
+    tool: { kind: "rust-app" },
   });
-  const found = findProducts(root, ["apps/*"]);
+  const found = findProducts(root);
   const factory = assembleFactory(company, found.products, available);
   assert.deepEqual(factory.problems, [
     'there is no extension "telepathy"',
@@ -94,16 +94,12 @@ test("what does not fit is said in plain words before anything starts", () => {
   ]);
 });
 
-test("products are found from their product.json; one that cannot be read says why", () => {
-  const root = companyWith({
-    "apps/a": { id: "a" },
-    "apps/b": { id: "a" },
-    "apps/c": { id: "Not An Id" },
-  });
-  mkdirSync(join(root, "apps", "d"));
-  writeFileSync(join(root, "apps", "d", "product.json"), "{ not json");
-  mkdirSync(join(root, "apps", "no-description"));
-  const found = findProducts(root, ["apps/*"]);
+test("products are found from their descriptions in products/; one that cannot be read says why", () => {
+  const root = companyWith({ a: {}, b: { id: "a" }, c: { id: "Not An Id" } });
+  mkdirSync(join(root, "products", "d"));
+  writeFileSync(join(root, "products", "d", "product.json"), "{ not json");
+  mkdirSync(join(root, "products", "no-description"));
+  const found = findProducts(root);
   assert.deepEqual(
     found.products.map((p) => p.id),
     ["a"],
@@ -111,15 +107,18 @@ test("products are found from their product.json; one that cannot be read says w
   assert.equal(found.problems.length, 3);
   assert.match(
     found.problems[0] ?? "",
-    /apps\/b\/product\.json: the id "a" is taken/,
+    /products\/b\/product\.json: its id is "a", but its folder is "b"/,
   );
   assert.match(found.problems[1] ?? "", /lowercase letters, digits and -/);
   assert.match(found.problems[2] ?? "", /cannot be read/);
-  // Defaults: no commands of its own, needs nothing.
-  const one = readProduct(join(root, "apps", "a", "product.json"));
+  // Defaults: no commands of its own, needs nothing; its code from its
+  // description's folder.
+  const one = readProduct(join(root, "products", "a", "product.json"));
   assert.ok("product" in one);
   assert.deepEqual(one.product.commands, {});
   assert.deepEqual(one.product.dependsOn, []);
+  assert.equal(one.product.folder, join(root, "code", "a"));
+  assert.equal(one.product.home, join(root, "products", "a"));
 });
 
 test("a company file that cannot be read stops the factory, with why", () => {
@@ -159,20 +158,21 @@ test("an extension or kit that is not right is refused at once, with its id", ()
   assert.deepEqual(plain.partsFor({} as never), []);
 });
 
-// A company folder with these products (their missing fields filled in).
+// A factory folder with these products, by folder name (their missing
+// fields filled in, their code in code/<folder>).
 function companyWith(
   products: Record<string, Record<string, unknown>>,
 ): string {
   const root = mkdtempSync(join(tmpdir(), "company-"));
   for (const [folder, fields] of Object.entries(products)) {
-    mkdirSync(join(root, folder), { recursive: true });
+    mkdirSync(join(root, "products", folder), { recursive: true });
     writeFileSync(
-      join(root, folder, "product.json"),
+      join(root, "products", folder, "product.json"),
       JSON.stringify({
+        id: folder,
         name: "A product",
         kind: "react-web-app",
-        about: "Something people use.",
-        users: [{ who: "people", does: "use it" }],
+        code: `../../code/${folder}`,
         ...fields,
       }),
     );

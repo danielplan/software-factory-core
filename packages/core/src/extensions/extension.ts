@@ -51,14 +51,30 @@ export type Guide = z.infer<typeof guideSchema>;
 export type ExtensionFile = z.input<typeof extensionSchema>;
 export type Extension = z.infer<typeof extensionSchema>;
 
-// A kit also makes the parts that run each product of its kind.
-export type Kit = z.infer<typeof kitSchema> & {
-  partsFor: (product: Product) => Part[];
+// What a kit recognises in a folder of existing code: a name for the
+// product, the commands that are already there, and where it answers.
+export type Detected = {
+  name: string;
+  commands: Product["commands"];
+  port?: number;
 };
 
-export type KitFile = z.input<typeof kitSchema> & {
-  partsFor?: (product: Product) => Part[];
+// A kit's code: the parts that run a product of its kind, whether a folder
+// of existing code is such a product, and how to make a new one.
+type KitCode = {
+  partsFor: (product: Product) => Part[];
+  detect: (folder: string) => Detected | null;
+  // The commands that make a new product in `folder` (which does not exist
+  // yet) with the framework's own starter, run one after the other in the
+  // folder's parent; null when the kit cannot make one.
+  create: ((folder: string, name: string) => string[][]) | null;
+  // Where a product of this kind usually answers.
+  port?: number;
 };
+
+export type Kit = z.infer<typeof kitSchema> & KitCode;
+
+export type KitFile = z.input<typeof kitSchema> & Partial<KitCode>;
 
 // An extension, checked: a mistake shows when the factory starts, with the
 // extension's id, not later as something odd on a screen.
@@ -77,5 +93,11 @@ export function defineKit(spec: KitFile): Kit {
     throw new Error(
       `The kit "${spec.id}" is not right: ${z.prettifyError(parsed.error)}`,
     );
-  return { ...parsed.data, partsFor: spec.partsFor ?? (() => []) };
+  return {
+    ...parsed.data,
+    partsFor: spec.partsFor ?? (() => []),
+    detect: spec.detect ?? (() => null),
+    create: spec.create ?? null,
+    ...(spec.port ? { port: spec.port } : {}),
+  };
 }

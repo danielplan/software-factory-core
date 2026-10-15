@@ -13,6 +13,9 @@ import { checkRules } from "./rules.ts";
 
 export type { Problem } from "./problem.ts";
 
+// The empty knowledge base a new company starts with (its context/ folder).
+export const templateFolder = join(import.meta.dirname, "..", "template");
+
 export type CheckOptions = {
   // Folder names never looked into (default: node_modules, .git, coverage).
   skipped?: string[];

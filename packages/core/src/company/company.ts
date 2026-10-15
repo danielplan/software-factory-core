@@ -1,7 +1,8 @@
-// The company file (factory.json, at the root of a company's repository):
-// the company's name, where its products are, and which extensions and kits
-// its factory uses. Everything else about the company lives in its own
-// folders: its products, its knowledge (context/) and its history (runs/).
+// The company file (factory.json, at the root of the company's factory
+// folder, on this computer): the company's name, which extensions and kits
+// its factory uses, and where its work is tracked. Everything else lives in
+// the folder: its products' descriptions (products/), its knowledge
+// (context/) and its history (runs/).
 
 import { readFileSync } from "node:fs";
 
@@ -11,11 +12,15 @@ import { messageOf } from "../products/product.ts";
 
 const id = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
+export const TRACKERS = ["none", "github", "jira"] as const;
+
 export const companySchema = z.object({
   name: z.string().min(1),
-  // Where the product folders are, as glob patterns from the root; each
-  // folder that has a product.json is a product.
-  products: z.array(z.string().min(1)).default(["*"]),
+  // What the company does, in a sentence or two.
+  about: z.string().default(""),
+  // Where its work is tracked: nowhere yet (the Ideas tab only), a GitHub
+  // board, or Jira Cloud. Their settings are in the settings groups.
+  tracker: z.enum(TRACKERS).default("none"),
   // The add-ons the factory uses, by id; the core extensions are on anyway.
   extensions: z.array(id).default([]),
   // Core extensions the company switches off.
