@@ -1,0 +1,13 @@
+{
+  "id": "shop",
+  "name": "Shop",
+  "kind": "react-web-app",
+  "about": "Where customers find products, order them and follow their orders.",
+  "users": [
+    {
+      "who": "customers",
+      "does": "browse the catalogue, order and follow their orders"
+    }
+  ],
+  "dependsOn": ["orders"]
+}

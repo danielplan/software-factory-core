@@ -1,0 +1,6 @@
+{
+  "name": "Acme",
+  "products": ["apps/*", "services/*"],
+  "kits": ["react-web-app", "nestjs-backend"],
+  "extensions": []
+}

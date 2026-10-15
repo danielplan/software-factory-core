@@ -1,0 +1,143 @@
+// A part: one program the factory starts, watches and stops (a product's
+// server, the runner), or only checks (a database). Extensions add the
+// factory's own parts; kits make one for each product of their kind. The
+// launcher and the System tab read only this list.
+
+import { z } from "zod";
+
+export const AREAS = ["products", "factory"] as const;
+
+// Where a part answers: a value in a settings file, a fixed port, or the
+// same address as another part.
+const portSchema = z.union([
+  z.object({ env: z.string(), key: z.string(), default: z.number().int() }),
+  z.object({ fixed: z.number().int().positive() }),
+  z.object({ part: z.string() }),
+]);
+
+const stepSchema = z.object({
+  label: z.string().min(1),
+  // Where the step runs, when not in the part's own folder.
+  folder: z.string().optional(),
+  // Install the packages when they are missing or older than the lockfile.
+  packages: z.literal(true).optional(),
+  run: z.array(z.string()).min(1).optional(),
+  // Skip the step when `output` is newer than every input.
+  unlessFresh: z
+    .object({ output: z.string(), inputs: z.array(z.string()).min(1) })
+    .optional(),
+});
+
+export const partSchema = z.object({
+  id: z.string().regex(/^[a-z][a-z0-9-]*$/),
+  name: z.string().min(1),
+  area: z.enum(AREAS),
+  // What it does, in a sentence the owner understands.
+  does: z.string().min(1),
+  dependsOn: z.array(z.string()).default([]),
+  folder: z.string().optional(),
+  // Files it cannot start without (its settings file).
+  needs: z.array(z.string()).optional(),
+  port: portSchema.optional(),
+  // An address that answers once the part is ready.
+  health: z.string().optional(),
+  // Where its Open link goes: a path at its address, or a web address.
+  open: z.string().optional(),
+  prepare: z.array(stepSchema).optional(),
+  run: z.array(z.string()).min(1).optional(),
+  // Settings for the program; "{port:<part>}" is that part's port.
+  env: z.record(z.string(), z.string()).optional(),
+  // auto: started with everything; button: only from its button; never:
+  // only checked.
+  start: z.enum(["auto", "button", "never"]),
+  // The owner may switch between "auto" and "button".
+  startChoice: z.literal(true).optional(),
+  startSeconds: z.number().int().positive().optional(),
+  // When it stops with a problem: what to do, in plain words.
+  help: z.object({ title: z.string(), text: z.string() }).optional(),
+});
+
+export type Part = z.infer<typeof partSchema>;
+export type Area = (typeof AREAS)[number];
+
+// What is wrong with the list, in plain words: a part twice, an unknown
+// dependency or address, nothing to start, a circle, or a part listed
+// before what it needs (stopping goes backwards through the list).
+export function checkParts(parts: Part[]): string[] {
+  const ids = new Set<string>();
+  const twice: string[] = [];
+  for (const part of parts) {
+    if (ids.has(part.id)) twice.push(`"${part.id}" is in the list twice`);
+    ids.add(part.id);
+  }
+  return [
+    ...twice,
+    ...parts.flatMap((part) => partProblems(part, ids)),
+    ...orderProblems(parts),
+    ...parts
+      .filter((part) => dependsOnItself(part, parts))
+      .map((part) => `"${part.id}" depends on itself in a circle`),
+  ];
+}
+
+function partProblems(part: Part, ids: Set<string>): string[] {
+  const problems = part.dependsOn
+    .filter((dependency) => !ids.has(dependency))
+    .map(
+      (dependency) =>
+        `"${part.id}" depends on "${dependency}", which is not in the list`,
+    );
+  if (part.port && "part" in part.port && !ids.has(part.port.part))
+    problems.push(
+      `"${part.id}" uses the address of "${part.port.part}", which is not in the list`,
+    );
+  if (part.start !== "never" && !part.run && !part.health)
+    problems.push(`"${part.id}" can be started but has nothing to start`);
+  if (part.startChoice && part.start === "never")
+    problems.push(
+      `"${part.id}" is never started, so how it starts cannot be chosen`,
+    );
+  return problems;
+}
+
+function orderProblems(parts: Part[]): string[] {
+  return parts.flatMap((part, index) =>
+    part.dependsOn
+      .filter(
+        (dependency) => parts.findIndex((p) => p.id === dependency) > index,
+      )
+      .map((dependency) => `"${part.id}" is listed before "${dependency}"`),
+  );
+}
+
+function dependsOnItself(start: Part, parts: Part[]): boolean {
+  const byId = new Map(parts.map((p) => [p.id, p]));
+  const seen = new Set<string>();
+  const queue = [...start.dependsOn];
+  for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+    if (id === start.id) return true;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    queue.push(...(byId.get(id)?.dependsOn ?? []));
+  }
+  return false;
+}
+
+// The parts in an order where each comes after what it needs.
+export function inStartOrder(parts: Part[]): Part[] {
+  const byId = new Map(parts.map((p) => [p.id, p]));
+  const ordered: Part[] = [];
+  const placed = new Set<string>();
+  const place = (part: Part, path: Set<string>): void => {
+    if (placed.has(part.id) || path.has(part.id)) return;
+    path.add(part.id);
+    for (const id of part.dependsOn) {
+      const other = byId.get(id);
+      if (other) place(other, path);
+    }
+    placed.add(part.id);
+    ordered.push(part);
+  };
+  for (const part of parts) place(part, new Set());
+  return ordered;
+}

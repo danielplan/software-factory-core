@@ -1,0 +1,10 @@
+{
+  "id": "orders",
+  "name": "Orders service",
+  "kind": "nestjs-backend",
+  "about": "Keeps the catalogue, the customers and their orders, for the shop.",
+  "users": [
+    { "who": "the shop", "does": "reads the catalogue and places orders" }
+  ],
+  "commands": { "start": "npm run start:dev" }
+}

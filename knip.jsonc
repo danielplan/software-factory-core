@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    ".": { "entry": [], "project": [] },
+    "packages/*": {
+      "entry": ["src/index.ts", "bin/*.ts", "test/**/*.ts"],
+      "project": ["src/**/*.ts", "bin/**/*.ts", "test/**/*.ts"],
+    },
+  },
+  "ignoreExportsUsedInFile": true,
+}

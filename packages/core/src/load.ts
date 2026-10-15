@@ -1,0 +1,25 @@
+// Loads a company's factory from its repository: the company file, its
+// products, and the extensions and kits it uses, put together.
+
+import { join } from "node:path";
+
+import { COMPANY_FILE, readCompany } from "./company/company.ts";
+import {
+  assembleFactory,
+  type Available,
+  type Factory,
+} from "./extensions/registry.ts";
+import { findProducts } from "./products/find-products.ts";
+
+// The factory, with every problem found; it cannot be loaded at all
+// without a readable company file.
+export function loadFactory(
+  root: string,
+  available: Available,
+): Factory | { problem: string } {
+  const read = readCompany(join(root, COMPANY_FILE));
+  if ("problem" in read) return read;
+  const found = findProducts(root, read.company.products);
+  const factory = assembleFactory(read.company, found.products, available);
+  return { ...factory, problems: [...found.problems, ...factory.problems] };
+}
