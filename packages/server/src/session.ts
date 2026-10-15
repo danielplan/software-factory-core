@@ -8,6 +8,7 @@ import { join } from "node:path";
 
 import {
   type Available,
+  type Claude,
   checkChanges,
   detectProducts,
   type Factory,
@@ -23,6 +24,7 @@ import { Launcher } from "@software-factory/launcher";
 
 import type {
   AddProducts,
+  ChangeDraft,
   ChooseTracker,
   CreateCompany,
   Job,
@@ -30,6 +32,7 @@ import type {
   ProductView,
   State,
 } from "./api.ts";
+import { SetupCoach } from "./coach/setup-coach.ts";
 import { createProducts } from "./create-products.ts";
 import { Refused } from "./refused.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
@@ -41,6 +44,8 @@ export type SessionOptions = {
   available: Available;
   templates: Templates;
   onChange: () => void;
+  // The setup coach's Claude Code and its instructions.
+  coach: { claude: Claude; guide: string; home?: string };
 };
 
 export class Session {
@@ -50,9 +55,15 @@ export class Session {
   private launcher: Launcher | null = null;
   private stopListening: (() => void) | null = null;
   private jobs: Job[] = [];
+  readonly coach: SetupCoach;
 
   constructor(options: SessionOptions) {
     this.options = options;
+    this.coach = new SetupCoach({
+      ...options.coach,
+      kits: options.available.kits,
+      onChange: options.onChange,
+    });
     if (options.root && hasFactory(options.root)) this.open(options.root);
   }
 
@@ -64,6 +75,7 @@ export class Session {
         factoriesFolder: this.options.factoriesFolder,
         kits,
         jobs: this.jobs,
+        coach: this.coach.view(),
       };
     const root = this.root;
     return {
@@ -91,6 +103,30 @@ export class Session {
     const root = writeCompany(request, this.place());
     this.open(root);
     return root;
+  }
+
+  // The setup coach's map made into the factory: the company, then its
+  // products (new ones in the factory's code folder).
+  async makeFromDraft(): Promise<void> {
+    const { company, products } = this.coach.keeper.draft;
+    if (this.coach.view().working)
+      throw new Refused("Wait until the coach has answered.");
+    const root = this.createCompany(company);
+    if (products.length === 0) return;
+    await this.addProducts({
+      products: products.map((product) =>
+        product.isNew
+          ? { ...product, folder: join(root, "code", product.id) }
+          : product,
+      ),
+    });
+  }
+
+  ownerChangesDraft(change: ChangeDraft): void {
+    if (this.root) throw new Refused("The factory is made already.");
+    this.coach.ownerChange(() => {
+      this.coach.keeper.owner(change);
+    });
   }
 
   // Products added on the Products tab: their descriptions, then the new

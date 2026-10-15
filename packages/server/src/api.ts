@@ -40,6 +40,7 @@ export type State =
       factoriesFolder: string;
       kits: KitView[];
       jobs: Job[];
+      coach: CoachView;
     }
   | {
       mode: "factory";
@@ -74,7 +75,43 @@ export type SetupProduct = {
   port?: number;
   commands?: Record<string, string>;
   isNew: boolean;
+  users?: { who: string; does: string }[];
+  dependsOn?: string[];
+  // Its first blueprint, drafted from its code.
+  blueprint?: string;
 };
+
+// The company as the setup coach drafts it while the owner talks: shown as
+// a map that builds up, and made into the factory when the owner says so.
+// A new product's folder is empty until then (it goes in the factory's
+// code folder).
+export type Draft = {
+  company: { name: string; about: string };
+  products: (SetupProduct & {
+    users: { who: string; does: string }[];
+    dependsOn: string[];
+  })[];
+};
+
+export type CoachMessage = { from: "coach" | "owner"; text: string };
+
+// The setup coach's conversation: what was said, the reply being written,
+// what it is doing right now, and why it cannot answer, if it cannot.
+export type CoachView = {
+  messages: CoachMessage[];
+  writing: string | null;
+  activity: string | null;
+  working: boolean;
+  problem: string | null;
+  draft: Draft;
+};
+
+// The owner's own change to the draft: the company, one product, or a
+// product taken off.
+export type ChangeDraft =
+  | { company: { name?: string; about?: string } }
+  | { product: { id: string; name?: string; about?: string } }
+  | { remove: string };
 
 // Setting up as part of the dashboard, one step at a time: the company
 // first (its factory folder), then products whenever, then the tracker.

@@ -80,6 +80,8 @@ export {
   type SettingView,
 } from "./settings/setting-groups.ts";
 export { claudeArgs, type Claude, type RunOptions } from "./agents/claude.ts";
+export { describeEvent, formatDuration } from "./agents/activity.ts";
+export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,
   readEvent,

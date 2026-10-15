@@ -6,13 +6,15 @@
 // factory then goes in `folder`, or in ~/Factories/<company>).
 
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import { WarmClaude } from "@software-factory/core";
 import { allKits } from "@software-factory/kits";
 import { templateFolder } from "@software-factory/knowledge-base";
-import { templatesFolder } from "@software-factory/method";
+import { guidesFolder, templatesFolder } from "@software-factory/method";
 
 import { startServer } from "../src/server.ts";
 import { defaultFactoriesFolder, Session } from "../src/session.ts";
@@ -30,6 +32,8 @@ const root = positionals[0] ? resolve(positionals[0]) : null;
 const page = join(import.meta.dirname, "..", "..", "dashboard", "dist");
 
 let changed = () => {};
+// Claude Code on this computer, signed in with the owner's own account.
+const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");
 const session = new Session({
   root,
   factoriesFolder: defaultFactoriesFolder(homedir()),
@@ -40,6 +44,10 @@ const session = new Session({
   },
   onChange: () => {
     changed();
+  },
+  coach: {
+    claude,
+    guide: readFileSync(join(guidesFolder, "setup-coach.md"), "utf8"),
   },
 });
 const started = startServer({ session, page, port });
@@ -55,6 +63,7 @@ if (!values["no-open"]) openInBrowser(address);
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () => {
     session.close();
+    claude.stop();
     process.exit(0);
   });
 

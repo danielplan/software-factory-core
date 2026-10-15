@@ -6,6 +6,17 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Setting up by talking: the setup coach (Claude Code on this computer) asks
+  about the company, reads existing code, and draws the company and its
+  products on a map that the owner can change, with a first blueprint per
+  product; **Make the factory** writes it. The form stays as an option.
+- The core runs Claude Code kept open between turns (`WarmClaude`) and turns
+  its events into plain lines (`describeEvent`); a run can deny more tools
+  (`deny`) and add instructions for the whole conversation (`instructions`).
+- `addProduct` takes the product's first blueprint; products added in setup
+  keep who uses them and what they need.
+- The method has the coaches' guides (`guidesFolder`).
+
 - A factory you can set up and run: `node packages/server/bin/software-factory.ts`
   opens the setup page (start something new, or bring existing code) and then
   the dashboard (System, Products, Settings).

@@ -14,7 +14,8 @@ import { inside } from "@/setup/draft";
 // page turns into the factory's dashboard.
 export function CreateCompany({
   factoriesFolder,
-}: Readonly<{ factoriesFolder: string }>) {
+  onCoach,
+}: Readonly<{ factoriesFolder: string; onCoach: () => void }>) {
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
   const [folder, setFolder] = useState("");
@@ -30,6 +31,13 @@ export function CreateCompany({
             The factory keeps its files on this computer, outside your code:
             what it knows about your products, its plans and its history.
           </p>
+          <button
+            type="button"
+            onClick={onCoach}
+            className="min-h-11 self-start text-sm underline underline-offset-2"
+          >
+            Talk to the coach instead
+          </button>
         </>
       }
     >

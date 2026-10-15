@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import type { State } from "../../server/src/api.ts";
 
 export type {
+  CoachView,
   DetectAnswer,
+  Draft,
   FolderList,
   Job,
   KitView,

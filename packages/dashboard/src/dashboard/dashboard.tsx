@@ -5,8 +5,8 @@ import { ProblemBox } from "@/components/problem-box";
 import { StatusLight } from "@/components/status-light";
 import { TopBar } from "@/components/top-bar";
 import { cn } from "@/lib/utils";
+import { SetupPage } from "@/setup-coach/setup-page";
 
-import { CreateCompany } from "./create-company";
 import { ProductsTab } from "./products-tab";
 import { SettingsTab } from "./settings-tab";
 import { SystemTab } from "./system-tab";
@@ -41,8 +41,8 @@ function useTab(): Tab {
   return tab;
 }
 
-// The dashboard, always: before there is a company, the System tab asks for
-// one and the other tabs wait for it.
+// The dashboard, always: before there is a company, the System tab sets it
+// up with the coach and the other tabs wait for it.
 export function Dashboard({ state }: Readonly<{ state: State }>) {
   const tab = useTab();
   const factory = state.mode === "factory" ? state : null;
@@ -66,11 +66,7 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 
 function TabContent({ state, tab }: Readonly<{ state: State; tab: Tab }>) {
   if (state.mode === "setup")
-    return tab === "system" ? (
-      <CreateCompany factoriesFolder={state.factoriesFolder} />
-    ) : (
-      <CreateFirst />
-    );
+    return tab === "system" ? <SetupPage state={state} /> : <CreateFirst />;
   if (tab === "products") return <ProductsTab state={state} />;
   if (tab === "settings") return <SettingsTab state={state} />;
   return <SystemTab state={state} />;

@@ -20,8 +20,16 @@ core, an extension or a kit; otherwise it is the company's.
 
 ## Setting up a factory
 
-One command (`npx software-factory`, to come) opens a setup page in the
-browser with two doors:
+One command (`npx software-factory`, to come) opens the dashboard, which
+starts with setting up. **The setup coach** talks with the owner in a chat
+beside a map of the company that builds up while they talk: the company,
+then its products, joined by what each needs. It is Claude Code on this
+computer, signed in with the owner's own account, following the method's
+`packages/method/guides/setup-coach.md`. It only reads code (never `.env`
+files) and draws on the map with its own tools over MCP; the owner can change
+any card by hand, and **Make the factory** writes the folder from the map.
+A plain form is there for whoever prefers it. Either way, there are two kinds
+of start:
 
 - **Start something new** (greenfield): the company (the coach interviews the
   owner and writes the first knowledge pages), the first product (its kit

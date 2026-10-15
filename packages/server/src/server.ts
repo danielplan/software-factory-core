@@ -12,11 +12,14 @@ import {
 } from "node:http";
 import { extname, join, normalize, sep } from "node:path";
 
+import { answerTools } from "./coach/setup-tools.ts";
 import { listFolders } from "./folders.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
 export const PAGE_HEADER = "x-software-factory";
+// The setup coach's tools, which check the coach's own token instead.
+const COACH_TOOLS = "/api/setup/mcp";
 const HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -46,6 +49,13 @@ export function startServer(options: {
   const server = createServer((incoming, response) => {
     void answer(incoming, response, { routes, watchers, ...options });
   });
+  server.on("listening", () => {
+    const address = server.address();
+    const port = typeof address === "object" && address ? address.port : 0;
+    options.session.coach.serveToolsAt(
+      `http://localhost:${String(port)}${COACH_TOOLS}`,
+    );
+  });
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
 }
@@ -59,6 +69,13 @@ function routesFor(session: Session): Record<string, Route> {
     "GET /api/folders": (_body, url) =>
       listFolders(url.searchParams.get("path")),
     "POST /api/setup/detect": (body) => session.detect(text(body, "folder")),
+    "POST /api/setup/say": (body) => session.coach.say(text(body, "text")),
+    "POST /api/setup/draft": (body) => {
+      session.ownerChangesDraft(
+        body as Parameters<Session["ownerChangesDraft"]>[0],
+      );
+    },
+    "POST /api/setup/make": () => session.makeFromDraft(),
     "POST /api/company": (body) =>
       session.createCompany(body as Parameters<Session["createCompany"]>[0]),
     "POST /api/products": (body) =>
@@ -79,6 +96,7 @@ type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
   page: string;
+  session: Session;
 };
 
 async function answer(
@@ -92,6 +110,9 @@ async function answer(
     send(response, 403, { error: "Not here." });
   } else if (url.pathname === "/api/events") {
     stream(response, context);
+  } else if (url.pathname === COACH_TOOLS && incoming.method === "POST") {
+    const body = await readBody(incoming).catch(() => null);
+    await answerTools(incoming, response, context.session.coach, body);
   } else if (!url.pathname.startsWith("/api/")) {
     sendFile(response, context.page, url.pathname);
   } else {

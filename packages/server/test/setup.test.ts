@@ -1,79 +1,15 @@
 import assert from "node:assert/strict";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { request } from "node:http";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { defineKit } from "@software-factory/core";
-import { templateFolder } from "@software-factory/knowledge-base";
-import { templatesFolder } from "@software-factory/method";
-
 import type { State } from "../src/api.ts";
-import { PAGE_HEADER, startServer } from "../src/server.ts";
-import { Session } from "../src/session.ts";
-import { trackers } from "../src/trackers.ts";
+import { stage } from "./stage.ts";
 
 // The setup flow through the server, as the page uses it: products found in
 // existing code, a new one made with its kit's starter, the tracker saved,
 // and the factory open afterwards.
-
-const web = defineKit({
-  id: "web-kit",
-  name: "Web kit",
-  about: "A stand-in for web apps.",
-  kind: "web-app",
-  commands: { start: "npm run dev" },
-  port: 5173,
-  detect: (folder) =>
-    existsSync(join(folder, "web.txt"))
-      ? { name: "Found app", commands: { verify: "npm test" } }
-      : null,
-  // Makes the folder with a file in it, as a real starter would.
-  create: (folder) => [
-    [
-      process.execPath,
-      "-e",
-      `require("fs").mkdirSync(${JSON.stringify(folder)}, { recursive: true })`,
-    ],
-  ],
-});
-
-async function stage() {
-  const home = mkdtempSync(join(tmpdir(), "setup-"));
-  const session = new Session({
-    root: null,
-    factoriesFolder: join(home, "Factories"),
-    available: { extensions: [trackers], kits: [web] },
-    templates: {
-      knowledgeBase: templateFolder,
-      agents: join(templatesFolder, "AGENTS.md"),
-    },
-    onChange: () => {},
-  });
-  const page = join(home, "page");
-  mkdirSync(page);
-  writeFileSync(join(page, "index.html"), "<p>The factory</p>");
-  // Port 0: the system picks a free one.
-  const { server } = startServer({ session, page, port: 0 });
-  await new Promise((resolve) => server.once("listening", resolve));
-  const address = server.address();
-  assert.ok(address && typeof address === "object");
-  const base = `http://localhost:${String(address.port)}`;
-  const post = async (path: string, body: unknown, header = true) =>
-    fetch(`${base}${path}`, {
-      method: "POST",
-      headers: header ? { [PAGE_HEADER]: "1" } : {},
-      body: JSON.stringify(body),
-    });
-  return { home, session, server, base, post };
-}
 
 test("setup in the dashboard: the company first, then products found and made, then the tracker", async () => {
   const { home, session, server, base, post } = await stage();

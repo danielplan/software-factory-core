@@ -31,6 +31,7 @@
   --warning: #e2a13c;
   --stopped: #a3aabb;
   --arrow: #b5bccb;
+  --dot: #d9deea;
   --surface: #f7f8fc;
   --surface-2: #f1f3f8;
   --glow-a: #dff5ec;
@@ -69,6 +70,7 @@
     --warning: #e8b058;
     --stopped: #6f778a;
     --arrow: #4a5263;
+    --dot: #2c3240;
     --surface: #1e232d;
     --surface-2: #242a35;
     --glow-a: rgb(47 180 124 / 0.12);
@@ -125,6 +127,21 @@
       opacity: 0.45;
     }
   }
+  /* Something new on the setup map arrives with a small pop. */
+  --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+  /* The coach's orb turns slowly while it thinks. */
+  --animate-swirl: swirl 3s linear infinite;
+  @keyframes swirl {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 /* The pastel glows behind a side panel. */
@@ -140,6 +157,22 @@
     radial-gradient(circle at 20% 10%, var(--glow-a) 0, transparent 50%),
     radial-gradient(circle at 85% 95%, var(--glow-b) 0, transparent 55%),
     var(--card);
+}
+
+/* The setup map: a light board with a dot grid. */
+@utility dotted-board {
+  background-color: var(--surface);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+/* The coach's orb: the pastel glows, blurred. */
+@utility orb {
+  border-radius: 999px;
+  filter: blur(3px);
+  background:
+    radial-gradient(circle at 35% 30%, #bfe9f7 0, transparent 60%),
+    radial-gradient(circle at 70% 70%, #c7cbfb 0, transparent 65%),
+    radial-gradient(circle at 30% 80%, #f8cfe0 0, transparent 60%);
 }
 
 /* Element rules sit in the base layer, so Tailwind classes win over them. */

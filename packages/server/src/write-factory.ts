@@ -56,15 +56,19 @@ export function writeProducts(
   ]);
   saveCompany(root, { ...read.company, kits: [...used] });
   for (const product of products)
-    addProduct(root, {
-      id: product.id,
-      name: product.name,
-      kind: product.kind,
-      folder: product.folder,
-      about: product.about,
-      users: [],
-      commands: product.commands ?? {},
-      dependsOn: [],
-      ...(product.port ? { port: product.port } : {}),
-    });
+    addProduct(
+      root,
+      {
+        id: product.id,
+        name: product.name,
+        kind: product.kind,
+        folder: product.folder,
+        about: product.about,
+        users: product.users ?? [],
+        commands: product.commands ?? {},
+        dependsOn: product.dependsOn ?? [],
+        ...(product.port ? { port: product.port } : {}),
+      },
+      product.blueprint,
+    );
 }

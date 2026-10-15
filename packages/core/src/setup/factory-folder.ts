@@ -61,12 +61,14 @@ export function saveCompany(root: string, company: Company): void {
   writeJson(join(root, COMPANY_FILE), companySchema.parse(company));
 }
 
-// A product's description, with a first blueprint next to it. Code inside
+// A product's description, with its first blueprint next to it (the one
+// given, drafted from the code, or a placeholder). Code inside
 // the factory folder or next to it is kept as a relative path, so the folders
 // can move together; code elsewhere keeps its whole path.
 export function addProduct(
   root: string,
   product: Omit<ProductFile, "code"> & { folder: string },
+  blueprint?: string,
 ): string {
   const home = join(root, PRODUCTS_FOLDER, product.id);
   if (existsSync(join(home, PRODUCT_FILE)))
@@ -80,7 +82,9 @@ export function addProduct(
   writeJson(join(home, PRODUCT_FILE), file);
   writeFileSync(
     join(home, "BLUEPRINT.md"),
-    `# ${file.name} blueprint\n\n- **Kind:** ${file.kind}.\n- **Code:** ${folder}.\n- **Structure, promises and checks:** to be written (the factory drafts them from the code for you to review).\n`,
+    blueprint?.trim()
+      ? `${blueprint.trim()}\n`
+      : `# ${file.name} blueprint\n\n- **Kind:** ${file.kind}.\n- **Code:** ${folder}.\n- **Structure, promises and checks:** to be written (the factory drafts them from the code for you to review).\n`,
   );
   return home;
 }

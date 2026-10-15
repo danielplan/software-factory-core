@@ -3,9 +3,11 @@ import { Fragment, useState } from "react";
 
 import { messageOf, type PartView, post } from "@/api";
 import { Accent } from "@/components/accent";
+import { Arrow } from "@/components/arrow";
 import { ProblemBox } from "@/components/problem-box";
 import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
+import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
@@ -180,32 +182,6 @@ function Heading({ parts }: Readonly<{ parts: PartView[] }>) {
   );
 }
 
-// Each product one column after the deepest product it needs.
-export function columnsOf(parts: PartView[]): PartView[][] {
-  const byId = new Map(parts.map((part) => [part.id, part]));
-  const depth = new Map<string, number>();
-  const depthOf = (part: PartView, seen: Set<string>): number => {
-    const known = depth.get(part.id);
-    if (known !== undefined) return known;
-    const below = part.dependsOn
-      .map((id) => byId.get(id))
-      .filter(
-        (other): other is PartView =>
-          other !== undefined && !seen.has(other.id),
-      )
-      .map((other) => depthOf(other, new Set([...seen, part.id])));
-    const found = below.length === 0 ? 0 : 1 + Math.max(...below);
-    depth.set(part.id, found);
-    return found;
-  };
-  const columns: PartView[][] = [];
-  for (const part of parts) {
-    const at = depthOf(part, new Set([part.id]));
-    columns[at] = [...(columns[at] ?? []), part];
-  }
-  return columns.filter(Boolean);
-}
-
 function ProductMap({
   parts,
   onPress,
@@ -229,24 +205,5 @@ function ProductMap({
         ))}
       </div>
     </div>
-  );
-}
-
-function Arrow() {
-  return (
-    <svg
-      className="flex-none text-arrow"
-      width="28"
-      height="16"
-      viewBox="0 0 28 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M2 8h22M18 3l6 5-6 5" />
-    </svg>
   );
 }
