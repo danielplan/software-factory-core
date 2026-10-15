@@ -20,6 +20,12 @@ import { startServer } from "../src/server.ts";
 import { defaultFactoriesFolder, Session } from "../src/session.ts";
 import { trackers } from "../src/trackers.ts";
 
+// The command that opens an address in the default browser.
+const OPENER: Partial<Record<NodeJS.Platform, string>> = {
+  darwin: "open",
+  win32: "explorer",
+};
+
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
@@ -66,12 +72,6 @@ for (const signal of ["SIGINT", "SIGTERM"] as const)
     claude.stop();
     process.exit(0);
   });
-
-// The command that opens an address in the default browser.
-const OPENER: Partial<Record<NodeJS.Platform, string>> = {
-  darwin: "open",
-  win32: "explorer",
-};
 
 function openInBrowser(url: string): void {
   const command = OPENER[process.platform] ?? "xdg-open";
