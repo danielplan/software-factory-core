@@ -45,9 +45,10 @@ companies update.
 | `packages/knowledge-base/` | The knowledge base's structure and its checks                                                                               | first version |
 | `examples/acme/`           | An example company with two products, used by the tests                                                                     | first version |
 
-Next: the launcher and the dashboard shell, then the core extensions (System
-and Factory tabs, the GitHub runner, the Ideas tab and prototypes), then the
-kits and add-ons.
+Next: product descriptions kept in the company's factory folder, the launcher
+and the dashboard shell, the setup page (greenfield and brownfield), then the
+core extensions (System and Factory tabs, the runner with GitHub and Jira
+Cloud, the Ideas tab and prototypes), then the kits and add-ons.
 
 ## Working on the core
 
