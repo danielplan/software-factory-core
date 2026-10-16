@@ -239,6 +239,10 @@
       transparent 55%
     ),
     var(--surface);
+  /* Plain in the dark theme: the glows look muddy there. */
+  @variant dark {
+    background: var(--surface);
+  }
 }
 
 /* Element rules sit in the base layer, so Tailwind classes win over them. */

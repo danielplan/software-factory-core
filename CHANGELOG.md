@@ -18,7 +18,7 @@ a major version may need a company to change something, and says what.
   and what to do, without the "Next" line, and shows only the products
   (each card says what the part does); the factory's own overview (ideas,
   where work is tracked, the builder) heads Settings. The pages sit on a
-  soft gradient, lower on the screen. The Ideas page's box is a plain
+  soft gradient (plain in the dark theme), lower on the screen. The Ideas page's box is a plain
   card with Talk and Send below the text; what is said starts the idea.
 - Connecting where work is tracked is guided, right after the factory is
   opened (and from the board's next steps and Settings): a **GitHub
