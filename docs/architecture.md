@@ -75,10 +75,15 @@ stays out of git (`factory/.gitignore`): the settings with their secrets
 (`settings/`) and the agents' working copies (`copies/`). The command finds
 the factory from anywhere inside the project.
 
-**Where work is tracked** is chosen in setup: a GitHub board, **Jira Cloud**,
-or none yet (the Ideas tab only). Both trackers ship with the core runner. In
-Jira, each step (Planning, Todo, In Progress, Review, Done) is mapped to a
-status of the company's own workflow, issues move with Jira's transitions,
+**Where work is tracked** is chosen right after the factory opens, and
+changed on Settings: the factory's own board (nothing to connect), a GitHub
+board, or **Jira Cloud**. Work goes through one set of stages everywhere:
+a draft idea, then Backlog, To do, In progress, Review and Done (`STAGES`
+in `packages/server/src/api.ts`). Connecting a board picks the label of
+the work the factory takes in and matches its columns to these stages; the
+factory's `board.json` keeps all of it, and only Jira's API token is kept
+in the settings. Both trackers ship with the core runner. In
+Jira, issues move with the company's own workflow's transitions,
 the coaching happens in the issue's comments, and the factory checks for
 changed issues every minute (Jira's webhooks need a public address, and the
 factory runs on this computer). **Where the code lives** (branches and pull
@@ -100,6 +105,7 @@ acme/                    the project, one repository
    │  └─ BLUEPRINT.md    its structure, promises and checks
    ├─ context/           its knowledge base (from the template)
    ├─ ideas/             the ideas shaped with the idea coach, one file each
+   ├─ board.json         the connected board: label, a column per stage
    ├─ runs/              its history
    └─ settings/, copies/ secrets and working copies, not in git
 ```
@@ -123,7 +129,7 @@ An extension (`defineExtension`) or a kit (`defineKit`) says what it adds:
 | Commands                          | the usual commands for a kind of product; a product's own win                            | kits                                                                                      |
 | Rules                             | conventions and lessons for a kind of product                                            | kits                                                                                      |
 | Tabs, agent tools, workflow steps | the dashboard's tabs, the coach's tools, the runner's steps                              | to come, with the core extensions                                                         |
-| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                        | to come, with the runner                                                                  |
+| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                        | in the server (`connect/`); the runner, which moves the work, to come                     |
 | Code hosts                        | where branches and pull requests go: GitHub                                              | to come, with the runner                                                                  |
 | Detection                         | a kit recognises its kind of product in existing code                                    | to come, with the setup page                                                              |
 

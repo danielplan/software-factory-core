@@ -85,7 +85,7 @@ function Bar({
         onProblem(messageOf(error));
       });
   };
-  const ready = idea.status === "ready";
+  const ready = idea.status !== "draft";
   return (
     <div className="pointer-events-auto flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-card/90 p-1.5 pr-2 shadow-soft backdrop-blur">
       <Button asChild variant="ghost" className="h-9 px-2.5 text-[13px]">

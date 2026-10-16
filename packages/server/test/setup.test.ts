@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { request } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -7,35 +7,29 @@ import { test } from "node:test";
 import type { State } from "../src/api.ts";
 import { stage } from "./stage.ts";
 
-// The setup flow through the server, as the page uses it: products found in
-// existing code, a new one made with its kit's starter, the tracker saved,
-// and the factory open afterwards.
+// The factory's folder, as the coach makes it when it names the company
+// (the coach's tests make the rest), and its settings saved from the page.
 
-test("setup in the dashboard: the company first, then products found and made, then the tracker", async () => {
-  const { home, project, session, server, base, post } = await stage();
+test("the factory's folder comes first, once, and its settings save from the page", async () => {
+  const { project, session, server, base, post } = await stage();
   try {
-    const code = join(home, "code");
-    mkdirSync(join(code, "shop"), { recursive: true });
-    writeFileSync(join(code, "shop", "web.txt"), "");
     const state = (await (await fetch(`${base}/api/state`)).json()) as State;
     assert.equal(state.mode, "setup");
     assert.deepEqual(
       state.kits.map((k) => [k.id, k.canCreate]),
       [["web-kit", true]],
     );
-    // Nothing but the company can come first.
     assert.deepEqual(
-      await (await post("/api/products", { products: [] })).json(),
-      { error: "Name your company first." },
+      await (await post("/api/settings", { group: "jira", values: {} })).json(),
+      { error: "There is no such setting." },
     );
 
-    const created = await post("/api/company", {
+    // In the project, which its own rules point to.
+    const root = session.createCompany({
       name: "Acme Garden",
       about: "Garden tools.",
     });
-    // In the project, which its own rules point to.
-    const root = join(project, "factory");
-    assert.equal(await created.json(), root);
+    assert.equal(root, join(project, "factory"));
     assert.match(
       readFileSync(join(project, "AGENTS.md"), "utf8"),
       /factory\/AGENTS\.md/,
@@ -44,87 +38,38 @@ test("setup in the dashboard: the company first, then products found and made, t
     assert.ok(empty.mode === "factory");
     assert.deepEqual(empty.products, []);
     assert.equal(empty.company.tracker, "none");
-    assert.equal(
-      (await post("/api/company", { name: "Again", about: "" })).status,
-      409,
+    assert.deepEqual(empty.board, {});
+    assert.throws(
+      () => session.createCompany({ name: "Again", about: "" }),
+      /has its company already/,
     );
 
-    const shop = {
-      id: "shop",
-      name: "Shop",
-      kind: "web-app",
-      folder: join(code, "shop"),
-      about: "",
-      port: 5173,
-      isNew: false,
-    };
-    const blog = {
-      id: "blog",
-      name: "Blog",
-      kind: "web-app",
-      folder: join(code, "blog"),
-      about: "News.",
-      port: 5174,
-      isNew: true,
-    };
-    assert.equal(
-      (await post("/api/products", { products: [shop, blog] })).status,
-      200,
-    );
-    assert.ok(existsSync(join(code, "blog")));
-    const open = session.state();
-    assert.ok(open.mode === "factory");
-    assert.deepEqual(open.company.kits, ["web-kit"]);
-    assert.deepEqual(
-      open.products.map((p) => p.id),
-      ["blog", "shop"],
-    );
-    assert.deepEqual(open.problems, []);
-    assert.deepEqual(
-      open.jobs.map((j) => [j.id, j.state]),
-      [["blog", "done"]],
-    );
-    assert.deepEqual(
-      await (await post("/api/products", { products: [shop] })).json(),
-      { error: 'There is a product "shop" already.' },
-    );
-
-    // The tracker: a wrong value refuses all of it; then it is saved.
+    // A wrong value is refused, with why; a secret is never sent back.
     const wrong = (await (
-      await post("/api/company/tracker", {
-        tracker: "jira",
-        settings: { JIRA_PROJECT: "lowercase" },
+      await post("/api/settings", {
+        group: "jira",
+        values: { JIRA_PROJECT: "ACME" },
       })
     ).json()) as { refused: Record<string, string> };
-    assert.match(wrong.refused.JIRA_PROJECT ?? "", /does not look right/);
-    await post("/api/company/tracker", {
-      tracker: "jira",
-      settings: { JIRA_SITE: "acme.atlassian.net", JIRA_TOKEN: "secret-1" },
-    });
+    assert.match(wrong.refused.JIRA_PROJECT ?? "", /Not a setting here/);
+    const saved = (await (
+      await post("/api/settings", {
+        group: "jira",
+        values: { JIRA_TOKEN: "secret-1" },
+      })
+    ).json()) as { refused: Record<string, string> };
+    assert.deepEqual(saved.refused, {});
     assert.match(
       readFileSync(join(root, "settings", "tracker.env"), "utf8"),
       /JIRA_TOKEN=secret-1/,
     );
     const tracked = session.state();
     assert.ok(tracked.mode === "factory");
-    assert.equal(tracked.company.tracker, "jira");
-    // The secret is never sent back, only that it is set.
     const jira = tracked.settings.find((g) => g.id === "jira");
     assert.equal(
       jira?.fields.find((f) => f.key === "JIRA_TOKEN")?.value,
       "(set)",
     );
-    assert.equal(
-      (await post("/api/company/tracker", { tracker: "slack" })).status,
-      409,
-    );
-    const saved = (await (
-      await post("/api/settings", {
-        group: "jira",
-        values: { JIRA_PROJECT: "ACME" },
-      })
-    ).json()) as { refused: Record<string, string> };
-    assert.deepEqual(saved.refused, {});
   } finally {
     session.close();
     server.close();
@@ -153,10 +98,10 @@ test("only this computer, and only the factory's page, may press its buttons", a
     assert.equal((await fetch(`${base}/api/nothing`)).status, 404);
     // Any other address is the page, which runs in the browser.
     assert.match(await (await fetch(`${base}/system`)).text(), /The factory/);
-    const nameless = await post("/api/company", { name: " ", about: "" });
-    assert.deepEqual(await nameless.json(), {
-      error: "Give the project a name.",
-    });
+    assert.throws(
+      () => session.createCompany({ name: " ", about: "" }),
+      /Give the project a name/,
+    );
   } finally {
     session.close();
     server.close();

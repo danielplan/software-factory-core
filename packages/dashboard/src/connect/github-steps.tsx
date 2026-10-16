@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { get, type GitHubStatus, messageOf, post } from "@/api";
+import { get, type GitHubStatus, messageOf, post, type StageMap } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
 import { Step } from "./connect-page";
 import { Pick, WhichWork } from "./pick";
-import { type Columns, type StageMap, StageMapping } from "./stage-map";
+import { type Columns, StageMapping } from "./stage-map";
 
 const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 

@@ -182,7 +182,7 @@ export class Ideas {
   ready(id: string): void {
     const idea = this.idea(id);
     if (idea.talk.working) throw new Refused("The coach is still answering.");
-    idea.kept = { ...idea.kept, status: "ready" };
+    idea.kept = { ...idea.kept, status: "backlog" };
     idea.save();
     this.options.onChange();
   }

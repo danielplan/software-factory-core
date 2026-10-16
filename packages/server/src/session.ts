@@ -6,8 +6,10 @@ import { join } from "node:path";
 
 import {
   type Available,
+  type Changes,
   type Claude,
   checkChanges,
+  type Company,
   type Factory,
   FACTORY_FOLDER,
   groupView,
@@ -16,16 +18,15 @@ import {
   saveCompany,
   saveGroup,
   type Templates,
-  TRACKERS,
 } from "@software-factory/core";
 import { Launcher } from "@software-factory/launcher";
 
 import type {
-  AddProducts,
+  Board,
   ChangeDraft,
-  ChooseTracker,
   CreateCompany,
   Job,
+  SetupProduct,
   State,
 } from "./api.ts";
 import {
@@ -37,10 +38,11 @@ import { Ideas } from "./coach/ideas.ts";
 import { pictureIn, shownPicture } from "./coach/pictures.ts";
 import { SetupCoach } from "./coach/setup-coach.ts";
 import type { ToolsFor } from "./coach/setup-tools.ts";
-import { createProducts } from "./create-products.ts";
+import { createProducts, startNew } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
 import { Refused } from "./refused.ts";
+import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { kitViews, productView } from "./views.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
@@ -50,7 +52,6 @@ export type SessionOptions = {
   available: Available;
   templates: Templates;
   onChange: () => void;
-  // The setup coach's Claude Code and its instructions.
   // The setup coach's and the idea coach's instructions.
   coach: { claude: Claude; guide: string; ideaGuide: string };
   // The tools on this computer the coach may install, once the owner
@@ -119,6 +120,7 @@ export class Session {
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
       onboarding: this.onboarding,
+      board: readBoard(root),
     };
   }
 
@@ -168,12 +170,6 @@ export class Session {
     this.reload();
   }
 
-  // The owner connects later (or has connected): the onboarding goes.
-  connectLater(): void {
-    this.onboarding = false;
-    this.options.onChange();
-  }
-
   // A tool on this computer, installed with the system's package manager.
   async installTool(id: string): Promise<{ installed: boolean }> {
     if (!this.coach.installables.some((i) => i.id === id))
@@ -219,42 +215,41 @@ export class Session {
     this.coach.ownerChange(change);
   }
 
-  // Products added on the Products tab: their descriptions, then the new
-  // ones made with their kits' starters, then they start.
-  async addProducts(request: AddProducts): Promise<void> {
+  // Products the coach adds: their descriptions, then the new ones made
+  // with their kits' starters, then they start.
+  private async addProducts(products: SetupProduct[]): Promise<void> {
     const root = this.rootOrRefuse();
-    writeProducts(root, request.products, this.options.available.kits);
+    writeProducts(root, products, this.options.available.kits);
     this.reload();
     const made = await createProducts(
-      request.products.filter((p) => p.isNew),
+      products.filter((p) => p.isNew),
       this.options.available.kits,
       (jobs) => {
         this.showJobs(jobs);
       },
     );
-    const launcher = this.launcher;
-    if (!made || !launcher) return;
-    // The new products that run (a kit may make no part for one).
-    const parts = new Set(launcher.state().map((part) => part.id));
-    const starting = request.products.filter((p) => parts.has(p.id));
-    await Promise.allSettled(starting.map((p) => launcher.start(p.id)));
+    if (made && this.launcher) await startNew(this.launcher, products);
   }
 
-  // Where work is tracked, with that tracker's settings.
-  chooseTracker(request: ChooseTracker) {
+  // Where work is tracked, which ends the onboarding: a board connected and
+  // checked (board.json, its secrets in settings), or the factory's own.
+  chooseBoard(
+    tracker: Company["tracker"],
+    board: Board = {},
+    secrets: Changes = {},
+  ) {
     const root = this.rootOrRefuse();
-    if (!this.factory) throw new Refused("There is no factory open.");
-    if (!TRACKERS.includes(request.tracker))
-      throw new Refused("Choose where work is tracked.");
-    const group = this.factory.settings.find((g) => g.id === request.tracker);
-    const { changes, refused } = group
-      ? checkChanges(group, request.settings ?? {})
-      : { changes: {}, refused: {} };
-    if (Object.keys(refused).length > 0) return { refused };
-    if (group) saveGroup(group, root, changes);
-    saveCompany(root, { ...this.factory.company, tracker: request.tracker });
+    const company = this.factoryOrRefuse().company;
+    const { refused } =
+      Object.keys(secrets).length > 0
+        ? this.saveSettings(tracker, secrets)
+        : { refused: {} };
+    const wrong = Object.entries(refused).map(([k, why]) => `${k}: ${why}`);
+    if (wrong.length > 0) throw new Refused(wrong.join(" · "));
+    saveBoard(root, { ...readBoard(root), ...board });
+    saveCompany(root, { ...company, tracker });
+    this.onboarding = false;
     this.reload();
-    return { refused };
   }
 
   // A settings group's new values; the refused ones say why.
@@ -316,7 +311,7 @@ export class Session {
         saveCompany(this.rootOrRefuse(), company);
         this.reload();
       },
-      addProducts: (products) => this.addProducts({ products }),
+      addProducts: (products) => this.addProducts(products),
       saveSettings: (group, values) => this.saveSettings(group, values),
       addOns: addOns(extensions).map((a) => a.id),
       install: (ids) => this.installAll(ids),
@@ -337,6 +332,11 @@ export class Session {
     this.earlierJobs = this.jobs;
     this.reload();
     return done;
+  }
+
+  private factoryOrRefuse(): Factory {
+    if (!this.factory) throw new Refused("There is no factory open.");
+    return this.factory;
   }
 
   private rootOrRefuse(): string {

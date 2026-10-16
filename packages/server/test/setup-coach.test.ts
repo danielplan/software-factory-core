@@ -80,11 +80,8 @@ test("the coach plans on the map, builds the factory once the owner says so, and
         ],
         ["configure", { addOns: ["rocket"] }],
         ["configure", { tracker: "github", addOns: ["voice"] }],
-        [
-          "configure",
-          { settings: { github: { GITHUB_REPOSITORY: "acme/shop" } } },
-        ],
-        ["configure", { settings: { github: { GITHUB_PROJECT: "lots" } } }],
+        ["configure", { settings: { jira: { JIRA_TOKEN: "secret-1" } } }],
+        ["configure", { settings: { jira: { JIRA_PROJECT: "ACME" } } }],
         ["configure", { project: { name: "Acme Garden" } }],
       ],
       reply: "It is built: open it when you like.",
@@ -164,8 +161,8 @@ test("the coach plans on the map, builds the factory once the owner says so, and
     assert.match(built[4] ?? "", /does not recognise \/no\/such/);
     assert.match(built[5] ?? "", /no add-on rocket/);
     assert.match(built[6] ?? "", /Saved where work is tracked/);
-    assert.match(built[7] ?? "", /Saved the settings github/);
-    assert.match(built[8] ?? "", /Settings github not saved: GITHUB_PROJECT/);
+    assert.match(built[7] ?? "", /Saved the settings jira/);
+    assert.match(built[8] ?? "", /Settings jira not saved: JIRA_PROJECT/);
     assert.match(built[9] ?? "", /Changed the project/);
 
     // Built, the page stays in setup until the owner opens the factory.

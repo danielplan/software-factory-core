@@ -1,21 +1,15 @@
-import { stageOf } from "@/ideas/stages";
+import type { StageMap } from "@/api";
+import { STAGES } from "@/ideas/stages";
 
 import { Pick } from "./pick";
 
-export type StageMap = Record<
-  "backlog" | "todo" | "building" | "trying" | "done",
-  string
->;
 export type Columns = { columns: string[]; suggested: StageMap };
 
-// The factory's stages, with their colours on the board.
-const ROWS = [
-  { id: "backlog", status: "ready" },
-  { id: "todo", status: "todo" },
-  { id: "building", status: "building" },
-  { id: "trying", status: "trying" },
-  { id: "done", status: "done" },
-] as const;
+// The factory's stages a board has columns for (all but the drafts).
+const ROWS = STAGES.filter(
+  (stage): stage is Exclude<(typeof STAGES)[number], { id: "draft" }> =>
+    stage.id !== "draft",
+);
 
 const NONE = "-";
 
@@ -40,11 +34,10 @@ export function StageMapping({
       <span className="text-xs text-muted-foreground">
         Matched from the columns' names; change any that is wrong.
       </span>
-      {ROWS.map((row) => {
-        const stage = stageOf(row.status);
+      {ROWS.map((stage) => {
         return (
           <div
-            key={row.id}
+            key={stage.id}
             className="grid items-center gap-2 sm:grid-cols-[9rem_minmax(0,1fr)]"
           >
             <span className="flex items-center gap-2 text-sm">
@@ -57,10 +50,13 @@ export function StageMapping({
             </span>
             <Pick
               label={`Column for ${stage.title}`}
-              value={value[row.id] || NONE}
+              value={value[stage.id] || NONE}
               options={options}
               onPick={(picked) => {
-                onChange({ ...value, [row.id]: picked === NONE ? "" : picked });
+                onChange({
+                  ...value,
+                  [stage.id]: picked === NONE ? "" : picked,
+                });
               }}
             />
           </div>

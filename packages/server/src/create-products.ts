@@ -6,6 +6,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 import type { Kit } from "@software-factory/core";
+import type { Launcher } from "@software-factory/launcher";
 
 import type { Job, SetupProduct } from "./api.ts";
 import { runJobs, runSteps } from "./jobs.ts";
@@ -24,6 +25,16 @@ export async function createProducts(
     })),
     show,
   );
+}
+
+// Starts the new products that run (a kit may make no part for one).
+export async function startNew(
+  launcher: Launcher,
+  products: SetupProduct[],
+): Promise<void> {
+  const parts = new Set(launcher.state().map((part) => part.id));
+  const starting = products.filter((p) => parts.has(p.id));
+  await Promise.allSettled(starting.map((p) => launcher.start(p.id)));
 }
 
 async function createOne(

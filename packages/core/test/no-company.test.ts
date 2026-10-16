@@ -15,9 +15,15 @@ test("no company's name or products are in the core", () => {
   const files = globSync("**/*", {
     cwd: ROOT,
     exclude: (entry) =>
-      ["node_modules", ".git", "coverage", "package-lock.json"].includes(
-        entry.name,
-      ),
+      // Not ours: installed packages, git's own files, coverage reports,
+      // and built output (dist, which holds others' data files).
+      [
+        "node_modules",
+        ".git",
+        "coverage",
+        "dist",
+        "package-lock.json",
+      ].includes(entry.name),
     withFileTypes: true,
   }).filter((entry) => entry.isFile());
   assert.ok(files.length > 20);

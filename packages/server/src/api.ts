@@ -3,6 +3,8 @@
 // these types only.
 
 import type { Company, GroupView } from "@software-factory/core";
+
+import type { Board } from "./connect/board-file.ts";
 import type { PartView } from "@software-factory/launcher";
 
 export type KitView = {
@@ -55,6 +57,8 @@ export type State =
       kits: KitView[];
       jobs: Job[];
       ideas: IdeaView[];
+      // The connected board, if any (board.json).
+      board: Board;
       // Just set up: connecting where work is tracked comes first.
       onboarding: boolean;
     };
@@ -167,13 +171,19 @@ export type Card = {
 
 export type CoachMessage = { from: "coach" | "owner"; text: string };
 
+// The stages agreed work goes through, on the factory's board (and the
+// connected board's columns, matched to them). An idea is a draft before.
+export const STAGES = ["backlog", "todo", "doing", "review", "done"] as const;
+export type Stage = (typeof STAGES)[number];
+export type StageMap = Record<Stage, string>;
+
 // One of the factory's ideas: its conversation with the idea coach and its
 // map, as the setup coach's (CoachView), and whether the plan is agreed.
 export type IdeaView = CoachView & {
   id: string;
   title: string;
-  // A draft until the owner agrees to its plan; then ready, on the board.
-  status: "draft" | "ready";
+  // A draft until the owner agrees to its plan; then a stage on the board.
+  status: "draft" | Stage;
   created: string;
   updated: string;
 };
@@ -200,15 +210,8 @@ export type CoachView = {
 export type ChangeDraft =
   { remove: string } | { move: { id: string; x: number; y: number } };
 
-// Setting up as part of the dashboard, one step at a time: the company
-// first (its factory folder), then products whenever, then the tracker.
+// The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };
 
-export type AddProducts = { products: SetupProduct[] };
-
-export type ChooseTracker = {
-  tracker: Company["tracker"];
-  // The chosen tracker's settings (the GitHub board's, or Jira's).
-  settings?: Record<string, string>;
-};
 export type { GitHubStatus } from "./connect/github.ts";
+export type { Board } from "./connect/board-file.ts";

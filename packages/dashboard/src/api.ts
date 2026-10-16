@@ -11,6 +11,7 @@ export type {
   GitHubStatus,
   IdeaView,
   IconName,
+  StageMap,
   State,
 } from "../../server/src/api.ts";
 export type { Company, GroupView } from "../../core/src/index.ts";

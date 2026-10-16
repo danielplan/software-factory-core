@@ -2,21 +2,13 @@
 // connected board (a GitHub board's Status, a Jira project's statuses)
 // each one is: suggested from the columns' names, checked by the owner.
 
-export const STAGES = [
-  "backlog",
-  "todo",
-  "building",
-  "trying",
-  "done",
-] as const;
-export type Stage = (typeof STAGES)[number];
-export type StageMap = Record<Stage, string>;
+import { type Stage, type StageMap, STAGES } from "../api.ts";
 
 // Words that name each stage on most boards; the first that fits wins.
 const WORDS: [Stage, RegExp][] = [
   ["done", /\b(done|closed|complete|completed|shipped|released|resolved)\b/i],
-  ["trying", /\b(review|reviewing|qa|test|testing|verify|staging|accept)/i],
-  ["building", /\b(in ?progress|doing|develop|building|working|wip|active)\b/i],
+  ["review", /\b(review|reviewing|qa|test|testing|verify|staging|accept)/i],
+  ["doing", /\b(in ?progress|doing|develop|building|working|wip|active)\b/i],
   ["todo", /\b(to ?do|ready|selected|planned|next|up next)\b/i],
   ["backlog", /\b(backlog|icebox|ideas?|triage|new|open)\b/i],
 ];
@@ -27,8 +19,8 @@ export function suggestStages(columns: string[]): StageMap {
   const map: StageMap = {
     backlog: "",
     todo: "",
-    building: "",
-    trying: "",
+    doing: "",
+    review: "",
     done: "",
   };
   const used = new Set<string>();
@@ -57,19 +49,4 @@ export function stagesFrom(asked: unknown, columns: string[]): StageMap {
     map[stage] = value;
   }
   return map;
-}
-
-// The settings a stage map is saved as: GITHUB_STAGE_DONE and the like,
-// each column's name encoded as in an address ("In%20Progress"), since a
-// setting has no spaces.
-export function stageSettings(
-  prefix: string,
-  map: StageMap,
-): Record<string, string> {
-  return Object.fromEntries(
-    STAGES.map((stage) => [
-      `${prefix}_STAGE_${stage.toUpperCase()}`,
-      encodeURIComponent(map[stage]),
-    ]),
-  );
 }

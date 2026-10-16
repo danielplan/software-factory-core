@@ -105,7 +105,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
   const get = async (path: string) =>
     (await fetch(`${base}${path}`)).json() as Promise<unknown>;
   try {
-    await post("/api/company", { name: "Acme", about: "" });
+    session.createCompany({ name: "Acme", about: "" });
     assert.deepEqual(await get("/api/connect/github"), {
       cli: true,
       login: null,
@@ -153,8 +153,8 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
         suggested: {
           backlog: "",
           todo: "Todo",
-          building: "In Progress",
-          trying: "",
+          doing: "In Progress",
+          review: "",
           done: "Done",
         },
       },
@@ -162,7 +162,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     const wrong = await post("/api/connect/github", {
       repository: "acme/shop",
       board: 1,
-      stages: { trying: "QA" },
+      stages: { review: "QA" },
     });
     assert.match(
       ((await wrong.json()) as { error: string }).error,
@@ -179,23 +179,19 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     });
     const state = factory(session);
     assert.equal(state.company.tracker, "github");
-    assert.equal(
-      state.settings
-        .find((g) => g.id === "github")
-        ?.fields.find((f) => f.key === "GITHUB_REPOSITORY")?.value,
-      "acme/shop",
-    );
-    const label = state.settings
-      .find((g) => g.id === "github")
-      ?.fields.find((f) => f.key === "GITHUB_LABEL");
-    assert.equal(label?.value, "*");
-    const column = (key: string) =>
-      state.settings
-        .find((g) => g.id === "github")
-        ?.fields.find((f) => f.key === key)?.value;
-    assert.equal(column("GITHUB_STAGE_BACKLOG"), "Todo");
-    assert.equal(column("GITHUB_STAGE_BUILDING"), "In%20Progress");
-    assert.equal(column("GITHUB_STAGE_DONE"), "Done");
+    // In the factory's board.json, which lives with the project.
+    assert.deepEqual(state.board.github, {
+      repository: "acme/shop",
+      board: 1,
+      label: "*",
+      stages: {
+        backlog: "Todo",
+        todo: "",
+        doing: "In Progress",
+        review: "",
+        done: "Done",
+      },
+    });
     assert.equal(state.onboarding, false);
     // The stand-in computer has no GitHub CLI to install.
     assert.equal((await post("/api/connect/github/install", {})).status, 409);
@@ -222,7 +218,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
   const error = async (answer: Response) =>
     ((await answer.json()) as { error: string }).error;
   try {
-    await post("/api/company", { name: "Acme", about: "" });
+    session.createCompany({ name: "Acme", about: "" });
     const listed = await post("/api/connect/jira/projects", login);
     assert.deepEqual(await listed.json(), {
       name: "Ann",
@@ -272,7 +268,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
           label: "no way!",
         }),
       ),
-      /JIRA_LABEL/,
+      /cannot be a label/,
     );
     const columns = await post("/api/connect/jira/columns", {
       ...login,
@@ -283,8 +279,8 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       suggested: {
         backlog: "Backlog",
         todo: "Selected for Development",
-        building: "",
-        trying: "In Review",
+        doing: "",
+        review: "In Review",
         done: "Done",
       },
     });
@@ -297,15 +293,18 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     });
     const state = factory(session);
     assert.equal(state.company.tracker, "jira");
-    const site = state.settings
+    const jira = state.board.jira;
+    assert.ok(jira);
+    assert.equal(jira.site, "acme.atlassian.net");
+    assert.equal(jira.label, "factory");
+    assert.equal(jira.stages.review, "In Review");
+    // The token is a secret, kept in the settings, never in board.json.
+    const token = state.settings
       .find((g) => g.id === "jira")
-      ?.fields.find((f) => f.key === "JIRA_SITE");
-    assert.equal(site?.value, "acme.atlassian.net");
-    const review = state.settings
-      .find((g) => g.id === "jira")
-      ?.fields.find((f) => f.key === "JIRA_STAGE_TRYING");
-    assert.equal(review?.value, "In%20Review");
-    assert.equal((await post("/api/connect/later", {})).status, 200);
+      ?.fields.find((f) => f.key === "JIRA_TOKEN");
+    assert.equal(token?.value, "(set)");
+    assert.equal((await post("/api/connect/own-board", {})).status, 200);
+    assert.equal(factory(session).company.tracker, "none");
   } finally {
     session.close();
     server.close();
@@ -332,16 +331,16 @@ test("the board's columns are matched to the factory's stages by their names", (
     {
       backlog: "Icebox",
       todo: "Up next",
-      building: "Doing",
-      trying: "QA",
+      doing: "Doing",
+      review: "QA",
       done: "Shipped",
     },
   );
   assert.deepEqual(suggestStages(["Whatever"]), {
     backlog: "",
     todo: "",
-    building: "",
-    trying: "",
+    doing: "",
+    review: "",
     done: "",
   });
 });

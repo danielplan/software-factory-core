@@ -6,7 +6,7 @@ import { Refused } from "../refused.ts";
 import type { Session } from "../session.ts";
 import type { GitHub } from "./github.ts";
 import { type Fetcher, jiraColumns, jiraProjects, siteOf } from "./jira.ts";
-import { stageSettings, stagesFrom, suggestStages } from "./stages.ts";
+import { stagesFrom, suggestStages } from "./stages.ts";
 
 type Route = (body: unknown, url: URL) => unknown;
 
@@ -18,8 +18,8 @@ export function connectRoutes(
   return {
     ...githubRoutes(session, github),
     ...jiraRoutes(session, fetcher),
-    "POST /api/connect/later": () => {
-      session.connectLater();
+    "POST /api/connect/own-board": () => {
+      session.chooseBoard("none");
     },
   };
 }
@@ -49,11 +49,8 @@ function githubRoutes(session: Session, github: GitHub): Record<string, Route> {
         throw new Refused("Choose a repository and a board.");
       const message = await github.check(repository, board);
       const stages = mapped(body, await github.columns(repository, board));
-      connected(session, "github", {
-        ...stageSettings("GITHUB", stages),
-        GITHUB_REPOSITORY: repository,
-        GITHUB_PROJECT: String(board),
-        GITHUB_LABEL: labelOf(body),
+      session.chooseBoard("github", {
+        github: { repository, board, label: labelOf(body), stages },
       });
       return { message };
     },
@@ -83,30 +80,22 @@ function jiraRoutes(session: Session, fetcher: Fetcher): Record<string, Route> {
         body,
         await jiraColumns(fetcher, login, project.key),
       );
-      connected(session, "jira", {
-        ...stageSettings("JIRA", stages),
-        JIRA_SITE: siteOf(login.site),
-        JIRA_EMAIL: login.email.trim(),
-        JIRA_TOKEN: login.token.trim(),
-        JIRA_PROJECT: project.key,
-        JIRA_LABEL: labelOf(body),
-      });
+      session.chooseBoard(
+        "jira",
+        {
+          jira: {
+            site: siteOf(login.site),
+            email: login.email.trim(),
+            project: project.key,
+            label: labelOf(body),
+            stages,
+          },
+        },
+        { JIRA_TOKEN: login.token.trim() },
+      );
       return { message: `Connected to “${project.name}” (${project.key}).` };
     },
   };
-}
-
-// Where work is tracked, checked already, saved with its settings; the
-// onboarding is done.
-function connected(
-  session: Session,
-  tracker: "github" | "jira",
-  settings: Record<string, string>,
-): void {
-  const { refused } = session.chooseTracker({ tracker, settings });
-  const wrong = Object.entries(refused).map(([key, why]) => `${key}: ${why}`);
-  if (wrong.length > 0) throw new Refused(wrong.join(" · "));
-  session.connectLater();
 }
 
 // The stages as the owner matched them to the board's columns.
@@ -124,7 +113,12 @@ function mapped(body: unknown, columns: string[]) {
 // The label that marks the factory's work: "factory" unless the owner
 // chose another, or * for all of it.
 function labelOf(body: unknown): string {
-  return field(body, "label").trim() || "factory";
+  const label = field(body, "label").trim() || "factory";
+  if (!/^(\*|[\w .:-]+)$/.test(label))
+    throw new Refused(
+      `“${label}” cannot be a label: use letters, digits, spaces, . : - or *.`,
+    );
+  return label;
 }
 
 function loginOf(body: unknown) {

@@ -1,7 +1,7 @@
 import { ExternalLink, KeyRound } from "lucide-react";
 import { useState } from "react";
 
-import { messageOf, post } from "@/api";
+import { messageOf, post, type StageMap } from "@/api";
 import { Field } from "@/components/field";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 
 import { Step } from "./connect-page";
 import { Pick, WhichWork } from "./pick";
-import { type Columns, type StageMap, StageMapping } from "./stage-map";
+import { type Columns, StageMapping } from "./stage-map";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };

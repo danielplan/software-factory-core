@@ -46,7 +46,7 @@ test("an idea is worked out with the coach on its map, kept in the factory, mark
   const { session, server, post, project, base } = await stage(pretend.claude);
   try {
     assert.equal((await post("/api/ideas", { text: "Hi" })).status, 409);
-    await post("/api/company", { name: "Acme", about: "" });
+    session.createCompany({ name: "Acme", about: "" });
     writeFileSync(join(project, "shop.png"), "PNG");
     const made = await post("/api/ideas", {
       text: "A wish list for gardeners, so they can save the tools they like for later",
@@ -104,7 +104,7 @@ test("an idea is worked out with the coach on its map, kept in the factory, mark
     );
 
     await post("/api/ideas/ready", { id });
-    assert.equal(ideasOf(session)[0]?.status, "ready");
+    assert.equal(ideasOf(session)[0]?.status, "backlog");
     assert.equal((await post("/api/ideas/ready", { id: "nope" })).status, 409);
     await post("/api/ideas/discard", { id });
     assert.deepEqual(ideasOf(session), []);
@@ -123,7 +123,7 @@ test("an idea is worked out with the coach on its map, kept in the factory, mark
 test("an idea's tools answer only its own coach, and only for an idea that is there", async () => {
   const { session, server, post, base } = await stage(pretendClaude([]).claude);
   try {
-    await post("/api/company", { name: "Acme", about: "" });
+    session.createCompany({ name: "Acme", about: "" });
     const made = await post("/api/ideas", {
       text: "Gift cards for every season sent by email",
     });

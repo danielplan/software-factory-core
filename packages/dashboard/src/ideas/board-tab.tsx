@@ -92,7 +92,7 @@ function doing(ideas: IdeaView[]): { busy: boolean; text: string } {
           ? `Thinking about “${first.title}”`
           : `Thinking about ${String(working.length)} ideas`,
     };
-  const waiting = ideas.filter((one) => one.status === "ready").length;
+  const waiting = ideas.filter((one) => one.status === "backlog").length;
   if (waiting > 0)
     return {
       busy: false,

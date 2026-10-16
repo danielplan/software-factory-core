@@ -83,8 +83,7 @@ export function TrackerChoice({
   const [problem, setProblem] = useState<string | null>(null);
   const ownBoard = () => {
     setProblem(null);
-    post("/api/company/tracker", { tracker: "none" })
-      .then(() => post("/api/connect/later"))
+    post("/api/connect/own-board")
       .then(() => {
         onDone("Work stays on the factory's own board.");
       })

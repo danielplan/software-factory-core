@@ -120,12 +120,6 @@ function routesFor(session: Session): Record<string, Route> {
     "POST /api/setup/open": () => {
       session.openFactory();
     },
-    "POST /api/company": (body) =>
-      session.createCompany(body as Parameters<Session["createCompany"]>[0]),
-    "POST /api/products": (body) =>
-      session.addProducts(body as Parameters<Session["addProducts"]>[0]),
-    "POST /api/company/tracker": (body) =>
-      session.chooseTracker(body as Parameters<Session["chooseTracker"]>[0]),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
     "POST /api/parts/start": (_b, url) => launcher().start(part(url)),

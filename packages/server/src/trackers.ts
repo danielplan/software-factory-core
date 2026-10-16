@@ -1,31 +1,10 @@
-// Where a company's work is tracked besides the factory's own board: the
-// settings of a GitHub board and of Jira Cloud, connected after setup and
-// changed on the Settings tab, with the label that marks the work the
-// factory takes in. The runner, which works on the cards, comes later and
-// reads them from here.
+// The secrets of where work is tracked, kept on this computer only: Jira's
+// API token (the GitHub CLI keeps its own sign-in). Which board, its label
+// and its columns are in the factory's board.json (connect/board-file.ts).
 
 import { defineExtension } from "@software-factory/core";
 
 const FILE = "settings/tracker.env";
-
-const STAGE_NAMES = {
-  BACKLOG: "Backlog",
-  TODO: "To do",
-  BUILDING: "In progress",
-  TRYING: "Review",
-  DONE: "Done",
-};
-
-// Which of the board's columns each of the factory's stages is (empty: the
-// board has none for it), matched when the board is connected.
-function stageFields(prefix: string, noun: string) {
-  return Object.entries(STAGE_NAMES).map(([stage, name]) => ({
-    key: `${prefix}_STAGE_${stage}`,
-    label: `${noun} for ${name}`,
-    help: `The board's ${noun.toLowerCase()} the factory's ${name} is, encoded as in an address (In%20Progress).`,
-    kind: "text" as const,
-  }));
-}
 
 export const trackers = defineExtension({
   id: "trackers",
@@ -33,41 +12,6 @@ export const trackers = defineExtension({
   about: "Where the company's work is tracked: a GitHub board or Jira Cloud.",
   core: true,
   settings: [
-    {
-      id: "github",
-      name: "GitHub board",
-      about:
-        "The repository and the board the factory works with: ideas become cards there, and the runner builds them.",
-      file: FILE,
-      usedBy: [],
-      fields: [
-        {
-          key: "GITHUB_REPOSITORY",
-          label: "Repository",
-          help: "Where the issues and pull requests are, as owner/name.",
-          kind: "text",
-          pattern: "^[\\w.-]+/[\\w.-]+$",
-        },
-        {
-          key: "GITHUB_PROJECT",
-          label: "Board number",
-          help: "The number at the end of the board's address (…/projects/1).",
-          kind: "number",
-          default: "1",
-          min: 1,
-          max: 9999,
-        },
-        {
-          key: "GITHUB_LABEL",
-          label: "Only cards labelled",
-          help: "The factory takes in only the cards with this label; * takes every card.",
-          kind: "text",
-          default: "factory",
-          pattern: "^(\\*|[\\w .:-]+)$",
-        },
-        ...stageFields("GITHUB", "Column"),
-      ],
-    },
     {
       id: "jira",
       name: "Jira Cloud",
@@ -77,41 +21,11 @@ export const trackers = defineExtension({
       usedBy: [],
       fields: [
         {
-          key: "JIRA_SITE",
-          label: "Site",
-          help: "Your Jira's address, for example acme.atlassian.net.",
-          kind: "text",
-          pattern: "^[\\w-]+\\.atlassian\\.net$",
-        },
-        {
-          key: "JIRA_PROJECT",
-          label: "Project key",
-          help: "The letters before an issue's number (ACME in ACME-12).",
-          kind: "text",
-          pattern: "^[A-Z][A-Z0-9]+$",
-        },
-        {
-          key: "JIRA_EMAIL",
-          label: "Your email",
-          help: "The email you sign in to Jira with.",
-          kind: "text",
-          pattern: "^[^@\\s]+@[^@\\s]+$",
-        },
-        {
           key: "JIRA_TOKEN",
           label: "API token",
           help: "Made at id.atlassian.com, Security, API tokens. Kept only on this computer.",
           kind: "secret",
         },
-        {
-          key: "JIRA_LABEL",
-          label: "Only issues labelled",
-          help: "The factory takes in only the issues with this label; * takes every issue.",
-          kind: "text",
-          default: "factory",
-          pattern: "^(\\*|[\\w.:-]+)$",
-        },
-        ...stageFields("JIRA", "Status"),
       ],
     },
   ],
