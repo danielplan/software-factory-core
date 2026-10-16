@@ -8,8 +8,6 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { LogoTile } from "./logo";
-
 export const TABS = ["board", "ideas", "system", "settings"] as const;
 export type Tab = (typeof TABS)[number];
 
@@ -21,8 +19,8 @@ const ITEMS: Record<Tab, { name: string; icon: ReactNode }> = {
 };
 
 // The way around the dashboard: a thin rail of icons, each with its name
-// underneath, against the left edge (along the top on a phone), the
-// factory's mark first and the whole factory's light last.
+// underneath, against the left edge (along the top on a phone), the whole
+// factory's light last.
 export function NavRail({
   current,
   status,
@@ -32,9 +30,6 @@ export function NavRail({
       aria-label="Tabs"
       className="pointer-events-auto fixed inset-x-0 top-0 z-30 flex items-center gap-1 border-b border-border-soft bg-card px-2 py-1.5 sm:inset-y-0 sm:right-auto sm:w-[72px] sm:flex-col sm:border-r sm:border-b-0 sm:px-0 sm:py-3"
     >
-      <span className="p-1 sm:mb-2">
-        <LogoTile small />
-      </span>
       {TABS.map((tab) => (
         <a
           key={tab}

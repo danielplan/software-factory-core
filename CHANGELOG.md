@@ -6,15 +6,17 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
-- The dashboard opens on the **Board**: what the factory is doing, every
-  piece of work in its column (Backlog: the ideas agreed to; To do, In
+- The dashboard opens on the **Board**: what the factory is doing now in
+  a line beside its title ("Thinking about …", work waiting to be built,
+  or "Waiting for work"), then every piece of work in its column (Backlog: the ideas agreed to; To do, In
   progress, Review and Done come with the builder). Work starts on the
-  **Ideas** tab: one big box to say what to build next, the ideas so far
+  **Ideas** tab: one big box in the middle to say what to build next, the ideas so far
   below it (shaping, or on the board), and each idea's workspace; an idea
   goes on the board once its plan is agreed. The **Products** tab is gone (the coach adds products; their
   descriptions are in the factory's files), and so are the add-products
   screens, `GET /api/folders` and `POST /api/setup/detect`. The company's
-  name no longer heads every tab, and the rail sits against the edge.
+  name no longer heads every tab, and the rail sits against the edge,
+  without the logo.
 - Ideas: the owner starts an idea with a sentence and shapes it
   with the idea coach (the method's `guides/idea-coach.md`) on a map, as in
   setup: the coach reads the code and the factory's knowledge and draws

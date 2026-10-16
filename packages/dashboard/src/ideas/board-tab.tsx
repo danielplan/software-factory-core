@@ -1,3 +1,6 @@
+import { Loader2 } from "lucide-react";
+
+import type { IdeaView } from "@/api";
 import type { FactoryState } from "@/dashboard/dashboard";
 
 import { IdeaCard } from "./idea-card";
@@ -13,11 +16,27 @@ const COLUMNS = [
   { id: "done", title: "Done" },
 ] as const;
 
-// What the factory is doing: every piece of work in the column of how far
-// it is. Before there is any, it says where work starts.
+// What the factory is doing: what it is busy with now, in a line beside
+// the title, then every piece of work in the column of how far it is.
+// Before there is any, it says where work starts.
 export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
+  const now = doing(state.ideas);
   return (
     <div className="grid gap-3">
+      <div className="flex flex-wrap items-baseline gap-3 px-1 pt-1">
+        <h1 className="text-[26px] font-medium tracking-[-0.02em]">Board</h1>
+        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+          {now.busy ? (
+            <Loader2 className="size-3.5 animate-spin" aria-hidden />
+          ) : (
+            <span
+              aria-hidden
+              className="size-2 rounded-full bg-muted-foreground/40"
+            />
+          )}
+          {now.text}
+        </span>
+      </div>
       {!state.ideas.some((one) => one.status !== "planning") && (
         <p className="px-1 text-sm text-muted-foreground">
           Nothing on the board yet. Work starts as an{" "}
@@ -56,4 +75,26 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
       </div>
     </div>
   );
+}
+
+// What the factory is busy with, in a line: an idea it is thinking about,
+// work waiting to be built, or nothing yet.
+function doing(ideas: IdeaView[]): { busy: boolean; text: string } {
+  const working = ideas.filter((one) => one.working);
+  const [first] = working;
+  if (first)
+    return {
+      busy: true,
+      text:
+        working.length === 1
+          ? `Thinking about “${first.title}”`
+          : `Thinking about ${String(working.length)} ideas`,
+    };
+  const waiting = ideas.filter((one) => one.status === "ready").length;
+  if (waiting > 0)
+    return {
+      busy: false,
+      text: `${String(waiting)} in the backlog, waiting to be built`,
+    };
+  return { busy: false, text: "Waiting for work" };
 }

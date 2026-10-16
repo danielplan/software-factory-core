@@ -9,8 +9,8 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { IdeaCard } from "./idea-card";
 import { IdeaWorkspace } from "./idea-workspace";
 
-// Where work starts: one big box to say what to build next, and the ideas
-// so far below it, newest first; one open in its workspace (#ideas/<id>).
+// Where work starts: one big box in the middle of the screen to say what
+// to build next, and the ideas so far below it, newest first; one open in its workspace (#ideas/<id>).
 export function IdeasTab({
   state,
   open,
@@ -18,8 +18,10 @@ export function IdeasTab({
   const idea = state.ideas.find((one) => one.id === open);
   if (idea) return <IdeaWorkspace idea={idea} />;
   return (
-    <div className="grid gap-12 pt-[12vh]">
-      <NewIdea />
+    <div className="grid gap-12">
+      <div className="grid min-h-[calc(100vh-8rem)] content-center">
+        <NewIdea />
+      </div>
       {state.ideas.length > 0 && (
         <section aria-label="Your ideas" className="grid gap-3">
           <h2 className="px-1 text-sm font-medium">Your ideas</h2>
