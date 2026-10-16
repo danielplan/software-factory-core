@@ -63,10 +63,13 @@ a major version may need a company to change something, and says what.
   company's `tracker` is `none` or the id of an add-on that tracks work;
   the factory's checks say so when it names none that is on. `startServer`
   takes `addOns` instead of `connectors`. The `trackers` extension is gone.
-- An **Add-ons** page on the rail: each add-on with what it does, a switch
-  (`POST /api/add-ons` with `id` and `on`, written to `factory.json`; the
-  add-on that work is tracked with cannot be switched off) and its settings
-  while it is on; then the kits, each with the products it knows. The state
+- An **Add-ons** page on the rail, laid out as a store: tiles with each
+  one's logo (from `simple-icons`) on shelves by what they are for (where
+  work is tracked, more abilities, kinds of product). An add-on is added or
+  removed there (`POST /api/add-ons` with `id` and `on`, written to
+  `factory.json`; the add-on that work is tracked with cannot be removed),
+  with its settings folded in while it is on; a kit shows the products it
+  knows. The connect choices show the same logos. The state
   lists every add-on (`addOns`, on or off) instead of `trackers`, and each
   product says its `kit`. Settings keeps where work is tracked and the
   settings no add-on has.

@@ -2,6 +2,7 @@ import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type AddOnView } from "@/api";
+import { lookOf } from "@/add-ons/looks";
 import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
@@ -65,21 +66,16 @@ export function TrackerChoice({
   const [choice, setChoice] = useState(current);
   const choices = [
     OWN,
-    ...trackers.flatMap((tracker) => {
-      const steps = TRACKER_STEPS[tracker.id];
-      return steps
-        ? [
-            {
-              id: tracker.id,
-              icon: steps.icon,
-              title: tracker.name,
-              text: tracker.about,
-            },
-          ]
-        : [];
-    }),
+    ...trackers
+      .filter((tracker) => TRACKER_STEPS[tracker.id])
+      .map((tracker) => ({
+        id: tracker.id,
+        icon: lookOf(tracker.id).icon,
+        title: tracker.name,
+        text: tracker.about,
+      })),
   ];
-  const Steps = TRACKER_STEPS[choice]?.Steps;
+  const Steps = TRACKER_STEPS[choice];
   const [problem, setProblem] = useState<string | null>(null);
   const ownBoard = () => {
     setProblem(null);

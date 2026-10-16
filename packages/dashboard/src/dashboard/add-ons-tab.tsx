@@ -1,59 +1,117 @@
-import { useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 import { type AddOnView, type KitView, messageOf, post } from "@/api";
+import { IconTile } from "@/add-ons/looks";
 import { ProblemBox } from "@/components/problem-box";
+import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 import type { FactoryState } from "./dashboard";
 import { GroupForm } from "./settings-card";
 
-// What the factory can do besides its own work, and what it knows: the
-// add-ons, each switched on or off here, with its settings while it is
-// on (a tracker's come from connecting its board); then the kits, one per
-// kind of product, with the products that use each (a kit comes with its
-// products, so it is not switched here).
+// The factory's store: what it can be given, as tiles with a logo, grouped
+// by what they are for. Add-ons are added or removed here, with their
+// settings while they are on (a tracker's come from connecting its board);
+// kits come with the products they know, so they are only shown.
 export function AddOnsTab({ state }: Readonly<{ state: FactoryState }>) {
-  const on = state.addOns.filter((addOn) => addOn.on).length;
-  const used = state.kits.filter((kit) => usersOf(kit, state).length > 0);
+  const added = state.addOns.filter((addOn) => addOn.on).length;
+  const trackers = state.addOns.filter((addOn) => addOn.tracker);
+  const others = state.addOns.filter((addOn) => !addOn.tracker);
   return (
-    <div className="grid content-start gap-6">
-      <header className="grid gap-1 px-1 pt-1">
+    <div className="grid content-start gap-10 pt-[4vh]">
+      <header className="grid gap-1.5 px-1">
         <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
           Add-ons
         </h1>
         <p className="text-muted-foreground">
-          {`${String(on)} of ${String(state.addOns.length)} add-ons are on, and ${String(used.length)} ${used.length === 1 ? "kit knows" : "kits know"} your products.`}
+          {`What your factory can do and knows. ${String(added)} of ${String(state.addOns.length)} add-ons are added.`}
         </p>
       </header>
-      <section aria-label="Add-ons" className="grid gap-4 lg:grid-cols-2">
-        {state.addOns.map((addOn) => (
-          <AddOnCard key={addOn.id} addOn={addOn} state={state} />
+      <Shelf
+        title="Where work is tracked"
+        about="The board your team already uses. Without one, work stays on the factory's own board."
+      >
+        {trackers.map((addOn) => (
+          <AddOnTile key={addOn.id} addOn={addOn} state={state} />
         ))}
-      </section>
-      <section aria-labelledby="kits" className="grid gap-3">
-        <h2 id="kits" className="px-1 text-[17px] font-semibold">
-          Kinds of product
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {state.kits.map((kit) => (
-            <KitCard key={kit.id} kit={kit} users={usersOf(kit, state)} />
+      </Shelf>
+      {others.length > 0 && (
+        <Shelf title="More abilities" about="Anything else the factory can do.">
+          {others.map((addOn) => (
+            <AddOnTile key={addOn.id} addOn={addOn} state={state} />
           ))}
-        </div>
-      </section>
+        </Shelf>
+      )}
+      <Shelf
+        title="Kinds of product"
+        about="Each kit knows one kind of product: how to start it, check it and build on it. They come with your products."
+      >
+        {state.kits.map((kit) => (
+          <KitTile key={kit.id} kit={kit} users={usersOf(kit, state)} />
+        ))}
+      </Shelf>
     </div>
   );
 }
 
-// An add-on: what it does, its switch, and its settings while it is on.
-function AddOnCard({
+// A row of the store: its name, what is on it, and its tiles.
+function Shelf({
+  title,
+  about,
+  children,
+}: Readonly<{ title: string; about: string; children: ReactNode }>) {
+  return (
+    <section aria-label={title} className="grid gap-4">
+      <div className="grid gap-0.5 px-1">
+        <h2 className="text-[17px] font-semibold">{title}</h2>
+        <p className="text-sm text-muted-foreground">{about}</p>
+      </div>
+      <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+// One thing in the store: its logo, name and where it comes from, what it
+// does, and at the bottom what it is doing here and what to press.
+function Tile({
+  id,
+  name,
+  from,
+  about,
+  children,
+}: Readonly<{
+  id: string;
+  name: string;
+  from: string;
+  about: string;
+  children: ReactNode;
+}>) {
+  return (
+    <article
+      aria-label={name}
+      className="grid gap-4 rounded-2xl bg-card p-5 shadow-soft"
+    >
+      <div className="flex items-center gap-3">
+        <IconTile id={id} big />
+        <div className="grid">
+          <span className="font-semibold">{name}</span>
+          <span className="text-xs text-muted-foreground">{from}</span>
+        </div>
+      </div>
+      <p className="min-h-10 text-sm text-foreground/75">{about}</p>
+      {children}
+    </article>
+  );
+}
+
+function AddOnTile({
   addOn,
   state,
 }: Readonly<{ addOn: AddOnView; state: FactoryState }>) {
@@ -64,51 +122,91 @@ function AddOnCard({
       setProblem(messageOf(error));
     });
   };
-  // A tracker's settings are filled in by connecting its board.
   const groups =
     addOn.on && !addOn.tracker
       ? state.settings.filter((group) => addOn.settings.includes(group.id))
       : [];
   return (
-    <Card aria-label={addOn.name} className="gap-4 shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-[17px]">{addOn.name}</CardTitle>
-        <CardDescription>{addOn.about}</CardDescription>
-        <CardAction>
-          <Switch
-            checked={addOn.on}
-            aria-label={`${addOn.name} on`}
-            onCheckedChange={turn}
-          />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <p className="text-xs text-muted-foreground">{noteOf(addOn, state)}</p>
-        {problem && <ProblemBox title="Not switched" text={problem} />}
-        {groups.map((group) => (
-          <GroupForm key={group.id} group={group} state={state} />
-        ))}
-      </CardContent>
-    </Card>
+    <Tile
+      id={addOn.id}
+      name={addOn.name}
+      from={addOn.builtIn ? "Comes with the factory" : "Add-on"}
+      about={addOn.about}
+    >
+      <div className="flex min-h-9 items-center gap-3">
+        <span className="flex-1 text-xs text-muted-foreground">
+          {noteOf(addOn, state)}
+        </span>
+        {addOn.on ? (
+          <Button
+            variant="ghost"
+            className="h-9 px-3 text-[13px] text-muted-foreground"
+            onClick={() => {
+              turn(false);
+            }}
+          >
+            Remove
+          </Button>
+        ) : (
+          <Button
+            className="h-9 rounded-full px-4 text-[13px]"
+            onClick={() => {
+              turn(true);
+            }}
+          >
+            Add
+          </Button>
+        )}
+      </div>
+      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {groups.length > 0 && <Settings groups={groups} state={state} />}
+    </Tile>
   );
 }
 
-// A kit: the kind of product it knows, and the products of that kind.
-function KitCard({ kit, users }: Readonly<{ kit: KitView; users: string[] }>) {
+// An added add-on's settings, folded away until wanted.
+function Settings({
+  groups,
+  state,
+}: Readonly<{ groups: FactoryState["settings"]; state: FactoryState }>) {
   return (
-    <Card aria-label={kit.name} className="gap-3 shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-[15px]">{kit.name}</CardTitle>
-        <CardDescription>{kit.about}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-xs text-muted-foreground">
-          {users.length > 0
-            ? `Used by ${users.join(", ")}.`
-            : "No product of this kind yet."}
-        </p>
-      </CardContent>
-    </Card>
+    <Collapsible className="grid gap-4 border-t border-border-soft pt-3">
+      <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm font-medium">
+        Settings
+        <ChevronDown
+          className="size-4 transition group-data-[state=open]:rotate-180"
+          aria-hidden
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="grid gap-4">
+        {groups.map((group) => (
+          <GroupForm key={group.id} group={group} state={state} />
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+function KitTile({ kit, users }: Readonly<{ kit: KitView; users: string[] }>) {
+  return (
+    <Tile id={kit.id} name={kit.name} from="Kit" about={kit.about}>
+      <div className="flex min-h-9 flex-wrap items-center gap-1.5">
+        {users.length > 0 ? (
+          users.map((name) => (
+            <span
+              key={name}
+              className="rounded-full bg-surface-2 px-2.5 py-1 text-xs"
+            >
+              {name}
+            </span>
+          ))
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            No product of this kind yet.
+          </span>
+        )}
+      </div>
+    </Tile>
   );
 }
 
@@ -119,12 +217,24 @@ function usersOf(kit: KitView, state: FactoryState): string[] {
     .map((product) => product.name);
 }
 
-// Where it comes from, and what it is doing for this factory now.
-function noteOf(addOn: AddOnView, state: FactoryState): string {
-  const from = addOn.builtIn ? "Comes with the factory." : "An extra.";
+// What an add-on is doing for this factory now.
+function noteOf(addOn: AddOnView, state: FactoryState): ReactNode {
   if (state.company.tracker === addOn.id)
-    return `${from} Your work is tracked here now.`;
-  if (addOn.tracker && addOn.on)
-    return `${from} Connect its board under Settings, Where work is tracked.`;
-  return from;
+    return (
+      <span className="inline-flex items-center gap-1 font-medium text-success">
+        <Check className="size-3.5" aria-hidden /> Your work is tracked here
+      </span>
+    );
+  if (!addOn.on) return null;
+  if (addOn.tracker)
+    return (
+      <a href="#settings" className="hover:text-foreground hover:underline">
+        Added · connect its board
+      </a>
+    );
+  return (
+    <span className="inline-flex items-center gap-1">
+      <Check className="size-3.5" aria-hidden /> Added
+    </span>
+  );
 }
