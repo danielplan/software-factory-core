@@ -5,7 +5,7 @@ import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
 import { Step } from "./connect-page";
-import { Pick } from "./pick";
+import { Pick, WhichWork } from "./pick";
 
 const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 
@@ -106,7 +106,7 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
           <span className="text-sm text-muted-foreground">
             Type this code in the browser window that opened:
           </span>
-          <span className="font-mono text-2xl font-semibold tracking-[0.12em]">
+          <span className="text-2xl font-semibold tracking-[0.12em] tabular-nums">
             {signing.code}
           </span>
         </div>
@@ -125,6 +125,7 @@ function BoardPicker({
 }: Readonly<{ onAllow: () => void; onDone: (message: string) => void }>) {
   const [repository, setRepository] = useState("");
   const [board, setBoard] = useState("");
+  const [label, setLabel] = useState("factory");
   const [checking, setChecking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const repositories = useList<string>(
@@ -144,7 +145,7 @@ function BoardPicker({
     try {
       const { message } = await post<{ message: string }>(
         "/api/connect/github",
-        { repository, board: Number(board) },
+        { repository, board: Number(board), label },
       );
       onDone(message);
     } catch (error) {
@@ -174,6 +175,7 @@ function BoardPicker({
           onPick={setBoard}
         />
       </div>
+      <WhichWork value={label} onPick={setLabel} noun="cards" />
       {problem && <ProblemBox title="That did not work" text={problem} />}
       {problem?.includes("allow it") && (
         <Button variant="outline" className={SMALL} onClick={onAllow}>

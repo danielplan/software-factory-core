@@ -1,3 +1,4 @@
+import { Hammer, LayoutDashboard, Lightbulb, SquareKanban } from "lucide-react";
 import { Fragment, useState } from "react";
 
 import { messageOf, type PartView, post } from "@/api";
@@ -5,6 +6,7 @@ import { Arrow } from "@/components/arrow";
 import { ProblemBox } from "@/components/problem-box";
 import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { columnsOf } from "@/lib/columns";
 import { TRACKER_NAMES } from "@/setup/draft";
 
@@ -28,11 +30,12 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
   const top = headline(state.parts);
   return (
     <div className="grid content-start gap-4">
-      <div className="flex flex-wrap items-center gap-3 px-1 pt-2">
-        <h1 className="inline-flex items-center gap-2.5 text-[22px] font-medium tracking-[-0.01em]">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pt-1">
+        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">System</h1>
+        <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
           <StatusLight light={top.light} />
           {top.text}
-        </h1>
+        </span>
         <span className="flex-1" />
         <Button
           variant="outline"
@@ -54,9 +57,13 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         </Button>
       </div>
       {problem && <ProblemBox title="That did not work" text={problem} />}
-      <NextSteps state={state} />
       <div className="grid items-start gap-4 lg:grid-cols-[2.3fr_1.5fr]">
-        <Area title="Your products" parts={products} onPress={press}>
+        <Area
+          title="Your products"
+          colour="#5b7cfa"
+          parts={products}
+          onPress={press}
+        >
           <p className="py-6 text-center text-sm text-muted-foreground">
             No products yet: describe what you want to build on the{" "}
             <a
@@ -70,6 +77,15 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         </Area>
         <FactoryArea state={state} parts={factory} onPress={press} />
       </div>
+      <Legend parts={state.parts} />
+    </div>
+  );
+}
+
+// The lights' meaning, and what each part does (folded away).
+function Legend({ parts }: Readonly<{ parts: PartView[] }>) {
+  return (
+    <>
       <div className="flex flex-wrap gap-4 px-1 text-xs text-muted-foreground">
         {LIGHTS.map((light) => (
           <span key={light} className="inline-flex items-center gap-1.5">
@@ -82,7 +98,7 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
           What each part does
         </summary>
         <dl className="mt-3 mb-1 grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[12rem_1fr]">
-          {state.parts.map((part) => (
+          {parts.map((part) => (
             <div key={part.id} className="contents">
               <dt className="font-medium">{part.name}</dt>
               <dd className="text-muted-foreground">{part.does}</dd>
@@ -90,7 +106,7 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
           ))}
         </dl>
       </details>
-    </div>
+    </>
   );
 }
 
@@ -98,11 +114,13 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
 // parts it needs, joined by arrows (down on a phone).
 function Area({
   title,
+  colour,
   parts,
   onPress,
   children,
 }: Readonly<{
   title: string;
+  colour: string;
   parts: PartView[];
   onPress: (path: string) => void;
   // Shown while the area has no parts.
@@ -110,13 +128,7 @@ function Area({
 }>) {
   if (parts.length === 0 && !children) return null;
   return (
-    <section
-      aria-label={title}
-      className="grid gap-3 rounded-3xl bg-card p-4 shadow-soft"
-    >
-      <h2 className="px-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-        {title}
-      </h2>
+    <AreaCard title={title} colour={colour}>
       {parts.length === 0 ? (
         children
       ) : (
@@ -137,7 +149,32 @@ function Area({
           ))}
         </div>
       )}
-    </section>
+    </AreaCard>
+  );
+}
+
+// An area's frame: a card with a band of its colour and its title.
+function AreaCard({
+  title,
+  colour,
+  children,
+}: Readonly<{ title: string; colour: string; children: React.ReactNode }>) {
+  return (
+    <Card
+      aria-label={title}
+      className="gap-3 border-t-[3px] py-4 shadow-soft"
+      style={{ borderTopColor: colour }}
+    >
+      <CardHeader className="px-4">
+        <CardTitle
+          className="text-xs font-semibold tracking-[0.08em] uppercase"
+          style={{ color: colour }}
+        >
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-2.5 px-4">{children}</CardContent>
+    </Card>
   );
 }
 
@@ -152,44 +189,31 @@ function FactoryArea({
   parts: PartView[];
   onPress: (path: string) => void;
 }>) {
-  const ready = state.ideas.filter((idea) => idea.status === "ready").length;
-  const components = [
-    { name: "Dashboard", text: "Running: this page", light: "running" },
-    {
-      name: "Ideas",
-      text: `${String(state.ideas.length)} ideas, ${String(ready)} ready`,
-      light: "running",
-      href: "#ideas",
-    },
-    {
-      name: "Where work is tracked",
-      text: TRACKER_NAMES[state.company.tracker],
-      light: state.company.tracker === "none" ? "stopped" : "running",
-      href: "#settings",
-    },
-    { name: "Builder", text: "Builds ready ideas: comes next", light: "none" },
-  ] as const;
+  const components = componentsOf(state);
   return (
-    <section
-      aria-label="The factory"
-      className="grid gap-3 rounded-3xl bg-card p-4 shadow-soft"
-    >
-      <h2 className="px-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-        The factory
-      </h2>
+    <AreaCard title="The factory" colour="#8b5cf6">
       <div className="grid gap-2.5 sm:grid-cols-2">
-        {components.map((one) => {
+        {components.map(({ icon: Icon, ...one }) => {
           const inner = (
             <>
               <span className="flex items-center gap-2 text-sm font-medium">
-                <StatusLight light={one.light} /> {one.name}
+                <span
+                  className="flex size-7 items-center justify-center rounded-lg [&_svg]:size-4"
+                  style={{
+                    color: one.colour,
+                    background: `color-mix(in oklab, ${one.colour} 14%, transparent)`,
+                  }}
+                >
+                  <Icon aria-hidden />
+                </span>
+                {one.name}
               </span>
               <span className="text-xs text-muted-foreground">{one.text}</span>
             </>
           );
           const look =
-            "grid gap-1 rounded-xl border border-border-soft bg-surface px-3 py-2.5";
-          return "href" in one ? (
+            "grid gap-1.5 rounded-xl border border-border-soft bg-surface px-3 py-2.5";
+          return one.href ? (
             <a
               key={one.name}
               href={one.href}
@@ -207,56 +231,75 @@ function FactoryArea({
       {parts.map((part) => (
         <PartCard key={part.id} part={part} onPress={onPress} />
       ))}
-    </section>
+    </AreaCard>
   );
 }
 
-// What is left to set up, in a line; each goes once it is done.
-function NextSteps({ state }: Readonly<{ state: FactoryState }>) {
-  const steps = [
-    ...(state.products.length === 0
-      ? [{ href: "#ideas", text: "Start your first product" }]
-      : []),
-    ...(state.company.tracker === "none"
-      ? [{ href: "#connect", text: "Connect Jira or GitHub" }]
-      : []),
+// The factory's own components, each with its icon and colour.
+function componentsOf(state: FactoryState) {
+  const ready = state.ideas.filter((idea) => idea.status === "ready").length;
+  return [
+    {
+      name: "Dashboard",
+      text: "Running: this page",
+      icon: LayoutDashboard,
+      colour: "#5b7cfa",
+    },
+    {
+      name: "Ideas",
+      text: `${count(state.ideas.length, "idea")}, ${String(ready)} ready to build`,
+      icon: Lightbulb,
+      colour: "#e2a13c",
+      href: "#ideas",
+    },
+    {
+      name: "Where work is tracked",
+      text: TRACKER_NAMES[state.company.tracker],
+      icon: SquareKanban,
+      colour: "#8b5cf6",
+      href: "#settings",
+    },
+    {
+      name: "Builder",
+      text: "Builds the ideas you agree to: comes next",
+      icon: Hammer,
+      colour: "#64748b",
+    },
   ];
-  if (steps.length === 0) return null;
-  return (
-    <p className="flex flex-wrap items-center gap-2 px-1 text-sm text-muted-foreground">
-      Next:
-      {steps.map((step) => (
-        <a
-          key={step.href}
-          href={step.href}
-          className="rounded-full bg-card px-3 py-1 text-foreground shadow-soft hover:bg-surface-2"
-        >
-          {step.text}
-        </a>
-      ))}
-    </p>
-  );
 }
 
-// The factory's light and line: a problem first, then starting, then all
-// running.
+// How the factory is doing, in a sentence that says what to do: a problem
+// first, then starting, then all running, else not running yet.
 function headline(parts: PartView[]): {
   light: PartView["light"];
   text: string;
 } {
   const lit = parts.filter((part) => part.light !== "none");
   const problems = lit.filter((part) => part.light === "problem").length;
+  if (lit.length === 0)
+    return {
+      light: "none",
+      text: "No products to run yet: they come with your first idea.",
+    };
   if (problems > 0)
     return {
       light: "problem",
-      text:
-        problems === 1
-          ? "One part needs you"
-          : `${String(problems)} parts need you`,
+      text: `${problems === 1 ? "One part" : String(problems) + " parts"} could not start: the card says why and what to do.`,
     };
   if (lit.some((part) => part.light === "starting"))
-    return { light: "starting", text: "Starting…" };
-  if (lit.length > 0 && lit.every((part) => part.light === "running"))
-    return { light: "running", text: "Everything is running" };
-  return { light: "stopped", text: "Ready to start" };
+    return { light: "starting", text: "Starting your products…" };
+  if (lit.every((part) => part.light === "running"))
+    return {
+      light: "running",
+      text: "Everything is running: open a product to try it.",
+    };
+  return {
+    light: "stopped",
+    text: "Your products are not running. Start them to try them on this computer.",
+  };
+}
+
+// "1 idea", "3 ideas".
+function count(n: number, noun: string): string {
+  return `${String(n)} ${noun}${n === 1 ? "" : "s"}`;
 }

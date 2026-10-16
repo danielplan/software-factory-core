@@ -18,7 +18,8 @@ export function Answer({
   className,
 }: Readonly<{
   call: VoiceCall;
-  coach: CoachView;
+  // Whether it is answering, and why it could not.
+  coach: Pick<CoachView, "working" | "problem">;
   onSay: (text: string) => void;
   placeholder?: string;
   className?: string;

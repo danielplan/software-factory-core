@@ -1,10 +1,11 @@
-import { ArrowUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
-import { Button } from "@/components/ui/button";
 import type { FactoryState } from "@/dashboard/dashboard";
+
+import { Answer } from "@/setup-coach/answer-box";
+import { VoiceCall } from "@/voice/voice-call";
 
 import { IdeaCard } from "./idea-card";
 import { IdeaWorkspace } from "./idea-workspace";
@@ -36,11 +37,12 @@ export function IdeasTab({
   );
 }
 
+// The idea in a sentence, typed or said out loud (Talk), which starts it
+// and opens it.
 function NewIdea() {
-  const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const start = async () => {
+  const start = async (text: string) => {
     if (!text.trim()) return;
     setBusy(true);
     setProblem(null);
@@ -52,51 +54,40 @@ function NewIdea() {
       setBusy(false);
     }
   };
+  const call = useStartCall(start);
   return (
     <section
       aria-label="A new idea"
       className="mx-auto grid w-full max-w-[720px] gap-5"
     >
-      <h1 className="text-center text-[34px] font-medium tracking-[-0.02em]">
+      <h1 className="text-center text-[34px] font-semibold tracking-[-0.02em]">
         What should we build next?
       </h1>
-      <form
-        className="glow-ring flex items-end gap-2 rounded-[22px] bg-card p-3 pl-5 shadow-big"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void start();
-        }}
-      >
-        <label htmlFor="new-idea" className="sr-only">
-          Your idea
-        </label>
-        <textarea
-          id="new-idea"
-          rows={3}
-          autoFocus
-          value={text}
-          placeholder="A wish list, so customers can save what they like for later…"
-          className="min-h-20 flex-1 resize-none bg-transparent py-2 text-base outline-none placeholder:text-muted-foreground"
-          onChange={(event) => {
-            setText(event.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "Enter" || event.shiftKey) return;
-            event.preventDefault();
-            void start();
-          }}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          aria-label="Start the idea"
-          className="size-10 rounded-full"
-          disabled={busy || !text.trim()}
-        >
-          <ArrowUp aria-hidden />
-        </Button>
-      </form>
+      <Answer
+        call={call}
+        coach={{ working: busy, problem }}
+        onSay={(text) => void start(text)}
+        placeholder="A wish list, so customers can save what they like for later…"
+        className="glow-ring min-h-28 p-3 pl-5 text-base shadow-big"
+      />
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </section>
   );
+}
+
+// Talking instead of typing: what is said starts the idea.
+function useStartCall(start: (text: string) => Promise<void>): VoiceCall {
+  const [call] = useState(() => new VoiceCall());
+  useEffect(() => {
+    call.sendTo(async (text) => {
+      await start(text);
+    });
+  });
+  useEffect(
+    () => () => {
+      call.end();
+    },
+    [call],
+  );
+  return call;
 }

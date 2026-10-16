@@ -1,6 +1,8 @@
-// Where a company's work is tracked: the settings of a GitHub board and of
-// Jira Cloud, chosen in setup and changed on the Settings tab. The runner,
-// which works on the cards, comes later and reads them from here.
+// Where a company's work is tracked besides the factory's own board: the
+// settings of a GitHub board and of Jira Cloud, connected after setup and
+// changed on the Settings tab, with the label that marks the work the
+// factory takes in. The runner, which works on the cards, comes later and
+// reads them from here.
 
 import { defineExtension } from "@software-factory/core";
 
@@ -35,6 +37,14 @@ export const trackers = defineExtension({
           default: "1",
           min: 1,
           max: 9999,
+        },
+        {
+          key: "GITHUB_LABEL",
+          label: "Only cards labelled",
+          help: "The factory takes in only the cards with this label; * takes every card.",
+          kind: "text",
+          default: "factory",
+          pattern: "^(\\*|[\\w .:-]+)$",
         },
       ],
     },
@@ -72,6 +82,14 @@ export const trackers = defineExtension({
           label: "API token",
           help: "Made at id.atlassian.com, Security, API tokens. Kept only on this computer.",
           kind: "secret",
+        },
+        {
+          key: "JIRA_LABEL",
+          label: "Only issues labelled",
+          help: "The factory takes in only the issues with this label; * takes every issue.",
+          kind: "text",
+          default: "factory",
+          pattern: "^(\\*|[\\w.:-]+)$",
         },
       ],
     },

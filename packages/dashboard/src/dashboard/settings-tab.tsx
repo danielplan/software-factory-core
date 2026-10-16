@@ -1,11 +1,17 @@
-import { Ban, GitBranch, SquareKanban } from "lucide-react";
+import { GitBranch, LayoutGrid, SquareKanban } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { type Company, type GroupView, messageOf, post } from "@/api";
-import { Accent } from "@/components/accent";
 import { ChoiceCard } from "@/components/choice-card";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { TRACKER_NAMES } from "@/setup/draft";
 
 import type { FactoryState } from "./dashboard";
@@ -14,13 +20,13 @@ import { SettingInput } from "./setting-input";
 type Tracker = Company["tracker"];
 
 const TRACKER_ICONS: Record<Tracker, ReactNode> = {
-  none: <Ban aria-hidden />,
+  none: <LayoutGrid aria-hidden />,
   github: <GitBranch aria-hidden />,
   jira: <SquareKanban aria-hidden />,
 };
 
 const TRACKER_ABOUT: Record<Tracker, string> = {
-  none: "Just the factory for now. You can choose later.",
+  none: "Work stays here, on the board in this app.",
   github: "Ideas become cards on a GitHub board.",
   jira: "Ideas become issues in a Jira Cloud project.",
 };
@@ -33,8 +39,8 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const trackers = new Set<string>(Object.keys(TRACKER_NAMES));
   return (
     <div className="grid max-w-3xl gap-5">
-      <h1 className="px-1 pt-2 text-[30px] font-medium tracking-[-0.02em]">
-        Your <Accent>settings</Accent>
+      <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
+        Settings
       </h1>
       <TrackerCard state={state} />
       {state.settings
@@ -55,7 +61,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
     settings: values,
   }));
   return (
-    <Card
+    <Topic
       title="Where work is tracked"
       about="Where the ideas you agree with the factory become work to build."
     >
@@ -91,7 +97,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
         usedBy={group?.usedBy ?? []}
         state={state}
       />
-    </Card>
+    </Topic>
   );
 }
 
@@ -104,7 +110,7 @@ function GroupCard({
     values,
   }));
   return (
-    <Card title={group.name} about={group.about}>
+    <Topic title={group.name} about={group.about}>
       <Fields group={group} form={form} />
       <Saving
         form={form}
@@ -112,7 +118,7 @@ function GroupCard({
         usedBy={group.usedBy}
         state={state}
       />
-    </Card>
+    </Topic>
   );
 }
 
@@ -121,7 +127,7 @@ function Addresses({ state }: Readonly<{ state: FactoryState }>) {
   const linked = state.parts.filter((part) => part.link);
   if (linked.length === 0) return null;
   return (
-    <Card title="Addresses" about="Where each part answers on this computer.">
+    <Topic title="Addresses" about="Where each part answers on this computer.">
       <dl className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[12rem_1fr]">
         {linked.map((part) => (
           <div key={part.id} className="contents">
@@ -139,26 +145,23 @@ function Addresses({ state }: Readonly<{ state: FactoryState }>) {
           </div>
         ))}
       </dl>
-    </Card>
+    </Topic>
   );
 }
 
-function Card({
+function Topic({
   title,
   about,
   children,
 }: Readonly<{ title: string; about: string; children: ReactNode }>) {
   return (
-    <section
-      aria-label={title}
-      className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft"
-    >
-      <header className="grid gap-1">
-        <h2 className="text-[17px] font-semibold">{title}</h2>
-        <p className="text-sm text-muted-foreground">{about}</p>
-      </header>
-      {children}
-    </section>
+    <Card aria-label={title} className="gap-5 shadow-soft">
+      <CardHeader>
+        <CardTitle className="text-[17px]">{title}</CardTitle>
+        <CardDescription>{about}</CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-5">{children}</CardContent>
+    </Card>
   );
 }
 

@@ -6,6 +6,17 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Work can stay on the **factory's own board**, in the app: it is the
+  first choice after setup and needs nothing connected (the tracker
+  `none`, now shown as "The factory's board"). A connected GitHub board or
+  Jira project takes in only the work labelled `factory`, or all of it
+  (`*`): new settings `GITHUB_LABEL` and `JIRA_LABEL`, chosen when
+  connecting.
+- The dashboard uses one font, shadcn's Card, Badge and Select, and a
+  colour per stage of work (Draft, Backlog, To do, In progress, Review,
+  Done) and per area. System says in a sentence how the factory is doing
+  and what to do, without the "Next" line. Talking (voice) works again on
+  the Ideas page's box: what is said starts the idea.
 - Connecting where work is tracked is guided, right after the factory is
   opened (and from the board's next steps and Settings): a **GitHub
   board** through the GitHub CLI on this computer (installed if missing;

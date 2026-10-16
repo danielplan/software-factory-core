@@ -1,4 +1,4 @@
-import { Ban, GitBranch, SquareKanban } from "lucide-react";
+import { GitBranch, LayoutGrid, SquareKanban } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { post } from "@/api";
@@ -8,10 +8,16 @@ import { Button } from "@/components/ui/button";
 import { GitHubSteps } from "./github-steps";
 import { JiraSteps } from "./jira-steps";
 
-type Choice = "github" | "jira";
+type Choice = "factory" | "github" | "jira";
 
 const CHOICES: { id: Choice; icon: ReactNode; title: string; text: string }[] =
   [
+    {
+      id: "factory",
+      icon: <LayoutGrid aria-hidden />,
+      title: "The factory's own board",
+      text: "Work stays here, on the board in this app. Nothing to connect.",
+    },
     {
       id: "github",
       icon: <GitBranch aria-hidden />,
@@ -26,26 +32,26 @@ const CHOICES: { id: Choice; icon: ReactNode; title: string; text: string }[] =
     },
   ];
 
-// Connecting where work is tracked, step by step, right after setup (and
-// from the board and Settings later): choose GitHub or Jira, follow its
-// steps, each checked; or do it later.
+// Where work is tracked, right after setup (and from Settings later): the
+// factory's own board, or a GitHub board or Jira connected step by step,
+// each step checked.
 export function ConnectPage() {
-  const [choice, setChoice] = useState<Choice | null>(null);
+  const [choice, setChoice] = useState<Choice>("factory");
   const [done, setDone] = useState<string | null>(null);
-  const later = () => {
+  const ownBoard = () => {
     void post("/api/connect/later").finally(() => {
       window.location.hash = "board";
     });
   };
   return (
-    <div className="mx-auto grid w-full max-w-2xl gap-6 pt-[8vh]">
+    <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
-        <h1 className="text-[30px] font-medium tracking-[-0.02em]">
-          Connect where work is tracked
+        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
+          Where should the factory keep its work?
         </h1>
         <p className="text-muted-foreground">
-          The ideas you agree to go on your board there, and the factory works
-          from it.
+          The ideas you agree to become work on a board, and the factory builds
+          from there. Keep it here, or use the board your team already has.
         </p>
       </header>
       {done ? (
@@ -63,7 +69,7 @@ export function ConnectPage() {
       ) : (
         <>
           <div
-            className="grid gap-3 sm:grid-cols-2"
+            className="grid gap-3 sm:grid-cols-3"
             role="radiogroup"
             aria-label="Tracker"
           >
@@ -80,15 +86,13 @@ export function ConnectPage() {
               />
             ))}
           </div>
+          {choice === "factory" && (
+            <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
+              Use the factory's board
+            </Button>
+          )}
           {choice === "github" && <GitHubSteps onDone={setDone} />}
           {choice === "jira" && <JiraSteps onDone={setDone} />}
-          <Button
-            variant="ghost"
-            className="h-10 justify-self-start px-3 text-muted-foreground"
-            onClick={later}
-          >
-            <Ban aria-hidden /> Later
-          </Button>
         </>
       )}
     </div>

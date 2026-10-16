@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { Step } from "./connect-page";
-import { Pick } from "./pick";
+import { Pick, WhichWork } from "./pick";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };
@@ -20,6 +20,7 @@ export function JiraSteps({
   const [login, setLogin] = useState<Login>({ site: "", email: "", token: "" });
   const [found, setFound] = useState<Projects | null>(null);
   const [project, setProject] = useState("");
+  const [label, setLabel] = useState("factory");
   const { busy, problem, run } = useRun();
   return (
     <section className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft">
@@ -64,6 +65,7 @@ export function JiraSteps({
                 }))}
                 onPick={setProject}
               />
+              <WhichWork value={label} onPick={setLabel} noun="issues" />
               <Button
                 className="h-10 justify-self-start px-4"
                 disabled={!project || busy}
@@ -71,7 +73,7 @@ export function JiraSteps({
                   void run(async () => {
                     const { message } = await post<{ message: string }>(
                       "/api/connect/jira",
-                      { ...login, project },
+                      { ...login, project, label },
                     );
                     onDone(message);
                   })

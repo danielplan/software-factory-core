@@ -4,17 +4,11 @@ import type { IdeaView } from "@/api";
 import type { FactoryState } from "@/dashboard/dashboard";
 
 import { IdeaCard } from "./idea-card";
+import { STAGES } from "./stages";
 
-// The columns work moves through. Backlog holds the ideas agreed to (an
-// idea still a draft stays on the Ideas tab); the rest comes with the
-// builder.
-const COLUMNS = [
-  { id: "ready", title: "Backlog" },
-  { id: "todo", title: "To do" },
-  { id: "building", title: "In progress" },
-  { id: "trying", title: "Review" },
-  { id: "done", title: "Done" },
-] as const;
+// The columns work moves through: Backlog holds the ideas agreed to (a
+// draft stays on the Ideas tab); the rest comes with the builder.
+const COLUMNS = STAGES.filter((stage) => stage.id !== "draft");
 
 // What the factory is doing: what it is busy with now, in a line beside
 // the title, then every piece of work in the column of how far it is.
@@ -24,7 +18,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-baseline gap-3 px-1 pt-1">
-        <h1 className="text-[26px] font-medium tracking-[-0.02em]">Board</h1>
+        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">Board</h1>
         <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           {now.busy ? (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
@@ -57,11 +51,20 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
               <section
                 key={column.id}
                 aria-label={column.title}
-                className="grid min-h-[60vh] content-start gap-2 rounded-2xl bg-card/50 p-2.5"
+                className="grid min-h-[60vh] content-start gap-2 rounded-2xl border-t-[3px] p-2.5"
+                style={{
+                  borderTopColor: column.colour,
+                  background: `color-mix(in oklab, ${column.colour} 7%, var(--card))`,
+                }}
               >
-                <h2 className="flex items-center gap-2 px-1.5 py-1 text-[13px] font-medium">
+                <h2 className="flex items-center gap-2 px-1.5 py-1 text-[13px] font-semibold">
+                  <span
+                    aria-hidden
+                    className="size-2 rounded-full"
+                    style={{ background: column.colour }}
+                  />
                   {column.title}
-                  <span className="text-muted-foreground">
+                  <span className="font-normal text-muted-foreground">
                     {String(ideas.length)}
                   </span>
                 </h2>

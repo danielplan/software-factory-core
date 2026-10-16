@@ -32,6 +32,7 @@ export function connectRoutes(
       connected(session, "github", {
         GITHUB_REPOSITORY: repository,
         GITHUB_PROJECT: String(board),
+        GITHUB_LABEL: labelOf(body),
       });
       return { message };
     },
@@ -48,6 +49,7 @@ export function connectRoutes(
         JIRA_EMAIL: login.email.trim(),
         JIRA_TOKEN: login.token.trim(),
         JIRA_PROJECT: project.key,
+        JIRA_LABEL: labelOf(body),
       });
       return { message: `Connected to “${project.name}” (${project.key}).` };
     },
@@ -68,6 +70,12 @@ function connected(
   const wrong = Object.entries(refused).map(([key, why]) => `${key}: ${why}`);
   if (wrong.length > 0) throw new Refused(wrong.join(" · "));
   session.connectLater();
+}
+
+// The label that marks the factory's work: "factory" unless the owner
+// chose another, or * for all of it.
+function labelOf(body: unknown): string {
+  return field(body, "label").trim() || "factory";
 }
 
 function loginOf(body: unknown) {

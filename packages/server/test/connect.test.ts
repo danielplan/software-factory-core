@@ -135,6 +135,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     const connected = await post("/api/connect/github", {
       repository: "acme/shop",
       board: 1,
+      label: "*",
     });
     assert.deepEqual(await connected.json(), {
       message: "Connected to “Roadmap”, 3 columns.",
@@ -147,6 +148,10 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
         ?.fields.find((f) => f.key === "GITHUB_REPOSITORY")?.value,
       "acme/shop",
     );
+    const label = state.settings
+      .find((g) => g.id === "github")
+      ?.fields.find((f) => f.key === "GITHUB_LABEL");
+    assert.equal(label?.value, "*");
     assert.equal(state.onboarding, false);
     // The stand-in computer has no GitHub CLI to install.
     assert.equal((await post("/api/connect/github/install", {})).status, 409);
@@ -214,6 +219,16 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
         await post("/api/connect/jira", { ...login, project: "NOPE" }),
       ),
       /Choose one/,
+    );
+    assert.match(
+      await error(
+        await post("/api/connect/jira", {
+          ...login,
+          project: "ACME",
+          label: "no way!",
+        }),
+      ),
+      /JIRA_LABEL/,
     );
     const connected = await post("/api/connect/jira", {
       ...login,
