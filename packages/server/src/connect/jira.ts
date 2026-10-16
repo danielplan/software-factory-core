@@ -22,11 +22,8 @@ export function siteOf(site: string): string {
   );
 }
 
-// Who the token belongs to, and the projects it can see.
-export async function jiraProjects(
-  fetcher: Fetcher,
-  login: JiraLogin,
-): Promise<{ name: string; projects: { key: string; name: string }[] }> {
+// Asking Jira, signed in with the token; a refusal says why in plain words.
+function asker(fetcher: Fetcher, login: JiraLogin) {
   const site = siteOf(login.site);
   if (!site || !login.email.trim() || !login.token.trim())
     throw new Refused("Give the site, your email and the API token.");
@@ -35,7 +32,7 @@ export async function jiraProjects(
     Authorization: `Basic ${auth.toString("base64")}`,
     Accept: "application/json",
   };
-  const ask = async (path: string) => {
+  return async (path: string): Promise<unknown> => {
     const answer = await fetcher(`https://${site}${path}`, { headers }).catch(
       () => {
         throw new Refused(`There is no Jira at ${site}.`);
@@ -49,6 +46,14 @@ export async function jiraProjects(
       );
     return answer.json();
   };
+}
+
+// Who the token belongs to, and the projects it can see.
+export async function jiraProjects(
+  fetcher: Fetcher,
+  login: JiraLogin,
+): Promise<{ name: string; projects: { key: string; name: string }[] }> {
+  const ask = asker(fetcher, login);
   const me = (await ask("/rest/api/3/myself")) as { displayName?: string };
   const found = (await ask("/rest/api/3/project/search?maxResults=100")) as {
     values?: { key: string; name: string }[];
@@ -57,4 +62,23 @@ export async function jiraProjects(
     name: me.displayName ?? login.email.trim(),
     projects: (found.values ?? []).map(({ key, name }) => ({ key, name })),
   };
+}
+
+// A project's statuses (its board's columns), once each, in order.
+export async function jiraColumns(
+  fetcher: Fetcher,
+  login: JiraLogin,
+  project: string,
+): Promise<string[]> {
+  const kinds = (await asker(
+    fetcher,
+    login,
+  )(`/rest/api/3/project/${encodeURIComponent(project)}/statuses`)) as {
+    statuses?: { name: string }[];
+  }[];
+  return [
+    ...new Set(
+      kinds.flatMap((kind) => (kind.statuses ?? []).map((s) => s.name)),
+    ),
+  ];
 }

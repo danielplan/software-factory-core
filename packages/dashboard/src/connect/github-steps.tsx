@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import { Step } from "./connect-page";
 import { Pick, WhichWork } from "./pick";
+import { type Columns, type StageMap, StageMapping } from "./stage-map";
 
 const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 
@@ -126,6 +127,7 @@ function BoardPicker({
   const [repository, setRepository] = useState("");
   const [board, setBoard] = useState("");
   const [label, setLabel] = useState("factory");
+  const [stages, setStages] = useState<StageMap | null>(null);
   const [checking, setChecking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const repositories = useList<string>(
@@ -145,7 +147,7 @@ function BoardPicker({
     try {
       const { message } = await post<{ message: string }>(
         "/api/connect/github",
-        { repository, board: Number(board), label },
+        { repository, board: Number(board), label, stages },
       );
       onDone(message);
     } catch (error) {
@@ -155,26 +157,25 @@ function BoardPicker({
   };
   return (
     <div className="grid gap-3">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Pick
-          label="Repository"
-          value={repository}
-          options={repositories.map((one) => ({ value: one, label: one }))}
-          onPick={(value) => {
-            setRepository(value);
-            setBoard("");
-          }}
+      <RepositoryAndBoard
+        repositories={repositories}
+        boards={boards}
+        repository={repository}
+        board={board}
+        onRepository={(value) => {
+          setRepository(value);
+          setBoard("");
+        }}
+        onBoard={setBoard}
+      />
+      {board && (
+        <BoardColumns
+          repository={repository}
+          board={board}
+          stages={stages}
+          onStages={setStages}
         />
-        <Pick
-          label="Board"
-          value={board}
-          options={boards.map((one) => ({
-            value: String(one.number),
-            label: one.title,
-          }))}
-          onPick={setBoard}
-        />
-      </div>
+      )}
       <WhichWork value={label} onPick={setLabel} noun="cards" />
       {problem && <ProblemBox title="That did not work" text={problem} />}
       {problem?.includes("allow it") && (
@@ -191,6 +192,72 @@ function BoardPicker({
       </Button>
     </div>
   );
+}
+
+// The repository and its owner's board, picked from lists.
+function RepositoryAndBoard({
+  repositories,
+  boards,
+  repository,
+  board,
+  onRepository,
+  onBoard,
+}: Readonly<{
+  repositories: string[];
+  boards: { number: number; title: string }[];
+  repository: string;
+  board: string;
+  onRepository: (value: string) => void;
+  onBoard: (value: string) => void;
+}>) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Pick
+        label="Repository"
+        value={repository}
+        options={repositories.map((one) => ({ value: one, label: one }))}
+        onPick={onRepository}
+      />
+      <Pick
+        label="Board"
+        value={board}
+        options={boards.map((one) => ({
+          value: String(one.number),
+          label: one.title,
+        }))}
+        onPick={onBoard}
+      />
+    </div>
+  );
+}
+
+// The chosen board's columns, matched to the factory's stages.
+function BoardColumns({
+  repository,
+  board,
+  stages,
+  onStages,
+}: Readonly<{
+  repository: string;
+  board: string;
+  stages: StageMap | null;
+  onStages: (stages: StageMap) => void;
+}>) {
+  const [columns, setColumns] = useState<string[]>([]);
+  useEffect(() => {
+    get<Columns>(
+      `/api/connect/github/columns?repository=${encodeURIComponent(repository)}&board=${board}`,
+    )
+      .then((found) => {
+        setColumns(found.columns);
+        onStages(found.suggested);
+      })
+      .catch(() => {
+        setColumns([]);
+      });
+  }, [repository, board, onStages]);
+  if (!stages || columns.length === 0) return null;
+  return <StageMapping columns={columns} value={stages} onChange={onStages} />;
 }
 
 // A list the server gives (none for no path); why it could not, to show.

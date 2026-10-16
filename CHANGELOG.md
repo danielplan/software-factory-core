@@ -11,7 +11,11 @@ a major version may need a company to change something, and says what.
   `none`, now shown as "The factory's board"). A connected GitHub board or
   Jira project takes in only the work labelled `factory`, or all of it
   (`*`): new settings `GITHUB_LABEL` and `JIRA_LABEL`, chosen when
-  connecting.
+  connecting. Connecting also matches the board's columns (a GitHub
+  board's Status, a Jira project's statuses) to the factory's stages,
+  suggested from their names and changed by the owner: settings
+  `GITHUB_STAGE_*` and `JIRA_STAGE_*` (`BACKLOG`, `TODO`, `BUILDING`,
+  `TRYING`, `DONE`), each a column's name encoded as in an address.
 - The dashboard uses one font, shadcn's Card, Badge and Select, and a
   colour per stage of work (Draft, Backlog, To do, In progress, Review,
   Done) and per area. System says in a sentence how the factory is doing

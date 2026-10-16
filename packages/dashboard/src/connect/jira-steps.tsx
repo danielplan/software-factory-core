@@ -1,3 +1,4 @@
+import { ExternalLink, KeyRound } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 
 import { Step } from "./connect-page";
 import { Pick, WhichWork } from "./pick";
+import { type Columns, type StageMap, StageMapping } from "./stage-map";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };
@@ -19,8 +21,6 @@ export function JiraSteps({
 }: Readonly<{ onDone: (message: string) => void }>) {
   const [login, setLogin] = useState<Login>({ site: "", email: "", token: "" });
   const [found, setFound] = useState<Projects | null>(null);
-  const [project, setProject] = useState("");
-  const [label, setLabel] = useState("factory");
   const { busy, problem, run } = useRun();
   return (
     <section className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft">
@@ -55,38 +55,87 @@ export function JiraSteps({
         </Step>
         <Step n={2} title="Your project" done={false}>
           {found && (
-            <div className="grid gap-3">
-              <Pick
-                label="Project"
-                value={project}
-                options={found.projects.map((one) => ({
-                  value: one.key,
-                  label: `${one.name} (${one.key})`,
-                }))}
-                onPick={setProject}
-              />
-              <WhichWork value={label} onPick={setLabel} noun="issues" />
-              <Button
-                className="h-10 justify-self-start px-4"
-                disabled={!project || busy}
-                onClick={() =>
-                  void run(async () => {
-                    const { message } = await post<{ message: string }>(
-                      "/api/connect/jira",
-                      { ...login, project, label },
-                    );
-                    onDone(message);
-                  })
-                }
-              >
-                Connect
-              </Button>
-            </div>
+            <ProjectStep
+              login={login}
+              found={found}
+              busy={busy}
+              run={run}
+              onDone={onDone}
+            />
           )}
         </Step>
       </ol>
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </section>
+  );
+}
+
+// The project, its statuses matched to the factory's stages, which work
+// the factory takes in; then Connect.
+function ProjectStep({
+  login,
+  found,
+  busy,
+  run,
+  onDone,
+}: Readonly<{
+  login: Login;
+  found: Projects;
+  busy: boolean;
+  run: (step: () => Promise<void>) => Promise<void>;
+  onDone: (message: string) => void;
+}>) {
+  const [project, setProject] = useState("");
+  const [label, setLabel] = useState("factory");
+  const [columns, setColumns] = useState<Columns | null>(null);
+  const [stages, setStages] = useState<StageMap | null>(null);
+  const choose = (key: string) => {
+    setProject(key);
+    setColumns(null);
+    void run(async () => {
+      const found = await post<Columns>("/api/connect/jira/columns", {
+        ...login,
+        project: key,
+      });
+      setColumns(found);
+      setStages(found.suggested);
+    });
+  };
+  return (
+    <div className="grid gap-3">
+      <Pick
+        label="Project"
+        value={project}
+        options={found.projects.map((one) => ({
+          value: one.key,
+          label: `${one.name} (${one.key})`,
+        }))}
+        onPick={choose}
+      />
+      {columns && stages && (
+        <StageMapping
+          columns={columns.columns}
+          value={stages}
+          onChange={setStages}
+        />
+      )}
+      <WhichWork value={label} onPick={setLabel} noun="issues" />
+      <Button
+        className="h-10 justify-self-start px-4"
+        disabled={!project || busy}
+        onClick={() =>
+          void run(async () => {
+            const { message } = await post<{ message: string }>(
+              "/api/connect/jira",
+              { ...login, project, label, stages },
+            );
+            onDone(message);
+          })
+        }
+      >
+        Connect
+      </Button>
+    </div>
   );
 }
 
@@ -133,9 +182,11 @@ function LoginFields({
         href="https://id.atlassian.com/manage-profile/security/api-tokens"
         target="_blank"
         rel="noreferrer"
-        className="text-sm underline underline-offset-2"
+        className="inline-flex w-fit items-center gap-1.5 text-sm underline underline-offset-2"
       >
+        <KeyRound className="size-4" aria-hidden />
         Create an API token
+        <ExternalLink className="size-3.5 text-muted-foreground" aria-hidden />
       </a>
     </>
   );

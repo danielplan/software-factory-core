@@ -116,6 +116,27 @@ export class GitHub {
     return projects.map(({ number, title }) => ({ number, title }));
   }
 
+  // The board's columns: its Status field's options.
+  async columns(repository: string, board: number): Promise<string[]> {
+    const owner = repository.split("/")[0] ?? "";
+    const fields = await this.cli.run([
+      "project",
+      "field-list",
+      String(board),
+      "--owner",
+      owner,
+      "--format",
+      "json",
+    ]);
+    if (fields.code !== 0) throw new Refused(problemOf(fields));
+    const status = (
+      JSON.parse(fields.out) as {
+        fields: { name: string; options?: { name: string }[] }[];
+      }
+    ).fields.find((field) => field.name === "Status");
+    return (status?.options ?? []).map((option) => option.name);
+  }
+
   // The chosen board answers: its title and its columns.
   async check(repository: string, board: number): Promise<string> {
     const owner = repository.split("/")[0] ?? "";

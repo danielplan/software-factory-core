@@ -8,6 +8,25 @@ import { defineExtension } from "@software-factory/core";
 
 const FILE = "settings/tracker.env";
 
+const STAGE_NAMES = {
+  BACKLOG: "Backlog",
+  TODO: "To do",
+  BUILDING: "In progress",
+  TRYING: "Review",
+  DONE: "Done",
+};
+
+// Which of the board's columns each of the factory's stages is (empty: the
+// board has none for it), matched when the board is connected.
+function stageFields(prefix: string, noun: string) {
+  return Object.entries(STAGE_NAMES).map(([stage, name]) => ({
+    key: `${prefix}_STAGE_${stage}`,
+    label: `${noun} for ${name}`,
+    help: `The board's ${noun.toLowerCase()} the factory's ${name} is, encoded as in an address (In%20Progress).`,
+    kind: "text" as const,
+  }));
+}
+
 export const trackers = defineExtension({
   id: "trackers",
   name: "Trackers",
@@ -46,6 +65,7 @@ export const trackers = defineExtension({
           default: "factory",
           pattern: "^(\\*|[\\w .:-]+)$",
         },
+        ...stageFields("GITHUB", "Column"),
       ],
     },
     {
@@ -91,6 +111,7 @@ export const trackers = defineExtension({
           default: "factory",
           pattern: "^(\\*|[\\w.:-]+)$",
         },
+        ...stageFields("JIRA", "Status"),
       ],
     },
   ],

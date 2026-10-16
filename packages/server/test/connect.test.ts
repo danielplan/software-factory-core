@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import type { Cli } from "../src/connect/github.ts";
 import type { Fetcher } from "../src/connect/jira.ts";
+import { suggestStages } from "../src/connect/stages.ts";
 import type { Session } from "../src/session.ts";
 import { stage } from "./stage.ts";
 
@@ -33,7 +34,9 @@ function pretendGitHub(): Cli & { answered: string[] } {
       if (asked.startsWith("project view 1 --owner acme"))
         return says('{"title":"Roadmap"}');
       if (asked.startsWith("project field-list 1"))
-        return says('{"fields":[{"name":"Status","options":[1,2,3]}]}');
+        return says(
+          '{"fields":[{"name":"Status","options":[{"name":"Todo"},{"name":"In Progress"},{"name":"Done"}]}]}',
+        );
       return fails("unknown");
     },
     start: (args, onLine) => {
@@ -73,6 +76,17 @@ const pretendJira: Fetcher = (url, { headers }) => {
     });
   if (url.includes("broken")) return answer(500, {});
   if (!good) return answer(401, {});
+  if (url.endsWith("/project/ACME/statuses"))
+    return answer(200, [
+      { statuses: [{ name: "Backlog" }, { name: "Selected for Development" }] },
+      {
+        statuses: [
+          { name: "In Review" },
+          { name: "Done" },
+          { name: "Backlog" },
+        ],
+      },
+    ]);
   if (url.endsWith("/rest/api/3/myself"))
     return answer(200, { displayName: "Ann" });
   return answer(200, { values: [{ key: "ACME", name: "Acme web", id: "1" }] });
@@ -132,10 +146,33 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
       (await post("/api/connect/github", { repository: "x", board: 1 })).status,
       409,
     );
+    assert.deepEqual(
+      await get("/api/connect/github/columns?repository=acme/shop&board=1"),
+      {
+        columns: ["Todo", "In Progress", "Done"],
+        suggested: {
+          backlog: "",
+          todo: "Todo",
+          building: "In Progress",
+          trying: "",
+          done: "Done",
+        },
+      },
+    );
+    const wrong = await post("/api/connect/github", {
+      repository: "acme/shop",
+      board: 1,
+      stages: { trying: "QA" },
+    });
+    assert.match(
+      ((await wrong.json()) as { error: string }).error,
+      /no column “QA”/,
+    );
     const connected = await post("/api/connect/github", {
       repository: "acme/shop",
       board: 1,
       label: "*",
+      stages: { backlog: "Todo", todo: "" },
     });
     assert.deepEqual(await connected.json(), {
       message: "Connected to “Roadmap”, 3 columns.",
@@ -152,6 +189,13 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
       .find((g) => g.id === "github")
       ?.fields.find((f) => f.key === "GITHUB_LABEL");
     assert.equal(label?.value, "*");
+    const column = (key: string) =>
+      state.settings
+        .find((g) => g.id === "github")
+        ?.fields.find((f) => f.key === key)?.value;
+    assert.equal(column("GITHUB_STAGE_BACKLOG"), "Todo");
+    assert.equal(column("GITHUB_STAGE_BUILDING"), "In%20Progress");
+    assert.equal(column("GITHUB_STAGE_DONE"), "Done");
     assert.equal(state.onboarding, false);
     // The stand-in computer has no GitHub CLI to install.
     assert.equal((await post("/api/connect/github/install", {})).status, 409);
@@ -230,6 +274,20 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       ),
       /JIRA_LABEL/,
     );
+    const columns = await post("/api/connect/jira/columns", {
+      ...login,
+      project: "ACME",
+    });
+    assert.deepEqual(await columns.json(), {
+      columns: ["Backlog", "Selected for Development", "In Review", "Done"],
+      suggested: {
+        backlog: "Backlog",
+        todo: "Selected for Development",
+        building: "",
+        trying: "In Review",
+        done: "Done",
+      },
+    });
     const connected = await post("/api/connect/jira", {
       ...login,
       project: "ACME",
@@ -243,6 +301,10 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       .find((g) => g.id === "jira")
       ?.fields.find((f) => f.key === "JIRA_SITE");
     assert.equal(site?.value, "acme.atlassian.net");
+    const review = state.settings
+      .find((g) => g.id === "jira")
+      ?.fields.find((f) => f.key === "JIRA_STAGE_TRYING");
+    assert.equal(review?.value, "In%20Review");
     assert.equal((await post("/api/connect/later", {})).status, 200);
   } finally {
     session.close();
@@ -263,3 +325,23 @@ async function until(done: () => Promise<boolean>): Promise<void> {
   }
   assert.fail("It never happened.");
 }
+
+test("the board's columns are matched to the factory's stages by their names", () => {
+  assert.deepEqual(
+    suggestStages(["Icebox", "Up next", "Doing", "QA", "Shipped"]),
+    {
+      backlog: "Icebox",
+      todo: "Up next",
+      building: "Doing",
+      trying: "QA",
+      done: "Shipped",
+    },
+  );
+  assert.deepEqual(suggestStages(["Whatever"]), {
+    backlog: "",
+    todo: "",
+    building: "",
+    trying: "",
+    done: "",
+  });
+});
