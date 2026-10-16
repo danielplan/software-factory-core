@@ -62,7 +62,7 @@ test("an idea is shaped with the coach on its map, kept in the factory, marked r
       ["owner", "coach"],
     );
     assert.equal(pretend.seen[0]?.readOnly, true);
-    assert.equal(pretend.seen[0]?.instructions, "Shape the idea.");
+    assert.equal(pretend.seen[0].instructions, "Shape the idea.");
     assert.match(
       pretend.answers[0]?.[0] ?? "",
       /^who = card-1\ncard-2\ncard-2 → card-1\nShown/,
