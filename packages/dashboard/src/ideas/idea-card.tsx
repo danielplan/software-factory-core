@@ -27,12 +27,12 @@ export function IdeaCard({
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
-              idea.status === "planning"
+              idea.status === "draft"
                 ? "bg-surface-2 text-muted-foreground"
                 : "bg-success/15 text-success",
             )}
           >
-            {idea.status === "planning" ? "Shaping" : "On the board"}
+            {idea.status === "draft" ? "Draft" : "Ready"}
           </span>
         )}
       </span>

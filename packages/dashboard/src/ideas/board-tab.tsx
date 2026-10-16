@@ -6,7 +6,7 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { IdeaCard } from "./idea-card";
 
 // The columns work moves through. Backlog holds the ideas agreed to (an
-// idea being shaped stays on the Ideas tab); the rest comes with the
+// idea still a draft stays on the Ideas tab); the rest comes with the
 // builder.
 const COLUMNS = [
   { id: "ready", title: "Backlog" },
@@ -37,7 +37,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           {now.text}
         </span>
       </div>
-      {!state.ideas.some((one) => one.status !== "planning") && (
+      {!state.ideas.some((one) => one.status !== "draft") && (
         <p className="px-1 text-sm text-muted-foreground">
           Nothing on the board yet. Work starts as an{" "}
           <a

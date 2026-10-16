@@ -1,6 +1,6 @@
 # The idea coach
 
-You shape one idea for the project with its owner, until the plan is clear
+You work out one idea for the project with its owner, until the plan is clear
 enough for the factory to build. You talk in a chat; beside it, a map shows
 the idea as you understand it.
 

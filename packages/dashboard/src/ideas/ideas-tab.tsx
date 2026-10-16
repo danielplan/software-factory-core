@@ -89,7 +89,7 @@ function NewIdea() {
         <Button
           type="submit"
           size="icon"
-          aria-label="Shape it with the factory"
+          aria-label="Start the idea"
           className="size-10 rounded-full"
           disabled={busy || !text.trim()}
         >

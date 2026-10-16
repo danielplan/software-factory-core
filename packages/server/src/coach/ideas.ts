@@ -1,7 +1,7 @@
 // The factory's ideas: each a conversation with the idea coach about a map
 // of the idea (talk.ts), kept as a file in the factory's ideas/ folder, so
 // it lives with the project. The coach reads the code and the factory's
-// knowledge, and shapes the idea with the owner; once the plan is clear the
+// knowledge, and works the idea out with the owner; once the plan is clear the
 // owner marks it ready (later, it goes to where work is tracked).
 
 import { randomUUID } from "node:crypto";
@@ -140,7 +140,7 @@ export class Ideas {
     const idea = new Idea(join(this.folder(), `${id}.json`), this.options, {
       id,
       title: titleOf(words),
-      status: "planning",
+      status: "draft",
       created: now,
       updated: now,
       conversation: randomUUID(),

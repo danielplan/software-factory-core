@@ -12,7 +12,7 @@ import { stage } from "./stage.ts";
 // map, kept as a file in the factory's ideas/ folder, marked ready once
 // agreed, or discarded.
 
-test("an idea is shaped with the coach on its map, kept in the factory, marked ready and discarded", async () => {
+test("an idea is worked out with the coach on its map, kept in the factory, marked ready and discarded", async () => {
   const pretend = pretendClaude([
     {
       calls: [
@@ -56,7 +56,7 @@ test("an idea is shaped with the coach on its map, kept in the factory, marked r
       idea.title,
       "A wish list for gardeners, so they can save the tools they…",
     );
-    assert.equal(idea.status, "planning");
+    assert.equal(idea.status, "draft");
     assert.deepEqual(
       idea.messages.map((m) => m.from),
       ["owner", "coach"],

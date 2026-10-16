@@ -170,7 +170,8 @@ export type CoachMessage = { from: "coach" | "owner"; text: string };
 export type IdeaView = CoachView & {
   id: string;
   title: string;
-  status: "planning" | "ready";
+  // A draft until the owner agrees to its plan; then ready, on the board.
+  status: "draft" | "ready";
   created: string;
   updated: string;
 };
