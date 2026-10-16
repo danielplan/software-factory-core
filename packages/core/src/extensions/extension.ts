@@ -45,6 +45,9 @@ export const kitSchema = z.object({
   // (conventions and lessons for the kind).
   rules: z.array(z.string().min(1)).default([]),
   guides: z.array(guideSchema).default([]),
+  // Recognises any code, so it only takes a folder in which no other kit
+  // finds a product, there or below (setup/detect.ts).
+  fallback: z.boolean().default(false),
 });
 
 export type Guide = z.infer<typeof guideSchema>;

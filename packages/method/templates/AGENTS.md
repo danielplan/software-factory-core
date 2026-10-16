@@ -1,6 +1,8 @@
 # Software Factory
 
-<!-- company: one sentence on what this factory is for, for example "This folder is a software factory for <company>." -->
+This folder, `factory/`, is the software factory for <company>, kept in the project's code: what it knows (`context/`), its history (`runs/`) and a description of each product (`products/`). The paths below are inside it; the products' code is around it.
+
+<!-- company: one sentence on what the project is for. -->
 
 When you are asked to build or change something, use the factory skills to plan, implement, verify and record the work. Start with the `factory` skill.
 

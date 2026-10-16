@@ -38,7 +38,7 @@ export function AddProducts({
             kits={state.kits}
             products={products}
             existing={state.products}
-            factory={state.root}
+            project={state.project}
             onChange={setProducts}
           />
         ) : (

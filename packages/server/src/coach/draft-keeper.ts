@@ -1,7 +1,8 @@
-// The setup coach's draft of the company: changed by the coach's tools and
-// by the owner on the map, each change shown at once. A product found in
+// The setup coach's draft of the project: changed by the coach's tools and
+// by the owner on the canvas, each change shown at once. A product found in
 // existing code keeps its folder and what its kit found there (commands,
-// port); a new one gets its folder when the factory is made.
+// port); a new one gets its folder when the factory is made. The canvas's
+// other things (the cards and installs) follow canvas-things.ts.
 
 import { existsSync } from "node:fs";
 
@@ -13,7 +14,23 @@ import {
 } from "@software-factory/core";
 
 import type { ChangeDraft, Draft } from "../api.ts";
+import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
+import {
+  answerInstall,
+  type CardIdea,
+  connect,
+  disconnect,
+  focus,
+  idsOn,
+  move,
+  propose,
+  removeThing,
+  settle,
+  withoutPlace,
+  writeCard,
+} from "./canvas-things.ts";
+import { pictureIn } from "./pictures.ts";
 
 type DraftProduct = Draft["products"][number];
 type Users = DraftProduct["users"];
@@ -39,11 +56,28 @@ export type ProductChange = {
 
 export class DraftKeeper {
   private kits: Kit[];
+  // The project's folder, where a card's picture is.
+  private project: string;
+  readonly installables: Installable[];
   private changed: () => void;
-  draft: Draft = { company: { name: "", about: "" }, products: [] };
+  draft: Draft = {
+    company: { name: "", about: "", settled: false },
+    products: [],
+    things: [],
+    links: [],
+    places: {},
+    focus: { ids: [], areas: [], n: 0 },
+  };
 
-  constructor(kits: Kit[], changed: () => void) {
+  constructor(
+    kits: Kit[],
+    installables: Installable[],
+    changed: () => void,
+    project: string,
+  ) {
+    this.project = project;
     this.kits = kits;
+    this.installables = installables;
     this.changed = changed;
   }
 
@@ -51,6 +85,7 @@ export class DraftKeeper {
     this.draft = {
       ...this.draft,
       company: {
+        ...this.draft.company,
         name: company.name?.trim() ?? this.draft.company.name,
         about: company.about?.trim() ?? this.draft.company.about,
       },
@@ -73,6 +108,7 @@ export class DraftKeeper {
       isNew: !idea.folder,
       commands: found?.commands ?? {},
       dependsOn: this.known(idea.dependsOn ?? []),
+      settled: false,
       ...(port ? { port } : {}),
     };
     this.save(withFreePorts([...this.draft.products, product]));
@@ -101,6 +137,7 @@ export class DraftKeeper {
 
   remove(id: string): string {
     this.product(id);
+    this.draft = withoutPlace(this.draft, id);
     this.save(
       this.draft.products
         .filter((p) => p.id !== id)
@@ -109,16 +146,107 @@ export class DraftKeeper {
     return `Removed ${id}.`;
   }
 
-  // The owner's change on the map.
+  card(idea: CardIdea): string {
+    const picture = idea.picture && pictureIn(this.project, idea.picture);
+    const made = writeCard(this.draft, {
+      ...idea,
+      ...(picture ? { picture } : {}),
+    });
+    this.update(made.draft);
+    return idea.id ? `Wrote ${made.id} again.` : `Wrote "${made.id}".`;
+  }
+
+  connect(arrow: { from: string; to: string; label?: string }): string {
+    const made = connect(this.draft, arrow);
+    this.update(made.draft);
+    return `Drew "${made.id}".`;
+  }
+
+  // Many cards and arrows at once, in order. An arrow's ends are cards
+  // already drawn or the keys of cards in this drawing; what does not fit
+  // is said and the rest is drawn.
+  draw(drawing: {
+    cards: (CardIdea & { key?: string })[];
+    arrows?: { from: string; to: string; label?: string }[];
+  }): string {
+    const keys = new Map<string, string>();
+    const said = drawing.cards.map(({ key, ...idea }) =>
+      this.attempt(() => {
+        const answer = this.card(idea);
+        const id = idea.id ?? this.draft.things.at(-1)?.id ?? "";
+        if (key) keys.set(key, id);
+        return key ? `${key}: ${answer}` : answer;
+      }),
+    );
+    for (const arrow of drawing.arrows ?? [])
+      said.push(
+        this.attempt(() =>
+          this.connect({
+            ...arrow,
+            from: keys.get(arrow.from) ?? arrow.from,
+            to: keys.get(arrow.to) ?? arrow.to,
+          }),
+        ),
+      );
+    return said.join("\n");
+  }
+
+  focus(on: { ids?: string[]; areas?: string[] }): string {
+    this.update(focus(this.draft, on));
+    return "The owner's canvas now shows it.";
+  }
+
+  disconnect(id: string): string {
+    this.update(disconnect(this.draft, id));
+    return `Took the arrow ${id} off.`;
+  }
+
+  settle(ids: string[], settled: boolean): string {
+    this.update(settle(this.draft, ids, settled));
+    return settled
+      ? `${ids.join(", ")} agreed: drawn solid.`
+      : `${ids.join(", ")} back to a sketch.`;
+  }
+
+  propose(proposal: { what: string; why: string }): string {
+    const made = propose(this.draft, this.installables, proposal);
+    this.update(made.draft);
+    return `Proposed as "${made.id}": the owner approves or declines it on the canvas.`;
+  }
+
+  // A product, or a thing, taken off the canvas.
+  removeAny(id: string): string {
+    if (this.draft.products.some((p) => p.id === id)) return this.remove(id);
+    this.update(removeThing(this.draft, id));
+    return `Removed ${id}.`;
+  }
+
+  // The owner's change on the canvas.
   owner(change: ChangeDraft): void {
-    if ("company" in change) this.setCompany(change.company);
-    else if ("product" in change) this.change(change.product);
-    else this.remove(change.remove);
+    if ("move" in change) this.update(move(this.draft, change.move));
+    else if ("install" in change)
+      this.update(answerInstall(this.draft, change.install));
+    else this.removeAny(change.remove);
   }
 
   // The draft for the coach to read.
   text(): string {
     return JSON.stringify(this.draft, null, 2);
+  }
+
+  // What a change said, or why it was refused.
+  private attempt(act: () => string): string {
+    try {
+      return act();
+    } catch (error) {
+      if (error instanceof Refused) return `Not drawn: ${error.message}`;
+      throw error;
+    }
+  }
+
+  private update(draft: Draft): void {
+    this.draft = draft;
+    this.changed();
   }
 
   // The kit for a product and, for existing code, what it found there.
@@ -155,7 +283,7 @@ export class DraftKeeper {
     this.changed();
   }
 
-  // Only products on the map, never the product itself.
+  // Only products on the canvas, never the product itself.
   private known(ids: string[], self?: string): string[] {
     const onMap = new Set(this.draft.products.map((p) => p.id));
     const unknown = ids.filter((id) => !onMap.has(id));
@@ -166,7 +294,7 @@ export class DraftKeeper {
 
   private freeId(name: string): string {
     const base = idFrom(name);
-    const taken = new Set(this.draft.products.map((p) => p.id));
+    const taken = idsOn(this.draft);
     let id = base;
     let n = 1;
     while (taken.has(id)) {

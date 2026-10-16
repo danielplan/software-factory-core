@@ -3,64 +3,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { Claude, RunOptions } from "@software-factory/core";
-
+import type { Session } from "../src/session.ts";
+import { pretendClaude } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
 
-// The setup coach: a conversation that draws the company on a map with its
-// tools, which the owner can change too, and which becomes the factory.
+// The setup coach: a conversation that draws the company on a canvas with
+// its tools, which the owner can change too, and which becomes the factory.
 
-type Call = [string, Record<string, unknown>];
-
-// A pretend Claude Code: each turn calls the tools it is given over MCP,
-// as the real one does, then answers. "<name>" in an argument is the path
-// set in `paths` by then.
-function pretendClaude(turns: { calls: Call[]; reply: string }[]) {
-  const paths: Record<string, string> = {};
-  const filled = (args: Record<string, unknown>) =>
-    JSON.parse(
-      JSON.stringify(args).replace(/<(\w+)>/g, (_, name: string) =>
-        JSON.stringify(paths[name] ?? "").slice(1, -1),
-      ),
-    ) as Record<string, unknown>;
-  const seen: RunOptions[] = [];
-  const answers: string[][] = [];
-  const claude: Claude = {
-    async run(options) {
-      seen.push(options);
-      const turn = turns[seen.length - 1];
-      if (!turn) return { ok: false, text: "", error: "spawn claude ENOENT" };
-      const mcp = options.mcp;
-      assert.ok(mcp);
-      const client = new Client({ name: "pretend", version: "1.0.0" });
-      await client.connect(
-        new StreamableHTTPClientTransport(new URL(mcp.url), {
-          requestInit: { headers: mcp.headers },
-        }),
-      );
-      const said: string[] = [];
-      for (const [name, args] of turn.calls) {
-        options.onActivity(`Using mcp__setup__${name}`);
-        const result = (await client.callTool({
-          name,
-          arguments: filled(args),
-        })) as {
-          content: { text: string }[];
-        };
-        said.push(result.content.map((c) => c.text).join(""));
-      }
-      await client.close();
-      answers.push(said);
-      options.onText?.(turn.reply.slice(0, 5));
-      return { ok: true, text: turn.reply };
-    },
-  };
-  return { claude, seen, answers, paths };
-}
-
-test("the coach puts the company and its products on the map while they talk, then the factory is made from it", async () => {
+test("the coach puts the company and its products on the canvas while they talk, then the factory is made from it", async () => {
   const pretend = pretendClaude([
     {
       calls: [
@@ -94,9 +44,22 @@ test("the coach puts the company and its products on the map while they talk, th
       ],
       reply: "I found your shop and added a blog. Does that look right?",
     },
-    { calls: [["look_at_map", {}]], reply: "Got it." },
+    {
+      calls: [
+        ["look_at_canvas", {}],
+        ["change_product", { id: "blog", about: "Our news." }],
+        ["set_company", { name: "Acme Garden" }],
+      ],
+      reply: "Got it.",
+    },
   ]);
-  const { session, server, post, home: folder } = await stage(pretend.claude);
+  const {
+    session,
+    server,
+    post,
+    home: folder,
+    project,
+  } = await stage(pretend.claude);
   try {
     const code = join(folder, "code");
     mkdirSync(join(code, "shop"), { recursive: true });
@@ -132,6 +95,7 @@ test("the coach puts the company and its products on the map while they talk, th
     assert.deepEqual(drafted.coach.draft.company, {
       name: "Acme",
       about: "Garden tools, online.",
+      settled: false,
     });
     assert.deepEqual(
       drafted.coach.draft.products.map((p) => [
@@ -151,31 +115,40 @@ test("the coach puts the company and its products on the map while they talk, th
     );
     assert.equal(drafted.coach.working, false);
 
-    // The owner changes the map; the coach hears of it next turn.
-    await post("/api/setup/draft", {
-      product: { id: "blog", about: "Our news." },
-    });
-    await post("/api/setup/draft", { company: { name: "Acme Garden" } });
+    // The owner moves a card (what a card says, they change by talking:
+    // that is refused); the coach hears of it next turn.
+    await post("/api/setup/draft", { move: { id: "blog", x: 1, y: 1 } });
+    assert.equal(
+      (await post("/api/setup/draft", { company: { name: "Acme Garden" } }))
+        .status,
+      409,
+    );
     assert.equal(
       (await post("/api/setup/draft", { remove: "nothing" })).status,
       409,
     );
-    await post("/api/setup/say", { text: "Looks good." });
+    await post("/api/setup/say", {
+      text: "Sieht gut aus.",
+      spokenIn: "Deutsch",
+    });
     const second = first(1);
     assert.ok(second);
-    assert.match(second.prompt, /I changed the map myself/);
+    assert.match(
+      second.prompt,
+      /^Sieht gut aus\.\n\n\(I changed the canvas myself; look at it\. Said out loud, in Deutsch: answer in Deutsch, for being read aloud\.\)$/,
+    );
     assert.equal(second.session?.resume, true);
 
     assert.equal((await post("/api/setup/make", {})).status, 200);
-    const root = join(folder, "Factories", "acme-garden");
+    const root = join(project, "factory");
     const made = session.state();
     assert.ok(made.mode === "factory");
     assert.equal(made.company.name, "Acme Garden");
     const blog = made.products.find((p) => p.id === "blog");
     assert.ok(blog);
     assert.equal(blog.about, "Our news.");
-    assert.equal(blog.folder, join(root, "code", "blog"));
-    assert.ok(existsSync(join(root, "code", "blog")));
+    assert.equal(blog.folder, join(project, "blog"));
+    assert.ok(existsSync(join(project, "blog")));
     const shop = made.products.find((p) => p.id === "shop");
     assert.deepEqual(shop?.users, [{ who: "Customers", does: "buy tools" }]);
     assert.equal(
@@ -221,3 +194,66 @@ test("only the coach's Claude Code uses its tools, and a missing Claude Code is 
     server.close();
   }
 });
+
+test("started in a project with code, the coach reads it first, before the owner says anything", async () => {
+  const pretend = pretendClaude([
+    {
+      calls: [["look_for_products", { folder: "<project>" }]],
+      reply: "This looks like a shop. Who buys from it?",
+    },
+  ]);
+  const { session, server, project } = await stage(pretend.claude, {
+    "web.txt": "",
+  });
+  pretend.paths.project = project;
+  try {
+    const coach = await answered(session);
+    const [opening] = pretend.seen;
+    assert.equal(opening?.prompt, `Here's my project: ${project}`);
+    assert.equal(opening.cwd, project);
+    assert.match(
+      opening.instructions ?? "",
+      /started the factory in their project's folder/,
+    );
+    // The owner sees the coach's answer, not the words that started it.
+    assert.deepEqual(coach.messages, [
+      { from: "coach", text: "This looks like a shop. Who buys from it?" },
+    ]);
+    assert.equal(coach.started, true);
+    assert.match(pretend.answers[0]?.[0] ?? "", /web/i);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("when reading the project did not work, the owner's next message asks for it again", async () => {
+  const pretend = pretendClaude([]);
+  const { session, server, post, project } = await stage(pretend.claude, {
+    "web.txt": "",
+  });
+  try {
+    assert.match(
+      (await answered(session)).problem ?? "",
+      /not on this computer/,
+    );
+    await post("/api/setup/say", { text: "Hello?" });
+    assert.equal(
+      pretend.seen[1]?.prompt,
+      `Here's my project: ${project}\n\nHello?`,
+    );
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+// The coach's view once its first turn is over.
+async function answered(session: Session) {
+  for (;;) {
+    const state = session.state();
+    assert.ok(state.mode === "setup");
+    if (state.coach.started && !state.coach.working) return state.coach;
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+}

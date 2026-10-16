@@ -37,5 +37,10 @@
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2"
+  },
+  "overrides": {
+    "@mintplex-labs/piper-tts-web": {
+      "onnxruntime-web": "1.26.0-dev.20260416-b7804b056c"
+    }
   }
 }

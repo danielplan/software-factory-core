@@ -9,6 +9,10 @@ import { defineConfig } from "vite";
 // the data requests to a running server.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // The voice's workers (speech model, Piper) load their parts as modules.
+  worker: { format: "es" },
+  // Served from this computer, so bigger files are fine.
+  build: { chunkSizeWarningLimit: 1500 },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },

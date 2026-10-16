@@ -1,7 +1,7 @@
-// Makes a company's factory folder (on this computer, outside the code):
+// Makes a project's factory folder (`factory/`, in the project's code):
 // the company file, the knowledge base from its template, the history, the
 // agents' ground rules from the method's template, and a description for
-// each product.
+// each product. The project's own AGENTS.md (and CLAUDE.md) point to it.
 
 import {
   cpSync,
@@ -10,7 +10,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, relative, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 import {
   COMPANY_FILE,
@@ -24,8 +24,37 @@ import { type ProductFile, productSchema } from "../products/product.ts";
 // (with context/ in it) and the method's AGENTS.md template.
 export type Templates = { knowledgeBase: string; agents: string };
 
+// The folder in a project that holds its factory.
+export const FACTORY_FOLDER = "factory";
+
 export function hasFactory(root: string): boolean {
   return existsSync(join(root, COMPANY_FILE));
+}
+
+// The factory of the project around `start`: the nearest factory folder
+// looking upward, or null when there is none.
+export function findFactory(start: string): string | null {
+  const project = upward(start, (folder) =>
+    hasFactory(join(folder, FACTORY_FOLDER)),
+  );
+  return project && join(project, FACTORY_FOLDER);
+}
+
+// The project around `start`, for setting one up: the top of its git
+// repository, or `start` itself when git does not keep it.
+export function projectOf(start: string): string {
+  return upward(start, (folder) => existsSync(join(folder, ".git"))) ?? start;
+}
+
+// The nearest folder from `start` upward that fits.
+function upward(start: string, fits: (folder: string) => boolean) {
+  let folder = resolve(start);
+  for (;;) {
+    if (fits(folder)) return folder;
+    const parent = dirname(folder);
+    if (parent === folder) return null;
+    folder = parent;
+  }
 }
 
 // A new factory folder; refused where one is already.
@@ -51,9 +80,36 @@ export function createFactoryFolder(
     join(root, "AGENTS.md"),
     readFileSync(templates.agents, "utf8").replaceAll("<company>", file.name),
   );
-  writeFileSync(join(root, "CLAUDE.md"), "@AGENTS.md\n");
   writeFileSync(join(root, ".gitignore"), "copies/\nsettings/\n");
   return file;
+}
+
+const POINTER = `## Software factory
+
+This project is built with a software factory. Its rules, its workflow and what it knows are in \`${FACTORY_FOLDER}/\`: read \`${FACTORY_FOLDER}/AGENTS.md\` before you build or change something.
+`;
+const IMPORT = `@${FACTORY_FOLDER}/AGENTS.md`;
+
+// The project's own AGENTS.md and CLAUDE.md point to its factory's rules:
+// made when there are none, added to the end when they say nothing of it.
+export function pointToFactory(project: string): void {
+  addOnce(join(project, "AGENTS.md"), POINTER, `${FACTORY_FOLDER}/AGENTS.md`);
+  addOnce(
+    join(project, "CLAUDE.md"),
+    `@AGENTS.md\n${IMPORT}\n`,
+    IMPORT,
+    `${IMPORT}\n`,
+  );
+}
+
+function addOnce(file: string, fresh: string, mark: string, more = fresh) {
+  if (!existsSync(file)) {
+    writeFileSync(file, fresh);
+    return;
+  }
+  const text = readFileSync(file, "utf8");
+  if (text.includes(mark)) return;
+  writeFileSync(file, `${text.trimEnd()}\n\n${more}`);
 }
 
 // The company file changed (its tracker, its kits): written back whole.

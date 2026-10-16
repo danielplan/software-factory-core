@@ -5,10 +5,12 @@ import type { Kit } from "@software-factory/core";
 
 import { expoApp } from "./expo-app.ts";
 import { nestjsBackend } from "./nestjs-backend.ts";
+import { otherCode } from "./other-code.ts";
 import { reactWebApp } from "./react-web-app.ts";
 
-export { expoApp, nestjsBackend, reactWebApp };
+export { expoApp, nestjsBackend, otherCode, reactWebApp };
 
 // In the order they are asked to recognise a folder: the phone app before
-// the web app, though each also refuses the other's kind.
-export const allKits: Kit[] = [expoApp, reactWebApp, nestjsBackend];
+// the web app, though each also refuses the other's kind. Other code is the
+// fallback, for what none of them knows.
+export const allKits: Kit[] = [expoApp, reactWebApp, nestjsBackend, otherCode];

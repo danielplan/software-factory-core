@@ -18,7 +18,7 @@ company is here: only what is true for any company.
   EXTENSIONS AND KITS (here, versioned)
        core extensions, on by default: Ideas tab and prototypes,
          GitHub runner, System and Factory tabs
-       add-ons, chosen per company: made-up worlds, voice
+       add-ons, chosen per company: made-up worlds
        kits, one per kind of product: Expo app, React web app, NestJS backend
        │ use only the core's API
   CORE (here)
@@ -40,20 +40,24 @@ companies update.
 
 ```sh
 npm install
-node packages/server/bin/software-factory.ts
+cd ~/code/my-project
+node <this folder>/packages/server/bin/software-factory.ts
 ```
 
-It opens <http://localhost:4300>: the setup page, to start something new or
-bring existing code, then the dashboard (System, Products, Settings). A new
-factory's folder goes in `~/Factories/<company>`; give a folder as the first
-argument to open that factory instead.
+Run it in your project. It opens <http://localhost:4300>: where the project
+has no factory yet, the setup page, where the coach reads the code and sets
+up the factory with you on a canvas; then the dashboard (System, Products,
+Settings). The factory lives in the project, in `factory/`, and the
+project's `AGENTS.md` points to it. Run it anywhere inside the project to
+open its factory; `software-factory new <name>` makes a folder for a new
+idea and sets it up there.
 
 ## What is here so far
 
 | Folder                     | What                                                                                                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/core/`           | Product descriptions, the company file, the extension registry, parts, settings groups, recognising products in existing code, making a factory folder, running Claude Code, working copies |
-| `packages/kits/`           | React web app, NestJS backend and Expo app: recognise, start and create each kind of product, with their rules                                                                              |
+| `packages/kits/`           | React web app, NestJS backend and Expo app: recognise, start and create each kind of product, with their rules; Other code for any other project                                            |
 | `packages/launcher/`       | Starts, watches and stops the parts                                                                                                                                                         |
 | `packages/server/`         | The local web server and the `software-factory` command; the trackers' settings (GitHub board, Jira Cloud)                                                                                  |
 | `packages/dashboard/`      | The web interface: the setup flow and the dashboard                                                                                                                                         |

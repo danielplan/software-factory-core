@@ -12,6 +12,7 @@ import {
 } from "node:http";
 import { extname, join, normalize, sep } from "node:path";
 
+import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { answerTools } from "./coach/setup-tools.ts";
 import { listFolders } from "./folders.ts";
 import { Refused } from "./refused.ts";
@@ -20,6 +21,8 @@ import type { Session } from "./session.ts";
 export const PAGE_HEADER = "x-software-factory";
 // The setup coach's tools, which check the coach's own token instead.
 const COACH_TOOLS = "/api/setup/mcp";
+// A picture from the project that a setup card shows.
+const PICTURE = "/api/setup/picture";
 const HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -55,6 +58,7 @@ export function startServer(options: {
     options.session.coach.serveToolsAt(
       `http://localhost:${String(port)}${COACH_TOOLS}`,
     );
+    options.session.begin();
   });
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
@@ -69,7 +73,8 @@ function routesFor(session: Session): Record<string, Route> {
     "GET /api/folders": (_body, url) =>
       listFolders(url.searchParams.get("path")),
     "POST /api/setup/detect": (body) => session.detect(text(body, "folder")),
-    "POST /api/setup/say": (body) => session.coach.say(text(body, "text")),
+    "POST /api/setup/say": (body) =>
+      session.coach.say(text(body, "text"), optionalText(body, "spokenIn")),
     "POST /api/setup/draft": (body) => {
       session.ownerChangesDraft(
         body as Parameters<Session["ownerChangesDraft"]>[0],
@@ -113,6 +118,8 @@ async function answer(
   } else if (url.pathname === COACH_TOOLS && incoming.method === "POST") {
     const body = await readBody(incoming).catch(() => null);
     await answerTools(incoming, response, context.session.coach, body);
+  } else if (url.pathname === PICTURE) {
+    sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (!url.pathname.startsWith("/api/")) {
     sendFile(response, context.page, url.pathname);
   } else {
@@ -181,6 +188,25 @@ function sendFile(response: ServerResponse, page: string, path: string): void {
   response.end(readFileSync(file));
 }
 
+function sendPicture(
+  response: ServerResponse,
+  session: Session,
+  path: string | null,
+): void {
+  const file = path ? session.setupPicture(path) : null;
+  if (!file || !existsSync(file)) {
+    send(response, 404, { error: "There is no such picture." });
+    return;
+  }
+  response.writeHead(200, {
+    "content-type":
+      PICTURE_TYPES[extname(file).toLowerCase()] ?? "application/octet-stream",
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+  });
+  response.end(readFileSync(file));
+}
+
 function send(response: ServerResponse, status: number, body: unknown): void {
   response.writeHead(status, {
     "content-type": "application/json",
@@ -204,6 +230,11 @@ function text(body: unknown, key: string): string {
   const value = (body as Record<string, unknown> | null)?.[key];
   if (typeof value !== "string") throw new Refused(`Say which ${key}.`);
   return value;
+}
+
+function optionalText(body: unknown, key: string): string | undefined {
+  const value = (body as Record<string, unknown> | null)?.[key];
+  return typeof value === "string" ? value : undefined;
 }
 
 function record(body: unknown, key: string): Record<string, unknown> {

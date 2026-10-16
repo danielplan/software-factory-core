@@ -15,9 +15,12 @@ import {
   createFactoryFolder,
   defineKit,
   detectProducts,
+  findFactory,
   findProducts,
   hasFactory,
   idFrom,
+  pointToFactory,
+  projectOf,
   readCompany,
   saveCompany,
   withFreePorts,
@@ -98,12 +101,7 @@ test("a new factory folder: the company file, the knowledge base, the history an
     readFileSync(join(root, "AGENTS.md"), "utf8"),
     "# Acme's factory\n",
   );
-  for (const file of [
-    "context/index.md",
-    "runs/README.md",
-    "CLAUDE.md",
-    ".gitignore",
-  ])
+  for (const file of ["context/index.md", "runs/README.md", ".gitignore"])
     assert.ok(existsSync(join(root, file)), file);
   assert.throws(
     () =>
@@ -165,5 +163,45 @@ test("a new factory folder: the company file, the knowledge base, the history an
         dependsOn: [],
       }),
     /There is a product "shop"/,
+  );
+});
+
+test("a project's factory: found from anywhere inside the project, and pointed to by its rules", () => {
+  const project = mkdtempSync(join(tmpdir(), "project-"));
+  const inside = join(project, "shop", "src");
+  mkdirSync(inside, { recursive: true });
+  assert.equal(findFactory(inside), null);
+  // Without git, the project is where the command runs; with git, its top.
+  assert.equal(projectOf(inside), inside);
+  mkdirSync(join(project, ".git"));
+  assert.equal(projectOf(inside), project);
+
+  writeFileSync(join(project, "factory.json"), "{}");
+  mkdirSync(join(project, "factory"));
+  writeFileSync(join(project, "factory", "factory.json"), "{}");
+  assert.equal(findFactory(inside), join(project, "factory"));
+
+  // No rules yet: they are made. Rules of its own: the pointer goes at
+  // the end, once.
+  pointToFactory(project);
+  assert.match(
+    readFileSync(join(project, "AGENTS.md"), "utf8"),
+    /^## Software factory\n[\s\S]*`factory\/AGENTS.md`/,
+  );
+  assert.equal(
+    readFileSync(join(project, "CLAUDE.md"), "utf8"),
+    "@AGENTS.md\n@factory/AGENTS.md\n",
+  );
+  const other = mkdtempSync(join(tmpdir(), "project-"));
+  writeFileSync(join(other, "AGENTS.md"), "# Our rules\n\n- Be kind.\n");
+  writeFileSync(join(other, "CLAUDE.md"), "@AGENTS.md\n");
+  pointToFactory(other);
+  pointToFactory(other);
+  const rules = readFileSync(join(other, "AGENTS.md"), "utf8");
+  assert.match(rules, /^# Our rules\n\n- Be kind\.\n\n## Software factory\n/);
+  assert.equal(rules.split("## Software factory").length, 2);
+  assert.equal(
+    readFileSync(join(other, "CLAUDE.md"), "utf8"),
+    "@AGENTS.md\n\n@factory/AGENTS.md\n",
   );
 });

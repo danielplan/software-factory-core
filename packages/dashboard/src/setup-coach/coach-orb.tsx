@@ -5,7 +5,7 @@ export function CoachOrb({ working }: Readonly<{ working: boolean }>) {
   return (
     <span
       aria-hidden
-      className={cn("orb size-10 flex-none", working && "animate-swirl")}
+      className={cn("orb size-7 flex-none", working && "animate-swirl")}
     />
   );
 }

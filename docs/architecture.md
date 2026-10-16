@@ -7,29 +7,48 @@ included, plugs in the same way.
 
 ## The layers
 
-| Layer                      | Who owns it                              | What                                                                                                                          | Where                                                         |
-| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base              | `packages/core`, `packages/method`, `packages/knowledge-base` |
-| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, GitHub runner, System and Factory tabs | to come                                                       |
-| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds, voice                                                                                     | to come                                                       |
-| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, NestJS backend                                                              | to come                                                       |
-| **Products and knowledge** | the company                              | its apps and services, `context/`, `runs/`, its own rules                                                                     | the company's repository                                      |
+| Layer                      | Who owns it                              | What                                                                                                                          | Where                                                                                         |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice       | `packages/core`, `packages/method`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
+| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, GitHub runner, System and Factory tabs | to come                                                                                       |
+| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                            | to come                                                                                       |
+| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, NestJS backend                                                              | to come                                                                                       |
+| **Products and knowledge** | the company                              | its apps and services, `context/`, `runs/`, its own rules                                                                     | the company's repository                                                                      |
 
 The rule for any piece: if it would be true for a different company, it is
 core, an extension or a kit; otherwise it is the company's.
 
 ## Setting up a factory
 
-One command (`npx software-factory`, to come) opens the dashboard, which
-starts with setting up. **The setup coach** talks with the owner in a chat
-beside a map of the company that builds up while they talk: the company,
-then its products, joined by what each needs. It is Claude Code on this
-computer, signed in with the owner's own account, following the method's
-`packages/method/guides/setup-coach.md`. It only reads code (never `.env`
-files) and draws on the map with its own tools over MCP; the owner can change
-any card by hand, and **Make the factory** writes the folder from the map.
-A plain form is there for whoever prefers it. Either way, there are two kinds
-of start:
+One command, run in the project (`npx software-factory`, to come), opens
+the dashboard in the browser. Where the project has no factory yet, it
+starts with setting up: one conversation and one canvas. The code tells
+the factory its products; what nobody has written down yet is the context
+around them, so setup is where the factory writes its first context. In a
+project with code, **the setup coach** reads the code and its git history
+straight away, confirms the products in a sentence, and guesses what it
+can: what the project is, how real it is, what must never happen, the
+people, its words, the system in plain words, and what is still open. It
+draws them as one picture: small cards framed in areas (an overview and
+the main workflows), joined by arrows, with rules, questions and pictures
+beside the steps they belong to, each a guess until the owner agrees; then it asks only where a guess is weak. In
+a new project (`software-factory new <name>`), it asks what the owner wants
+to build and fills the same cards from the answers. The coach is Claude
+Code on this computer, signed in with the owner's own account, following
+the method's `packages/method/guides/setup-coach.md`. It only reads code
+(never `.env` files) and writes the draft with its own tools over MCP. The
+owner moves or removes cards, and changes one by clicking it and telling
+the coach. The coach also decides what the factory needs installed, from
+a closed list (tools on this computer such as Git and the GitHub CLI, and
+add-ons; `packages/server/src/installables.ts`), and proposes each with why.
+**Make the factory** writes the folder, the products and the context page
+(`context/explanation/the-project.md`), and installs only what the owner
+approved. The owner can talk instead of typing: voice is part of
+the core (`packages/dashboard/src/voice/`). A speech model runs in the
+browser (Whisper) and writes their words down; the coach's answer is read
+out loud as it is written (Piper, also in the browser), and saying "stop"
+interrupts it. Nothing said leaves the computer except the written words
+sent to the coach. There are two kinds of start:
 
 - **Start something new** (greenfield): the company (the coach interviews the
   owner and writes the first knowledge pages), the first product (its kit
@@ -44,10 +63,15 @@ of start:
   ideas and plans first, then builds as pull requests checked by the
   company's existing CI.
 
-**The factory's files stay on this computer**, in a folder of their own,
-outside the code repositories: the company file, the product descriptions,
-the knowledge base, the history and the agents' working copies. A backup to a
-private repository is an option in the settings, not the default.
+**The factory lives in the project**, in its `factory/` folder, kept in the
+same repository as the code: the company file, the product descriptions,
+the knowledge base and the history change with the code they describe, in
+the same commits and pull requests, and every copy of the code has them.
+The project's own `AGENTS.md` (and `CLAUDE.md`) point to the factory's
+rules, so any agent working in the code finds them. What must not be shared
+stays out of git (`factory/.gitignore`): the settings with their secrets
+(`settings/`) and the agents' working copies (`copies/`). The command finds
+the factory from anywhere inside the project.
 
 **Where work is tracked** is chosen in setup: a GitHub board, **Jira Cloud**,
 or none yet (the Ideas tab only). Both trackers ship with the core runner. In
@@ -62,20 +86,23 @@ hosts later.
 ## A company's factory folder
 
 ```text
-acme/                    the company's factory, on this computer
-├─ factory.json          the company: its products, its kits and add-ons
-├─ apps/shop/
-│  ├─ product.json       the product described: kind, users, commands
-│  └─ BLUEPRINT.md       its structure, promises and checks
-├─ services/orders/…
-├─ context/              its knowledge base (from the template)
-└─ runs/                 its history
+acme/                    the project, one repository
+├─ AGENTS.md             the project's rules, pointing to factory/AGENTS.md
+├─ shop/                 a product's code
+├─ orders/               another product's code
+└─ factory/              its factory
+   ├─ AGENTS.md          the agents' ground rules and workflow
+   ├─ factory.json       the company: its kits and add-ons
+   ├─ products/shop/
+   │  ├─ product.json    the product described: kind, users, commands, code
+   │  └─ BLUEPRINT.md    its structure, promises and checks
+   ├─ context/           its knowledge base (from the template)
+   ├─ runs/              its history
+   └─ settings/, copies/ secrets and working copies, not in git
 ```
 
-Today the example company keeps each product's description in the product's
-folder. Next, the descriptions move into the factory folder
-(`products/<id>.json`), each pointing at the product's code by path or git
-address, so an existing codebase needs nothing added to it.
+Each product's description points at its code with a path from it
+(`../../../shop`), so the project can move as a whole.
 
 The core never names a product. It reads each product's description (see
 `productSchema` in `packages/core/src/products/product.ts`) and the company

@@ -17,6 +17,7 @@ export const ACME = join(
   "..",
   "examples",
   "acme",
+  "factory",
 );
 
 const portFrom = (product: Product) =>

@@ -1,15 +1,21 @@
 // A factory server for the tests, on a free port, with a stand-in kit for
-// web apps and, for the setup coach, a pretend Claude Code.
+// web apps, a stand-in add-on, stand-in tools to install and, for the setup
+// coach, a pretend Claude Code.
 
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { type Claude, defineKit } from "@software-factory/core";
+import {
+  type Claude,
+  defineExtension,
+  defineKit,
+} from "@software-factory/core";
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/method";
 
+import type { Installable } from "../src/installables.ts";
 import { PAGE_HEADER, startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
 import { trackers } from "../src/trackers.ts";
@@ -35,20 +41,50 @@ export const web = defineKit({
   ],
 });
 
+const voice = defineExtension({
+  id: "voice",
+  name: "Voice",
+  about: "Talk with the coach out loud.",
+});
+
+// A tool to install: one that installs (a command that works), one that is
+// here already, and one the factory cannot install here.
+const tool = (id: string, more: Partial<Installable>): Installable => ({
+  id,
+  name: id.charAt(0).toUpperCase() + id.slice(1),
+  about: `The ${id}.`,
+  kind: "tool",
+  present: () => false,
+  steps: [[process.execPath, "-e", ""]],
+  how: `Get the ${id} from the shop.`,
+  ...more,
+});
+export const tools = [
+  tool("hammer", {}),
+  tool("saw", { present: () => true }),
+  tool("drill", { steps: null }),
+];
+
 export async function stage(
   claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) },
+  // The project's code before the factory starts; none by default.
+  code: Record<string, string> = {},
 ) {
   const home = mkdtempSync(join(tmpdir(), "setup-"));
+  const project = join(home, "project");
+  mkdirSync(project);
+  for (const [file, text] of Object.entries(code))
+    writeFileSync(join(project, file), text);
   const session = new Session({
-    root: null,
-    factoriesFolder: join(home, "Factories"),
-    available: { extensions: [trackers], kits: [web] },
+    project,
+    available: { extensions: [trackers, voice], kits: [web] },
     templates: {
       knowledgeBase: templateFolder,
       agents: join(templatesFolder, "AGENTS.md"),
     },
     onChange: () => {},
-    coach: { claude, guide: "Help set up.", home },
+    coach: { claude, guide: "Help set up." },
+    tools,
   });
   const page = join(home, "page");
   mkdirSync(page);
@@ -65,5 +101,5 @@ export async function stage(
       headers: header ? { [PAGE_HEADER]: "1" } : {},
       body: JSON.stringify(body),
     });
-  return { home, session, server, base, post };
+  return { home, project, session, server, base, post };
 }

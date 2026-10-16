@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 
 import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
+import { NavRail, type Tab, TABS } from "@/components/nav-rail";
 import { StatusLight } from "@/components/status-light";
-import { TopBar } from "@/components/top-bar";
-import { cn } from "@/lib/utils";
 import { SetupPage } from "@/setup-coach/setup-page";
 
 import { ProductsTab } from "./products-tab";
@@ -12,14 +11,6 @@ import { SettingsTab } from "./settings-tab";
 import { SystemTab } from "./system-tab";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
-
-const TABS = ["system", "products", "settings"] as const;
-type Tab = (typeof TABS)[number];
-const NAMES: Record<Tab, string> = {
-  system: "System",
-  products: "Products",
-  settings: "Settings",
-};
 
 // The tab in the address (#products), so a reload stays on it.
 function tabFromHash(): Tab {
@@ -41,100 +32,75 @@ function useTab(): Tab {
   return tab;
 }
 
-// The dashboard, always: before there is a company, the System tab sets it
-// up with the coach and the other tabs wait for it.
+// The dashboard: before there is a company, only the setup page; once there
+// is a factory, its tabs.
 export function Dashboard({ state }: Readonly<{ state: State }>) {
+  // Setting up fills the window, with nothing but the coach and the
+  // canvas: the tabs come once there is a factory.
+  if (state.mode === "setup") return <SetupPage state={state} />;
+  return <FactoryDashboard state={state} />;
+}
+
+function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const tab = useTab();
-  const factory = state.mode === "factory" ? state : null;
   return (
-    <div className="grid gap-5">
-      <TopBar
-        company={factory?.company.name ?? ""}
-        tabs={<Tabs current={tab} />}
-        status={factory && <Overall state={factory} />}
-      />
-      {factory && factory.problems.length > 0 && (
+    <div className="grid gap-5 max-sm:pt-14 sm:pl-[76px]">
+      <NavRail current={tab} status={<Overall state={state} light />} />
+      <header className="flex flex-wrap items-baseline justify-between gap-3 px-1">
+        <h1 className="text-2xl font-medium tracking-[-0.02em]">
+          {state.company.name}
+        </h1>
+        <span className="inline-flex items-center gap-2 text-[13px] text-muted-foreground">
+          <Overall state={state} />
+        </span>
+      </header>
+      {state.problems.length > 0 && (
         <ProblemBox
           title="Something in the factory's files does not fit"
-          text={factory.problems.join(" · ")}
+          text={state.problems.join(" · ")}
         />
       )}
-      <TabContent state={state} tab={tab} />
+      {tab === "products" && <ProductsTab state={state} />}
+      {tab === "settings" && <SettingsTab state={state} />}
+      {tab === "system" && <SystemTab state={state} />}
     </div>
   );
 }
 
-function TabContent({ state, tab }: Readonly<{ state: State; tab: Tab }>) {
-  if (state.mode === "setup")
-    return tab === "system" ? <SetupPage state={state} /> : <CreateFirst />;
-  if (tab === "products") return <ProductsTab state={state} />;
-  if (tab === "settings") return <SettingsTab state={state} />;
-  return <SystemTab state={state} />;
-}
-
-function CreateFirst() {
-  return (
-    <div className="rounded-3xl bg-card p-6 text-muted-foreground">
-      First give the factory your company's name on the{" "}
-      <a
-        href="#system"
-        className="text-foreground underline underline-offset-2"
-      >
-        System
-      </a>{" "}
-      tab.
-    </div>
-  );
-}
-
-function Tabs({ current }: Readonly<{ current: Tab }>) {
-  return (
-    <nav
-      className="flex flex-wrap gap-1 rounded-[14px] bg-surface-2 p-1"
-      aria-label="Tabs"
-    >
-      {TABS.map((name) => (
-        <a
-          key={name}
-          href={`#${name}`}
-          aria-current={current === name ? "page" : undefined}
-          className={cn(
-            "inline-flex min-h-10 items-center rounded-[10px] px-4 text-sm text-muted-foreground hover:text-foreground",
-            current === name && "bg-card text-foreground shadow-soft",
-          )}
-        >
-          {NAMES[name]}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
-// The whole factory in a few words, at the right of the top bar.
-function Overall({ state }: Readonly<{ state: FactoryState }>) {
-  const parts = state.parts.filter((part) => part.light !== "none");
-  const running = parts.filter((part) => part.light === "running").length;
-  if (parts.some((part) => part.light === "problem"))
+// The whole factory in a few words, beside its name; only its light (with
+// the words to hover) on the rail.
+function Overall({
+  state,
+  light = false,
+}: Readonly<{ state: FactoryState; light?: boolean }>) {
+  const { lit, words } = overallOf(state);
+  if (light)
     return (
-      <>
-        <StatusLight light="problem" /> Something needs you
-      </>
-    );
-  if (parts.some((part) => part.light === "starting"))
-    return (
-      <>
-        <StatusLight light="starting" /> Starting
-      </>
-    );
-  if (parts.length > 0 && running === parts.length)
-    return (
-      <>
-        <StatusLight light="running" /> All running
-      </>
+      <span title={words} aria-label={words} className="flex">
+        <StatusLight light={lit} />
+      </span>
     );
   return (
     <>
-      <StatusLight light="stopped" /> {running} of {parts.length} running
+      <StatusLight light={lit} /> {words}
     </>
   );
+}
+
+function overallOf(state: FactoryState): {
+  lit: "problem" | "starting" | "running" | "stopped";
+  words: string;
+} {
+  const parts = state.parts.filter((part) => part.light !== "none");
+  const running = parts.filter((part) => part.light === "running").length;
+  if (parts.some((part) => part.light === "problem"))
+    return { lit: "problem", words: "Something needs you" };
+  if (parts.some((part) => part.light === "starting"))
+    return { lit: "starting", words: "Starting" };
+  if (parts.length > 0 && running === parts.length)
+    return { lit: "running", words: "All running" };
+  return {
+    lit: "stopped",
+    words: `${String(running)} of ${String(parts.length)} running`,
+  };
 }

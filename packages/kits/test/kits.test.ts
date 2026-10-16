@@ -1,22 +1,37 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import {
+  detectProducts,
   loadFactory,
   partSchema,
   type Kit,
   type Product,
 } from "@software-factory/core";
 
-import { allKits, expoApp, nestjsBackend, reactWebApp } from "../src/index.ts";
+import {
+  allKits,
+  expoApp,
+  nestjsBackend,
+  otherCode,
+  reactWebApp,
+} from "../src/index.ts";
 
 // The kits that ship with the core: each recognises its own kind of product
 // in existing code and no other, runs it, and makes a new one.
 
-const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
+const ACME = join(
+  import.meta.dirname,
+  "..",
+  "..",
+  "..",
+  "examples",
+  "acme",
+  "factory",
+);
 
 // A folder with this package.json in it (or none).
 function folderWith(file?: Record<string, unknown> | string): string {
@@ -50,8 +65,12 @@ const phone = {
   devDependencies: { "@vitejs/plugin-react": "5.0.0" },
 };
 
+// The kits for one kind of product each; Other code takes any project
+// (tested below).
+const specific = allKits.filter((kit) => !kit.fallback);
+
 const recognisedBy = (folder: string) =>
-  allKits.filter((kit) => kit.detect(folder) !== null).map((kit) => kit.id);
+  specific.filter((kit) => kit.detect(folder) !== null).map((kit) => kit.id);
 
 test("each kit recognises its own kind and no other", () => {
   assert.deepEqual(recognisedBy(folderWith(web)), ["react-web-app"]);
@@ -127,7 +146,7 @@ function productOf(kit: Kit, fields: Partial<Product> = {}): Product {
 }
 
 test("each kit runs a product as one valid part, on the product's port or its own", () => {
-  for (const kit of allKits) {
+  for (const kit of specific) {
     const [part, ...more] = kit.partsFor(
       productOf(kit, { dependsOn: ["api"] }),
     );
@@ -235,4 +254,91 @@ test("each kit's rules are there", () => {
   const root = join(import.meta.dirname, "..");
   for (const kit of allKits)
     for (const file of kit.rules) assert.ok(existsSync(join(root, file)), file);
+});
+
+// A folder with these files in it, each with its text.
+function folderWithFiles(files: Record<string, string>): string {
+  const folder = mkdtempSync(join(tmpdir(), "code-"));
+  for (const [name, text] of Object.entries(files)) {
+    const path = join(folder, name);
+    mkdirSync(join(path, ".."), { recursive: true });
+    writeFileSync(path, text);
+  }
+  return folder;
+}
+
+test("other code: any project, with the commands its files tell", () => {
+  const python = folderWithFiles({
+    "pyproject.toml": "",
+    "tests/test_x.py": "",
+  });
+  assert.deepEqual(otherCode.detect(python)?.commands, { verify: "pytest" });
+  assert.deepEqual(
+    otherCode.detect(folderWithFiles({ "requirements.txt": "" }))?.commands,
+    {},
+  );
+  assert.deepEqual(
+    otherCode.detect(folderWithFiles({ "go.mod": "", "main.go": "" }))
+      ?.commands,
+    { start: "go run .", verify: "go test ./..." },
+  );
+  assert.deepEqual(
+    otherCode.detect(folderWithFiles({ "go.mod": "" }))?.commands,
+    { verify: "go test ./..." },
+  );
+  assert.deepEqual(
+    otherCode.detect(folderWithFiles({ "Cargo.toml": "" }))?.commands,
+    { start: "cargo run", verify: "cargo test" },
+  );
+  assert.deepEqual(
+    otherCode.detect(folderWithFiles({ "index.html": "" }))?.commands,
+    {},
+  );
+  const site = otherCode.detect(
+    folderWith({
+      name: "my-site",
+      scripts: { start: "next start", test: "x" },
+    }),
+  );
+  assert.ok(site);
+  assert.equal(site.name, "My site");
+  assert.deepEqual(site.commands, { start: "npm start", verify: "npm test" });
+  assert.deepEqual(
+    otherCode.detect(folderWith({ scripts: { dev: "next dev" } }))?.commands,
+    { start: "npm run dev" },
+  );
+  assert.equal(otherCode.detect(folderWith()), null);
+  assert.equal(otherCode.create, null);
+});
+
+test("other code runs its start command from its button, or not at all", () => {
+  const product = productOf(otherCode, {
+    commands: { start: "npm  run dev" },
+  });
+  const [part] = otherCode.partsFor(product);
+  assert.ok(part);
+  assert.deepEqual(part.run, ["npm", "run", "dev"]);
+  assert.equal(part.start, "button");
+  assert.ok(partSchema.safeParse(part).success);
+  assert.deepEqual(otherCode.partsFor({ ...product, commands: {} }), []);
+});
+
+test("a project's own apps win over the project as a whole", () => {
+  const monorepo = folderWithFiles({
+    "package.json": JSON.stringify({ name: "everything" }),
+    "apps/shop/package.json": JSON.stringify(web),
+    "tools/script/go.mod": "",
+  });
+  assert.deepEqual(
+    detectProducts(monorepo, allKits).map((c) => [c.id, c.kind]),
+    [
+      ["shop", "react-web-app"],
+      ["script", "other-code"],
+    ],
+  );
+  const alone = folderWithFiles({ "pyproject.toml": "" });
+  assert.deepEqual(
+    detectProducts(alone, allKits).map((c) => c.kind),
+    ["other-code"],
+  );
 });

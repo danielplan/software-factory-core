@@ -1,7 +1,7 @@
-// The factory this server shows: none yet (the setup flow), or one factory
-// folder with its products, its parts running through the launcher and its
-// settings. Setting up writes the folder, makes the new products with their
-// kits' starters, and opens it.
+// The factory this server shows: the project's, in its factory folder, or
+// none yet (the setup flow, for that project), with its products, its parts running through the launcher and its
+// settings. Setting up writes the folder, installs what the owner approved,
+// makes the new products with their kits' starters, and opens it.
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -12,6 +12,7 @@ import {
   checkChanges,
   detectProducts,
   type Factory,
+  FACTORY_FOLDER,
   groupView,
   hasFactory,
   loadFactory,
@@ -32,20 +33,26 @@ import type {
   ProductView,
   State,
 } from "./api.ts";
+import { approved } from "./coach/canvas-things.ts";
+import { shownPicture } from "./coach/pictures.ts";
 import { SetupCoach } from "./coach/setup-coach.ts";
 import { createProducts } from "./create-products.ts";
+import { install } from "./install.ts";
+import { addOns, type Installable } from "./installables.ts";
 import { Refused } from "./refused.ts";
-import { writeCompany, writeProducts } from "./write-factory.ts";
+import { writeCompany, writeContext, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
-  // The factory folder to open; none, or one without a factory: setup.
-  root: string | null;
-  factoriesFolder: string;
+  // The project: its factory folder opens, or, without one, setup.
+  project: string;
   available: Available;
   templates: Templates;
   onChange: () => void;
   // The setup coach's Claude Code and its instructions.
-  coach: { claude: Claude; guide: string; home?: string };
+  coach: { claude: Claude; guide: string };
+  // The tools on this computer the coach may propose to install
+  // (installables.ts: computerTools); the add-ons come from `available`.
+  tools: Installable[];
 };
 
 export class Session {
@@ -55,16 +62,27 @@ export class Session {
   private launcher: Launcher | null = null;
   private stopListening: (() => void) | null = null;
   private jobs: Job[] = [];
+  // Jobs finished before the ones running now, still shown.
+  private earlierJobs: Job[] = [];
   readonly coach: SetupCoach;
 
   constructor(options: SessionOptions) {
     this.options = options;
     this.coach = new SetupCoach({
       ...options.coach,
+      project: options.project,
       kits: options.available.kits,
+      installables: [...options.tools, ...addOns(options.available.extensions)],
       onChange: options.onChange,
     });
-    if (options.root && hasFactory(options.root)) this.open(options.root);
+    const root = join(options.project, FACTORY_FOLDER);
+    if (hasFactory(root)) this.open(root);
+  }
+
+  // Once the server listens: without a factory, the coach starts reading
+  // the project's code.
+  begin(): void {
+    if (!this.root) void this.coach.begin();
   }
 
   state(): State {
@@ -72,7 +90,7 @@ export class Session {
     if (!this.root || !this.factory)
       return {
         mode: "setup",
-        factoriesFolder: this.options.factoriesFolder,
+        project: this.options.project,
         kits,
         jobs: this.jobs,
         coach: this.coach.view(),
@@ -80,6 +98,7 @@ export class Session {
     const root = this.root;
     return {
       mode: "factory",
+      project: this.options.project,
       root,
       company: this.factory.company,
       products: this.factory.products.map(productView),
@@ -96,30 +115,54 @@ export class Session {
     return { candidates: detectProducts(folder, this.options.available.kits) };
   }
 
-  // The first step: the company and its factory folder, which opens with
-  // no products yet.
+  // The first step: the project's factory folder, which opens with no
+  // products yet.
   createCompany(request: CreateCompany): string {
     if (this.root) throw new Refused("This factory has its company already.");
-    const root = writeCompany(request, this.place());
+    const root = writeCompany(
+      request,
+      this.options.project,
+      this.options.templates,
+    );
     this.open(root);
     return root;
   }
 
-  // The setup coach's map made into the factory: the company, then its
-  // products (new ones in the factory's code folder).
+  // The setup coach's canvas made into the factory: the company, what the
+  // owner approved to install, then its products (new ones in a folder of
+  // their own in the project).
   async makeFromDraft(): Promise<void> {
-    const { company, products } = this.coach.keeper.draft;
+    const { draft } = this.coach.keeper;
+    const { company, products } = draft;
     if (this.coach.view().working)
       throw new Refused("Wait until the coach has answered.");
     const root = this.createCompany(company);
+    writeContext(root, draft);
+    const chosen = new Set(approved(draft));
+    await install(
+      root,
+      this.coach.keeper.installables.filter((i) => chosen.has(i.id)),
+      (jobs) => {
+        this.showJobs(jobs);
+      },
+    );
+    this.reload();
+    this.earlierJobs = this.jobs;
     if (products.length === 0) return;
     await this.addProducts({
       products: products.map((product) =>
         product.isNew
-          ? { ...product, folder: join(root, "code", product.id) }
+          ? { ...product, folder: join(this.options.project, product.id) }
           : product,
       ),
     });
+  }
+
+  // The file of a picture a setup card shows (pictures.ts); none for any
+  // other path.
+  setupPicture(path: string): string | null {
+    if (this.root) return null;
+    return shownPicture(this.options.project, this.coach.keeper.draft, path);
   }
 
   ownerChangesDraft(change: ChangeDraft): void {
@@ -139,8 +182,7 @@ export class Session {
       request.products.filter((p) => p.isNew),
       this.options.available.kits,
       (jobs) => {
-        this.jobs = jobs;
-        this.options.onChange();
+        this.showJobs(jobs);
       },
     );
     const launcher = this.launcher;
@@ -205,12 +247,9 @@ export class Session {
     return this.root;
   }
 
-  private place() {
-    return {
-      factoriesFolder: this.options.factoriesFolder,
-      kits: this.options.available.kits,
-      templates: this.options.templates,
-    };
+  private showJobs(jobs: Job[]): void {
+    this.jobs = [...this.earlierJobs, ...jobs];
+    this.options.onChange();
   }
 
   // The factory's files changed: read again; what runs keeps running.
@@ -250,5 +289,3 @@ function productView(product: Factory["products"][number]): ProductView {
     users: product.users,
   };
 }
-
-export const defaultFactoriesFolder = (home: string) => join(home, "Factories");

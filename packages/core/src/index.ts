@@ -56,6 +56,10 @@ export {
   addProduct,
   createFactoryFolder,
   hasFactory,
+  FACTORY_FOLDER,
+  findFactory,
+  pointToFactory,
+  projectOf,
   saveCompany,
   type Templates,
 } from "./setup/factory-folder.ts";

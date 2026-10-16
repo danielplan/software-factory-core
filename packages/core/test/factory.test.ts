@@ -36,7 +36,7 @@ test("the example company: its products, their kits, the parts and settings they
     verify: "npm run verify",
     start: "npm run start:dev",
   });
-  assert.equal(orders.folder, join(ACME, "code", "orders"));
+  assert.equal(orders.folder, join(ACME, "..", "orders"));
   // A part per product (from its kit), each after what it needs, then the
   // core extensions' parts.
   assert.deepEqual(

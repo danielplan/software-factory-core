@@ -41,6 +41,11 @@
   --shadow-big: 0 30px 60px -30px rgb(40 52 90 / 0.35);
   --shadow-soft: 0 1px 3px rgb(27 31 42 / 0.08);
   --radius: 0.625rem;
+  /* The factory's own gradient, from the coach's orb: the start prompt's
+     ring and the setup page's glow (deeper in dark mode). */
+  --gradient-1: #bfe9f7;
+  --gradient-2: #c7cbfb;
+  --gradient-3: #f8cfe0;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -78,6 +83,9 @@
     --glow-c: rgb(96 116 214 / 0.14);
     --glow-base: #1a1f28;
     --shadow-big: 0 30px 60px -30px rgb(0 0 0 / 0.6);
+    --gradient-1: #2b5a6b;
+    --gradient-2: #3b3f7a;
+    --gradient-3: #6b3550;
     --shadow-soft: 0 1px 3px rgb(0 0 0 / 0.4);
     color-scheme: dark;
   }
@@ -135,6 +143,38 @@
       transform: translateY(8px) scale(0.96);
     }
   }
+  /* The coach's conversation slides in at the side after the first answer. */
+  --animate-dock: dock 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  @keyframes dock {
+    from {
+      opacity: 0;
+      transform: translateX(-40%) scale(0.96);
+    }
+  }
+  /* The voice's orb (voice/voice-orb.tsx): getting ready, writing down,
+     speaking. Listening follows the voice itself; thinking, it swirls. */
+  --animate-orb-wait: orb-wait 1.8s ease-in-out infinite;
+  --animate-orb-ripple: orb-ripple 1.2s ease-out infinite;
+  --animate-orb-talk: orb-talk 0.9s ease-in-out infinite;
+  @keyframes orb-wait {
+    50% {
+      opacity: 0.35;
+      transform: scale(0.9);
+    }
+  }
+  @keyframes orb-ripple {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, #c7cbfb 60%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 18px transparent;
+    }
+  }
+  @keyframes orb-talk {
+    50% {
+      transform: scale(1.12);
+    }
+  }
   /* The coach's orb turns slowly while it thinks. */
   --animate-swirl: swirl 3s linear infinite;
   @keyframes swirl {
@@ -159,12 +199,6 @@
     var(--card);
 }
 
-/* The setup map: a light board with a dot grid. */
-@utility dotted-board {
-  background-color: var(--surface);
-  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
 /* The coach's orb: the pastel glows, blurred. */
 @utility orb {
   border-radius: 999px;
@@ -173,6 +207,39 @@
     radial-gradient(circle at 35% 30%, #bfe9f7 0, transparent 60%),
     radial-gradient(circle at 70% 70%, #c7cbfb 0, transparent 65%),
     radial-gradient(circle at 30% 80%, #f8cfe0 0, transparent 60%);
+}
+/* The gradient as a thin ring around a white card (the start prompt). */
+@utility glow-ring {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(
+        120deg,
+        var(--gradient-1),
+        var(--gradient-2),
+        var(--gradient-3)
+      )
+      border-box;
+}
+/* The gradient, faint, filling the setup page behind the canvas. */
+@utility glow-page {
+  background:
+    radial-gradient(
+      ellipse at 12% 8%,
+      color-mix(in srgb, var(--gradient-1) 45%, transparent) 0,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 88% 18%,
+      color-mix(in srgb, var(--gradient-2) 40%, transparent) 0,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      color-mix(in srgb, var(--gradient-3) 40%, transparent) 0,
+      transparent 55%
+    ),
+    var(--surface);
 }
 
 /* Element rules sit in the base layer, so Tailwind classes win over them. */

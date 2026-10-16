@@ -27,7 +27,8 @@
       "project": ["src/**/*.ts", "bin/**/*.ts", "test/**/*.ts"],
     },
     "packages/dashboard": {
-      "project": ["src/**/*.{ts,tsx}"],
+      "entry": ["test/**/*.ts"],
+      "project": ["src/**/*.{ts,tsx}", "test/**/*.ts"],
     },
   },
   "ignoreExportsUsedInFile": true,

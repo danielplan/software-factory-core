@@ -36,14 +36,16 @@ export type Job = {
 export type State =
   | {
       mode: "setup";
-      // Where a new factory folder goes when nothing else is said.
-      factoriesFolder: string;
+      // The project being set up; its factory goes in its factory folder.
+      project: string;
       kits: KitView[];
       jobs: Job[];
       coach: CoachView;
     }
   | {
       mode: "factory";
+      // The project, and its factory folder in it.
+      project: string;
       root: string;
       company: Company;
       products: ProductView[];
@@ -81,17 +83,122 @@ export type SetupProduct = {
   blueprint?: string;
 };
 
-// The company as the setup coach drafts it while the owner talks: shown as
-// a map that builds up, and made into the factory when the owner says so.
-// A new product's folder is empty until then (it goes in the factory's
-// code folder).
+// The project as the setup coach drafts it: the code tells it the
+// products, so what it builds with the owner is the context around them,
+// shown on a canvas and written into the knowledge base when the factory
+// is made. The products are confirmed in the conversation, not drawn; a new
+// product's folder is empty until the factory is made (it goes in the
+// project). Each thing is a sketch until the owner agrees to it
+// (`settled`).
 export type Draft = {
-  company: { name: string; about: string };
+  company: { name: string; about: string; settled: boolean };
   products: (SetupProduct & {
     users: { who: string; does: string }[];
     dependsOn: string[];
+    settled: boolean;
   })[];
+  // The context around the products, as cards in areas, and what the
+  // coach proposes to install.
+  things: Thing[];
+  // Arrows from card to card (steps in order, what leads to what).
+  links: { id: string; from: string; to: string; label: string }[];
+  // What the coach points the owner to: cards by id and areas by name. The
+  // canvas moves there each time it is set (n counts the times).
+  focus: { ids: string[]; areas: string[]; n: number };
+  // Where the owner put a thing by hand; the others are arranged.
+  places: Record<string, { x: number; y: number }>;
 };
+
+// A card the coach writes on the canvas: a title and short items, in an
+// area it chooses. An item is a term and what it means, or a line on its
+// own; a guess from the code is not confirmed until the owner agrees.
+// The icons a card or an item can show: everyday things, not technology.
+export const ICONS = [
+  "person",
+  "people",
+  "company",
+  "shop",
+  "home",
+  "work",
+  "truck",
+  "car",
+  "ship",
+  "package",
+  "cart",
+  "fuel",
+  "energy",
+  "battery",
+  "sun",
+  "leaf",
+  "water",
+  "phone-app",
+  "screen",
+  "server",
+  "data",
+  "world",
+  "languages",
+  "place",
+  "route",
+  "calendar",
+  "time",
+  "payment",
+  "money",
+  "bill",
+  "alert",
+  "mail",
+  "chat",
+  "call",
+  "safe",
+  "private",
+  "warning",
+  "never",
+  "done",
+  "question",
+  "see",
+  "tool",
+  "care",
+  "health",
+  "star",
+  "goal",
+  "try",
+  "idea",
+  "learn",
+  "growth",
+  "settings",
+  "picture",
+  "document",
+] as const;
+export type IconName = (typeof ICONS)[number];
+
+// A card the coach writes on the canvas, in an area it chooses: a short
+// title, a line of text if needed, and an icon; or a picture from the
+// project with its title as the caption. A rule (what must never happen)
+// or a question (still open) is marked as one, beside what it is about. A
+// guess from the code is not confirmed until the owner agrees.
+export type Thing =
+  | {
+      id: string;
+      kind: "card";
+      area: string;
+      title: string;
+      text?: string;
+      icon?: IconName;
+      // A picture from the project, by its path inside it.
+      picture?: string;
+      tone?: "rule" | "question";
+      confirmed: boolean;
+    }
+  | {
+      id: string;
+      kind: "install";
+      // What is installed: an id from the installables (installables.ts).
+      what: string;
+      name: string;
+      about: string;
+      why: string;
+      // The owner's answer; installed with the factory when approved.
+      answer: "asked" | "approved" | "declined";
+    };
 
 export type CoachMessage = { from: "coach" | "owner"; text: string };
 
@@ -102,20 +209,22 @@ export type CoachView = {
   writing: string | null;
   activity: string | null;
   working: boolean;
+  // A turn was asked for: the canvas is shown.
+  started: boolean;
   problem: string | null;
   draft: Draft;
 };
 
-// The owner's own change to the draft: the company, one product, or a
-// product taken off.
+// The owner's own change to the canvas: a thing taken off, moved, or an
+// install answered. What a thing says is changed by talking to the coach.
 export type ChangeDraft =
-  | { company: { name?: string; about?: string } }
-  | { product: { id: string; name?: string; about?: string } }
-  | { remove: string };
+  | { remove: string }
+  | { move: { id: string; x: number; y: number } }
+  | { install: { id: string; answer: "approved" | "declined" } };
 
 // Setting up as part of the dashboard, one step at a time: the company
 // first (its factory folder), then products whenever, then the tracker.
-export type CreateCompany = { name: string; about: string; folder?: string };
+export type CreateCompany = { name: string; about: string };
 
 export type AddProducts = { products: SetupProduct[] };
 

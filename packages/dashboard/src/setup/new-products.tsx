@@ -11,18 +11,19 @@ import { Field } from "@/components/field";
 import { freeId, freePort, inside } from "./draft";
 
 // Something new: the products to make, each of a kind a kit can make, with
-// ids and ports no product has yet (`existing` are the factory's own).
+// ids and ports no product has yet (`existing` are the factory's own),
+// each in a folder of its own in the project.
 export function NewProducts({
   kits,
   products,
   existing,
-  factory,
+  project,
   onChange,
 }: Readonly<{
   kits: KitView[];
   products: SetupProduct[];
   existing: { id: string; port: number | null }[];
-  factory: string;
+  project: string;
   onChange: (products: SetupProduct[]) => void;
 }>) {
   const makers = kits.filter((kit) => kit.canCreate);
@@ -37,7 +38,7 @@ export function NewProducts({
         id,
         name: name.trim(),
         kind,
-        folder: inside(factory, "code", id),
+        folder: inside(project, id),
         about: "",
         port: freePort(kind, taken),
         isNew: true,

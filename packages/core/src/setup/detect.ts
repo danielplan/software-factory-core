@@ -21,14 +21,32 @@ const DEPTH = 3;
 
 // The products found under `folder`, each with a free id and port. A
 // folder a kit recognises is not looked into further (a product's own
-// subfolders are part of it).
+// subfolders are part of it). A fallback kit only takes a folder in which
+// nothing was found below, so a project's own apps win over the project
+// as a whole.
 export function detectProducts(folder: string, kits: Kit[]): Candidate[] {
-  const found: Candidate[] = [];
-  const look = (path: string, depth: number): void => {
-    const kit = kits.find((k) => k.detect(path) !== null);
-    const detected = kit?.detect(path);
-    if (kit && detected) {
-      found.push({
+  const specific = kits.filter((k) => !k.fallback);
+  const fallbacks = kits.filter((k) => k.fallback);
+  const look = (path: string, depth: number): Candidate[] => {
+    const own = candidateIn(path, specific);
+    if (own) return [own];
+    const below =
+      depth < DEPTH
+        ? folders(path).flatMap((entry) => look(join(path, entry), depth + 1))
+        : [];
+    if (below.length > 0) return below;
+    const other = candidateIn(path, fallbacks);
+    return other ? [other] : [];
+  };
+  return withFreePorts(withFreeIds(look(folder, 0)));
+}
+
+// The product the first kit that recognises `path` finds there.
+function candidateIn(path: string, kits: Kit[]): Candidate | null {
+  for (const kit of kits) {
+    const detected = kit.detect(path);
+    if (detected)
+      return {
         ...detected,
         id: idFrom(basename(path)),
         kind: kit.kind,
@@ -37,14 +55,9 @@ export function detectProducts(folder: string, kits: Kit[]): Candidate[] {
         ...((detected.port ?? kit.port)
           ? { port: detected.port ?? kit.port }
           : {}),
-      });
-      return;
-    }
-    if (depth >= DEPTH) return;
-    for (const entry of folders(path)) look(join(path, entry), depth + 1);
-  };
-  look(folder, 0);
-  return withFreePorts(withFreeIds(found));
+      };
+  }
+  return null;
 }
 
 function folders(path: string): string[] {

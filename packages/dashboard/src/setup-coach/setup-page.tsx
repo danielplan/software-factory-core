@@ -1,52 +1,149 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import type { State } from "@/api";
-import { Accent } from "@/components/accent";
-import { CreateCompany } from "@/dashboard/create-company";
+import { post, type State } from "@/api";
+import { ProblemBox } from "@/components/problem-box";
+import { LANGUAGES } from "@/voice/languages";
+import { useCoachVoice } from "@/voice/use-coach-voice";
+import { VoiceCall } from "@/voice/voice-call";
 
-import { CoachChat } from "./coach-chat";
-import { DraftMap } from "./draft-map";
+import { attachedNames } from "./canvas";
+import { aboutLine, CoachChat, CoachStart } from "./coach-chat";
+import { MakeFactory, SetupCanvas } from "./setup-canvas";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
-// Setting up by talking: the coach beside the map of the company it drafts.
-// The form is still there for whoever prefers it.
+// Setting up the project's factory by talking or typing: one conversation
+// and one canvas, where the coach draws the project as it understands it.
+// A project with code is read first, straight away; a new one starts with
+// nothing but a chat prompt in the middle. Once the coach is at work,
+// the canvas fills the window and the conversation floats on it, docked at
+// the side; the factory is made from there once the owner has agreed.
+// Pieces clicked on the canvas are attached to the owner's next message.
 export function SetupPage({ state }: Readonly<{ state: SetupState }>) {
-  const [form, setForm] = useState(false);
-  if (form)
-    return (
-      <CreateCompany
-        factoriesFolder={state.factoriesFolder}
-        onCoach={() => {
-          setForm(false);
-        }}
-      />
-    );
+  const [attached, setAttached] = useState<string[]>([]);
+  const [problem, setProblem] = useState<string | null>(null);
+  const call = useSetupCall(state, attached, () => {
+    setAttached([]);
+  });
+  const { coach } = state;
   return (
-    <div className="grid gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 px-1 pt-2">
-        <h1 className="text-[30px] font-medium tracking-[-0.02em]">
-          Let's set up your <Accent>factory</Accent>
-        </h1>
-        <button
-          type="button"
-          onClick={() => {
-            setForm(true);
+    <div className="glow-page fixed inset-0">
+      {coach.started && (
+        <SetupCanvas
+          draft={coach.draft}
+          attached={attached}
+          onPick={(id) => {
+            setAttached((now) =>
+              now.includes(id) ? now.filter((a) => a !== id) : [...now, id],
+            );
           }}
-          className="min-h-11 text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-        >
-          Fill in a form instead
-        </button>
-      </div>
-      <div className="flex flex-wrap gap-5">
-        <DraftMap
-          draft={state.coach.draft}
-          kits={state.kits}
-          factoriesFolder={state.factoriesFolder}
-          working={state.coach.working}
+          onProblem={setProblem}
         />
-        <CoachChat coach={state.coach} />
-      </div>
+      )}
+      {coach.started ? (
+        <Docked
+          state={state}
+          call={call}
+          attached={attached}
+          setAttached={setAttached}
+          problem={problem}
+        />
+      ) : (
+        <div className="absolute inset-0 grid place-items-center p-4">
+          <CoachStart coach={coach} call={call} />
+        </div>
+      )}
     </div>
   );
+}
+
+// After the first answer: the conversation docked at the right (below on a
+// phone), with the button that makes the factory once it can be made, and
+// what went wrong on the canvas, if anything, at the bottom left.
+function Docked({
+  state,
+  call,
+  attached,
+  setAttached,
+  problem,
+}: Readonly<{
+  state: SetupState;
+  call: VoiceCall;
+  attached: string[];
+  setAttached: React.Dispatch<React.SetStateAction<string[]>>;
+  problem: string | null;
+}>) {
+  const { coach } = state;
+  return (
+    <div className="pointer-events-none absolute inset-0 grid grid-rows-[minmax(0,1fr)_auto] gap-3 p-3 sm:p-4 lg:grid-cols-[minmax(0,1fr)_400px] lg:grid-rows-1">
+      <div className="flex min-h-0 flex-col justify-end">
+        {problem && (
+          <div className="pointer-events-auto max-w-2xl">
+            <ProblemBox title="That did not work" text={problem} />
+          </div>
+        )}
+      </div>
+      <CoachChat
+        className="pointer-events-auto h-[42vh] lg:h-full"
+        coach={coach}
+        call={call}
+        attached={attachedNames(coach.draft, attached)}
+        onUnpick={(id) => {
+          setAttached((now) => now.filter((a) => a !== id));
+        }}
+        onSent={() => {
+          setAttached([]);
+        }}
+      >
+        {agreed(coach.draft) && (
+          <MakeFactory
+            working={coach.working}
+            onMake={() => {
+              call.end();
+            }}
+          />
+        )}
+      </CoachChat>
+    </div>
+  );
+}
+
+// The factory can be made once the owner has agreed to the project and at
+// least one product: the coach's first guesses are not enough.
+function agreed(draft: SetupState["coach"]["draft"]): boolean {
+  return (
+    draft.company.settled &&
+    draft.company.name.trim() !== "" &&
+    draft.products.some((product) => product.settled)
+  );
+}
+
+// The voice call with the coach: one for the page, kept through the move
+// from the box in the middle to the side, sending what the owner says
+// (with the pieces they picked) and reading the coach's answers out loud.
+// It ends when the page goes (the factory is made).
+function useSetupCall(
+  state: SetupState,
+  attached: string[],
+  onSent: () => void,
+): VoiceCall {
+  const [call] = useState(() => new VoiceCall());
+  const about = aboutLine(attachedNames(state.coach.draft, attached));
+  useEffect(() => {
+    call.sendTo(async (text, language) => {
+      onSent();
+      await post("/api/setup/say", {
+        text: text + about,
+        spokenIn: LANGUAGES[language].name,
+      });
+    });
+  });
+  useEffect(
+    () => () => {
+      call.end();
+    },
+    [call],
+  );
+  useCoachVoice(call, state.coach);
+  return call;
 }

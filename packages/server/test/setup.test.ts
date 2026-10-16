@@ -12,7 +12,7 @@ import { stage } from "./stage.ts";
 // and the factory open afterwards.
 
 test("setup in the dashboard: the company first, then products found and made, then the tracker", async () => {
-  const { home, session, server, base, post } = await stage();
+  const { home, project, session, server, base, post } = await stage();
   try {
     const code = join(home, "code");
     mkdirSync(join(code, "shop"), { recursive: true });
@@ -33,8 +33,13 @@ test("setup in the dashboard: the company first, then products found and made, t
       name: "Acme Garden",
       about: "Garden tools.",
     });
-    const root = join(home, "Factories", "acme-garden");
+    // In the project, which its own rules point to.
+    const root = join(project, "factory");
     assert.equal(await created.json(), root);
+    assert.match(
+      readFileSync(join(project, "AGENTS.md"), "utf8"),
+      /factory\/AGENTS\.md/,
+    );
     const empty = session.state();
     assert.ok(empty.mode === "factory");
     assert.deepEqual(empty.products, []);
@@ -161,7 +166,7 @@ test("only this computer, and only the factory's page, may press its buttons", a
     );
     const nameless = await post("/api/company", { name: " ", about: "" });
     assert.deepEqual(await nameless.json(), {
-      error: "Give the company a name.",
+      error: "Give the project a name.",
     });
     const folders = (await (
       await fetch(`${base}/api/folders?path=/`)

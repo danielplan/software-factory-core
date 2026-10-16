@@ -1,0 +1,106 @@
+// The kit for any other code: a website, a service or a tool the other kits
+// do not know. It recognises a folder by the usual files of a project
+// (package.json, pyproject.toml, go.mod, Cargo.toml and others), takes the
+// commands it can tell from them, and runs the start command when the owner
+// presses Start. It is the fallback: a folder is only its product when no
+// other kit finds a product in it or below it.
+
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+import { defineKit, type Product } from "@software-factory/core";
+
+import {
+  commandsOf,
+  doesOf,
+  type PackageJson,
+  readableName,
+  readPackageJson,
+  verifyCommand,
+} from "./package-json.ts";
+
+// The files that say a folder is a project, by what it is made with.
+const MARKERS = [
+  "package.json",
+  "pyproject.toml",
+  "requirements.txt",
+  "setup.py",
+  "go.mod",
+  "Cargo.toml",
+  "Gemfile",
+  "composer.json",
+  "pom.xml",
+  "build.gradle",
+  "build.gradle.kts",
+  "Makefile",
+  "index.html",
+];
+
+export const otherCode = defineKit({
+  id: "other-code",
+  name: "Other code",
+  about:
+    "Any other code: a website, a service or a tool, started and checked with its own commands.",
+  kind: "other-code",
+  commands: {},
+  fallback: true,
+  detect: (folder) => {
+    const has = (file: string) => existsSync(join(folder, file));
+    if (!MARKERS.some(has)) return null;
+    const file = readPackageJson(folder);
+    return {
+      name: readableName(file ?? noPackage, folder),
+      commands: file ? npmCommands(file) : otherCommands(has),
+    };
+  },
+  partsFor: (product: Product) => {
+    const run = product.commands.start?.split(/\s+/).filter(Boolean);
+    if (!run?.length) return [];
+    return [
+      {
+        id: product.id,
+        name: product.name,
+        area: "products",
+        does: doesOf(product, "code"),
+        dependsOn: product.dependsOn,
+        folder: product.folder,
+        run,
+        // Its own program: started only from its button, since the factory
+        // cannot tell where or how it answers.
+        start: "button",
+      },
+    ];
+  },
+});
+
+const noPackage: PackageJson = {
+  name: null,
+  packages: new Set(),
+  scripts: new Set(),
+};
+
+function npmCommands(file: PackageJson): Product["commands"] {
+  return commandsOf({ start: npmStart(file), verify: verifyCommand(file) });
+}
+
+function npmStart(file: PackageJson): string | undefined {
+  if (file.scripts.has("dev")) return "npm run dev";
+  if (file.scripts.has("start")) return "npm start";
+  return undefined;
+}
+
+// The commands a project made with Go, Rust or Python usually has.
+function otherCommands(has: (file: string) => boolean): Product["commands"] {
+  if (has("go.mod"))
+    return commandsOf({
+      start: has("main.go") ? "go run ." : undefined,
+      verify: "go test ./...",
+    });
+  if (has("Cargo.toml"))
+    return commandsOf({ start: "cargo run", verify: "cargo test" });
+  if (has("pyproject.toml") || has("requirements.txt") || has("setup.py"))
+    return commandsOf({
+      verify: has("tests") || has("test") ? "pytest" : undefined,
+    });
+  return {};
+}
