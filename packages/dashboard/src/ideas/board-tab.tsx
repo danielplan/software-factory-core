@@ -51,9 +51,8 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
               <section
                 key={column.id}
                 aria-label={column.title}
-                className="grid min-h-[60vh] content-start gap-2 rounded-2xl border-t-[3px] p-2.5"
+                className="grid min-h-[60vh] content-start gap-2 rounded-2xl p-2.5"
                 style={{
-                  borderTopColor: column.colour,
                   background: `color-mix(in oklab, ${column.colour} 7%, var(--card))`,
                 }}
               >

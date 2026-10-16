@@ -21,10 +21,9 @@ export function IdeaCard({
     <a
       href={`#ideas/${idea.id}`}
       className={cn(
-        "grid gap-1.5 rounded-xl border-l-[3px] bg-card p-3 shadow-soft hover:ring-1 hover:ring-foreground/20",
+        "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft hover:ring-1 hover:ring-foreground/20",
         idea.working && "ring-2 ring-[var(--glow-c)]",
       )}
-      style={{ borderLeftColor: stage.colour }}
     >
       <span className="flex items-start gap-2">
         <span className="flex-1 text-sm font-medium">{idea.title}</span>

@@ -153,18 +153,14 @@ function Area({
   );
 }
 
-// An area's frame: a card with a band of its colour and its title.
+// An area's frame: a card with its title in the area's colour.
 function AreaCard({
   title,
   colour,
   children,
 }: Readonly<{ title: string; colour: string; children: React.ReactNode }>) {
   return (
-    <Card
-      aria-label={title}
-      className="gap-3 border-t-[3px] py-4 shadow-soft"
-      style={{ borderTopColor: colour }}
-    >
+    <Card aria-label={title} className="gap-3 py-4 shadow-soft">
       <CardHeader className="px-4">
         <CardTitle
           className="text-xs font-semibold tracking-[0.08em] uppercase"
