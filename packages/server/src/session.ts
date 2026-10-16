@@ -1,7 +1,8 @@
 // The factory this server shows: the project's, in its factory folder, or
-// none yet (the setup flow, for that project), with its products, its parts running through the launcher and its
-// settings. Setting up writes the folder, installs what the owner approved,
-// makes the new products with their kits' starters, and opens it.
+// none yet (the setup flow, for that project), with its products, its parts
+// running through the launcher and its settings. In setup the coach plans
+// the factory with the owner on a map, then builds it with the same steps
+// as the dashboard's (coach/configure.ts) and the owner opens it.
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -33,14 +34,19 @@ import type {
   ProductView,
   State,
 } from "./api.ts";
-import { approved } from "./coach/canvas-things.ts";
-import { shownPicture } from "./coach/pictures.ts";
+import {
+  type Configuration,
+  configure,
+  type Workshop,
+} from "./coach/configure.ts";
+import { pictureIn, shownPicture } from "./coach/pictures.ts";
 import { SetupCoach } from "./coach/setup-coach.ts";
+import type { ToolsFor } from "./coach/setup-tools.ts";
 import { createProducts } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
 import { Refused } from "./refused.ts";
-import { writeCompany, writeContext, writeProducts } from "./write-factory.ts";
+import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
   // The project: its factory folder opens, or, without one, setup.
@@ -50,8 +56,8 @@ export type SessionOptions = {
   onChange: () => void;
   // The setup coach's Claude Code and its instructions.
   coach: { claude: Claude; guide: string };
-  // The tools on this computer the coach may propose to install
-  // (installables.ts: computerTools); the add-ons come from `available`.
+  // The tools on this computer the coach may install, once the owner
+  // agreed (installables.ts: computerTools).
   tools: Installable[];
 };
 
@@ -74,6 +80,7 @@ export class Session {
       kits: options.available.kits,
       installables: [...options.tools, ...addOns(options.available.extensions)],
       onChange: options.onChange,
+      made: () => this.root !== null,
     });
     const root = join(options.project, FACTORY_FOLDER);
     if (hasFactory(root)) this.open(root);
@@ -87,7 +94,7 @@ export class Session {
 
   state(): State {
     const kits = this.kits();
-    if (!this.root || !this.factory)
+    if (!this.root || !this.factory || this.coach.building())
       return {
         mode: "setup",
         project: this.options.project,
@@ -128,48 +135,48 @@ export class Session {
     return root;
   }
 
-  // The setup coach's canvas made into the factory: the company, what the
-  // owner approved to install, then its products (new ones in a folder of
-  // their own in the project).
-  async makeFromDraft(): Promise<void> {
-    const { draft } = this.coach.keeper;
-    const { company, products } = draft;
-    if (this.coach.view().working)
-      throw new Refused("Wait until the coach has answered.");
-    const root = this.createCompany(company);
-    writeContext(root, draft);
-    const chosen = new Set(approved(draft));
-    await install(
-      root,
-      this.coach.keeper.installables.filter((i) => chosen.has(i.id)),
-      (jobs) => {
-        this.showJobs(jobs);
+  // The coach's tools: its map, and the factory's settings once building.
+  coachTools(): ToolsFor {
+    return {
+      token: this.coach.token,
+      draw: (drawing) =>
+        this.coach.draw(drawing, (path) =>
+          pictureIn(this.options.project, path),
+        ),
+      configure: (asked: Configuration) => {
+        if (!this.coach.building())
+          throw new Refused(
+            "Plan with the owner first: build once they say so.",
+          );
+        return configure(this.workshop(), asked);
       },
-    );
+    };
+  }
+
+  // The owner says to build the factory as planned.
+  async build(): Promise<void> {
+    if (this.root && !this.coach.building())
+      throw new Refused("The factory is made already.");
+    await this.coach.build();
+  }
+
+  // The owner opens the factory the coach made: setup is over.
+  openFactory(): void {
+    if (!this.root) throw new Refused("There is no factory yet.");
+    this.coach.finish();
     this.reload();
-    this.earlierJobs = this.jobs;
-    if (products.length === 0) return;
-    await this.addProducts({
-      products: products.map((product) =>
-        product.isNew
-          ? { ...product, folder: join(this.options.project, product.id) }
-          : product,
-      ),
-    });
   }
 
   // The file of a picture a setup card shows (pictures.ts); none for any
   // other path.
   setupPicture(path: string): string | null {
-    if (this.root) return null;
-    return shownPicture(this.options.project, this.coach.keeper.draft, path);
+    if (!this.inSetup()) return null;
+    return shownPicture(this.options.project, this.coach.map, path);
   }
 
   ownerChangesDraft(change: ChangeDraft): void {
-    if (this.root) throw new Refused("The factory is made already.");
-    this.coach.ownerChange(() => {
-      this.coach.keeper.owner(change);
-    });
+    if (!this.inSetup()) throw new Refused("The factory is made already.");
+    this.coach.ownerChange(change);
   }
 
   // Products added on the Products tab: their descriptions, then the new
@@ -240,6 +247,45 @@ export class Session {
     this.launcher = new Launcher({ root, parts: loaded.parts });
     this.stopListening = this.launcher.subscribe(this.options.onChange);
     this.options.onChange();
+  }
+
+  private inSetup(): boolean {
+    return !this.root || this.coach.building();
+  }
+
+  // What the coach's configure acts on: this factory, as it is made.
+  private workshop(): Workshop {
+    const { kits, extensions } = this.options.available;
+    return {
+      project: this.options.project,
+      kits,
+      root: () => this.root,
+      company: () => this.factory?.company ?? null,
+      makeFolder: (company) => {
+        this.createCompany(company);
+      },
+      saveCompany: (company) => {
+        saveCompany(this.rootOrRefuse(), company);
+        this.reload();
+      },
+      addProducts: (products) => this.addProducts({ products }),
+      saveSettings: (group, values) => this.saveSettings(group, values),
+      addOns: addOns(extensions).map((a) => a.id),
+      install: async (ids) => {
+        const done = await install(
+          this.rootOrRefuse(),
+          this.coach.installables.filter((i) => ids.includes(i.id)),
+          (jobs) => {
+            this.showJobs(jobs);
+          },
+        );
+        // Still shown beside what comes next.
+        this.earlierJobs = this.jobs;
+        this.reload();
+        return done;
+      },
+      problems: () => this.factory?.problems ?? [],
+    };
   }
 
   private rootOrRefuse(): string {

@@ -6,30 +6,26 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
-- Setup writes the project's first context instead of drawing its code,
-  as one picture of the project with its context inside it. The coach reads
-  the code and its git history briefly (new tool `look_at_history`),
-  confirms the products in a sentence, and draws an overview and the main
-  workflows with `draw`: many small cards and the arrows between them in
-  one call. A card is a short title, a line and an icon (from a closed list
-  of everyday things), or a picture from the project with a caption
-  (served only while a card shows it); a rule or a question is marked with
-  its `tone` and drawn beside the step it is about. Cards are framed in
-  areas the coach names, laid out along the arrows with ELK, and arrows go
-  around cards. The coach goes one area at a time, the overview first,
-  then each main workflow, and points the owner to what it is asking about
-  (`focus`): the canvas moves there and shows it. A guess from the code is
-  unconfirmed; what the owner says is confirmed. **Make the factory** writes the cards to
-  `context/explanation/the-project.md` (a section per area, a line per
-  card with where its arrows lead), linked from the explanation index. The
-  coach's `add_note`, `add_diagram`, `change_thing`, `link` and `unlink`
-  are gone; the canvas shows no products, notes or diagrams (Mermaid is no
-  longer used).
+- Setup is planned on a map and then built by the coach itself. The coach
+  explores the code with Claude Code's own tools and has two of its own:
+  `draw`, for the map it plans with the owner (small cards in areas,
+  arrows, pictures from the project, rules and questions marked, and what
+  to show the owner, all in one call), and `configure`, for the factory's
+  own settings once the owner presses **Build the factory** (the project,
+  its products, tracker, add-ons, settings and tools to install, checked as
+  they are saved, with what the factory's checks still find). Building, it
+  may write in the project: it writes the blueprints and the knowledge
+  base's pages itself. The owner then presses **Open the factory**. The map
+  is laid out along its arrows with ELK. Gone: the coach's `set_company`,
+  `look_for_products`, `add_product`, `change_product`, `write_blueprint`,
+  `add_note`, `add_diagram`, `change_thing`, `link`, `unlink`, `settle`,
+  `look_at_canvas`, `look_at_computer` and `propose_install`, the draft's
+  company and products, and `POST /api/setup/make` (now `/api/setup/build`
+  and `/api/setup/open`). Mermaid is no longer used.
 - The setup page is plainer. The conversation has no header: while the
   coach works, its orb turns in the chat beside what it is doing; during a
-  call, the same orb is the voice. The title and the form are gone. **Make
-  the factory** is in the chat, and shows only once the owner has agreed to
-  the project and at least one product. A card on the canvas shows only
+  call, the same orb is the voice. The title and the form are gone; **Build the
+  factory** and **Open the factory** are in the chat. A card on the canvas shows only
   what it says and is dragged anywhere or taken off with its bin; the owner
   changes it by clicking it and telling the coach, not by editing it.
   Nothing for a company to do.

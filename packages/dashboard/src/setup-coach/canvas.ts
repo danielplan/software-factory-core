@@ -1,7 +1,7 @@
-// The setup canvas as the drawing library (React Flow) takes it: the
-// project and what to install on their own, each area the coach writes in
-// as a frame around its cards, and the coach's arrows between cards, along
-// the ways the arrangement found for them (layout.ts).
+// The setup map as the drawing library (React Flow) takes it: each area the
+// coach draws in as a frame around its cards, cards without an area on
+// their own, and the coach's arrows between cards, along the ways the
+// arrangement found for them (layout.ts).
 
 import { type Edge, MarkerType, type Node } from "@xyflow/react";
 import { createContext } from "react";
@@ -10,19 +10,13 @@ import type { Draft } from "@/api";
 
 import type { Point } from "./layout";
 
-type Thing = Draft["things"][number];
-
-export const COMPANY = "company";
-
 // The owner's change to the canvas, sent to the server (setup-canvas.tsx).
 export const CanvasChange = createContext<(body: unknown) => void>(() => {});
 
 // What one node on the canvas shows.
 export type Piece =
-  | { kind: "company"; company: Draft["company"] }
   | { kind: "area"; title: string }
-  | { kind: "card"; thing: Extract<Thing, { kind: "card" }> }
-  | { kind: "install"; thing: Extract<Thing, { kind: "install" }> };
+  | { kind: "card"; card: Draft["cards"][number] };
 
 export type PieceData = {
   piece: Piece;
@@ -50,28 +44,24 @@ export const areaId = (title: string) => `area:${title}`;
 function piecesOf(
   draft: Draft,
 ): { id: string; piece: Piece; parent?: string }[] {
-  const cards = draft.things.flatMap((t) => (t.kind === "card" ? [t] : []));
-  const installs = draft.things.flatMap((t) =>
-    t.kind === "install" ? [t] : [],
-  );
-  const areas = [...new Set(cards.map((card) => card.area))];
+  const areas = [
+    ...new Set(draft.cards.flatMap((card) => (card.area ? [card.area] : []))),
+  ];
   return [
-    { id: COMPANY, piece: { kind: "company", company: draft.company } },
+    ...draft.cards
+      .filter((card) => !card.area)
+      .map((card) => ({ id: card.id, piece: { kind: "card" as const, card } })),
     // A frame comes before its cards, as the drawing library needs.
     ...areas.flatMap((title) => [
       { id: areaId(title), piece: { kind: "area" as const, title } },
-      ...cards
+      ...draft.cards
         .filter((card) => card.area === title)
-        .map((thing) => ({
-          id: thing.id,
-          piece: { kind: "card" as const, thing },
+        .map((card) => ({
+          id: card.id,
+          piece: { kind: "card" as const, card },
           parent: areaId(title),
         })),
     ]),
-    ...installs.map((thing) => ({
-      id: thing.id,
-      piece: { kind: "install" as const, thing },
-    })),
   ];
 }
 
@@ -154,16 +144,7 @@ export function attachedNames(
 
 // A piece's name in a few words, for "(About: …)" in the owner's message.
 function nameOf(piece: Piece): string {
-  switch (piece.kind) {
-    case "company":
-      return piece.company.name || "the project";
-    case "area":
-      return piece.title;
-    case "card":
-      return piece.thing.title;
-    case "install":
-      return piece.thing.name;
-  }
+  return piece.kind === "area" ? piece.title : piece.card.title;
 }
 
 // What the arrangement depends on: which cards and their sizes (to the

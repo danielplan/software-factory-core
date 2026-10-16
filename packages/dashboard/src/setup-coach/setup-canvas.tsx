@@ -19,8 +19,6 @@ import {
 } from "react";
 
 import { type Draft, messageOf, post } from "@/api";
-import { ProblemBox } from "@/components/problem-box";
-import { Button } from "@/components/ui/button";
 
 import {
   CanvasChange,
@@ -237,43 +235,5 @@ function onCanvas(
       const y = place.y + (area?.y ?? 0);
       return [[box.id, { x, y }]];
     }),
-  );
-}
-
-// Making the factory from the canvas; the page then becomes its dashboard.
-export function MakeFactory({
-  working,
-  onMake,
-}: Readonly<{
-  working: boolean;
-  // Pressed: the voice call ends.
-  onMake: () => void;
-}>) {
-  const [making, setMaking] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const make = async () => {
-    onMake();
-    setMaking(true);
-    setProblem(null);
-    try {
-      await post("/api/setup/make");
-    } catch (error) {
-      setProblem(messageOf(error));
-      setMaking(false);
-    }
-  };
-  return (
-    <div className="grid gap-3">
-      {problem && (
-        <ProblemBox title="The factory could not be made" text={problem} />
-      )}
-      <Button
-        className="h-11 w-full px-[22px]"
-        disabled={working || making}
-        onClick={() => void make()}
-      >
-        {making ? "Making it…" : "Make the factory"}
-      </Button>
-    </div>
   );
 }

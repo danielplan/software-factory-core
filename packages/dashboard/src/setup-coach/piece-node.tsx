@@ -1,25 +1,35 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { Check, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { use } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { CanvasChange, type Piece, type PieceNode } from "./canvas";
 import { ICON } from "./icons";
 
-const KIND: Record<Piece["kind"], string> = {
-  company: "Project",
-  area: "Area",
-  card: "Card",
-  install: "To install",
-};
+type Card = Extract<Piece, { kind: "card" }>["card"];
 
-// One thing on the setup canvas: a plain card to read, with a dashed
-// outline while it is a sketch and a solid one once agreed. The owner
-// moves it by dragging it anywhere and takes it off with the bin that
-// shows on hover (all but the project); they change it by talking:
-// clicking it attaches it to their next message to the coach.
+// What the coach points the owner to: a soft glow of the coach's own
+// colours around it.
+const FOCUSED =
+  "shadow-[0_0_0_4px_var(--glow-c),0_0_32px_8px_color-mix(in_oklab,var(--glow-b)_80%,transparent)]";
+
+// The icon a rule or a question has when the coach gave it none.
+const TONE_ICON = { rule: "never", question: "question" } as const;
+
+// A rule (what must never happen) and a question (still open) stand out
+// from the facts around them.
+const TONE = {
+  fact: "",
+  rule: "bg-[color-mix(in_oklab,var(--destructive)_7%,var(--card))]",
+  question: "bg-[color-mix(in_oklab,var(--glow-c)_60%,var(--card))]",
+} as const;
+
+// One thing on the map: an area's frame with its title, or a card to read,
+// dashed while it is a guess and solid once the owner agreed. The owner
+// moves a card by dragging it anywhere and takes it off with the bin that
+// shows on hover; they change it by talking: clicking it attaches it to
+// their next message to the coach.
 export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
   const { piece, attached, focused, placed } = data;
   if (piece.kind === "area")
@@ -37,61 +47,34 @@ export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
         </h2>
       </section>
     );
+  const { card } = piece;
   return (
     <article
-      aria-label={KIND[piece.kind]}
+      aria-label={card.title}
       className={cn(
-        "piece-handle group relative grid w-[240px] animate-pop cursor-grab content-start gap-1.5 rounded-2xl border-2 bg-card p-3.5 text-card-foreground shadow-soft transition-opacity",
-        settledOf(piece)
-          ? "border-solid border-arrow"
-          : "border-dashed border-arrow",
-        piece.kind === "card" && TONE[piece.thing.tone ?? "fact"],
+        "piece-handle group relative grid w-[240px] animate-pop cursor-grab content-start gap-1.5 rounded-2xl border-2 border-arrow bg-card p-3.5 text-card-foreground shadow-soft transition-opacity",
+        card.confirmed ? "border-solid" : "border-dashed",
+        TONE[card.tone ?? "fact"],
         focused && FOCUSED,
         attached &&
           "ring-2 ring-foreground ring-offset-2 ring-offset-background",
         !placed && "opacity-0",
       )}
     >
-      <Handles />
-      <PieceBody id={id} piece={piece} />
-      {piece.kind !== "company" && <TakeOff id={id} kind={KIND[piece.kind]} />}
+      <Handle type="target" position={Position.Top} className="opacity-0" />
+      <CardBody card={card} />
+      <TakeOff id={id} />
+      <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </article>
   );
 }
 
-// What the coach points the owner to: a soft glow of the coach's own
-// colours around it.
-const FOCUSED =
-  "shadow-[0_0_0_4px_var(--glow-c),0_0_32px_8px_color-mix(in_oklab,var(--glow-b)_80%,transparent)]";
-
-// A rule (what must never happen) and a question (still open) stand out
-// from the facts around them.
-// The icon a rule or a question has when the coach gave it none.
-const TONE_ICON = { rule: "never", question: "question" } as const;
-
-const TONE = {
-  fact: "",
-  rule: "bg-[color-mix(in_oklab,var(--destructive)_7%,var(--card))]",
-  question: "bg-[color-mix(in_oklab,var(--glow-c)_60%,var(--card))]",
-} as const;
-
-// Where arrows leave and arrive when they have no way of their own
-// (route-edge.tsx): out at the bottom, in at the top; unseen.
-function Handles() {
-  return (
-    <>
-      <Handle type="target" position={Position.Top} className="opacity-0" />
-      <Handle type="source" position={Position.Bottom} className="opacity-0" />
-    </>
-  );
-}
-
-function TakeOff({ id, kind }: Readonly<{ id: string; kind: string }>) {
+function TakeOff({ id }: Readonly<{ id: string }>) {
   const change = use(CanvasChange);
   return (
     <button
       type="button"
-      aria-label={`Take the ${kind.toLowerCase()} off the canvas`}
+      aria-label="Take the card off the map"
       className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-lg bg-card text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-surface-2 hover:text-foreground focus-visible:opacity-100 [&_svg]:size-3.5"
       onClick={() => {
         change({ remove: id });
@@ -102,45 +85,11 @@ function TakeOff({ id, kind }: Readonly<{ id: string; kind: string }>) {
   );
 }
 
-// Solid once agreed: a card, once every item is confirmed.
-function settledOf(piece: Exclude<Piece, { kind: "area" }>): boolean {
-  switch (piece.kind) {
-    case "company":
-      return piece.company.settled;
-    case "card":
-      return piece.thing.confirmed;
-    case "install":
-      return piece.thing.answer === "approved";
-  }
-}
-
-function PieceBody({
-  id,
-  piece,
-}: Readonly<{ id: string; piece: Exclude<Piece, { kind: "area" }> }>) {
-  switch (piece.kind) {
-    case "company":
-      return (
-        <Named
-          name={piece.company.name || "Your project"}
-          about={piece.company.about || "Its vision appears here."}
-        />
-      );
-    case "card":
-      return <CardBody piece={piece} />;
-    case "install":
-      return <InstallBody id={id} piece={piece} />;
-  }
-}
-
-// A name and the sentence under it.
 // A card: its icon, its title and a line under it; or a picture from the
 // project with its title as the caption. A guess not yet confirmed is
 // lighter.
-function CardBody({
-  piece,
-}: Readonly<{ piece: Extract<Piece, { kind: "card" }> }>) {
-  const { title, text, icon, picture, tone, confirmed } = piece.thing;
+function CardBody({ card }: Readonly<{ card: Card }>) {
+  const { title, text, icon, picture, tone, confirmed } = card;
   const named = icon ?? (tone ? TONE_ICON[tone] : undefined);
   const Icon = named ? ICON[named] : null;
   return (
@@ -167,65 +116,6 @@ function CardBody({
       )}
       {!confirmed && (
         <span className="sr-only">A guess, not yet confirmed.</span>
-      )}
-    </div>
-  );
-}
-
-function Named({ name, about }: Readonly<{ name: string; about: string }>) {
-  return (
-    <>
-      <span className="text-[15px] font-medium">{name}</span>
-      {about && (
-        <span className="text-[13px] leading-snug text-muted-foreground">
-          {about}
-        </span>
-      )}
-    </>
-  );
-}
-
-function InstallBody({
-  id,
-  piece,
-}: Readonly<{ id: string; piece: Extract<Piece, { kind: "install" }> }>) {
-  const change = use(CanvasChange);
-  const { thing } = piece;
-  const answer = (choice: "approved" | "declined") => {
-    change({ install: { id, answer: choice } });
-  };
-  return (
-    <div className="grid gap-2">
-      <p className="text-[15px] font-medium">{thing.name}</p>
-      <p className="text-[13px] leading-snug text-muted-foreground">
-        {thing.why || thing.about}
-      </p>
-      <div className="flex gap-2">
-        <Button
-          variant={thing.answer === "approved" ? "default" : "outline"}
-          className="h-8 flex-1 px-3 text-[13px]"
-          aria-pressed={thing.answer === "approved"}
-          onClick={() => {
-            answer("approved");
-          }}
-        >
-          <Check aria-hidden /> Approve
-        </Button>
-        <Button
-          variant={thing.answer === "declined" ? "secondary" : "ghost"}
-          className="h-8 flex-1 px-3 text-[13px]"
-          aria-pressed={thing.answer === "declined"}
-          onClick={() => {
-            answer("declined");
-          }}
-        >
-          Not now
-        </Button>
-      </div>
-      {thing.answer === "approved" && (
-        <p className="text-xs text-success">
-          Installed when the factory is made.
-        </p>
       )}
     </div>
   );

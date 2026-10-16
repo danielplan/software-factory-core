@@ -80,7 +80,10 @@ function routesFor(session: Session): Record<string, Route> {
         body as Parameters<Session["ownerChangesDraft"]>[0],
       );
     },
-    "POST /api/setup/make": () => session.makeFromDraft(),
+    "POST /api/setup/build": () => session.build(),
+    "POST /api/setup/open": () => {
+      session.openFactory();
+    },
     "POST /api/company": (body) =>
       session.createCompany(body as Parameters<Session["createCompany"]>[0]),
     "POST /api/products": (body) =>
@@ -117,7 +120,7 @@ async function answer(
     stream(response, context);
   } else if (url.pathname === COACH_TOOLS && incoming.method === "POST") {
     const body = await readBody(incoming).catch(() => null);
-    await answerTools(incoming, response, context.session.coach, body);
+    await answerTools(incoming, response, context.session.coachTools(), body);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (!url.pathname.startsWith("/api/")) {

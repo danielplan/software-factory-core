@@ -39,8 +39,6 @@ export function shownPicture(
   draft: Draft,
   path: string,
 ): string | null {
-  const shown = draft.things.some(
-    (t) => t.kind === "card" && t.picture === path,
-  );
+  const shown = draft.cards.some((card) => card.picture === path);
   return shown ? join(project, path) : null;
 }

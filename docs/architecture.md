@@ -22,28 +22,27 @@ core, an extension or a kit; otherwise it is the company's.
 
 One command, run in the project (`npx software-factory`, to come), opens
 the dashboard in the browser. Where the project has no factory yet, it
-starts with setting up: one conversation and one canvas. The code tells
-the factory its products; what nobody has written down yet is the context
-around them, so setup is where the factory writes its first context. In a
-project with code, **the setup coach** reads the code and its git history
-straight away, confirms the products in a sentence, and guesses what it
-can: what the project is, how real it is, what must never happen, the
-people, its words, the system in plain words, and what is still open. It
-draws them as one picture: small cards framed in areas (an overview and
-the main workflows), joined by arrows, with rules, questions and pictures
-beside the steps they belong to, each a guess until the owner agrees; then it asks only where a guess is weak. In
-a new project (`software-factory new <name>`), it asks what the owner wants
-to build and fills the same cards from the answers. The coach is Claude
-Code on this computer, signed in with the owner's own account, following
-the method's `packages/method/guides/setup-coach.md`. It only reads code
-(never `.env` files) and writes the draft with its own tools over MCP. The
-owner moves or removes cards, and changes one by clicking it and telling
-the coach. The coach also decides what the factory needs installed, from
-a closed list (tools on this computer such as Git and the GitHub CLI, and
-add-ons; `packages/server/src/installables.ts`), and proposes each with why.
-**Make the factory** writes the folder, the products and the context page
-(`context/explanation/the-project.md`), and installs only what the owner
-approved. The owner can talk instead of typing: voice is part of
+starts with setting up: one conversation and one map, in two steps.
+**The setup coach** (Claude Code on this computer, signed in with the
+owner's own account, following the method's
+`packages/method/guides/setup-coach.md`) first plans the factory with the
+owner. It explores the code with its own tools (never `.env` files) and
+draws how the system works on the map with one tool of its own, `draw`:
+small cards framed in areas, joined by arrows, with pictures from the
+project, the parts and who uses them, the main workflows, and inside them
+what the code cannot say (how real it is, what must never happen, the
+project's words, what is still open), one area at a time, each card a
+guess until the owner agrees. The owner moves or removes cards, and
+changes one by clicking it and telling the coach. When the owner presses
+**Build the factory**, the coach may write in the project and builds it
+itself: the factory's own settings through its other tool, `configure`
+(the project, which makes the folder; its products; the tracker, add-ons,
+settings and tools to install from `packages/server/src/installables.ts`,
+only as the owner agreed), checked as they are saved, and the blueprints
+and knowledge pages with its own tools, until the factory's checks find
+nothing. The owner then presses **Open the factory**. In a new project
+(`software-factory new <name>`), the plan starts from what the owner wants
+to build. The owner can talk instead of typing: voice is part of
 the core (`packages/dashboard/src/voice/`). A speech model runs in the
 browser (Whisper) and writes their words down; the coach's answer is read
 out loud as it is written (Piper, also in the browser), and saying "stop"

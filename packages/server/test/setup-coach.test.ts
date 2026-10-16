@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -7,122 +7,132 @@ import type { Session } from "../src/session.ts";
 import { pretendClaude } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
 
-// The setup coach: a conversation that draws the company on a canvas with
-// its tools, which the owner can change too, and which becomes the factory.
+// The setup coach: a conversation that plans the factory with the owner on
+// a map, then builds it once they say so; the owner opens it.
 
-test("the coach puts the company and its products on the canvas while they talk, then the factory is made from it", async () => {
+test("the coach plans on the map, builds the factory once the owner says so, and the owner opens it", async () => {
   const pretend = pretendClaude([
     {
       calls: [
-        ["set_company", { name: "Acme", about: "Garden tools, online." }],
-        ["look_for_products", { folder: "<code>" }],
         [
-          "add_product",
+          "draw",
           {
-            name: "Shop",
-            kind: "web-app",
-            about: "Where customers buy.",
-            users: [{ who: "Customers", does: "buy tools" }],
-            folder: "<shop>",
+            cards: [
+              {
+                key: "shop",
+                area: "The project",
+                title: "The shop",
+                icon: "shop",
+              },
+              {
+                key: "blog",
+                area: "The project",
+                title: "The blog",
+                to: [{ card: "shop", label: "links to" }],
+              },
+            ],
+            show: { areas: ["The project"] },
           },
         ],
-        ["write_blueprint", { id: "shop", markdown: "# Shop blueprint\n" }],
-        [
-          "add_product",
-          {
-            name: "Blog",
-            kind: "web-app",
-            about: "News.",
-            dependsOn: ["shop"],
-          },
-        ],
-        ["add_product", { name: "Ghost", kind: "phone-app", about: "" }],
-        [
-          "add_product",
-          { name: "Gone", kind: "web-app", about: "", folder: "/no/such" },
-        ],
+        ["configure", { project: { name: "Acme" } }],
       ],
-      reply: "I found your shop and added a blog. Does that look right?",
+      reply: "Is that right?",
     },
+    { calls: [], reply: "Shall I build it?" },
     {
       calls: [
-        ["look_at_canvas", {}],
-        ["change_product", { id: "blog", about: "Our news." }],
-        ["set_company", { name: "Acme Garden" }],
+        [
+          "configure",
+          { products: [{ name: "Shop", kind: "web-app", about: "Buy." }] },
+        ],
+        ["configure", { project: { name: "Acme", about: "Garden tools." } }],
+        [
+          "configure",
+          {
+            products: [
+              {
+                name: "Shop",
+                kind: "web-app",
+                about: "Where customers buy.",
+                folder: "<shop>",
+                users: [{ who: "Customers", does: "buy tools" }],
+              },
+              {
+                name: "Blog",
+                kind: "web-app",
+                about: "News.",
+                dependsOn: ["Shop"],
+              },
+            ],
+          },
+        ],
+        [
+          "configure",
+          { products: [{ name: "Ghost", kind: "phone-app", about: "x" }] },
+        ],
+        [
+          "configure",
+          {
+            products: [
+              { name: "Gone", kind: "web-app", about: "x", folder: "/no/such" },
+            ],
+          },
+        ],
+        ["configure", { addOns: ["rocket"] }],
+        ["configure", { tracker: "github", addOns: ["voice"] }],
+        [
+          "configure",
+          { settings: { github: { GITHUB_REPOSITORY: "acme/shop" } } },
+        ],
+        ["configure", { settings: { github: { GITHUB_PROJECT: "lots" } } }],
+        ["configure", { project: { name: "Acme Garden" } }],
       ],
-      reply: "Got it.",
+      reply: "It is built: open it when you like.",
     },
   ]);
-  const {
-    session,
-    server,
-    post,
-    home: folder,
-    project,
-  } = await stage(pretend.claude);
+  const { session, server, post, home, project } = await stage(pretend.claude);
   try {
-    const code = join(folder, "code");
+    const code = join(home, "code");
     mkdirSync(join(code, "shop"), { recursive: true });
     writeFileSync(join(code, "shop", "web.txt"), "");
-    pretend.paths.code = code;
     pretend.paths.shop = join(code, "shop");
-    const first = (turn: number) => pretend.seen[turn];
+    const turn = (n: number) => pretend.seen[n];
 
     const state = session.state();
     assert.ok(state.mode === "setup");
-    assert.equal(state.coach.messages[0]?.from, "coach");
+    assert.equal(state.coach.phase, "plan");
 
-    const said = await post("/api/setup/say", { text: "We are Acme." });
-    assert.equal(said.status, 200);
-    const asked = first(0);
-    assert.ok(asked);
-    assert.equal(asked.readOnly, true);
-    assert.deepEqual(asked.tools, ["Read", "Grep", "Glob"]);
-    assert.ok(asked.deny?.includes("Read(**/.env*)"));
-    assert.match(asked.instructions ?? "", /Help set up\.[\s\S]*`web-app`/);
-    assert.equal(asked.session?.resume, false);
-
-    const [answers] = pretend.answers;
-    assert.ok(answers);
-    assert.match(answers[1] ?? "", /"id": "shop"/);
-    assert.equal(answers[2], 'Added Shop as "shop".');
-    // A kind no kit knows is refused by the tool's own schema.
-    assert.match(answers[5] ?? "", /expected "web-app"/);
-    assert.match(answers[6] ?? "", /There is no folder/);
-
-    const drafted = session.state();
-    assert.ok(drafted.mode === "setup");
-    assert.deepEqual(drafted.coach.draft.company, {
-      name: "Acme",
-      about: "Garden tools, online.",
-      settled: false,
+    await post("/api/setup/say", { text: "We are Acme." });
+    const planning = turn(0);
+    assert.ok(planning);
+    assert.equal(planning.readOnly, true);
+    assert.deepEqual(planning.tools, ["Read", "Grep", "Glob"]);
+    assert.ok(planning.deny?.includes("Read(**/.env*)"));
+    assert.match(
+      planning.instructions ?? "",
+      /Help set up\.[\s\S]*`web-app`[\s\S]*`hammer` \(tool\)/,
+    );
+    const [drew] = pretend.answers;
+    assert.ok(drew);
+    assert.match(
+      drew[0] ?? "",
+      /^shop = card-1\nblog = card-2\ncard-2 → card-1\nShown to the owner\.\n\nCards:\n- card-1 \[The project\] \(guess\): The shop/,
+    );
+    assert.match(drew[1] ?? "", /Plan with the owner first/);
+    const map = session.state();
+    assert.ok(map.mode === "setup");
+    assert.deepEqual(map.coach.draft.focus, {
+      ids: [],
+      areas: ["The project"],
+      n: 1,
     });
-    assert.deepEqual(
-      drafted.coach.draft.products.map((p) => [
-        p.id,
-        p.isNew,
-        p.port,
-        p.dependsOn,
-      ]),
-      [
-        ["shop", false, 5173, []],
-        ["blog", true, 5174, ["shop"]],
-      ],
-    );
-    assert.deepEqual(
-      drafted.coach.messages.map((m) => m.from),
-      ["coach", "owner", "coach"],
-    );
-    assert.equal(drafted.coach.working, false);
 
-    // The owner moves a card (what a card says, they change by talking:
-    // that is refused); the coach hears of it next turn.
-    await post("/api/setup/draft", { move: { id: "blog", x: 1, y: 1 } });
-    assert.equal(
-      (await post("/api/setup/draft", { company: { name: "Acme Garden" } }))
-        .status,
-      409,
-    );
+    // The owner moves a card and takes one off; the coach hears of it.
+    await post("/api/setup/draft", { move: { id: "card-1", x: 1, y: 2 } });
+    await post("/api/setup/draft", {
+      move: { id: "area:The project", x: 0, y: 0 },
+    });
+    await post("/api/setup/draft", { remove: "card-2" });
     assert.equal(
       (await post("/api/setup/draft", { remove: "nothing" })).status,
       409,
@@ -131,34 +141,73 @@ test("the coach puts the company and its products on the canvas while they talk,
       text: "Sieht gut aus.",
       spokenIn: "Deutsch",
     });
-    const second = first(1);
-    assert.ok(second);
     assert.match(
-      second.prompt,
+      turn(1)?.prompt ?? "",
       /^Sieht gut aus\.\n\n\(I changed the canvas myself; look at it\. Said out loud, in Deutsch: answer in Deutsch, for being read aloud\.\)$/,
     );
-    assert.equal(second.session?.resume, true);
+    assert.equal(turn(1)?.session?.resume, true);
 
-    assert.equal((await post("/api/setup/make", {})).status, 200);
-    const root = join(project, "factory");
+    assert.equal((await post("/api/setup/build", {})).status, 200);
+    const building = turn(2);
+    assert.ok(building);
+    assert.equal(building.readOnly, false);
+    assert.deepEqual(building.tools, ["Read", "Grep", "Glob", "Write", "Edit"]);
+    assert.ok(building.deny?.includes("Write(**/.env*)"));
+    assert.match(building.prompt, /^Build the factory now/);
+    const [, , built] = pretend.answers;
+    assert.ok(built);
+    assert.match(built[0] ?? "", /Give the project first/);
+    assert.match(built[1] ?? "", /Made the factory's folder/);
+    assert.match(built[2] ?? "", /^Added Shop, Blog\.\n/);
+    assert.match(built[2] ?? "", /The factory's checks/);
+    assert.match(built[3] ?? "", /No kit knows a phone-app/);
+    assert.match(built[4] ?? "", /does not recognise \/no\/such/);
+    assert.match(built[5] ?? "", /no add-on rocket/);
+    assert.match(built[6] ?? "", /Saved where work is tracked/);
+    assert.match(built[7] ?? "", /Saved the settings github/);
+    assert.match(built[8] ?? "", /Settings github not saved: GITHUB_PROJECT/);
+    assert.match(built[9] ?? "", /Changed the project/);
+
+    // Built, the page stays in setup until the owner opens the factory.
+    const ready = session.state();
+    assert.ok(ready.mode === "setup");
+    assert.equal(ready.coach.phase, "build");
+    assert.equal(ready.coach.made, true);
+    assert.deepEqual(ready.coach.messages.map((m) => m.text).slice(-2), [
+      "Build the factory.",
+      "It is built: open it when you like.",
+    ]);
+    assert.equal((await post("/api/setup/open", {})).status, 200);
     const made = session.state();
     assert.ok(made.mode === "factory");
     assert.equal(made.company.name, "Acme Garden");
+    assert.equal(made.company.about, "Garden tools.");
+    assert.equal(made.company.tracker, "github");
+    assert.deepEqual(made.company.extensions, ["voice"]);
     const blog = made.products.find((p) => p.id === "blog");
-    assert.ok(blog);
-    assert.equal(blog.about, "Our news.");
-    assert.equal(blog.folder, join(project, "blog"));
+    assert.equal(blog?.folder, join(project, "blog"));
     assert.ok(existsSync(join(project, "blog")));
     const shop = made.products.find((p) => p.id === "shop");
     assert.deepEqual(shop?.users, [{ who: "Customers", does: "buy tools" }]);
-    assert.equal(
-      readFileSync(join(root, "products", "shop", "BLUEPRINT.md"), "utf8"),
-      "# Shop blueprint\n",
+    assert.ok(
+      existsSync(join(project, "factory", "products", "shop", "BLUEPRINT.md")),
     );
     assert.equal(
-      (await post("/api/setup/draft", { remove: "shop" })).status,
+      (await post("/api/setup/draft", { remove: "card-1" })).status,
       409,
     );
+    assert.equal((await post("/api/setup/build", {})).status, 409);
+    assert.equal((await post("/api/setup/open", {})).status, 200);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("opening a factory before there is one is refused", async () => {
+  const { session, server, post } = await stage();
+  try {
+    assert.equal((await post("/api/setup/open", {})).status, 409);
   } finally {
     session.close();
     server.close();
@@ -198,7 +247,7 @@ test("only the coach's Claude Code uses its tools, and a missing Claude Code is 
 test("started in a project with code, the coach reads it first, before the owner says anything", async () => {
   const pretend = pretendClaude([
     {
-      calls: [["look_for_products", { folder: "<project>" }]],
+      calls: [["draw", { cards: [{ title: "A shop" }] }]],
       reply: "This looks like a shop. Who buys from it?",
     },
   ]);
@@ -220,7 +269,7 @@ test("started in a project with code, the coach reads it first, before the owner
       { from: "coach", text: "This looks like a shop. Who buys from it?" },
     ]);
     assert.equal(coach.started, true);
-    assert.match(pretend.answers[0]?.[0] ?? "", /web/i);
+    assert.match(pretend.answers[0]?.[0] ?? "", /^card-1\n/);
   } finally {
     session.close();
     server.close();

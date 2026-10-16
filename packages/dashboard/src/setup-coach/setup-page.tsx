@@ -8,7 +8,8 @@ import { VoiceCall } from "@/voice/voice-call";
 
 import { attachedNames } from "./canvas";
 import { aboutLine, CoachChat, CoachStart } from "./coach-chat";
-import { MakeFactory, SetupCanvas } from "./setup-canvas";
+import { SetupAction } from "./setup-action";
+import { SetupCanvas } from "./setup-canvas";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -17,7 +18,7 @@ type SetupState = Extract<State, { mode: "setup" }>;
 // A project with code is read first, straight away; a new one starts with
 // nothing but a chat prompt in the middle. Once the coach is at work,
 // the canvas fills the window and the conversation floats on it, docked at
-// the side; the factory is made from there once the owner has agreed.
+// the side; the factory is built and opened from there.
 // Pieces clicked on the canvas are attached to the owner's next message.
 export function SetupPage({ state }: Readonly<{ state: SetupState }>) {
   const [attached, setAttached] = useState<string[]>([]);
@@ -95,26 +96,14 @@ function Docked({
           setAttached([]);
         }}
       >
-        {agreed(coach.draft) && (
-          <MakeFactory
-            working={coach.working}
-            onMake={() => {
-              call.end();
-            }}
-          />
-        )}
+        <SetupAction
+          coach={coach}
+          onPress={() => {
+            call.end();
+          }}
+        />
       </CoachChat>
     </div>
-  );
-}
-
-// The factory can be made once the owner has agreed to the project and at
-// least one product: the coach's first guesses are not enough.
-function agreed(draft: SetupState["coach"]["draft"]): boolean {
-  return (
-    draft.company.settled &&
-    draft.company.name.trim() !== "" &&
-    draft.products.some((product) => product.settled)
   );
 }
 

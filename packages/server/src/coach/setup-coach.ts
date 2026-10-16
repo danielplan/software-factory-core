@@ -1,21 +1,21 @@
 // The setup coach: a conversation with the owner, held by Claude Code on
-// this computer in the project's folder, that drafts the factory on a
-// canvas (draft-keeper.ts) with its tools (setup-tools.ts). When the project
-// has code, it reads it first, before the owner says anything; it changes
-// nothing;
-// what it proposes to install waits for the owner's approval. One
-// turn at a time; the owner sees the reply while it is written and what the
-// coach is doing.
+// this computer in the project's folder. It plans the factory with the owner
+// on a map (map.ts) and, once they say so, builds it: its own tools
+// (setup-tools.ts) draw the map and set the factory's settings, and Claude
+// Code's own read the code and, when building, write the factory's pages.
+// When the project has code, it reads it first, before the owner says
+// anything. One turn at a time; the owner sees the reply while it is
+// written and what the coach is doing.
 
 import { randomUUID } from "node:crypto";
 import { readdirSync } from "node:fs";
 
 import type { Claude, Kit } from "@software-factory/core";
 
-import type { CoachMessage, CoachView } from "../api.ts";
+import type { ChangeDraft, CoachMessage, CoachView, Draft } from "../api.ts";
 import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
-import { DraftKeeper } from "./draft-keeper.ts";
+import { draw, type Drawing, EMPTY, mapText, move, removeCard } from "./map.ts";
 import { COACH_HEADER } from "./setup-tools.ts";
 
 const HELLO =
@@ -23,20 +23,8 @@ const HELLO =
 
 // The coach's own tools, in plain words for the owner.
 const TOOL_LINES: Record<string, string> = {
-  set_company: "Writing down what the project is",
-  look_for_products: "Looking for products in your code",
-  look_at_history: "Reading the project's history",
-  add_product: "Noting a product",
-  change_product: "Changing a product",
-  remove: "Taking something off the canvas",
-  write_blueprint: "Writing a blueprint",
-  draw: "Drawing what I learnt",
-  focus: "Showing you",
-  disconnect: "Taking an arrow off",
-  look_at_canvas: "Looking at the canvas",
-  settle: "Marking what we agreed",
-  look_at_computer: "Checking what is on this computer",
-  propose_install: "Proposing something to install",
+  draw: "Drawing on the map",
+  configure: "Setting up the factory",
 };
 const TOOL_PREFIX = "Using mcp__setup__";
 // What the owner sees while the coach works: its tools, not its words
@@ -46,8 +34,10 @@ const SHOWN = /^(Reading|Searching|Looking)/;
 export type SetupCoachOptions = {
   claude: Claude;
   kits: Kit[];
-  // What the coach may propose to install (installables.ts).
+  // What the coach may install once the owner agreed (installables.ts).
   installables: Installable[];
+  // Whether the factory it builds is there yet.
+  made: () => boolean;
   // The coach's instructions (the method's guides/setup-coach.md).
   guide: string;
   onChange: () => void;
@@ -58,8 +48,14 @@ export type SetupCoachOptions = {
 
 export class SetupCoach {
   readonly token = randomUUID();
-  readonly keeper: DraftKeeper;
   readonly kits: Kit[];
+  readonly installables: Installable[];
+  // The map it plans with the owner.
+  map: Draft = EMPTY;
+  // Planning, or building once the owner said so; finished once they opened
+  // the factory.
+  private phase: "plan" | "build" = "plan";
+  private finished = false;
   private options: SetupCoachOptions;
   private conversation = randomUUID();
   private started = false;
@@ -78,12 +74,7 @@ export class SetupCoach {
   constructor(options: SetupCoachOptions) {
     this.options = options;
     this.kits = options.kits;
-    this.keeper = new DraftKeeper(
-      options.kits,
-      options.installables,
-      options.onChange,
-      options.project,
-    );
+    this.installables = options.installables;
     this.opening = hasCode(options.project)
       ? `Here's my project: ${options.project}`
       : null;
@@ -103,14 +94,57 @@ export class SetupCoach {
       working: this.writing !== null,
       started: this.asked,
       problem: this.problem,
-      draft: this.keeper.draft,
+      draft: this.map,
+      phase: this.phase,
+      made: this.options.made(),
     };
   }
 
-  // The owner changed the canvas: the coach hears of it with the next message.
-  ownerChange(act: () => void): void {
-    act();
+  // Building and not yet opened: setup stays on the page.
+  building(): boolean {
+    return this.phase === "build" && !this.finished;
+  }
+
+  // The coach's drawing on the map; what it did, and the map now.
+  draw(drawing: Drawing, picture: (path: string) => string): string {
+    const drawn = draw(this.map, drawing, picture);
+    this.map = drawn.draft;
+    this.changed();
+    const done = drawn.said.length > 0 ? [...drawn.said, ""] : [];
+    return [...done, mapText(this.map)].join("\n");
+  }
+
+  // The owner moved or took off a card: the coach hears of it with the next
+  // message.
+  ownerChange(change: ChangeDraft): void {
+    this.map =
+      "move" in change
+        ? move(this.map, change.move)
+        : removeCard(this.map, change.remove);
     this.ownerChanged = true;
+    this.changed();
+  }
+
+  // The owner says to build the factory as planned: from now on the coach
+  // may write in the project.
+  async build(): Promise<void> {
+    if (this.writing !== null)
+      throw new Refused("The coach is still answering.");
+    this.phase = "build";
+    this.messages = [
+      ...this.messages,
+      { from: "owner", text: "Build the factory." },
+    ];
+    await this.answer(
+      "Build the factory now, as we planned: you may write in the project.",
+      undefined,
+    );
+  }
+
+  // The owner opened the factory: setup is over.
+  finish(): void {
+    this.finished = true;
+    this.changed();
   }
 
   // The owner's words; `spokenIn` names the language when they were said
@@ -168,9 +202,17 @@ export class SetupCoach {
     return {
       cwd: this.options.project,
       prompt,
-      readOnly: true,
-      tools: ["Read", "Grep", "Glob"],
-      deny: ["Read(**/.env*)"],
+      ...(this.phase === "build"
+        ? {
+            readOnly: false,
+            tools: ["Read", "Grep", "Glob", "Write", "Edit"],
+            deny: ["Read(**/.env*)", "Edit(**/.env*)", "Write(**/.env*)"],
+          }
+        : {
+            readOnly: true,
+            tools: ["Read", "Grep", "Glob"],
+            deny: ["Read(**/.env*)"],
+          }),
       instructions: this.instructions(),
       session: { id: this.conversation, resume: this.started },
       mcp: {
@@ -201,7 +243,13 @@ export class SetupCoach {
     const first = this.opening
       ? `The owner started the factory in their project's folder, ${this.options.project}: the first message says so.`
       : `The project's folder, ${this.options.project}, has no code yet. The owner's first message answers: "${HELLO}"`;
-    return `${this.options.guide}\n\n## The kinds the kits know\n\n${kinds}\n\n${first}`;
+    const installable = this.installables
+      .map(
+        (i) =>
+          `- \`${i.id}\` (${i.kind}): ${i.name}. ${i.about}${i.present() ? " Here already." : ""}`,
+      )
+      .join("\n");
+    return `${this.options.guide}\n\n## The kinds the kits know\n\n${kinds}\n\n## What configure can install or switch on\n\n${installable}\n\n${first}`;
   }
 
   private changed(): void {
@@ -227,8 +275,8 @@ function plain(line: string): string | null {
 
 function problemOf(error: string): string {
   if (/ENOENT/.test(error))
-    return "Claude Code is not on this computer. Install it from claude.com/code and sign in, or fill in the form instead.";
+    return "Claude Code is not on this computer. Install it from claude.com/code and sign in, then try again.";
   if (/log ?in|auth|credential/i.test(error))
     return "Claude Code is not signed in. Run claude once in a terminal to sign in, then try again.";
-  return `The coach stopped: ${error || "no reason given"}. Try again, or fill in the form instead.`;
+  return `The coach stopped: ${error || "no reason given"}. Try again.`;
 }
