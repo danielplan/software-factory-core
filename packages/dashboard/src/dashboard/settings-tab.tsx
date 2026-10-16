@@ -4,18 +4,14 @@ import { type ReactNode, useState } from "react";
 import { type Company, type GroupView, messageOf, post } from "@/api";
 import { Accent } from "@/components/accent";
 import { ChoiceCard } from "@/components/choice-card";
-import { Field } from "@/components/field";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { TRACKER_NAMES } from "@/setup/draft";
 
 import type { FactoryState } from "./dashboard";
+import { SettingInput } from "./setting-input";
 
 type Tracker = Company["tracker"];
-
-// A secret the server says is set; its value is never sent to the page.
-const SECRET_SET = "(set)";
 
 const TRACKER_ICONS: Record<Tracker, ReactNode> = {
   none: <Ban aria-hidden />,
@@ -271,67 +267,4 @@ function useForm(
   };
   const changed = Object.keys(values).length > 0;
   return { values, refused, problem, saved, save, type, reset, changed };
-}
-
-type SettingView = GroupView["fields"][number];
-
-// One setting: a choice, or text (a secret as a password, never shown).
-function SettingInput({
-  id,
-  field,
-  typed,
-  problem,
-  onType,
-}: Readonly<{
-  id: string;
-  field: SettingView;
-  typed: string | undefined;
-  problem: string | undefined;
-  onType: (value: string) => void;
-}>) {
-  const { label, help, shown } = describe(field, typed);
-  return (
-    <Field id={id} label={label} help={help} {...(problem ? { problem } : {})}>
-      {field.kind === "choice" ? (
-        <select
-          id={id}
-          className="h-10 rounded-[10px] border border-input bg-card px-2 text-sm"
-          value={shown}
-          onChange={(event) => {
-            onType(event.target.value);
-          }}
-        >
-          {field.choices?.map((choice) => (
-            <option key={choice.value} value={choice.value}>
-              {choice.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <Input
-          id={id}
-          type={field.kind === "secret" ? "password" : "text"}
-          inputMode={field.kind === "number" ? "numeric" : undefined}
-          autoComplete="off"
-          placeholder={field.default ?? ""}
-          value={shown}
-          onChange={(event) => {
-            onType(event.target.value);
-          }}
-        />
-      )}
-    </Field>
-  );
-}
-
-// A setting's label and help, and what its box shows: a secret that is set
-// says so, and its box stays empty until a new one is typed.
-function describe(field: SettingView, typed: string | undefined) {
-  const secret = field.kind === "secret";
-  const set = secret && field.value === SECRET_SET;
-  return {
-    label: set ? `${field.label} (set)` : field.label,
-    help: set ? `${field.help} Type a new one to replace it.` : field.help,
-    shown: typed ?? (secret ? "" : (field.value ?? "")),
-  };
 }
