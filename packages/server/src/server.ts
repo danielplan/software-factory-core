@@ -19,8 +19,10 @@ import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
 export const PAGE_HEADER = "x-software-factory";
-// The setup coach's tools, which check the coach's own token instead.
+// The coaches' tools, which check the coach's own token instead: the setup
+// coach's, and each idea's.
 const COACH_TOOLS = "/api/setup/mcp";
+const IDEA_TOOLS = /^\/api\/ideas\/mcp\/([\w-]+)$/;
 // A picture from the project that a setup card shows.
 const PICTURE = "/api/setup/picture";
 const HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -55,9 +57,7 @@ export function startServer(options: {
   server.on("listening", () => {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
-    options.session.coach.serveToolsAt(
-      `http://localhost:${String(port)}${COACH_TOOLS}`,
-    );
+    options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
   });
   server.listen(options.port, "127.0.0.1");
@@ -81,6 +81,31 @@ function routesFor(session: Session): Record<string, Route> {
       );
     },
     "POST /api/setup/build": () => session.build(),
+    "POST /api/ideas": (body) => ({
+      id: session.ideasOrRefuse().create(text(body, "text")),
+    }),
+    "POST /api/ideas/say": (body) =>
+      session
+        .ideasOrRefuse()
+        .say(
+          text(body, "id"),
+          text(body, "text"),
+          optionalText(body, "spokenIn"),
+        ),
+    "POST /api/ideas/draft": (body) => {
+      session
+        .ideasOrRefuse()
+        .ownerChange(
+          text(body, "id"),
+          body as Parameters<Session["ownerChangesDraft"]>[0],
+        );
+    },
+    "POST /api/ideas/ready": (body) => {
+      session.ideasOrRefuse().ready(text(body, "id"));
+    },
+    "POST /api/ideas/discard": (body) => {
+      session.ideasOrRefuse().discard(text(body, "id"));
+    },
     "POST /api/setup/open": () => {
       session.openFactory();
     },
@@ -121,6 +146,8 @@ async function answer(
   } else if (url.pathname === COACH_TOOLS && incoming.method === "POST") {
     const body = await readBody(incoming).catch(() => null);
     await answerTools(incoming, response, context.session.coachTools(), body);
+  } else if (IDEA_TOOLS.test(url.pathname) && incoming.method === "POST") {
+    await ideaTools(incoming, response, context.session, url.pathname);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (!url.pathname.startsWith("/api/")) {
@@ -191,12 +218,29 @@ function sendFile(response: ServerResponse, page: string, path: string): void {
   response.end(readFileSync(file));
 }
 
+// One idea coach's tool call; an idea that is not there is said plainly.
+async function ideaTools(
+  incoming: IncomingMessage,
+  response: ServerResponse,
+  session: Session,
+  path: string,
+): Promise<void> {
+  const id = IDEA_TOOLS.exec(path)?.[1] ?? "";
+  const body = await readBody(incoming).catch(() => null);
+  try {
+    await answerTools(incoming, response, session.ideaTools(id), body);
+  } catch (error) {
+    if (!(error instanceof Refused)) throw error;
+    send(response, 404, { error: error.message });
+  }
+}
+
 function sendPicture(
   response: ServerResponse,
   session: Session,
   path: string | null,
 ): void {
-  const file = path ? session.setupPicture(path) : null;
+  const file = path ? session.picture(path) : null;
   if (!file || !existsSync(file)) {
     send(response, 404, { error: "There is no such picture." });
     return;

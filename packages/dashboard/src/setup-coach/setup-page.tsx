@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { post, type State } from "@/api";
+import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
-import { LANGUAGES } from "@/voice/languages";
-import { useCoachVoice } from "@/voice/use-coach-voice";
-import { VoiceCall } from "@/voice/voice-call";
+import type { VoiceCall } from "@/voice/voice-call";
 
 import { attachedNames } from "./canvas";
-import { aboutLine, CoachChat, CoachStart } from "./coach-chat";
+import { useCoachCall } from "./coach-call";
+import { CoachChat, CoachStart } from "./coach-chat";
 import { SetupAction } from "./setup-action";
 import { SetupCanvas } from "./setup-canvas";
 
@@ -23,7 +22,7 @@ type SetupState = Extract<State, { mode: "setup" }>;
 export function SetupPage({ state }: Readonly<{ state: SetupState }>) {
   const [attached, setAttached] = useState<string[]>([]);
   const [problem, setProblem] = useState<string | null>(null);
-  const call = useSetupCall(state, attached, () => {
+  const call = useCoachCall(state.coach, attached, () => {
     setAttached([]);
   });
   const { coach } = state;
@@ -105,34 +104,4 @@ function Docked({
       </CoachChat>
     </div>
   );
-}
-
-// The voice call with the coach: one for the page, kept through the move
-// from the box in the middle to the side, sending what the owner says
-// (with the pieces they picked) and reading the coach's answers out loud.
-// It ends when the page goes (the factory is made).
-function useSetupCall(
-  state: SetupState,
-  attached: string[],
-  onSent: () => void,
-): VoiceCall {
-  const [call] = useState(() => new VoiceCall());
-  const about = aboutLine(attachedNames(state.coach.draft, attached));
-  useEffect(() => {
-    call.sendTo(async (text, language) => {
-      onSent();
-      await post("/api/setup/say", {
-        text: text + about,
-        spokenIn: LANGUAGES[language].name,
-      });
-    });
-  });
-  useEffect(
-    () => () => {
-      call.end();
-    },
-    [call],
-  );
-  useCoachVoice(call, state.coach);
-  return call;
 }

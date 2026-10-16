@@ -96,6 +96,7 @@ acme/                    the project, one repository
    │  ├─ product.json    the product described: kind, users, commands, code
    │  └─ BLUEPRINT.md    its structure, promises and checks
    ├─ context/           its knowledge base (from the template)
+   ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ runs/              its history
    └─ settings/, copies/ secrets and working copies, not in git
 ```

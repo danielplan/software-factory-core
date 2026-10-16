@@ -57,6 +57,7 @@ const session = new Session({
   coach: {
     claude,
     guide: readFileSync(join(guidesFolder, "setup-coach.md"), "utf8"),
+    ideaGuide: readFileSync(join(guidesFolder, "idea-coach.md"), "utf8"),
   },
   tools: computerTools(),
 });

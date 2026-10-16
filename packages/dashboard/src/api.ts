@@ -10,6 +10,7 @@ export type {
   DetectAnswer,
   Draft,
   FolderList,
+  IdeaView,
   IconName,
   Job,
   KitView,

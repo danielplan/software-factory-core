@@ -6,6 +6,20 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- An **Ideas** tab: the owner starts an idea with a sentence and shapes it
+  with the idea coach (the method's `guides/idea-coach.md`) on a map, as in
+  setup: the coach reads the code and the factory's knowledge and draws
+  who it is for, the journey, what must never happen and what is open.
+  **Ready** marks the plan as agreed (sending it to where work is tracked
+  comes with the builder). Each idea is a file in the factory's `ideas/`
+  folder. The setup and idea coaches share one conversation (`coach/talk.ts`).
+- **System** is the factory's overview: the products and the factory
+  itself side by side, compact part cards in a map, what is left to set up
+  in a line, and what each part does.
+- **Settings** has one card per topic: where work is tracked shows only the
+  chosen tracker's settings, with what is set now and one Save; every card
+  offers to restart the parts that read it; an Addresses card lists where
+  each part answers.
 - Setup is planned on a map and then built by the coach itself. The coach
   explores the code with Claude Code's own tools and has two of its own:
   `draw`, for the map it plans with the owner (small cards in areas,

@@ -83,7 +83,7 @@ export async function stage(
       agents: join(templatesFolder, "AGENTS.md"),
     },
     onChange: () => {},
-    coach: { claude, guide: "Help set up." },
+    coach: { claude, guide: "Help set up.", ideaGuide: "Shape the idea." },
     tools,
   });
   const page = join(home, "page");

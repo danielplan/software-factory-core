@@ -23,7 +23,8 @@ export const COACH_HEADER = "x-setup-coach";
 export type ToolsFor = {
   token: string;
   draw: (drawing: Drawing) => string;
-  configure: (configuration: Configuration) => Promise<string>;
+  // Only the setup coach's.
+  configure?: (configuration: Configuration) => Promise<string>;
 };
 
 const card = z.object({
@@ -95,29 +96,31 @@ function toolsFor(on: ToolsFor): McpServer {
     },
     (args) => answer(() => on.draw(args)),
   );
-  server.registerTool(
-    "configure",
-    {
-      description:
-        "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked, its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
-      inputSchema: {
-        project: z
-          .object({ name: z.string().min(1), about: z.string().optional() })
-          .optional(),
-        products: z.array(product).optional(),
-        tracker: z.enum(["none", "github", "jira"]).optional(),
-        addOns: z.array(z.string()).optional(),
-        settings: z
-          .record(z.string(), z.record(z.string(), z.string().nullable()))
-          .optional()
-          .describe(
-            "By settings group id: its values by key (null: the default).",
-          ),
-        install: z.array(z.string()).optional().describe("Tools by id."),
+  const configure = on.configure;
+  if (configure)
+    server.registerTool(
+      "configure",
+      {
+        description:
+          "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked, its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
+        inputSchema: {
+          project: z
+            .object({ name: z.string().min(1), about: z.string().optional() })
+            .optional(),
+          products: z.array(product).optional(),
+          tracker: z.enum(["none", "github", "jira"]).optional(),
+          addOns: z.array(z.string()).optional(),
+          settings: z
+            .record(z.string(), z.record(z.string(), z.string().nullable()))
+            .optional()
+            .describe(
+              "By settings group id: its values by key (null: the default).",
+            ),
+          install: z.array(z.string()).optional().describe("Tools by id."),
+        },
       },
-    },
-    async (args) => answerAsync(() => on.configure(args)),
-  );
+      async (args) => answerAsync(() => configure(args)),
+    );
   return server;
 }
 

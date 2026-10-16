@@ -30,8 +30,6 @@ import type {
   ChooseTracker,
   CreateCompany,
   Job,
-  KitView,
-  ProductView,
   State,
 } from "./api.ts";
 import {
@@ -39,6 +37,7 @@ import {
   configure,
   type Workshop,
 } from "./coach/configure.ts";
+import { Ideas } from "./coach/ideas.ts";
 import { pictureIn, shownPicture } from "./coach/pictures.ts";
 import { SetupCoach } from "./coach/setup-coach.ts";
 import type { ToolsFor } from "./coach/setup-tools.ts";
@@ -46,6 +45,7 @@ import { createProducts } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
 import { Refused } from "./refused.ts";
+import { kitViews, productView } from "./views.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -55,7 +55,8 @@ export type SessionOptions = {
   templates: Templates;
   onChange: () => void;
   // The setup coach's Claude Code and its instructions.
-  coach: { claude: Claude; guide: string };
+  // The setup coach's and the idea coach's instructions.
+  coach: { claude: Claude; guide: string; ideaGuide: string };
   // The tools on this computer the coach may install, once the owner
   // agreed (installables.ts: computerTools).
   tools: Installable[];
@@ -71,6 +72,10 @@ export class Session {
   // Jobs finished before the ones running now, still shown.
   private earlierJobs: Job[] = [];
   readonly coach: SetupCoach;
+  // The factory's ideas, once it is open.
+  private ideas: Ideas | null = null;
+  // Where the server answers the coaches' tools.
+  private toolsBase = "";
 
   constructor(options: SessionOptions) {
     this.options = options;
@@ -93,7 +98,7 @@ export class Session {
   }
 
   state(): State {
-    const kits = this.kits();
+    const kits = kitViews(this.options.available.kits);
     if (!this.root || !this.factory || this.coach.building())
       return {
         mode: "setup",
@@ -114,6 +119,7 @@ export class Session {
       problems: this.factory.problems,
       kits,
       jobs: this.jobs,
+      ideas: this.ideas?.list() ?? [],
     };
   }
 
@@ -167,11 +173,36 @@ export class Session {
     this.reload();
   }
 
-  // The file of a picture a setup card shows (pictures.ts); none for any
-  // other path.
-  setupPicture(path: string): string | null {
-    if (!this.inSetup()) return null;
-    return shownPicture(this.options.project, this.coach.map, path);
+  // Where the server answers the coaches' tools, once it listens.
+  serveToolsAt(base: string): void {
+    this.toolsBase = base;
+    this.coach.serveToolsAt(`${base}/setup/mcp`);
+    this.ideas?.serveToolsAt(`${base}/ideas/mcp`);
+  }
+
+  // The file of a picture a card shows, on the setup map or an idea's
+  // (pictures.ts); none for any other path.
+  picture(path: string): string | null {
+    if (this.inSetup())
+      return shownPicture(this.options.project, this.coach.map, path);
+    return this.ideas?.shows(path) ? join(this.options.project, path) : null;
+  }
+
+  // An idea's tools: only its map.
+  ideaTools(id: string): ToolsFor {
+    const ideas = this.ideasOrRefuse();
+    return {
+      token: ideas.token(id),
+      draw: (drawing) =>
+        ideas.draw(id, drawing, (path) =>
+          pictureIn(this.options.project, path),
+        ),
+    };
+  }
+
+  ideasOrRefuse(): Ideas {
+    if (!this.ideas) throw new Refused("There is no factory open.");
+    return this.ideas;
   }
 
   ownerChangesDraft(change: ChangeDraft): void {
@@ -245,6 +276,14 @@ export class Session {
     this.root = root;
     this.factory = loaded;
     this.launcher = new Launcher({ root, parts: loaded.parts });
+    this.ideas = new Ideas({
+      claude: this.options.coach.claude,
+      root,
+      project: this.options.project,
+      guide: this.options.coach.ideaGuide,
+      onChange: this.options.onChange,
+    });
+    if (this.toolsBase) this.ideas.serveToolsAt(`${this.toolsBase}/ideas/mcp`);
     this.stopListening = this.launcher.subscribe(this.options.onChange);
     this.options.onChange();
   }
@@ -307,31 +346,4 @@ export class Session {
     this.launcher?.setParts(loaded.parts);
     this.options.onChange();
   }
-
-  private kits(): KitView[] {
-    return this.options.available.kits.map((kit) => ({
-      id: kit.id,
-      name: kit.name,
-      about: kit.about,
-      kind: kit.kind,
-      canCreate: kit.create !== null,
-    }));
-  }
-}
-
-function productView(product: Factory["products"][number]): ProductView {
-  return {
-    id: product.id,
-    name: product.name,
-    kind: product.kind,
-    about: product.about,
-    folder: product.folder,
-    port: product.port ?? null,
-    commands: Object.fromEntries(
-      Object.entries(product.commands).filter(
-        (entry): entry is [string, string] => typeof entry[1] === "string",
-      ),
-    ),
-    users: product.users,
-  };
 }

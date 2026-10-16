@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
 import { type CoachView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -9,6 +9,7 @@ import type { VoiceCall } from "@/voice/voice-call";
 
 import { Answer } from "./answer-box";
 import { CoachOrb } from "./coach-orb";
+import { CoachRouteContext } from "./route";
 import { Said } from "./said";
 
 type Attached = { id: string; name: string };
@@ -16,11 +17,12 @@ type Attached = { id: string; name: string };
 // Sending the owner's words to the coach, with the pieces of the canvas
 // they are about; why it failed, if it did.
 function useSay(attached: Attached[], onSent: () => void) {
+  const route = use(CoachRouteContext);
   const [problem, setProblem] = useState<string | null>(null);
   const say = (text: string) => {
     setProblem(null);
     onSent();
-    post("/api/setup/say", { text: text + aboutLine(attached) }).catch(
+    post(route.say, { ...route.with, text: text + aboutLine(attached) }).catch(
       (error: unknown) => {
         setProblem(messageOf(error));
       },

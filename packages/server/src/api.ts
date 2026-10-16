@@ -54,6 +54,7 @@ export type State =
       problems: string[];
       kits: KitView[];
       jobs: Job[];
+      ideas: IdeaView[];
     };
 
 // A folder on this computer and the folders in it, for choosing one.
@@ -173,6 +174,16 @@ export type Card = {
 };
 
 export type CoachMessage = { from: "coach" | "owner"; text: string };
+
+// One of the factory's ideas: its conversation with the idea coach and its
+// map, as the setup coach's (CoachView), and whether the plan is agreed.
+export type IdeaView = CoachView & {
+  id: string;
+  title: string;
+  status: "planning" | "ready";
+  created: string;
+  updated: string;
+};
 
 // The setup coach's conversation: what was said, the reply being written,
 // what it is doing right now, and why it cannot answer, if it cannot.

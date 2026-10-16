@@ -4,6 +4,7 @@ import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { NavRail, type Tab, TABS } from "@/components/nav-rail";
 import { StatusLight } from "@/components/status-light";
+import { IdeasTab } from "@/ideas/ideas-tab";
 import { SetupPage } from "@/setup-coach/setup-page";
 
 import { ProductsTab } from "./products-tab";
@@ -12,24 +13,28 @@ import { SystemTab } from "./system-tab";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
-// The tab in the address (#products), so a reload stays on it.
-function tabFromHash(): Tab {
-  const asked = window.location.hash.slice(1);
-  return TABS.find((tab) => tab === asked) ?? "system";
+// The tab in the address (#products), and what is open in it
+// (#ideas/<id>), so a reload stays there.
+function placeFromHash(): { tab: Tab; open: string | null } {
+  const [asked, open] = window.location.hash.slice(1).split("/");
+  return {
+    tab: TABS.find((tab) => tab === asked) ?? "system",
+    open: open ?? null,
+  };
 }
 
-function useTab(): Tab {
-  const [tab, setTab] = useState<Tab>(tabFromHash);
+function usePlace(): { tab: Tab; open: string | null } {
+  const [place, setPlace] = useState(placeFromHash);
   useEffect(() => {
     const follow = () => {
-      setTab(tabFromHash());
+      setPlace(placeFromHash());
     };
     window.addEventListener("hashchange", follow);
     return () => {
       window.removeEventListener("hashchange", follow);
     };
   }, []);
-  return tab;
+  return place;
 }
 
 // The dashboard: before there is a company, only the setup page; once there
@@ -42,7 +47,7 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
-  const tab = useTab();
+  const { tab, open } = usePlace();
   return (
     <div className="grid gap-5 max-sm:pt-14 sm:pl-[76px]">
       <NavRail current={tab} status={<Overall state={state} light />} />
@@ -60,6 +65,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
           text={state.problems.join(" · ")}
         />
       )}
+      {tab === "ideas" && <IdeasTab state={state} open={open} />}
       {tab === "products" && <ProductsTab state={state} />}
       {tab === "settings" && <SettingsTab state={state} />}
       {tab === "system" && <SystemTab state={state} />}

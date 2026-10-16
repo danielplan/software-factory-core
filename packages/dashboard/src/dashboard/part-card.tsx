@@ -3,14 +3,23 @@ import { ChevronDown, ExternalLink } from "lucide-react";
 import type { PartView } from "@/api";
 import { LABEL, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// One part: its light in a small tile, its name and what it is doing, its
-// link and buttons, and its problem below.
+// One part, compact: its light, name and Open link, what it is doing, its
+// buttons, and its problem below; its frame tells how it is.
+const FRAME: Record<PartView["light"], string> = {
+  running: "border-success/40",
+  starting: "border-primary/60 shadow-[0_0_0_4px_var(--glow-c)]",
+  problem: "border-destructive/50",
+  stopped: "border-border-soft",
+  none: "border-border-soft",
+};
+
 export function PartCard({
   part,
   onPress,
@@ -22,22 +31,31 @@ export function PartCard({
     <div
       data-light={part.light}
       title={part.does}
-      className="grid gap-3 rounded-2xl border border-border-soft bg-surface py-3.5 pr-3.5 pl-4"
+      className={cn(
+        "grid gap-1.5 rounded-xl border bg-surface px-3 py-2.5",
+        FRAME[part.light],
+      )}
     >
-      <div className="flex min-h-[68px] items-center gap-3">
-        <span className="flex size-9 flex-none items-center justify-center rounded-[11px] bg-card shadow-soft">
-          <StatusLight light={part.light} />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[15px] font-medium">{part.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {part.light === "starting" && part.step
-              ? `Starting · ${part.step}`
-              : status}
-          </span>
-        </span>
-        <PartButtons part={part} onPress={onPress} />
+      <div className="flex items-center gap-2">
+        <StatusLight light={part.light} />
+        <span className="truncate text-sm font-medium">{part.name}</span>
+        {part.link && (
+          <a
+            href={part.link}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground hover:text-foreground hover:underline"
+          >
+            Open <ExternalLink className="size-3" aria-hidden />
+          </a>
+        )}
       </div>
+      <span className="text-xs text-muted-foreground">
+        {part.light === "starting" && part.step
+          ? `Starting · ${part.step}`
+          : status}
+      </span>
+      <PartButtons part={part} onPress={onPress} />
       {part.problem && <PartProblem problem={part.problem} />}
     </div>
   );
@@ -47,7 +65,7 @@ function PartProblem({
   problem,
 }: Readonly<{ problem: NonNullable<PartView["problem"]> }>) {
   return (
-    <div className="grid gap-1 rounded-xl border border-destructive/20 bg-destructive/[0.07] p-3 text-sm">
+    <div className="grid gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-xs">
       <p className="font-medium text-destructive">{problem.title}</p>
       <p className="text-foreground/80">{problem.text}</p>
       {problem.details.length > 0 && (
@@ -66,8 +84,8 @@ function PartProblem({
   );
 }
 
-// Open, then Start (or Try again after a problem), Restart and Stop, as the
-// part allows.
+// Start (or Try again after a problem), Restart and Stop, as the part
+// allows.
 function PartButtons({
   part,
   onPress,
@@ -75,16 +93,10 @@ function PartButtons({
   const press = (action: string) => () => {
     onPress(`/api/parts/${encodeURIComponent(part.id)}/${action}`);
   };
-  const look = "h-9 rounded-[10px] px-3 text-[13px] font-normal";
+  if (!part.canStart && !part.canStop) return null;
+  const look = "h-7 rounded-lg px-2.5 text-xs font-normal";
   return (
-    <div className="flex flex-none flex-wrap justify-end gap-1.5">
-      {part.link && (
-        <Button asChild variant="outline" className={look}>
-          <a href={part.link} target="_blank" rel="noreferrer">
-            Open <ExternalLink className="size-3" aria-hidden />
-          </a>
-        </Button>
-      )}
+    <div className="flex flex-wrap gap-1.5">
       {part.canStart && (
         <Button variant="outline" className={look} onClick={press("start")}>
           {part.light === "problem" ? "Try again" : "Start"}

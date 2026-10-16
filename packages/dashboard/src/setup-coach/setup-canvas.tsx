@@ -31,6 +31,7 @@ import {
 import { type Arrangement, arrange, type Box, type Point } from "./layout";
 import { PieceNodeView } from "./piece-node";
 import { RouteEdgeView } from "./route-edge";
+import { CoachRouteContext } from "./route";
 import { useView, WholeCanvas } from "./view";
 
 const NODE_TYPES: NodeTypes = { piece: PieceNodeView };
@@ -65,14 +66,17 @@ export function SetupCanvas({
   onPick: (id: string) => void;
   onProblem: (problem: string | null) => void;
 }>) {
+  const route = use(CoachRouteContext);
   const change = useMemo(
     () => (body: unknown) => {
       onProblem(null);
-      post("/api/setup/draft", body).catch((error: unknown) => {
-        onProblem(messageOf(error));
-      });
+      post(route.draft, { ...route.with, ...(body as object) }).catch(
+        (error: unknown) => {
+          onProblem(messageOf(error));
+        },
+      );
     },
-    [onProblem],
+    [onProblem, route],
   );
   return (
     <CanvasChange value={change}>
