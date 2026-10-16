@@ -5,7 +5,7 @@
 
 import { spawn } from "node:child_process";
 
-import { Refused } from "../refused.ts";
+import { Refused } from "../../refused.ts";
 import { GH } from "./programs.ts";
 
 // One run of the GitHub CLI: its exit code and what it wrote.

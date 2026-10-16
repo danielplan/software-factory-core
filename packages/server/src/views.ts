@@ -1,8 +1,8 @@
 // The factory's products and kits as the page shows them.
 
-import type { Factory, Kit } from "@software-factory/core";
+import type { Extension, Factory, Kit } from "@software-factory/core";
 
-import type { KitView, ProductView } from "./api.ts";
+import type { KitView, ProductView, TrackerView } from "./api.ts";
 
 export function kitViews(kits: Kit[]): KitView[] {
   return kits.map((kit) => ({
@@ -29,4 +29,11 @@ export function productView(product: Factory["products"][number]): ProductView {
     ),
     users: product.users,
   };
+}
+
+// The add-ons that track work, as the page offers them.
+export function trackerViews(extensions: Extension[]): TrackerView[] {
+  return extensions
+    .filter((extension) => extension.tracker)
+    .map(({ id, name, about }) => ({ id, name, about }));
 }

@@ -43,7 +43,7 @@ and knowledge pages with its own tools, until the factory's checks find
 nothing. The owner then presses **Open the factory**. Right after, the dashboard guides
 connecting where work is tracked: a GitHub board through the GitHub CLI on
 this computer, or Jira Cloud with an API token, each checked before it is
-saved (`packages/server/src/connect/`). In a new project
+saved (the GitHub and Jira add-ons, `packages/server/src/add-ons/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
 to build. The owner can talk instead of typing: voice is part of
 the core (`packages/dashboard/src/voice/`). A speech model runs in the
@@ -119,7 +119,16 @@ file (`companySchema` in `packages/core/src/company/company.ts`).
 
 ## Extension points
 
-An extension (`defineExtension`) or a kit (`defineKit`) says what it adds:
+Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of
+product. An **add-on** gives it an ability a company may want, or want
+another of in its place: in the core it is an extension (`defineExtension`),
+and in the server an `AddOn` (`packages/server/src/add-ons/add-on.ts`), the
+extension with the routes the server answers for it, at
+`/api/add-ons/<id>/…` and only while it is on; its page, if any, is in
+`packages/dashboard/src/add-ons/`. Built-in add-ons (`core: true`) are on
+unless the company file switches them off (`without`); others are switched
+on by name (`extensions`). The first add-ons are where work is tracked: a
+GitHub board and Jira Cloud (`tracker: true`). What each adds:
 
 | Point                             | What                                                                                     | Today                                                                                     |
 | --------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -129,7 +138,7 @@ An extension (`defineExtension`) or a kit (`defineKit`) says what it adds:
 | Commands                          | the usual commands for a kind of product; a product's own win                            | kits                                                                                      |
 | Rules                             | conventions and lessons for a kind of product                                            | kits                                                                                      |
 | Tabs, agent tools, workflow steps | the dashboard's tabs, the coach's tools, the runner's steps                              | to come, with the core extensions                                                         |
-| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                        | in the server (`connect/`); the runner, which moves the work, to come                     |
+| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                        | add-ons (`tracker: true`, routes, connecting steps); the runner, to come                  |
 | Code hosts                        | where branches and pull requests go: GitHub                                              | to come, with the runner                                                                  |
 | Detection                         | a kit recognises its kind of product in existing code                                    | to come, with the setup page                                                              |
 

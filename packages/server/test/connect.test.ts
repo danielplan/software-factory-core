@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import { join } from "node:path";
 import { test } from "node:test";
 
-import type { Cli } from "../src/connect/github.ts";
-import type { Fetcher } from "../src/connect/jira.ts";
+import { saveCompany } from "@software-factory/core";
+
+import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Fetcher } from "../src/add-ons/jira/jira.ts";
 import { suggestStages } from "../src/connect/stages.ts";
 import type { Session } from "../src/session.ts";
 import { stage } from "./stage.ts";
@@ -106,27 +109,27 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     (await fetch(`${base}${path}`)).json() as Promise<unknown>;
   try {
     session.createCompany({ name: "Acme", about: "" });
-    assert.deepEqual(await get("/api/connect/github"), {
+    assert.deepEqual(await get("/api/add-ons/github/status"), {
       cli: true,
       login: null,
       signingIn: null,
     });
-    await post("/api/connect/github/sign-in", {});
+    await post("/api/add-ons/github/sign-in", {});
     await until(async () => {
-      const status = (await get("/api/connect/github")) as {
+      const status = (await get("/api/add-ons/github/status")) as {
         login: string | null;
       };
       return status.login === "octo";
     });
     assert.deepEqual(cli.answered, ['login:"\\n"']);
-    assert.deepEqual(await get("/api/connect/github/repositories"), [
+    assert.deepEqual(await get("/api/add-ons/github/repositories"), [
       "acme/shop",
       "acme/blog",
     ]);
-    assert.deepEqual(await get("/api/connect/github/boards?owner=acme"), [
+    assert.deepEqual(await get("/api/add-ons/github/boards?owner=acme"), [
       { number: 1, title: "Roadmap" },
     ]);
-    const scopes = await fetch(`${base}/api/connect/github/boards?owner=nope`);
+    const scopes = await fetch(`${base}/api/add-ons/github/boards?owner=nope`);
     assert.equal(scopes.status, 409);
     assert.match(
       ((await scopes.json()) as { error: string }).error,
@@ -134,20 +137,21 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     );
 
     // Asked to allow boards, the refresh that does not finish says so.
-    await post("/api/connect/github/sign-in", { more: "yes" });
+    await post("/api/add-ons/github/sign-in", { more: "yes" });
     await until(async () => {
-      const status = (await get("/api/connect/github")) as {
+      const status = (await get("/api/add-ons/github/status")) as {
         signingIn: { problem: string | null } | null;
       };
       return status.signingIn?.problem !== null && status.signingIn !== null;
     });
 
     assert.equal(
-      (await post("/api/connect/github", { repository: "x", board: 1 })).status,
+      (await post("/api/add-ons/github/connect", { repository: "x", board: 1 }))
+        .status,
       409,
     );
     assert.deepEqual(
-      await get("/api/connect/github/columns?repository=acme/shop&board=1"),
+      await get("/api/add-ons/github/columns?repository=acme/shop&board=1"),
       {
         columns: ["Todo", "In Progress", "Done"],
         suggested: {
@@ -159,7 +163,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
         },
       },
     );
-    const wrong = await post("/api/connect/github", {
+    const wrong = await post("/api/add-ons/github/connect", {
       repository: "acme/shop",
       board: 1,
       stages: { review: "QA" },
@@ -168,7 +172,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
       ((await wrong.json()) as { error: string }).error,
       /no column “QA”/,
     );
-    const connected = await post("/api/connect/github", {
+    const connected = await post("/api/add-ons/github/connect", {
       repository: "acme/shop",
       board: 1,
       label: "*",
@@ -194,7 +198,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
     });
     assert.equal(state.onboarding, false);
     // The stand-in computer has no GitHub CLI to install.
-    assert.equal((await post("/api/connect/github/install", {})).status, 409);
+    assert.equal((await post("/api/add-ons/github/install", {})).status, 409);
   } finally {
     session.close();
     server.close();
@@ -202,7 +206,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
 });
 
 test("connecting Jira: the token is checked against Jira, which lists the projects to pick from", async () => {
-  const { session, server, post } = await stage(
+  const { project, session, server, post } = await stage(
     undefined,
     {},
     {
@@ -219,20 +223,20 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     ((await answer.json()) as { error: string }).error;
   try {
     session.createCompany({ name: "Acme", about: "" });
-    const listed = await post("/api/connect/jira/projects", login);
+    const listed = await post("/api/add-ons/jira/projects", login);
     assert.deepEqual(await listed.json(), {
       name: "Ann",
       projects: [{ key: "ACME", name: "Acme web" }],
     });
     assert.match(
       await error(
-        await post("/api/connect/jira/projects", { ...login, token: "no" }),
+        await post("/api/add-ons/jira/projects", { ...login, token: "no" }),
       ),
       /did not accept/,
     );
     assert.match(
       await error(
-        await post("/api/connect/jira/projects", {
+        await post("/api/add-ons/jira/projects", {
           ...login,
           site: "down.example",
         }),
@@ -241,7 +245,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     );
     assert.match(
       await error(
-        await post("/api/connect/jira/projects", {
+        await post("/api/add-ons/jira/projects", {
           ...login,
           site: "broken.example",
         }),
@@ -250,19 +254,19 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     );
     assert.match(
       await error(
-        await post("/api/connect/jira/projects", { ...login, email: " " }),
+        await post("/api/add-ons/jira/projects", { ...login, email: " " }),
       ),
       /Give the site/,
     );
     assert.match(
       await error(
-        await post("/api/connect/jira", { ...login, project: "NOPE" }),
+        await post("/api/add-ons/jira/connect", { ...login, project: "NOPE" }),
       ),
       /Choose one/,
     );
     assert.match(
       await error(
-        await post("/api/connect/jira", {
+        await post("/api/add-ons/jira/connect", {
           ...login,
           project: "ACME",
           label: "no way!",
@@ -270,7 +274,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       ),
       /cannot be a label/,
     );
-    const columns = await post("/api/connect/jira/columns", {
+    const columns = await post("/api/add-ons/jira/columns", {
       ...login,
       project: "ACME",
     });
@@ -284,7 +288,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
         done: "Done",
       },
     });
-    const connected = await post("/api/connect/jira", {
+    const connected = await post("/api/add-ons/jira/connect", {
       ...login,
       project: "ACME",
     });
@@ -305,6 +309,21 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     assert.equal(token?.value, "(set)");
     assert.equal((await post("/api/connect/own-board", {})).status, 200);
     assert.equal(factory(session).company.tracker, "none");
+
+    // An add-on switched off answers nothing, and is not offered.
+    saveCompany(join(project, "factory"), {
+      ...factory(session).company,
+      without: ["github"],
+    });
+    session.chooseBoard("none");
+    assert.deepEqual(
+      factory(session).trackers.map((t) => t.id),
+      ["jira"],
+    );
+    assert.match(
+      await error(await post("/api/add-ons/github/sign-in", {})),
+      /GitHub board is off/,
+    );
   } finally {
     session.close();
     server.close();

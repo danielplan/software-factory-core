@@ -22,7 +22,8 @@ import { guidesFolder, templatesFolder } from "@software-factory/method";
 import { computerTools } from "../src/installables.ts";
 import { startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
-import { trackers } from "../src/trackers.ts";
+import { githubAddOn } from "../src/add-ons/github/index.ts";
+import { jiraAddOn } from "../src/add-ons/jira/index.ts";
 
 // The command that opens an address in the default browser.
 const OPENER: Partial<Record<NodeJS.Platform, string>> = {
@@ -41,12 +42,17 @@ const port = Number(values.port);
 const project = projectFrom(positionals);
 const page = join(import.meta.dirname, "..", "..", "dashboard", "dist");
 
+// The add-ons that ship with the factory.
+const addOns = [githubAddOn(), jiraAddOn()];
 let changed = () => {};
 // Claude Code on this computer, signed in with the owner's own account.
 const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");
 const session = new Session({
   project,
-  available: { extensions: [trackers], kits: allKits },
+  available: {
+    extensions: addOns.map((addOn) => addOn.extension),
+    kits: allKits,
+  },
   templates: {
     knowledgeBase: templateFolder,
     agents: join(templatesFolder, "AGENTS.md"),
@@ -61,7 +67,7 @@ const session = new Session({
   },
   tools: computerTools(),
 });
-const started = startServer({ session, page, port });
+const started = startServer({ session, page, port, addOns });
 changed = started.changed;
 
 const address = `http://localhost:${String(port)}`;

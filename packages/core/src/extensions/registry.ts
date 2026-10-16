@@ -32,6 +32,14 @@ export function assembleFactory(
 ): Factory {
   const problems: string[] = [];
   const extensions = chosenExtensions(company, available, problems);
+  const tracker = company.tracker;
+  if (
+    tracker !== "none" &&
+    !extensions.some((e) => e.tracker && e.id === tracker)
+  )
+    problems.push(
+      `work is tracked in "${tracker}", but no add-on that is on tracks work there`,
+    );
   const kits = chosenKits(company, available, problems);
   const known = products.flatMap((product) => {
     const kit = kits.find((k) => k.kind === product.kind);

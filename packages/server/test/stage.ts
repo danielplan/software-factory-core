@@ -15,12 +15,13 @@ import {
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/method";
 
-import type { Cli } from "../src/connect/github.ts";
-import type { Fetcher } from "../src/connect/jira.ts";
+import type { Cli } from "../src/add-ons/github/github.ts";
+import { githubAddOn } from "../src/add-ons/github/index.ts";
+import type { Fetcher } from "../src/add-ons/jira/jira.ts";
+import { jiraAddOn } from "../src/add-ons/jira/index.ts";
 import type { Installable } from "../src/installables.ts";
 import { PAGE_HEADER, startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
-import { trackers } from "../src/trackers.ts";
 
 export const web = defineKit({
   id: "web-kit",
@@ -85,9 +86,13 @@ export async function stage(
   mkdirSync(project);
   for (const [file, text] of Object.entries(code))
     writeFileSync(join(project, file), text);
+  const addOns = [githubAddOn(connectors.cli), jiraAddOn(connectors.fetcher)];
   const session = new Session({
     project,
-    available: { extensions: [trackers, voice], kits: [web] },
+    available: {
+      extensions: [...addOns.map((a) => a.extension), voice],
+      kits: [web],
+    },
     templates: {
       knowledgeBase: templateFolder,
       agents: join(templatesFolder, "AGENTS.md"),
@@ -100,7 +105,7 @@ export async function stage(
   mkdirSync(page);
   writeFileSync(join(page, "index.html"), "<p>The factory</p>");
   // Port 0: the system picks a free one.
-  const { server } = startServer({ session, page, port: 0, connectors });
+  const { server } = startServer({ session, page, port: 0, addOns });
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   assert.ok(address && typeof address === "object");

@@ -57,8 +57,10 @@ export type State =
       kits: KitView[];
       jobs: Job[];
       ideas: IdeaView[];
-      // The connected board, if any (board.json).
+      // The connected boards, by tracker add-on (board.json).
       board: Board;
+      // The add-ons that are on and track work, to connect a board with.
+      trackers: TrackerView[];
       // Just set up: connecting where work is tracked comes first.
       onboarding: boolean;
     };
@@ -213,5 +215,7 @@ export type ChangeDraft =
 // The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };
 
-export type { GitHubStatus } from "./connect/github.ts";
+export type { GitHubStatus } from "./add-ons/github/github.ts";
+
+export type TrackerView = { id: string; name: string; about: string };
 export type { Board } from "./connect/board-file.ts";

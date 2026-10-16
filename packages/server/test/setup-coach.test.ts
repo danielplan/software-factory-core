@@ -83,6 +83,7 @@ test("the coach plans on the map, builds the factory once the owner says so, and
         ["configure", { settings: { jira: { JIRA_TOKEN: "secret-1" } } }],
         ["configure", { settings: { jira: { JIRA_PROJECT: "ACME" } } }],
         ["configure", { project: { name: "Acme Garden" } }],
+        ["configure", { tracker: "pigeon-post" }],
       ],
       reply: "It is built: open it when you like.",
     },
@@ -164,6 +165,7 @@ test("the coach plans on the map, builds the factory once the owner says so, and
     assert.match(built[7] ?? "", /Saved the settings jira/);
     assert.match(built[8] ?? "", /Settings jira not saved: JIRA_PROJECT/);
     assert.match(built[9] ?? "", /Changed the project/);
+    assert.match(built[10] ?? "", /No add-on tracks work in pigeon-post/);
 
     // Built, the page stays in setup until the owner opens the factory.
     const ready = session.state();

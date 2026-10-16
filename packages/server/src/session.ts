@@ -38,12 +38,12 @@ import { Ideas } from "./coach/ideas.ts";
 import { pictureIn, shownPicture } from "./coach/pictures.ts";
 import { SetupCoach } from "./coach/setup-coach.ts";
 import type { ToolsFor } from "./coach/setup-tools.ts";
-import { createProducts, startNew } from "./create-products.ts";
+import { makeAndStart } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
 import { Refused } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
-import { kitViews, productView } from "./views.ts";
+import { kitViews, productView, trackerViews } from "./views.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -121,6 +121,7 @@ export class Session {
       ideas: this.ideas?.list() ?? [],
       onboarding: this.onboarding,
       board: readBoard(root),
+      trackers: trackerViews(this.factory.extensions),
     };
   }
 
@@ -218,27 +219,26 @@ export class Session {
   // Products the coach adds: their descriptions, then the new ones made
   // with their kits' starters, then they start.
   private async addProducts(products: SetupProduct[]): Promise<void> {
-    const root = this.rootOrRefuse();
-    writeProducts(root, products, this.options.available.kits);
+    writeProducts(this.rootOrRefuse(), products, this.options.available.kits);
     this.reload();
-    const made = await createProducts(
-      products.filter((p) => p.isNew),
-      this.options.available.kits,
-      (jobs) => {
+    await makeAndStart(products, this.options.available.kits, {
+      show: (jobs) => {
         this.showJobs(jobs);
       },
-    );
-    if (made && this.launcher) await startNew(this.launcher, products);
+      launcher: () => this.launcher,
+    });
   }
 
   // Where work is tracked, which ends the onboarding: a board connected and
   // checked (board.json, its secrets in settings), or the factory's own.
   chooseBoard(
     tracker: Company["tracker"],
-    board: Board = {},
+    entry?: Board[string],
     secrets: Changes = {},
   ) {
     const root = this.rootOrRefuse();
+    // As the file says now: the owner may have changed it by hand.
+    this.reload();
     const company = this.factoryOrRefuse().company;
     const { refused } =
       Object.keys(secrets).length > 0
@@ -246,10 +246,15 @@ export class Session {
         : { refused: {} };
     const wrong = Object.entries(refused).map(([k, why]) => `${k}: ${why}`);
     if (wrong.length > 0) throw new Refused(wrong.join(" · "));
-    saveBoard(root, { ...readBoard(root), ...board });
+    if (entry) saveBoard(root, { ...readBoard(root), [tracker]: entry });
     saveCompany(root, { ...company, tracker });
     this.onboarding = false;
     this.reload();
+  }
+
+  // Whether the factory has this add-on on.
+  isOn(id: string): boolean {
+    return this.factory?.extensions.some((e) => e.id === id) ?? false;
   }
 
   // A settings group's new values; the refused ones say why.
@@ -313,7 +318,7 @@ export class Session {
       },
       addProducts: (products) => this.addProducts(products),
       saveSettings: (group, values) => this.saveSettings(group, values),
-      addOns: addOns(extensions).map((a) => a.id),
+      extensions,
       install: (ids) => this.installAll(ids),
       problems: () => this.factory?.problems ?? [],
     };

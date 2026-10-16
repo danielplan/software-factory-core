@@ -4,9 +4,9 @@ import { get, type GitHubStatus, messageOf, post, type StageMap } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
-import { Step } from "./connect-page";
-import { Pick, WhichWork } from "./pick";
-import { type Columns, StageMapping } from "./stage-map";
+import { Step } from "@/connect/step";
+import { Pick, WhichWork } from "@/connect/pick";
+import { type Columns, StageMapping } from "@/connect/stage-map";
 
 const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 
@@ -26,7 +26,7 @@ export function GitHubSteps({
               variant="outline"
               className={SMALL}
               onClick={() => {
-                act("/api/connect/github/install");
+                act("/api/add-ons/github/install");
               }}
             >
               Install it
@@ -38,7 +38,7 @@ export function GitHubSteps({
           {status.login && (
             <BoardPicker
               onAllow={() => {
-                act("/api/connect/github/sign-in", { more: "yes" });
+                act("/api/add-ons/github/sign-in", { more: "yes" });
               }}
               onDone={onDone}
             />
@@ -58,7 +58,7 @@ function useGitHub() {
   const [status, setStatus] = useState<GitHubStatus | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const look = useCallback(() => {
-    get<GitHubStatus>("/api/connect/github")
+    get<GitHubStatus>("/api/add-ons/github/status")
       .then(setStatus)
       .catch((error: unknown) => {
         setProblem(messageOf(error));
@@ -96,7 +96,7 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
         <Button
           className={SMALL}
           onClick={() => {
-            act("/api/connect/github/sign-in");
+            act("/api/add-ons/github/sign-in");
           }}
         >
           Sign in with GitHub
@@ -131,13 +131,13 @@ function BoardPicker({
   const [checking, setChecking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const repositories = useList<string>(
-    "/api/connect/github/repositories",
+    "/api/add-ons/github/repositories",
     setProblem,
   );
   const owner = repository.split("/")[0] ?? "";
   const boards = useList<{ number: number; title: string }>(
     owner
-      ? `/api/connect/github/boards?owner=${encodeURIComponent(owner)}`
+      ? `/api/add-ons/github/boards?owner=${encodeURIComponent(owner)}`
       : null,
     setProblem,
   );
@@ -146,7 +146,7 @@ function BoardPicker({
     setProblem(null);
     try {
       const { message } = await post<{ message: string }>(
-        "/api/connect/github",
+        "/api/add-ons/github/connect",
         { repository, board: Number(board), label, stages },
       );
       onDone(message);
@@ -246,7 +246,7 @@ function BoardColumns({
   const [columns, setColumns] = useState<string[]>([]);
   useEffect(() => {
     get<Columns>(
-      `/api/connect/github/columns?repository=${encodeURIComponent(repository)}&board=${board}`,
+      `/api/add-ons/github/columns?repository=${encodeURIComponent(repository)}&board=${board}`,
     )
       .then((found) => {
         setColumns(found.columns);

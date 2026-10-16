@@ -1,41 +1,25 @@
-import { GitBranch, LayoutGrid, SquareKanban } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { LayoutGrid } from "lucide-react";
+import { useState } from "react";
 
-import { messageOf, post } from "@/api";
+import { messageOf, post, type TrackerView } from "@/api";
+import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
 
-import { GitHubSteps } from "./github-steps";
-import { JiraSteps } from "./jira-steps";
-
-type Choice = "factory" | "github" | "jira";
-
-const CHOICES: { id: Choice; icon: ReactNode; title: string; text: string }[] =
-  [
-    {
-      id: "factory",
-      icon: <LayoutGrid aria-hidden />,
-      title: "The factory's own board",
-      text: "Work stays here, on the board in this app. Nothing to connect.",
-    },
-    {
-      id: "github",
-      icon: <GitBranch aria-hidden />,
-      title: "GitHub board",
-      text: "Through the GitHub CLI on this computer.",
-    },
-    {
-      id: "jira",
-      icon: <SquareKanban aria-hidden />,
-      title: "Jira Cloud",
-      text: "With an API token from your Jira account.",
-    },
-  ];
+// The factory's own board: "none", as the company file says.
+const OWN = {
+  id: "none",
+  icon: <LayoutGrid aria-hidden />,
+  title: "The factory's own board",
+  text: "Work stays here, on the board in this app. Nothing to connect.",
+};
 
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
-export function ConnectPage() {
+export function ConnectPage({
+  trackers,
+}: Readonly<{ trackers: TrackerView[] }>) {
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
@@ -61,25 +45,43 @@ export function ConnectPage() {
           </Button>
         </section>
       ) : (
-        <TrackerChoice current="none" onDone={setDone} />
+        <TrackerChoice trackers={trackers} current="none" onDone={setDone} />
       )}
     </div>
   );
 }
 
-// The factory's own board, a GitHub board or Jira: the three choices, and
-// under the chosen one its steps, each checked. Used right after setup and
-// on Settings.
+// The factory's own board, or a board of one of the tracker add-ons that
+// are on (those the page has steps for): the choices, and under the
+// chosen one its steps, each checked. Used right after setup and on
+// Settings.
 export function TrackerChoice({
+  trackers,
   current,
   onDone,
 }: Readonly<{
-  current: "none" | "github" | "jira";
+  trackers: TrackerView[];
+  current: string;
   onDone: (message: string) => void;
 }>) {
-  const [choice, setChoice] = useState<Choice>(
-    current === "none" ? "factory" : current,
-  );
+  const [choice, setChoice] = useState(current);
+  const choices = [
+    OWN,
+    ...trackers.flatMap((tracker) => {
+      const steps = TRACKER_STEPS[tracker.id];
+      return steps
+        ? [
+            {
+              id: tracker.id,
+              icon: steps.icon,
+              title: tracker.name,
+              text: tracker.about,
+            },
+          ]
+        : [];
+    }),
+  ];
+  const Steps = TRACKER_STEPS[choice]?.Steps;
   const [problem, setProblem] = useState<string | null>(null);
   const ownBoard = () => {
     setProblem(null);
@@ -98,7 +100,7 @@ export function TrackerChoice({
         role="radiogroup"
         aria-label="Tracker"
       >
-        {CHOICES.map((one) => (
+        {choices.map((one) => (
           <ChoiceCard
             key={one.id}
             chosen={choice === one.id}
@@ -111,40 +113,13 @@ export function TrackerChoice({
           />
         ))}
       </div>
-      {choice === "factory" && (
+      {choice === "none" && (
         <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
           Use the factory's board
         </Button>
       )}
-      {choice === "github" && <GitHubSteps onDone={onDone} />}
-      {choice === "jira" && <JiraSteps onDone={onDone} />}
+      {Steps && <Steps onDone={onDone} />}
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </div>
-  );
-}
-
-// One step: its number, title and what it says now, and what to do.
-export function Step({
-  n,
-  title,
-  done,
-  children,
-}: Readonly<{ n: number; title: string; done: boolean; children: ReactNode }>) {
-  return (
-    <li className="flex gap-3">
-      <span
-        className={
-          done
-            ? "flex size-7 flex-none items-center justify-center rounded-full bg-success/15 text-xs font-semibold text-success"
-            : "flex size-7 flex-none items-center justify-center rounded-full bg-surface-2 text-xs font-semibold"
-        }
-      >
-        {done ? "✓" : String(n)}
-      </span>
-      <div className="grid min-w-0 flex-1 gap-2 pt-0.5">
-        <span className="text-[15px] font-medium">{title}</span>
-        {children}
-      </div>
-    </li>
   );
 }

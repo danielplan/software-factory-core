@@ -12,15 +12,14 @@ import { messageOf } from "../products/product.ts";
 
 const id = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
-export const TRACKERS = ["none", "github", "jira"] as const;
-
 export const companySchema = z.object({
   name: z.string().min(1),
   // What the company does, in a sentence or two.
   about: z.string().default(""),
-  // Where its work is tracked: nowhere yet (the Ideas tab only), a GitHub
-  // board, or Jira Cloud. Their settings are in the settings groups.
-  tracker: z.enum(TRACKERS).default("none"),
+  // Where its work is tracked: the factory's own board ("none"), or the id
+  // of an add-on that tracks work (a GitHub board, Jira Cloud). Which board
+  // is in the factory's board.json.
+  tracker: id.default("none"),
   // The add-ons the factory uses, by id; the core extensions are on anyway.
   extensions: z.array(id).default([]),
   // Core extensions the company switches off.

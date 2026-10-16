@@ -78,6 +78,7 @@ test("what does not fit is said in plain words before anything starts", () => {
     name: "Beta",
     extensions: ["telepathy"],
     kits: ["react-web-app", "cobol-app"],
+    tracker: "pigeon-post",
   });
   const root = companyWith({
     site: { kind: "react-web-app", dependsOn: ["api"] },
@@ -87,6 +88,7 @@ test("what does not fit is said in plain words before anything starts", () => {
   const factory = assembleFactory(company, found.products, available);
   assert.deepEqual(factory.problems, [
     'there is no extension "telepathy"',
+    'work is tracked in "pigeon-post", but no add-on that is on tracks work there',
     'there is no kit "cobol-app"',
     '"tool" is a rust-app, but the company uses no kit for that kind',
     '"site" needs "api", which is not one of the products',

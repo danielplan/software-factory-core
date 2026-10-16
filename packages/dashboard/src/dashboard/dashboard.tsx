@@ -70,7 +70,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
           text={state.problems.join(" · ")}
         />
       )}
-      {tab === "connect" && <ConnectPage />}
+      {tab === "connect" && <ConnectPage trackers={state.trackers} />}
       {tab === "board" && <BoardTab state={state} />}
       {tab === "ideas" && <IdeasTab state={state} open={open} />}
       {tab === "settings" && <SettingsTab state={state} />}

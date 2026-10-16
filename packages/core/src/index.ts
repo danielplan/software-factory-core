@@ -6,7 +6,6 @@ export {
   COMPANY_FILE,
   companySchema,
   readCompany,
-  TRACKERS,
   type Company,
 } from "./company/company.ts";
 export {

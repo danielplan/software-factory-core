@@ -13,9 +13,7 @@ import {
 import { extname, join, normalize, sep } from "node:path";
 
 import { PICTURE_TYPES } from "./coach/pictures.ts";
-import { type Cli, GitHub, realCli } from "./connect/github.ts";
-import type { Fetcher } from "./connect/jira.ts";
-import { connectRoutes } from "./connect/routes.ts";
+import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerTools } from "./coach/setup-tools.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
@@ -39,12 +37,10 @@ const TYPES: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
-type Route = (body: unknown, url: URL) => unknown;
-
 export function startServer(options: {
   session: Session;
-  // Where the factory reaches GitHub and Jira (stand-ins in the tests).
-  connectors?: { cli: Cli; fetcher: Fetcher };
+  // The add-ons whose routes it answers (stand-ins in the tests).
+  addOns: AddOn[];
   // The built web interface (index.html and its files).
   page: string;
   port: number;
@@ -54,15 +50,19 @@ export function startServer(options: {
     const data = `data: ${JSON.stringify(options.session.state())}\n\n`;
     for (const response of watchers) response.write(data);
   };
-  const github = new GitHub(options.connectors?.cli ?? realCli(), () => {
-    changed();
-  });
+  const { session } = options;
   const routes = {
-    ...routesFor(options.session),
-    ...connectRoutes(
-      options.session,
-      github,
-      options.connectors?.fetcher ?? fetch,
+    ...routesFor(session),
+    ...addOnRoutes(
+      options.addOns,
+      (id) => ({
+        connect: (entry, secrets) => {
+          session.chooseBoard(id, entry, secrets);
+        },
+        installTool: (tool) => session.installTool(tool),
+        changed,
+      }),
+      (id) => session.isOn(id),
     ),
   };
   const server = createServer((incoming, response) => {
@@ -119,6 +119,9 @@ function routesFor(session: Session): Record<string, Route> {
     },
     "POST /api/setup/open": () => {
       session.openFactory();
+    },
+    "POST /api/connect/own-board": () => {
+      session.chooseBoard("none");
     },
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),

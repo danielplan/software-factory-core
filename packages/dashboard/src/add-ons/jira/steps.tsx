@@ -7,9 +7,9 @@ import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { Step } from "./connect-page";
-import { Pick, WhichWork } from "./pick";
-import { type Columns, StageMapping } from "./stage-map";
+import { Step } from "@/connect/step";
+import { Pick, WhichWork } from "@/connect/pick";
+import { type Columns, StageMapping } from "@/connect/stage-map";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };
@@ -44,7 +44,7 @@ export function JiraSteps({
               onClick={() =>
                 void run(async () => {
                   setFound(
-                    await post<Projects>("/api/connect/jira/projects", login),
+                    await post<Projects>("/api/add-ons/jira/projects", login),
                   );
                 })
               }
@@ -93,7 +93,7 @@ function ProjectStep({
     setProject(key);
     setColumns(null);
     void run(async () => {
-      const found = await post<Columns>("/api/connect/jira/columns", {
+      const found = await post<Columns>("/api/add-ons/jira/columns", {
         ...login,
         project: key,
       });
@@ -126,7 +126,7 @@ function ProjectStep({
         onClick={() =>
           void run(async () => {
             const { message } = await post<{ message: string }>(
-              "/api/connect/jira",
+              "/api/add-ons/jira/connect",
               { ...login, project, label, stages },
             );
             onDone(message);

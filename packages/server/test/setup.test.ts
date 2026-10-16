@@ -60,7 +60,7 @@ test("the factory's folder comes first, once, and its settings save from the pag
     ).json()) as { refused: Record<string, string> };
     assert.deepEqual(saved.refused, {});
     assert.match(
-      readFileSync(join(root, "settings", "tracker.env"), "utf8"),
+      readFileSync(join(root, "settings", "jira.env"), "utf8"),
       /JIRA_TOKEN=secret-1/,
     );
     const tracked = session.state();

@@ -53,16 +53,25 @@ a major version may need a company to change something, and says what.
   **Jira Cloud** with an API token (checked against Jira, which lists the
   projects). Connecting picks the label of the work the factory takes in
   (`factory` by default, `*` for all) and matches the board's columns to the
-  factory's stages, suggested from their names. Routes under
-  `/api/connect/…`; `POST /api/connect/own-board` keeps the factory's own
-  board. `startServer` takes `connectors` (stand-ins in the tests).
+  factory's stages, suggested from their names. `POST
+/api/connect/own-board` keeps the factory's own board.
+- **GitHub and Jira are add-ons**, the first real ones: each is an
+  extension (`tracker: true`, built in and on unless switched off with
+  `without`) with its own routes at `/api/add-ons/<id>/…` (answered only
+  while it is on) and its own connecting steps on the page
+  (`packages/server/src/add-ons/`, `packages/dashboard/src/add-ons/`). The
+  company's `tracker` is `none` or the id of an add-on that tracks work;
+  the factory's checks say so when it names none that is on. `startServer`
+  takes `addOns` instead of `connectors`; the state lists the `trackers`
+  that are on. The `trackers` extension is gone.
 - **One stage vocabulary** for work everywhere: `draft`, then `backlog`,
   `todo`, `doing`, `review`, `done` (`STAGES` in the server's `api.ts`).
   Ideas marked `ready` before are read as `backlog`.
-- **`board.json`** in the factory folder keeps which board is connected:
-  the GitHub repository and board, or the Jira site, email and project; the
-  label; and the column for each stage. Only Jira's API token stays in the
-  settings (`settings/tracker.env`, the `jira` group); the GitHub CLI keeps
+- **`board.json`** in the factory folder keeps which board is connected,
+  by tracker add-on: the label, the column for each stage, and what the
+  add-on needs (the GitHub repository and board, or the Jira site, email and
+  project). Only Jira's API token stays in the
+  settings (`settings/jira.env`, the Jira add-on's group); the GitHub CLI keeps
   its own sign-in. **A company that connected a board on an earlier build
   of this branch connects it again** (the `GITHUB_*` and `JIRA_*` settings
   besides `JIRA_TOKEN` are no longer read).

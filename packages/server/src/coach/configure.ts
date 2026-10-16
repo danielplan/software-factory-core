@@ -11,6 +11,7 @@ import { join } from "node:path";
 import {
   type Company,
   type Detected,
+  type Extension,
   idFrom,
   type Kit,
   withFreePorts,
@@ -30,7 +31,7 @@ export type Configuration = {
     users?: { who: string; does: string }[];
     dependsOn?: string[];
   }[];
-  tracker?: "none" | "github" | "jira";
+  tracker?: string;
   addOns?: string[];
   settings?: Record<string, Record<string, string | null>>;
   install?: string[];
@@ -50,7 +51,8 @@ export type Workshop = {
     group: string,
     values: Record<string, unknown>,
   ) => { refused: Record<string, string> };
-  addOns: string[];
+  // Every extension there is: the add-ons, and those that track work.
+  extensions: Extension[];
   install: (ids: string[]) => Promise<boolean>;
   // What the factory's own loading found wrong.
   problems: () => string[];
@@ -110,10 +112,16 @@ function companyChanges(
 ): string[] {
   if (!asked.tracker && !asked.addOns) return [];
   const unknown = (asked.addOns ?? []).filter(
-    (id) => !shop.addOns.includes(id),
+    (id) => !shop.extensions.some((e) => !e.core && e.id === id),
   );
   if (unknown.length > 0)
     throw new Refused(`There is no add-on ${unknown.join(", ")}.`);
+  const { tracker } = asked;
+  const trackers = shop.extensions.filter((e) => e.tracker).map((e) => e.id);
+  if (tracker && tracker !== "none" && !trackers.includes(tracker))
+    throw new Refused(
+      `No add-on tracks work in ${tracker}: use none or one of ${trackers.join(", ")}.`,
+    );
   shop.saveCompany({
     ...company,
     ...(asked.tracker ? { tracker: asked.tracker } : {}),

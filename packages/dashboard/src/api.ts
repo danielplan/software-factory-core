@@ -13,8 +13,9 @@ export type {
   IconName,
   StageMap,
   State,
+  TrackerView,
 } from "../../server/src/api.ts";
-export type { Company, GroupView } from "../../core/src/index.ts";
+export type { GroupView } from "../../core/src/index.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
 // The server answers buttons only from its own page, which says so.

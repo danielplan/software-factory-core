@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TRACKER_NAMES } from "@/setup/draft";
 
 import { TrackerChoice } from "@/connect/connect-page";
 
@@ -23,7 +22,8 @@ import { SettingInput } from "./setting-input";
 // tracker's settings) and every other settings group. Each card shows what is set now and saves on
 // its own; the parts that read it can be restarted from there.
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
-  const trackers = new Set<string>(Object.keys(TRACKER_NAMES));
+  // A tracker add-on's settings group (its id) is filled in by connecting.
+  const trackers = new Set(state.trackers.map((tracker) => tracker.id));
   const groups = state.settings.filter((group) => !trackers.has(group.id));
   const sections = [
     "Where work is tracked",
@@ -87,12 +87,19 @@ function sectionId(name: string): string {
 // on the page; what was connected, once done.
 function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
   const [done, setDone] = useState<string | null>(null);
+  const now =
+    state.trackers.find((tracker) => tracker.id === state.company.tracker)
+      ?.name ?? "The factory's board";
   return (
     <Topic
       title="Where work is tracked"
-      about={`Now: ${TRACKER_NAMES[state.company.tracker]}. Where the ideas you agree to become work to build.`}
+      about={`Now: ${now}. Where the ideas you agree to become work to build.`}
     >
-      <TrackerChoice current={state.company.tracker} onDone={setDone} />
+      <TrackerChoice
+        trackers={state.trackers}
+        current={state.company.tracker}
+        onDone={setDone}
+      />
       {done && <p className="text-sm font-medium text-success">{done}</p>}
     </Topic>
   );

@@ -1,8 +1,9 @@
-// Which board the factory's work is on, besides its own: the GitHub board
-// or Jira project connected, the label that marks the factory's work, and
-// which of its columns each stage is. Kept in the factory's board.json,
-// with the factory, since none of it is secret (Jira's token is in the
-// settings, on this computer only).
+// Which board the factory's work is on, besides its own: for each tracker
+// add-on connected (by its id), the label that marks the factory's work,
+// which of the board's columns each stage is, and what the add-on needs to
+// find the board (a GitHub repository and board, a Jira site and project).
+// Kept in the factory's board.json, with the factory, since none of it is
+// secret (secrets are in the add-on's settings, on this computer only).
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -20,25 +21,10 @@ const stages = z.object(
   >,
 );
 
-export const boardSchema = z.object({
-  github: z
-    .object({
-      repository: z.string(),
-      board: z.number().int(),
-      label: z.string(),
-      stages,
-    })
-    .optional(),
-  jira: z
-    .object({
-      site: z.string(),
-      email: z.string(),
-      project: z.string(),
-      label: z.string(),
-      stages,
-    })
-    .optional(),
-});
+export const boardSchema = z.record(
+  z.string(),
+  z.looseObject({ label: z.string(), stages }),
+);
 
 export type Board = z.infer<typeof boardSchema>;
 

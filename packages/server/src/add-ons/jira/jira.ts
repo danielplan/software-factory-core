@@ -2,7 +2,7 @@
 // site, the owner's email and the token are checked against Jira itself,
 // which then lists the projects to pick from.
 
-import { Refused } from "../refused.ts";
+import { Refused } from "../../refused.ts";
 
 export type JiraLogin = { site: string; email: string; token: string };
 

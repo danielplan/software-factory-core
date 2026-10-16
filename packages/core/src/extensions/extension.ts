@@ -27,6 +27,9 @@ export const extensionSchema = z.object({
   about: z.string().min(1),
   // Ships with the core and is on unless the company switches it off.
   core: z.boolean().default(false),
+  // A place where work is tracked (a GitHub board, Jira): the company's
+  // tracker names one.
+  tracker: z.boolean().default(false),
   // The factory's own programs this extension runs.
   parts: z.array(partSchema).default([]),
   settings: z.array(settingGroupSchema).default([]),

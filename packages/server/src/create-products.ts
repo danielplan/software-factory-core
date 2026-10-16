@@ -12,7 +12,7 @@ import type { Job, SetupProduct } from "./api.ts";
 import { runJobs, runSteps } from "./jobs.ts";
 
 // True when every product was made.
-export async function createProducts(
+async function createProducts(
   products: SetupProduct[],
   kits: Kit[],
   show: (jobs: Job[]) => void,
@@ -27,11 +27,20 @@ export async function createProducts(
   );
 }
 
-// Starts the new products that run (a kit may make no part for one).
-export async function startNew(
-  launcher: Launcher,
+// The new products made, then every product added that runs started (a
+// kit may make no part for one), once all were made.
+export async function makeAndStart(
   products: SetupProduct[],
+  kits: Kit[],
+  on: { show: (jobs: Job[]) => void; launcher: () => Launcher | null },
 ): Promise<void> {
+  const made = await createProducts(
+    products.filter((p) => p.isNew),
+    kits,
+    on.show,
+  );
+  const launcher = on.launcher();
+  if (!made || !launcher) return;
   const parts = new Set(launcher.state().map((part) => part.id));
   const starting = products.filter((p) => parts.has(p.id));
   await Promise.allSettled(starting.map((p) => launcher.start(p.id)));
