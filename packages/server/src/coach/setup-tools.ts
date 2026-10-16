@@ -22,7 +22,9 @@ export const COACH_HEADER = "x-setup-coach";
 // What the tools act on: the coach's map and the factory being made.
 export type ToolsFor = {
   token: string;
-  draw: (drawing: Drawing) => string;
+  draw: (drawing: Drawing & { title?: string }) => string;
+  // An idea's map may also name the idea.
+  titled?: boolean;
   // Only the setup coach's.
   configure?: (configuration: Configuration) => Promise<string>;
 };
@@ -92,6 +94,16 @@ function toolsFor(on: ToolsFor): McpServer {
             areas: z.array(z.string()).optional(),
           })
           .optional(),
+        ...(on.titled
+          ? {
+              title: z
+                .string()
+                .optional()
+                .describe(
+                  'The idea\'s title, a few words as on a to-do list ("Port weather for drivers"): give it once you understand the idea.',
+                ),
+            }
+          : {}),
       },
     },
     (args) => answer(() => on.draw(args)),

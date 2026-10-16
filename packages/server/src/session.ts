@@ -186,6 +186,7 @@ export class Session {
     const ideas = this.ideasOrRefuse();
     return {
       token: ideas.token(id),
+      titled: true,
       draw: (drawing) =>
         ideas.draw(id, drawing, (path) =>
           pictureIn(this.options.project, path),

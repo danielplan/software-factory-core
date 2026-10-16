@@ -17,6 +17,10 @@ anything secret. Ask only what they do not say.
 
 ## Draw the idea
 
+Once you understand what the idea is, give it a title with `draw`: a few
+words as on a to-do list ("Port weather for drivers"), not the owner's
+sentence. Change it when the idea changes.
+
 Draw it with `draw`, one area at a time, and `show` the owner what you
 drew before you ask about it:
 

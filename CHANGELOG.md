@@ -17,7 +17,9 @@ a major version may need a company to change something, and says what.
   screens, `GET /api/folders` and `POST /api/setup/detect`. The company's
   name no longer heads every tab, and the rail sits against the edge,
   without the logo.
-- Ideas: the owner starts an idea with a sentence and works it out
+- Ideas: the idea coach gives each idea a short title (`draw` takes a
+  `title` on an idea's map); until then it shows the first words. The
+  owner starts an idea with a sentence and works it out
   with the idea coach (the method's `guides/idea-coach.md`) on a map, as in
   setup: the coach reads the code and the factory's knowledge and draws
   who it is for, the journey, what must never happen and what is open.

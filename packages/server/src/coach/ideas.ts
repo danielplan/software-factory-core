@@ -162,8 +162,16 @@ export class Ideas {
     });
   }
 
-  draw(id: string, drawing: Drawing, picture: (path: string) => string) {
-    return this.idea(id).talk.draw(drawing, picture);
+  // The idea's map, and its title if the coach gives one.
+  draw(
+    id: string,
+    { title, ...drawing }: Drawing & { title?: string },
+    picture: (path: string) => string,
+  ): string {
+    const idea = this.idea(id);
+    if (title?.trim())
+      idea.kept = { ...idea.kept, title: title.trim().slice(0, 80) };
+    return idea.talk.draw(drawing, picture);
   }
 
   ownerChange(id: string, change: ChangeDraft): void {
@@ -208,11 +216,9 @@ export class Ideas {
   }
 }
 
-// The idea's first words as its title: the first line, cut at a word.
+// The idea's first few words, until the coach gives it a title.
 function titleOf(words: string): string {
-  const line = words.split("\n")[0] ?? words;
-  if (line.length <= 60) return line;
-  const cut = line.slice(0, 60);
-  const space = cut.lastIndexOf(" ");
-  return `${space > 20 ? cut.slice(0, space) : cut}…`;
+  const all = (words.split("\n")[0] ?? words).split(/\s+/).filter(Boolean);
+  const first = all.slice(0, 6).join(" ");
+  return all.length > 6 ? `${first}…` : first;
 }

@@ -34,6 +34,7 @@ test("an idea is worked out with the coach on its map, kept in the factory, mark
               },
             ],
             show: { areas: ["Who"] },
+            title: "Gardeners' wish list",
           },
         ],
         ["configure", { project: { name: "Nope" } }],
@@ -52,10 +53,7 @@ test("an idea is worked out with the coach on its map, kept in the factory, mark
     });
     const { id } = (await made.json()) as { id: string };
     const idea = await answered(session, id);
-    assert.equal(
-      idea.title,
-      "A wish list for gardeners, so they can save the tools they…",
-    );
+    assert.equal(idea.title, "Gardeners' wish list");
     assert.equal(idea.status, "draft");
     assert.deepEqual(
       idea.messages.map((m) => m.from),
@@ -126,8 +124,15 @@ test("an idea's tools answer only its own coach, and only for an idea that is th
   const { session, server, post, base } = await stage(pretendClaude([]).claude);
   try {
     await post("/api/company", { name: "Acme", about: "" });
-    const made = await post("/api/ideas", { text: "Gift cards" });
+    const made = await post("/api/ideas", {
+      text: "Gift cards for every season sent by email",
+    });
     const { id } = (await made.json()) as { id: string };
+    // Its first words, until the coach gives it a title.
+    assert.deepEqual(
+      ideasOf(session).map((idea) => idea.title),
+      ["Gift cards for every season sent…"],
+    );
     const call = (path: string, token: string) =>
       fetch(`${base}${path}`, {
         method: "POST",
