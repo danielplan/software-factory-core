@@ -68,7 +68,7 @@ function NewIdea() {
         coach={{ working: busy, problem }}
         onSay={(text) => void start(text)}
         placeholder="A wish list, so customers can save what they like for later…"
-        className="glow-ring min-h-28 p-3 pl-5 text-base shadow-big"
+        big
       />
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </section>

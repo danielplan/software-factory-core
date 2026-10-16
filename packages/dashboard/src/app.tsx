@@ -3,12 +3,12 @@ import { WifiOff } from "lucide-react";
 import { useFactoryState } from "@/api";
 import { Dashboard } from "@/dashboard/dashboard";
 
-// The whole page: the dashboard, on the grey ground (it asks for the
+// The whole page: the dashboard, on the soft gradient ground (it asks for the
 // company first when there is none).
 export function App() {
   const { state, connected } = useFactoryState();
   return (
-    <div className="min-h-full px-4 py-6 sm:px-6 sm:py-8">
+    <div className="glow-page min-h-screen bg-fixed px-4 pt-10 pb-8 sm:px-6 sm:pt-16">
       <div className="mx-auto grid w-full max-w-[1180px] gap-5">
         {!connected && (
           <div

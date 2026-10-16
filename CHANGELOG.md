@@ -15,8 +15,11 @@ a major version may need a company to change something, and says what.
 - The dashboard uses one font, shadcn's Card, Badge and Select, and a
   colour per stage of work (Draft, Backlog, To do, In progress, Review,
   Done) and per area. System says in a sentence how the factory is doing
-  and what to do, without the "Next" line. Talking (voice) works again on
-  the Ideas page's box: what is said starts the idea.
+  and what to do, without the "Next" line, and shows only the products
+  (each card says what the part does); the factory's own overview (ideas,
+  where work is tracked, the builder) heads Settings. The pages sit on a
+  soft gradient, lower on the screen. The Ideas page's box is a plain
+  card with Talk and Send below the text; what is said starts the idea.
 - Connecting where work is tracked is guided, right after the factory is
   opened (and from the board's next steps and Settings): a **GitHub
   board** through the GitHub CLI on this computer (installed if missing;

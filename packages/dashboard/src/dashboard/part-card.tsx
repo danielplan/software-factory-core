@@ -50,6 +50,11 @@ export function PartCard({
           </a>
         )}
       </div>
+      {part.does && (
+        <span className="line-clamp-2 text-xs text-foreground/70">
+          {part.does}
+        </span>
+      )}
       <span className="text-xs text-muted-foreground">
         {part.light === "starting" && part.step
           ? `Starting · ${part.step}`

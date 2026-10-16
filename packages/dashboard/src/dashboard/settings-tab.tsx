@@ -15,6 +15,7 @@ import {
 import { TRACKER_NAMES } from "@/setup/draft";
 
 import type { FactoryState } from "./dashboard";
+import { FactoryOverview } from "./factory-overview";
 import { SettingInput } from "./setting-input";
 
 type Tracker = Company["tracker"];
@@ -42,6 +43,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
       <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
         Settings
       </h1>
+      <FactoryOverview state={state} />
       <TrackerCard state={state} />
       {state.settings
         .filter((group) => !trackers.has(group.id))
