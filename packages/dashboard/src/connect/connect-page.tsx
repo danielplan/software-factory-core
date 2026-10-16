@@ -1,7 +1,8 @@
 import { GitBranch, LayoutGrid, SquareKanban } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
-import { post } from "@/api";
+import { messageOf, post } from "@/api";
+import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
 
@@ -32,17 +33,10 @@ const CHOICES: { id: Choice; icon: ReactNode; title: string; text: string }[] =
     },
   ];
 
-// Where work is tracked, right after setup (and from Settings later): the
-// factory's own board, or a GitHub board or Jira connected step by step,
-// each step checked.
+// Where work is tracked, right after setup: the choice and its steps, and
+// once done, the way to the board.
 export function ConnectPage() {
-  const [choice, setChoice] = useState<Choice>("factory");
   const [done, setDone] = useState<string | null>(null);
-  const ownBoard = () => {
-    void post("/api/connect/later").finally(() => {
-      window.location.hash = "board";
-    });
-  };
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
@@ -67,34 +61,65 @@ export function ConnectPage() {
           </Button>
         </section>
       ) : (
-        <>
-          <div
-            className="grid gap-3 sm:grid-cols-3"
-            role="radiogroup"
-            aria-label="Tracker"
-          >
-            {CHOICES.map((one) => (
-              <ChoiceCard
-                key={one.id}
-                chosen={choice === one.id}
-                icon={one.icon}
-                title={one.title}
-                text={one.text}
-                onChoose={() => {
-                  setChoice(one.id);
-                }}
-              />
-            ))}
-          </div>
-          {choice === "factory" && (
-            <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
-              Use the factory's board
-            </Button>
-          )}
-          {choice === "github" && <GitHubSteps onDone={setDone} />}
-          {choice === "jira" && <JiraSteps onDone={setDone} />}
-        </>
+        <TrackerChoice current="none" onDone={setDone} />
       )}
+    </div>
+  );
+}
+
+// The factory's own board, a GitHub board or Jira: the three choices, and
+// under the chosen one its steps, each checked. Used right after setup and
+// on Settings.
+export function TrackerChoice({
+  current,
+  onDone,
+}: Readonly<{
+  current: "none" | "github" | "jira";
+  onDone: (message: string) => void;
+}>) {
+  const [choice, setChoice] = useState<Choice>(
+    current === "none" ? "factory" : current,
+  );
+  const [problem, setProblem] = useState<string | null>(null);
+  const ownBoard = () => {
+    setProblem(null);
+    post("/api/company/tracker", { tracker: "none" })
+      .then(() => post("/api/connect/later"))
+      .then(() => {
+        onDone("Work stays on the factory's own board.");
+      })
+      .catch((error: unknown) => {
+        setProblem(messageOf(error));
+      });
+  };
+  return (
+    <div className="grid gap-5">
+      <div
+        className="grid gap-3 sm:grid-cols-3"
+        role="radiogroup"
+        aria-label="Tracker"
+      >
+        {CHOICES.map((one) => (
+          <ChoiceCard
+            key={one.id}
+            chosen={choice === one.id}
+            icon={one.icon}
+            title={one.title}
+            text={one.text}
+            onChoose={() => {
+              setChoice(one.id);
+            }}
+          />
+        ))}
+      </div>
+      {choice === "factory" && (
+        <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
+          Use the factory's board
+        </Button>
+      )}
+      {choice === "github" && <GitHubSteps onDone={onDone} />}
+      {choice === "jira" && <JiraSteps onDone={onDone} />}
+      {problem && <ProblemBox title="That did not work" text={problem} />}
     </div>
   );
 }

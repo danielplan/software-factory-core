@@ -1,8 +1,6 @@
-import { GitBranch, LayoutGrid, SquareKanban } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
-import { type Company, type GroupView, messageOf, post } from "@/api";
-import { ChoiceCard } from "@/components/choice-card";
+import { type GroupView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,27 +12,15 @@ import {
 } from "@/components/ui/card";
 import { TRACKER_NAMES } from "@/setup/draft";
 
+import { TrackerChoice } from "@/connect/connect-page";
+
 import type { FactoryState } from "./dashboard";
 import { SettingInput } from "./setting-input";
 
-type Tracker = Company["tracker"];
-
-const TRACKER_ICONS: Record<Tracker, ReactNode> = {
-  none: <LayoutGrid aria-hidden />,
-  github: <GitBranch aria-hidden />,
-  jira: <SquareKanban aria-hidden />,
-};
-
-const TRACKER_ABOUT: Record<Tracker, string> = {
-  none: "Work stays here, on the board in this app.",
-  github: "Ideas become cards on a GitHub board.",
-  jira: "Ideas become issues in a Jira Cloud project.",
-};
-
-// The factory's settings, in order: a list of the sections at the side,
+// The factory's settings, in order: a list of the sections at the side
+// (when there is more than one),
 // then one card each: where work is tracked (with only the chosen
-// tracker's settings), every other settings group, and where each part
-// answers. Each card shows what is set now and saves on
+// tracker's settings) and every other settings group. Each card shows what is set now and saves on
 // its own; the parts that read it can be restarted from there.
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const trackers = new Set<string>(Object.keys(TRACKER_NAMES));
@@ -42,21 +28,25 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const sections = [
     "Where work is tracked",
     ...groups.map((group) => group.name),
-    ...(state.parts.some((part) => part.link) ? ["Addresses"] : []),
   ];
   return (
     <div className="grid gap-5">
       <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
         Settings
       </h1>
-      <div className="grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,48rem)]">
-        <Sections names={sections} />
+      <div
+        className={
+          sections.length > 1
+            ? "grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,48rem)]"
+            : "grid max-w-3xl"
+        }
+      >
+        {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
           <TrackerCard state={state} />
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}
-          <Addresses state={state} />
         </div>
       </div>
     </div>
@@ -93,50 +83,17 @@ function sectionId(name: string): string {
   return `settings-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
+// Where work is tracked: the same choice and steps as right after setup,
+// on the page; what was connected, once done.
 function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
-  const [tracker, setTracker] = useState<Tracker>(state.company.tracker);
-  const group = state.settings.find((g) => g.id === tracker);
-  const form = useForm("/api/company/tracker", (values) => ({
-    tracker,
-    settings: values,
-  }));
+  const [done, setDone] = useState<string | null>(null);
   return (
     <Topic
       title="Where work is tracked"
-      about="Where the ideas you agree with the factory become work to build."
+      about={`Now: ${TRACKER_NAMES[state.company.tracker]}. Where the ideas you agree to become work to build.`}
     >
-      <div
-        className="grid gap-3 sm:grid-cols-3"
-        role="radiogroup"
-        aria-label="Tracker"
-      >
-        {(Object.keys(TRACKER_NAMES) as Tracker[]).map((one) => (
-          <ChoiceCard
-            key={one}
-            chosen={tracker === one}
-            icon={TRACKER_ICONS[one]}
-            title={TRACKER_NAMES[one]}
-            text={TRACKER_ABOUT[one]}
-            onChoose={() => {
-              setTracker(one);
-              form.reset();
-            }}
-          />
-        ))}
-      </div>
-      <a
-        href="#connect"
-        className="justify-self-start text-sm underline underline-offset-2"
-      >
-        Connect step by step, with a check that it works
-      </a>
-      {group && <Fields group={group} form={form} />}
-      <Saving
-        form={form}
-        changed={form.changed || tracker !== state.company.tracker}
-        usedBy={group?.usedBy ?? []}
-        state={state}
-      />
+      <TrackerChoice current={state.company.tracker} onDone={setDone} />
+      {done && <p className="text-sm font-medium text-success">{done}</p>}
     </Topic>
   );
 }
@@ -158,33 +115,6 @@ function GroupCard({
         usedBy={group.usedBy}
         state={state}
       />
-    </Topic>
-  );
-}
-
-// Where each part answers, to open it or tell someone.
-function Addresses({ state }: Readonly<{ state: FactoryState }>) {
-  const linked = state.parts.filter((part) => part.link);
-  if (linked.length === 0) return null;
-  return (
-    <Topic title="Addresses" about="Where each part answers on this computer.">
-      <dl className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[12rem_1fr]">
-        {linked.map((part) => (
-          <div key={part.id} className="contents">
-            <dt className="text-muted-foreground">{part.name}</dt>
-            <dd>
-              <a
-                href={part.link ?? ""}
-                target="_blank"
-                rel="noreferrer"
-                className="underline-offset-2 hover:underline"
-              >
-                {part.link}
-              </a>
-            </dd>
-          </div>
-        ))}
-      </dl>
     </Topic>
   );
 }

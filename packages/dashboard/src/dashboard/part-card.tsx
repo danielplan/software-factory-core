@@ -1,7 +1,7 @@
 import { ChevronDown, ExternalLink } from "lucide-react";
 
 import type { PartView } from "@/api";
-import { LABEL, StatusLight } from "@/components/status-light";
+import { StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -24,9 +24,14 @@ export function PartCard({
   part,
   onPress,
 }: Readonly<{ part: PartView; onPress: (path: string) => void }>) {
+  // Only what the light does not say: a step, or that it was started
+  // elsewhere.
+  const step =
+    part.light === "starting" && part.step
+      ? `Starting · ${part.step}`
+      : part.step;
   const status =
-    part.step ??
-    (part.outside ? "Running, started outside the factory" : LABEL[part.light]);
+    step ?? (part.outside ? "Running, started outside the factory" : null);
   return (
     <div
       data-light={part.light}
@@ -55,11 +60,9 @@ export function PartCard({
           {part.does}
         </span>
       )}
-      <span className="text-xs text-muted-foreground">
-        {part.light === "starting" && part.step
-          ? `Starting · ${part.step}`
-          : status}
-      </span>
+      {status && (
+        <span className="text-xs text-muted-foreground">{status}</span>
+      )}
       <PartButtons part={part} onPress={onPress} />
       {part.problem && <PartProblem problem={part.problem} />}
     </div>

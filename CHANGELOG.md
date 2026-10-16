@@ -18,8 +18,11 @@ a major version may need a company to change something, and says what.
   and what to do, without the "Next" line, and shows only the products
   (each card says what the part does); its status in a row of its
   own with Start all and Stop all, and the factory itself (ideas, where
-  work is tracked, the builder) below the products. Settings lists its
-  sections at the side, one card each. The pages sit on a
+  work is tracked, the builder) below the products. Settings has one card per
+  topic (listed at the side when there are several); where work is
+  tracked is chosen and connected right there, with the same steps as
+  after setup. The factory overview and the addresses are gone; a part
+  card shows its state in words only when the light does not say it. The pages sit on a
   soft gradient (plain in the dark theme), lower on the screen. The Ideas page's box is a plain
   card with Talk and Send below the text; what is said starts the idea.
 - Connecting where work is tracked is guided, right after the factory is

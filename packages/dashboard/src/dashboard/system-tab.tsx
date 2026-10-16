@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
-import { FactoryOverview } from "./factory-overview";
 import { PartCard } from "./part-card";
 
 // The factory at a glance: how it is doing in a line, then its components
@@ -81,7 +80,6 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         />
       </div>
       <Legend />
-      <FactoryOverview state={state} />
     </div>
   );
 }
