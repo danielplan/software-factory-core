@@ -9,9 +9,9 @@ import type { FactoryState } from "./dashboard";
 // and its builder (to come), each a tile that leads to it.
 export function FactoryOverview({ state }: Readonly<{ state: FactoryState }>) {
   return (
-    <Card aria-label="Your factory" className="gap-3 py-5 shadow-soft">
+    <Card aria-label="The factory" className="gap-3 py-5 shadow-soft">
       <CardHeader className="px-5">
-        <CardTitle className="text-[17px]">Your factory</CardTitle>
+        <CardTitle className="text-[17px]">The factory</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-2.5 px-5 sm:grid-cols-3">
         {componentsOf(state).map(({ icon: Icon, ...one }) => {

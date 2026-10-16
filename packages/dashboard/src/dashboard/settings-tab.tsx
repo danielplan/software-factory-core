@@ -15,7 +15,6 @@ import {
 import { TRACKER_NAMES } from "@/setup/draft";
 
 import type { FactoryState } from "./dashboard";
-import { FactoryOverview } from "./factory-overview";
 import { SettingInput } from "./setting-input";
 
 type Tracker = Company["tracker"];
@@ -32,27 +31,66 @@ const TRACKER_ABOUT: Record<Tracker, string> = {
   jira: "Ideas become issues in a Jira Cloud project.",
 };
 
-// The factory's settings, one card per topic: where work is tracked (with
-// only the chosen tracker's settings), every other settings group, and
-// where each part answers. Each card shows what is set now and saves on
+// The factory's settings, in order: a list of the sections at the side,
+// then one card each: where work is tracked (with only the chosen
+// tracker's settings), every other settings group, and where each part
+// answers. Each card shows what is set now and saves on
 // its own; the parts that read it can be restarted from there.
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const trackers = new Set<string>(Object.keys(TRACKER_NAMES));
+  const groups = state.settings.filter((group) => !trackers.has(group.id));
+  const sections = [
+    "Where work is tracked",
+    ...groups.map((group) => group.name),
+    ...(state.parts.some((part) => part.link) ? ["Addresses"] : []),
+  ];
   return (
-    <div className="grid max-w-3xl gap-5">
+    <div className="grid gap-5">
       <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
         Settings
       </h1>
-      <FactoryOverview state={state} />
-      <TrackerCard state={state} />
-      {state.settings
-        .filter((group) => !trackers.has(group.id))
-        .map((group) => (
-          <GroupCard key={group.id} group={group} state={state} />
-        ))}
-      <Addresses state={state} />
+      <div className="grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,48rem)]">
+        <Sections names={sections} />
+        <div className="grid gap-5">
+          <TrackerCard state={state} />
+          {groups.map((group) => (
+            <GroupCard key={group.id} group={group} state={state} />
+          ))}
+          <Addresses state={state} />
+        </div>
+      </div>
     </div>
   );
+}
+
+// The settings' sections, to go to one.
+function Sections({ names }: Readonly<{ names: string[] }>) {
+  return (
+    <nav
+      aria-label="Sections"
+      className="sticky top-6 grid gap-0.5 max-lg:hidden"
+    >
+      {names.map((name) => (
+        <button
+          key={name}
+          type="button"
+          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+          onClick={() => {
+            document
+              .getElementById(sectionId(name))
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          {name}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+// "Where work is tracked" → "settings-where-work-is-tracked".
+function sectionId(name: string): string {
+  return `settings-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
 function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
@@ -157,7 +195,11 @@ function Topic({
   children,
 }: Readonly<{ title: string; about: string; children: ReactNode }>) {
   return (
-    <Card aria-label={title} className="gap-5 shadow-soft">
+    <Card
+      id={sectionId(title)}
+      aria-label={title}
+      className="scroll-mt-6 gap-5 shadow-soft"
+    >
       <CardHeader>
         <CardTitle className="text-[17px]">{title}</CardTitle>
         <CardDescription>{about}</CardDescription>

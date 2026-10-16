@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
+import { FactoryOverview } from "./factory-overview";
 import { PartCard } from "./part-card";
 
 // The factory at a glance: how it is doing in a line, then its components
@@ -28,13 +29,12 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
   const top = headline(state.parts);
   return (
     <div className="grid content-start gap-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pt-1">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">System</h1>
-        <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-          <StatusLight light={top.light} />
-          {top.text}
-        </span>
-        <span className="flex-1" />
+      <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
+        System
+      </h1>
+      <Card className="flex-row flex-wrap items-center gap-3 px-5 py-4 shadow-soft">
+        <StatusLight light={top.light} />
+        <span className="min-w-0 flex-1 text-[15px]">{top.text}</span>
         <Button
           variant="outline"
           className="h-9 px-3.5 text-[13px]"
@@ -53,7 +53,7 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         >
           Stop all
         </Button>
-      </div>
+      </Card>
       {problem && <ProblemBox title="That did not work" text={problem} />}
       <div className="grid gap-4">
         <Area
@@ -81,6 +81,7 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         />
       </div>
       <Legend />
+      <FactoryOverview state={state} />
     </div>
   );
 }
