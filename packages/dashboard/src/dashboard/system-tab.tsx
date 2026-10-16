@@ -5,7 +5,13 @@ import { Arrow } from "@/components/arrow";
 import { ProblemBox } from "@/components/problem-box";
 import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
@@ -34,30 +40,36 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
       <Card className="flex-row flex-wrap items-center gap-3 px-5 py-4 shadow-soft">
         <StatusLight light={top.light} />
         <span className="min-w-0 flex-1 text-[15px]">{top.text}</span>
-        <Button
-          variant="outline"
-          className="h-9 px-3.5 text-[13px]"
-          onClick={() => {
-            press("/api/start-all");
-          }}
-        >
-          Start all
-        </Button>
-        <Button
-          variant="outline"
-          className="h-9 px-3.5 text-[13px]"
-          onClick={() => {
-            press("/api/stop-all");
-          }}
-        >
-          Stop all
-        </Button>
       </Card>
       {problem && <ProblemBox title="That did not work" text={problem} />}
       <div className="grid gap-4">
         <Area
           title="Your products"
           colour="#5b7cfa"
+          actions={
+            products.length > 0 && (
+              <>
+                <Button
+                  variant="outline"
+                  className="h-9 px-3.5 text-[13px]"
+                  onClick={() => {
+                    press("/api/start-all");
+                  }}
+                >
+                  Start all
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-9 px-3.5 text-[13px]"
+                  onClick={() => {
+                    press("/api/stop-all");
+                  }}
+                >
+                  Stop all
+                </Button>
+              </>
+            )
+          }
           parts={products}
           onPress={press}
         >
@@ -104,12 +116,15 @@ function Legend() {
 function Area({
   title,
   colour,
+  actions,
   parts,
   onPress,
   children,
 }: Readonly<{
   title: string;
   colour: string;
+  // Buttons at its top right.
+  actions?: React.ReactNode;
   parts: PartView[];
   onPress: (path: string) => void;
   // Shown while the area has no parts.
@@ -117,7 +132,7 @@ function Area({
 }>) {
   if (parts.length === 0 && !children) return null;
   return (
-    <AreaCard title={title} colour={colour}>
+    <AreaCard title={title} colour={colour} actions={actions}>
       {parts.length === 0 ? (
         children
       ) : (
@@ -146,8 +161,14 @@ function Area({
 function AreaCard({
   title,
   colour,
+  actions,
   children,
-}: Readonly<{ title: string; colour: string; children: React.ReactNode }>) {
+}: Readonly<{
+  title: string;
+  colour: string;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}>) {
   return (
     <Card aria-label={title} className="gap-3 py-4 shadow-soft">
       <CardHeader className="px-4">
@@ -157,6 +178,7 @@ function AreaCard({
         >
           {title}
         </CardTitle>
+        {actions && <CardAction className="flex gap-2">{actions}</CardAction>}
       </CardHeader>
       <CardContent className="grid gap-2.5 px-4">{children}</CardContent>
     </Card>

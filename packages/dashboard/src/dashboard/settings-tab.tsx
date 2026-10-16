@@ -18,7 +18,7 @@ import type { FactoryState } from "./dashboard";
 import { SettingInput } from "./setting-input";
 
 // The factory's settings, in order: a list of the sections at the side
-// (when there is more than one),
+// (when there is more than one), the cards using the full width,
 // then one card each: where work is tracked (with only the chosen
 // tracker's settings) and every other settings group. Each card shows what is set now and saves on
 // its own; the parts that read it can be restarted from there.
@@ -37,8 +37,8 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
       <div
         className={
           sections.length > 1
-            ? "grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,48rem)]"
-            : "grid max-w-3xl"
+            ? "grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]"
+            : "grid"
         }
       >
         {sections.length > 1 && <Sections names={sections} />}
