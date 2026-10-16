@@ -62,8 +62,14 @@ a major version may need a company to change something, and says what.
   (`packages/server/src/add-ons/`, `packages/dashboard/src/add-ons/`). The
   company's `tracker` is `none` or the id of an add-on that tracks work;
   the factory's checks say so when it names none that is on. `startServer`
-  takes `addOns` instead of `connectors`; the state lists the `trackers`
-  that are on. The `trackers` extension is gone.
+  takes `addOns` instead of `connectors`. The `trackers` extension is gone.
+- An **Add-ons** page on the rail: each add-on with what it does, a switch
+  (`POST /api/add-ons` with `id` and `on`, written to `factory.json`; the
+  add-on that work is tracked with cannot be switched off) and its settings
+  while it is on; then the kits, each with the products it knows. The state
+  lists every add-on (`addOns`, on or off) instead of `trackers`, and each
+  product says its `kit`. Settings keeps where work is tracked and the
+  settings no add-on has.
 - **One stage vocabulary** for work everywhere: `draft`, then `backlog`,
   `todo`, `doing`, `review`, `done` (`STAGES` in the server's `api.ts`).
   Ideas marked `ready` before are read as `backlog`.

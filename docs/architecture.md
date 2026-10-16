@@ -127,7 +127,8 @@ extension with the routes the server answers for it, at
 `/api/add-ons/<id>/…` and only while it is on; its page, if any, is in
 `packages/dashboard/src/add-ons/`. Built-in add-ons (`core: true`) are on
 unless the company file switches them off (`without`); others are switched
-on by name (`extensions`). The first add-ons are where work is tracked: a
+on by name (`extensions`); the owner switches them on the dashboard's
+Add-ons page, which also lists the kits. The first add-ons are where work is tracked: a
 GitHub board and Jira Cloud (`tracker: true`). What each adds:
 
 | Point                             | What                                                                                     | Today                                                                                     |

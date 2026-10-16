@@ -12,7 +12,6 @@ import {
   type Company,
   type Factory,
   FACTORY_FOLDER,
-  groupView,
   hasFactory,
   loadFactory,
   saveCompany,
@@ -41,9 +40,10 @@ import type { ToolsFor } from "./coach/setup-tools.ts";
 import { makeAndStart } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
-import { Refused } from "./refused.ts";
+import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
-import { kitViews, productView, trackerViews } from "./views.ts";
+import { factoryView, kitViews } from "./views.ts";
+import { switched } from "./add-ons/switch.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -106,22 +106,19 @@ export class Session {
         jobs: this.jobs,
         coach: this.coach.view(),
       };
-    const root = this.root;
     return {
       mode: "factory",
       project: this.options.project,
-      root,
-      company: this.factory.company,
-      products: this.factory.products.map(productView),
+      ...factoryView(
+        this.factory,
+        this.root,
+        this.options.available.extensions,
+      ),
       parts: this.launcher?.state() ?? [],
-      settings: this.factory.settings.map((group) => groupView(group, root)),
-      problems: this.factory.problems,
       kits,
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
       onboarding: this.onboarding,
-      board: readBoard(root),
-      trackers: trackerViews(this.factory.extensions),
     };
   }
 
@@ -237,19 +234,17 @@ export class Session {
     secrets: Changes = {},
   ) {
     const root = this.rootOrRefuse();
-    // As the file says now: the owner may have changed it by hand.
-    this.reload();
-    const company = this.factoryOrRefuse().company;
-    const { refused } =
-      Object.keys(secrets).length > 0
-        ? this.saveSettings(tracker, secrets)
-        : { refused: {} };
-    const wrong = Object.entries(refused).map(([k, why]) => `${k}: ${why}`);
-    if (wrong.length > 0) throw new Refused(wrong.join(" · "));
+    if (Object.keys(secrets).length > 0)
+      refuseAny(this.saveSettings(tracker, secrets).refused);
     if (entry) saveBoard(root, { ...readBoard(root), [tracker]: entry });
-    saveCompany(root, { ...company, tracker });
     this.onboarding = false;
-    this.reload();
+    this.changeCompany((company) => ({ ...company, tracker }));
+  }
+
+  // An add-on switched on or off (switch.ts).
+  switchAddOn(id: string, on: boolean): void {
+    const { extensions } = this.options.available;
+    this.changeCompany((company) => switched(company, extensions, id, on));
   }
 
   // Whether the factory has this add-on on.
@@ -352,6 +347,14 @@ export class Session {
   private showJobs(jobs: Job[]): void {
     this.jobs = [...this.earlierJobs, ...jobs];
     this.options.onChange();
+  }
+
+  // The company file changed, from what it says now (the owner may have
+  // changed it by hand).
+  private changeCompany(change: (company: Company) => Company): void {
+    this.reload();
+    saveCompany(this.rootOrRefuse(), change(this.factoryOrRefuse().company));
+    this.reload();
   }
 
   // The factory's files changed: read again; what runs keeps running.

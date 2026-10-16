@@ -6,14 +6,15 @@ import { useEffect, useState } from "react";
 import type { State } from "../../server/src/api.ts";
 
 export type {
+  AddOnView,
   CoachView,
   Draft,
   GitHubStatus,
   IdeaView,
+  KitView,
   IconName,
   StageMap,
   State,
-  TrackerView,
 } from "../../server/src/api.ts";
 export type { GroupView } from "../../core/src/index.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";

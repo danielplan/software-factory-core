@@ -19,6 +19,8 @@ export type ProductView = {
   id: string;
   name: string;
   kind: string;
+  // The kit that knows its kind.
+  kit: string;
   about: string;
   folder: string;
   port: number | null;
@@ -59,8 +61,8 @@ export type State =
       ideas: IdeaView[];
       // The connected boards, by tracker add-on (board.json).
       board: Board;
-      // The add-ons that are on and track work, to connect a board with.
-      trackers: TrackerView[];
+      // Every add-on there is, on or off.
+      addOns: AddOnView[];
       // Just set up: connecting where work is tracked comes first.
       onboarding: boolean;
     };
@@ -217,5 +219,16 @@ export type CreateCompany = { name: string; about: string };
 
 export type { GitHubStatus } from "./add-ons/github/github.ts";
 
-export type TrackerView = { id: string; name: string; about: string };
+export type AddOnView = {
+  id: string;
+  name: string;
+  about: string;
+  // Ships with the factory (on unless switched off).
+  builtIn: boolean;
+  on: boolean;
+  // Tracks work: a board to connect.
+  tracker: boolean;
+  // Its settings groups, by id (shown while it is on).
+  settings: string[];
+};
 export type { Board } from "./connect/board-file.ts";

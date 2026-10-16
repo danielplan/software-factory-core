@@ -1,7 +1,7 @@
 import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
-import { messageOf, post, type TrackerView } from "@/api";
+import { messageOf, post, type AddOnView } from "@/api";
 import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
@@ -17,9 +17,7 @@ const OWN = {
 
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
-export function ConnectPage({
-  trackers,
-}: Readonly<{ trackers: TrackerView[] }>) {
+export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
@@ -60,7 +58,7 @@ export function TrackerChoice({
   current,
   onDone,
 }: Readonly<{
-  trackers: TrackerView[];
+  trackers: AddOnView[];
   current: string;
   onDone: (message: string) => void;
 }>) {

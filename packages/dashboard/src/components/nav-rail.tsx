@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Lightbulb,
+  Puzzle,
   Settings,
   SquareKanban,
 } from "lucide-react";
@@ -8,13 +9,20 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-export const TABS = ["board", "ideas", "system", "settings"] as const;
+export const TABS = [
+  "board",
+  "ideas",
+  "system",
+  "add-ons",
+  "settings",
+] as const;
 export type Tab = (typeof TABS)[number];
 
 const ITEMS: Record<Tab, { name: string; icon: ReactNode }> = {
   board: { name: "Board", icon: <SquareKanban aria-hidden /> },
   ideas: { name: "Ideas", icon: <Lightbulb aria-hidden /> },
   system: { name: "System", icon: <LayoutDashboard aria-hidden /> },
+  "add-ons": { name: "Add-ons", icon: <Puzzle aria-hidden /> },
   settings: { name: "Settings", icon: <Settings aria-hidden /> },
 };
 

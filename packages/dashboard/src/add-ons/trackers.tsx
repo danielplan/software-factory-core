@@ -1,6 +1,8 @@
 import { GitBranch, SquareKanban } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
+import type { AddOnView } from "@/api";
+
 import { GitHubSteps } from "./github/steps";
 import { JiraSteps } from "./jira/steps";
 
@@ -17,3 +19,8 @@ export const TRACKER_STEPS: Record<
   github: { icon: <GitBranch aria-hidden />, Steps: GitHubSteps },
   jira: { icon: <SquareKanban aria-hidden />, Steps: JiraSteps },
 };
+
+// The add-ons that are on and track work: the boards to connect.
+export function onTrackers(addOns: AddOnView[]): AddOnView[] {
+  return addOns.filter((addOn) => addOn.on && addOn.tracker);
+}

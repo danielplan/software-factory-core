@@ -120,6 +120,12 @@ function routesFor(session: Session): Record<string, Route> {
     "POST /api/setup/open": () => {
       session.openFactory();
     },
+    "POST /api/add-ons": (body) => {
+      session.switchAddOn(
+        text(body, "id"),
+        (body as { on?: unknown } | null)?.on === true,
+      );
+    },
     "POST /api/connect/own-board": () => {
       session.chooseBoard("none");
     },

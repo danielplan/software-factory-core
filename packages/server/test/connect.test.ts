@@ -317,13 +317,32 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     });
     session.chooseBoard("none");
     assert.deepEqual(
-      factory(session).trackers.map((t) => t.id),
+      factory(session)
+        .addOns.filter((a) => a.on && a.tracker)
+        .map((a) => a.id),
       ["jira"],
     );
     assert.match(
       await error(await post("/api/add-ons/github/sign-in", {})),
       /GitHub board is off/,
     );
+
+    // The page switches add-ons on and off: a built-in one is listed in
+    // without while off, another in extensions while on; never off the one
+    // work is tracked with.
+    const turn = (id: string, on: boolean) => post("/api/add-ons", { id, on });
+    assert.equal((await turn("github", true)).status, 200);
+    assert.equal((await turn("voice", true)).status, 200);
+    assert.deepEqual(factory(session).company.without, []);
+    assert.deepEqual(factory(session).company.extensions, ["voice"]);
+    await turn("voice", false);
+    assert.deepEqual(factory(session).company.extensions, []);
+    session.chooseBoard("jira");
+    assert.match(
+      await error(await turn("jira", false)),
+      /Work is tracked with Jira Cloud/,
+    );
+    assert.match(await error(await turn("telepathy", true)), /no add-on/);
   } finally {
     session.close();
     server.close();
