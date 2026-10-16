@@ -60,10 +60,10 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
           <p className="py-6 text-center text-sm text-muted-foreground">
             No products yet: describe what you want to build on the{" "}
             <a
-              href="#board"
+              href="#ideas"
               className="text-foreground underline underline-offset-2"
             >
-              Board
+              Ideas
             </a>{" "}
             tab.
           </p>
@@ -159,7 +159,7 @@ function FactoryArea({
       name: "Ideas",
       text: `${String(state.ideas.length)} ideas, ${String(ready)} ready`,
       light: "running",
-      href: "#board",
+      href: "#ideas",
     },
     {
       name: "Where work is tracked",
@@ -215,7 +215,7 @@ function FactoryArea({
 function NextSteps({ state }: Readonly<{ state: FactoryState }>) {
   const steps = [
     ...(state.products.length === 0
-      ? [{ href: "#board", text: "Start your first product" }]
+      ? [{ href: "#ideas", text: "Start your first product" }]
       : []),
     ...(state.company.tracker === "none"
       ? [{ href: "#settings", text: "Connect Jira or GitHub" }]

@@ -33,7 +33,7 @@ function Workspace({ idea }: Readonly<{ idea: IdeaView }>) {
     setAttached([]);
   });
   return (
-    <div className="glow-page fixed inset-0 z-20 sm:left-[88px]">
+    <div className="glow-page fixed inset-0 z-20 max-sm:top-14 sm:left-[72px]">
       <SetupCanvas
         draft={idea.draft}
         attached={attached}
@@ -70,7 +70,7 @@ function Workspace({ idea }: Readonly<{ idea: IdeaView }>) {
   );
 }
 
-// Back to the board, the idea's title and how far it is, Ready and Discard.
+// Back to the ideas, the idea's title and how far it is, Ready and Discard.
 function Bar({
   idea,
   onProblem,
@@ -79,7 +79,7 @@ function Bar({
     onProblem(null);
     post(path, { id: idea.id })
       .then(() => {
-        if (path.endsWith("discard")) window.location.hash = "board";
+        if (path.endsWith("discard")) window.location.hash = "ideas";
       })
       .catch((error: unknown) => {
         onProblem(messageOf(error));
@@ -89,8 +89,8 @@ function Bar({
   return (
     <div className="pointer-events-auto flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-card/90 p-1.5 pr-2 shadow-soft backdrop-blur">
       <Button asChild variant="ghost" className="h-9 px-2.5 text-[13px]">
-        <a href="#board">
-          <ArrowLeft aria-hidden /> Board
+        <a href="#ideas">
+          <ArrowLeft aria-hidden /> Ideas
         </a>
       </Button>
       <span className="max-w-[28rem] truncate px-1 text-[15px] font-medium">
