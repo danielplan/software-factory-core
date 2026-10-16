@@ -2,11 +2,12 @@ import type { FactoryState } from "@/dashboard/dashboard";
 
 import { IdeaCard } from "./idea-card";
 
-// The columns work moves through. Backlog holds the ideas still being
-// shaped; To do, the plans agreed to; the rest comes with the builder.
+// The columns work moves through. Backlog holds the ideas agreed to (an
+// idea being shaped stays on the Ideas tab); the rest comes with the
+// builder.
 const COLUMNS = [
-  { id: "planning", title: "Backlog" },
-  { id: "ready", title: "To do" },
+  { id: "ready", title: "Backlog" },
+  { id: "todo", title: "To do" },
   { id: "building", title: "In progress" },
   { id: "trying", title: "Review" },
   { id: "done", title: "Done" },
@@ -17,7 +18,7 @@ const COLUMNS = [
 export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <div className="grid gap-3">
-      {state.ideas.length === 0 && (
+      {!state.ideas.some((one) => one.status !== "planning") && (
         <p className="px-1 text-sm text-muted-foreground">
           Nothing on the board yet. Work starts as an{" "}
           <a
@@ -26,7 +27,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           >
             idea
           </a>
-          .
+          : once you agree to its plan, it comes here.
         </p>
       )}
       <div className="overflow-x-auto pb-2">
@@ -46,7 +47,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
                   </span>
                 </h2>
                 {ideas.map((one) => (
-                  <IdeaCard key={one.id} idea={one} />
+                  <IdeaCard key={one.id} idea={one} status={false} />
                 ))}
               </section>
             );

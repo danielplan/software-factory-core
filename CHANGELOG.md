@@ -7,10 +7,11 @@ a major version may need a company to change something, and says what.
 ## Unreleased
 
 - The dashboard opens on the **Board**: what the factory is doing, every
-  piece of work in its column (Backlog: ideas being shaped; To do: plans
-  agreed to; In progress, Review and Done come with the builder). Work
-  starts on the **Ideas** tab: a new idea in a sentence, and each idea's
-  workspace. The **Products** tab is gone (the coach adds products; their
+  piece of work in its column (Backlog: the ideas agreed to; To do, In
+  progress, Review and Done come with the builder). Work starts on the
+  **Ideas** tab: one big box to say what to build next, the ideas so far
+  below it (shaping, or on the board), and each idea's workspace; an idea
+  goes on the board once its plan is agreed. The **Products** tab is gone (the coach adds products; their
   descriptions are in the factory's files), and so are the add-products
   screens, `GET /api/folders` and `POST /api/setup/detect`. The company's
   name no longer heads every tab, and the rail sits against the edge.

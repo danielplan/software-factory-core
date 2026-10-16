@@ -5,7 +5,14 @@ import { cn } from "@/lib/utils";
 
 // An idea as a card: its title, and whether the factory is working on it
 // now or when it last changed. It opens the idea (#ideas/<id>).
-export function IdeaCard({ idea }: Readonly<{ idea: IdeaView }>) {
+export function IdeaCard({
+  idea,
+  status = true,
+}: Readonly<{
+  idea: IdeaView;
+  // Whether it says how far it is (not on the board, whose columns say so).
+  status?: boolean;
+}>) {
   return (
     <a
       href={`#ideas/${idea.id}`}
@@ -14,7 +21,21 @@ export function IdeaCard({ idea }: Readonly<{ idea: IdeaView }>) {
         idea.working && "ring-2 ring-[var(--glow-c)]",
       )}
     >
-      <span className="text-sm font-medium">{idea.title}</span>
+      <span className="flex items-start gap-2">
+        <span className="flex-1 text-sm font-medium">{idea.title}</span>
+        {status && (
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
+              idea.status === "planning"
+                ? "bg-surface-2 text-muted-foreground"
+                : "bg-success/15 text-success",
+            )}
+          >
+            {idea.status === "planning" ? "Shaping" : "On the board"}
+          </span>
+        )}
+      </span>
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
         {idea.working ? (
           <>
