@@ -7,18 +7,12 @@ import type { State } from "../../server/src/api.ts";
 
 export type {
   CoachView,
-  DetectAnswer,
   Draft,
-  FolderList,
   IdeaView,
   IconName,
-  Job,
-  KitView,
-  ProductView,
-  SetupProduct,
   State,
 } from "../../server/src/api.ts";
-export type { Candidate, Company, GroupView } from "../../core/src/index.ts";
+export type { Company, GroupView } from "../../core/src/index.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
 // The server answers buttons only from its own page, which says so.
@@ -87,25 +81,6 @@ export function useFactoryState(): { state: State | null; connected: boolean } {
     };
   }, []);
   return { state, connected };
-}
-
-// "My Shop" → "my-shop", as the server makes ids: lowercase words joined
-// by dashes, starting with a letter.
-export function idFrom(name: string): string {
-  const words = name
-    .toLowerCase()
-    .split(/[^a-z0-9]/)
-    .filter(Boolean);
-  const id = words.join("-");
-  const start = id.search(/[a-z]/);
-  return start === -1 ? "app" : id.slice(start);
-}
-
-// A folder's path without the slashes at its end.
-export function withoutEndSlashes(path: string): string {
-  let end = path.length;
-  while (end > 1 && (path[end - 1] === "/" || path[end - 1] === "\\")) end -= 1;
-  return path.slice(0, end);
 }
 
 export function messageOf(error: unknown): string {

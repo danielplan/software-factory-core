@@ -58,12 +58,12 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
       <div className="grid items-start gap-4 lg:grid-cols-[2.3fr_1.5fr]">
         <Area title="Your products" parts={products} onPress={press}>
           <p className="py-6 text-center text-sm text-muted-foreground">
-            No products yet: add them on the{" "}
+            No products yet: describe what you want to build on the{" "}
             <a
-              href="#products"
+              href="#board"
               className="text-foreground underline underline-offset-2"
             >
-              Products
+              Board
             </a>{" "}
             tab.
           </p>
@@ -159,7 +159,7 @@ function FactoryArea({
       name: "Ideas",
       text: `${String(state.ideas.length)} ideas, ${String(ready)} ready`,
       light: "running",
-      href: "#ideas",
+      href: "#board",
     },
     {
       name: "Where work is tracked",
@@ -215,7 +215,7 @@ function FactoryArea({
 function NextSteps({ state }: Readonly<{ state: FactoryState }>) {
   const steps = [
     ...(state.products.length === 0
-      ? [{ href: "#products", text: "Add your products" }]
+      ? [{ href: "#board", text: "Start your first product" }]
       : []),
     ...(state.company.tracker === "none"
       ? [{ href: "#settings", text: "Connect Jira or GitHub" }]

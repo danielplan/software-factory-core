@@ -49,13 +49,6 @@ test("setup in the dashboard: the company first, then products found and made, t
       409,
     );
 
-    const detected = (await (
-      await post("/api/setup/detect", { folder: code })
-    ).json()) as { candidates: { id: string; name: string; port?: number }[] };
-    assert.deepEqual(
-      detected.candidates.map((c) => [c.id, c.name, c.port]),
-      [["shop", "Found app", 5173]],
-    );
     const shop = {
       id: "shop",
       name: "Shop",
@@ -160,18 +153,10 @@ test("only this computer, and only the factory's page, may press its buttons", a
     assert.equal((await fetch(`${base}/api/nothing`)).status, 404);
     // Any other address is the page, which runs in the browser.
     assert.match(await (await fetch(`${base}/system`)).text(), /The factory/);
-    assert.equal(
-      (await post("/api/setup/detect", { folder: "/no/such/folder" })).status,
-      409,
-    );
     const nameless = await post("/api/company", { name: " ", about: "" });
     assert.deepEqual(await nameless.json(), {
       error: "Give the project a name.",
     });
-    const folders = (await (
-      await fetch(`${base}/api/folders?path=/`)
-    ).json()) as { parent: string | null };
-    assert.equal(folders.parent, null);
   } finally {
     session.close();
     server.close();

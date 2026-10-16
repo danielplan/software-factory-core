@@ -4,14 +4,12 @@
 // the factory with the owner on a map, then builds it with the same steps
 // as the dashboard's (coach/configure.ts) and the owner opens it.
 
-import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 import {
   type Available,
   type Claude,
   checkChanges,
-  detectProducts,
   type Factory,
   FACTORY_FOLDER,
   groupView,
@@ -121,11 +119,6 @@ export class Session {
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
     };
-  }
-
-  detect(folder: string) {
-    if (!existsSync(folder)) throw new Refused(`There is no folder ${folder}.`);
-    return { candidates: detectProducts(folder, this.options.available.kits) };
   }
 
   // The first step: the project's factory folder, which opens with no

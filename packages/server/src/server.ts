@@ -14,7 +14,6 @@ import { extname, join, normalize, sep } from "node:path";
 
 import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { answerTools } from "./coach/setup-tools.ts";
-import { listFolders } from "./folders.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -70,9 +69,6 @@ function routesFor(session: Session): Record<string, Route> {
     decodeURIComponent(url.pathname.split("/")[3] ?? "");
   return {
     "GET /api/state": () => session.state(),
-    "GET /api/folders": (_body, url) =>
-      listFolders(url.searchParams.get("path")),
-    "POST /api/setup/detect": (body) => session.detect(text(body, "folder")),
     "POST /api/setup/say": (body) =>
       session.coach.say(text(body, "text"), optionalText(body, "spokenIn")),
     "POST /api/setup/draft": (body) => {

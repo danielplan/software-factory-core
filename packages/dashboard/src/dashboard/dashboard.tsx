@@ -4,21 +4,20 @@ import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { NavRail, type Tab, TABS } from "@/components/nav-rail";
 import { StatusLight } from "@/components/status-light";
-import { IdeasTab } from "@/ideas/ideas-tab";
+import { BoardTab } from "@/ideas/board-tab";
 import { SetupPage } from "@/setup-coach/setup-page";
 
-import { ProductsTab } from "./products-tab";
 import { SettingsTab } from "./settings-tab";
 import { SystemTab } from "./system-tab";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
-// The tab in the address (#products), and what is open in it
-// (#ideas/<id>), so a reload stays there.
+// The tab in the address (#settings), and what is open in it
+// (#board/<id>), so a reload stays there. The board comes first.
 function placeFromHash(): { tab: Tab; open: string | null } {
   const [asked, open] = window.location.hash.slice(1).split("/");
   return {
-    tab: TABS.find((tab) => tab === asked) ?? "system",
+    tab: TABS.find((tab) => tab === asked) ?? "board",
     open: open ?? null,
   };
 }
@@ -50,46 +49,27 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const { tab, open } = usePlace();
   return (
     <div className="grid gap-5 max-sm:pt-14 sm:pl-[76px]">
-      <NavRail current={tab} status={<Overall state={state} light />} />
-      <header className="flex flex-wrap items-baseline justify-between gap-3 px-1">
-        <h1 className="text-2xl font-medium tracking-[-0.02em]">
-          {state.company.name}
-        </h1>
-        <span className="inline-flex items-center gap-2 text-[13px] text-muted-foreground">
-          <Overall state={state} />
-        </span>
-      </header>
+      <NavRail current={tab} status={<Overall state={state} />} />
       {state.problems.length > 0 && (
         <ProblemBox
           title="Something in the factory's files does not fit"
           text={state.problems.join(" · ")}
         />
       )}
-      {tab === "ideas" && <IdeasTab state={state} open={open} />}
-      {tab === "products" && <ProductsTab state={state} />}
+      {tab === "board" && <BoardTab state={state} open={open} />}
       {tab === "settings" && <SettingsTab state={state} />}
       {tab === "system" && <SystemTab state={state} />}
     </div>
   );
 }
 
-// The whole factory in a few words, beside its name; only its light (with
-// the words to hover) on the rail.
-function Overall({
-  state,
-  light = false,
-}: Readonly<{ state: FactoryState; light?: boolean }>) {
+// The whole factory's light on the rail, with its words to hover.
+function Overall({ state }: Readonly<{ state: FactoryState }>) {
   const { lit, words } = overallOf(state);
-  if (light)
-    return (
-      <span title={words} aria-label={words} className="flex">
-        <StatusLight light={lit} />
-      </span>
-    );
   return (
-    <>
-      <StatusLight light={lit} /> {words}
-    </>
+    <span title={words} aria-label={words} className="flex">
+      <StatusLight light={lit} />
+    </span>
   );
 }
 

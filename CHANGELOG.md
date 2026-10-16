@@ -6,7 +6,14 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
-- An **Ideas** tab: the owner starts an idea with a sentence and shapes it
+- The dashboard opens on the **Board**: what the factory is doing, every
+  idea in a column of how far it is (Shaping, Ready, Building, To try,
+  Done; the last three come with the builder), the ones it works on right
+  now marked, and **New idea** to start one. The **Products** tab is gone
+  (the coach adds products; their descriptions are in the factory's
+  files), and so are the add-products screens, `GET /api/folders` and
+  `POST /api/setup/detect`. The company's name no longer heads every tab.
+- Ideas: the owner starts an idea with a sentence and shapes it
   with the idea coach (the method's `guides/idea-coach.md`) on a map, as in
   setup: the coach reads the code and the factory's knowledge and draws
   who it is for, the journey, what must never happen and what is open.

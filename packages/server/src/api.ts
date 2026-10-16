@@ -2,7 +2,7 @@
 // page shows, and the requests its buttons send. The web interface imports
 // these types only.
 
-import type { Candidate, Company, GroupView } from "@software-factory/core";
+import type { Company, GroupView } from "@software-factory/core";
 import type { PartView } from "@software-factory/launcher";
 
 export type KitView = {
@@ -56,16 +56,6 @@ export type State =
       jobs: Job[];
       ideas: IdeaView[];
     };
-
-// A folder on this computer and the folders in it, for choosing one.
-export type FolderList = {
-  path: string;
-  parent: string | null;
-  folders: string[];
-  home: string;
-};
-
-export type DetectAnswer = { candidates: Candidate[] };
 
 // A product to describe in the new factory: found in existing code, or new
 // (made with its kit's starter in `folder`).

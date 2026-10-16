@@ -1,17 +1,16 @@
-import { LayoutDashboard, Lightbulb, Package, Settings } from "lucide-react";
+import { LayoutDashboard, Settings, SquareKanban } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { LogoTile } from "./logo";
 
-export const TABS = ["system", "ideas", "products", "settings"] as const;
+export const TABS = ["board", "system", "settings"] as const;
 export type Tab = (typeof TABS)[number];
 
 const ITEMS: Record<Tab, { name: string; icon: ReactNode }> = {
+  board: { name: "Board", icon: <SquareKanban aria-hidden /> },
   system: { name: "System", icon: <LayoutDashboard aria-hidden /> },
-  ideas: { name: "Ideas", icon: <Lightbulb aria-hidden /> },
-  products: { name: "Products", icon: <Package aria-hidden /> },
   settings: { name: "Settings", icon: <Settings aria-hidden /> },
 };
 
