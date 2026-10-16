@@ -6,6 +6,15 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Connecting where work is tracked is guided, right after the factory is
+  opened (and from the board's next steps and Settings): a **GitHub
+  board** through the GitHub CLI on this computer (installed if missing;
+  signing in in the browser with a one-time code the page shows; the
+  repository and board picked from lists; the board checked before it is
+  saved), or **Jira Cloud** with an API token (checked against Jira, which
+  then lists the projects). The state says `onboarding` until the owner
+  connects or chooses Later. `startServer` takes `connectors` (stand-ins
+  in the tests).
 - The dashboard opens on the **Board**: what the factory is doing now in
   a line beside its title ("Thinking about …", work waiting to be built,
   or "Waiting for work"), then every piece of work in its column (Backlog: the ideas agreed to; To do, In

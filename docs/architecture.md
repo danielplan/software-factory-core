@@ -40,7 +40,10 @@ itself: the factory's own settings through its other tool, `configure`
 settings and tools to install from `packages/server/src/installables.ts`,
 only as the owner agreed), checked as they are saved, and the blueprints
 and knowledge pages with its own tools, until the factory's checks find
-nothing. The owner then presses **Open the factory**. In a new project
+nothing. The owner then presses **Open the factory**. Right after, the dashboard guides
+connecting where work is tracked: a GitHub board through the GitHub CLI on
+this computer, or Jira Cloud with an API token, each checked before it is
+saved (`packages/server/src/connect/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
 to build. The owner can talk instead of typing: voice is part of
 the core (`packages/dashboard/src/voice/`). A speech model runs in the

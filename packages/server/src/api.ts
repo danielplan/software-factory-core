@@ -55,6 +55,8 @@ export type State =
       kits: KitView[];
       jobs: Job[];
       ideas: IdeaView[];
+      // Just set up: connecting where work is tracked comes first.
+      onboarding: boolean;
     };
 
 // A product to describe in the new factory: found in existing code, or new
@@ -209,3 +211,4 @@ export type ChooseTracker = {
   // The chosen tracker's settings (the GitHub board's, or Jira's).
   settings?: Record<string, string>;
 };
+export type { GitHubStatus } from "./connect/github.ts";

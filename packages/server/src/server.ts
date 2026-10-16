@@ -13,6 +13,9 @@ import {
 import { extname, join, normalize, sep } from "node:path";
 
 import { PICTURE_TYPES } from "./coach/pictures.ts";
+import { type Cli, GitHub, realCli } from "./connect/github.ts";
+import type { Fetcher } from "./connect/jira.ts";
+import { connectRoutes } from "./connect/routes.ts";
 import { answerTools } from "./coach/setup-tools.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
@@ -40,6 +43,8 @@ type Route = (body: unknown, url: URL) => unknown;
 
 export function startServer(options: {
   session: Session;
+  // Where the factory reaches GitHub and Jira (stand-ins in the tests).
+  connectors?: { cli: Cli; fetcher: Fetcher };
   // The built web interface (index.html and its files).
   page: string;
   port: number;
@@ -49,7 +54,17 @@ export function startServer(options: {
     const data = `data: ${JSON.stringify(options.session.state())}\n\n`;
     for (const response of watchers) response.write(data);
   };
-  const routes = routesFor(options.session);
+  const github = new GitHub(options.connectors?.cli ?? realCli(), () => {
+    changed();
+  });
+  const routes = {
+    ...routesFor(options.session),
+    ...connectRoutes(
+      options.session,
+      github,
+      options.connectors?.fetcher ?? fetch,
+    ),
+  };
   const server = createServer((incoming, response) => {
     void answer(incoming, response, { routes, watchers, ...options });
   });

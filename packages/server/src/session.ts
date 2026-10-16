@@ -1,8 +1,6 @@
-// The factory this server shows: the project's, in its factory folder, or
-// none yet (the setup flow, for that project), with its products, its parts
-// running through the launcher and its settings. In setup the coach plans
-// the factory with the owner on a map, then builds it with the same steps
-// as the dashboard's (coach/configure.ts) and the owner opens it.
+// The factory this server shows (its products, parts and settings), or its
+// setup: the coach plans it with the owner, builds it (coach/configure.ts),
+// and the owner opens it, then connects where work is tracked.
 
 import { join } from "node:path";
 
@@ -74,6 +72,8 @@ export class Session {
   private ideas: Ideas | null = null;
   // Where the server answers the coaches' tools.
   private toolsBase = "";
+  // Just set up: connecting the tools comes first.
+  private onboarding = false;
 
   constructor(options: SessionOptions) {
     this.options = options;
@@ -118,6 +118,7 @@ export class Session {
       kits,
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
+      onboarding: this.onboarding,
     };
   }
 
@@ -163,7 +164,21 @@ export class Session {
   openFactory(): void {
     if (!this.root) throw new Refused("There is no factory yet.");
     this.coach.finish();
+    this.onboarding = true;
     this.reload();
+  }
+
+  // The owner connects later (or has connected): the onboarding goes.
+  connectLater(): void {
+    this.onboarding = false;
+    this.options.onChange();
+  }
+
+  // A tool on this computer, installed with the system's package manager.
+  async installTool(id: string): Promise<{ installed: boolean }> {
+    if (!this.coach.installables.some((i) => i.id === id))
+      throw new Refused(`The factory cannot install ${id}.`);
+    return { installed: await this.installAll([id]) };
   }
 
   // Where the server answers the coaches' tools, once it listens.
@@ -304,21 +319,24 @@ export class Session {
       addProducts: (products) => this.addProducts({ products }),
       saveSettings: (group, values) => this.saveSettings(group, values),
       addOns: addOns(extensions).map((a) => a.id),
-      install: async (ids) => {
-        const done = await install(
-          this.rootOrRefuse(),
-          this.coach.installables.filter((i) => ids.includes(i.id)),
-          (jobs) => {
-            this.showJobs(jobs);
-          },
-        );
-        // Still shown beside what comes next.
-        this.earlierJobs = this.jobs;
-        this.reload();
-        return done;
-      },
+      install: (ids) => this.installAll(ids),
       problems: () => this.factory?.problems ?? [],
     };
+  }
+
+  // What the factory can install, by id; its jobs stay shown beside what
+  // comes next.
+  private async installAll(ids: string[]): Promise<boolean> {
+    const done = await install(
+      this.rootOrRefuse(),
+      this.coach.installables.filter((i) => ids.includes(i.id)),
+      (jobs) => {
+        this.showJobs(jobs);
+      },
+    );
+    this.earlierJobs = this.jobs;
+    this.reload();
+    return done;
   }
 
   private rootOrRefuse(): string {

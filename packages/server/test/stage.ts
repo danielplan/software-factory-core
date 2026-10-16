@@ -15,6 +15,8 @@ import {
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/method";
 
+import type { Cli } from "../src/connect/github.ts";
+import type { Fetcher } from "../src/connect/jira.ts";
 import type { Installable } from "../src/installables.ts";
 import { PAGE_HEADER, startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
@@ -69,6 +71,14 @@ export async function stage(
   claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) },
   // The project's code before the factory starts; none by default.
   code: Record<string, string> = {},
+  // Stand-ins for GitHub and Jira; none reach them by default.
+  connectors: { cli: Cli; fetcher: Fetcher } = {
+    cli: {
+      run: () => Promise.resolve({ code: 1, out: "", err: "" }),
+      start: () => ({ answer: () => {}, done: Promise.resolve(1) }),
+    },
+    fetcher: () => Promise.reject(new Error("offline")),
+  },
 ) {
   const home = mkdtempSync(join(tmpdir(), "setup-"));
   const project = join(home, "project");
@@ -90,7 +100,7 @@ export async function stage(
   mkdirSync(page);
   writeFileSync(join(page, "index.html"), "<p>The factory</p>");
   // Port 0: the system picks a free one.
-  const { server } = startServer({ session, page, port: 0 });
+  const { server } = startServer({ session, page, port: 0, connectors });
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   assert.ok(address && typeof address === "object");

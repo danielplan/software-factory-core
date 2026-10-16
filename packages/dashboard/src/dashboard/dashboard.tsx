@@ -4,6 +4,7 @@ import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { NavRail, type Tab, TABS } from "@/components/nav-rail";
 import { StatusLight } from "@/components/status-light";
+import { ConnectPage } from "@/connect/connect-page";
 import { BoardTab } from "@/ideas/board-tab";
 import { IdeasTab } from "@/ideas/ideas-tab";
 import { SetupPage } from "@/setup-coach/setup-page";
@@ -15,15 +16,20 @@ export type FactoryState = Extract<State, { mode: "factory" }>;
 
 // The tab in the address (#settings), and what is open in it
 // (#ideas/<id>), so a reload stays there. The board comes first.
-function placeFromHash(): { tab: Tab; open: string | null } {
+type Place = { tab: Tab | "connect"; open: string | null };
+
+function placeFromHash(): Place {
   const [asked, open] = window.location.hash.slice(1).split("/");
   return {
-    tab: TABS.find((tab) => tab === asked) ?? "board",
+    tab:
+      asked === "connect"
+        ? "connect"
+        : (TABS.find((tab) => tab === asked) ?? "board"),
     open: open ?? null,
   };
 }
 
-function usePlace(): { tab: Tab; open: string | null } {
+function usePlace(): Place {
   const [place, setPlace] = useState(placeFromHash);
   useEffect(() => {
     const follow = () => {
@@ -47,16 +53,24 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
-  const { tab, open } = usePlace();
+  const place = usePlace();
+  // Just set up, connecting where work is tracked comes first.
+  const { tab, open } = state.onboarding
+    ? { ...place, tab: "connect" as const }
+    : place;
   return (
     <div className="grid gap-5 max-sm:pt-14 sm:pl-[72px]">
-      <NavRail current={tab} status={<Overall state={state} />} />
+      <NavRail
+        current={tab === "connect" ? "settings" : tab}
+        status={<Overall state={state} />}
+      />
       {state.problems.length > 0 && (
         <ProblemBox
           title="Something in the factory's files does not fit"
           text={state.problems.join(" · ")}
         />
       )}
+      {tab === "connect" && <ConnectPage />}
       {tab === "board" && <BoardTab state={state} />}
       {tab === "ideas" && <IdeasTab state={state} open={open} />}
       {tab === "settings" && <SettingsTab state={state} />}

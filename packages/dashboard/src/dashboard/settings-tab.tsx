@@ -82,6 +82,12 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
           />
         ))}
       </div>
+      <a
+        href="#connect"
+        className="justify-self-start text-sm underline underline-offset-2"
+      >
+        Connect step by step, with a check that it works
+      </a>
       {group && <Fields group={group} form={form} />}
       <Saving
         form={form}

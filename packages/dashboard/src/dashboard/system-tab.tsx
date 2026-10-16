@@ -218,7 +218,7 @@ function NextSteps({ state }: Readonly<{ state: FactoryState }>) {
       ? [{ href: "#ideas", text: "Start your first product" }]
       : []),
     ...(state.company.tracker === "none"
-      ? [{ href: "#settings", text: "Connect Jira or GitHub" }]
+      ? [{ href: "#connect", text: "Connect Jira or GitHub" }]
       : []),
   ];
   if (steps.length === 0) return null;

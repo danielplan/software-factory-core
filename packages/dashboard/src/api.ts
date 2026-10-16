@@ -8,6 +8,7 @@ import type { State } from "../../server/src/api.ts";
 export type {
   CoachView,
   Draft,
+  GitHubStatus,
   IdeaView,
   IconName,
   State,

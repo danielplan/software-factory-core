@@ -183,6 +183,8 @@ test("the coach plans on the map, builds the factory once the owner says so, and
     assert.equal(made.company.name, "Acme Garden");
     assert.equal(made.company.about, "Garden tools.");
     assert.equal(made.company.tracker, "github");
+    // Just opened, connecting where work is tracked comes first.
+    assert.equal(made.onboarding, true);
     assert.deepEqual(made.company.extensions, ["voice"]);
     const blog = made.products.find((p) => p.id === "blog");
     assert.equal(blog?.folder, join(project, "blog"));

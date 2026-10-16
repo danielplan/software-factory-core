@@ -1,0 +1,60 @@
+// Connecting the factory to a Jira Cloud project with an API token: the
+// site, the owner's email and the token are checked against Jira itself,
+// which then lists the projects to pick from.
+
+import { Refused } from "../refused.ts";
+
+export type JiraLogin = { site: string; email: string; token: string };
+
+export type Fetcher = (
+  url: string,
+  init: { headers: Record<string, string> },
+) => Promise<{ ok: boolean; status: number; json: () => Promise<unknown> }>;
+
+// A Jira site as its address alone: "https://acme.atlassian.net/" is
+// acme.atlassian.net.
+export function siteOf(site: string): string {
+  return (
+    site
+      .trim()
+      .replace(/^https?:\/\//, "")
+      .split("/")[0] ?? ""
+  );
+}
+
+// Who the token belongs to, and the projects it can see.
+export async function jiraProjects(
+  fetcher: Fetcher,
+  login: JiraLogin,
+): Promise<{ name: string; projects: { key: string; name: string }[] }> {
+  const site = siteOf(login.site);
+  if (!site || !login.email.trim() || !login.token.trim())
+    throw new Refused("Give the site, your email and the API token.");
+  const auth = Buffer.from(`${login.email.trim()}:${login.token.trim()}`);
+  const headers = {
+    Authorization: `Basic ${auth.toString("base64")}`,
+    Accept: "application/json",
+  };
+  const ask = async (path: string) => {
+    const answer = await fetcher(`https://${site}${path}`, { headers }).catch(
+      () => {
+        throw new Refused(`There is no Jira at ${site}.`);
+      },
+    );
+    if (answer.status === 401 || answer.status === 403)
+      throw new Refused("Jira did not accept this email and token.");
+    if (!answer.ok)
+      throw new Refused(
+        `Jira answered with an error (${String(answer.status)}).`,
+      );
+    return answer.json();
+  };
+  const me = (await ask("/rest/api/3/myself")) as { displayName?: string };
+  const found = (await ask("/rest/api/3/project/search?maxResults=100")) as {
+    values?: { key: string; name: string }[];
+  };
+  return {
+    name: me.displayName ?? login.email.trim(),
+    projects: (found.values ?? []).map(({ key, name }) => ({ key, name })),
+  };
+}
