@@ -52,7 +52,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
         <div
           className="grid gap-3"
           style={{
-            gridTemplateColumns: `repeat(${String(COLUMNS.length)}, minmax(10.5rem, 1fr))`,
+            gridTemplateColumns: `repeat(${String(COLUMNS.length)}, minmax(12rem, 1fr))`,
           }}
         >
           {COLUMNS.map((column) => {

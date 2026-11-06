@@ -78,11 +78,10 @@ forward`, no public address needed) and a check every few minutes for
 
 ## The kits
 
-| Kit                                     | Here | To come                                                                                                                                                             |
-| --------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React web app, NestJS backend, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
-| SvelteKit web app                       | no   | the whole kit                                                                                                                                                       |
-| Other code                              | yes  | –                                                                                                                                                                   |
+| Kit                                                        | Here | To come                                                                                                                                                             |
+| ---------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React web app, SvelteKit web app, NestJS backend, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
+| Other code                                                 | yes  | –                                                                                                                                                                   |
 
 ## What stays with a company
 
@@ -130,6 +129,5 @@ more than the theme allows is a change asked of the core.
    **Made-up worlds**.
 6. **Voice** as an add-on of its own, with live words and quick drafts.
 7. **Usage log**, **Updates**, **Desktop start**.
-8. **SvelteKit kit**, whenever a company needs it.
 
 Each step is a release, tried on the example company first.

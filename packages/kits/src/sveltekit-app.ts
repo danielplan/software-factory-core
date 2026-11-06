@@ -1,0 +1,86 @@
+// The SvelteKit web app kit: a web app made with SvelteKit (Svelte and
+// Vite). It recognises one by its packages, runs it with Vite's development
+// server, checks it with its check script (svelte-check), and makes a new
+// one with SvelteKit's own starter (sv).
+
+import { basename } from "node:path";
+
+import { defineKit, type Product } from "@software-factory/core";
+
+import {
+  commandsOf,
+  doesOf,
+  readableName,
+  readPackageJson,
+  verifyCommand,
+} from "./package-json.ts";
+
+const PORT = 5173;
+
+export const sveltekitApp = defineKit({
+  id: "sveltekit-app",
+  name: "SvelteKit web app",
+  about: "A web app made with SvelteKit.",
+  kind: "sveltekit-app",
+  commands: { start: "npm run dev" },
+  rules: [
+    "rules/sveltekit-app/conventions.md",
+    "rules/sveltekit-app/lessons.md",
+  ],
+  port: PORT,
+  detect: (folder) => {
+    const file = readPackageJson(folder);
+    if (!file?.packages.has("@sveltejs/kit")) return null;
+    return {
+      name: readableName(file, folder),
+      commands: commandsOf({
+        start: file.scripts.has("dev") ? "npm run dev" : undefined,
+        verify: verifyCommand(file),
+      }),
+    };
+  },
+  partsFor: (product: Product) => {
+    const port = product.port ?? PORT;
+    return [
+      {
+        id: product.id,
+        name: product.name,
+        area: "products",
+        does: doesOf(product, "web app"),
+        dependsOn: product.dependsOn,
+        folder: product.folder,
+        prepare: [{ label: "Installing packages", packages: true }],
+        run: [
+          "npm",
+          "run",
+          "dev",
+          "--",
+          "--port",
+          String(port),
+          "--strictPort",
+          "--host",
+          "127.0.0.1",
+        ],
+        port: { fixed: port },
+        health: "/",
+        open: "/",
+        start: "auto",
+      },
+    ];
+  },
+  create: (folder) => [
+    [
+      "npx",
+      "sv@latest",
+      "create",
+      basename(folder),
+      "--template",
+      "minimal",
+      "--types",
+      "ts",
+      "--no-add-ons",
+      "--install",
+      "npm",
+    ],
+  ],
+});

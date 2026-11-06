@@ -6,6 +6,14 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **A SvelteKit web app kit** (`sveltekit-app`): it recognises a SvelteKit
+  app by its packages, runs it with Vite's server, checks it with its check
+  script (svelte-check) and makes a new one with SvelteKit's own starter
+  (`sv`); its rules are the usual SvelteKit way and its lessons. A company
+  with a SvelteKit app described as Other code can change the product's
+  kind to `sveltekit-app` and add the kit to `factory.json`.
+- The dashboard is wider (up to 1600px), so the board's six columns have
+  room.
 - **Only the tracker in use is on.** Choosing where work is tracked switches
   the other built-in trackers off (the factory's own board: all of them);
   Settings still offers each, and switches one on when it is chosen.

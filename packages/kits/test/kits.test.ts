@@ -18,6 +18,7 @@ import {
   nestjsBackend,
   otherCode,
   reactWebApp,
+  sveltekitApp,
 } from "../src/index.ts";
 
 // The kits that ship with the core: each recognises its own kind of product
@@ -59,6 +60,11 @@ const server = {
   },
   dependencies: { "@nestjs/core": "11.0.0" },
 };
+const svelte = {
+  name: "@acme/my-site",
+  scripts: { dev: "vite dev", check: "svelte-kit sync && svelte-check" },
+  devDependencies: { "@sveltejs/kit": "3.0.0", svelte: "5.0.0", vite: "7.0.0" },
+};
 const phone = {
   scripts: { start: "expo start", check: "tsc" },
   dependencies: { expo: "54.0.0", react: "19.0.0", "react-native": "0.81.0" },
@@ -75,6 +81,8 @@ const recognisedBy = (folder: string) =>
 test("each kit recognises its own kind and no other", () => {
   assert.deepEqual(recognisedBy(folderWith(web)), ["react-web-app"]);
   assert.deepEqual(recognisedBy(folderWith(server)), ["nestjs-backend"]);
+  // SvelteKit uses Vite too, but no React: only its own kit knows it.
+  assert.deepEqual(recognisedBy(folderWith(svelte)), ["sveltekit-app"]);
   // A phone app uses React too, but it is not a web app.
   assert.deepEqual(recognisedBy(folderWith(phone)), ["expo-app"]);
   // React without Vite, no package.json, or one that cannot be read: nothing.
@@ -341,4 +349,42 @@ test("a project's own apps win over the project as a whole", () => {
     detectProducts(alone, allKits).map((c) => c.kind),
     ["other-code"],
   );
+});
+
+test("the SvelteKit kit runs a site with Vite's server, checks it with svelte-check and makes one with sv", () => {
+  assert.deepEqual(sveltekitApp.detect(folderWith(svelte)), {
+    name: "My site",
+    commands: { start: "npm run dev", verify: "npm run check" },
+  });
+  const [part] = sveltekitApp.partsFor(
+    productOf(sveltekitApp, { port: 5300, about: "Shows." }),
+  );
+  assert.ok(part);
+  assert.deepEqual(part.run, [
+    "npm",
+    "run",
+    "dev",
+    "--",
+    "--port",
+    "5300",
+    "--strictPort",
+    "--host",
+    "127.0.0.1",
+  ]);
+  assert.deepEqual(part.port, { fixed: 5300 });
+  assert.deepEqual(sveltekitApp.create?.(join(tmpdir(), "site"), "Site"), [
+    [
+      "npx",
+      "sv@latest",
+      "create",
+      "site",
+      "--template",
+      "minimal",
+      "--types",
+      "ts",
+      "--no-add-ons",
+      "--install",
+      "npm",
+    ],
+  ]);
 });

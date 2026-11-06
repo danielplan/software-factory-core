@@ -7,6 +7,7 @@ import {
   siJira,
   siNestjs,
   siReact,
+  siSvelte,
 } from "simple-icons";
 
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const LOOKS: Record<string, Look | undefined> = {
   jira: { icon: <Logo icon={siJira} />, colour: "#2684ff" },
   "expo-app": { icon: <Logo icon={siExpo} />, colour: INK },
   "react-web-app": { icon: <Logo icon={siReact} />, colour: "#149eca" },
+  "sveltekit-app": { icon: <Logo icon={siSvelte} />, colour: "#ff3e00" },
   "nestjs-backend": { icon: <Logo icon={siNestjs} />, colour: "#e0234e" },
   "other-code": { icon: <Code aria-hidden />, colour: "#64748b" },
 };

@@ -19,7 +19,8 @@ company is here: only what is true for any company.
        core extensions, on by default: Ideas tab and prototypes,
          GitHub runner, System and Factory tabs
        add-ons, chosen per company: made-up worlds
-       kits, one per kind of product: Expo app, React web app, NestJS backend
+       kits, one per kind of product: Expo app, React web app, SvelteKit web app,
+         NestJS backend
        │ use only the core's API
   CORE (here)
        loading products and extensions, parts, settings, agents (Claude Code),
@@ -58,7 +59,7 @@ idea and sets it up there.
 | Folder                     | What                                                                                                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/core/`           | Product descriptions, the company file, the extension registry, parts, settings groups, recognising products in existing code, making a factory folder, running Claude Code, working copies |
-| `packages/kits/`           | React web app, NestJS backend and Expo app: recognise, start and create each kind of product, with their rules; Other code for any other project                                            |
+| `packages/kits/`           | React web app, SvelteKit web app, NestJS backend and Expo app: recognise, start and create each kind of product, with their rules; Other code for any other project                         |
 | `packages/launcher/`       | Starts, watches and stops the parts                                                                                                                                                         |
 | `packages/server/`         | The local web server and the `software-factory` command; the trackers' settings (GitHub board, Jira Cloud)                                                                                  |
 | `packages/dashboard/`      | The web interface: the setup flow and the dashboard                                                                                                                                         |
