@@ -10,6 +10,8 @@
     "@software-factory/knowledge-base": "0.1.0",
     "@software-factory/launcher": "0.1.0",
     "@software-factory/method": "0.1.0",
+    "culori": "4.0.2",
+    "postcss": "8.5.30",
     "zod": "4.6.5"
   },
   "engines": {
@@ -18,5 +20,8 @@
   "bin": {
     "software-factory": "./bin/software-factory.ts"
   },
-  "description": "The factory's local web server and the software-factory command: the setup flow and the dashboard."
+  "description": "The factory's local web server and the software-factory command: the setup flow and the dashboard.",
+  "devDependencies": {
+    "@types/culori": "4.0.1"
+  }
 }

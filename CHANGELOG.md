@@ -6,6 +6,13 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Building writes the factory's look.** When the project has an app
+  people see, the setup coach writes `factory/theme.css` from it while
+  building, and the factory's checks look at the theme: the colours text
+  sits on, set for light and dark as plain colours and readable (WCAG AA,
+  4.5:1), and the files it names (`theme-check.ts`, with postcss and
+  culori). The setup coach asks once which add-ons the owner wants, and
+  draws arrows only inside an area.
 - **Setup draws the whole picture first.** The coach's guide names what
   building needs (what the factory builds, what each must keep, what the
   project is, how work will go), and the coach drafts all of it in its first

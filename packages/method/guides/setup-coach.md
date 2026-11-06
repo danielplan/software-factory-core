@@ -67,8 +67,11 @@ to build:
 3. **What the project is**: for whom, what it changes for them, how real
    it is, its own words, and what is still open. This becomes the knowledge
    base, beside the documentation already there.
-4. **How work will go**: who decides what is built, and where work is
-   tracked, if the owner has a place already.
+4. **How work will go**: who decides what is built, where work is tracked
+   (if the owner has a place already), and which of the factory's add-ons
+   (listed below) they want. Suggest the few that fit, each as a card with
+   why, and ask once; switch on only what they agree to. They can change it
+   later on the Add-ons page.
 
 Where the project's documentation already says something, the map shows it
 briefly, from there; the factory links to it.
@@ -88,7 +91,8 @@ briefly, from there; the factory links to it.
   about; its text names what that is. A guess is unconfirmed until the
   owner agrees; then draw it again, confirmed.
 - Every arrow says what it means in a word or two ("uses", "sends orders
-  to"). Arrows join things that act on each other; a rule or a question
+  to"). Arrows join cards in the same area that act on each other; between
+  areas, a card's text names the other side instead. A rule or a question
   gets none.
 - The owner moves and removes cards themselves, and clicks one to ask
   about it: their message then ends with "(About: …)". When they changed
@@ -113,10 +117,27 @@ from the map:
    documentation already says it, link to that page from where the fact
    would go and add only what it does not say; list that documentation on
    the knowledge base's index, with what each page answers. Never copy it.
-3. `configure` where work is tracked, add-ons, settings and tools to
+3. The factory's look, when the project has an app people see: write
+   `factory/theme.css` so the factory looks related to that app, never the
+   same. Read the app's colour variables, its Tailwind theme, its design
+   guide and its fonts. Set on `:root`, and again inside
+   `@media (prefers-color-scheme: dark) { :root { … } }`, as plain colours
+   (`#rrggbb`): `--ground`, `--background`, `--surface`, `--surface-2`,
+   `--foreground`, `--card`, `--card-foreground`, `--popover`,
+   `--popover-foreground`, `--primary`, `--primary-foreground`,
+   `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`,
+   `--accent`, `--accent-foreground`, `--destructive`, `--success`,
+   `--warning`, `--border`, `--input`, `--ring`, `--arrow` and `--dot`; then
+   `--font-body`, `--radius`, `--shadow-soft` and `--shadow-big`. Use the
+   project's own font files with `@font-face` and
+   `url("/api/theme/file?path=<the file's path inside the project>")`. Change
+   only these: the factory keeps its own orb, layout and name, never the
+   app's mascot. Without an app people see, write no theme.
+4. `configure` where work is tracked, add-ons, settings and tools to
    install, but only what the owner agreed to.
-4. Read what `configure` says the factory's checks find, and put it right
-   until they find nothing.
+5. Read what `configure` says the factory's checks find (the theme's
+   too), and put it right until they find nothing; `configure` with nothing
+   runs them again.
 
 Then tell the owner in two sentences what you built, and that they can
 press **Open the factory**.

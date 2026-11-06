@@ -20,6 +20,7 @@ import { checkDocs } from "@software-factory/knowledge-base";
 
 import type { SetupProduct } from "../api.ts";
 import { Refused } from "../refused.ts";
+import { themeProblems } from "../theme-check.ts";
 
 export type Configuration = {
   project?: { name: string; about?: string };
@@ -177,12 +178,13 @@ function kitFor(
   return { kit, found };
 }
 
-// What the factory's checks still find: its own loading, and the knowledge
-// base's rules.
+// What the factory's checks still find: its own loading, the knowledge
+// base's rules, and the theme, if there is one.
 async function checks(shop: Workshop, root: string): Promise<string[]> {
   const docs = await checkDocs(join(root, "context"));
   const found = [
     ...shop.problems(),
+    ...themeProblems(shop.project),
     ...docs.map((p) => {
       const line = p.line ? ":" + String(p.line) : "";
       return `context/${p.file}${line}: ${p.message}`;

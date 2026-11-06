@@ -109,20 +109,21 @@ and may use the project's own files, such as its fonts, as
 `url("/api/theme/file?path=<path inside the project>")`; only files the theme
 names are given out. An upgrade never touches it.
 
-To come: an agent that writes the theme from the company's own app (its CSS
-variables, its design guide, its fonts and logo, a picture of it running)
-when the factory is set up or when the owner asks, and a check that every
-variable is set, text is readable on its background (WCAG AA) in both themes
-and the fonts load; the logo beside the factory's name. The components
-themselves are never changed in a company: more than the theme allows is a
-change asked of the core.
+When the factory is built, the setup coach writes the theme from the
+company's own app (its colour variables, its design guide, its fonts), and
+the factory's checks look at it (`packages/server/src/theme-check.ts`): the
+colours text sits on are set for light and dark as plain colours, text is
+readable on them (WCAG AA), and every file it names is in the project. To
+come: writing it again when the owner asks, and the logo beside the
+factory's name. The components themselves are never changed in a company:
+more than the theme allows is a change asked of the core.
 
 ## The order
 
 1. **The kernel's missing pieces**: install, add, remove and upgrade; the
    extension points for tabs, agent tools and workflow steps; a working
    copy's own environment. Then a first release.
-2. **The theme**: the agent that writes it, and its check.
+2. **The theme**: written again when the owner asks; the logo.
 3. **Runner**, with the Board's dragging and GitHub's signals; Jira after.
 4. **Ideas**, the rest of it.
 5. **Prototypes**, with the kits' starters and prototype mode; then
