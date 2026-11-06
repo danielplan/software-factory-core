@@ -6,6 +6,14 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **The method's skills reach the coding agents.** Making the factory's
+  folder puts the method's skills (factory, plan, build-test-first,
+  review-structure, show-result, update-context) in the project's
+  `.claude/skills` and `.agents/skills`, so planning and building with the
+  method works in Claude Code and Codex too. A skill folder the factory put
+  there is replaced by a newer one; one of the project's own with the same
+  name is left alone (`server/src/install-skills.ts`). A factory made
+  before gets them on its next upgrade.
 - The factory takes in every card on a connected board unless the owner
   asks for only the cards with a label (`*` is the default label, before
   `factory`). Boards connected before keep their label.

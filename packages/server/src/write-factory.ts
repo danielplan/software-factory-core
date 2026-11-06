@@ -18,6 +18,7 @@ import {
 } from "@software-factory/core";
 
 import type { CreateCompany, SetupProduct } from "./api.ts";
+import { installSkills } from "./install-skills.ts";
 import { addKitServers } from "./kit-servers.ts";
 import { Refused } from "./refused.ts";
 
@@ -34,6 +35,7 @@ export function writeCompany(
     throw new Refused(`There is a factory in ${root} already.`);
   createFactoryFolder(root, { name, about: request.about }, templates);
   pointToFactory(project);
+  installSkills(project);
   return root;
 }
 
