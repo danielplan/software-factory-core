@@ -27,6 +27,8 @@ Use the following skills to create the run and manage its progress:
 
 Read each skill when you need to use it. Each skill has its own instructions and approach.
 
+When the person asks to update the factory itself to a newer core, use [`upgrade-factory`](../upgrade-factory/SKILL.md) instead of a run.
+
 ## Work from the board
 
 When the factory is connected to a board, work lives there: anyone adds cards to its backlog, and whoever runs the factory's runner builds the cards that are ready. In the project, the `software-factory card` command reads and moves them (`software-factory card help` lists what it does).

@@ -6,6 +6,12 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **An `upgrade-factory` skill** in the method: a coding agent runs
+  `software-factory upgrade`, does the small changes it lists under "Needs
+  you", asks about the ones that are the owner's choice, checks again and
+  hands the result over for review. Every factory gets it with its next
+  `software-factory upgrade`.
+
 ## 0.2.0 (2026-11-06)
 
 **To upgrade:** run `software-factory upgrade` in the project, review the

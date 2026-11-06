@@ -22,7 +22,7 @@ test("every skill has a name, matching its folder, and a description", () => {
   const skills = listSkills();
   assert.deepEqual(
     skills.map((skill) => skill.name),
-    ["factory", ...LOOP].sort((a, b) => a.localeCompare(b)),
+    ["factory", ...LOOP, "upgrade-factory"].sort((a, b) => a.localeCompare(b)),
   );
   for (const skill of skills) {
     assert.equal(basename(dirname(skill.file)), skill.name);
@@ -35,7 +35,7 @@ test("the factory skill links to every other skill", () => {
     join(skillsFolder, "factory", "SKILL.md"),
     "utf8",
   );
-  for (const name of LOOP)
+  for (const name of [...LOOP, "upgrade-factory"])
     assert.ok(factory.includes(`(../${name}/SKILL.md)`), `links ${name}`);
 });
 

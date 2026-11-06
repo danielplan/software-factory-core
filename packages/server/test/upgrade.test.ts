@@ -123,7 +123,7 @@ test("an old factory is brought to the core's version, step by step", async () =
     extensions,
   });
   assert.equal(again.from, CORE_VERSION);
-  assert.deepEqual(again.done, ["Refreshed the method's skills (12 folders)."]);
+  assert.deepEqual(again.done, ["Refreshed the method's skills (14 folders)."]);
 });
 
 test("what a migration cannot do alone is left to the owner, and said", async () => {
