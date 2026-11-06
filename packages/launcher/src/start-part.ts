@@ -9,7 +9,7 @@ import { addressOf, envOf, type Part, portOf } from "@software-factory/core";
 
 import type { Light, NewProblem, PartLight } from "./part-light.ts";
 import { answers, portTaken } from "./probe.ts";
-import { foreignFolder } from "./listener.ts";
+import { foreignFolder, runsHere } from "./listener.ts";
 import { Program } from "./programs.ts";
 import { isFresh, packagesNeeded } from "./readiness.ts";
 
@@ -61,6 +61,19 @@ function commandOf(s: Starter, part: Part, inner: PartLight): string[] | null {
     text: part.help?.text ?? "Start it, then press Try again.",
   });
   return null;
+}
+
+// Answering, or its own program on its port (on an address the health
+// check does not try, such as IPv6 only): started outside the factory.
+async function runningAlready(
+  s: Starter,
+  part: Part,
+  address: string | null,
+  port: number | null,
+): Promise<boolean> {
+  if (part.health && address && (await answers(address + part.health)))
+    return true;
+  return port !== null && runsHere(port, folderOf(s.root, part));
 }
 
 // The part's port, taken by a program that runs in another folder: most
@@ -122,7 +135,7 @@ async function alreadyAnswers(
     s.fail(inner, takenByAnotherCopy(part, port, other));
     return true;
   }
-  if (part.health && address && (await answers(address + part.health))) {
+  if (await runningAlready(s, part, address, port)) {
     inner.outside = Boolean(part.run);
     s.set(inner, "running", null);
     return true;

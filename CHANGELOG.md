@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- A product's own program counts as running when it listens on its port
+  from its own folder, also where the health check cannot reach it (a
+  development server on IPv6 only), instead of showing as stopped or as
+  "used by another program".
 - **Planning in a coding agent, from the board's cards.** `software-factory
 card` (list, show, new, move, comment, agree) works with the cards of
   the connected GitHub board from the project, for the coding agents and

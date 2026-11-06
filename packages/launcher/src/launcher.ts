@@ -17,7 +17,7 @@ import {
 } from "./part-light.ts";
 import { answers, portTaken } from "./probe.ts";
 import type { Program } from "./programs.ts";
-import { foreignFolder } from "./listener.ts";
+import { foreignFolder, runsHere } from "./listener.ts";
 import {
   folderOf,
   partById,
@@ -217,8 +217,13 @@ export class Launcher {
   // when there is no way to tell.
   private async answering(part: Part): Promise<boolean | null> {
     const address = addressOf(part, this.parts, this.root);
-    if (part.health && address) return await answers(address + part.health);
     const port = portOf(part, this.parts, this.root);
+    if (part.health && address && (await answers(address + part.health)))
+      return true;
+    // Its own program on its port, on an address the health check does
+    // not try (a development server on IPv6 only).
+    if (port && runsHere(port, folderOf(this.root, part))) return true;
+    if (part.health && address) return false;
     return port ? await portTaken(port) : null;
   }
 

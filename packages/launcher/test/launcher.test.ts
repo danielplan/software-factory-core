@@ -181,10 +181,14 @@ test("a part already running elsewhere is shown as running, not started twice, a
     serving("api", port),
     part({
       id: "holder",
+      folder: "holder",
       run: ["node", FAKE, "listen", String(other)],
       port: { fixed: other },
     }),
   ]);
+  // Each product in a folder of its own, as in a real project.
+  mkdirSync(join(outside.root, "holder"));
+  mkdirSync(join(outside.root, "taken"));
   await outside.launcher.startAll();
   // The same project: its program was started outside the factory.
   const { launcher, light } = launcherWith(
@@ -192,6 +196,7 @@ test("a part already running elsewhere is shown as running, not started twice, a
       serving("api", port),
       part({
         id: "taken",
+        folder: "taken",
         run: ["node", FAKE, "hang"],
         port: { fixed: other },
         health: "/",
@@ -213,10 +218,7 @@ test("a part already running elsewhere is shown as running, not started twice, a
     await launcher.start("api");
     assert.equal(light("api")?.outside, true);
     await launcher.start("taken");
-    assert.match(
-      light("taken")?.problem?.title ?? "",
-      /used by another program/,
-    );
+    assert.match(light("taken")?.problem?.title ?? "", /is used by/);
     await launcher.start("checked");
     assert.equal(light("checked")?.light, "running");
     assert.equal(light("checked")?.canStart, false);

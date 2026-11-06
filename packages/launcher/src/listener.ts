@@ -20,6 +20,15 @@ export function foreignFolder(port: number, folder: string): string | null {
   return within(running, mine) || within(mine, running) ? null : running;
 }
 
+// Whether the program listening on the port runs in this part's folder
+// (or around it): this part, started outside the factory.
+export function runsHere(port: number, folder: string): boolean {
+  const running = listenerFolder(port);
+  if (!running) return false;
+  const mine = real(resolve(folder));
+  return within(running, mine) || within(mine, running);
+}
+
 function real(path: string): string {
   try {
     return realpathSync.native(path);
