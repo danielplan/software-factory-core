@@ -310,3 +310,26 @@ async function answered(session: Session) {
     await new Promise((resolve) => setImmediate(resolve));
   }
 }
+
+test("a factory on its own board opens without a step to connect a board", async () => {
+  const pretend = pretendClaude([
+    { calls: [], reply: "Shall I build it?" },
+    {
+      calls: [["configure", { project: { name: "Acme" }, tracker: "none" }]],
+      reply: "It is built.",
+    },
+  ]);
+  const { session, server, post } = await stage(pretend.claude);
+  try {
+    await post("/api/setup/say", { text: "We are Acme." });
+    await post("/api/setup/build", {});
+    assert.equal((await post("/api/setup/open", {})).status, 200);
+    const made = session.state();
+    assert.ok(made.mode === "factory");
+    assert.equal(made.company.tracker, "none");
+    assert.equal(made.onboarding, false);
+  } finally {
+    session.close();
+    server.close();
+  }
+});

@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Opening a factory built in setup asks where work is tracked only when
+  setup chose a GitHub or Jira board that is not connected yet; the
+  factory's own board needs no step. The setup coach's theme takes the
+  app's colours as they are, never shifting a brand colour.
 - **Building writes the factory's look.** When the project has an app
   people see, the setup coach writes `factory/theme.css` from it while
   building, and the factory's checks look at the theme: the colours text

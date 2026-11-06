@@ -160,11 +160,14 @@ export class Session {
     await this.coach.build();
   }
 
-  // The owner opens the factory the coach made: setup is over.
+  // The owner opens the factory the coach made: setup is over. Connecting
+  // where work is tracked comes first only for a board agreed in setup and
+  // not connected yet; the factory's own board needs nothing.
   openFactory(): void {
     if (!this.root) throw new Refused("There is no factory yet.");
     this.coach.finish();
-    this.onboarding = true;
+    const tracker = this.factory?.company.tracker ?? "none";
+    this.onboarding = tracker !== "none" && !readBoard(this.root)[tracker];
     this.reload();
   }
 

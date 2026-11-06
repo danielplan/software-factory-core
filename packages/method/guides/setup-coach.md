@@ -118,21 +118,22 @@ from the map:
    would go and add only what it does not say; list that documentation on
    the knowledge base's index, with what each page answers. Never copy it.
 3. The factory's look, when the project has an app people see: write
-   `factory/theme.css` so the factory looks related to that app, never the
-   same. Read the app's colour variables, its Tailwind theme, its design
-   guide and its fonts. Set on `:root`, and again inside
-   `@media (prefers-color-scheme: dark) { :root { … } }`, as plain colours
-   (`#rrggbb`): `--ground`, `--background`, `--surface`, `--surface-2`,
-   `--foreground`, `--card`, `--card-foreground`, `--popover`,
+   `factory/theme.css` so the factory looks like part of the same family.
+   Take the app's own colours, fonts, corners and shadows as they are, from
+   its colour variables, its Tailwind theme and its design guide: never
+   shift a brand colour. What keeps the factory its own is its orb, its
+   layout and its name, never the app's mascot. Set on `:root`, and again
+   inside `@media (prefers-color-scheme: dark) { :root { … } }`, as plain
+   colours (`#rrggbb`): `--ground`, `--background`, `--surface`,
+   `--surface-2`, `--foreground`, `--card`, `--card-foreground`, `--popover`,
    `--popover-foreground`, `--primary`, `--primary-foreground`,
    `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`,
    `--accent`, `--accent-foreground`, `--destructive`, `--success`,
    `--warning`, `--border`, `--input`, `--ring`, `--arrow` and `--dot`; then
    `--font-body`, `--radius`, `--shadow-soft` and `--shadow-big`. Use the
    project's own font files with `@font-face` and
-   `url("/api/theme/file?path=<the file's path inside the project>")`. Change
-   only these: the factory keeps its own orb, layout and name, never the
-   app's mascot. Without an app people see, write no theme.
+   `url("/api/theme/file?path=<the file's path inside the project>")`.
+   Without an app people see, write no theme.
 4. `configure` where work is tracked, add-ons, settings and tools to
    install, but only what the owner agreed to.
 5. Read what `configure` says the factory's checks find (the theme's

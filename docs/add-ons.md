@@ -94,9 +94,9 @@ general terms.
 ## The theme
 
 The factory is a system of its own, next to the company's app: it should feel
-related to the app, never be mistaken for it. So the theme changes little:
-the accent colour, the fonts, the corners and the logo beside the factory's
-name. The factory keeps its own face (the orb the coaches speak through, never
+related to the app, never be mistaken for it. The theme takes the app's own
+colours, fonts and corners as they are (never shifting a brand colour), and
+the logo beside the factory's name. The factory keeps its own face (the orb the coaches speak through, never
 the app's own mascot or assistant), its own layout and its own name.
 
 The dashboard is built once and themed through CSS variables, so a company
