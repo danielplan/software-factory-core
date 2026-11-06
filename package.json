@@ -1,0 +1,42 @@
+{
+  "name": "software-factory",
+  "version": "0.3.0",
+  "description": "The software factory's core: the software-factory command, its dashboard and method.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "software-factory": "bin/software-factory.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "@software-factory/core": "0.3.0",
+    "@software-factory/dashboard": "0.3.0",
+    "@software-factory/kits": "0.3.0",
+    "@software-factory/knowledge-base": "0.3.0",
+    "@software-factory/launcher": "0.3.0",
+    "@software-factory/method": "0.3.0",
+    "@software-factory/server": "0.3.0",
+    "culori": "4.0.2",
+    "postcss": "8.5.30",
+    "remark": "15.0.1",
+    "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-validate-links": "13.1.0",
+    "unified": "11.0.5",
+    "unified-engine": "11.2.2",
+    "unist-util-visit": "5.1.0",
+    "vfile": "6.0.3",
+    "zod": "4.6.5"
+  },
+  "bundleDependencies": [
+    "@software-factory/core",
+    "@software-factory/kits",
+    "@software-factory/knowledge-base",
+    "@software-factory/launcher",
+    "@software-factory/method",
+    "@software-factory/server",
+    "@software-factory/dashboard"
+  ]
+}
