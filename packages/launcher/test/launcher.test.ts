@@ -4,11 +4,13 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+
 import { setTimeout as sleep } from "node:timers/promises";
 
 import { partSchema, type Part } from "@software-factory/core";
 
 import { Launcher } from "../src/index.ts";
+import { failLight, newPartLight, viewOf } from "../src/part-light.ts";
 
 // The launcher with real programs: a pretend program (fixtures) that
 // serves, crashes, hangs or works as a preparation step.
@@ -276,4 +278,20 @@ test("a missing settings file, a part that never answers, and stopping now", asy
     await launcher.stopAll();
     launcher.close();
   }
+});
+
+test("a part that starts with others has no buttons of its own, until it has a problem", () => {
+  const part: Part = partSchema.parse({
+    id: "shared",
+    name: "Shared",
+    area: "products",
+    does: "Kept built.",
+    run: ["npm", "run", "dev"],
+    start: "with",
+  });
+  const inner = newPartLight(part);
+  assert.equal(viewOf(part, inner, null).canStart, false);
+  assert.equal(viewOf(part, inner, null).canStop, false);
+  failLight(inner, { title: "It stopped", text: "Look at it." });
+  assert.equal(viewOf(part, inner, null).canStart, true);
 });

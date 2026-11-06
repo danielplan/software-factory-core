@@ -1,7 +1,7 @@
 import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
-import { messageOf, post, type AddOnView } from "@/api";
+import { messageOf, post, type AddOnView, type Board } from "@/api";
 import { lookOf } from "@/add-ons/looks";
 import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
@@ -56,10 +56,13 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
 export function TrackerChoice({
   trackers,
   current,
+  connected,
   onDone,
 }: Readonly<{
   trackers: AddOnView[];
   current: string;
+  // The boards connected now, by tracker: their steps start from them.
+  connected?: Board;
   onDone: (message: string) => void;
 }>) {
   const [choice, setChoice] = useState(current);
@@ -127,7 +130,7 @@ export function TrackerChoice({
           Use the factory's board
         </Button>
       )}
-      {Steps && <Steps onDone={onDone} />}
+      {Steps && <Steps onDone={onDone} connected={connected?.[choice]} />}
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </div>
   );

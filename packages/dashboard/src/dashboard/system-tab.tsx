@@ -191,7 +191,10 @@ function headline(parts: PartView[]): {
   light: PartView["light"];
   text: string;
 } {
-  const lit = parts.filter((part) => part.light !== "none");
+  // A part that runs with others says nothing on its own.
+  const lit = parts.filter(
+    (part) => part.light !== "none" && part.start !== "with",
+  );
   const problems = lit.filter((part) => part.light === "problem").length;
   if (lit.length === 0)
     return {
@@ -209,6 +212,11 @@ function headline(parts: PartView[]): {
     return {
       light: "running",
       text: "Everything is running: open a product to try it.",
+    };
+  if (lit.some((part) => part.light === "running"))
+    return {
+      light: "stopped",
+      text: "Some of your products are running: start the others to try everything.",
     };
   return {
     light: "stopped",

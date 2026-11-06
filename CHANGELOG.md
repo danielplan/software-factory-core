@@ -6,6 +6,14 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **A part can start with what uses it** (`start: "with"`): it has no
+  buttons of its own and starts when a part that depends on it starts (a
+  TypeScript package's watch build). System's headline leaves it out and
+  says when only some products run. A company whose package part was
+  `auto` gets `with` from the kit.
+- On Settings, changing where work is tracked starts from the board
+  connected now: its step is done, and its repository, board, columns and
+  label are already chosen.
 - **Kits bring their MCP servers** (`mcp` in `defineKit`): written into the
   project's `.mcp.json` when a product of their kind is added, only where
   the project has no server of that name (`server/src/kit-servers.ts`). The

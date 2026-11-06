@@ -47,9 +47,10 @@ export const partSchema = z.object({
   run: z.array(z.string()).min(1).optional(),
   // Settings for the program; "{port:<part>}" is that part's port.
   env: z.record(z.string(), z.string()).optional(),
-  // auto: started with everything; button: only from its button; never:
-  // only checked.
-  start: z.enum(["auto", "button", "never"]),
+  // auto: started with everything; button: only from its button; with:
+  // started with the parts that need it, never on its own (a package kept
+  // built while the products using it run); never: only checked.
+  start: z.enum(["auto", "button", "with", "never"]),
   // The owner may switch between "auto" and "button".
   startChoice: z.literal(true).optional(),
   startSeconds: z.number().int().positive().optional(),

@@ -92,11 +92,17 @@ export function viewOf(
     step: inner.step,
     problem: inner.problem,
     link,
+    // A part that starts with others has no buttons, but can be tried
+    // again after a problem.
     canStart:
       part.start !== "never" &&
       Boolean(part.run) &&
-      (inner.light === "stopped" || inner.light === "problem"),
-    canStop: !inner.outside && Boolean(inner.program || inner.starting),
+      (inner.light === "problem" ||
+        (inner.light === "stopped" && part.start !== "with")),
+    canStop:
+      part.start !== "with" &&
+      !inner.outside &&
+      Boolean(inner.program || inner.starting),
     outside: inner.outside,
   };
 }

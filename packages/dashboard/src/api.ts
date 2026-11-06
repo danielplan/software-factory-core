@@ -7,6 +7,7 @@ import type { State } from "../../server/src/api.ts";
 
 export type {
   AddOnView,
+  Board,
   CoachView,
   Draft,
   GitHubStatus,

@@ -74,7 +74,7 @@ export const typescriptPackage = defineKit({
         folder: product.folder,
         prepare: [{ label: "Installing packages", packages: true }],
         run: ["npm", "run", "dev"],
-        start: "auto",
+        start: "with",
       },
     ];
   },

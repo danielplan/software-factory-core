@@ -30,8 +30,7 @@ export function PartCard({
     part.light === "starting" && part.step
       ? `Starting · ${part.step}`
       : part.step;
-  const status =
-    step ?? (part.outside ? "Running, started outside the factory" : null);
+  const status = step ?? quietStatus(part);
   return (
     <div
       data-light={part.light}
@@ -67,6 +66,14 @@ export function PartCard({
       {part.problem && <PartProblem problem={part.problem} />}
     </div>
   );
+}
+
+// What a part that is not starting says: started elsewhere, or that it
+// runs with what uses it.
+function quietStatus(part: PartView): string | null {
+  if (part.outside) return "Running, started outside the factory";
+  if (part.start === "with") return "Runs with the products that use it";
+  return null;
 }
 
 function PartProblem({

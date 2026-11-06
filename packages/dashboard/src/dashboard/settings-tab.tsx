@@ -106,6 +106,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
             <TrackerChoice
               trackers={trackersOf(state.addOns)}
               current={state.company.tracker}
+              connected={state.board}
               onDone={setDone}
             />
           </CollapsibleContent>
