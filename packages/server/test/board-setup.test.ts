@@ -100,7 +100,7 @@ test("a board that is there is connected as it is, saying which stages have no c
   assert.deepEqual(entry, {
     repository: "acme/shop",
     board: 1,
-    label: "factory",
+    label: "*",
     stages: {
       backlog: "",
       planning: "",

@@ -17,10 +17,10 @@ export function stagesOf(body: unknown, columns: string[]) {
   }
 }
 
-// The label that marks the factory's work: "factory" unless the owner
+// The label that marks the factory's work: * (all of it) unless the owner
 // chose another, or * for all of it.
 export function labelOf(body: unknown): string {
-  const label = field(body, "label").trim() || "factory";
+  const label = field(body, "label").trim() || "*";
   if (!/^(\*|[\w .:-]+)$/.test(label))
     throw new Refused(
       `“${label}” cannot be a label: use letters, digits, spaces, . : - or *.`,

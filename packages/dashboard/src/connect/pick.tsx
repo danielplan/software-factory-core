@@ -38,8 +38,8 @@ export function Pick({
   );
 }
 
-// Which of the board's work the factory takes in: what carries its label,
-// or all of it.
+// Which of the board's work the factory takes in: all of it (the usual),
+// or only what carries a label.
 export function WhichWork({
   value,
   onPick,
@@ -50,8 +50,8 @@ export function WhichWork({
       label="Work the factory takes in"
       value={value}
       options={[
-        { value: "factory", label: `Only ${noun} labelled “factory”` },
         { value: "*", label: `Every ${noun.replace(/s$/, "")} on the board` },
+        { value: "factory", label: `Only ${noun} labelled “factory”` },
       ]}
       onPick={onPick}
     />

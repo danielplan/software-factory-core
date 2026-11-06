@@ -306,7 +306,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     const jira = state.board.jira;
     assert.ok(jira);
     assert.equal(jira.site, "acme.atlassian.net");
-    assert.equal(jira.label, "factory");
+    assert.equal(jira.label, "*");
     assert.equal(jira.stages.review, "In Review");
     // The token is a secret, kept in the settings, never in board.json.
     const token = state.settings

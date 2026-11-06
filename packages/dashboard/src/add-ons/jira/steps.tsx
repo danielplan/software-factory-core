@@ -86,7 +86,7 @@ function ProjectStep({
   onDone: (message: string) => void;
 }>) {
   const [project, setProject] = useState("");
-  const [label, setLabel] = useState("factory");
+  const [label, setLabel] = useState("*");
   const [columns, setColumns] = useState<Columns | null>(null);
   const [stages, setStages] = useState<StageMap | null>(null);
   const choose = (key: string) => {

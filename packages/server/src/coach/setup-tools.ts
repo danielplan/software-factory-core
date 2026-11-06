@@ -137,7 +137,7 @@ const CONFIGURE_INPUT = {
         .string()
         .optional()
         .describe(
-          "The label that marks the factory's work; factory unless agreed otherwise, * for all.",
+          "Which work the factory takes in: * (every card, the usual), or only the cards with this label when the owner asks for it.",
         ),
       addColumns: z
         .boolean()

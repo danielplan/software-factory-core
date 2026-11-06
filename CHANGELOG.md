@@ -6,6 +6,9 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- The factory takes in every card on a connected board unless the owner
+  asks for only the cards with a label (`*` is the default label, before
+  `factory`). Boards connected before keep their label.
 - **Another copy of the project is not taken for this one.** When a part's
   port is in use, the launcher asks which folder the program on it runs in
   (lsof, on macOS and Linux); a program from another folder (a second

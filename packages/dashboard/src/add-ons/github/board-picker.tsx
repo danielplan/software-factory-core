@@ -185,7 +185,7 @@ function useList<T>(
 function useBoardChoice(connected?: Board[string]) {
   const [repository, setRepository] = useState(textOf(connected?.repository));
   const [board, setBoard] = useState(textOf(connected?.board));
-  const [label, setLabel] = useState(connected?.label ?? "factory");
+  const [label, setLabel] = useState(connected?.label ?? "*");
   const [stages, setStages] = useState<StageMap | null>(null);
   const matched = useCallback(
     (suggested: StageMap) => {
