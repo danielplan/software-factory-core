@@ -54,11 +54,30 @@ async function facts(cli: Cli, project: string): Promise<string> {
   const lines = await Promise.all(
     boards.slice(0, 6).map(async (board) => {
       const status = await statusOf(cli, owner, board.number).catch(() => null);
-      const columns = status?.options.map((o) => o.name).join(", ") ?? "?";
-      return `- “${board.title}” (board ${String(board.number)}): ${String(board.items.totalCount)} cards; columns ${columns}`;
+      return `- “${board.title}” (board ${String(board.number)}): ${String(board.items.totalCount)} cards; ${columnsSaid(status)}`;
     }),
   );
   return [`${intro} The boards of ${owner}:`, ...lines].join("\n");
+}
+
+// A board's columns, and the factory's stages they are (from their names).
+function columnsSaid(status: Status | null): string {
+  if (!status) return "its columns could not be read";
+  const names = status.options.map((o) => o.name);
+  const stages = suggestStages(names);
+  const matched = STAGES.filter((stage) => stages[stage]).map(
+    (stage) => `${STAGE_COLUMNS[stage].title} = ${stages[stage]}`,
+  );
+  const missing = STAGES.filter((stage) => !stages[stage]).map(
+    (stage) => STAGE_COLUMNS[stage].title,
+  );
+  return [
+    `columns ${names.join(", ")}`,
+    matched.length > 0 ? `the factory's stages: ${matched.join(", ")}` : "",
+    missing.length > 0 ? `no column for ${missing.join(", ")}` : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
 }
 
 async function connect(cli: Cli, project: string, asked: BoardAsked) {

@@ -82,7 +82,7 @@ test("the coach hears where the code is on GitHub and the boards there", async (
   assert.equal(
     facts,
     "On GitHub: the code is at acme/shop. The boards of acme:\n" +
-      "- “Roadmap” (board 1): 3 cards; columns Todo, In Progress, Done",
+      "- “Roadmap” (board 1): 3 cards; columns Todo, In Progress, Done; the factory's stages: To do = Todo, In progress = In Progress, Done = Done; no column for Backlog, Planning, Review",
   );
   assert.equal(
     await githubSetup(cli).facts(project("https://gitlab.com/acme/shop")),
