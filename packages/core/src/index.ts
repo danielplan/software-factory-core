@@ -99,3 +99,5 @@ export {
   type CopySettings,
 } from "./copies/workspace.ts";
 export { run } from "./processes.ts";
+
+export { compareVersions, CORE_VERSION, FIRST_VERSION } from "./version.ts";

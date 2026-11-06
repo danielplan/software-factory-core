@@ -19,6 +19,7 @@ import {
 } from "../company/company.ts";
 import { PRODUCT_FILE, PRODUCTS_FOLDER } from "../products/find-products.ts";
 import { type ProductFile, productSchema } from "../products/product.ts";
+import { CORE_VERSION } from "../version.ts";
 
 // Where the starting files come from: the knowledge base's template folder
 // (with context/ in it) and the method's AGENTS.md template.
@@ -65,7 +66,7 @@ export function createFactoryFolder(
 ): Company {
   if (hasFactory(root))
     throw new Error(`There is a factory in ${root} already.`);
-  const file = companySchema.parse(company);
+  const file = companySchema.parse({ ...company, core: CORE_VERSION });
   mkdirSync(root, { recursive: true });
   writeJson(join(root, COMPANY_FILE), file);
   cpSync(join(templates.knowledgeBase, "context"), join(root, "context"), {

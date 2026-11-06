@@ -155,11 +155,15 @@ has no kit, a part listed twice, a dependency that is not there.
 
 ## How companies update
 
-- **The core:** a company pins a version. An upgrade (a command, to come)
-  updates the packages, copies the core's files the agents read into a
-  read-only folder, runs the release's migrations and then the checks, on a
-  branch of its own. A company never edits the core; it uses an extension
-  point, or asks for a change here.
+- **The core:** a company's `factory.json` says which version of the core its
+  factory is on (`core`). `software-factory upgrade`, run in the project,
+  brings it to the core the command comes from: it runs the migrations of
+  every release in between (`packages/server/src/upgrade/migrations.ts`),
+  refreshes what the factory owns in the project (the method's skills, the
+  kits' MCP servers), writes the new version and runs the factory's checks.
+  It says what it did and what it leaves to the owner; the owner reviews the
+  changes and commits them. A company never edits the core; it uses an
+  extension point, or asks for a change here.
 - **Extensions and kits:** each has its own version and release notes, and is
   switched on or off in `factory.json`. A kit's rules are read-only in the
   company; the company and each product add their own on top, and where they

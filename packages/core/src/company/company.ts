@@ -26,6 +26,8 @@ export const companySchema = z.object({
   without: z.array(id).default([]),
   // The kits, one per kind of product the company has.
   kits: z.array(id).default([]),
+  // The core's version the factory is on (version.ts); none: the first.
+  core: z.string().optional(),
 });
 
 export type Company = z.infer<typeof companySchema>;

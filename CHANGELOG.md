@@ -6,6 +6,16 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+## 0.2.0 (2026-11-06)
+
+**To upgrade:** run `software-factory upgrade` in the project, review the
+changes, commit them.
+
+- **`software-factory upgrade`** brings a factory to the core it runs on:
+  the migrations of each release since its version, the method's skills
+  and the kits' MCP servers refreshed, the version written into
+  `factory.json` (`core`), and the checks. A factory without a version is
+  on 0.1.0.
 - A product's own program counts as running when it listens on its port
   from its own folder, also where the health check cannot reach it (a
   development server on IPv6 only), instead of showing as stopped or as

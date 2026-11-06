@@ -2,6 +2,7 @@
 // software-factory [folder] [--port <port>] [--no-open]
 // software-factory new <name>
 // software-factory card … (the board's cards, for planning in a coding agent)
+// software-factory upgrade (the project's factory, to this core's version)
 //
 // Run in a project, starts its factory on this computer and opens it in the
 // browser. The factory lives in the project, in its factory/ folder, found
@@ -22,6 +23,7 @@ import { guidesFolder, templatesFolder } from "@software-factory/method";
 
 import { cardCommand } from "../src/cards/command.ts";
 import { computerTools } from "../src/installables.ts";
+import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/add-ons/github/board-setup.ts";
@@ -38,6 +40,18 @@ const OPENER: Partial<Record<NodeJS.Platform, string>> = {
 if (process.argv[2] === "card")
   process.exit(await cardCommand(process.argv.slice(3)));
 
+// The add-ons that ship with the factory.
+const addOns = [githubAddOn(), jiraAddOn()];
+
+// The project's factory, brought to this core's version: done, then exit.
+if (process.argv[2] === "upgrade")
+  process.exit(
+    await upgradeCommand(process.cwd(), {
+      kits: allKits,
+      extensions: addOns.map((addOn) => addOn.extension),
+    }),
+  );
+
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
@@ -49,8 +63,6 @@ const port = Number(values.port);
 const project = projectFrom(positionals);
 const page = join(import.meta.dirname, "..", "..", "dashboard", "dist");
 
-// The add-ons that ship with the factory.
-const addOns = [githubAddOn(), jiraAddOn()];
 let changed = () => {};
 // Claude Code on this computer, signed in with the owner's own account.
 const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");

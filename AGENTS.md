@@ -14,6 +14,12 @@ here reach every company with its next upgrade, so they are made with care.
   that company's repository or its own extension.
 - **Extensions and kits use only the core's published API** (what
   `packages/core/src/index.ts` exports), never its internals.
+- **A change a company would have to make by hand comes with a migration**
+  in `packages/server/src/upgrade/migrations.ts`, for the release it comes
+  in, so `software-factory upgrade` makes it; what it cannot decide alone it
+  leaves to the owner, said in a line. A release raises `CORE_VERSION`
+  (`packages/core/src/version.ts`), gets its section in `CHANGELOG.md` and a
+  tag (`v<version>`).
 - **Every change to what a company sees or relies on** (an extension point, a
   product description field, a file a company writes, a command) gets a line in
   `CHANGELOG.md` under "Unreleased", and says what a company has to do, if
