@@ -143,7 +143,11 @@ from the map:
    `url("/api/theme/file?path=<the file's path inside the project>")`.
    Without an app people see, write no theme.
 4. `configure` where work is tracked, add-ons, settings and tools to
-   install, but only what the owner agreed to.
+   install, but only what the owner agreed to. Where work is tracked is
+   `tracker`: `none` (the factory's own board), `github` (a GitHub board) or
+   `jira` (Jira Cloud); these come with the factory, nothing to switch on.
+   Connecting the board itself is the owner's first step after opening the
+   factory.
 5. Read what `configure` says the factory's checks find (the theme's
    too), and put it right until they find nothing; `configure` with nothing
    runs them again.
