@@ -6,6 +6,11 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Setup is kept.** The setup conversation, its map, whether the factory
+  is being built and Claude Code's conversation are kept in
+  `factory/setup.json` once something was said or drawn, so setup goes on
+  where it was when the factory is started again, and the project keeps a
+  record of how its factory was set up (`coach/setup-record.ts`).
 - **The GitHub board is set up in setup, with the owner.** The setup coach
   hears where the code is on GitHub and the boards there (their columns and
   cards), agrees on one with the owner, or a new one, and while building

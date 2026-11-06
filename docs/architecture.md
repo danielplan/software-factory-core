@@ -106,6 +106,7 @@ acme/                    the project, one repository
    ├─ context/           its knowledge base (from the template)
    ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
+   ├─ setup.json         the setup conversation and its map, kept
    ├─ runs/              its history
    └─ settings/, copies/ secrets and working copies, not in git
 ```

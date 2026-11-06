@@ -17,6 +17,7 @@ import { Refused } from "../refused.ts";
 import type { Drawing } from "./map.ts";
 import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
+import { readSetup, saveSetup } from "./setup-record.ts";
 import { Talk } from "./talk.ts";
 
 const HELLO =
@@ -77,15 +78,43 @@ export class SetupCoach {
     this.options = options;
     this.kits = options.kits;
     this.installables = options.installables;
+    // An earlier setup in this project goes on where it was.
+    const kept = readSetup(options.project);
     this.talk = new Talk({
       claude: options.claude,
       cwd: options.project,
-      onChange: options.onChange,
+      onChange: () => {
+        options.onChange();
+        // Kept once a turn is over, not while the reply is written.
+        if (!this.talk.working) this.keep();
+      },
+      ...(kept ? { kept: { ...kept, map: kept.map as Draft } } : {}),
     });
-    this.opening = hasCode(options.project)
-      ? `Here's my project: ${options.project}\n\n${projectFacts(options.project)}`
-      : null;
-    if (!this.opening) this.talk.messages = [{ from: "coach", text: HELLO }];
+    this.phase = kept?.phase ?? "plan";
+    this.asked = (kept?.messages.length ?? 0) > 0;
+    const answered = kept?.messages.some((m) => m.from === "coach") ?? false;
+    this.opening =
+      hasCode(options.project) && !answered
+        ? `Here's my project: ${options.project}\n\n${projectFacts(options.project)}`
+        : null;
+    if (!this.opening && !kept)
+      this.talk.messages = [{ from: "coach", text: HELLO }];
+  }
+
+  // The conversation kept in the project, once something was said or drawn.
+  private keep(): void {
+    const { talk } = this;
+    if (
+      !talk.messages.some((m) => m.from === "owner") &&
+      !talk.map.cards.length
+    )
+      return;
+    saveSetup(this.options.project, {
+      conversation: talk.id,
+      phase: this.phase,
+      messages: talk.messages,
+      map: talk.map,
+    });
   }
 
   get token(): string {

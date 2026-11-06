@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import type { Session } from "../src/session.ts";
+import type { Draft } from "../src/api.ts";
+import { SetupCoach } from "../src/coach/setup-coach.ts";
+import { readSetup } from "../src/coach/setup-record.ts";
 import type { TrackerSetup } from "../src/connect/tracker-setup.ts";
 import { Refused } from "../src/refused.ts";
 import { pretendClaude } from "./pretend-claude.ts";
@@ -397,6 +400,58 @@ test("the coach connects the board the owner agreed to while it builds; opening 
     assert.equal(opened.company.tracker, "github");
     assert.equal(opened.board.github?.board, 7);
     assert.equal(opened.onboarding, false);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("the setup conversation is kept in the project and goes on after the factory is started again", async () => {
+  const pretend = pretendClaude([
+    {
+      calls: [["draw", { cards: [{ area: "What it builds", title: "Shop" }] }]],
+      reply: "Is that right?",
+    },
+  ]);
+  const { session, server, post, project } = await stage(pretend.claude);
+  try {
+    await post("/api/setup/say", { text: "We are Acme." });
+    const kept = JSON.parse(
+      readFileSync(join(project, "factory", "setup.json"), "utf8"),
+    ) as { phase: string; messages: { text: string }[]; map: Draft };
+    assert.equal(kept.phase, "plan");
+    assert.deepEqual(kept.messages.map((m) => m.text).slice(1), [
+      "We are Acme.",
+      "Is that right?",
+    ]);
+    assert.equal(kept.map.cards[0]?.title, "Shop");
+    // The project has code by now; what was said already is not read again.
+    writeFileSync(join(project, "app.js"), "");
+    // Started again: the same conversation, the same map, nothing to read
+    // first again.
+    const again = new SetupCoach({
+      claude: pretend.claude,
+      kits: [],
+      installables: [],
+      made: () => false,
+      guide: "Help set up.",
+      onChange: () => {},
+      project,
+    });
+    const view = again.view();
+    assert.deepEqual(view.messages.map((m) => m.text).slice(1), [
+      "We are Acme.",
+      "Is that right?",
+    ]);
+    assert.equal(view.draft.cards[0]?.title, "Shop");
+    assert.equal(view.started, true);
+    assert.equal(view.phase, "plan");
+    assert.equal(again.token.length > 0, true);
+    await again.begin();
+    assert.equal(pretend.seen.length, 1);
+    // A record that does not fit starts afresh.
+    writeFileSync(join(project, "factory", "setup.json"), "{ nope");
+    assert.equal(readSetup(project), null);
   } finally {
     session.close();
     server.close();
