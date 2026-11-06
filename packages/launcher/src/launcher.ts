@@ -17,7 +17,14 @@ import {
 } from "./part-light.ts";
 import { answers, portTaken } from "./probe.ts";
 import type { Program } from "./programs.ts";
-import { partById, type Starter, startPart } from "./start-part.ts";
+import { foreignFolder } from "./listener.ts";
+import {
+  folderOf,
+  partById,
+  type Starter,
+  startPart,
+  takenByAnotherCopy,
+} from "./start-part.ts";
 
 export class Launcher {
   readonly root: string;
@@ -186,12 +193,24 @@ export class Launcher {
     const up = await this.answering(part);
     if (up === null) return;
     if (up && inner.light !== "running") {
+      if (this.anotherCopyHas(part, inner)) return;
       inner.outside = Boolean(part.run);
       this.set(inner, "running", null);
     } else if (!up && inner.light === "running") {
       resetLight(inner);
       this.notify();
     }
+  }
+
+  // A program of another copy of the project on the part's port is not this
+  // part: it is said as a problem. True when it is so.
+  private anotherCopyHas(part: Part, inner: PartLight): boolean {
+    const port = portOf(part, this.parts, this.root);
+    const other = port ? foreignFolder(port, folderOf(this.root, part)) : null;
+    if (!port || !other) return false;
+    failLight(inner, takenByAnotherCopy(part, port, other));
+    this.notify();
+    return true;
   }
 
   // Whether the part answers (its health address, else its port); null

@@ -15,11 +15,23 @@ export async function answers(url: string, timeoutMs = 1500): Promise<boolean> {
   }
 }
 
-// True when something accepts connections on the port, whatever it is.
+// True when something accepts connections on the port, whatever it is, on
+// IPv4 or IPv6 (a development server may listen on only one of them, and
+// "localhost" in a browser reaches either).
 export async function portTaken(
   port: number,
-  host = "127.0.0.1",
   timeoutMs = 1000,
+): Promise<boolean> {
+  const taken = await Promise.all(
+    ["127.0.0.1", "::1"].map((host) => takenOn(port, host, timeoutMs)),
+  );
+  return taken.some(Boolean);
+}
+
+async function takenOn(
+  port: number,
+  host: string,
+  timeoutMs: number,
 ): Promise<boolean> {
   return await new Promise((resolve) => {
     const socket = connect({ port, host });

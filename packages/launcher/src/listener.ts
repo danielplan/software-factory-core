@@ -1,0 +1,57 @@
+// Whose program is on a part's port: the folder it runs in, asked of lsof
+// (macOS and Linux). Another copy of the same project (a second working
+// copy, a worktree) uses the same ports, and its program must not be taken
+// for this part's: it is said as a problem instead.
+
+import { execFileSync } from "node:child_process";
+import { realpathSync } from "node:fs";
+import { isAbsolute, relative, resolve } from "node:path";
+
+import { LSOF } from "./system-tools.ts";
+
+// The folder the program listening on the port runs in, when it is not
+// this part's (neither inside the part's folder nor around it); none when
+// it is, or when it cannot be told.
+export function foreignFolder(port: number, folder: string): string | null {
+  const running = listenerFolder(port);
+  if (!running) return null;
+  // Both as they really are (on macOS /var is /private/var).
+  const mine = real(resolve(folder));
+  return within(running, mine) || within(mine, running) ? null : running;
+}
+
+function real(path: string): string {
+  try {
+    return realpathSync.native(path);
+  } catch {
+    return path;
+  }
+}
+
+function within(inner: string, outer: string): boolean {
+  const path = relative(outer, inner);
+  return !path.startsWith("..") && !isAbsolute(path);
+}
+
+function listenerFolder(port: number): string | null {
+  const pid = ask(["-nP", `-iTCP:${String(port)}`, "-sTCP:LISTEN", "-t"])
+    ?.split("\n")
+    .find(Boolean);
+  if (!pid) return null;
+  const cwd = ask(["-a", "-p", pid, "-d", "cwd", "-Fn"])
+    ?.split("\n")
+    .find((line) => line.startsWith("n"));
+  return cwd ? real(cwd.slice(1)) : null;
+}
+
+function ask(args: string[]): string | null {
+  try {
+    return execFileSync(LSOF, args, {
+      encoding: "utf8",
+      timeout: 2000,
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+  } catch {
+    return null;
+  }
+}

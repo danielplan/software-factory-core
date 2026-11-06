@@ -186,17 +186,26 @@ test("a part already running elsewhere is shown as running, not started twice, a
     }),
   ]);
   await outside.launcher.startAll();
-  const { launcher, light } = launcherWith([
-    serving("api", port),
-    part({
-      id: "taken",
-      run: ["node", FAKE, "hang"],
-      port: { fixed: other },
-      health: "/",
-    }),
-    part({ id: "checked", start: "never", health: "/", port: { fixed: port } }),
-    part({ id: "nothing" }),
-  ]);
+  // The same project: its program was started outside the factory.
+  const { launcher, light } = launcherWith(
+    [
+      serving("api", port),
+      part({
+        id: "taken",
+        run: ["node", FAKE, "hang"],
+        port: { fixed: other },
+        health: "/",
+      }),
+      part({
+        id: "checked",
+        start: "never",
+        health: "/",
+        port: { fixed: port },
+      }),
+      part({ id: "nothing" }),
+    ],
+    outside.root,
+  );
   try {
     await until(() => light("api")?.light === "running");
     assert.equal(light("api")?.outside, true);
@@ -294,4 +303,25 @@ test("a part that starts with others has no buttons of its own, until it has a p
   assert.equal(viewOf(part, inner, null).canStop, false);
   failLight(inner, { title: "It stopped", text: "Look at it." });
   assert.equal(viewOf(part, inner, null).canStart, true);
+});
+
+test("a program of another copy of the project on a part's port is a problem, not this part", async () => {
+  const port = await freePort();
+  const copy = launcherWith([serving("api", port)]);
+  await copy.launcher.startAll();
+  const { launcher, light } = launcherWith([serving("api", port)]);
+  try {
+    await until(() => light("api")?.light === "problem");
+    assert.match(
+      light("api")?.problem?.title ?? "",
+      /used by a program from another folder/,
+    );
+    assert.equal(light("api")?.outside, false);
+    await launcher.start("api");
+    assert.match(light("api")?.problem?.text ?? "", /runs in .*l-/);
+  } finally {
+    await copy.launcher.stopAll();
+    launcher.close();
+    copy.launcher.close();
+  }
 });

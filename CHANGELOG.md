@@ -6,6 +6,12 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Another copy of the project is not taken for this one.** When a part's
+  port is in use, the launcher asks which folder the program on it runs in
+  (lsof, on macOS and Linux); a program from another folder (a second
+  working copy, a worktree) is a problem that names that folder, not "running,
+  started outside the factory". A port counts as taken on IPv4 or IPv6, so a
+  development server listening only on ::1 is noticed too.
 - **A part can start with what uses it** (`start: "with"`): it has no
   buttons of its own and starts when a part that depends on it starts (a
   TypeScript package's watch build). System's headline leaves it out and

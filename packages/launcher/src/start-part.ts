@@ -9,6 +9,7 @@ import { addressOf, envOf, type Part, portOf } from "@software-factory/core";
 
 import type { Light, NewProblem, PartLight } from "./part-light.ts";
 import { answers, portTaken } from "./probe.ts";
+import { foreignFolder } from "./listener.ts";
 import { Program } from "./programs.ts";
 import { isFresh, packagesNeeded } from "./readiness.ts";
 
@@ -62,6 +63,19 @@ function commandOf(s: Starter, part: Part, inner: PartLight): string[] | null {
   return null;
 }
 
+// The part's port, taken by a program that runs in another folder: most
+// often another copy of the same project.
+export function takenByAnotherCopy(
+  part: Part,
+  port: number,
+  folder: string,
+): NewProblem {
+  return {
+    title: `Address ${String(port)} is used by a program from another folder`,
+    text: `${part.name} needs it, but the program on it runs in ${folder} (perhaps another copy of this project). Stop it there, then press Try again.`,
+  };
+}
+
 export function folderOf(root: string, part: Part, step?: Step): string {
   return resolve(root, part.folder ?? ".", step?.folder ?? ".");
 }
@@ -102,12 +116,17 @@ async function alreadyAnswers(
   inner: PartLight,
 ): Promise<boolean> {
   const address = addressOf(part, s.parts, s.root);
+  const port = portOf(part, s.parts, s.root);
+  const other = port ? foreignFolder(port, folderOf(s.root, part)) : null;
+  if (port && other && (await portTaken(port))) {
+    s.fail(inner, takenByAnotherCopy(part, port, other));
+    return true;
+  }
   if (part.health && address && (await answers(address + part.health))) {
     inner.outside = Boolean(part.run);
     s.set(inner, "running", null);
     return true;
   }
-  const port = portOf(part, s.parts, s.root);
   if (part.run && port && (await portTaken(port))) {
     s.fail(inner, {
       title: `Address ${String(port)} is used by another program`,
