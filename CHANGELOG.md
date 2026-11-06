@@ -6,6 +6,15 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Setup draws the whole picture first.** The coach's guide names what
+  building needs (what the factory builds, what each must keep, what the
+  project is, how work will go), and the coach drafts all of it in its first
+  turn, then asks only about weak guesses. **Build the factory** appears
+  only once the coach says the map is ready (`draw` takes `ready`; the
+  draft keeps it).
+- **The map is laid out area by area**, then the areas together, so cards and
+  areas no arrow joins are packed in rows instead of one long line; the
+  view is centred in the room beside the coach.
 - **The setup coach starts from what is there.** In a project with code,
   its first message carries the project's history (from git: how long, how
   lately, how many people, the latest commits) and lists the documentation

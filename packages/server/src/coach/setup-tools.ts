@@ -77,6 +77,44 @@ const product = z.object({
   dependsOn: z.array(z.string()).optional(),
 });
 
+// What `draw` takes: the setup map also says when it is ready to build, an
+// idea's map names the idea.
+function drawInput(titled: boolean) {
+  return {
+    cards: z.array(card).optional(),
+    remove: z.array(z.string()).optional(),
+    disconnect: z
+      .array(z.object({ from: z.string(), to: z.string() }))
+      .optional(),
+    show: z
+      .object({
+        cards: z.array(z.string()).optional(),
+        areas: z.array(z.string()).optional(),
+      })
+      .optional(),
+    ...(titled
+      ? {}
+      : {
+          ready: z
+            .boolean()
+            .optional()
+            .describe(
+              "Whether the map now holds what building the factory needs; true offers the owner the button to build it.",
+            ),
+        }),
+    ...(titled
+      ? {
+          title: z
+            .string()
+            .optional()
+            .describe(
+              'The idea\'s title, a few words as on a to-do list ("Port weather for drivers"): give it once you understand the idea.',
+            ),
+        }
+      : {}),
+  };
+}
+
 function toolsFor(on: ToolsFor): McpServer {
   const server = new McpServer({ name: "setup", version: "1.0.0" });
   server.registerTool(
@@ -84,29 +122,7 @@ function toolsFor(on: ToolsFor): McpServer {
     {
       description:
         "Change the map you plan with the owner, in one call: draw cards (new, or again by id), each with the cards it points to; take cards or arrows off; show the owner some cards or areas (their canvas moves there). A card is one thing: a short title, a line, an icon; or a picture from the project with a caption. Answers with what it did and the whole map.",
-      inputSchema: {
-        cards: z.array(card).optional(),
-        remove: z.array(z.string()).optional(),
-        disconnect: z
-          .array(z.object({ from: z.string(), to: z.string() }))
-          .optional(),
-        show: z
-          .object({
-            cards: z.array(z.string()).optional(),
-            areas: z.array(z.string()).optional(),
-          })
-          .optional(),
-        ...(on.titled
-          ? {
-              title: z
-                .string()
-                .optional()
-                .describe(
-                  'The idea\'s title, a few words as on a to-do list ("Port weather for drivers"): give it once you understand the idea.',
-                ),
-            }
-          : {}),
-      },
+      inputSchema: drawInput(on.titled === true),
     },
     (args) => answer(() => on.draw(args)),
   );

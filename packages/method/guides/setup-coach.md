@@ -50,30 +50,38 @@ and lists the documentation already in it.
 - A card says only what you found. Where the code offers a choice (a setting
   with several options), the card says the choice, not one of them.
 
-### What to draw
+### What the map must hold
 
-- The parts of the system and who uses each, the main workflows step by
-  step, and inside them what the code cannot say: how real each part is
-  (in use, a try, made up), what must never happen, the project's own
-  words, who decides, and what is still open. Show the obvious too, not
-  only your questions.
-- The pieces of code the factory will build and check: each program, its
-  folder, the kind of product it is (one of the kinds below, or plainly
-  none the factory knows yet) and the commands that check it, in plain
-  words. Folders of data, content or documentation are not products: say
-  what they are for beside the product that uses them. These become the
-  products when you build.
-- The rules a change must keep: besides the promises to the people who use
-  it, the few rules the project's own rules for agents insist on most, beside
-  the parts they are about.
+Building the factory needs these, so the map holds them before you offer
+to build:
+
+1. **What the factory builds**: each program it will change and check, its
+   folder, the kind of product it is (one of the kinds below, or plainly
+   none the factory knows yet), who uses it and the commands that check it,
+   in plain words. Folders of data, content or documentation are not
+   products: say what they are for beside the product that uses them. These
+   become the products when you build.
+2. **What each must keep**: the promises to the people who use it, and the
+   few rules the project's own rules for agents insist on most, beside the
+   parts they are about. These become the products' blueprints.
+3. **What the project is**: for whom, what it changes for them, how real
+   it is, its own words, and what is still open. This becomes the knowledge
+   base, beside the documentation already there.
+4. **How work will go**: who decides what is built, and where work is
+   tracked, if the owner has a place already.
+
+Where the project's documentation already says something, the map shows it
+briefly, from there; the factory links to it.
 
 ### How to draw it
 
-- One area at a time, each about one thing, its name saying which: who
-  uses it, how the system is built, one workflow. Never one "Overview" that
-  mixes people, parts, rules and questions. Show the owner what you drew
-  (`show`), say in a sentence what it is, and ask about your weakest guess.
-  Then offer the next area, or let them choose.
+- First draw the whole picture at once, as your guesses: one area for each
+  of the four above that the project has something for, each about one
+  thing, its name saying which ("Who uses it", "What the factory builds").
+  Never one "Overview" that mixes people, parts, rules and questions. Show
+  the owner the whole map (`show`), say in a sentence what is on it, and ask
+  about your weakest guess. Then go through the weak guesses one at a time,
+  area by area; what the documentation says needs no question.
 - A card is one thing: a short title, a line, an icon; or a picture from
   the project (a screenshot, a design, an app's icon) with a caption. Mark
   a rule or a question with its tone and put it in the area of what it is
@@ -86,8 +94,10 @@ and lists the documentation already in it.
   about it: their message then ends with "(About: …)". When they changed
   the map, `draw` with nothing shows it to you.
 
-When the map holds what the factory needs, say so: the owner presses
-**Build the factory** below the chat.
+When the map holds the four and the owner agreed to what the factory
+builds, `draw` with `ready` and say so: the button **Build the factory**
+then appears below the chat. If the owner asks to build before that, say
+what is still missing in a sentence, or offer it anyway if they insist.
 
 ## Build it
 

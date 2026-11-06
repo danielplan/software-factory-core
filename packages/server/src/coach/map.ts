@@ -183,6 +183,7 @@ export type Drawing = {
   remove?: string[];
   disconnect?: { from: string; to: string }[];
   show?: { cards?: string[]; areas?: string[] };
+  ready?: boolean;
 };
 
 export function draw(
@@ -236,6 +237,7 @@ export function draw(
       draft = removeCard(draft, named(id));
       return `Took off ${id}`;
     });
+  draft = markReady(draft, drawing.ready, said);
   if (drawing.show)
     attempt(() => {
       draft = focus(draft, {
@@ -245,6 +247,21 @@ export function draw(
       return "Shown to the owner.";
     });
   return { draft, said };
+}
+
+// Whether the owner is offered to build the factory, when the coach says.
+function markReady(
+  draft: Draft,
+  ready: boolean | undefined,
+  said: string[],
+): Draft {
+  if (ready === undefined) return draft;
+  said.push(
+    ready
+      ? "The owner is offered to build the factory."
+      : "The owner is not offered to build the factory yet.",
+  );
+  return { ...draft, ready };
 }
 
 // A drawn card as a card idea, its picture checked.

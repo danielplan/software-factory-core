@@ -96,6 +96,9 @@ export type Draft = {
   // What the coach points the owner to: cards by id and areas by name. The
   // canvas moves there each time it is set (n counts the times).
   focus: { ids: string[]; areas: string[]; n: number };
+  // The setup coach says the map holds what building the factory needs:
+  // only then is the owner offered to build it.
+  ready?: boolean;
 };
 
 // The icons a card or an item can show: everyday things, not technology.

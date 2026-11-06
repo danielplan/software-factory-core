@@ -4,9 +4,9 @@ import { type CoachView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
-// The one step the owner takes in setup, below the chat: once the map shows
-// something, have the coach build the factory as planned; once it is
-// built, open it (the page becomes its dashboard).
+// The one step the owner takes in setup, below the chat: once the coach
+// says the map holds what the factory needs, have it build the factory as
+// planned; once it is built, open it (the page becomes its dashboard).
 export function SetupAction({
   coach,
   onPress,
@@ -19,7 +19,7 @@ export function SetupAction({
   const [problem, setProblem] = useState<string | null>(null);
   const building = coach.phase === "build";
   if (building && !coach.made) return null;
-  if (!building && coach.draft.cards.length === 0) return null;
+  if (!building && !coach.draft.ready) return null;
   const press = async () => {
     onPress();
     setBusy(true);
