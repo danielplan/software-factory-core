@@ -177,7 +177,17 @@ export type CoachMessage = { from: "coach" | "owner"; text: string };
 
 // The stages agreed work goes through, on the factory's board (and the
 // connected board's columns, matched to them). An idea is a draft before.
-export const STAGES = ["backlog", "todo", "doing", "review", "done"] as const;
+// Planning: the plan of a piece of work is talked through with the owner in
+// its conversation (for work that did not come through Ideas) until it is
+// agreed; To do is the owner's go-ahead to build it.
+export const STAGES = [
+  "backlog",
+  "planning",
+  "todo",
+  "doing",
+  "review",
+  "done",
+] as const;
 export type Stage = (typeof STAGES)[number];
 export type StageMap = Record<Stage, string>;
 

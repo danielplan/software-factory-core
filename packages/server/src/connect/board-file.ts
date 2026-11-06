@@ -14,11 +14,11 @@ import { STAGES } from "../api.ts";
 
 export const BOARD_FILE = "board.json";
 
+// A stage added later (Planning) is "" in a board file written before it.
 const stages = z.object(
-  Object.fromEntries(STAGES.map((stage) => [stage, z.string()])) as Record<
-    (typeof STAGES)[number],
-    z.ZodString
-  >,
+  Object.fromEntries(
+    STAGES.map((stage) => [stage, z.string().default("")]),
+  ) as Record<(typeof STAGES)[number], z.ZodDefault<z.ZodString>>,
 );
 
 export const boardSchema = z.record(

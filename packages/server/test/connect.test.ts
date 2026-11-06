@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -6,6 +8,7 @@ import { saveCompany } from "@software-factory/core";
 
 import type { Cli } from "../src/add-ons/github/github.ts";
 import type { Fetcher } from "../src/add-ons/jira/jira.ts";
+import { readBoard } from "../src/connect/board-file.ts";
 import { suggestStages } from "../src/connect/stages.ts";
 import type { Session } from "../src/session.ts";
 import { stage } from "./stage.ts";
@@ -156,6 +159,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
         columns: ["Todo", "In Progress", "Done"],
         suggested: {
           backlog: "",
+          planning: "",
           todo: "Todo",
           doing: "In Progress",
           review: "",
@@ -190,6 +194,7 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
       label: "*",
       stages: {
         backlog: "Todo",
+        planning: "",
         todo: "",
         doing: "In Progress",
         review: "",
@@ -282,6 +287,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       columns: ["Backlog", "Selected for Development", "In Review", "Done"],
       suggested: {
         backlog: "Backlog",
+        planning: "",
         todo: "Selected for Development",
         doing: "",
         review: "In Review",
@@ -368,6 +374,7 @@ test("the board's columns are matched to the factory's stages by their names", (
     suggestStages(["Icebox", "Up next", "Doing", "QA", "Shipped"]),
     {
       backlog: "Icebox",
+      planning: "",
       todo: "Up next",
       doing: "Doing",
       review: "QA",
@@ -376,9 +383,47 @@ test("the board's columns are matched to the factory's stages by their names", (
   );
   assert.deepEqual(suggestStages(["Whatever"]), {
     backlog: "",
+    planning: "",
     todo: "",
     doing: "",
     review: "",
     done: "",
   });
+});
+
+test("a board's Planning column is matched to the Planning stage", () => {
+  assert.deepEqual(
+    suggestStages([
+      "Backlog",
+      "Planning",
+      "Todo",
+      "In Progress",
+      "In Review",
+      "Done",
+    ]),
+    {
+      backlog: "Backlog",
+      planning: "Planning",
+      todo: "Todo",
+      doing: "In Progress",
+      review: "In Review",
+      done: "Done",
+    },
+  );
+  assert.equal(suggestStages(["Refinement", "Ready"]).planning, "Refinement");
+});
+
+test("a board file written before Planning existed still loads", () => {
+  const root = mkdtempSync(join(tmpdir(), "board-"));
+  writeFileSync(
+    join(root, "board.json"),
+    JSON.stringify({
+      github: {
+        label: "factory",
+        stages: { backlog: "", todo: "Todo", doing: "", review: "", done: "" },
+      },
+    }),
+  );
+  assert.equal(readBoard(root).github?.stages.planning, "");
+  assert.equal(readBoard(root).github?.stages.todo, "Todo");
 });

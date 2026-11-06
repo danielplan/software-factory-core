@@ -78,7 +78,7 @@ the factory from anywhere inside the project.
 **Where work is tracked** is chosen right after the factory opens, and
 changed on Settings: the factory's own board (nothing to connect), a GitHub
 board, or **Jira Cloud**. Work goes through one set of stages everywhere:
-a draft idea, then Backlog, To do, In progress, Review and Done (`STAGES`
+a draft idea, then Backlog, Planning, To do, In progress, Review and Done (`STAGES`
 in `packages/server/src/api.ts`). Connecting a board picks the label of
 the work the factory takes in and matches its columns to these stages; the
 factory's `board.json` keeps all of it, and only Jira's API token is kept
@@ -142,6 +142,9 @@ GitHub board and Jira Cloud (`tracker: true`). What each adds:
 | Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                        | add-ons (`tracker: true`, routes, connecting steps); the runner, to come                  |
 | Code hosts                        | where branches and pull requests go: GitHub                                              | to come, with the runner                                                                  |
 | Detection                         | a kit recognises its kind of product in existing code                                    | to come, with the setup page                                                              |
+
+Which add-ons the core ships, what each needs, and the order they come in:
+[the add-ons](add-ons.md).
 
 `assembleFactory` (in `packages/core/src/extensions/registry.ts`) puts a
 company's factory together and says, in plain words, everything that does not

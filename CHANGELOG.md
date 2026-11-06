@@ -6,6 +6,13 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **A Planning stage** between Backlog and To do: work whose plan is talked
+  through with the owner in its conversation until it is agreed (for work
+  that did not come through Ideas); To do stays the owner's go-ahead to
+  build. Connecting a board suggests a column for it from names such as
+  Planning or Refinement. A `board.json` written before reads Planning as
+  no column; a company that wants one picks its column on Settings.
+
 - **Setup is planned on a map, then built by the coach.** The setup coach
   reads the project with Claude Code's own tools (read-only while planning)
   and has two tools of its own: `draw`, for the map it plans with the owner

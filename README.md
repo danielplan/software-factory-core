@@ -34,7 +34,8 @@ company is here: only what is true for any company.
   live in its repository and describe themselves; the core finds them.
 
 See [the architecture](docs/architecture.md) for the extension points and how
-companies update.
+companies update. [The add-ons](docs/add-ons.md) lists the parts a company
+chooses from.
 
 ## Try it
 

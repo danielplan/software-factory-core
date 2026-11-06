@@ -9,6 +9,10 @@ const WORDS: [Stage, RegExp][] = [
   ["done", /\b(done|closed|complete|completed|shipped|released|resolved)\b/i],
   ["review", /\b(review|reviewing|qa|test|testing|verify|staging|accept)/i],
   ["doing", /\b(in ?progress|doing|develop|building|working|wip|active)\b/i],
+  [
+    "planning",
+    /\b(planning|plan|refine|refinement|shaping|discuss|discussion)\b/i,
+  ],
   ["todo", /\b(to ?do|ready|selected|planned|next|up next)\b/i],
   ["backlog", /\b(backlog|icebox|ideas?|triage|new|open)\b/i],
 ];
@@ -18,6 +22,7 @@ const WORDS: [Stage, RegExp][] = [
 export function suggestStages(columns: string[]): StageMap {
   const map: StageMap = {
     backlog: "",
+    planning: "",
     todo: "",
     doing: "",
     review: "",
