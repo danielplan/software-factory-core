@@ -10,7 +10,7 @@ import type { VoiceCall } from "@/voice/voice-call";
 import { Answer } from "./answer-box";
 import { CoachOrb } from "./coach-orb";
 import { CoachRouteContext } from "./route";
-import { Said } from "./said";
+import { Said, SaidByOwner } from "./said";
 
 type Attached = { id: string; name: string };
 
@@ -149,7 +149,11 @@ function Conversation({ coach }: Readonly<{ coach: CoachView }>) {
     <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-1">
       {coach.messages.map((message, index) => (
         <Bubble key={index} mine={message.from === "owner"}>
-          <Said text={message.text} />
+          {message.from === "owner" ? (
+            <SaidByOwner text={message.text} />
+          ) : (
+            <Said text={message.text} />
+          )}
         </Bubble>
       ))}
       {coach.working && <AtWork coach={coach} />}

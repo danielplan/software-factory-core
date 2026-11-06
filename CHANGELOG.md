@@ -6,6 +6,9 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- The coaches' replies are shown as Markdown (paragraphs, bold, lists,
+  links, code, small tables) with `react-markdown` and `remark-gfm`; the
+  owner's own words stay as typed.
 - **Knowledge lives in the repository.** The agents' ground rules
   (`packages/method/templates/AGENTS.md`) say what is known goes into the
   knowledge base, a blueprint or a decision, never only into an agent's own
