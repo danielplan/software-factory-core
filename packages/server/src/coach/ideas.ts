@@ -20,6 +20,8 @@ import type { Claude } from "@software-factory/core";
 import type { ChangeDraft, CoachMessage, Draft, IdeaView } from "../api.ts";
 import { Refused } from "../refused.ts";
 import { type Drawing, EMPTY } from "./map.ts";
+import { pictureIn } from "./pictures.ts";
+import type { ToolsFor } from "./setup-tools.ts";
 import { Talk } from "./talk.ts";
 
 export const IDEAS_FOLDER = "ideas";
@@ -192,6 +194,16 @@ export class Ideas {
     this.ideas.delete(id);
     rmSync(join(this.folder(), `${id}.json`), { force: true });
     this.options.onChange();
+  }
+
+  // An idea's tools: only its map, with pictures from the project.
+  toolsFor(id: string): ToolsFor {
+    return {
+      token: this.token(id),
+      titled: true,
+      draw: (drawing) =>
+        this.draw(id, drawing, (path) => pictureIn(this.options.project, path)),
+    };
   }
 
   token(id: string): string {

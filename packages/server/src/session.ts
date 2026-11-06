@@ -7,7 +7,6 @@ import { join } from "node:path";
 import {
   type Available,
   type Changes,
-  type Claude,
   checkChanges,
   type Company,
   type Factory,
@@ -35,7 +34,7 @@ import {
 } from "./coach/configure.ts";
 import { Ideas } from "./coach/ideas.ts";
 import { pictureIn, shownPicture } from "./coach/pictures.ts";
-import { SetupCoach } from "./coach/setup-coach.ts";
+import { type CoachOptions, SetupCoach } from "./coach/setup-coach.ts";
 import type { ToolsFor } from "./coach/setup-tools.ts";
 import { makeAndStart } from "./create-products.ts";
 import { install } from "./install.ts";
@@ -52,8 +51,9 @@ export type SessionOptions = {
   available: Available;
   templates: Templates;
   onChange: () => void;
-  // The setup coach's and the idea coach's instructions.
-  coach: { claude: Claude; guide: string; ideaGuide: string };
+  // The setup coach's and the idea coach's instructions, and the trackers
+  // it can set up a board with (tracker-setup.ts).
+  coach: CoachOptions;
   // The tools on this computer the coach may install, once the owner
   // agreed (installables.ts: computerTools).
   tools: Installable[];
@@ -195,15 +195,7 @@ export class Session {
 
   // An idea's tools: only its map.
   ideaTools(id: string): ToolsFor {
-    const ideas = this.ideasOrRefuse();
-    return {
-      token: ideas.token(id),
-      titled: true,
-      draw: (drawing) =>
-        ideas.draw(id, drawing, (path) =>
-          pictureIn(this.options.project, path),
-        ),
-    };
+    return this.ideasOrRefuse().toolsFor(id);
   }
 
   ideasOrRefuse(): Ideas {
@@ -319,6 +311,10 @@ export class Session {
       extensions,
       install: (ids) => this.installAll(ids),
       problems: () => this.factory?.problems ?? [],
+      trackers: this.options.coach.trackers ?? [],
+      connectBoard: (tracker, entry) => {
+        this.chooseBoard(tracker, entry);
+      },
     };
   }
 

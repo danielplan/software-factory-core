@@ -115,6 +115,49 @@ function drawInput(titled: boolean) {
   };
 }
 
+// What `configure` takes.
+const CONFIGURE_INPUT = {
+  project: z
+    .object({ name: z.string().min(1), about: z.string().optional() })
+    .optional(),
+  products: z.array(product).optional(),
+  tracker: z.string().optional(),
+  board: z
+    .object({
+      board: z
+        .number()
+        .int()
+        .optional()
+        .describe("A board that is there, by its number."),
+      create: z
+        .string()
+        .optional()
+        .describe("Or a new board's title: the factory makes it."),
+      label: z
+        .string()
+        .optional()
+        .describe(
+          "The label that marks the factory's work; factory unless agreed otherwise, * for all.",
+        ),
+      addColumns: z
+        .boolean()
+        .optional()
+        .describe(
+          "The owner agreed to add the columns the factory's stages miss.",
+        ),
+    })
+    .optional()
+    .describe(
+      "The board the owner agreed to, for the tracker set: connected now, or made and connected.",
+    ),
+  addOns: z.array(z.string()).optional(),
+  settings: z
+    .record(z.string(), z.record(z.string(), z.string().nullable()))
+    .optional()
+    .describe("By settings group id: its values by key (null: the default)."),
+  install: z.array(z.string()).optional().describe("Tools by id."),
+};
+
 function toolsFor(on: ToolsFor): McpServer {
   const server = new McpServer({ name: "setup", version: "1.0.0" });
   server.registerTool(
@@ -133,21 +176,7 @@ function toolsFor(on: ToolsFor): McpServer {
       {
         description:
           "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked (none: the factory's own board, or the id of an add-on that tracks work), its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
-        inputSchema: {
-          project: z
-            .object({ name: z.string().min(1), about: z.string().optional() })
-            .optional(),
-          products: z.array(product).optional(),
-          tracker: z.string().optional(),
-          addOns: z.array(z.string()).optional(),
-          settings: z
-            .record(z.string(), z.record(z.string(), z.string().nullable()))
-            .optional()
-            .describe(
-              "By settings group id: its values by key (null: the default).",
-            ),
-          install: z.array(z.string()).optional().describe("Tools by id."),
-        },
+        inputSchema: CONFIGURE_INPUT,
       },
       async (args) => answerAsync(() => configure(args)),
     );

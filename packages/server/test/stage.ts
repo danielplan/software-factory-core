@@ -2,6 +2,7 @@
 // web apps, a stand-in add-on, stand-in tools to install and, for the setup
 // coach, a pretend Claude Code.
 
+import type { TrackerSetup } from "../src/connect/tracker-setup.ts";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -80,6 +81,8 @@ export async function stage(
     },
     fetcher: () => Promise.reject(new Error("offline")),
   },
+  // What the setup coach can set up a board with; none by default.
+  trackers: TrackerSetup[] = [],
 ) {
   const home = mkdtempSync(join(tmpdir(), "setup-"));
   const project = join(home, "project");
@@ -98,7 +101,12 @@ export async function stage(
       agents: join(templatesFolder, "AGENTS.md"),
     },
     onChange: () => {},
-    coach: { claude, guide: "Help set up.", ideaGuide: "Shape the idea." },
+    coach: {
+      claude,
+      guide: "Help set up.",
+      ideaGuide: "Shape the idea.",
+      trackers,
+    },
     tools,
   });
   const page = join(home, "page");

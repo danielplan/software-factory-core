@@ -6,6 +6,15 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **The GitHub board is set up in setup, with the owner.** The setup coach
+  hears where the code is on GitHub and the boards there (their columns and
+  cards), agrees on one with the owner, or a new one, and while building
+  `configure` takes `board`: it connects that board, or makes one linked to
+  the code with the factory's stages as its columns, and adds the stages'
+  missing columns to a board that is there only when the owner agreed,
+  keeping its own (`add-ons/github/board-setup.ts`, through
+  `connect/tracker-setup.ts`; the session's `coach.trackers`). A board
+  connected in setup needs no step after opening.
 - The coaches' replies are shown as Markdown (paragraphs, bold, lists,
   links, code, small tables) with `react-markdown` and `remark-gfm`; the
   owner's own words stay as typed.

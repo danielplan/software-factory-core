@@ -70,12 +70,20 @@ to build:
 3. **What the project is**: for whom, what it changes for them, how real
    it is, its own words, and what is still open. This becomes the knowledge
    base, beside the documentation already there.
-4. **How work will go**: who decides what is built, where work is tracked
-   (a GitHub board is the factory's standard: recommend it when the code is
-   on GitHub, else the factory's own board), and which of the factory's add-ons
-   (listed below) they want. Suggest the few that fit, each as a card with
-   why, and ask once; switch on only what they agree to. They can change it
-   later on the Add-ons page.
+4. **How work will go**: who decides what is built, where work is tracked,
+   and which of the factory's add-ons (listed below) the owner wants.
+   Suggest the add-ons that fit, each as a card with why, and ask once;
+   switch on only what they agree to. They can change it later on the
+   Add-ons page.
+   A GitHub board is the factory's standard place for work: recommend it
+   when the code is on GitHub, else the factory's own board. Your first
+   message says where the code is on GitHub and lists the boards there,
+   with their columns and cards. Set the board up with the owner now: one
+   of those, or a new one the factory makes for the project (its columns
+   are then the factory's stages: Backlog, Planning, To do, In progress,
+   Review, Done). For a board that is there, say which stages it has no
+   column for and ask whether the factory may add them (its cards keep
+   their place). Draw the board you agreed on as a card.
 
 Where the project's documentation already says something, the map shows it
 briefly, from there; the factory links to it.
@@ -146,8 +154,10 @@ from the map:
    install, but only what the owner agreed to. Where work is tracked is
    `tracker`: `none` (the factory's own board), `github` (a GitHub board) or
    `jira` (Jira Cloud); these come with the factory, nothing to switch on.
-   Connecting the board itself is the owner's first step after opening the
-   factory.
+   For a GitHub board, `configure` with `board` too: its number, or `create`
+   with a title for a new one, and `addColumns` only when the owner agreed.
+   If it cannot be connected here, say why: the owner connects it right
+   after opening the factory.
 5. Read what `configure` says the factory's checks find (the theme's
    too), and put it right until they find nothing; `configure` with nothing
    runs them again.

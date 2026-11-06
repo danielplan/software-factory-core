@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import type { Session } from "../src/session.ts";
+import type { TrackerSetup } from "../src/connect/tracker-setup.ts";
+import { Refused } from "../src/refused.ts";
 import { pretendClaude } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
 
@@ -328,6 +330,73 @@ test("a factory on its own board opens without a step to connect a board", async
     assert.ok(made.mode === "factory");
     assert.equal(made.company.tracker, "none");
     assert.equal(made.onboarding, false);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("the coach connects the board the owner agreed to while it builds; opening needs no step to connect it", async () => {
+  const pretend = pretendClaude([
+    {
+      calls: [
+        [
+          "configure",
+          {
+            project: { name: "Acme" },
+            tracker: "github",
+            board: { create: "Acme work" },
+          },
+        ],
+        ["configure", { board: { board: 99 } }],
+      ],
+      reply: "It is built.",
+    },
+  ]);
+  const asked: unknown[] = [];
+  const github: TrackerSetup = {
+    id: "github",
+    facts: () => Promise.resolve("On GitHub: the code is at acme/shop."),
+    connect: (_project, board) => {
+      asked.push(board);
+      if (board.board === 99)
+        return Promise.reject(new Refused("No board 99."));
+      return Promise.resolve({
+        entry: {
+          repository: "acme/shop",
+          board: 7,
+          label: "factory",
+          stages: {
+            backlog: "",
+            planning: "",
+            todo: "",
+            doing: "",
+            review: "",
+            done: "",
+          },
+        },
+        said: "Made and connected board 7.",
+      });
+    },
+  };
+  const { session, server, post } = await stage(pretend.claude, {}, undefined, [
+    github,
+  ]);
+  try {
+    await post("/api/setup/build", {});
+    const [made, refused] = pretend.answers[0] ?? [];
+    assert.match(made ?? "", /Made and connected board 7\./);
+    assert.match(
+      refused ?? "",
+      /Not connected: No board 99\. The owner connects it after opening the factory\./,
+    );
+    assert.deepEqual(asked, [{ create: "Acme work" }, { board: 99 }]);
+    assert.equal((await post("/api/setup/open", {})).status, 200);
+    const opened = session.state();
+    assert.ok(opened.mode === "factory");
+    assert.equal(opened.company.tracker, "github");
+    assert.equal(opened.board.github?.board, 7);
+    assert.equal(opened.onboarding, false);
   } finally {
     session.close();
     server.close();

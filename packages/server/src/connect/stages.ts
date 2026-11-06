@@ -4,6 +4,16 @@
 
 import { type Stage, type StageMap, STAGES } from "../api.ts";
 
+// Each stage as a column on a board the factory makes, with what it means.
+export const STAGE_COLUMNS: Record<Stage, { title: string; about: string }> = {
+  backlog: { title: "Backlog", about: "Agreed, not planned yet." },
+  planning: { title: "Planning", about: "Its plan is talked through." },
+  todo: { title: "To do", about: "Planned: the go-ahead to build it." },
+  doing: { title: "In progress", about: "The factory builds it." },
+  review: { title: "Review", about: "Built: waiting for a review." },
+  done: { title: "Done", about: "Merged or closed." },
+};
+
 // Words that name each stage on most boards; the first that fits wins.
 const WORDS: [Stage, RegExp][] = [
   ["done", /\b(done|closed|complete|completed|shipped|released|resolved)\b/i],

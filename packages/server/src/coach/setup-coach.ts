@@ -15,6 +15,7 @@ import type { ChangeDraft, CoachView, Draft } from "../api.ts";
 import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
 import type { Drawing } from "./map.ts";
+import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
 import { Talk } from "./talk.ts";
 
@@ -45,7 +46,17 @@ export type SetupCoachOptions = {
   // The project being set up, where Claude Code starts; it reads the code
   // below.
   project: string;
+  // What the trackers that come with the factory can set up with the owner
+  // (where the code is, the boards there; connecting or making one).
+  trackers?: TrackerSetup[];
 };
+
+// What a session gives the coaches: Claude Code, both coaches' instructions,
+// and the trackers the setup coach can set up a board with.
+export type CoachOptions = Pick<
+  SetupCoachOptions,
+  "claude" | "guide" | "trackers"
+> & { ideaGuide: string };
 
 export class SetupCoach {
   readonly kits: Kit[];
@@ -146,6 +157,11 @@ export class SetupCoach {
   // The project's code read and drawn before the owner says anything.
   async begin(): Promise<void> {
     if (!this.opening || this.asked) return;
+    const tracked = await trackerFacts(
+      this.options.trackers ?? [],
+      this.options.project,
+    );
+    if (tracked && this.opening) this.opening += `\n\n${tracked}`;
     await this.answer("", undefined);
   }
 

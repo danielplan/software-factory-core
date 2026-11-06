@@ -19,6 +19,8 @@ import {
 import { checkDocs } from "@software-factory/knowledge-base";
 
 import type { SetupProduct } from "../api.ts";
+import type { Board } from "../connect/board-file.ts";
+import type { BoardAsked, TrackerSetup } from "../connect/tracker-setup.ts";
 import { Refused } from "../refused.ts";
 import { themeProblems } from "../theme-check.ts";
 
@@ -33,6 +35,8 @@ export type Configuration = {
     dependsOn?: string[];
   }[];
   tracker?: string;
+  // The board the owner agreed to, for the tracker (tracker-setup.ts).
+  board?: BoardAsked;
   addOns?: string[];
   settings?: Record<string, Record<string, string | null>>;
   install?: string[];
@@ -57,6 +61,9 @@ export type Workshop = {
   install: (ids: string[]) => Promise<boolean>;
   // What the factory's own loading found wrong.
   problems: () => string[];
+  // Setting up the trackers' boards, and keeping the one connected.
+  trackers: TrackerSetup[];
+  connectBoard: (tracker: string, entry: Board[string]) => void;
 };
 
 export async function configure(
@@ -72,16 +79,8 @@ export async function configure(
       "Give the project first: its name makes the factory's folder.",
     );
   said.push(...companyChanges(shop, company, asked));
-  if (asked.settings)
-    for (const [group, values] of Object.entries(asked.settings)) {
-      const { refused } = shop.saveSettings(group, values);
-      const wrong = Object.entries(refused).map(([k, why]) => `${k}: ${why}`);
-      said.push(
-        wrong.length > 0
-          ? `Settings ${group} not saved: ${wrong.join("; ")}`
-          : `Saved the settings ${group}.`,
-      );
-    }
+  if (asked.board) said.push(await connectBoard(shop, asked.board));
+  said.push(...settingsChanges(shop, asked.settings ?? {}));
   if (asked.products && asked.products.length > 0) {
     await shop.addProducts(productsOf(shop, asked.products));
     said.push(`Added ${asked.products.map((p) => p.name).join(", ")}.`);
@@ -129,6 +128,38 @@ function companyChanges(
     ...(asked.addOns ? { extensions: asked.addOns } : {}),
   });
   return ["Saved where work is tracked and the add-ons."];
+}
+
+// Each settings group's values, saved; the refused ones say why.
+function settingsChanges(
+  shop: Workshop,
+  settings: NonNullable<Configuration["settings"]>,
+): string[] {
+  return Object.entries(settings).map(([group, values]) => {
+    const { refused } = shop.saveSettings(group, values);
+    const wrong = Object.entries(refused).map(([k, why]) => `${k}: ${why}`);
+    return wrong.length > 0
+      ? `Settings ${group} not saved: ${wrong.join("; ")}`
+      : `Saved the settings ${group}.`;
+  });
+}
+
+// The board the owner agreed to, connected (or made) for the tracker the
+// factory has; what did not work is said, and the owner connects it after
+// opening the factory.
+async function connectBoard(shop: Workshop, asked: BoardAsked) {
+  const tracker = shop.company()?.tracker ?? "none";
+  const setup = shop.trackers.find((t) => t.id === tracker);
+  if (!setup)
+    return `Not connected: set a tracker that can be set up here first (${shop.trackers.map((t) => t.id).join(", ") || "none"}).`;
+  try {
+    const { entry, said } = await setup.connect(shop.project, asked);
+    shop.connectBoard(tracker, entry);
+    return said;
+  } catch (error) {
+    if (!(error instanceof Refused)) throw error;
+    return `Not connected: ${error.message} The owner connects it after opening the factory.`;
+  }
 }
 
 // The products as the factory describes them: existing code where its kit

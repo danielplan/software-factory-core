@@ -22,6 +22,7 @@ import { guidesFolder, templatesFolder } from "@software-factory/method";
 import { computerTools } from "../src/installables.ts";
 import { startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
+import { githubSetup } from "../src/add-ons/github/board-setup.ts";
 import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { jiraAddOn } from "../src/add-ons/jira/index.ts";
 
@@ -64,6 +65,7 @@ const session = new Session({
     claude,
     guide: readFileSync(join(guidesFolder, "setup-coach.md"), "utf8"),
     ideaGuide: readFileSync(join(guidesFolder, "idea-coach.md"), "utf8"),
+    trackers: [githubSetup()],
   },
   tools: computerTools(),
 });
