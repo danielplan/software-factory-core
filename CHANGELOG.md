@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- The setup coach draws what the project's own documentation says as
+  confirmed, naming where it says so, so only its own guesses stay open;
+  each rule starts with the part it is about; pictures only where they
+  show clearly what people see.
 - Opening a factory built in setup asks where work is tracked only when
   setup chose a GitHub or Jira board that is not connected yet; the
   factory's own board needs no step. The setup coach's theme takes the

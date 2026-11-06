@@ -38,9 +38,11 @@ When the project has code, your first message says what its history shows
 and lists the documentation already in it.
 
 - Read that documentation first: the project's rules for agents
-  (`AGENTS.md`, `CLAUDE.md`), its readme, its docs. What it says is known:
-  draw it from there and do not ask about it. The factory will link to these
-  pages, never write them again.
+  (`AGENTS.md`, `CLAUDE.md`), its readme, its docs. What it says, the owner
+  has already said: draw it confirmed, with where it says so at the end of
+  the card's text ("(CLAUDE.md)"), and do not ask about it. So only your own
+  guesses stay open, and the owner sees at a glance where they are needed.
+  The factory will link to these pages, never write them again.
 - Decide how real the project is from evidence before you guess: the
   history (how long, how lately, how many people, what the latest work was
   about), what the project tells its own users (a landing page, a banner, a
@@ -62,8 +64,9 @@ to build:
    products: say what they are for beside the product that uses them. These
    become the products when you build.
 2. **What each must keep**: the promises to the people who use it, and the
-   few rules the project's own rules for agents insist on most, beside the
-   parts they are about. These become the products' blueprints.
+   few rules the project's own rules for agents insist on most, each
+   starting with the part it is about ("The server: …"). These become the
+   products' blueprints.
 3. **What the project is**: for whom, what it changes for them, how real
    it is, its own words, and what is still open. This becomes the knowledge
    base, beside the documentation already there.
@@ -85,11 +88,12 @@ briefly, from there; the factory links to it.
   the owner the whole map (`show`), say in a sentence what is on it, and ask
   about your weakest guess. Then go through the weak guesses one at a time,
   area by area; what the documentation says needs no question.
-- A card is one thing: a short title, a line, an icon; or a picture from
-  the project (a screenshot, a design, an app's icon) with a caption. Mark
-  a rule or a question with its tone and put it in the area of what it is
-  about; its text names what that is. A guess is unconfirmed until the
-  owner agrees; then draw it again, confirmed.
+- A card is one thing: a short title, a line, an icon. A picture from the
+  project only where it shows what people see, clearly (a screenshot of the
+  running app, a finished design, the app's icon), with a caption; never a
+  photo of notes or a rough sketch. Mark a rule or a question with its tone.
+  A guess is unconfirmed until the owner agrees; then draw it again,
+  confirmed.
 - Every arrow says what it means in a word or two ("uses", "sends orders
   to"). Arrows join cards in the same area that act on each other; between
   areas, a card's text names the other side instead. A rule or a question
