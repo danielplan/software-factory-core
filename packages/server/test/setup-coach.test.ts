@@ -449,6 +449,19 @@ test("the setup conversation is kept in the project and goes on after the factor
     assert.equal(again.token.length > 0, true);
     await again.begin();
     assert.equal(pretend.seen.length, 1);
+    // Once the owner opened the factory, starting again shows no setup.
+    again.finish();
+    const opened = new SetupCoach({
+      claude: pretend.claude,
+      kits: [],
+      installables: [],
+      made: () => true,
+      guide: "Help set up.",
+      onChange: () => {},
+      project,
+    });
+    assert.equal(opened.building(), false);
+    assert.equal(readSetup(project)?.phase, "open");
     // A record that does not fit starts afresh.
     writeFileSync(join(project, "factory", "setup.json"), "{ nope");
     assert.equal(readSetup(project), null);

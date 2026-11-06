@@ -17,7 +17,7 @@ import { Refused } from "../refused.ts";
 import type { Drawing } from "./map.ts";
 import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
-import { readSetup, saveSetup } from "./setup-record.ts";
+import { readSetup, saveSetup, type SetupRecord } from "./setup-record.ts";
 import { Talk } from "./talk.ts";
 
 const HELLO =
@@ -90,13 +90,10 @@ export class SetupCoach {
       },
       ...(kept ? { kept: { ...kept, map: kept.map as Draft } } : {}),
     });
-    this.phase = kept?.phase ?? "plan";
-    this.asked = (kept?.messages.length ?? 0) > 0;
-    const answered = kept?.messages.some((m) => m.from === "coach") ?? false;
-    this.opening =
-      hasCode(options.project) && !answered
-        ? `Here's my project: ${options.project}\n\n${projectFacts(options.project)}`
-        : null;
+    this.phase = !kept || kept.phase === "plan" ? "plan" : "build";
+    this.finished = kept?.phase === "open";
+    this.asked = Boolean(kept?.messages.length);
+    this.opening = openingOf(options.project, kept);
     if (!this.opening && !kept)
       this.talk.messages = [{ from: "coach", text: HELLO }];
   }
@@ -111,7 +108,7 @@ export class SetupCoach {
       return;
     saveSetup(this.options.project, {
       conversation: talk.id,
-      phase: this.phase,
+      phase: this.finished ? "open" : this.phase,
       messages: talk.messages,
       map: talk.map,
     });
@@ -173,6 +170,7 @@ export class SetupCoach {
   // The owner opened the factory: setup is over.
   finish(): void {
     this.finished = true;
+    this.keep();
     this.options.onChange();
   }
 
@@ -223,6 +221,14 @@ export class SetupCoach {
       .join("\n");
     return `${this.options.guide}\n\n## The kinds the kits know\n\n${kinds}\n\n## What configure can install or switch on\n\n${installable}\n\n${first}`;
   }
+}
+
+// The project's code to read first: none for a project without code, or
+// once the coach has answered (the conversation goes on from there).
+function openingOf(project: string, kept: SetupRecord | null): string | null {
+  const answered = kept?.messages.some((m) => m.from === "coach") ?? false;
+  if (answered || !hasCode(project)) return null;
+  return `Here's my project: ${project}\n\n${projectFacts(project)}`;
 }
 
 // Whether a folder has anything in it but hidden files (such as .git).

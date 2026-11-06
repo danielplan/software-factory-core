@@ -1,6 +1,6 @@
 // The setup conversation, kept in the project as `factory/setup.json` once
 // something was said or drawn: what was said, the map, whether the factory
-// is being built, and Claude Code's conversation to go on with. So setup
+// is being built or was opened, and Claude Code's conversation to go on with. So setup
 // carries on where it was after the factory is started again, and the
 // project keeps a record of how its factory was set up.
 
@@ -14,7 +14,8 @@ export const SETUP_FILE = "setup.json";
 
 const recordSchema = z.object({
   conversation: z.string(),
-  phase: z.enum(["plan", "build"]),
+  // Planning, building, or opened: setup is over.
+  phase: z.enum(["plan", "build", "open"]),
   messages: z.array(
     z.object({ from: z.enum(["coach", "owner"]), text: z.string() }),
   ),
