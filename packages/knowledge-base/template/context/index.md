@@ -20,6 +20,13 @@ the runs say what happened and when. To add or change a page, follow
 | See which choices were made, with the options and reasons                   | Decision    | [Decisions](decisions/index.md)            |
 | Read the original material as it was given                                  | Source      | [Sources](sources/README.md), never edited |
 
+## The project's own documentation
+
+What the project documents outside this folder stays there, and those pages
+stay the source for what they cover. They are listed here, each with the
+question it answers; a page in this knowledge base links to them and adds
+only what they do not say.
+
 ## Reading order for a new task
 
 1. This index, then the [feature](reference/features/index.md) the task touches.

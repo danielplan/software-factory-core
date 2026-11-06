@@ -6,6 +6,24 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **The setup coach starts from what is there.** In a project with code,
+  its first message carries the project's history (from git: how long, how
+  lately, how many people, the latest commits) and lists the documentation
+  already in it (`packages/server/src/coach/project-facts.ts`). Its guide has
+  it read that documentation first and link to it instead of writing it
+  again, decide how real the project is from evidence and name it, draw the
+  pieces of code the factory will build with their kind and checks, keep one
+  topic per area, label every arrow, and give rules and questions none. The
+  knowledge base's index lists the project's own documentation, which stays
+  the source for what it covers.
+- **The factory's look** is calmer: a light neutral ground, white cards with
+  a hairline, one accent colour (an indigo), the coach's messages beside its
+  orb; a guess on the map is a plain card, and an agreed one has a tick
+  (no more dashed borders). Rows on the map have room for their arrows.
+- **A company's theme**: `factory/theme.css`, when there is one, is loaded
+  after the dashboard's own styles, so its variables win; it may use the
+  project's own fonts and pictures through `/api/theme/file`. The font is the
+  variable `--font-body`.
 - **A Planning stage** between Backlog and To do: work whose plan is talked
   through with the owner in its conversation until it is agreed (for work
   that did not come through Ideas); To do stays the owner's go-ahead to

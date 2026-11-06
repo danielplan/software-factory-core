@@ -15,6 +15,7 @@ import type { ChangeDraft, CoachView, Draft } from "../api.ts";
 import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
 import type { Drawing } from "./map.ts";
+import { projectFacts } from "./project-facts.ts";
 import { Talk } from "./talk.ts";
 
 const HELLO =
@@ -71,7 +72,7 @@ export class SetupCoach {
       onChange: options.onChange,
     });
     this.opening = hasCode(options.project)
-      ? `Here's my project: ${options.project}`
+      ? `Here's my project: ${options.project}\n\n${projectFacts(options.project)}`
       : null;
     if (!this.opening) this.talk.messages = [{ from: "coach", text: HELLO }];
   }
@@ -167,7 +168,7 @@ export class SetupCoach {
       )
       .join("\n");
     const first = this.opening
-      ? `The owner started the factory in their project's folder, ${this.options.project}: the first message says so.`
+      ? `The owner started the factory in their project's folder, ${this.options.project}: the first message says so, with the project's history and its own documentation.`
       : `The project's folder, ${this.options.project}, has no code yet. The owner's first message answers: "${HELLO}"`;
     const installable = this.installables
       .map(

@@ -45,7 +45,7 @@ export function RouteEdgeView({
       label={label}
       labelX={labelX}
       labelY={labelY}
-      labelStyle={{ fontSize: 13, fontWeight: 500 }}
+      labelStyle={{ fontSize: 12, fontWeight: 500 }}
       labelBgPadding={[8, 4]}
       labelBgBorderRadius={8}
     />

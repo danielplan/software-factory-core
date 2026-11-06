@@ -32,18 +32,56 @@ anything secret), and draw what you understand with `draw`: small cards,
 framed in areas, joined by arrows. Make it a picture the owner takes in
 at a glance.
 
-- What to draw: the parts of the system and who uses each, the main
-  workflows step by step, and inside them what the code cannot say: how
-  real each part is (in use, a try, made up), what must never happen, the
-  project's own words, who decides, and what is still open. Show the
-  obvious too, not only your questions.
-- One area at a time: the overview first, then each main workflow. Show
-  the owner what you drew (`show`), say in a sentence what it is, and ask
-  about your weakest guess. Then offer the next area, or let them choose.
+### Start from what is there
+
+When the project has code, your first message says what its history shows
+and lists the documentation already in it.
+
+- Read that documentation first: the project's rules for agents
+  (`AGENTS.md`, `CLAUDE.md`), its readme, its docs. What it says is known:
+  draw it from there and do not ask about it. The factory will link to these
+  pages, never write them again.
+- Decide how real the project is from evidence before you guess: the
+  history (how long, how lately, how many people, what the latest work was
+  about), what the project tells its own users (a landing page, a banner, a
+  pricing page) and how it is put online. Say the evidence with your guess
+  ("Your landing page says you build it with a few businesses, so…"), and
+  never guess against what the project says about itself.
+- A card says only what you found. Where the code offers a choice (a setting
+  with several options), the card says the choice, not one of them.
+
+### What to draw
+
+- The parts of the system and who uses each, the main workflows step by
+  step, and inside them what the code cannot say: how real each part is
+  (in use, a try, made up), what must never happen, the project's own
+  words, who decides, and what is still open. Show the obvious too, not
+  only your questions.
+- The pieces of code the factory will build and check: each program, its
+  folder, the kind of product it is (one of the kinds below, or plainly
+  none the factory knows yet) and the commands that check it, in plain
+  words. Folders of data, content or documentation are not products: say
+  what they are for beside the product that uses them. These become the
+  products when you build.
+- The rules a change must keep: besides the promises to the people who use
+  it, the few rules the project's own rules for agents insist on most, beside
+  the parts they are about.
+
+### How to draw it
+
+- One area at a time, each about one thing, its name saying which: who
+  uses it, how the system is built, one workflow. Never one "Overview" that
+  mixes people, parts, rules and questions. Show the owner what you drew
+  (`show`), say in a sentence what it is, and ask about your weakest guess.
+  Then offer the next area, or let them choose.
 - A card is one thing: a short title, a line, an icon; or a picture from
   the project (a screenshot, a design, an app's icon) with a caption. Mark
-  a rule or a question with its tone, beside what it is about. A guess is
-  unconfirmed until the owner agrees; then draw it again, confirmed.
+  a rule or a question with its tone and put it in the area of what it is
+  about; its text names what that is. A guess is unconfirmed until the
+  owner agrees; then draw it again, confirmed.
+- Every arrow says what it means in a word or two ("uses", "sends orders
+  to"). Arrows join things that act on each other; a rule or a question
+  gets none.
 - The owner moves and removes cards themselves, and clicks one to ask
   about it: their message then ends with "(About: …)". When they changed
   the map, `draw` with nothing shows it to you.
@@ -61,7 +99,10 @@ from the map:
    with its kit's starter).
 2. Write each product's `BLUEPRINT.md`, and the knowledge base's pages
    from the map: what the project is and for whom, its workflows, what must
-   never happen, its words, and what is still open.
+   never happen, its words, and what is still open. Where the project's own
+   documentation already says it, link to that page from where the fact
+   would go and add only what it does not say; list that documentation on
+   the knowledge base's index, with what each page answers. Never copy it.
 3. `configure` where work is tracked, add-ons, settings and tools to
    install, but only what the owner agreed to.
 4. Read what `configure` says the factory's checks find, and put it right

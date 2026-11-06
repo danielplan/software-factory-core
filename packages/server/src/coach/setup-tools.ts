@@ -56,7 +56,9 @@ const card = z.object({
   to: z
     .array(z.object({ card: z.string(), label: z.string().optional() }))
     .optional()
-    .describe("The cards it points to (ids, or keys in this drawing)."),
+    .describe(
+      'The cards it points to (ids, or keys in this drawing), each with what the arrow means in a word or two ("uses", "sends orders to").',
+    ),
 });
 
 const product = z.object({

@@ -60,7 +60,7 @@ export type SessionOptions = {
 };
 
 export class Session {
-  private options: SessionOptions;
+  readonly options: SessionOptions;
   private root: string | null = null;
   private factory: Factory | null = null;
   private launcher: Launcher | null = null;

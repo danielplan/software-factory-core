@@ -43,7 +43,7 @@ const COLOURS = {
   "--xy-background-color": "transparent",
   "--xy-attribution-background-color": "transparent",
   "--xy-edge-stroke": "var(--arrow)",
-  "--xy-edge-label-background-color": "var(--surface)",
+  "--xy-edge-label-background-color": "var(--ground)",
   "--xy-edge-label-color": "var(--muted-foreground)",
   "--xy-controls-button-background-color": "var(--card)",
   "--xy-controls-button-border-color": "var(--border)",

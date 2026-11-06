@@ -84,7 +84,7 @@ export function CoachChat({
     <aside
       aria-label="The coach"
       className={cn(
-        "glow-card flex min-h-0 min-w-0 animate-dock flex-col gap-4 rounded-3xl p-5 shadow-big",
+        "glow-card flex min-h-0 min-w-0 animate-dock flex-col gap-4 rounded-[calc(var(--radius)+14px)] border border-border p-5 shadow-big",
         className,
       )}
     >
@@ -158,18 +158,24 @@ function Conversation({ coach }: Readonly<{ coach: CoachView }>) {
   );
 }
 
+// The owner's words in a bubble of the accent; the coach's beside its orb,
+// as plain text.
 function Bubble({
   mine,
   children,
 }: Readonly<{ mine: boolean; children: React.ReactNode }>) {
+  if (mine)
+    return (
+      <div className="flex animate-pop justify-end">
+        <div className="max-w-[88%] rounded-2xl bg-primary px-3.5 py-2.5 text-sm leading-relaxed text-primary-foreground [overflow-wrap:anywhere]">
+          {children}
+        </div>
+      </div>
+    );
   return (
-    <div className={cn("flex animate-pop", mine && "justify-end")}>
-      <div
-        className={cn(
-          "max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed [overflow-wrap:anywhere]",
-          mine ? "bg-primary text-primary-foreground" : "bg-surface-2",
-        )}
-      >
+    <div className="flex animate-pop items-start gap-2.5">
+      <CoachOrb working={false} />
+      <div className="max-w-[88%] min-w-0 pt-0.5 text-sm leading-relaxed [overflow-wrap:anywhere]">
         {children}
       </div>
     </div>
@@ -184,7 +190,7 @@ function AtWork({ coach }: Readonly<{ coach: CoachView }>) {
       <CoachOrb working />
       <div
         aria-live="polite"
-        className="max-w-[88%] min-w-0 rounded-2xl bg-surface-2 px-3.5 py-2.5 text-sm leading-relaxed [overflow-wrap:anywhere]"
+        className="max-w-[88%] min-w-0 pt-0.5 text-sm leading-relaxed [overflow-wrap:anywhere]"
       >
         {coach.writing ? (
           <Said text={coach.writing} />

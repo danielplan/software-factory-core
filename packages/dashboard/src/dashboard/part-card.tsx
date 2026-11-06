@@ -14,7 +14,7 @@ import {
 // buttons, and its problem below; its frame tells how it is.
 const FRAME: Record<PartView["light"], string> = {
   running: "border-success/40",
-  starting: "border-primary/60 shadow-[0_0_0_4px_var(--glow-c)]",
+  starting: "border-primary/60 shadow-[0_0_0_4px_var(--tint)]",
   problem: "border-destructive/50",
   stopped: "border-border-soft",
   none: "border-border-soft",

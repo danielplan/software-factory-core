@@ -100,24 +100,29 @@ name. The factory keeps its own face (the orb the coaches speak through, never
 the app's own mascot or assistant), its own layout and its own name.
 
 The dashboard is built once and themed through CSS variables, so a company
-changes its look without changing the core. When the factory is set up, or
-when the owner asks, an agent looks at the company's own app (its CSS
-variables, its Tailwind theme, its design guide, its fonts and logo, a picture
-of it running) and writes `factory/theme.css` (the variables, light and dark)
-and `factory/theme.json` (fonts, logo, name, corners, shadows, spacing). A
-check makes sure every variable is set, text is readable on its background
-(WCAG AA) in both themes and the fonts load. The dashboard reads the theme
-when it opens; an upgrade never touches it. The components themselves are
-never changed in a company: more than the theme allows is a change asked of
-the core. The dashboard shows colour only through these variables, except
-the logos' own colours.
+changes its look without changing the core. Its own look is calm: a light
+neutral ground, white cards with a hairline and one accent colour.
+`factory/theme.css` changes it: the server gives it to the dashboard, which
+loads it after its own styles (`packages/server/src/theme.ts`). It sets the
+variables for light and dark (colours, `--font-body`, `--radius`, shadows)
+and may use the project's own files, such as its fonts, as
+`url("/api/theme/file?path=<path inside the project>")`; only files the theme
+names are given out. An upgrade never touches it.
+
+To come: an agent that writes the theme from the company's own app (its CSS
+variables, its design guide, its fonts and logo, a picture of it running)
+when the factory is set up or when the owner asks, and a check that every
+variable is set, text is readable on its background (WCAG AA) in both themes
+and the fonts load; the logo beside the factory's name. The components
+themselves are never changed in a company: more than the theme allows is a
+change asked of the core.
 
 ## The order
 
 1. **The kernel's missing pieces**: install, add, remove and upgrade; the
    extension points for tabs, agent tools and workflow steps; a working
    copy's own environment. Then a first release.
-2. **The theme.**
+2. **The theme**: the agent that writes it, and its check.
 3. **Runner**, with the Board's dragging and GitHub's signals; Jira after.
 4. **Ideas**, the rest of it.
 5. **Prototypes**, with the kits' starters and prototype mode; then

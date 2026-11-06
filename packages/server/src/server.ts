@@ -13,6 +13,7 @@ import {
 import { extname, join, normalize, sep } from "node:path";
 
 import { PICTURE_TYPES } from "./coach/pictures.ts";
+import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerTools } from "./coach/setup-tools.ts";
 import { Refused } from "./refused.ts";
@@ -164,6 +165,8 @@ async function answer(
     await ideaTools(incoming, response, context.session, url.pathname);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
+  } else if (THEME_ROUTES.has(url.pathname)) {
+    sendTheme(response, context.session.options.project, url);
   } else if (!url.pathname.startsWith("/api/")) {
     sendFile(response, context.page, url.pathname);
   } else {

@@ -259,7 +259,10 @@ test("started in a project with code, the coach reads it first, before the owner
   try {
     const coach = await answered(session);
     const [opening] = pretend.seen;
-    assert.equal(opening?.prompt, `Here's my project: ${project}`);
+    assert.equal(
+      opening?.prompt,
+      `Here's my project: ${project}\n\nIts history: none (no git, or no commits yet).\n\nIts own documentation: none.`,
+    );
     assert.equal(opening.cwd, project);
     assert.match(
       opening.instructions ?? "",
@@ -290,7 +293,7 @@ test("when reading the project did not work, the owner's next message asks for i
     await post("/api/setup/say", { text: "Hello?" });
     assert.equal(
       pretend.seen[1]?.prompt,
-      `Here's my project: ${project}\n\nHello?`,
+      `Here's my project: ${project}\n\nIts history: none (no git, or no commits yet).\n\nIts own documentation: none.\n\nHello?`,
     );
   } finally {
     session.close();

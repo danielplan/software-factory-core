@@ -1,5 +1,5 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { Trash2 } from "lucide-react";
+import { CircleCheck, Trash2 } from "lucide-react";
 import { use } from "react";
 
 import { cn } from "@/lib/utils";
@@ -9,10 +9,9 @@ import { ICON } from "./icons";
 
 type Card = Extract<Piece, { kind: "card" }>["card"];
 
-// What the coach points the owner to: a soft glow of the coach's own
-// colours around it.
+// What the coach points the owner to: a soft ring of the accent around it.
 const FOCUSED =
-  "shadow-[0_0_0_4px_var(--glow-c),0_0_32px_8px_color-mix(in_oklab,var(--glow-b)_80%,transparent)]";
+  "shadow-[0_0_0_4px_color-mix(in_oklab,var(--primary)_22%,transparent),0_0_32px_6px_color-mix(in_oklab,var(--primary)_12%,transparent)]";
 
 // The icon a rule or a question has when the coach gave it none.
 const TONE_ICON = { rule: "never", question: "question" } as const;
@@ -21,12 +20,12 @@ const TONE_ICON = { rule: "never", question: "question" } as const;
 // from the facts around them.
 const TONE = {
   fact: "",
-  rule: "bg-[color-mix(in_oklab,var(--destructive)_7%,var(--card))]",
-  question: "bg-[color-mix(in_oklab,var(--glow-c)_60%,var(--card))]",
+  rule: "bg-[color-mix(in_oklab,var(--destructive)_6%,var(--card))]",
+  question: "bg-[var(--tint)]",
 } as const;
 
 // One thing on the map: an area's frame with its title, or a card to read,
-// dashed while it is a guess and solid once the owner agreed. The owner
+// with a tick once the owner agreed to it. The owner
 // moves a card by dragging it anywhere and takes it off with the bin that
 // shows on hover; they change it by talking: clicking it attaches it to
 // their next message to the coach.
@@ -37,12 +36,12 @@ export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
       <section
         aria-label={piece.title}
         className={cn(
-          "size-full rounded-3xl border border-border/70 bg-card/35 transition-[opacity,box-shadow]",
+          "size-full rounded-[calc(var(--radius)+14px)] border border-border/80 bg-card/45 transition-[opacity,box-shadow]",
           focused && FOCUSED,
           !placed && "opacity-0",
         )}
       >
-        <h2 className="piece-handle cursor-grab px-4 pt-3.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        <h2 className="piece-handle cursor-grab px-4 pt-3.5 text-sm font-semibold text-muted-foreground">
           {piece.title}
         </h2>
       </section>
@@ -52,8 +51,7 @@ export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
     <article
       aria-label={card.title}
       className={cn(
-        "piece-handle group relative grid w-[240px] animate-pop cursor-grab content-start gap-1.5 rounded-2xl border-2 border-arrow bg-card p-3.5 text-card-foreground shadow-soft transition-opacity",
-        card.confirmed ? "border-solid" : "border-dashed",
+        "piece-handle group relative grid w-[240px] animate-pop cursor-grab content-start gap-1.5 rounded-[calc(var(--radius)+4px)] border border-border bg-card p-3.5 text-card-foreground shadow-soft transition-[opacity,box-shadow]",
         TONE[card.tone ?? "fact"],
         focused && FOCUSED,
         attached &&
@@ -86,14 +84,14 @@ function TakeOff({ id }: Readonly<{ id: string }>) {
 }
 
 // A card: its icon, its title and a line under it; or a picture from the
-// project with its title as the caption. A guess not yet confirmed is
-// lighter.
+// project with its title as the caption. Once the owner agreed, a tick
+// follows the title.
 function CardBody({ card }: Readonly<{ card: Card }>) {
   const { title, text, icon, picture, tone, confirmed } = card;
   const named = icon ?? (tone ? TONE_ICON[tone] : undefined);
   const Icon = named ? ICON[named] : null;
   return (
-    <div className={cn("grid gap-1.5", !confirmed && "opacity-70")}>
+    <div className="grid gap-1.5">
       {picture && (
         <img
           src={`/api/setup/picture?path=${encodeURIComponent(picture)}`}
@@ -103,11 +101,17 @@ function CardBody({ card }: Readonly<{ card: Card }>) {
       )}
       <span className="flex items-center gap-2 pr-6 text-[15px] leading-snug font-medium">
         {Icon && (
-          <span className="flex size-8 flex-none items-center justify-center rounded-full bg-[var(--glow-c)] [&_svg]:size-4">
+          <span className="flex size-8 flex-none items-center justify-center rounded-full bg-[var(--tint)] text-primary [&_svg]:size-4">
             <Icon aria-hidden />
           </span>
         )}
         {title}
+        {confirmed && (
+          <CircleCheck
+            aria-label="Agreed"
+            className="size-4 flex-none text-success"
+          />
+        )}
       </span>
       {text && (
         <span className="text-[13px] leading-snug text-muted-foreground">

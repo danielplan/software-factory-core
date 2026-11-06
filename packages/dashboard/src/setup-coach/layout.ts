@@ -14,14 +14,20 @@ function layoutKernel(): Promise<ELK> {
   return elk;
 }
 
+// The room between cards, set on the canvas and on each area (an area's
+// cards are spaced by the area's own options). Between rows there is room
+// for an arrow's label and the arrow itself.
+const SPACING = {
+  "elk.spacing.nodeNode": "28",
+  "elk.layered.spacing.nodeNodeBetweenLayers": "64",
+  "elk.spacing.componentComponent": "56",
+};
 const OPTIONS = {
   "elk.algorithm": "layered",
   "elk.direction": "DOWN",
   "elk.hierarchyHandling": "INCLUDE_CHILDREN",
   "elk.edgeRouting": "ORTHOGONAL",
-  "elk.spacing.nodeNode": "28",
-  "elk.layered.spacing.nodeNodeBetweenLayers": "36",
-  "elk.spacing.componentComponent": "56",
+  ...SPACING,
   "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
   // Arrows' bends in the canvas's own terms; cards inside their area.
   "elk.json.edgeCoords": "ROOT",
@@ -65,7 +71,7 @@ export async function arrange(
         .map(({ id, width, height }) => ({ id, width, height })),
       ...areas.map((area) => ({
         id: area,
-        layoutOptions: { "elk.padding": AREA_PADDING },
+        layoutOptions: { ...SPACING, "elk.padding": AREA_PADDING },
         children: boxes
           .filter((box) => box.area === area)
           .map(({ id, width, height }) => ({ id, width, height })),

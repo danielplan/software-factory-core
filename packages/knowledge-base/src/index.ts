@@ -11,6 +11,7 @@ import { HISTORY, indexFiles } from "./paths.ts";
 import type { Problem } from "./problem.ts";
 import { checkRules } from "./rules.ts";
 
+export { GIT } from "./git.ts";
 export type { Problem } from "./problem.ts";
 
 // The empty knowledge base a new company starts with (its context/ folder).
