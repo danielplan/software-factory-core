@@ -6,6 +6,17 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Planning in a coding agent, from the board's cards.** `software-factory
+card` (list, show, new, move, comment, agree) works with the cards of
+  the connected GitHub board from the project, for the coding agents and
+  the owner (`server/src/cards/`). `agree` writes the agreed plan into the
+  card (between marks, with the prototype's branch and who agreed when),
+  refuses a prototype branch that is not pushed, and moves the card to
+  ready, where the factory's runner (on whichever computer runs it) takes
+  it. The `factory` skill works from the board; the `plan` skill plans a
+  card with prototypes on its branch (`factory/issue-<number>`) and hands
+  it on when the person agrees. A company upgrading gets the skills and the
+  line in `factory/AGENTS.md`.
 - **The method's skills reach the coding agents.** Making the factory's
   folder puts the method's skills (factory, plan, build-test-first,
   review-structure, show-result, update-context) in the project's

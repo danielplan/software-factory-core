@@ -44,7 +44,7 @@ These defaults hold for every product, whatever its kind. Each kind's kit adds i
 
 ## Factory workflow
 
-Start with the `factory` skill. It opens a run file in `runs/NNN-short-name.md` and routes through `plan` → `build-test-first` → `review-structure` → `show-result` → `update-context`.
+Start with the `factory` skill. It opens a run file in `runs/NNN-short-name.md` and routes through `plan` → `build-test-first` → `review-structure` → `show-result` → `update-context`. When the factory is connected to a board, work comes from its cards: `software-factory card` lists, plans and readies them (`software-factory card help`).
 
 - `context/index.md` is the knowledge base's entry point, organised with Diátaxis: `tutorials/` (learn by doing), `how-to/` (steps for a task), `reference/` (the products, `features/` one page per product feature, `conventions/` one page per kind of product, `lessons/` sorted the same way), `explanation/` (product intent and system context). `context/decisions/` holds numbered MADR decision records. `context/sources/` is immutable: add a newly dated source instead of editing. Runs are the only history.
 - Each product has a `BLUEPRINT.md`: its kind, structure, promises (what must stay true; ask before changing) and checks.

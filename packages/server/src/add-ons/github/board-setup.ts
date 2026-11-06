@@ -19,8 +19,13 @@ import { type Cli, type Ran, realCli } from "./github.ts";
 // A board as GitHub lists it.
 type Listed = { number: number; title: string; items: { totalCount: number } };
 // A board's Status field: its id, and its options as they are.
-type Option = { id: string; name: string; color: string; description: string };
-type Status = { id: string; options: Option[] };
+export type Option = {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+};
+export type Status = { id: string; options: Option[] };
 
 // GitHub's colours for each stage's column.
 const COLOURS: Record<(typeof STAGES)[number], string> = {
@@ -141,7 +146,7 @@ async function makeBoard(
 }
 
 // The board's Status field, with its options as they are.
-async function statusOf(
+export async function statusOf(
   cli: Cli,
   owner: string,
   board: number,
@@ -220,7 +225,7 @@ function optionInput(option: Omit<Option, "id"> & { id?: string }): string {
   return `{${id}name: ${name}, color: ${option.color}, description: ${about}}`;
 }
 
-function answer(ran: Ran): string {
+export function answer(ran: Ran): string {
   if (ran.code !== 0)
     throw new Refused(ran.err.trim() || "GitHub did not answer.");
   return ran.out;
@@ -230,7 +235,7 @@ function boardList(owner: string): string[] {
   return ["project", "list", "--owner", owner, "--format", "json"];
 }
 
-function ownerOf(repository: string): string {
+export function ownerOf(repository: string): string {
   return repository.split("/")[0] ?? "";
 }
 

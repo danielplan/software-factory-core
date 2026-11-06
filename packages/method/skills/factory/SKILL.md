@@ -27,6 +27,14 @@ Use the following skills to create the run and manage its progress:
 
 Read each skill when you need to use it. Each skill has its own instructions and approach.
 
+## Work from the board
+
+When the factory is connected to a board, work lives there: anyone adds cards to its backlog, and whoever runs the factory's runner builds the cards that are ready. In the project, the `software-factory card` command reads and moves them (`software-factory card help` lists what it does).
+
+- **Pick the work:** `software-factory card list` (or `list backlog`) shows the cards; `card show <number>` one card, with its comments. When the person brings a new request that belongs on the board, make it a card first: `card new "<title>" --body-file <file>`.
+- **Plan it here:** move the card to planning (`card move <number> planning`), open the run for it (its Request links the card), and plan it with the person with [`plan`](../plan/SKILL.md), prototypes included.
+- **Hand it on:** once the person agrees to the plan, `plan` writes it into the card and moves the card to ready. Then stop: the runner builds it, on whichever computer runs it. If the person wants it built here instead, say so, move the card to in progress and carry on with `build-test-first`.
+
 When an extension of the factory started you (its prompt says so), also follow the guide that extension names: it says how to answer there and what that setting changes.
 
 Changes to the factory itself in this company (its `AGENTS.md`, its skills or its folder structure) get a row in the company's CHANGES.md, with the reason, before you make them. The core's own files are not changed here: a change the core needs is suggested to its maintainer, written without company details.

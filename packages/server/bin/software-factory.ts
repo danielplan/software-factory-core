@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // software-factory [folder] [--port <port>] [--no-open]
 // software-factory new <name>
+// software-factory card … (the board's cards, for planning in a coding agent)
 //
 // Run in a project, starts its factory on this computer and opens it in the
 // browser. The factory lives in the project, in its factory/ folder, found
@@ -19,6 +20,7 @@ import { allKits } from "@software-factory/kits";
 import { templateFolder } from "@software-factory/knowledge-base";
 import { guidesFolder, templatesFolder } from "@software-factory/method";
 
+import { cardCommand } from "../src/cards/command.ts";
 import { computerTools } from "../src/installables.ts";
 import { startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
@@ -31,6 +33,10 @@ const OPENER: Partial<Record<NodeJS.Platform, string>> = {
   darwin: "open",
   win32: "explorer",
 };
+
+// The board's cards, for the coding agents: answered here, then done.
+if (process.argv[2] === "card")
+  process.exit(await cardCommand(process.argv.slice(3)));
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,

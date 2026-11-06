@@ -82,6 +82,14 @@ Each step below has a goal, the shape of the message, and when it counts as agre
 
 **Agreed when:** they confirm the checks. Record the check plan.
 
+## Planning a card, with prototypes
+
+When the plan is for a card on the board (the `factory` skill picked it), the person and you work it out here, on this computer, and someone else's computer may build it.
+
+- **Prototype in the real app, on the card's branch.** During UX/UI, when screens are discussed, make a clickable prototype in the product itself, on a branch named `factory/issue-<number>` in this copy, and run it so the person can try it (give them the address). Start from a similar page, reuse the app's own pieces and conventions, extend an existing area rather than adding a page, and open directly on the screen the card is about. Pretend data is clearly made up and never real people's. Try, don't check: no tests or lint while prototyping; change it as they react.
+- **Write the plan for someone who was not here.** The plan in the card is all the builder gets besides the prototype: the goal and the journey, the screens and what in the prototype is final, the parts touched and the choices with their reasons, the checks, and what is out of scope or still open. Name the places in the code.
+- **Only the person's agreement makes it ready.** When they say they agree: commit the prototype on its branch ("Prototype for #<number>"), push it (`git push -u origin factory/issue-<number>`), write the plan into a file, and run `software-factory card agree <number> --plan-file <file> --prototype factory/issue-<number>`. It writes the plan into the card, notes who agreed and when, and moves the card to ready for the runner. Without a prototype, leave out `--prototype`.
+
 ## Before building
 
 Confirm each part to be touched is in the plan, its choices are recorded and its checks are planned. Give a brief plain handoff: "We will build parts X and Y using the agreed tools, and check that these journeys work." Keep open questions under **Open**. For a product without a blueprint, draw one from the code, as the knowledge base's page on maintaining it says, and mark anything inferred as inferred.
