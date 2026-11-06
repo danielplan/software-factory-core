@@ -78,10 +78,10 @@ forward`, no public address needed) and a check every few minutes for
 
 ## The kits
 
-| Kit                                                        | Here | To come                                                                                                                                                             |
-| ---------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React web app, SvelteKit web app, NestJS backend, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
-| Other code                                                 | yes  | –                                                                                                                                                                   |
+| Kit                                                                            | Here | To come                                                                                                                                                             |
+| ------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React web app, SvelteKit web app, NestJS backend, TypeScript package, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
+| Other code                                                                     | yes  | –                                                                                                                                                                   |
 
 ## What stays with a company
 

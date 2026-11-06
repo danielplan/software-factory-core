@@ -19,6 +19,7 @@ import {
   otherCode,
   reactWebApp,
   sveltekitApp,
+  typescriptPackage,
 } from "../src/index.ts";
 
 // The kits that ship with the core: each recognises its own kind of product
@@ -65,6 +66,14 @@ const svelte = {
   scripts: { dev: "vite dev", check: "svelte-kit sync && svelte-check" },
   devDependencies: { "@sveltejs/kit": "3.0.0", svelte: "5.0.0", vite: "7.0.0" },
 };
+const shared = {
+  name: "@acme/spec",
+  main: "./dist/index.js",
+  exports: { ".": "./dist/index.js" },
+  scripts: { build: "tsc", dev: "tsc --watch" },
+  devDependencies: { typescript: "6.0.0" },
+  dependencies: { zod: "4.0.0" },
+};
 const phone = {
   scripts: { start: "expo start", check: "tsc" },
   dependencies: { expo: "54.0.0", react: "19.0.0", "react-native": "0.81.0" },
@@ -83,6 +92,8 @@ test("each kit recognises its own kind and no other", () => {
   assert.deepEqual(recognisedBy(folderWith(server)), ["nestjs-backend"]);
   // SvelteKit uses Vite too, but no React: only its own kit knows it.
   assert.deepEqual(recognisedBy(folderWith(svelte)), ["sveltekit-app"]);
+  // Shared TypeScript code given out as a package, with no framework.
+  assert.deepEqual(recognisedBy(folderWith(shared)), ["typescript-package"]);
   // A phone app uses React too, but it is not a web app.
   assert.deepEqual(recognisedBy(folderWith(phone)), ["expo-app"]);
   // React without Vite, no package.json, or one that cannot be read: nothing.
@@ -154,7 +165,8 @@ function productOf(kit: Kit, fields: Partial<Product> = {}): Product {
 }
 
 test("each kit runs a product as one valid part, on the product's port or its own", () => {
-  for (const kit of specific) {
+  // A package answers nowhere: it is kept built (tested below).
+  for (const kit of specific.filter((one) => one.port !== undefined)) {
     const [part, ...more] = kit.partsFor(
       productOf(kit, { dependsOn: ["api"] }),
     );
@@ -387,4 +399,44 @@ test("the SvelteKit kit runs a site with Vite's server, checks it with svelte-ch
       "npm",
     ],
   ]);
+});
+
+test("the SvelteKit kit brings Svelte's MCP server", () => {
+  assert.deepEqual(sveltekitApp.mcp, {
+    svelte: { type: "stdio", command: "npx", args: ["-y", "@sveltejs/mcp"] },
+  });
+  assert.deepEqual(reactWebApp.mcp, {});
+});
+
+test("a TypeScript package is checked by its build and kept built by its watch script", () => {
+  assert.deepEqual(typescriptPackage.detect(folderWith(shared)), {
+    name: "Spec",
+    commands: { start: "npm run dev", verify: "npm run build" },
+  });
+  const [watch] = typescriptPackage.partsFor(
+    productOf(typescriptPackage, { commands: { start: "npm run dev" } }),
+  );
+  assert.deepEqual(partSchema.parse(watch).run, ["npm", "run", "dev"]);
+  assert.deepEqual(
+    typescriptPackage.partsFor(productOf(typescriptPackage)),
+    [],
+  );
+  // Its own check wins; without a build, the compiler checks the types.
+  assert.deepEqual(
+    typescriptPackage.detect(
+      folderWith({ ...shared, scripts: { test: "node --test" } }),
+    )?.commands,
+    { verify: "npm test" },
+  );
+  assert.deepEqual(
+    typescriptPackage.detect(folderWith({ ...shared, scripts: {} }))?.commands,
+    { verify: "npx tsc --noEmit" },
+  );
+  // Not a package: nothing given out, a framework, or a program to start.
+  for (const not of [
+    { ...shared, main: undefined, exports: undefined },
+    { ...shared, dependencies: { express: "5" } },
+    { ...shared, scripts: { start: "node ." } },
+  ])
+    assert.equal(typescriptPackage.detect(folderWith(not)), null);
 });

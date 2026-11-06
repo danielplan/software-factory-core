@@ -15,6 +15,7 @@ export {
   type Extension,
   type ExtensionFile,
   type Guide,
+  type McpServer,
   type Kit,
   type KitFile,
 } from "./extensions/extension.ts";

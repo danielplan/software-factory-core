@@ -8,6 +8,7 @@ import {
   siNestjs,
   siReact,
   siSvelte,
+  siTypescript,
 } from "simple-icons";
 
 import { cn } from "@/lib/utils";
@@ -25,6 +26,10 @@ const LOOKS: Record<string, Look | undefined> = {
   "expo-app": { icon: <Logo icon={siExpo} />, colour: INK },
   "react-web-app": { icon: <Logo icon={siReact} />, colour: "#149eca" },
   "sveltekit-app": { icon: <Logo icon={siSvelte} />, colour: "#ff3e00" },
+  "typescript-package": {
+    icon: <Logo icon={siTypescript} />,
+    colour: "#3178c6",
+  },
   "nestjs-backend": { icon: <Logo icon={siNestjs} />, colour: "#e0234e" },
   "other-code": { icon: <Code aria-hidden />, colour: "#64748b" },
 };

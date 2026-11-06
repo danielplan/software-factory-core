@@ -36,6 +36,18 @@ Decide where a file goes by what it is and who uses it: a page's own pieces
 next to its route, what several pages share in the library folder, and what
 must never reach the browser in its server folder.
 
+## Svelte's MCP server
+
+The factory adds Svelte's own MCP server to the project (`svelte` in the
+project's MCP settings). Use it:
+
+1. **list-sections** first, to find the parts of the Svelte and SvelteKit
+   documentation that matter for the task;
+2. **get-documentation** for each of them, before writing code that uses
+   them;
+3. **svelte-autofixer** on every Svelte component you write or change, again
+   until it reports no issues and no suggestions.
+
 ## The rules and why
 
 - **Data comes from load functions,** so every page renders on the server

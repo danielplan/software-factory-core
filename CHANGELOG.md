@@ -6,6 +6,15 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Kits bring their MCP servers** (`mcp` in `defineKit`): written into the
+  project's `.mcp.json` when a product of their kind is added, only where
+  the project has no server of that name (`server/src/kit-servers.ts`). The
+  SvelteKit kit brings Svelte's own (documentation and the autofixer), and
+  its rules say to use it.
+- **A TypeScript package kit** (`typescript-package`): shared code given out
+  as a package (exports, main or types; TypeScript; no framework; no start
+  script), checked with its own check or its build, and kept built by its
+  watch script while the others run.
 - **A SvelteKit web app kit** (`sveltekit-app`): it recognises a SvelteKit
   app by its packages, runs it with Vite's server, checks it with its check
   script (svelte-check) and makes a new one with SvelteKit's own starter

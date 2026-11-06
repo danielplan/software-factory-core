@@ -36,6 +36,17 @@ export const extensionSchema = z.object({
   guides: z.array(guideSchema).default([]),
 });
 
+// An MCP server the agents use on a product of a kind (its framework's
+// documentation and checks): run on this computer, or reached at an address.
+const mcpServerSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("stdio"),
+    command: z.string().min(1),
+    args: z.array(z.string()).default([]),
+  }),
+  z.object({ type: z.literal("http"), url: z.url() }),
+]);
+
 export const kitSchema = z.object({
   id,
   name: z.string().min(1),
@@ -48,12 +59,16 @@ export const kitSchema = z.object({
   // (conventions and lessons for the kind).
   rules: z.array(z.string().min(1)).default([]),
   guides: z.array(guideSchema).default([]),
+  // The MCP servers the agents use on such a product, by name: written into
+  // the project's .mcp.json when a product of this kind is added.
+  mcp: z.record(id, mcpServerSchema).default({}),
   // Recognises any code, so it only takes a folder in which no other kit
   // finds a product, there or below (setup/detect.ts).
   fallback: z.boolean().default(false),
 });
 
 export type Guide = z.infer<typeof guideSchema>;
+export type McpServer = z.infer<typeof mcpServerSchema>;
 export type ExtensionFile = z.input<typeof extensionSchema>;
 export type Extension = z.infer<typeof extensionSchema>;
 

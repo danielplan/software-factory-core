@@ -11,6 +11,8 @@ export type PackageJson = {
   name: string | null;
   packages: Set<string>;
   scripts: Set<string>;
+  // Says what it gives other code (exports, main or types): a package.
+  library: boolean;
 };
 
 export function readPackageJson(folder: string): PackageJson | null {
@@ -29,6 +31,7 @@ export function readPackageJson(folder: string): PackageJson | null {
       ...keysOf(file.devDependencies),
     ]),
     scripts: new Set(keysOf(file.scripts)),
+    library: ["exports", "main", "types"].some((key) => key in file),
   };
 }
 

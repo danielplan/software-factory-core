@@ -2,7 +2,7 @@
 // company first (the folder, and the project's rules pointing to it), then products (found in existing code, or about to be
 // made) whenever the owner adds them, with the kits their kinds need.
 
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import {
   addProduct,
@@ -18,6 +18,7 @@ import {
 } from "@software-factory/core";
 
 import type { CreateCompany, SetupProduct } from "./api.ts";
+import { addKitServers } from "./kit-servers.ts";
 import { Refused } from "./refused.ts";
 
 // The factory folder made in the project; its path.
@@ -59,6 +60,11 @@ export function writeProducts(
     ...kits.filter((kit) => kinds.has(kit.kind)).map((kit) => kit.id),
   ]);
   saveCompany(root, { ...read.company, kits: [...used] });
+  // The kits' MCP servers, for the agents working on these products.
+  addKitServers(
+    dirname(root),
+    kits.filter((kit) => kinds.has(kit.kind)),
+  );
   for (const product of products)
     addProduct(
       root,

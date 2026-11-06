@@ -8,8 +8,16 @@ import { nestjsBackend } from "./nestjs-backend.ts";
 import { otherCode } from "./other-code.ts";
 import { reactWebApp } from "./react-web-app.ts";
 import { sveltekitApp } from "./sveltekit-app.ts";
+import { typescriptPackage } from "./typescript-package.ts";
 
-export { expoApp, nestjsBackend, otherCode, reactWebApp, sveltekitApp };
+export {
+  expoApp,
+  nestjsBackend,
+  otherCode,
+  reactWebApp,
+  sveltekitApp,
+  typescriptPackage,
+};
 
 // In the order they are asked to recognise a folder: the phone app before
 // the web app, though each also refuses the other's kind. Other code is the
@@ -19,5 +27,6 @@ export const allKits: Kit[] = [
   reactWebApp,
   sveltekitApp,
   nestjsBackend,
+  typescriptPackage,
   otherCode,
 ];

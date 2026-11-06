@@ -1,0 +1,90 @@
+// The TypeScript package kit: shared code other products use (types,
+// schemas, rules), written in TypeScript and given out as a package, with no
+// app framework of its own. It recognises one by its package.json (it says
+// what it gives: exports, main or types; it has TypeScript and no
+// framework), checks it with its own check (else its build: compiling is
+// its type check), and keeps it built while the others run when it has a
+// dev (watch) script.
+
+import { defineKit, type Product } from "@software-factory/core";
+
+import {
+  commandsOf,
+  doesOf,
+  type PackageJson,
+  readableName,
+  readPackageJson,
+  verifyCommand,
+} from "./package-json.ts";
+
+// The packages that make code an app of a kind another kit knows, or a
+// framework app no kit knows yet: then it is not a plain package.
+const FRAMEWORKS = [
+  "react",
+  "react-dom",
+  "react-native",
+  "expo",
+  "svelte",
+  "@sveltejs/kit",
+  "vue",
+  "nuxt",
+  "next",
+  "@angular/core",
+  "@nestjs/core",
+  "express",
+  "fastify",
+  "hono",
+];
+
+export const typescriptPackage = defineKit({
+  id: "typescript-package",
+  name: "TypeScript package",
+  about:
+    "Shared code other products use (types, schemas, rules), given out as a package.",
+  kind: "typescript-package",
+  commands: {},
+  rules: [
+    "rules/typescript-package/conventions.md",
+    "rules/typescript-package/lessons.md",
+  ],
+  detect: (folder) => {
+    const file = readPackageJson(folder);
+    if (!file || !isPackage(file)) return null;
+    return {
+      name: readableName(file, folder),
+      commands: commandsOf({
+        start: file.scripts.has("dev") ? "npm run dev" : undefined,
+        verify:
+          verifyCommand(file) ??
+          (file.scripts.has("build") ? "npm run build" : "npx tsc --noEmit"),
+      }),
+    };
+  },
+  // Kept built while the products that use it run: its watch script, when
+  // it has one; nothing to run otherwise.
+  partsFor: (product: Product) => {
+    if (product.commands.start !== "npm run dev") return [];
+    return [
+      {
+        id: product.id,
+        name: product.name,
+        area: "products",
+        does: doesOf(product, "package"),
+        dependsOn: product.dependsOn,
+        folder: product.folder,
+        prepare: [{ label: "Installing packages", packages: true }],
+        run: ["npm", "run", "dev"],
+        start: "auto",
+      },
+    ];
+  },
+});
+
+function isPackage(file: PackageJson): boolean {
+  return (
+    file.library &&
+    file.packages.has("typescript") &&
+    !FRAMEWORKS.some((name) => file.packages.has(name)) &&
+    !file.scripts.has("start")
+  );
+}

@@ -1,7 +1,8 @@
 // The SvelteKit web app kit: a web app made with SvelteKit (Svelte and
 // Vite). It recognises one by its packages, runs it with Vite's development
-// server, checks it with its check script (svelte-check), and makes a new
-// one with SvelteKit's own starter (sv).
+// server, checks it with its check script (svelte-check), makes a new one
+// with SvelteKit's own starter (sv), and gives the agents Svelte's MCP
+// server.
 
 import { basename } from "node:path";
 
@@ -28,6 +29,11 @@ export const sveltekitApp = defineKit({
     "rules/sveltekit-app/lessons.md",
   ],
   port: PORT,
+  // Svelte's own MCP server: its documentation, and the autofixer that
+  // checks each component the agents write.
+  mcp: {
+    svelte: { type: "stdio", command: "npx", args: ["-y", "@sveltejs/mcp"] },
+  },
   detect: (folder) => {
     const file = readPackageJson(folder);
     if (!file?.packages.has("@sveltejs/kit")) return null;

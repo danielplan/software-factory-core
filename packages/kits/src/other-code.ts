@@ -77,6 +77,7 @@ const noPackage: PackageJson = {
   name: null,
   packages: new Set(),
   scripts: new Set(),
+  library: false,
 };
 
 function npmCommands(file: PackageJson): Product["commands"] {
