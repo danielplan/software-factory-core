@@ -16,6 +16,7 @@ import { checkDocs } from "@software-factory/knowledge-base";
 
 import { installSkills } from "../install-skills.ts";
 import { addKitServers } from "../kit-servers.ts";
+import { pinCore } from "../pin-core.ts";
 import { themeProblems } from "../theme-check.ts";
 import {
   companyOf,
@@ -63,6 +64,10 @@ export async function upgradeFactory(
   );
   if (servers.length > 0)
     done.push(`Added the MCP servers ${servers.join(", ")} to .mcp.json.`);
+  if (pinCore(project, to))
+    done.push(
+      `Pinned the core in package.json at release ${to}: run npm install.`,
+    );
   if (compareVersions(to, from) > 0)
     saveCompany(root, { ...companyOf(root), core: to });
   return { from, to, done, left, problems: await problemsOf(context) };

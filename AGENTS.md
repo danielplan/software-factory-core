@@ -17,9 +17,8 @@ here reach every company with its next upgrade, so they are made with care.
 - **A change a company would have to make by hand comes with a migration**
   in `packages/server/src/upgrade/migrations.ts`, for the release it comes
   in, so `software-factory upgrade` makes it; what it cannot decide alone it
-  leaves to the owner, said in a line. A release raises `CORE_VERSION`
-  (`packages/core/src/version.ts`), gets its section in `CHANGELOG.md` and a
-  tag (`v<version>`).
+  leaves to the owner, said in a line. How a release is made and reaches the
+  projects: [releasing the core](docs/releasing.md).
 - **Every change to what a company sees or relies on** (an extension point, a
   product description field, a file a company writes, a command) gets a line in
   `CHANGELOG.md` under "Unreleased", and says what a company has to do, if

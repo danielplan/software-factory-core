@@ -155,7 +155,9 @@ has no kit, a part listed twice, a dependency that is not there.
 
 ## How companies update
 
-- **The core:** a company's `factory.json` says which version of the core its
+- **The core:** a project installs it from this repository at a release's
+  tag, pinned in its `package.json` ([releasing the core](releasing.md)).
+  A company's `factory.json` says which version of the core its
   factory is on (`core`). `software-factory upgrade`, run in the project,
   brings it to the core the command comes from: it runs the migrations of
   every release in between (`packages/server/src/upgrade/migrations.ts`),

@@ -6,6 +6,22 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+## 0.3.0 (2026-11-06)
+
+**To upgrade:** pin `"software-factory":
+"github:danielplan/software-factory-core#release-0.3.0"` in the project's
+devDependencies, `npm install`, then `npx software-factory upgrade` (it
+pins the core itself from now on).
+
+- **The core installs from this repository.** A release is the core built
+  as one package (`scripts/build-release.mjs`: compiled to JavaScript, its
+  packages bundled, the dashboard built) on the `release` branch, tagged
+  `release-<version>` (`npm run release -- --push`). Setting up a factory
+  and `software-factory upgrade` pin it in the project's `package.json`;
+  everyone with the project runs it with `npx software-factory`
+  ([releasing the core](docs/releasing.md)).
+- The method's skills and the agents' ground rules call `npx software-factory`;
+  a migration changes the line in a factory's `AGENTS.md`.
 - **An `upgrade-factory` skill** in the method: a coding agent runs
   `software-factory upgrade`, does the small changes it lists under "Needs
   you", asks about the ones that are the owner's choice, checks again and

@@ -62,7 +62,18 @@ export const MIGRATIONS: Migration[] = [
         join(root, "AGENTS.md"),
         "`update-context`.",
         "software-factory card",
-        " When the factory is connected to a board, work comes from its cards: `software-factory card` lists, plans and readies them (`software-factory card help`).",
+        " When the factory is connected to a board, work comes from its cards: `npx software-factory card` lists, plans and readies them (`npx software-factory card help`).",
+      ),
+  },
+  {
+    version: "0.3.0",
+    about: "The agents call the core pinned in the project, with npx",
+    run: ({ root }) =>
+      replaceIn(
+        join(root, "AGENTS.md"),
+        /(?<!npx )`software-factory card/g,
+        "`npx software-factory card",
+        "The agents' ground rules call the pinned core with npx.",
       ),
   },
 ];
@@ -136,6 +147,21 @@ function addAfter(
     };
   writeFileSync(file, read.replace(after, after + text));
   return { done: ["Named the board's cards in factory/AGENTS.md."], left: [] };
+}
+
+// Replaces what the pattern finds in a file, if anything.
+function replaceIn(
+  file: string,
+  pattern: RegExp,
+  text: string,
+  said: string,
+): Migrated {
+  if (!existsSync(file)) return nothing();
+  const read = readFileSync(file, "utf8");
+  const changed = read.replace(pattern, text);
+  if (changed === read) return nothing();
+  writeFileSync(file, changed);
+  return { done: [said], left: [] };
 }
 
 export function companyOf(root: string): Company {

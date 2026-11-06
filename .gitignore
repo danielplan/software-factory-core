@@ -4,3 +4,5 @@ coverage/
 .env
 *.log
 packages/dashboard/dist/
+tsconfig.release.json
+.release/

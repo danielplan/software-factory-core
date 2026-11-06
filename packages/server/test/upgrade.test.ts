@@ -103,7 +103,7 @@ test("an old factory is brought to the core's version, step by step", async () =
   );
   assert.match(
     readFileSync(join(root, "AGENTS.md"), "utf8"),
-    /`update-context`\. When the factory is connected to a board, work comes from its cards/,
+    /`update-context`\. When the factory is connected to a board, work comes from its cards: `npx software-factory card`/,
   );
   assert.ok(existsSync(join(project, ".claude", "skills", "plan", "SKILL.md")));
   assert.match(
@@ -166,4 +166,39 @@ test("every migration belongs to a release up to this core's, in order", () => {
     last = migration.version;
   }
   assert.equal(compareVersions("0.10.0", "0.9.1") > 0, true);
+});
+
+test("a factory on 0.2.0 calls the pinned core with npx in its ground rules", async () => {
+  const { project, root } = oldFactory();
+  const rules = join(root, "AGENTS.md");
+  write(
+    rules,
+    "Work comes from its cards: `software-factory card` lists them (`software-factory card help`).\n",
+  );
+  write(
+    join(root, "factory.json"),
+    JSON.stringify({
+      name: "Acme",
+      tracker: "github",
+      core: "0.2.0",
+      kits: ["sveltekit-app"],
+      without: ["jira"],
+    }),
+  );
+  const result = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.equal(result.from, "0.2.0");
+  assert.ok(
+    result.done.includes(
+      "The agents' ground rules call the pinned core with npx.",
+    ),
+  );
+  assert.equal(
+    readFileSync(rules, "utf8"),
+    "Work comes from its cards: `npx software-factory card` lists them (`npx software-factory card help`).\n",
+  );
 });

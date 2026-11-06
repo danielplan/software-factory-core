@@ -2,7 +2,15 @@
 // is on (`core`), and `software-factory upgrade` brings it to this one,
 // running the migrations of every release in between.
 
-export const CORE_VERSION = "0.2.0";
+export const CORE_VERSION = "0.3.0";
+
+// Where a project installs the core from: this repository, at the tag of a
+// release (release-<version>, scripts/publish-release.mjs).
+export const RELEASE_SOURCE = "github:danielplan/software-factory-core";
+
+export function releaseOf(version: string): string {
+  return `${RELEASE_SOURCE}#release-${version}`;
+}
 
 // Before a factory said its version, it was on the first one.
 export const FIRST_VERSION = "0.1.0";

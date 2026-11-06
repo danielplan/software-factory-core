@@ -100,4 +100,10 @@ export {
 } from "./copies/workspace.ts";
 export { run } from "./processes.ts";
 
-export { compareVersions, CORE_VERSION, FIRST_VERSION } from "./version.ts";
+export {
+  compareVersions,
+  CORE_VERSION,
+  FIRST_VERSION,
+  RELEASE_SOURCE,
+  releaseOf,
+} from "./version.ts";
