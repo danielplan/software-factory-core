@@ -14,6 +14,7 @@ When you are asked to build or change something, use the factory skills to plan,
 - Standards before home-made code. Before writing code for a common problem (validation, forms, routing, sign-in, data access, migrations, translations, dates, charts, layout, tests), use what the framework already provides, then a widely used, maintained library that fits it. Write your own only when neither fits, and say why in the run. When you find home-made code that a standard covers, propose replacing it.
 - If the request could change more than one product, ask which one before coding.
 - Ask for an account, a credential or a purchase instead of trying to get one.
+- What is known lives in the repository: the knowledge base, a product's blueprint, a decision record. Never only in an agent's own memory (such as Claude Code's memory) or a chat, where no other agent or person finds it. When you find a note kept only there, write it into the knowledge base.
 - Write down what is not done: unfinished items go into the product's blueprint (under Open) or the run's Later section before a run is called done.
 - Never loosen a check or add a lint-disabling comment without asking.
 - Changes to this file, the skills or the folder structure get a row in `CHANGES.md`, with the reason, before you make them.

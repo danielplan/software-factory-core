@@ -6,6 +6,13 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Knowledge lives in the repository.** The agents' ground rules
+  (`packages/method/templates/AGENTS.md`) say what is known goes into the
+  knowledge base, a blueprint or a decision, never only into an agent's own
+  memory; the setup coach writes notes it found in such a memory into the
+  knowledge base. A GitHub board is the factory's standard place for work:
+  the setup coach recommends it when the code is on GitHub. A company
+  upgrading adds the rule to its `factory/AGENTS.md`.
 - The setup coach draws what the project's own documentation says as
   confirmed, naming where it says so, so only its own guesses stay open;
   each rule starts with the part it is about; pictures only where they

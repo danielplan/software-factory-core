@@ -71,7 +71,8 @@ to build:
    it is, its own words, and what is still open. This becomes the knowledge
    base, beside the documentation already there.
 4. **How work will go**: who decides what is built, where work is tracked
-   (if the owner has a place already), and which of the factory's add-ons
+   (a GitHub board is the factory's standard: recommend it when the code is
+   on GitHub, else the factory's own board), and which of the factory's add-ons
    (listed below) they want. Suggest the few that fit, each as a card with
    why, and ask once; switch on only what they agree to. They can change it
    later on the Add-ons page.
@@ -121,6 +122,9 @@ from the map:
    documentation already says it, link to that page from where the fact
    would go and add only what it does not say; list that documentation on
    the knowledge base's index, with what each page answers. Never copy it.
+   What you found only in an agent's own memory (such as Claude Code's
+   memory for this project) goes into the knowledge base, saying where it
+   came from: knowledge lives in the repository.
 3. The factory's look, when the project has an app people see: write
    `factory/theme.css` so the factory looks like part of the same family.
    Take the app's own colours, fonts, corners and shadows as they are, from
