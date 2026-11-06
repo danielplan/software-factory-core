@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type { State } from "@/api";
-import { onTrackers } from "@/add-ons/trackers";
+import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { NavRail, type Tab, TABS } from "@/components/nav-rail";
 import { StatusLight } from "@/components/status-light";
@@ -72,7 +72,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
           text={state.problems.join(" · ")}
         />
       )}
-      {tab === "connect" && <ConnectPage trackers={onTrackers(state.addOns)} />}
+      {tab === "connect" && <ConnectPage trackers={trackersOf(state.addOns)} />}
       {tab === "add-ons" && <AddOnsTab state={state} />}
       {tab === "board" && <BoardTab state={state} />}
       {tab === "ideas" && <IdeasTab state={state} open={open} />}

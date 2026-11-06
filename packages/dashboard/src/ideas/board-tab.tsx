@@ -3,6 +3,8 @@ import { Loader2 } from "lucide-react";
 import type { IdeaView } from "@/api";
 import type { FactoryState } from "@/dashboard/dashboard";
 
+import { ConnectedBoard } from "@/connect/connected-board";
+
 import { IdeaCard } from "./idea-card";
 import { STAGES } from "./stages";
 
@@ -43,8 +45,16 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           : once you agree to its plan, it comes here.
         </p>
       )}
+      <div className="px-1">
+        <ConnectedBoard state={state} brief />
+      </div>
       <div className="overflow-x-auto pb-2">
-        <div className="grid min-w-[960px] grid-cols-5 gap-3">
+        <div
+          className="grid gap-3"
+          style={{
+            gridTemplateColumns: `repeat(${String(COLUMNS.length)}, minmax(10.5rem, 1fr))`,
+          }}
+        >
           {COLUMNS.map((column) => {
             const ideas = state.ideas.filter((one) => one.status === column.id);
             return (

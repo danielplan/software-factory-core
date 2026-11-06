@@ -42,7 +42,7 @@ import { addOns, type Installable } from "./installables.ts";
 import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
-import { switched } from "./add-ons/switch.ts";
+import { switched, trackedWith } from "./add-ons/switch.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -233,7 +233,8 @@ export class Session {
       refuseAny(this.saveSettings(tracker, secrets).refused);
     if (entry) saveBoard(root, { ...readBoard(root), [tracker]: entry });
     this.onboarding = false;
-    this.changeCompany((company) => ({ ...company, tracker }));
+    const { extensions } = this.options.available;
+    this.changeCompany((c) => trackedWith(c, extensions, tracker));
   }
 
   // An add-on switched on or off (switch.ts).

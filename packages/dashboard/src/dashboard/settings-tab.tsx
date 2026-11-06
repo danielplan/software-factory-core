@@ -1,7 +1,14 @@
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-import { onTrackers } from "@/add-ons/trackers";
+import { trackersOf } from "@/add-ons/trackers";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { TrackerChoice } from "@/connect/connect-page";
+import { ConnectedBoard } from "@/connect/connected-board";
 
 import type { FactoryState } from "./dashboard";
 import { GroupCard, sectionId, Topic } from "./settings-card";
@@ -79,11 +86,31 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
       title="Where work is tracked"
       about={`Now: ${now}. Where the ideas you agree to become work to build.`}
     >
-      <TrackerChoice
-        trackers={onTrackers(state.addOns)}
-        current={state.company.tracker}
-        onDone={setDone}
-      />
+      <ConnectedBoard state={state} />
+      {state.company.tracker === "none" ? (
+        <TrackerChoice
+          trackers={trackersOf(state.addOns)}
+          current={state.company.tracker}
+          onDone={setDone}
+        />
+      ) : (
+        <Collapsible className="grid gap-4">
+          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-sm font-medium">
+            Change where work is tracked
+            <ChevronDown
+              className="size-4 transition group-data-[state=open]:rotate-180"
+              aria-hidden
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <TrackerChoice
+              trackers={trackersOf(state.addOns)}
+              current={state.company.tracker}
+              onDone={setDone}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      )}
       {done && <p className="text-sm font-medium text-success">{done}</p>}
     </Topic>
   );

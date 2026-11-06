@@ -50,10 +50,9 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
   );
 }
 
-// The factory's own board, or a board of one of the tracker add-ons that
-// are on (those the page has steps for): the choices, and under the
-// chosen one its steps, each checked. Used right after setup and on
-// Settings.
+// The factory's own board, or a board of one of the tracker add-ons (those
+// the page has steps for): the choices, and under the chosen one its
+// steps, each checked. Used right after setup and on Settings.
 export function TrackerChoice({
   trackers,
   current,
@@ -77,6 +76,22 @@ export function TrackerChoice({
   ];
   const Steps = TRACKER_STEPS[choice];
   const [problem, setProblem] = useState<string | null>(null);
+  // A tracker that is off is switched on to connect its board.
+  const choose = (id: string) => {
+    setProblem(null);
+    const off = trackers.find((tracker) => tracker.id === id && !tracker.on);
+    if (!off) {
+      setChoice(id);
+      return;
+    }
+    post("/api/add-ons", { id, on: true })
+      .then(() => {
+        setChoice(id);
+      })
+      .catch((error: unknown) => {
+        setProblem(messageOf(error));
+      });
+  };
   const ownBoard = () => {
     setProblem(null);
     post("/api/connect/own-board")
@@ -102,7 +117,7 @@ export function TrackerChoice({
             title={one.title}
             text={one.text}
             onChoose={() => {
-              setChoice(one.id);
+              choose(one.id);
             }}
           />
         ))}

@@ -6,6 +6,17 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **Only the tracker in use is on.** Choosing where work is tracked switches
+  the other built-in trackers off (the factory's own board: all of them);
+  Settings still offers each, and switches one on when it is chosen.
+  Settings shows the connected board (a link, the label, which column each
+  stage is) and folds the choice away under "Change where work is
+  tracked".
+- **Add-ons in two parts**: "In use" (the board work is tracked on, the
+  add-ons on, the kits of the products) and "Not used", greyed. A board is
+  changed on Settings, not added here.
+- **The Board** fits all six stages in one row and says where work is
+  tracked, with a link.
 - **Setup is kept.** The setup conversation, its map, whether the factory
   is being built and Claude Code's conversation are kept in
   `factory/setup.json` once something was said or drawn, so setup goes on

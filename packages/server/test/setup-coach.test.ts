@@ -84,7 +84,7 @@ test("the coach plans on the map, builds the factory once the owner says so, and
           },
         ],
         ["configure", { addOns: ["rocket"] }],
-        ["configure", { tracker: "github", addOns: ["voice"] }],
+        ["configure", { tracker: "jira", addOns: ["voice"] }],
         ["configure", { settings: { jira: { JIRA_TOKEN: "secret-1" } } }],
         ["configure", { settings: { jira: { JIRA_PROJECT: "ACME" } } }],
         ["configure", { project: { name: "Acme Garden" } }],
@@ -186,7 +186,7 @@ test("the coach plans on the map, builds the factory once the owner says so, and
     assert.ok(made.mode === "factory");
     assert.equal(made.company.name, "Acme Garden");
     assert.equal(made.company.about, "Garden tools.");
-    assert.equal(made.company.tracker, "github");
+    assert.equal(made.company.tracker, "jira");
     // Just opened, connecting where work is tracked comes first.
     assert.equal(made.onboarding, true);
     assert.deepEqual(made.company.extensions, ["voice"]);

@@ -21,6 +21,7 @@ import { checkDocs } from "@software-factory/knowledge-base";
 import type { SetupProduct } from "../api.ts";
 import type { Board } from "../connect/board-file.ts";
 import type { BoardAsked, TrackerSetup } from "../connect/tracker-setup.ts";
+import { trackedWith } from "../add-ons/switch.ts";
 import { Refused } from "../refused.ts";
 import { themeProblems } from "../theme-check.ts";
 
@@ -122,11 +123,12 @@ function companyChanges(
     throw new Refused(
       `No add-on tracks work in ${tracker}: use none or one of ${trackers.join(", ")}.`,
     );
-  shop.saveCompany({
-    ...company,
-    ...(asked.tracker ? { tracker: asked.tracker } : {}),
-    ...(asked.addOns ? { extensions: asked.addOns } : {}),
-  });
+  const added = asked.addOns
+    ? { ...company, extensions: asked.addOns }
+    : company;
+  shop.saveCompany(
+    asked.tracker ? trackedWith(added, shop.extensions, asked.tracker) : added,
+  );
   return ["Saved where work is tracked and the add-ons."];
 }
 

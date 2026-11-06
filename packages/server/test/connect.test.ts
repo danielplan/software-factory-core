@@ -316,7 +316,8 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     assert.equal((await post("/api/connect/own-board", {})).status, 200);
     assert.equal(factory(session).company.tracker, "none");
 
-    // An add-on switched off answers nothing, and is not offered.
+    // On the factory's own board no tracker is on; one that is off
+    // answers nothing.
     saveCompany(join(project, "factory"), {
       ...factory(session).company,
       without: ["github"],
@@ -326,7 +327,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       factory(session)
         .addOns.filter((a) => a.on && a.tracker)
         .map((a) => a.id),
-      ["jira"],
+      [],
     );
     assert.match(
       await error(await post("/api/add-ons/github/sign-in", {})),
@@ -339,7 +340,8 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     const turn = (id: string, on: boolean) => post("/api/add-ons", { id, on });
     assert.equal((await turn("github", true)).status, 200);
     assert.equal((await turn("voice", true)).status, 200);
-    assert.deepEqual(factory(session).company.without, []);
+    // Jira stays off: on the factory's own board no tracker was on.
+    assert.deepEqual(factory(session).company.without, ["jira"]);
     assert.deepEqual(factory(session).company.extensions, ["voice"]);
     await turn("voice", false);
     assert.deepEqual(factory(session).company.extensions, []);

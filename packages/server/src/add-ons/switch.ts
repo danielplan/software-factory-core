@@ -23,3 +23,21 @@ export function switched(
   const others = company[list].filter((id) => id !== extension.id);
   return { ...company, [list]: listed ? [...others, extension.id] : others };
 }
+
+// Work tracked with one tracker from now on (or none: the factory's own
+// board): it is on, and the other built-in trackers are off, so only the
+// one in use shows as added.
+export function trackedWith(
+  company: Company,
+  extensions: Extension[],
+  tracker: Company["tracker"],
+): Company {
+  const trackers = new Set(
+    extensions.filter((e) => e.core && e.tracker).map((e) => e.id),
+  );
+  const without = [
+    ...company.without.filter((id) => !trackers.has(id)),
+    ...[...trackers].filter((id) => id !== tracker),
+  ];
+  return { ...company, tracker, without };
+}

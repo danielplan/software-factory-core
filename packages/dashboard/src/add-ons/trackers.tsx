@@ -12,7 +12,8 @@ export const TRACKER_STEPS: Record<
   ComponentType<{ onDone: (message: string) => void }> | undefined
 > = { github: GitHubSteps, jira: JiraSteps };
 
-// The add-ons that are on and track work: the boards to connect.
-export function onTrackers(addOns: AddOnView[]): AddOnView[] {
-  return addOns.filter((addOn) => addOn.on && addOn.tracker);
+// The add-ons that track work: the boards that can be connected. Only the
+// one in use is on; another is switched on when it is chosen.
+export function trackersOf(addOns: AddOnView[]): AddOnView[] {
+  return addOns.filter((addOn) => addOn.tracker);
 }
