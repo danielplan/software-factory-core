@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   existsSync,
   lstatSync,
+  readFileSync,
   mkdirSync,
   mkdtempSync,
   writeFileSync,
@@ -105,6 +106,7 @@ test("a copy is made from the base branch, never takes settings files, and links
   await git("clone", "--quiet", origin, source);
   mkdirSync(join(source, "app"));
   writeFileSync(join(source, "app", "README.md"), "An app");
+  writeFileSync(join(source, "app", ".env.example"), "PORT=3000\n");
   await git("-C", source, "add", ".");
   await git(
     "-C",
@@ -132,7 +134,13 @@ test("a copy is made from the base branch, never takes settings files, and links
   );
   await copy.prepareReadOnly();
   assert.equal(existsSync(join(copy.path, "app", "README.md")), true);
-  assert.equal(existsSync(join(copy.path, "app", ".env")), false);
+  // The owner's settings never come in; the copy's own start from the
+  // project's example, which stays as it is.
+  assert.equal(
+    readFileSync(join(copy.path, "app", ".env"), "utf8"),
+    "PORT=3000\n",
+  );
+  assert.equal(existsSync(join(copy.path, "app", ".env.example")), true);
   assert.equal(
     lstatSync(join(copy.path, "app", "pictures")).isSymbolicLink(),
     true,
@@ -143,6 +151,11 @@ test("a copy is made from the base branch, never takes settings files, and links
   assert.equal(existsSync(join(copy.path, "app", ".env.local")), false);
   writeFileSync(join(copy.path, "app", "NOTE.md"), "A change");
   const commit = await copy.commitAll("A draft");
+  // The example is not deleted in what the copy commits.
+  assert.equal(
+    await git("-C", copy.path, "show", "--name-status", "--format=", commit),
+    "A\tapp/NOTE.md\nA\tapp/pictures\n",
+  );
   assert.match(commit, /^[0-9a-f]{40}$/);
   assert.throws(
     () =>

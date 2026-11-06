@@ -25,7 +25,7 @@ export {
   type Factory,
   type KnownProduct,
 } from "./extensions/registry.ts";
-export { loadFactory } from "./load.ts";
+export { type InCopy, loadFactory } from "./load.ts";
 export {
   addressOf,
   envOf,

@@ -6,6 +6,18 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- **A working copy runs beside the owner's checkout.** Loading a factory
+  for a working copy (`loadFactory(root, available, { folder, data, shift })`)
+  moves each product's port by the copy's shift and adds the settings the
+  product gets in a copy: `copyEnv` in its `product.json`, where
+  `{port:<id>}` is a product's port in the copy, `{copy}` the copy's folder
+  and `{data}` a folder for its own data outside its code. A copy's own
+  `.env` files are made from the project's `.env.example` (never the
+  owner's) and are never committed; changes to the examples are.
+- Fixed: settings files in a working copy were not found (Node's glob does
+  not match `**/.env*`), and the `.env.example` files would have been
+  taken out of a copy.
+
 ## 0.3.0 (2026-11-06)
 
 **To upgrade:** pin `"software-factory":

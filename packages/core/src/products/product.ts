@@ -44,9 +44,16 @@ export const productSchema = z.object({
     .default({}),
   // The products it needs running (a phone app needs its backend).
   dependsOn: z.array(z.string()).default([]),
+  // Settings it gets in a working copy of the factory, so a copy runs on
+  // its own ports and with its own data, beside the owner's: "{port:<id>}"
+  // is that product's port in the copy, "{copy}" the copy's folder, "{data}"
+  // a folder for its own data outside its code (a database's files).
+  copyEnv: z.record(z.string(), z.string()).default({}),
 });
 
 export type ProductFile = z.infer<typeof productSchema>;
+// A product as it is given, before the defaults are filled in.
+export type ProductInput = z.input<typeof productSchema>;
 
 // A product as the factory knows it: its description, the folder of its code
 // and the folder its description is in.

@@ -158,6 +158,7 @@ function productOf(kit: Kit, fields: Partial<Product> = {}): Product {
     users: [],
     commands: {},
     dependsOn: [],
+    copyEnv: {},
     folder: "/code/shop",
     home: "/factory/products/shop",
     ...fields,

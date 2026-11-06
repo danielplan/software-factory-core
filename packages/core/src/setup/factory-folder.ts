@@ -18,7 +18,7 @@ import {
   companySchema,
 } from "../company/company.ts";
 import { PRODUCT_FILE, PRODUCTS_FOLDER } from "../products/find-products.ts";
-import { type ProductFile, productSchema } from "../products/product.ts";
+import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
 
 // Where the starting files come from: the knowledge base's template folder
@@ -124,7 +124,7 @@ export function saveCompany(root: string, company: Company): void {
 // can move together; code elsewhere keeps its whole path.
 export function addProduct(
   root: string,
-  product: Omit<ProductFile, "code"> & { folder: string },
+  product: Omit<ProductInput, "code"> & { folder: string },
   blueprint?: string,
 ): string {
   const home = join(root, PRODUCTS_FOLDER, product.id);

@@ -5,14 +5,23 @@
 // git does not keep (pictures, for example) can be linked in from the owner's
 // checkout; settings files (.env) never are: a job gets its own.
 
-import { existsSync, globSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
+import { dirname, join, sep } from "node:path";
 
 import { run } from "../processes.ts";
 
 // Settings files an older factory may have copied into a copy; removed when
-// found, so a job never runs with the owner's settings.
-const LEFT_OUT = /(^|\/)\.env(\.[\w.-]+)?$/;
+// found, so a job never runs with the owner's settings. The examples the
+// project keeps (.env.example) stay: a copy's own settings start from them.
+const LEFT_OUT = /(^|\/)\.env(\.(?!example$)[\w.-]+)?$/;
+const EXAMPLE = /(^|\/)\.env\.example$/;
 
 export type CopySettings = {
   // The owner's checkout, with the local-only files.
@@ -101,7 +110,16 @@ export class Workspace {
 
   // Commits everything as it is, even nothing, and returns the commit.
   async commitAll(message: string): Promise<string> {
-    await this.git("add", "--all");
+    // Everything but the copy's own settings (.env, made from the
+    // examples), which are never committed; changes to the examples are.
+    await this.git(
+      "add",
+      "--all",
+      "--",
+      ".",
+      ":(exclude,glob)**/.env",
+      ":(exclude).env",
+    );
     await this.gitWithoutHooks(
       "commit",
       "--quiet",
@@ -154,12 +172,15 @@ export class Workspace {
       mkdirSync(dirname(to), { recursive: true });
       symlinkSync(from, to, "junction");
     }
-    const settingsFiles = globSync("**/.env*", {
-      cwd: this.path,
-      exclude: (path) => ["node_modules", ".git"].includes(basename(path)),
-    });
+    const settingsFiles = settingsIn(this.path);
     for (const file of settingsFiles.filter((name) => LEFT_OUT.test(name)))
       rmSync(join(this.path, file), { force: true });
+    // A copy's own settings: from the project's examples, never the
+    // owner's; a product's copy settings (copyEnv) come on top.
+    for (const example of settingsFiles.filter((name) => EXAMPLE.test(name))) {
+      const own = join(this.path, dirname(example), ".env");
+      if (!existsSync(own)) copyFileSync(join(this.path, example), own);
+    }
   }
 
   private async git(...args: string[]): Promise<string> {
@@ -173,4 +194,17 @@ export class Workspace {
       env: { LEFTHOOK: "0" },
     });
   }
+}
+
+// The settings files (.env, .env.*) anywhere in a copy but in installed
+// packages and git's own folder, as paths inside it. (fs.globSync's "**"
+// does not find them on every Node version: the folder is read instead.)
+function settingsIn(folder: string): string[] {
+  return readdirSync(folder, { recursive: true, encoding: "utf8" })
+    .map((path) => path.split(sep).join("/"))
+    .filter(
+      (path) =>
+        /(^|\/)\.env(\.[\w.-]+)?$/.test(path) &&
+        !/(^|\/)(node_modules|\.git)\//.test(path),
+    );
 }
