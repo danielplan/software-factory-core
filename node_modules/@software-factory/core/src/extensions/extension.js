@@ -1,5 +1,5 @@
 // How the factory is extended. An extension adds abilities to the factory
-// (a tab, the GitHub runner); a kit teaches it one kind of product (an Expo
+// (a tab, a tracker); a kit teaches it one kind of product (an Expo
 // app): the usual commands, the parts that run such a product, and the rules
 // the agents follow when they work on one. Both say what they add through the
 // same few extension points, and use only what the core exports.
