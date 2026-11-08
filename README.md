@@ -1,7 +1,7 @@
-# Software factory 0.6.2
+# Software factory 0.7.0
 
 The core, built to install from this repository: in a project,
 
-    npm install -D github:<owner>/software-factory-core#release-0.6.2
+    npm install -D github:<owner>/software-factory-core#release-0.7.0
 
 then `npx software-factory`. Built from the main branch by scripts/build-release.mjs.
