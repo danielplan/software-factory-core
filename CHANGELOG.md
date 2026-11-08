@@ -4,9 +4,9 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
-## Unreleased
+## 0.5.0 (2026-11-08)
 
-**To upgrade:** pin the new release, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade names the new check command in `AGENTS.md`.
+**To upgrade:** pin `release-0.5.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade names the new check command in `AGENTS.md`.
 
 - **Cards depend on and replace each other**, on GitHub's own relations:
   `card depends <n> --on <m>` (GitHub's "blocked by"), `card replace <n> --by <m>`
