@@ -109,7 +109,10 @@ export class Workspace {
   }
 
   // A branch kept on GitHub (a card's build): continued from what GitHub
-  // has when it is there, otherwise started from the latest main.
+  // has when it is there, otherwise started from the latest main. Work this
+  // copy has that GitHub has not yet (a build stopped when the factory
+  // closed) is continued as it is, uncommitted changes too; when GitHub's
+  // branch went another way, that work is kept on a branch of its own.
   async prepareSharedBranch(branch: string): Promise<void> {
     await this.download();
     const remote = await this.git(
@@ -118,7 +121,12 @@ export class Workspace {
       "--list",
       `origin/${branch}`,
     );
-    const from = remote.trim() === "" ? this.settings.baseBranch : branch;
+    const onGitHub = remote.trim() !== "";
+    if (await this.continuesLocally(branch, onGitHub)) {
+      this.bringLocalFiles();
+      return;
+    }
+    const from = onGitHub ? branch : this.settings.baseBranch;
     await this.git(
       "checkout",
       "--quiet",
@@ -153,6 +161,47 @@ export class Workspace {
       "origin",
       `${commit}:refs/heads/${branch}`,
     );
+  }
+
+  // Whether the copy carries on with its own branch of a card: it holds
+  // everything GitHub's has, or GitHub has none and the copy was stopped on
+  // it before its first push. When GitHub's went another way, the copy's own
+  // commits are kept as <branch>-kept-<commit> before it is replaced.
+  private async continuesLocally(
+    branch: string,
+    onGitHub: boolean,
+  ): Promise<boolean> {
+    if ((await this.git("branch", "--list", branch)).trim() === "")
+      return false;
+    const current = (await this.git("branch", "--show-current")).trim();
+    if (!onGitHub) return current === branch;
+    const tip = (await this.git("rev-parse", branch)).trim();
+    const github = `origin/${branch}`;
+    if (!(await this.succeeds("merge-base", "--is-ancestor", github, tip))) {
+      const own = await this.git("rev-list", `${github}..${tip}`);
+      if (own.trim() !== "")
+        await this.git(
+          "branch",
+          "--force",
+          `${branch}-kept-${tip.slice(0, 7)}`,
+          tip,
+        );
+      return false;
+    }
+    if (current !== branch) {
+      await this.git("checkout", "--quiet", "--force", branch);
+      await this.git("clean", "--quiet", "-fd");
+    }
+    return true;
+  }
+
+  private async succeeds(...args: string[]): Promise<boolean> {
+    try {
+      await this.git(...args);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async download(): Promise<void> {

@@ -171,6 +171,30 @@ test("a copy is made from the base branch, never takes settings files, and links
   await builds.prepareSharedBranch("factory/card-2");
   assert.equal(existsSync(join(builds.path, "app", "NOTE.md")), false);
 
+  // A build stopped before its first push carries on as it was.
+  writeFileSync(join(builds.path, "app", "STARTED.md"), "Begun");
+  await builds.prepareSharedBranch("factory/card-2");
+  assert.equal(existsSync(join(builds.path, "app", "STARTED.md")), true);
+
+  // Work GitHub has not yet, committed or not, is continued after a restart.
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(existsSync(join(builds.path, "app", "NOTE.md")), true);
+  const own = await builds.commitAll("Not pushed yet");
+  writeFileSync(join(builds.path, "app", "HALF.md"), "Not committed");
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal((await git("-C", builds.path, "rev-parse", "HEAD")).trim(), own);
+  assert.equal(existsSync(join(builds.path, "app", "HALF.md")), true);
+
+  // When GitHub's branch went another way, GitHub's is taken and the copy's
+  // own commits stay on a branch of their own.
+  writeFileSync(join(copy.path, "app", "OTHER.md"), "From elsewhere");
+  await copy.pushCommit(await copy.commitAll("Elsewhere"), "factory/card-1");
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(existsSync(join(builds.path, "app", "HALF.md")), false);
+  assert.equal(existsSync(join(builds.path, "app", "OTHER.md")), true);
+  const kept = `factory/card-1-kept-${own.slice(0, 7)}`;
+  assert.equal((await git("-C", builds.path, "rev-parse", kept)).trim(), own);
+
   assert.throws(
     () =>
       new Workspace(
