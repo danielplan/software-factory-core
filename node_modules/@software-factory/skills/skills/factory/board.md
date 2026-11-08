@@ -18,6 +18,9 @@ same: the [factory](SKILL.md) skill and the skills it routes to.
 - Something you notice outside the card (a bug, a rough edge, an idea):
   name it in your answer under **Noticed**, in a line each, so the owner can
   make it a card; don't fix it on the side.
+- Your turn is the whole job: when it ends, the factory reads your last line,
+  and nothing you started keeps running. Run long checks in the foreground
+  and wait for them; never end with "I'll do it when this finishes".
 - End your answer with exactly one last line, `STATUS: <value>`, with one of
   the values your prompt lists. The factory reads it to move the card, so
   nothing may follow it.
@@ -71,8 +74,10 @@ by point. `STATUS: done`, or `STATUS: blocked` with one clear question.
 ## The checks before the pull request
 
 Before opening or updating the pull request, the factory runs every changed
-product's verify command itself. There is no pull request until every check
-passes. When some fail, you get what failed, up to three rounds:
+product's verify command itself. When some fail, you get what failed, up to
+three rounds; the pull request is opened once every check passes. If they
+are still red after that, the factory opens a draft pull request with what
+fails, and the card waits for the owner:
 
 - Every red check is yours to fix, also one that already failed before your
   change: a broken or out-of-date test is fixed like any other code.
