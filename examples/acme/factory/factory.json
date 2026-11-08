@@ -1,7 +1,0 @@
-{
-  "name": "Acme",
-  "about": "Sells garden tools online.",
-  "tracker": "none",
-  "kits": ["react-web-app", "nestjs-backend"],
-  "extensions": []
-}

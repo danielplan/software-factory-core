@@ -1,5 +1,0 @@
-// The programs of this computer the launcher asks, found on PATH on purpose:
-// the ones installed and set up here.
-
-// Lists open files and ports (macOS and Linux).
-export const LSOF = "lsof";
