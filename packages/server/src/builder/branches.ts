@@ -1,6 +1,6 @@
 // The branch a card is built on, and what the builder did put on it.
 
-import { run } from "@software-factory/core";
+import { run, stageAllButSettings } from "@software-factory/core";
 
 // The same branch a prototype of the card is pushed to while planning (the
 // plan skill), so the build continues it.
@@ -18,14 +18,7 @@ export async function commitAndPush(
   const git = (...args: string[]) =>
     run("git", ["-C", folder, ...args], { env: { LEFTHOOK: "0" } });
   if ((await git("status", "--porcelain")).trim() !== "") {
-    await git(
-      "add",
-      "--all",
-      "--",
-      ".",
-      ":(exclude,glob)**/.env",
-      ":(exclude).env",
-    );
+    await stageAllButSettings(folder);
     await git("commit", "--quiet", "-m", message);
   }
   await git(

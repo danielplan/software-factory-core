@@ -2,7 +2,7 @@
 // is on (`core`), and `software-factory upgrade` brings it to this one,
 // running the migrations of every release in between.
 
-export const CORE_VERSION = "0.6.0";
+export const CORE_VERSION = "0.6.1";
 
 // Where a project installs the core from: this repository, at the tag of a
 // release (release-<version>, scripts/publish-release.mjs).

@@ -4,6 +4,17 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.6.1 (2026-11-08)
+
+**To upgrade:** pin `release-0.6.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- Fixed: the builder could not save its work in a project whose `.gitignore`
+  ignores `.env` (git stopped with "The following paths are ignored"), so
+  every build failed at the end and its next try reset the copy. Saving a
+  prototype had the same fault. Both now add everything the plain way and
+  take any settings file out again (`stageAllButSettings`, in the core's
+  API).
+
 ## 0.6.0 (2026-11-08)
 
 **To upgrade:** pin `release-0.6.0`, `npm install`, `npx software-factory upgrade`.

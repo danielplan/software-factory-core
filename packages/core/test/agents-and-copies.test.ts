@@ -19,6 +19,7 @@ import {
   resultOf,
   retryWhileLocked,
   run,
+  stageAllButSettings,
   Workspace,
 } from "../src/index.ts";
 
@@ -208,5 +209,32 @@ test("a git lock is waited for, a few times; anything else is not", async () => 
   await assert.rejects(
     run("git", ["no-such-command"]),
     /git no-such-command failed/,
+  );
+});
+
+test("settings files are never staged, whether the project ignores them or not", async () => {
+  const folder = mkdtempSync(join(tmpdir(), "stage-"));
+  await run("git", ["init", "--quiet", folder]);
+  writeFileSync(join(folder, ".gitignore"), "/.env\n");
+  writeFileSync(join(folder, ".env"), "SECRET=1\n");
+  mkdirSync(join(folder, "app"));
+  writeFileSync(join(folder, "app", "README.md"), "The app\n");
+  writeFileSync(join(folder, "app", ".env.example"), "PORT=3000\n");
+  // The project ignores only the top one: this one is not ignored.
+  writeFileSync(join(folder, "app", ".env"), "SECRET=2\n");
+  await stageAllButSettings(folder);
+  const staged = await run("git", [
+    "-C",
+    folder,
+    "diff",
+    "--cached",
+    "--name-only",
+  ]);
+  assert.deepEqual(
+    staged
+      .trim()
+      .split("\n")
+      .sort((a, b) => a.localeCompare(b)),
+    [".gitignore", "app/.env.example", "app/README.md"],
   );
 });

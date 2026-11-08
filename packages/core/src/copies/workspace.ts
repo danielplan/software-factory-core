@@ -133,16 +133,7 @@ export class Workspace {
 
   // Commits everything as it is, even nothing, and returns the commit.
   async commitAll(message: string): Promise<string> {
-    // Everything but the copy's own settings (.env, made from the
-    // examples), which are never committed; changes to the examples are.
-    await this.git(
-      "add",
-      "--all",
-      "--",
-      ".",
-      ":(exclude,glob)**/.env",
-      ":(exclude).env",
-    );
+    await stageAllButSettings(this.path);
     await this.gitWithoutHooks(
       "commit",
       "--quiet",
@@ -217,6 +208,22 @@ export class Workspace {
       env: { LEFTHOOK: "0" },
     });
   }
+}
+
+// Stages everything in a copy but its own settings files (.env, made from
+// the examples), which are never committed; changes to the examples are.
+// Everything is added the plain way, which keeps to the project's
+// .gitignore, and a settings file the project does not ignore is taken out
+// again. (Leaving them out by name instead makes git refuse when the
+// project ignores them already.)
+export async function stageAllButSettings(folder: string): Promise<void> {
+  const git = (...args: string[]) => run("git", ["-C", folder, ...args]);
+  await git("add", "--all");
+  const staged = (await git("diff", "--cached", "--name-only", "-z"))
+    .split("\0")
+    .filter((path) => /(^|\/)\.env$/.test(path));
+  if (staged.length > 0)
+    await git("rm", "--cached", "--quiet", "--", ...staged);
 }
 
 // The settings files (.env, .env.*) anywhere in a copy but in installed

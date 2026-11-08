@@ -97,6 +97,7 @@ export {
 } from "./agents/events.ts";
 export {
   retryWhileLocked,
+  stageAllButSettings,
   Workspace,
   type CopySettings,
 } from "./copies/workspace.ts";
