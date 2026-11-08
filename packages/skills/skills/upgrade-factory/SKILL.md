@@ -3,7 +3,7 @@ name: upgrade-factory
 description: Bring this project's factory to a newer core with `npx software-factory upgrade`, then make the small changes it leaves under "Needs you", check, and hand the result over for review. Use when the person asks to update or upgrade the factory, or when the factory says a newer core is there.
 ---
 
-The upgrade command does what can be done by code: each release's migrations, the method's skills, the kits' MCP servers, the version in `factory/factory.json`. What it cannot decide alone it lists under "Needs you". This skill runs it and finishes those, so an upgrade is one request for the person.
+The upgrade command does what can be done by code: each release's migrations, the skills, the kits' MCP servers, the version in `factory/factory.json`. What it cannot decide alone it lists under "Needs you". This skill runs it and finishes those, so an upgrade is one request for the person.
 
 ## Steps
 

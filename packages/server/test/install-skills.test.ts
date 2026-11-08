@@ -12,7 +12,7 @@ import { test } from "node:test";
 
 import { installSkills } from "../src/install-skills.ts";
 
-// The method's skills, where the coding agents in the project find them.
+// The skills, where the coding agents in the project find them.
 
 function skills(): string {
   const from = mkdtempSync(join(tmpdir(), "skills-"));
@@ -25,7 +25,7 @@ function skills(): string {
 
 const read = (...path: string[]) => readFileSync(join(...path), "utf8");
 
-test("the method's skills go where Claude Code and Codex look, and are kept up to date", () => {
+test("the skills go where Claude Code and Codex look, and are kept up to date", () => {
   const from = skills();
   const project = mkdtempSync(join(tmpdir(), "project-"));
   // The project's own skill called plan, for Codex, is left alone.

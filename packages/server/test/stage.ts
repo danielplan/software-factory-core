@@ -14,7 +14,7 @@ import {
   defineKit,
 } from "@software-factory/core";
 import { templateFolder } from "@software-factory/knowledge-base";
-import { templatesFolder } from "@software-factory/method";
+import { templatesFolder } from "@software-factory/skills";
 
 import type { Cli } from "../src/add-ons/github/github.ts";
 import { githubAddOn } from "../src/add-ons/github/index.ts";

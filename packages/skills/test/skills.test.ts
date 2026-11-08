@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { listSkills, skillsFolder, templatesFolder } from "../src/index.ts";
 
-// The method as a company gets it: every skill named and described, the
+// The skills as a company gets them: every skill named and described, the
 // factory skill routing to each. (No company in it: the core's guard,
 // packages/core/test/no-company.test.ts, checks every file.)
 

@@ -14,7 +14,7 @@ const id = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
 // A piece of an agent's instructions: a Markdown file that is joined to what
 // that agent reads (the coach, the prototype maker, the builder), after the
-// core method's own.
+// core skills' own.
 const guideSchema = z.object({
   agent: id,
   title: z.string().min(1),

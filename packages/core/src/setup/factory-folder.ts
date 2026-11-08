@@ -1,6 +1,6 @@
 // Makes a project's factory folder (`factory/`, in the project's code):
 // the company file, the knowledge base from its template, the history, the
-// agents' ground rules from the method's template, and a description for
+// agents' ground rules from the skills package's template, and a description for
 // each product. The project's own AGENTS.md (and CLAUDE.md) point to it.
 
 import {
@@ -22,7 +22,7 @@ import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
 
 // Where the starting files come from: the knowledge base's template folder
-// (with context/ in it) and the method's AGENTS.md template.
+// (with context/ in it) and the skills package's AGENTS.md template.
 export type Templates = { knowledgeBase: string; agents: string };
 
 // The folder in a project that holds its factory.

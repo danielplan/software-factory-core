@@ -9,7 +9,7 @@ included, plugs in the same way.
 
 | Layer                      | Who owns it                              | What                                                                                                                                                 | Where                                                                                         |
 | -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                              | `packages/core`, `packages/method`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
+| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                              | `packages/core`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
 | **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, the board with its coach and builder, System and Factory tabs | to come                                                                                       |
 | **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                   | to come                                                                                       |
 | **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                              | to come                                                                                       |
@@ -24,8 +24,8 @@ One command, run in the project (`npx software-factory`, to come), opens
 the dashboard in the browser. Where the project has no factory yet, it
 starts with setting up: one conversation and one map, in two steps.
 **The setup coach** (Claude Code on this computer, signed in with the
-owner's own account, following the method's
-`packages/method/guides/setup-coach.md`) first plans the factory with the
+owner's own account, following the skills package's
+`packages/skills/guides/setup-coach.md`) first plans the factory with the
 owner. It explores the code with its own tools (never `.env` files) and
 draws how the system works on the map with one tool of its own, `draw`:
 small cards framed in areas, joined by arrows, with pictures from the
@@ -161,7 +161,7 @@ has no kit, a part listed twice, a dependency that is not there.
   factory is on (`core`). `software-factory upgrade`, run in the project,
   brings it to the core the command comes from: it runs the migrations of
   every release in between (`packages/server/src/upgrade/migrations.ts`),
-  refreshes what the factory owns in the project (the method's skills, the
+  refreshes what the factory owns in the project (the skills, the
   kits' MCP servers), writes the new version and runs the factory's checks.
   It says what it did and what it leaves to the owner; the owner reviews the
   changes and commits them. A company never edits the core; it uses an

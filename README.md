@@ -24,10 +24,10 @@ company is here: only what is true for any company.
        │ use only the core's API
   CORE (here)
        loading products and extensions, parts, settings, agents (Claude Code),
-       working copies, the method, the knowledge base and its checks
+       working copies, the skills, the knowledge base and its checks
 ```
 
-- **Core** (`packages/core`, `packages/method`, `packages/knowledge-base`):
+- **Core** (`packages/core`, `packages/skills`, `packages/knowledge-base`):
   the same in every company and never edited there.
 - **Extensions** add abilities to the factory; **kits** teach it a kind of
   product. Both are versioned here; a company chooses which it uses.
@@ -63,7 +63,7 @@ idea and sets it up there.
 | `packages/launcher/`       | Starts, watches and stops the parts                                                                                                                                                         |
 | `packages/server/`         | The local web server and the `software-factory` command; the trackers' settings (GitHub board, Jira Cloud)                                                                                  |
 | `packages/dashboard/`      | The web interface: the setup flow and the dashboard                                                                                                                                         |
-| `packages/method/`         | The method the agents follow, and ground rules for a company                                                                                                                                |
+| `packages/skills/`         | The skills the agents follow, and ground rules for a company                                                                                                                                |
 | `packages/knowledge-base/` | The knowledge base's template and its checks                                                                                                                                                |
 | `examples/acme/`           | An example company's factory folder, used by the tests                                                                                                                                      |
 

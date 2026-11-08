@@ -20,7 +20,7 @@ the first company's factory; they come here written for any company (see
 | Parts: start, watch and stop them; the System tab                                                                | yes                   |
 | Settings groups and the Settings tab                                                                             | yes                   |
 | Running Claude Code (kept open between turns), working copies                                                    | yes                   |
-| The method (skills the agents follow) and the knowledge base with its checks                                     | yes                   |
+| The skills the agents follow and the knowledge base with its checks                                              | yes                   |
 | The setup coach on a map; Build and Open the factory                                                             | yes                   |
 | The Add-ons page                                                                                                 | yes                   |
 | **The theme**: the dashboard takes the look of the company's own app (see below)                                 | to come               |

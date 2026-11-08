@@ -20,7 +20,7 @@ import { parseArgs } from "node:util";
 import { findFactory, projectOf, WarmClaude } from "@software-factory/core";
 import { allKits } from "@software-factory/kits";
 import { templateFolder } from "@software-factory/knowledge-base";
-import { guidesFolder, templatesFolder } from "@software-factory/method";
+import { guidesFolder, templatesFolder } from "@software-factory/skills";
 
 import { cardCommand } from "../src/cards/command.ts";
 import { topCommand } from "../src/top-commands.ts";

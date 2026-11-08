@@ -1,0 +1,16 @@
+{
+  "name": "@software-factory/skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The skills a software factory's agents follow: the factory loop, each step's skill, and the ground rules a company's AGENTS.md starts from.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "skills",
+    "templates",
+    "guides"
+  ]
+}

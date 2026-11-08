@@ -4,6 +4,15 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.5.2 (2026-11-08)
+
+**To upgrade:** pin `release-0.5.2`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- **"Method" is now called "skills"**, the word for what it is: the package
+  `packages/method` (`@software-factory/method`) is `packages/skills`
+  (`@software-factory/skills`), and the docs, the upgrade's report ("Refreshed
+  the skills") and the skills' own text say skills. Nothing else changes.
+
 ## 0.5.1 (2026-11-08)
 
 **To upgrade:** pin `release-0.5.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade brings the factory skill's new `board.md`.

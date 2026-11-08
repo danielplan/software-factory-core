@@ -1,6 +1,6 @@
 // Brings a company's factory to the core it runs on: the migrations of every
 // release after the factory's version, in order; then what the factory owns
-// in the project, refreshed every time (the method's skills, the kits' MCP
+// in the project, refreshed every time (the skills, the kits' MCP
 // servers); the new version in factory.json; and the factory's checks.
 
 import { join } from "node:path";
@@ -54,9 +54,7 @@ export async function upgradeFactory(
   }
   const skills = installSkills(project);
   if (skills.length > 0)
-    done.push(
-      `Refreshed the method's skills (${String(skills.length)} folders).`,
-    );
+    done.push(`Refreshed the skills (${String(skills.length)} folders).`);
   const used = new Set(companyOf(root).kits);
   const servers = addKitServers(
     project,

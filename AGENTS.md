@@ -33,7 +33,7 @@ here reach every company with its next upgrade, so they are made with care.
 ## Layout
 
 - `packages/core/`: the core's code (`src/`, tests in `test/`).
-- `packages/method/`: the method, as the files agents read (`skills/`).
+- `packages/skills/`: the skills, as the files agents read (`skills/`), their guides and templates.
 - `packages/knowledge-base/`: the knowledge base's structure (`template/`)
   and its checks (`bin/`, `src/`).
 - `examples/acme/`: the example company.

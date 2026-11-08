@@ -3,7 +3,7 @@
 //
 // The core's packages, compiled to JavaScript in their own layout (npm does
 // not run TypeScript from node_modules) and bundled inside the package, with
-// the dashboard built, the method's skills, templates and guides, the
+// the dashboard built, the skills, their templates and guides, the
 // knowledge base's template and the kits' rules. Its own `bin` is the
 // software-factory command. The folder is then committed to the release
 // branch and tagged release-<version> (docs/releasing.md).
@@ -26,12 +26,12 @@ const PACKAGES = [
   "kits",
   "knowledge-base",
   "launcher",
-  "method",
   "server",
+  "skills",
 ];
 // What each package needs besides its compiled code, as its own files.
 const ASSETS = {
-  method: ["skills", "templates", "guides"],
+  skills: ["skills", "templates", "guides"],
   "knowledge-base": ["template"],
   kits: ["rules"],
 };
@@ -127,7 +127,7 @@ writeFileSync(
       name: "software-factory",
       version,
       description:
-        "The software factory's core: the software-factory command, its dashboard and method.",
+        "The software factory's core: the software-factory command, its dashboard and skills.",
       type: "module",
       engines: { node: ">=24" },
       bin: { "software-factory": "bin/software-factory.js" },

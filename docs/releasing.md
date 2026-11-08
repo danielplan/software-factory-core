@@ -35,7 +35,7 @@ Setting up the factory pins the core in the project's `package.json`:
 Everyone with access to this repository then gets it with `npm install`,
 and runs `npx software-factory` (the factory, `card …`, `upgrade`). To move
 to a newer release: change the tag, `npm install`, then
-`npx software-factory upgrade` (the method's `upgrade-factory` skill does all
+`npx software-factory upgrade` (the `upgrade-factory` skill does all
 of it). A project without a `package.json` installs the same release
 globally: `npm install -g github:danielplan/software-factory-core#release-0.3.0`.
 

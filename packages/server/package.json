@@ -9,7 +9,7 @@
     "@software-factory/kits": "0.1.0",
     "@software-factory/knowledge-base": "0.1.0",
     "@software-factory/launcher": "0.1.0",
-    "@software-factory/method": "0.1.0",
+    "@software-factory/skills": "0.1.0",
     "culori": "4.0.2",
     "postcss": "8.5.30",
     "zod": "4.6.5"

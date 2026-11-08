@@ -41,7 +41,7 @@ export type SetupCoachOptions = {
   installables: Installable[];
   // Whether the factory it builds is there yet.
   made: () => boolean;
-  // The coach's instructions (the method's guides/setup-coach.md).
+  // The coach's instructions (guides/setup-coach.md in the skills package).
   guide: string;
   onChange: () => void;
   // The project being set up, where Claude Code starts; it reads the code
