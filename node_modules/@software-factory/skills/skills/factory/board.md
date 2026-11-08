@@ -2,7 +2,7 @@
 
 Read this when the factory's coach or builder started you: its prompt says
 so. The factory watches the board, gives you the card and its conversation,
-posts your final answer as a comment and moves the card. The method stays the
+posts your final answer as a comment and moves the card. The skills stay the
 same: the [factory](SKILL.md) skill and the skills it routes to.
 
 ## Always

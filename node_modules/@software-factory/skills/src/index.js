@@ -1,4 +1,4 @@
-// The method a software factory's agents follow: the skills (one folder each,
+// The skills a software factory's agents follow: the skills (one folder each,
 // with its SKILL.md), the templates a company's files start from, and the
 // coaches' guides. A company gets them as files, since agents read them as
 // files.
