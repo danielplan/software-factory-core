@@ -20,7 +20,7 @@ place for them, the reasons are lost and the same question is asked again.
 
 ## Decision Outcome
 
-Chosen: one numbered record per decision, in MADR, in `context/decisions/`
+Chosen: one numbered record per decision, in MADR, in `docs/decisions/`
 (`NNNN-title.md`, with `status`, `date` and `decision-makers`). A run that
 makes a choice links its record.
 

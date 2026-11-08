@@ -11,8 +11,8 @@ the owner's language and everyday words.
 ## Look first
 
 Before you ask, read what the factory knows: the knowledge base in
-`factory/context/` (start at its `index.md`), the products' blueprints in
-`factory/products/`, and the code they point to. Never `.env` files or
+`docs/` (start at its `index.md`), each product's blueprint next to its
+code (the folders `factory/factory.json` lists), and the code itself. Never `.env` files or
 anything secret. Ask only what they do not say.
 
 ## Draw the idea

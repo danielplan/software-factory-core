@@ -14,12 +14,12 @@ Go through the following four steps of the request: product, UX/UI, architecture
 ## How a session runs
 
 - **One step per message, in order.** Later steps depend on earlier ones. Go back if an earlier answer turns out wrong, and say so.
-- **Look first.** Read the existing plan, the knowledge base's entry page (context/index.md), the linked pages, the product's `product.json` and `BLUEPRINT.md`, and the code. Say in plain words what is already known, and only ask about what is open.
+- **Look first.** Read the existing plan, the knowledge base's entry page (`docs/index.md`), the linked pages, the product's `product.json` and `BLUEPRINT.md`, and the code. Say in plain words what is already known, and only ask about what is open.
 - **Show something to react to before asking.** Every message has a visual or a concrete example and ends with one question.
 - **Say what a thing is before naming it.** Plain description first, the technical term second, and only if they will meet it again.
 - **Coach a choice** when there is more than one reasonable answer: what it is in one sentence, the real options with their practical trade-off (as many as really exist), your recommendation, and a question. If they say "you decide", pick, say why, and record that the factory chose.
 - **Keep the agreed plan current.** When the person changes their mind, change the plan in place; what was tried and dropped goes under **Tried**, with why, never in between.
-- **Record each step in the run file once agreed.** Add only new promises (what must stay true) to the product's `BLUEPRINT.md`, and an accepted choice to the company's decisions (context/decisions/) as a numbered MADR record, as the knowledge base's page on recording a decision says. Choices already recorded there stay; mention them, do not reopen them.
+- **Record each step in the run file once agreed.** Add only new promises (what must stay true) to the product's `BLUEPRINT.md`, and an accepted choice to the company's decisions (`docs/decisions/`) as a numbered MADR record, as the knowledge base's page on recording a decision says. Choices already recorded there stay; mention them, do not reopen them.
 
 Each step below has a goal, the shape of the message, and when it counts as agreed.
 
@@ -56,7 +56,7 @@ Each step below has a goal, the shape of the message, and when it counts as agre
 
 **The message:**
 
-- A box-and-arrow picture with one sentence per part: what it is for and what it hands on. Say why it is split this way. Start from the conventions for the product's kind (its kit's rules, and the company's own in context/reference/conventions/) and the product's blueprint.
+- A box-and-arrow picture with one sentence per part: what it is for and what it hands on. Say why it is split this way. Start from the conventions for the product's kind (its kit's rules, and the company's own in docs/reference/conventions/) and the product's blueprint.
 - Only after the structure is agreed: the technology, as one or two coached choices.
 
 **Application foundations:** For a new product, substantial feature or technology change, inspect what exists and identify the supporting capabilities the agreed journeys need. Consider the relevant interaction, data, integration, access, reliability, accessibility, delivery and testing needs for the product and its platforms. Anticipate dependencies and gaps before implementation. Reuse suitable existing solutions, compare maintained tools where they solve a recurring problem, and explain material choices through their practical benefits and costs. This is a thinking aid, not a fixed checklist or a requirement to install a standard stack. Record accepted choices and justified deferrals in the run and, once the owner accepts them, on a decision page, preserving earlier decisions and authorizations.

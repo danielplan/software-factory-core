@@ -12,17 +12,19 @@ works in technical words.
 
 ## The factory you build
 
-It lives in the project, in `factory/`:
+Its settings live in the project's `factory/`; what it knows and its
+products' descriptions live in the project itself:
 
-- `factory.json`: the project's name and what it is, where work is
-  tracked, its add-ons and kits. Set it with `configure`.
-- `products/<id>/`: each product's `product.json` (set with `configure`)
-  and its `BLUEPRINT.md`, which you write: kind, what it is for, its
-  structure, its promises (what must stay true) and the commands that
-  check it.
-- `context/`: the knowledge base, made with the folder. Its
-  `how-to/maintain-the-knowledge-base.md` says where a fact goes and how a
-  page is written; follow it.
+- `factory/factory.json`: the project's name and what it is, where work is
+  tracked, its add-ons and kits, and its products' folders. Set it with
+  `configure`.
+- Each product's folder: its `product.json` (set with `configure`) and its
+  `BLUEPRINT.md`, which you write: kind, what it is for, its structure, its
+  promises (what must stay true) and the commands that check it.
+- `docs/`: one space for what the project knows: its own documentation and
+  the knowledge base's sections (made with the folder, beside what is
+  there). Its `how-to/maintain-the-knowledge-base.md` says where a fact goes
+  and how a page is written; follow it.
 - The project's `AGENTS.md` points to the factory (made with the folder).
 
 ## Plan on the map
@@ -126,14 +128,19 @@ from the map:
    with its kit's starter).
 2. Write each product's `BLUEPRINT.md`, and the knowledge base's pages
    from the map: what the project is and for whom, its workflows, what must
-   never happen, its words, and what is still open. Where the project's own
-   documentation already says it, link to that page from where the fact
-   would go and add only what it does not say; list that documentation on
-   the knowledge base's index, with what each page answers. Never copy it.
+   never happen, its words, and what is still open.
+3. **Make docs/ one space.** The project's own documentation joins the
+   knowledge base instead of standing beside it: sort each page into the
+   section it belongs to (a how-to, reference, explanation; dated material
+   into `sources/`), give it its "**Type:**" line, and link it from its
+   section's index. Where a page is long, split it by the questions it
+   answers, a screen or two each. Keep what a page says; move it, never
+   copy it, and set every link and written path that pointed at it
+   (`npx software-factory check-docs` finds the ones left).
    What you found only in an agent's own memory (such as Claude Code's
    memory for this project) goes into the knowledge base, saying where it
    came from: knowledge lives in the repository.
-3. The factory's look, when the project has an app people see: write
+4. The factory's look, when the project has an app people see: write
    `factory/theme.css` so the factory looks like part of the same family.
    Take the app's own colours, fonts, corners and shadows as they are, from
    its colour variables, its Tailwind theme and its design guide: never
@@ -150,7 +157,7 @@ from the map:
    project's own font files with `@font-face` and
    `url("/api/theme/file?path=<the file's path inside the project>")`.
    Without an app people see, write no theme.
-4. `configure` where work is tracked, add-ons, settings and tools to
+5. `configure` where work is tracked, add-ons, settings and tools to
    install, but only what the owner agreed to. Where work is tracked is
    `tracker`: `none` (the factory's own board), `github` (a GitHub board) or
    `jira` (Jira Cloud); these come with the factory, nothing to switch on.
@@ -158,7 +165,7 @@ from the map:
    with a title for a new one, and `addColumns` only when the owner agreed.
    If it cannot be connected here, say why: the owner connects it right
    after opening the factory.
-5. Read what `configure` says the factory's checks find (the theme's
+6. Read what `configure` says the factory's checks find (the theme's
    too), and put it right until they find nothing; `configure` with nothing
    runs them again.
 
