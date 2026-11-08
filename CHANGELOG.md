@@ -4,6 +4,19 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.4.1 (2026-11-08)
+
+**To upgrade:** pin `release-0.4.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- **The coach and the builder are switches with words**: a panel on the
+  Board tab, a row each, with what it does and what it is doing now
+  (shadcn's Switch), instead of two buttons that said "on" or "off".
+- **A card opens**: a panel with its stage, links to the card and its pull
+  request, and, while the coach or the builder works on it, its steps so
+  far. On the card itself a step shows in a few words ("Running a
+  command"), no longer the whole command running out of the card.
+- "Read it again" beside where the work is tracked reads the board now.
+
 ## 0.4.0 (2026-11-08)
 
 **To upgrade:** set `"software-factory":

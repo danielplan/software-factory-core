@@ -44,6 +44,8 @@ export type CardView = {
   stage: Stage | null;
   column: string;
   url: string;
+  // The pull request the builder opened for it, once it has.
+  pullRequest: string | null;
 };
 
 // What the builder is doing: on or off, the card it works on, its last
@@ -52,11 +54,17 @@ export type BuilderView = {
   on: boolean;
   working: { number: number; title: string; what: string } | null;
   activity: string | null;
+  // Its last steps on that card, oldest first.
+  steps: string[];
   problem: string | null;
 };
 
 // The coach answering in the cards: on or off, and the card it answers.
-export type CoachInCardsView = { on: boolean; working: number | null };
+export type CoachInCardsView = {
+  on: boolean;
+  working: number | null;
+  steps: string[];
+};
 
 export type WorkView = {
   cards: CardView[];

@@ -1,15 +1,15 @@
-import { Hammer, Loader2, MessagesSquare, RefreshCw } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 import { type IdeaView, post, type WorkView } from "@/api";
 import type { FactoryState } from "@/dashboard/dashboard";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 import { ConnectedBoard } from "@/connect/connected-board";
 
-import { BoardCard } from "./board-card";
+import { BoardCard, type Working } from "./board-card";
+import { BoardWorkers } from "./board-workers";
 import { IdeaCard } from "./idea-card";
 import { STAGES } from "./stages";
 
@@ -18,12 +18,12 @@ import { STAGES } from "./stages";
 // the column of its stage.
 const COLUMNS = STAGES.filter((stage) => stage.id !== "draft");
 
-const SMALL = "h-9 gap-1.5 px-3.5 text-[13px]";
+const SWITCHES = { coach: "/api/coach-in-cards", builder: "/api/builder" };
 
-// What the factory is doing: what it is busy with now, in a line beside
-// the title, with the builder's and the coach's switches; then every piece
-// of work in the column of how far it is. Before there is any, it says
-// where work starts.
+// What the factory is doing: with a connected board, who works it (the
+// coach and the builder, each with its switch); then every piece of work in
+// the column of how far it is. Before there is any, it says where work
+// starts.
 export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   const { work } = state;
   const [problem, setProblem] = useState<string | null>(null);
@@ -40,7 +40,15 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   const shown = problem ?? work?.problem ?? work?.builder.problem ?? null;
   return (
     <div className="grid gap-3">
-      <BoardHeader now={now} work={work} press={press} />
+      <BoardHeader now={now} work={work} />
+      {work && (
+        <BoardWorkers
+          work={work}
+          onSwitch={(who, on) => {
+            press(SWITCHES[who], { on });
+          }}
+        />
+      )}
       {shown && <ProblemBox title="That did not work" text={shown} />}
       {empty && (
         <p className="px-1 text-sm text-muted-foreground">
@@ -54,75 +62,63 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           : once you agree to its plan, it comes here.
         </p>
       )}
-      <div className="px-1">
-        <ConnectedBoard state={state} brief />
-      </div>
+      <WhereTracked
+        state={state}
+        onRead={() => {
+          press("/api/work/refresh");
+        }}
+      />
       <Columns ideas={state.ideas} work={work} />
     </div>
   );
 }
 
-type Press = (path: string, body?: unknown) => void;
-
-// The title, what the factory is busy with, and the builder's and the
-// coach's switches.
+// The title, and what the factory is busy with when no board is connected
+// (with one, the coach's and the builder's rows say it).
 function BoardHeader({
   now,
   work,
-  press,
-}: Readonly<{
-  now: { busy: boolean; text: string };
-  work: WorkView | null;
-  press: Press;
-}>) {
+}: Readonly<{ now: { busy: boolean; text: string }; work: WorkView | null }>) {
   return (
     <div className="flex flex-wrap items-center gap-3 px-1">
       <h1 className="text-[26px] font-semibold tracking-[-0.02em]">Board</h1>
-      <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm text-muted-foreground">
-        {now.busy ? (
-          <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
-        ) : (
-          <span
-            aria-hidden
-            className="size-2 shrink-0 rounded-full bg-muted-foreground/40"
-          />
-        )}
-        <span className="truncate" title={now.text}>
-          {now.text}
+      {!work && (
+        <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm text-muted-foreground">
+          {now.busy ? (
+            <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
+          ) : (
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-full bg-muted-foreground/40"
+            />
+          )}
+          <span className="truncate" title={now.text}>
+            {now.text}
+          </span>
         </span>
-      </span>
+      )}
+    </div>
+  );
+}
+
+// Where the work is tracked, and a way to read the board again now.
+function WhereTracked({
+  state,
+  onRead,
+}: Readonly<{ state: FactoryState; onRead: () => void }>) {
+  const { work } = state;
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
+      <ConnectedBoard state={state} brief />
       {work && (
-        <span className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            className={SMALL}
-            title="Read the board again"
-            aria-label="Read the board again"
-            onClick={() => {
-              press("/api/work/refresh");
-            }}
-          >
-            <RefreshCw className="size-3.5" aria-hidden />
-          </Button>
-          <Switch
-            label="Coach in cards"
-            hint="Answers what you write on a card in Planning, and moves it to Ready once you agree to its plan."
-            on={work.coach.on}
-            icon={<MessagesSquare className="size-3.5" aria-hidden />}
-            onPress={(on) => {
-              press("/api/coach-in-cards", { on });
-            }}
-          />
-          <Switch
-            label="Builder"
-            hint="Builds the cards in Ready, one at a time, in a copy of the code of its own, and opens a pull request for each. It never merges."
-            on={work.builder.on}
-            icon={<Hammer className="size-3.5" aria-hidden />}
-            onPress={(on) => {
-              press("/api/builder", { on });
-            }}
-          />
-        </span>
+        <Button
+          variant="ghost"
+          className="h-8 gap-1.5 px-2.5 text-[13px] text-muted-foreground"
+          onClick={onRead}
+        >
+          <RefreshCw className="size-3.5" aria-hidden />
+          Read it again
+        </Button>
       )}
     </div>
   );
@@ -185,48 +181,17 @@ function Columns({
   );
 }
 
-// A switch as a button that says whether it is on; its hint says what it
-// does.
-function Switch({
-  label,
-  hint,
-  on,
-  icon,
-  onPress,
-}: Readonly<{
-  label: string;
-  hint: string;
-  on: boolean;
-  icon: ReactNode;
-  onPress: (on: boolean) => void;
-}>) {
-  return (
-    <Button
-      variant="outline"
-      className={cn(
-        SMALL,
-        "transition-colors",
-        on &&
-          "border-transparent bg-[var(--tint)] text-white hover:bg-[var(--tint)]/90",
-      )}
-      title={hint}
-      aria-pressed={on}
-      onClick={() => {
-        onPress(!on);
-      }}
-    >
-      {icon}
-      {label}: {on ? "on" : "off"}
-    </Button>
-  );
-}
-
-// What the builder or the coach is doing with this card, if anything.
-function workingOn(work: WorkView | null, number: number): string | null {
+// Who works on this card now, if anyone.
+function workingOn(work: WorkView | null, number: number): Working | null {
   const building = work?.builder.working;
-  if (building?.number === number)
-    return work?.builder.activity ?? `The builder is ${building.what}…`;
-  if (work?.coach.working === number) return "The coach is answering…";
+  if (work && building?.number === number)
+    return {
+      who: "The builder",
+      what: building.what,
+      steps: work.builder.steps,
+    };
+  if (work?.coach.working === number)
+    return { who: "The coach", what: "planning", steps: work.coach.steps };
   return null;
 }
 

@@ -363,6 +363,14 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
   });
   assert.equal(pushed, "Hello");
 
+  // The card shows its pull request; the builder kept its steps.
+  await work.refresh();
+  assert.equal(
+    work.view().cards.find((c) => c.number === 2)?.pullRequest,
+    pr.url,
+  );
+  assert.deepEqual(work.view().builder.steps, []);
+
   // A review comment is answered on the same branch.
   pr.thread.push({
     author: "owner",

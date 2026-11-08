@@ -24,7 +24,8 @@ export type BoardWorkOptions = {
   now?: () => Date;
 };
 
-type Running = { job: Job; title: string; activity: string | null };
+type Running = { job: Job; title: string; steps: string[] };
+const STEPS = 40;
 const WHAT: Record<Job["kind"], string> = {
   plan: "planning",
   build: "building",
@@ -34,6 +35,8 @@ const WHAT: Record<Job["kind"], string> = {
 export class BoardWork {
   private readonly options: BoardWorkOptions;
   private cards: CardView[] = [];
+  // The pull requests the builder opened, by card, from the last reading.
+  private pullRequests = new Map<number, string>();
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -58,7 +61,8 @@ export class BoardWork {
             what: WHAT[building.job.kind],
           }
         : null,
-      activity: building?.activity ?? null,
+      activity: building?.steps.at(-1) ?? null,
+      steps: building?.steps ?? [],
       problem: this.laneProblem,
     };
     return {
@@ -69,6 +73,7 @@ export class BoardWork {
       coach: {
         on: this.on.chat,
         working: this.running.get("chat")?.job.number ?? null,
+        steps: this.running.get("chat")?.steps ?? [],
       },
     };
   }
@@ -132,6 +137,7 @@ export class BoardWork {
       stage,
       column,
       url,
+      pullRequest: this.pullRequests.get(number) ?? null,
     }));
     this.problem = null;
     this.read = (this.options.now?.() ?? new Date()).toISOString();
@@ -141,6 +147,7 @@ export class BoardWork {
   private async work(listed: Card[]): Promise<void> {
     const { cards, pullRequests } = this.options;
     const board = await snapshotOf(listed, cards, pullRequests);
+    this.notePullRequests(board);
     const busy = new Set([...this.running.values()].map((r) => r.job.number));
     const decision = decide(board, busy);
     for (const move of decision.moves)
@@ -156,17 +163,28 @@ export class BoardWork {
     }
   }
 
+  // The pull requests the cards have, shown on them from now on.
+  private notePullRequests(board: BoardCard[]): void {
+    for (const card of board)
+      if (card.pullRequest)
+        this.pullRequests.set(card.number, card.pullRequest.url);
+    this.cards = this.cards.map((c) => ({
+      ...c,
+      pullRequest: this.pullRequests.get(c.number) ?? null,
+    }));
+  }
+
   private async move(move: { number: number; stage: Stage }) {
     await this.options.cards.move(move.number, move.stage);
   }
 
   private begin(job: Job, card: BoardCard): void {
-    const running: Running = { job, title: card.title, activity: null };
+    const running: Running = { job, title: card.title, steps: [] };
     this.running.set(job.lane, running);
     this.options.onChange();
     void this.options.jobs
       .run(job, card, (line) => {
-        running.activity = line;
+        running.steps = [...running.steps, line].slice(-STEPS);
         this.options.onChange();
       })
       .catch((error: unknown) => {
