@@ -48,7 +48,7 @@ Start with the `factory` skill. It opens a run file in `runs/NNN-short-name.md` 
 
 - `context/index.md` is the knowledge base's entry point, organised with Diátaxis: `tutorials/` (learn by doing), `how-to/` (steps for a task), `reference/` (the products, `features/` one page per product feature, `conventions/` one page per kind of product, `lessons/` sorted the same way), `explanation/` (product intent and system context). `context/decisions/` holds numbered MADR decision records. `context/sources/` is immutable: add a newly dated source instead of editing. Runs are the only history.
 - Each product has a `BLUEPRINT.md`: its kind, structure, promises (what must stay true; ask before changing) and checks.
-- After changing Markdown pages, run the knowledge base's checks.
+- After changing Markdown pages, run the knowledge base's checks (`npx software-factory check-docs`).
 - The git hooks enforce the checks on commit and push; never bypass them with `--no-verify`.
 
 <!-- company: how to set up a fresh copy and run each product, or a link to the how-to page that says it. -->
