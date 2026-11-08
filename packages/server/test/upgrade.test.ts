@@ -137,7 +137,7 @@ test("an old factory is brought to the core's version, step by step", async () =
     extensions,
   });
   assert.equal(again.from, CORE_VERSION);
-  assert.deepEqual(again.done, ["Refreshed the skills (14 folders)."]);
+  assert.deepEqual(again.done, ["Refreshed the skills (16 folders)."]);
 });
 
 test("what a migration cannot do alone is left to the owner, and said", async () => {
@@ -320,5 +320,5 @@ test("0.6.0 moves the knowledge base into the project's docs and the products ne
     kits: allKits,
     extensions,
   });
-  assert.deepEqual(again.done, ["Refreshed the skills (14 folders)."]);
+  assert.deepEqual(again.done, ["Refreshed the skills (16 folders)."]);
 });

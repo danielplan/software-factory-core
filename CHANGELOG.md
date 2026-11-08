@@ -4,6 +4,14 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.8.0 (2026-11-08)
+
+**To upgrade:** pin `release-0.8.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand. The new `prototype` skill is put in `.claude/skills` and `.agents/skills` by `software-factory upgrade`. A project that already has a skill of its own called `prototype` keeps it (the factory never overwrites a skill it did not put there): delete that folder, then upgrade, to take the core's.
+
+- New: the `prototype` skill: how the coach makes, runs and shows a clickable prototype of a card in the real product, in a copy of the code of its own. The `plan` and `factory` skills link to it.
+- New: `software-factory prototype <number>` makes the card's copy (a git worktree on `factory/issue-<number>`, in `<project>-prototypes/`, beside the project) and runs the project's own start command in it. `--stop` and `--remove` stop it and delete the copy (the branch stays); `list` shows the copies; other options go on to the start command. The commands are named in the company file:
+  `"prototype": { "start": "…", "stop": "…", "remove": "…" }` (`stop` and `remove` are optional). Each runs in the copy with `FACTORY_CARD`, `FACTORY_BRANCH`, `FACTORY_PROJECT` and `FACTORY_COPY` set. Without `start`, the copy is made and nothing runs in it.
+
 ## 0.7.1 (2026-11-08)
 
 **To upgrade:** pin `release-0.7.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.

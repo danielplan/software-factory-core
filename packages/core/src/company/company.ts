@@ -33,6 +33,18 @@ export const companySchema = z.object({
   // product.json and BLUEPRINT.md. None: a factory from before 0.6.0, whose
   // products are described in its own products/ folder.
   products: z.array(z.string().min(1)).optional(),
+  // How the project runs a card's prototype in its own copy of the code. The
+  // core makes the copy and keeps track of it (`software-factory prototype`);
+  // these commands, run in the copy, start and stop what the project needs
+  // (its servers, its database, made-up data). None: the copy is made, and
+  // the project's own commands are not run.
+  prototype: z
+    .object({
+      start: z.string().min(1),
+      stop: z.string().min(1).optional(),
+      remove: z.string().min(1).optional(),
+    })
+    .optional(),
 });
 
 export type Company = z.infer<typeof companySchema>;

@@ -9,6 +9,7 @@ import { parseArgs } from "node:util";
 import { findFactory } from "@software-factory/core";
 
 import { CARD_USAGE } from "./cards/command.ts";
+import { PROTOTYPE_USAGE } from "./prototypes/command.ts";
 import { checkKnowledge } from "./knowledge-check.ts";
 
 export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
@@ -17,7 +18,8 @@ software-factory new <name>                  a folder for a new idea, set up the
 software-factory check-docs                  the knowledge base's checks (docs/)
 software-factory upgrade                     the project's factory, to this core's version
 software-factory help                        this help
-${CARD_USAGE}`;
+${CARD_USAGE}
+${PROTOTYPE_USAGE}`;
 
 type Out = (line: string) => void;
 
@@ -43,7 +45,10 @@ export async function topCommand(
   }
   if (first === "check-docs") return checkDocsHere(from, out);
   // Starting the factory, and the commands answered elsewhere (card, upgrade).
-  if (first === undefined || ["new", "card", "upgrade"].includes(first))
+  if (
+    first === undefined ||
+    ["new", "card", "prototype", "upgrade"].includes(first)
+  )
     return null;
   if (existsSync(resolve(from, first))) return null;
   out(`There is no command or folder “${first}”.\n\n${USAGE}`);

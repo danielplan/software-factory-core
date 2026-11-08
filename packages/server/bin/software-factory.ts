@@ -2,6 +2,7 @@
 // software-factory [folder] [--port <port>] [--no-open]
 // software-factory new <name>
 // software-factory card … (the board's cards, for planning in a coding agent)
+// software-factory prototype … (a card's prototype, in its own copy of the code)
 // software-factory upgrade (the project's factory, to this core's version)
 // software-factory check-docs (the knowledge base's checks) · help
 //
@@ -23,6 +24,7 @@ import { templateFolder } from "@software-factory/knowledge-base";
 import { guidesFolder, templatesFolder } from "@software-factory/skills";
 
 import { cardCommand } from "../src/cards/command.ts";
+import { prototypeCommand } from "../src/prototypes/command.ts";
 import { topCommand } from "../src/top-commands.ts";
 import { computerTools } from "../src/installables.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
@@ -41,6 +43,10 @@ const OPENER: Partial<Record<NodeJS.Platform, string>> = {
 // The board's cards, for the coding agents: answered here, then done.
 if (process.argv[2] === "card")
   process.exit(await cardCommand(process.argv.slice(3)));
+
+// A card's prototype, in its own copy of the code: answered here, then done.
+if (process.argv[2] === "prototype")
+  process.exit(await prototypeCommand(process.argv.slice(3)));
 
 // Help, the knowledge base's checks, and words that are no command: answered
 // here, then done (never taken for a folder to start the factory in).

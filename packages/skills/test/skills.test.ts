@@ -12,6 +12,7 @@ import { listSkills, skillsFolder, templatesFolder } from "../src/index.ts";
 
 const LOOP = [
   "plan",
+  "prototype",
   "build-test-first",
   "review-structure",
   "show-result",
