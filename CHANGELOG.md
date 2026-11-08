@@ -4,6 +4,29 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.6.0 (2026-11-08)
+
+**To upgrade:** pin `release-0.6.0`, `npm install`, `npx software-factory upgrade`.
+The upgrade moves files (below) and sets the links; then sort the project's own
+docs into the knowledge base's sections, which `npx software-factory check-docs`
+lists.
+
+- **One space for what a project knows**: the knowledge base is the project's
+  `docs/`, beside its own documentation, no longer `factory/context/`. Setup
+  copies the sections in without overwriting a page that is there, and the setup
+  coach sorts the project's own pages into them. `check-docs` checks `docs/` as
+  one knowledge base: every page in a section with its "**Type:**" line.
+- **Products describe themselves next to their code**: `product.json` and
+  `BLUEPRINT.md` sit in the product's folder, and `factory.json` lists the
+  folders (`"products": ["apps/web", …]`); `code` is no longer needed. A factory
+  from before 0.6.0 still loads the old way until it is upgraded.
+- **The upgrade moves both**: `factory/context/*` into `docs/`, each
+  `factory/products/<id>/` next to its code, and every Markdown link and written
+  path to the old places is set to the new ones. A page that is already in
+  `docs/` with other text stays where it was, for the owner to merge.
+- **Long pages get a hint**: a knowledge-base page over 1,200 words is named as
+  one to split (a screen or two each); a hint doesn't fail the check.
+
 ## 0.5.3 (2026-11-08)
 
 **To upgrade:** pin `release-0.5.3`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
