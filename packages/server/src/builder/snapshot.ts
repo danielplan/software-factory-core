@@ -38,6 +38,7 @@ async function boardCard(
     stage: card.stage,
     closed: card.closed,
     agreedInText: false,
+    waitsFor: card.waitsFor,
     thread: [],
     pullRequest: null,
   };

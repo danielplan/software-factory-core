@@ -3,6 +3,7 @@
 // software-factory new <name>
 // software-factory card … (the board's cards, for planning in a coding agent)
 // software-factory upgrade (the project's factory, to this core's version)
+// software-factory check-docs (the knowledge base's checks) · help
 //
 // Run in a project, starts its factory on this computer and opens it in the
 // browser. The factory lives in the project, in its factory/ folder, found
@@ -22,6 +23,7 @@ import { templateFolder } from "@software-factory/knowledge-base";
 import { guidesFolder, templatesFolder } from "@software-factory/method";
 
 import { cardCommand } from "../src/cards/command.ts";
+import { topCommand } from "../src/top-commands.ts";
 import { computerTools } from "../src/installables.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/server.ts";
@@ -39,6 +41,11 @@ const OPENER: Partial<Record<NodeJS.Platform, string>> = {
 // The board's cards, for the coding agents: answered here, then done.
 if (process.argv[2] === "card")
   process.exit(await cardCommand(process.argv.slice(3)));
+
+// Help, the knowledge base's checks, and words that are no command: answered
+// here, then done (never taken for a folder to start the factory in).
+const answered = await topCommand(process.argv.slice(2));
+if (answered !== null) process.exit(answered);
 
 // The add-ons that ship with the factory.
 const addOns = [githubAddOn(), jiraAddOn()];

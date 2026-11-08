@@ -76,6 +76,17 @@ export const MIGRATIONS: Migration[] = [
         "The agents' ground rules call the pinned core with npx.",
       ),
   },
+  {
+    version: "0.5.0",
+    about: "The agents' ground rules name the knowledge base's check command",
+    run: ({ root }) =>
+      replaceIn(
+        join(root, "AGENTS.md"),
+        /run the knowledge base's checks\.(?! \(`npx)/,
+        "run the knowledge base's checks (`npx software-factory check-docs`).",
+        "The agents' ground rules name the command that checks the knowledge base.",
+      ),
+  },
 ];
 
 // A product described as other code that a kit now recognises becomes that

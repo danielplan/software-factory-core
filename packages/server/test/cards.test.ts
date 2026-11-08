@@ -35,6 +35,9 @@ function pretendGitHub() {
     [3, { title: "Invoices in euros", body: "As written.", column: "Backlog" }],
   ]);
   const said: string[] = [];
+  // Which card waits for which (GitHub's "blocked by"), and which are closed.
+  const blockedBy = new Map<number, number[]>();
+  const closed = new Set<number>();
   const says = (out: unknown) =>
     Promise.resolve({
       code: 0,
@@ -51,6 +54,13 @@ function pretendGitHub() {
         url: `https://github.com/acme/shop/issues/${String(number)}`,
         repository: { nameWithOwner: "acme/shop" },
         labels: { nodes: [] },
+        state: closed.has(number) ? "CLOSED" : "OPEN",
+        blockedBy: {
+          nodes: (blockedBy.get(number) ?? []).map((n) => ({
+            number: n,
+            state: closed.has(n) ? "CLOSED" : "OPEN",
+          })),
+        },
       },
     })),
     // Another repository's issue and a draft are not the factory's cards.
@@ -68,7 +78,28 @@ function pretendGitHub() {
     { id: "item-d", fieldValueByName: null, content: null },
   ];
   // The board through GitHub's API: its items, its Status field, a move.
+  const node = (n: number) => ({
+    number: n,
+    title: issues.get(n)?.title ?? "",
+    state: closed.has(n) ? "CLOSED" : "OPEN",
+  });
   const api = (query: string) => {
+    if (query.includes("repository(owner:")) {
+      const n = Number(/issue\(number: (\d+)\)/.exec(query)?.[1]);
+      const blocking = [...blockedBy]
+        .filter(([, on]) => on.includes(n))
+        .map(([waiting]) => waiting);
+      return says({
+        data: {
+          repository: {
+            issue: {
+              blockedBy: { nodes: (blockedBy.get(n) ?? []).map(node) },
+              blocking: { nodes: blocking.map(node) },
+            },
+          },
+        },
+      });
+    }
     if (query.includes("updateProjectV2ItemFieldValue")) {
       const item = /itemId: "item-(\d+)"/.exec(query)?.[1];
       const option = /singleSelectOptionId: "(o\d)"/.exec(query)?.[1];
@@ -93,7 +124,8 @@ function pretendGitHub() {
         comments: [{ author: { login: "ana" }, body: "Euros only?" }],
       });
     if (verb === "edit" && found) found.body = value("--body");
-    if (verb === "comment") said.push(value("--body"));
+    if (verb === "comment") said.push(`#${String(number)}: ${value("--body")}`);
+    if (verb === "close") closed.add(Number(number));
     if (verb === "create") {
       issues.set(9, { title: value("--title"), body: "", column: "" });
       return says("https://github.com/acme/shop/issues/9\n");
@@ -103,7 +135,19 @@ function pretendGitHub() {
   const run = (args: string[]) => {
     const [first, second] = args;
     if (first === "api" && second === "user") return says("octo\n");
-    if (first === "api") return api(args[3] ?? "");
+    if (first === "api" && second === "graphql") return api(args[3] ?? "");
+    // An issue's id, and a new "blocked by" relation between two issues.
+    const id = /issues\/(\d+)$/.exec(second ?? "");
+    if (first === "api" && id) return says(`10${id[1] ?? ""}\n`);
+    const blocked = /issues\/(\d+)\/dependencies\/blocked_by$/.exec(
+      args[3] ?? "",
+    );
+    if (first === "api" && blocked) {
+      const waiting = Number(blocked[1]);
+      const on = Number(/issue_id=10(\d+)/.exec(args.join(" "))?.[1]);
+      blockedBy.set(waiting, [...(blockedBy.get(waiting) ?? []), on]);
+      return says("{}");
+    }
     if (first === "issue") return issue(args);
     if (first === "project" && second === "item-add") return says("{}");
     return Promise.resolve({
@@ -116,7 +160,7 @@ function pretendGitHub() {
     run,
     start: () => ({ answer: () => {}, done: Promise.resolve(1) }),
   };
-  return { cli, issues, said };
+  return { cli, issues, said, closed };
 }
 
 // A project with its factory on the stand-in board, and an origin (a bare
@@ -191,7 +235,7 @@ test("a coding agent plans a card with the owner and puts it in ready, with its 
     /No agreed plan yet\.\n\nAs written\.\n\n— ana:\nEuros only\?/,
   );
   await card(folder, github.cli, "comment", "3", "--body", "Yes, euros only.");
-  assert.deepEqual(github.said, ["Yes, euros only."]);
+  assert.deepEqual(github.said, ["#3: Yes, euros only."]);
 
   const plan = join(folder, "plan.md");
   writeFileSync(plan, "Show totals in euros.\n");
@@ -232,7 +276,7 @@ test("a coding agent plans a card with the owner and puts it in ready, with its 
   );
   assert.match(
     (await card(folder, github.cli, "list", "ready")).said,
-    /^#3 {2}To do/,
+    /^#3 {2}Ready/,
   );
 });
 
@@ -259,5 +303,53 @@ test("a new card lands in the backlog; mistakes are said plainly", async () => {
   assert.match(
     (await card(mkdtempSync(join(tmpdir(), "none-")), github.cli, "list")).said,
     /no factory here/,
+  );
+});
+
+test("cards depend on and replace each other; something noticed becomes a card that links back", async () => {
+  const github = pretendGitHub();
+  const folder = project();
+  github.issues.set(4, {
+    title: "Totals per month",
+    body: "",
+    column: "Ready",
+  });
+  const said = async (...args: string[]) =>
+    (await card(folder, github.cli, ...args)).said;
+
+  assert.equal(
+    await said("depends", "4", "--on", "3"),
+    "#4 now depends on #3: it is built after it.",
+  );
+  assert.match(
+    await said("list"),
+    /#4 {2}Ready {2}Totals per month {2}\(waits for #3\)/,
+  );
+  assert.match(await said("show", "4"), /Depends on: #3 Invoices in euros/);
+  assert.match(await said("show", "3"), /Needed by: #4 Totals per month/);
+  assert.match(
+    await said("depends", "4", "--on", "4"),
+    /can't depend on itself/,
+  );
+
+  // Something noticed while working on #3 becomes its own card, linked both ways.
+  assert.match(
+    await said("new", "Rounding", "is", "off", "--found-while", "3"),
+    /^#9 {2}Backlog {2}Rounding is off/,
+  );
+  assert.ok(github.said.includes("#3: Noticed while working on this: #9."));
+
+  // #3 is replaced by #4: closed, with a note on both, and #4 no longer waits.
+  assert.equal(
+    await said("replace", "3", "--by", "4"),
+    "#3 is closed: #4 does it now. Both say so.",
+  );
+  assert.ok(github.closed.has(3));
+  assert.ok(github.said.includes("#3: Replaced by #4, which does this now."));
+  assert.ok(github.said.includes("#4: Replaces #3."));
+  assert.doesNotMatch(await said("list"), /waits for/);
+  assert.match(
+    await said("show", "4"),
+    /Depends on: #3 Invoices in euros \(done\)/,
   );
 });

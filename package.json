@@ -12,8 +12,8 @@
   },
   "scripts": {
     "prepare": "lefthook install",
-    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --test \"packages/*/test/**/*.test.ts\"",
-    "test:coverage": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --experimental-test-coverage --test-coverage-include=\"packages/*/src/**\" --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=90 --test \"packages/*/test/**/*.test.ts\"",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --import ./scripts/test-setup.mjs --test \"packages/*/test/**/*.test.ts\"",
+    "test:coverage": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --import ./scripts/test-setup.mjs --experimental-test-coverage --test-coverage-include=\"packages/*/src/**\" --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=90 --test \"packages/*/test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit && tsc --noEmit -p packages/dashboard",
     "lint": "eslint --max-warnings 0 packages *.mjs",
     "deadcode": "knip",

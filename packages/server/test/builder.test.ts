@@ -113,6 +113,7 @@ function pretendBoard(kept: Map<number, Kept>) {
           url: `https://github.com/o/r/issues/${String(number)}`,
           labels: [],
           closed: c.closed ?? false,
+          waitsFor: [],
         })),
       ),
     show: async (number) => {
@@ -124,6 +125,8 @@ function pretendBoard(kept: Map<number, Kept>) {
         body: c.body,
         agreed: planOf(c.body) !== null,
         comments: c.comments,
+        dependsOn: [],
+        neededBy: [],
       };
     },
     move: (number, stage) => {
@@ -139,6 +142,8 @@ function pretendBoard(kept: Map<number, Kept>) {
       return Promise.resolve();
     },
     create: () => Promise.reject(new Error("not here")),
+    dependOn: () => Promise.reject(new Error("not here")),
+    replace: () => Promise.reject(new Error("not here")),
     writePlan: (number, plan) => {
       const c = kept.get(number);
       if (c) c.body = withPlan(c.body, plan);

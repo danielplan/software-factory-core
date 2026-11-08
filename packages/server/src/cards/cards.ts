@@ -19,13 +19,21 @@ export type Card = {
   labels: string[];
   // Closed where it is tracked.
   closed: boolean;
+  // The open cards it waits for (depends on): it is built after them.
+  waitsFor: number[];
 };
+
+// Another card, as a relation names it.
+export type Related = { number: number; title: string; closed: boolean };
 
 export type CardDetail = Card & {
   body: string;
   // Whether the card carries an agreed plan.
   agreed: boolean;
   comments: { author: string; body: string; at: string }[];
+  // The cards it depends on, and the cards that depend on it.
+  dependsOn: Related[];
+  neededBy: Related[];
 };
 
 export type Cards = {
@@ -36,6 +44,12 @@ export type Cards = {
   create: (title: string, body: string) => Promise<Card>;
   // Writes the agreed plan into the card (replacing an earlier one).
   writePlan: (number: number, plan: string) => Promise<void>;
+  // The card is built only after the other one (where it is tracked: GitHub's
+  // "blocked by").
+  dependOn: (number: number, on: number) => Promise<void>;
+  // The card is not needed any more because the other one does it: closed,
+  // with a note on both, so it stays findable.
+  replace: (number: number, by: number) => Promise<void>;
 };
 
 const START = "<!-- factory:agreed-plan -->";
@@ -57,6 +71,12 @@ export function planOf(body: string): string | null {
   const end = body.indexOf(END);
   if (at < 0 || end <= at) return null;
   return body.slice(at + START.length, end).trim();
+}
+
+// The word the factory uses for a stage when it speaks of it (the board's
+// column may be named differently): "ready" for the cards the builder takes.
+export function stageWord(stage: Stage): string {
+  return stage === "todo" ? "Ready" : STAGE_COLUMNS[stage].title;
 }
 
 // A stage as the owner or an agent names it: its id ("todo"), its title

@@ -202,3 +202,37 @@ test("a factory on 0.2.0 calls the pinned core with npx in its ground rules", as
     "Work comes from its cards: `npx software-factory card` lists them (`npx software-factory card help`).\n",
   );
 });
+
+test("a factory on 0.4.1 names the knowledge base's check command in its ground rules", async () => {
+  const { project, root } = oldFactory();
+  const rules = join(root, "AGENTS.md");
+  write(
+    rules,
+    "- After changing Markdown pages, run the knowledge base's checks.\n",
+  );
+  write(
+    join(root, "factory.json"),
+    JSON.stringify({
+      name: "Acme",
+      tracker: "github",
+      core: "0.4.1",
+      kits: ["sveltekit-app"],
+      without: ["jira"],
+    }),
+  );
+  const result = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.ok(
+    result.done.includes(
+      "The agents' ground rules name the command that checks the knowledge base.",
+    ),
+  );
+  assert.equal(
+    readFileSync(rules, "utf8"),
+    "- After changing Markdown pages, run the knowledge base's checks (`npx software-factory check-docs`).\n",
+  );
+});

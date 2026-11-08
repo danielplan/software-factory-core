@@ -13,16 +13,28 @@ import { findFactory } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
 import { type Cli, realCli } from "../add-ons/github/github.ts";
-import { STAGE_COLUMNS } from "../connect/stages.ts";
 import { Refused } from "../refused.ts";
-import { type Card, type Cards, stageNamed } from "./cards.ts";
+import {
+  type Card,
+  type Cards,
+  type Related,
+  stageNamed,
+  stageWord,
+} from "./cards.ts";
 import { cardsFor } from "./cards-for.ts";
 
 export const CARD_USAGE = `software-factory card list [stage]          the board's cards, with their stage
 software-factory card show <number>          a card: its text, comments, agreed plan
-software-factory card new <title> [--body-file <file>]   a new card in the backlog
+software-factory card new <title> [--body-file <file>] [--found-while <number>]
+                                             a new card in the backlog (something noticed
+                                             while working on another card links back to it)
 software-factory card move <number> <stage>  backlog, planning, ready, doing, review, done
 software-factory card comment <number> --body <text> | --body-file <file>
+software-factory card depends <number> --on <number>
+                                             the card is built only after the other one
+software-factory card replace <number> --by <number>
+                                             the card is not needed: the other one does it
+                                             (closed with a note on both, still findable)
 software-factory card agree <number> --plan-file <file> [--prototype <branch>]
                                              the plan the owner agreed to, into the card,
                                              which moves to ready for the factory's builder`;
@@ -47,6 +59,9 @@ export async function cardCommand(
         "body-file": { type: "string" },
         body: { type: "string" },
         prototype: { type: "string" },
+        "found-while": { type: "string" },
+        on: { type: "string" },
+        by: { type: "string" },
       },
     });
     const [verb = "help", ...rest] = positionals;
@@ -58,9 +73,7 @@ export async function cardCommand(
     await run(verb, rest, values, { cards, project, cli, out });
     return 0;
   } catch (error) {
-    if (!(error instanceof Refused) && !(error instanceof TypeError))
-      throw error;
-    out(error.message);
+    out(problemOf(error));
     return 1;
   }
 }
@@ -70,6 +83,9 @@ type Options = {
   "body-file"?: string;
   body?: string;
   prototype?: string;
+  "found-while"?: string;
+  on?: string;
+  by?: string;
 };
 type Context = { cards: Cards; project: string; cli: Cli; out: Out };
 
@@ -106,6 +122,8 @@ const VERBS: Record<string, Verb | undefined> = {
       [
         line(card),
         card.agreed ? "Has an agreed plan." : "No agreed plan yet.",
+        ...relations("Depends on", card.dependsOn),
+        ...relations("Needed by", card.neededBy),
         "",
         card.body.trim() || "(no text)",
         ...card.comments.map((c) => `\n— ${c.author}:\n${c.body.trim()}`),
@@ -115,13 +133,40 @@ const VERBS: Record<string, Verb | undefined> = {
   new: async (rest, options, { cards, out }) => {
     const title = rest.join(" ").trim();
     if (!title) throw new Refused("Give the card a title.");
-    out(line(await cards.create(title, textOf(options))));
+    const found = options["found-while"];
+    const from = found === undefined ? null : numberOf(found);
+    const made = await cards.create(
+      title,
+      withFoundWhile(textOf(options), from),
+    );
+    if (from !== null)
+      await cards.comment(
+        from,
+        `Noticed while working on this: #${String(made.number)}.`,
+      );
+    out(line(made));
+  },
+  depends: async (rest, options, { cards, out }) => {
+    const number = numberOf(rest[0]);
+    const on = numberOf(options.on);
+    await cards.dependOn(number, on);
+    out(
+      `#${String(number)} now depends on #${String(on)}: it is built after it.`,
+    );
+  },
+  replace: async (rest, options, { cards, out }) => {
+    const number = numberOf(rest[0]);
+    const by = numberOf(options.by);
+    await cards.replace(number, by);
+    out(
+      `#${String(number)} is closed: #${String(by)} does it now. Both say so.`,
+    );
   },
   move: async (rest, _options, { cards, out }) => {
     const number = numberOf(rest[0]);
     const stage = stageOrRefuse(rest[1] ?? "");
     await cards.move(number, stage);
-    out(`Moved #${String(number)} to ${STAGE_COLUMNS[stage].title}.`);
+    out(`Moved #${String(number)} to ${stageWord(stage)}.`);
   },
   comment: async (rest, options, { cards, out }) => {
     const number = numberOf(rest[0]);
@@ -176,9 +221,46 @@ function cardsHere(from: string, cli: Cli): { cards: Cards; project: string } {
   return { cards: found.cards, project: dirname(root) };
 }
 
+// A card as one line: its number, its stage, its title, what it waits for.
 function line(card: Card): string {
-  const column = card.stage ? STAGE_COLUMNS[card.stage].title : card.column;
-  return `#${String(card.number)}  ${column || "(no column)"}  ${card.title}  ${card.url}`;
+  const column = card.stage ? stageWord(card.stage) : card.column;
+  const waits =
+    card.waitsFor.length > 0
+      ? `  (waits for ${card.waitsFor.map(ref).join(", ")})`
+      : "";
+  return `${ref(card.number)}  ${column || "(no column)"}  ${card.title}${waits}  ${card.url}`;
+}
+
+// A card's relations of one kind, in a line; nothing when it has none.
+function relations(heading: string, related: Related[]): string[] {
+  if (related.length === 0) return [];
+  return [`${heading}: ${related.map(relatedLine).join(" · ")}`];
+}
+
+function relatedLine(card: Related): string {
+  const done = card.closed ? " (done)" : "";
+  return `${ref(card.number)} ${card.title}${done}`;
+}
+
+function ref(number: number): string {
+  return `#${String(number)}`;
+}
+
+// The new card's text, saying which card it was noticed on.
+function withFoundWhile(text: string, from: number | null): string {
+  const said = text.trim();
+  if (from === null) return said;
+  const found = `Found while working on ${ref(from)}.`;
+  return said ? `${said}\n\n${found}` : found;
+}
+
+// What went wrong, in a line: what the factory refused, or anything else
+// that failed (never a crash).
+function problemOf(error: unknown): string {
+  if (error instanceof Refused || error instanceof TypeError)
+    return error.message;
+  const message = error instanceof Error ? error.message : String(error);
+  return `Something went wrong: ${message}`;
 }
 
 function numberOf(text: string | undefined): number {
@@ -203,12 +285,17 @@ function textOf(options: Options): string {
   return options.body ?? "";
 }
 
-// Whether the branch is on the repository's origin.
+// Whether the branch is on the repository's origin. Git never waits for a
+// password here (it would hang the command): it answers within half a minute.
 function pushed(project: string, branch: string): boolean {
   const ran = spawnSync(
     GIT,
     ["-C", project, "ls-remote", "--heads", "origin", branch],
-    { encoding: "utf8" },
+    {
+      encoding: "utf8",
+      timeout: 30_000,
+      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+    },
   );
   return ran.status === 0 && ran.stdout.trim().length > 0;
 }

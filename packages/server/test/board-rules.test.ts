@@ -34,6 +34,7 @@ function card(over: Partial<BoardCard> = {}): BoardCard {
     stage: "planning",
     closed: false,
     agreedInText: false,
+    waitsFor: [],
     thread: [],
     pullRequest: null,
     ...over,
@@ -125,6 +126,10 @@ test("Ready builds only an agreed plan; otherwise the card goes back with why", 
   };
   back("not agreed yet")(ready({}));
   assert.deepEqual(ready({ agreedInText: true }).jobs, build);
+  // A card that depends on an open card waits in Ready, untouched.
+  const waiting = ready({ agreedInText: true, waitsFor: [7] });
+  assert.deepEqual(waiting.jobs, []);
+  assert.deepEqual(waiting.moves, []);
   const agreed = factory("The plan", "plan-agreed");
   assert.deepEqual(ready({ thread: [agreed] }).jobs, build);
   back("new comment after the agreed plan")(

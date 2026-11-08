@@ -27,6 +27,8 @@ export type BoardCard = {
   closed: boolean;
   // The agreed plan is in the card's text (software-factory card agree).
   agreedInText: boolean;
+  // The open cards it depends on: it is not built before they are done.
+  waitsFor: number[];
   thread: Message[];
   pullRequest: {
     number: number;
@@ -98,6 +100,8 @@ function lookInStage(card: BoardCard, found: Found): void {
         order.plan.push({ lane: "chat", kind: "plan", number });
       break;
     case "todo": {
+      // It waits in Ready until the cards it depends on are done.
+      if (card.waitsFor.length > 0) break;
       const why = notReady(card);
       if (why === null)
         order.build.push({ lane: "build", kind: "build", number });

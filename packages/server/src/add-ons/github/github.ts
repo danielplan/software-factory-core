@@ -177,18 +177,30 @@ function problemOf(ran: Ran): string {
   return ran.err.trim() || "GitHub did not answer.";
 }
 
+// How long one answer from GitHub may take before the factory gives up on
+// it, so a stuck network or sign-in never hangs a command.
+const ANSWER_WITHIN = 60_000;
+
 // The GitHub CLI on this computer.
-export function realCli(): Cli {
+export function realCli(within = ANSWER_WITHIN): Cli {
   return {
     run: (args) =>
       new Promise((resolve, reject) => {
         const child = spawn(GH, args, { stdio: ["ignore", "pipe", "pipe"] });
         let out = "";
         let err = "";
+        const late = setTimeout(() => {
+          child.kill();
+          err = `GitHub didn't answer within ${String(within / 1000)} seconds: check the connection and try again.`;
+        }, within);
         child.stdout.on("data", (chunk: Buffer) => (out += chunk.toString()));
         child.stderr.on("data", (chunk: Buffer) => (err += chunk.toString()));
-        child.on("error", reject);
+        child.on("error", (error) => {
+          clearTimeout(late);
+          reject(error);
+        });
         child.on("close", (code) => {
+          clearTimeout(late);
           resolve({ code: code ?? 1, out, err });
         });
       }),

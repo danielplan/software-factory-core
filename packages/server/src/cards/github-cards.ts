@@ -8,6 +8,7 @@ import { answer, ownerOf, statusOf } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
 import type { Card, CardDetail, Cards } from "./cards.ts";
+import { blockedBy, relationsOf } from "./github-relations.ts";
 import { planOf, withPlan } from "./cards.ts";
 
 // The board as board.json keeps it.
@@ -25,6 +26,7 @@ type Issue = {
   repository: string;
   labels: string[];
   closed: boolean;
+  waitsFor: number[];
 };
 type Item = { id: string; status: string; issue: Issue | null };
 type Project = { id: string; items: Item[] };
@@ -38,6 +40,8 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     comment: (number, text) => cards.comment(number, text),
     create: (title, body) => cards.create(title, body),
     writePlan: (number, plan) => cards.writePlan(number, plan),
+    dependOn: (number, on) => cards.dependOn(number, on),
+    replace: (number, by) => cards.replace(number, by),
   };
 }
 
@@ -70,10 +74,12 @@ class GitHubCards {
         createdAt: string;
       }[];
     }>(number, "body,comments");
+    const related = await relationsOf(this.cli, this.board.repository, number);
     return {
       ...card,
       body: read.body,
       agreed: planOf(read.body) !== null,
+      ...related,
       comments: read.comments.map((c) => ({
         author: c.author?.login ?? "",
         body: c.body,
@@ -138,6 +144,33 @@ class GitHubCards {
     ]);
   }
 
+  // GitHub's "blocked by": the card waits for the other one.
+  async dependOn(number: number, on: number): Promise<void> {
+    if (number === on) throw new Refused("A card can't depend on itself.");
+    await this.find(number);
+    await blockedBy(this.cli, this.board.repository, number, on);
+  }
+
+  // Closed as not planned, with a note on both cards pointing to the other.
+  async replace(number: number, by: number): Promise<void> {
+    if (number === by) throw new Refused("A card can't replace itself.");
+    await this.find(number);
+    await this.find(by);
+    await this.comment(
+      number,
+      `Replaced by #${String(by)}, which does this now.`,
+    );
+    await this.comment(by, `Replaces #${String(number)}.`);
+    await this.gh([
+      "issue",
+      "close",
+      String(number),
+      ...this.repo,
+      "--reason",
+      "not planned",
+    ]);
+  }
+
   // The card with that number, its item and the board.
   private async find(number: number) {
     const project = await this.project();
@@ -162,6 +195,7 @@ class GitHubCards {
       url: issue.url,
       labels: issue.labels,
       closed: issue.closed,
+      waitsFor: issue.waitsFor,
     };
   }
 
@@ -222,7 +256,7 @@ class GitHubCards {
 
 const ITEMS = `id items(first: 100) { nodes { id
   fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
-  content { ... on Issue { number title url state repository { nameWithOwner } labels(first: 20) { nodes { name } } } } } }`;
+  content { ... on Issue { number title url state repository { nameWithOwner } labels(first: 20) { nodes { name } } blockedBy(first: 20) { nodes { number state } } } } } }`;
 
 type Node = {
   id: string;
@@ -234,6 +268,7 @@ type Node = {
     state?: string;
     repository?: { nameWithOwner: string };
     labels?: { nodes: { name: string }[] };
+    blockedBy?: { nodes: { number: number; state: string }[] };
   } | null;
 };
 type ProjectAnswer = {
@@ -245,20 +280,24 @@ type ProjectAnswer = {
 };
 
 function itemOf(node: Node): Item {
-  const content = node.content;
   return {
     id: node.id,
     status: node.fieldValueByName?.name ?? "",
-    issue:
-      content?.number === undefined
-        ? null
-        : {
-            number: content.number,
-            title: content.title ?? "",
-            url: content.url ?? "",
-            repository: content.repository?.nameWithOwner ?? "",
-            labels: content.labels?.nodes.map((l) => l.name) ?? [],
-            closed: content.state === "CLOSED",
-          },
+    issue: issueOf(node.content),
+  };
+}
+
+function issueOf(content: Node["content"]): Issue | null {
+  if (content?.number === undefined) return null;
+  return {
+    number: content.number,
+    title: content.title ?? "",
+    url: content.url ?? "",
+    repository: content.repository?.nameWithOwner ?? "",
+    labels: content.labels?.nodes.map((l) => l.name) ?? [],
+    closed: content.state === "CLOSED",
+    waitsFor: (content.blockedBy?.nodes ?? [])
+      .filter((b) => b.state !== "CLOSED")
+      .map((b) => b.number),
   };
 }

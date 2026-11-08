@@ -15,6 +15,9 @@ same: the [factory](SKILL.md) skill and the skills it routes to.
   non-developer, following `AGENTS.md`: plain words, trade-offs, options.
 - Ask for an account, a credential or a purchase in your answer instead of
   trying to get one.
+- Something you notice outside the card (a bug, a rough edge, an idea):
+  name it in your answer under **Noticed**, in a line each, so the owner can
+  make it a card; don't fix it on the side.
 - End your answer with exactly one last line, `STATUS: <value>`, with one of
   the values your prompt lists. The factory reads it to move the card, so
   nothing may follow it.
@@ -28,6 +31,8 @@ Coach the owner through the `plan` skill, in the card's comments:
   branch and read-only: write nothing. The run file and the blueprint are
   written when building.
 - While a question is open: `STATUS: question`.
+- Before the plan is agreed, read the board's other cards and name the ones
+  this plan depends on, replaces or changes, so the owner can link them.
 - When everything the card touches is agreed, write the agreed plan instead:
   the request, which product(s), the plan, the checks, what stays open. End
   by asking the owner to move the card to **Ready** to build it.

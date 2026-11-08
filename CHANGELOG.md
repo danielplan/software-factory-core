@@ -6,6 +6,33 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+**To upgrade:** pin the new release, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade names the new check command in `AGENTS.md`.
+
+- **Cards depend on and replace each other**, on GitHub's own relations:
+  `card depends <n> --on <m>` (GitHub's "blocked by"), `card replace <n> --by <m>`
+  (closed as not planned, with a note on both, so it stays findable). `card show`
+  lists a card's relations, `card list` marks the cards that wait, and the builder
+  doesn't start a card before the cards it depends on are done.
+- **Something noticed becomes a card**: `card new … --found-while <n>` links the new
+  card and the one being worked on, both ways. The `factory` skill says to propose a
+  card for anything noticed outside the current work, and the board's builder names
+  such things under **Noticed** in its answer.
+- **Plans keep their shape**: the agreed plan stays current and short, with what was
+  tried and dropped under **Tried**; a plan with a prototype says what in it is final;
+  a plan that outgrows its card asks whether to split it; before agreeing, the board's
+  other cards are checked for what this plan depends on, replaces or changes. A run
+  is committed when its plan is agreed and when it ends.
+- **AI behaviour is prototyped with the real agent**, at least once, when a card is
+  about what an agent says, asks or builds.
+- **`software-factory check-docs`** runs the knowledge base's checks in a project
+  (the skills and `AGENTS.md` name it).
+- **Commands answer and end**: `help`, `--help` and a word that is no command or
+  folder print the help instead of starting the factory; GitHub calls give up after a
+  minute and git never waits for a password; anything unexpected is said in a line
+  instead of a crash; the cards the builder takes are called **Ready** everywhere.
+- **Tests never reach the real repository**: git's variables from a hook
+  (commit, push) are removed before the tests run, so the tests' own git
+  repositories stay in their temporary folders.
 - Fixed: `software-factory upgrade` pinned the core in devDependencies even
   when the project keeps it in optionalDependencies, so the project ended
   up with two pins. It now pins it where the project keeps it.
