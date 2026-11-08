@@ -4,6 +4,18 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.7.0 (2026-11-08)
+
+**To upgrade:** pin `release-0.7.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- New: the Settings tab has an "AI model" group. The model typed there
+  (`opus`, `sonnet`, a full model id) is used by every Claude Code run the
+  factory makes: the coaches, the builder and the card coach. Empty, which
+  is the default, keeps the account's own default, so nothing changes until
+  someone sets it. It is saved in `settings/factory.env` in the factory's
+  folder and read again on each run, so a change applies to the next turn.
+  It does not affect Codex. Nothing to do when upgrading.
+
 ## 0.6.2 (2026-11-08)
 
 **To upgrade:** pin `release-0.6.2`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.

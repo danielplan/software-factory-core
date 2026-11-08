@@ -49,7 +49,7 @@ test("the example company: its products, their kits, the parts and settings they
   );
   assert.deepEqual(
     factory.settings.map((g) => g.id),
-    ["github"],
+    ["ai-model", "github"],
   );
   assert.deepEqual(
     factory.guides.map((g) => g.file),

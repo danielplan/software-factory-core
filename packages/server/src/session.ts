@@ -44,6 +44,7 @@ import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
 import { switched, trackedWith } from "./add-ons/switch.ts";
 import { ConnectedWork } from "./builder/connect-work.ts";
+import { withModelChoice } from "./model-choice.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -79,8 +80,8 @@ export class Session {
   // The connected board's cards, the builder and the coach in the cards.
   readonly work: ConnectedWork;
 
-  constructor(options: SessionOptions) {
-    this.options = options;
+  constructor(given: SessionOptions) {
+    const options = (this.options = withModelChoice(given, () => this.root));
     this.coach = new SetupCoach({
       ...options.coach,
       project: options.project,

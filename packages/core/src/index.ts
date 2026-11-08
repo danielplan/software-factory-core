@@ -87,6 +87,7 @@ export {
 } from "./settings/setting-groups.ts";
 export { claudeArgs, type Claude, type RunOptions } from "./agents/claude.ts";
 export { describeEvent, formatDuration } from "./agents/activity.ts";
+export { withChosenModel } from "./agents/model-setting.ts";
 export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,

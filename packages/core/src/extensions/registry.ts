@@ -2,6 +2,7 @@
 // it uses, and what they add (parts, settings, the agents' guides), with
 // everything that does not fit said in plain words before anything starts.
 
+import { modelSettings } from "../agents/model-setting.ts";
 import type { Company } from "../company/company.ts";
 import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
@@ -55,7 +56,10 @@ export function assembleFactory(
     ...known.flatMap((product) => partsOf(product, kits)),
     ...extensions.flatMap((extension) => extension.parts),
   ]);
-  const settings = extensions.flatMap((extension) => extension.settings);
+  const settings = [
+    modelSettings,
+    ...extensions.flatMap((extension) => extension.settings),
+  ];
   problems.push(
     ...checkParts(parts),
     ...checkGroups(
