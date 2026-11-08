@@ -7,7 +7,7 @@ import { test } from "node:test";
 import type { Claude } from "@software-factory/core";
 
 import type { Cli } from "../src/add-ons/github/github.ts";
-import { realShell, runChecks } from "../src/builder/checks.ts";
+import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
 import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
 import { githubPullRequests } from "../src/builder/pull-requests.ts";
 
@@ -177,4 +177,19 @@ test("the board work is put together from a factory with a connected board, and 
   assert.equal(connected.orRefuse(), work);
   connected.stop();
   assert.equal(connected.view(), null);
+});
+
+test("a failed check's report shows the lines that name what failed, then its summary", () => {
+  const output = [
+    "ok 1 adds",
+    "✘ 2 the day view shows Rosi",
+    ...Array.from({ length: 40 }, (_, n) => `ok ${String(n + 3)} passes`),
+    "84 passed, 1 failed",
+  ].join("\n");
+  const shown = shownOutput(output).split("\n");
+  assert.equal(shown[0], "✘ 2 the day view shows Rosi");
+  assert.equal(shown[1], "…");
+  assert.equal(shown.at(-1), "84 passed, 1 failed");
+  assert.equal(shown.length, 32);
+  assert.equal(shownOutput("short\nfailed"), "short\nfailed");
 });

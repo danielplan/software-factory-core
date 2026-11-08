@@ -399,19 +399,18 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
   work.stop();
 });
 
-test("checks that still fail make a draft; a question or a stopped build goes back to Planning", async () => {
+test("checks still red after three rounds open no pull request; a question or a stopped build goes back to Planning", async () => {
   const { copy } = await project();
   const plan = withPlan("", "The plan.");
   const kept = new Map<number, Kept>([
     [5, { title: "Red", stage: "todo", body: plan, comments: [] }],
   ]);
   let answer: string | null = "Built.\nSTATUS: done";
-  const { claude } = pretendClaude((options) => {
+  const { claude, prompts } = pretendClaude((options) => {
     writeFileSync(join(options.cwd, "app", "RED.md"), String(clock));
     return answer;
   });
-  const { work, prs } = setUp(kept, claude, copy, [
-    false,
+  const { work, prs, checks } = setUp(kept, claude, copy, [
     false,
     false,
     false,
@@ -419,13 +418,15 @@ test("checks that still fail make a draft; a question or a stopped build goes ba
   ]);
   work.switch("build", true);
   await settled(work);
-  assert.equal(prs.made[0]?.draft, true);
-  assert.match(prs.made[0].body, /The checks still fail/);
+  // Checked, then three rounds of fixing, each checked again.
+  assert.equal(checks.filter((c) => c === "npm test").length, 4);
+  assert.ok(prompts.some((p) => p.includes("(round 3 of 3)")));
+  assert.equal(prs.made.length, 0);
   assert.equal(kept.get(5)?.stage, "doing");
-  assert.equal(
-    readNote(kept.get(5)?.comments.at(-1)?.body ?? ""),
-    "checks-failed",
-  );
+  const said = kept.get(5)?.comments.at(-1)?.body ?? "";
+  assert.equal(readNote(said), "checks-failed");
+  assert.match(said, /no pull request yet/);
+  assert.match(said, /1 test failed/);
 
   // The owner's hint lets it try again; this time it asks a question.
   answer = "Which colour?\nSTATUS: blocked";
@@ -490,4 +491,33 @@ test("a board that cannot be read says why; a coach that cannot start says so in
   assert.equal(work.view().problem, "GitHub is away");
   work.start();
   work.stop();
+});
+
+test("a red check only the owner can fix becomes a question in the card", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      7,
+      {
+        title: "Key",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  const { claude } = pretendClaude((options) => {
+    writeFileSync(join(options.cwd, "app", "KEY.md"), "x");
+    return options.prompt.includes("make the checks pass")
+      ? "The tests need the payment provider's key.\nSTATUS: blocked"
+      : "Built.\nSTATUS: done";
+  });
+  const { work, prs } = setUp(kept, claude, copy, [false]);
+  work.switch("build", true);
+  await settled(work);
+  assert.equal(prs.made.length, 0);
+  assert.equal(kept.get(7)?.stage, "planning");
+  const said = kept.get(7)?.comments.at(-1)?.body ?? "";
+  assert.equal(readNote(said), "blocked");
+  assert.match(said, /payment provider's key/);
 });

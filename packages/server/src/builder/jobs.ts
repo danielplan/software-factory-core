@@ -1,8 +1,9 @@
 // The jobs on a card: the coach plans it (read-only copy of main), the
 // builder builds it or answers its review comments (the card's branch in a
 // copy of its own). After a build the factory runs the checks itself, gives
-// the builder one round to fix a failure, pushes, and opens or updates the
-// pull request: a draft that says so when the checks still fail.
+// the builder up to three rounds to fix what is red, pushes, and opens the
+// pull request only once every check passes; until then the card waits
+// in In progress with what fails.
 
 import { randomUUID } from "node:crypto";
 
@@ -52,6 +53,8 @@ export type JobsOptions = {
 
 const BUILD_TIME_MS = 3 * 60 * 60_000;
 const PLAN_TIME_MS = 20 * 60_000;
+// Rounds of fixing while a check is red, before the owner is asked.
+const FIX_ROUNDS = 3;
 const PLAN_NOTES: readonly Note[] = ["question", "plan-agreed", "blocked"];
 
 export class Jobs {
@@ -123,20 +126,26 @@ export class Jobs {
       return;
     }
     const checked = await this.checkAndPush(card, onActivity);
-    const url = await this.pullRequest(card, answer.text, checked);
-    if (checked.passed) {
+    if (checked.blocked !== null) {
+      await this.say(card.number, checked.blocked, "blocked");
+      await cards.move(card.number, "planning");
+      return;
+    }
+    if (!checked.passed) {
       await this.say(
         card.number,
-        `Built: ${url} is ready for your review.`,
-        "review-ready",
-      );
-      await cards.move(card.number, "review");
-    } else
-      await this.say(
-        card.number,
-        `The work is built, but the checks still fail after one round of fixing, so the pull request is a draft: ${url}\n\nWhat fails is in its description. The card stays in **In progress**: write a comment here to let the builder try again, with any hint you have.`,
+        `The work is built, but the checks still fail after ${String(FIX_ROUNDS)} rounds of fixing, so there is no pull request yet. The card stays in **In progress**: write a comment here to let the builder try again, with any hint you have.\n\n${checked.report}`,
         "checks-failed",
       );
+      return;
+    }
+    const url = await this.pullRequest(card, answer.text);
+    await this.say(
+      card.number,
+      `Built, and every check passes: ${url} is ready for your review.`,
+      "review-ready",
+    );
+    await cards.move(card.number, "review");
   }
 
   private async feedback(card: BoardCard, onActivity: (line: string) => void) {
@@ -146,6 +155,10 @@ export class Jobs {
     const note: Note = answer.status === "done" ? "fixed" : "blocked";
     if (note === "fixed") {
       const checked = await this.checkAndPush(card, onActivity);
+      if (checked.blocked !== null) {
+        await this.sayOnPullRequest(pr.number, checked.blocked, "blocked");
+        return;
+      }
       if (!checked.passed) {
         await this.options.pullRequests.update(
           pr.number,
@@ -154,7 +167,7 @@ export class Jobs {
         );
         await this.sayOnPullRequest(
           pr.number,
-          `${answer.text}\n\nThe checks still fail, so this is a draft again: what fails is in the description.`,
+          `${answer.text}\n\nThe checks still fail after ${String(FIX_ROUNDS)} rounds of fixing, so this is a draft until they pass:\n\n${checked.report}`,
           "checks-failed",
         );
         return;
@@ -209,11 +222,13 @@ export class Jobs {
         };
   }
 
-  // The checks, one round of fixing when they fail, then the branch pushed.
+  // The checks, and up to FIX_ROUNDS rounds of fixing while any is red (the
+  // builder fixes every red check, also one that was red before its change);
+  // it stops early when the builder says only the owner can unblock it.
   private async checkAndPush(
     card: BoardCard,
     onActivity: (line: string) => void,
-  ) {
+  ): Promise<{ passed: boolean; report: string; blocked: string | null }> {
     const copy = await this.options.copies.build();
     const check = async () => {
       const base = await this.options.pullRequests.baseBranch();
@@ -227,28 +242,27 @@ export class Jobs {
       });
     };
     let checked = await check();
-    if (!checked.passed) {
-      await this.agent(card, fixChecksPrompt(card, checked.report), onActivity);
+    for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
+      const answer = await this.agent(
+        card,
+        fixChecksPrompt(card, checked.report, round, FIX_ROUNDS),
+        onActivity,
+      );
+      if (answer.status === "blocked")
+        return { ...checked, blocked: answer.text };
       checked = await check();
     }
-    return checked;
+    return { ...checked, blocked: null };
   }
 
   // Opens the card's pull request, or updates the one there is; its address.
-  private async pullRequest(
-    card: BoardCard,
-    text: string,
-    checked: { passed: boolean; report: string },
-  ) {
+  private async pullRequest(card: BoardCard, text: string) {
     const { pullRequests } = this.options;
     const branch = branchOf(card.number);
-    const failed = checked.passed
-      ? ""
-      : `\n\n${failedChecksSection(checked.report)}`;
-    const body = `${text}\n\nCloses #${String(card.number)}.${failed}`;
+    const body = `${text}\n\nCloses #${String(card.number)}.`;
     const found = await pullRequests.find(branch);
     if (found?.state === "OPEN") {
-      await pullRequests.update(found.number, body, !checked.passed);
+      await pullRequests.update(found.number, body, false);
       return found.url;
     }
     const made = await pullRequests.open({
@@ -256,7 +270,7 @@ export class Jobs {
       base: await pullRequests.baseBranch(),
       title: card.title,
       body,
-      draft: !checked.passed,
+      draft: false,
     });
     return made.url;
   }

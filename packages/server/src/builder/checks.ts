@@ -24,7 +24,10 @@ export type Shell = (
 export type CheckOutcome = { passed: boolean; report: string };
 
 const HOUR = 60 * 60_000;
-const TAIL = 60;
+const TAIL = 30;
+const FAILED_LINES = 40;
+// A line that tells what failed, in the usual test and check tools' words.
+const FAILING = /✘|✖|×|\bfail(ed|ing|s|ure)?\b|\berror\b|\bnot ok\b/i;
 
 // The checks for what the branch changed: each product with a changed file
 // in its folder and a verify command.
@@ -95,10 +98,21 @@ async function installIfMissing(copy: string, folder: string, shell: Shell) {
 function reportOf(failed: CheckResult[]): string {
   return failed
     .map((r) => {
-      const tail = r.output.trimEnd().split("\n").slice(-TAIL).join("\n");
-      return `### ${r.name}: \`${r.command}\` failed\n\n\`\`\`\n${tail}\n\`\`\``;
+      return `### ${r.name}: \`${r.command}\` failed\n\n\`\`\`\n${shownOutput(r.output)}\n\`\`\``;
     })
     .join("\n\n");
+}
+
+// What a failed check said: the lines that name what failed, then its last
+// lines (a test tool's summary), without saying a line twice.
+export function shownOutput(output: string): string {
+  const lines = output.trimEnd().split("\n");
+  const tail = lines.slice(-TAIL);
+  const failing = lines
+    .slice(0, -TAIL)
+    .filter((line) => FAILING.test(line))
+    .slice(0, FAILED_LINES);
+  return [...failing, ...(failing.length > 0 ? ["…"] : []), ...tail].join("\n");
 }
 
 // A command in a folder, through the system's shell, with plain output.
@@ -134,11 +148,12 @@ export const realShell: Shell = (cwd, command) =>
     });
   });
 
-// Added to the pull request when the checks still fail.
+// Added to the pull request when the checks fail again after review
+// comments: it is a draft until they pass.
 export function failedChecksSection(report: string): string {
-  return `## The checks still fail
+  return `## The checks fail
 
-The factory ran the checks on this computer, gave the failure to the builder once to fix, and ran them again. These still fail, so this pull request is a **draft**: do not merge it yet.
+The factory ran the checks on this computer and gave the failures to the builder to fix, three rounds. These still fail, so this pull request is a **draft** until they pass: do not merge it yet.
 
 ${report}`;
 }

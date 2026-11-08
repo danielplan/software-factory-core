@@ -4,6 +4,22 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.5.1 (2026-11-08)
+
+**To upgrade:** pin `release-0.5.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade brings the factory skill's new `board.md`.
+
+- **No pull request while a check is red.** The builder gets up to three
+  rounds to fix what the factory's own checks find (one before). If they are
+  still red, the branch is pushed but no pull request is opened: the card
+  stays in In progress with what fails, and a comment lets the builder try
+  again. Before, it opened a draft pull request.
+- **Every red check is the builder's to fix**, also one that already failed
+  before its change (a broken or out-of-date test is code like any other).
+  Only what cannot pass in code (an account, a setting, a decision) becomes
+  a question in the card, which goes back to Planning.
+- **The report shows what failed**: the lines that name a failure, then the
+  check's last lines. Before, only its last lines, often all passing tests.
+
 ## 0.5.0 (2026-11-08)
 
 **To upgrade:** pin `release-0.5.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand: the upgrade names the new check command in `AGENTS.md`.

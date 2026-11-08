@@ -71,7 +71,13 @@ by point. `STATUS: done`, or `STATUS: blocked` with one clear question.
 ## The checks before the pull request
 
 Before opening or updating the pull request, the factory runs every changed
-product's verify command itself. When they fail, you get what failed once:
-fix the cause (never loosen a check or skip a test), run them again, and say
-what you changed. `STATUS: done`, or `STATUS: blocked` when only the owner
-can decide.
+product's verify command itself. There is no pull request until every check
+passes. When some fail, you get what failed, up to three rounds:
+
+- Every red check is yours to fix, also one that already failed before your
+  change: a broken or out-of-date test is fixed like any other code.
+- Fix the cause. Never loosen a check, skip a test or lower a threshold.
+- Run the checks again yourself, and say what you changed. `STATUS: done`.
+- Only when a check cannot pass in code (it needs an account, a setting only
+  the owner has, a decision that is theirs): say what is needed.
+  `STATUS: blocked`.

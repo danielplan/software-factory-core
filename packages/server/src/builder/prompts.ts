@@ -54,12 +54,17 @@ ${cardText(card, reviewTimeline(card))}
 ${answer("done", "blocked")}`;
 }
 
-export function fixChecksPrompt(card: BoardCard, report: string): string {
+export function fixChecksPrompt(
+  card: BoardCard,
+  report: string,
+  round: number,
+  rounds: number,
+): string {
   return `${SHARED}
 
-## Your task: make the checks pass for card #${String(card.number)}
+## Your task: make the checks pass for card #${String(card.number)} (round ${String(round)} of ${String(rounds)})
 
-You are on branch \`${branchOf(card.number)}\`. The factory ran the checks before the pull request, and these failed. Follow the guide's "The checks before the pull request" section.
+You are on branch \`${branchOf(card.number)}\`. The factory ran the checks before the pull request, and these failed. There is no pull request until every one passes. Follow the guide's "The checks before the pull request" section: every red check is yours to fix, also one that already failed before your change.
 
 ${report}
 
