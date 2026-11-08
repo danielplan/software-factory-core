@@ -1,0 +1,47 @@
+{
+  "name": "software-factory-core",
+  "private": true,
+  "description": "The core of a software factory, shared by every company's factory: the core, its extensions and kits.",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "prepare": "lefthook install",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --test \"packages/*/test/**/*.test.ts\"",
+    "test:coverage": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test-isolation=none --test-timeout=120000 --experimental-test-coverage --test-coverage-include=\"packages/*/src/**\" --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=90 --test \"packages/*/test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/dashboard",
+    "lint": "eslint --max-warnings 0 packages *.mjs",
+    "deadcode": "knip",
+    "duplicates": "jscpd packages",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:docs": "node packages/knowledge-base/bin/check-docs.ts .",
+    "verify": "npm run build -w @software-factory/dashboard && npm run format:check && npm run lint && npm run typecheck && npm run deadcode && npm run duplicates && npm run test:coverage && npm run check:docs",
+    "release": "node scripts/publish-release.mjs"
+  },
+  "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "globals": "^17.13.0",
+    "jscpd": "^5.4.1",
+    "knip": "^6.41.0",
+    "lefthook": "^2.2.1",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2"
+  },
+  "overrides": {
+    "@mintplex-labs/piper-tts-web": {
+      "onnxruntime-web": "1.26.0-dev.20260416-b7804b056c"
+    }
+  }
+}

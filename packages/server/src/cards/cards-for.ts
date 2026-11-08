@@ -1,0 +1,35 @@
+// The cards of the board a factory is connected to: from its company file
+// (which tracker) and board.json (which board). Cards come from a GitHub
+// board for now.
+
+import { join } from "node:path";
+
+import { readCompany } from "@software-factory/core";
+
+import type { Cli } from "../add-ons/github/github.ts";
+import { readBoard } from "../connect/board-file.ts";
+import type { Cards } from "./cards.ts";
+import { githubCards, type GitHubBoard } from "./github-cards.ts";
+
+export type Connected = { cards: Cards; repository: string };
+
+// The factory's folder's cards, or why there are none.
+export function cardsFor(
+  root: string,
+  cli: Cli,
+): Connected | { problem: string } {
+  const read = readCompany(join(root, "factory.json"));
+  if ("problem" in read) return read;
+  const { tracker } = read.company;
+  const entry = readBoard(root)[tracker];
+  if (tracker === "github" && entry) {
+    const board = entry as GitHubBoard;
+    return { cards: githubCards(cli, board), repository: board.repository };
+  }
+  return {
+    problem:
+      tracker === "none"
+        ? "Work stays on the factory's own board: connect a GitHub board to plan cards here."
+        : `Cards from ${tracker} come later; for now, cards come from a connected GitHub board.`,
+  };
+}

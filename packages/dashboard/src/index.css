@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+/* Dark mode follows the computer's setting. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+/* Calm and plain: a light neutral ground, white cards with a hairline, one
+   accent colour for actions (an indigo from the coach's orb), the lights as
+   the only other colour. A company's theme (factory/theme.css, loaded after
+   this) changes these variables to look like its own app; the factory keeps
+   its orb and its layout. */
+:root {
+  --font-body: Onest, system-ui, sans-serif;
+  --ground: #f5f6f8;
+  --background: #f5f6f8;
+  --foreground: #1b1f2a;
+  --card: #ffffff;
+  --card-foreground: #1b1f2a;
+  --popover: #ffffff;
+  --popover-foreground: #1b1f2a;
+  --primary: #4b55d6;
+  --primary-foreground: #ffffff;
+  /* The accent, faint: icons' rounds, questions, what the coach points to. */
+  --tint: color-mix(in oklab, var(--primary) 10%, var(--card));
+  --secondary: #f1f3f8;
+  --secondary-foreground: #1b1f2a;
+  --muted: #f7f8fc;
+  --muted-foreground: #5b6475;
+  --accent: #f1f3f8;
+  --accent-foreground: #1b1f2a;
+  --destructive: #d9534f;
+  --border: #e2e5ec;
+  --border-soft: #eceef4;
+  --input: #e2e5ec;
+  --ring: #4b55d6;
+  --link: #1b1f2a;
+  --success: #2fb47c;
+  --warning: #e2a13c;
+  --stopped: #a3aabb;
+  --arrow: #a7afc0;
+  --dot: #dde1e8;
+  --surface: #f5f6f8;
+  --surface-2: #eef0f4;
+  --glow-a: #dff5ec;
+  --glow-b: #f1def6;
+  --glow-c: #e3e8fb;
+  --glow-base: #f4f6fb;
+  --shadow-big: 0 30px 60px -30px rgb(40 52 90 / 0.35);
+  --shadow-soft: 0 1px 3px rgb(27 31 42 / 0.08);
+  --radius: 0.625rem;
+  /* The factory's own gradient, from the coach's orb: the start prompt's
+     ring and the setup page's glow (deeper in dark mode). */
+  --gradient-1: #bfe9f7;
+  --gradient-2: #c7cbfb;
+  --gradient-3: #f8cfe0;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0f1218;
+    --background: #0f1218;
+    --foreground: #e9ecf2;
+    --card: #171b23;
+    --card-foreground: #e9ecf2;
+    --popover: #171b23;
+    --popover-foreground: #e9ecf2;
+    --primary: #959cff;
+    --primary-foreground: #11141b;
+    --secondary: #1e232d;
+    --secondary-foreground: #e9ecf2;
+    --muted: #1e232d;
+    --muted-foreground: #9aa3b5;
+    --accent: #252b37;
+    --accent-foreground: #e9ecf2;
+    --destructive: #e8726e;
+    --border: #2a303c;
+    --border-soft: #242a35;
+    --input: #2f3542;
+    --ring: #959cff;
+    --link: #e9ecf2;
+    --success: #3cc68c;
+    --warning: #e8b058;
+    --stopped: #6f778a;
+    --arrow: #4a5263;
+    --dot: #2c3240;
+    --surface: #1e232d;
+    --surface-2: #242a35;
+    --glow-a: rgb(47 180 124 / 0.12);
+    --glow-b: rgb(176 108 196 / 0.12);
+    --glow-c: rgb(96 116 214 / 0.14);
+    --glow-base: #1a1f28;
+    --shadow-big: 0 30px 60px -30px rgb(0 0 0 / 0.6);
+    --gradient-1: #2b5a6b;
+    --gradient-2: #3b3f7a;
+    --gradient-3: #6b3550;
+    --shadow-soft: 0 1px 3px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --color-ground: var(--ground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-stopped: var(--stopped);
+  --color-arrow: var(--arrow);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --shadow-big: var(--shadow-big);
+  --shadow-soft: var(--shadow-soft);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --animate-breathe: breathe 1.6s ease-in-out infinite;
+  @keyframes breathe {
+    50% {
+      opacity: 0.45;
+    }
+  }
+  /* Something new on the setup map arrives with a small pop. */
+  --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+  /* The coach's conversation slides in at the side after the first answer. */
+  --animate-dock: dock 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  @keyframes dock {
+    from {
+      opacity: 0;
+      transform: translateX(-40%) scale(0.96);
+    }
+  }
+  /* The voice's orb (voice/voice-orb.tsx): getting ready, writing down,
+     speaking. Listening follows the voice itself; thinking, it swirls. */
+  --animate-orb-wait: orb-wait 1.8s ease-in-out infinite;
+  --animate-orb-ripple: orb-ripple 1.2s ease-out infinite;
+  --animate-orb-talk: orb-talk 0.9s ease-in-out infinite;
+  @keyframes orb-wait {
+    50% {
+      opacity: 0.35;
+      transform: scale(0.9);
+    }
+  }
+  @keyframes orb-ripple {
+    from {
+      box-shadow: 0 0 0 0 color-mix(in oklab, #c7cbfb 60%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 18px transparent;
+    }
+  }
+  @keyframes orb-talk {
+    50% {
+      transform: scale(1.12);
+    }
+  }
+  /* The coach's orb turns slowly while it thinks. */
+  --animate-swirl: swirl 3s linear infinite;
+  @keyframes swirl {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* The pastel glows behind a side panel. */
+@utility glow-panel {
+  background:
+    radial-gradient(circle at 15% 10%, var(--glow-a) 0, transparent 45%),
+    radial-gradient(circle at 10% 95%, var(--glow-b) 0, transparent 50%),
+    radial-gradient(circle at 90% 55%, var(--glow-c) 0, transparent 55%),
+    var(--glow-base);
+}
+/* A panel that floats on the page: a plain card. */
+@utility glow-card {
+  background: var(--card);
+}
+
+/* The coach's orb: the pastel glows, blurred. */
+@utility orb {
+  border-radius: 999px;
+  filter: blur(3px);
+  background:
+    radial-gradient(circle at 35% 30%, #bfe9f7 0, transparent 60%),
+    radial-gradient(circle at 70% 70%, #c7cbfb 0, transparent 65%),
+    radial-gradient(circle at 30% 80%, #f8cfe0 0, transparent 60%);
+}
+/* The gradient as a thin ring around a white card (the start prompt). */
+@utility glow-ring {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(
+        120deg,
+        var(--gradient-1),
+        var(--gradient-2),
+        var(--gradient-3)
+      )
+      border-box;
+}
+/* The page behind everything: the ground, with the accent's faint light
+   in one corner; plain in the dark theme. */
+@utility glow-page {
+  background:
+    radial-gradient(
+      ellipse at 8% 0%,
+      color-mix(in oklab, var(--primary) 7%, transparent) 0,
+      transparent 45%
+    ),
+    var(--ground);
+  @variant dark {
+    background: var(--ground);
+  }
+}
+
+/* Element rules sit in the base layer, so Tailwind classes win over them. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--foreground);
+    background: var(--ground);
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+    }
+  }
+}

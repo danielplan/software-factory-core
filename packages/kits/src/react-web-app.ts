@@ -1,0 +1,91 @@
+// The React web app kit: a web app made with React and Vite. It recognises
+// one by its packages, runs it with Vite's development server, and makes a
+// new one with Vite's own starter.
+
+import { basename } from "node:path";
+
+import { defineKit, type Product } from "@software-factory/core";
+
+import {
+  commandsOf,
+  doesOf,
+  readableName,
+  readPackageJson,
+  verifyCommand,
+} from "./package-json.ts";
+
+const PORT = 5173;
+// A phone app also uses React; these packages say it is one.
+const PHONE = ["expo", "react-native"];
+
+export const reactWebApp = defineKit({
+  id: "react-web-app",
+  name: "React web app",
+  about: "A web app made with React and Vite.",
+  kind: "react-web-app",
+  commands: { start: "npm run dev" },
+  rules: [
+    "rules/react-web-app/conventions.md",
+    "rules/react-web-app/lessons.md",
+  ],
+  port: PORT,
+  detect: (folder) => {
+    const file = readPackageJson(folder);
+    if (!file?.packages.has("react")) return null;
+    if (PHONE.some((name) => file.packages.has(name))) return null;
+    if (
+      !file.packages.has("vite") &&
+      !file.packages.has("@vitejs/plugin-react")
+    )
+      return null;
+    return {
+      name: readableName(file, folder),
+      commands: commandsOf({
+        start: file.scripts.has("dev") ? "npm run dev" : undefined,
+        verify: verifyCommand(file),
+      }),
+    };
+  },
+  partsFor: (product: Product) => {
+    const port = product.port ?? PORT;
+    return [
+      {
+        id: product.id,
+        name: product.name,
+        area: "products",
+        does: doesOf(product, "web app"),
+        dependsOn: product.dependsOn,
+        folder: product.folder,
+        prepare: [{ label: "Installing packages", packages: true }],
+        run: [
+          "npm",
+          "run",
+          "dev",
+          "--",
+          "--port",
+          String(port),
+          "--strictPort",
+          "--host",
+          "127.0.0.1",
+        ],
+        port: { fixed: port },
+        health: "/",
+        open: "/",
+        start: "auto",
+      },
+    ];
+  },
+  create: (folder) => [
+    [
+      "npm",
+      "create",
+      "vite@latest",
+      basename(folder),
+      "--",
+      "--template",
+      "react-ts",
+      "--no-interactive",
+    ],
+    ["npm", "install", "--prefix", basename(folder)],
+  ],
+});

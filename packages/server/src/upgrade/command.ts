@@ -1,0 +1,56 @@
+// software-factory upgrade: run in a project, brings its factory to the core
+// this command comes from, and says what it did, what it leaves to the
+// owner, and what the factory's checks find. It changes the files only; the
+// owner reviews them (git diff) and commits.
+
+import { dirname } from "node:path";
+
+import { type Extension, findFactory, type Kit } from "@software-factory/core";
+
+import { Refused } from "../refused.ts";
+import { upgradeFactory } from "./upgrade.ts";
+
+type Out = (line: string) => void;
+
+export async function upgradeCommand(
+  from: string,
+  available: { kits: Kit[]; extensions: Extension[] },
+  out: Out = (line) => {
+    process.stdout.write(`${line}\n`);
+  },
+): Promise<number> {
+  const root = findFactory(from);
+  if (!root) {
+    out("There is no factory here: run it in a project.");
+    return 1;
+  }
+  try {
+    const result = await upgradeFactory({
+      project: dirname(root),
+      root,
+      ...available,
+    });
+    out(
+      result.from === result.to
+        ? `The factory is on the core's version, ${result.to}.`
+        : `Upgraded the factory from ${result.from} to ${result.to}.`,
+    );
+    list(out, "Done:", result.done);
+    list(out, "Needs you:", result.left);
+    if (result.problems.length > 0)
+      list(out, "The factory's checks find:", result.problems);
+    else out("The factory's checks find nothing wrong.");
+    out("Review the changes (git diff), then commit them.");
+    return 0;
+  } catch (error) {
+    if (!(error instanceof Refused)) throw error;
+    out(error.message);
+    return 1;
+  }
+}
+
+function list(out: Out, title: string, lines: string[]): void {
+  if (lines.length === 0) return;
+  out(title);
+  for (const line of lines) out(`- ${line}`);
+}

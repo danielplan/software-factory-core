@@ -1,0 +1,13 @@
+# Git hooks, run by lefthook (https://lefthook.dev); `npm install` sets them
+# up. Never skip them with --no-verify.
+
+pre-commit:
+  jobs:
+    - name: format
+      run: npx --no-install prettier --check --ignore-unknown {staged_files}
+      fail_text: "Formatting: run `npm run format` and stage the result."
+
+pre-push:
+  jobs:
+    - name: verify
+      run: npm run verify
