@@ -1,6 +1,6 @@
 {
   "name": "software-factory",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "The software factory's core: the software-factory command, its dashboard and skills.",
   "type": "module",
   "engines": {
@@ -11,13 +11,13 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.1",
-    "@software-factory/core": "0.8.0",
-    "@software-factory/dashboard": "0.8.0",
-    "@software-factory/kits": "0.8.0",
-    "@software-factory/knowledge-base": "0.8.0",
-    "@software-factory/launcher": "0.8.0",
-    "@software-factory/server": "0.8.0",
-    "@software-factory/skills": "0.8.0",
+    "@software-factory/core": "0.8.1",
+    "@software-factory/dashboard": "0.8.1",
+    "@software-factory/kits": "0.8.1",
+    "@software-factory/knowledge-base": "0.8.1",
+    "@software-factory/launcher": "0.8.1",
+    "@software-factory/server": "0.8.1",
+    "@software-factory/skills": "0.8.1",
     "culori": "4.0.2",
     "postcss": "8.5.30",
     "remark": "15.0.1",
