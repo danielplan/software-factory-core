@@ -4,6 +4,17 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.7.1 (2026-11-08)
+
+**To upgrade:** pin `release-0.7.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- Fixed: a card could not be built while its prototype was still set up on
+  the card's branch in another working copy. The build failed with
+  "'factory/issue-N' is already used by worktree at …" and the builder tried
+  again, over and over. Before the builder takes a card's branch, any other
+  copy holding it is now detached at the commit it is on. No file changes
+  and nothing running there stops.
+
 ## 0.7.0 (2026-11-08)
 
 **To upgrade:** pin `release-0.7.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.

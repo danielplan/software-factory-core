@@ -16,6 +16,7 @@ import {
 import { dirname, join, sep } from "node:path";
 
 import { run } from "../processes.ts";
+import { freeBranch } from "./free-branch.ts";
 
 // Settings files an older factory may have copied into a copy; removed when
 // found, so a job never runs with the owner's settings. The examples the
@@ -115,6 +116,7 @@ export class Workspace {
   // branch went another way, that work is kept on a branch of its own.
   async prepareSharedBranch(branch: string): Promise<void> {
     await this.download();
+    await freeBranch(this.path, branch, this.path);
     const remote = await this.git(
       "branch",
       "--remotes",
