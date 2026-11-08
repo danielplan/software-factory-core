@@ -4,6 +4,12 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## Unreleased
+
+- Fixed: `software-factory upgrade` pinned the core in devDependencies even
+  when the project keeps it in optionalDependencies, so the project ended
+  up with two pins. It now pins it where the project keeps it.
+
 ## 0.4.1 (2026-11-08)
 
 **To upgrade:** pin `release-0.4.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.

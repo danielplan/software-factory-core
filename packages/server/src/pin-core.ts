@@ -1,4 +1,4 @@
-// The core pinned in the project: its package.json's devDependencies name
+// The core pinned in the project: its package.json names
 // this core's release (software-factory, from the core's repository), so
 // everyone with the project runs the same factory after npm install, with
 // npx software-factory. A project without a package.json is left alone.
@@ -10,19 +10,27 @@ import { CORE_VERSION, releaseOf } from "@software-factory/core";
 
 export const CORE_PACKAGE = "software-factory";
 
-// True when the pin changed.
+// True when the pin changed. It is pinned where the project keeps it: in
+// optionalDependencies when the project has it there (so npm install still
+// works for someone who cannot reach the core's repository), otherwise in
+// devDependencies.
 export function pinCore(project: string, version = CORE_VERSION): boolean {
   const file = join(project, "package.json");
   if (!existsSync(file)) return false;
   const text = readFileSync(file, "utf8");
-  const data = JSON.parse(text) as {
-    devDependencies?: Record<string, string>;
-  };
+  const data = JSON.parse(text) as Record<
+    string,
+    Record<string, string> | undefined
+  >;
+  const section =
+    data.optionalDependencies?.[CORE_PACKAGE] === undefined
+      ? "devDependencies"
+      : "optionalDependencies";
   const wanted = releaseOf(version);
-  if (data.devDependencies?.[CORE_PACKAGE] === wanted) return false;
+  if (data[section]?.[CORE_PACKAGE] === wanted) return false;
   const pinned = {
     ...data,
-    devDependencies: { ...data.devDependencies, [CORE_PACKAGE]: wanted },
+    [section]: { ...data[section], [CORE_PACKAGE]: wanted },
   };
   // Written with the indentation the file already has.
   const indent = /\n([ \t]+)"/.exec(text)?.[1] ?? "  ";

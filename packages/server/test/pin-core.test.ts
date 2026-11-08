@@ -37,3 +37,26 @@ test("the project's package.json pins this core's release, in its own indentatio
   // No package.json: left alone.
   assert.equal(pinCore(mkdtempSync(join(tmpdir(), "none-"))), false);
 });
+
+test("a project that keeps the core optional has it pinned there, not added again", () => {
+  const project = mkdtempSync(join(tmpdir(), "pin-"));
+  const file = join(project, "package.json");
+  writeFileSync(
+    file,
+    JSON.stringify({
+      name: "shop",
+      optionalDependencies: { "software-factory": releaseOf("0.1.0") },
+    }),
+  );
+  assert.equal(pinCore(project), true);
+  const read = JSON.parse(readFileSync(file, "utf8")) as Record<
+    string,
+    Record<string, string> | undefined
+  >;
+  assert.equal(
+    read.optionalDependencies?.["software-factory"],
+    releaseOf(CORE_VERSION),
+  );
+  assert.equal(read.devDependencies, undefined);
+  assert.equal(pinCore(project), false);
+});
