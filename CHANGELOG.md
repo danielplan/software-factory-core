@@ -4,6 +4,24 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.5.3 (2026-11-08)
+
+**To upgrade:** pin `release-0.5.3`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- **A builder that stops halfway carries on.** When the builder's turn ends
+  without its status line (it left the tests running and meant to look
+  later), the factory goes on in the same conversation, up to twice, telling
+  it to run its checks in the foreground, fix what fails and finish. Before,
+  the card went back with "stopped without saying how it ended".
+- **When the builder gives up, its work goes up as a draft.** Still red
+  after three rounds of fixing, or unable to finish: the factory opens (or
+  updates) a draft pull request with what it did and what is wrong, and the
+  card waits in In progress for a comment. Before (0.5.1), there was no pull
+  request, so the work could not be seen. A question for the owner still
+  sends the card back to Planning.
+- The factory skill's `board.md` says that a turn is the whole job: nothing
+  keeps running after it.
+
 ## 0.5.2 (2026-11-08)
 
 **To upgrade:** pin `release-0.5.2`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.

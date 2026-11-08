@@ -171,10 +171,12 @@ function lastNote(thread: Message[], kinds: readonly Note[]): Note | null {
   return null;
 }
 
-// The checks still failed after one fix: the build waits for the owner.
+// The builder gave up (the checks still red after its rounds of fixing, or
+// it could not finish): the build waits for the owner's comment.
 function waitingAfterFailedChecks(thread: Message[]): boolean {
+  const gaveUp: readonly Note[] = ["checks-failed", "failed"];
   return (
-    thread.some((m) => readNote(m.body) === "checks-failed") &&
-    !ownerSpokeAfter(thread, ["checks-failed"])
+    thread.some((m) => gaveUp.includes(readNote(m.body) ?? "started")) &&
+    !ownerSpokeAfter(thread, gaveUp)
   );
 }

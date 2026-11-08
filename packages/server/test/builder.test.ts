@@ -399,7 +399,7 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
   work.stop();
 });
 
-test("checks still red after three rounds open no pull request; a question or a stopped build goes back to Planning", async () => {
+test("when the builder gives up, its work goes up as a draft and the card waits; a question goes back to Planning", async () => {
   const { copy } = await project();
   const plan = withPlan("", "The plan.");
   const kept = new Map<number, Kept>([
@@ -416,60 +416,55 @@ test("checks still red after three rounds open no pull request; a question or a 
     false,
     false,
   ]);
+  const card = kept.get(5);
+  assert.ok(card);
+  const last = () => card.comments.at(-1)?.body ?? "";
+  const owner = (body: string) =>
+    card.comments.push({ author: "owner", body, at: now(), where: "card" });
   work.switch("build", true);
   await settled(work);
-  // Checked, then three rounds of fixing, each checked again.
+  // Checked, then three rounds of fixing, each checked again: still red, so
+  // a draft that says what fails, and the card waits in In progress.
   assert.equal(checks.filter((c) => c === "npm test").length, 4);
   assert.ok(prompts.some((p) => p.includes("(round 3 of 3)")));
-  assert.equal(prs.made.length, 0);
-  assert.equal(kept.get(5)?.stage, "doing");
-  const said = kept.get(5)?.comments.at(-1)?.body ?? "";
-  assert.equal(readNote(said), "checks-failed");
-  assert.match(said, /no pull request yet/);
-  assert.match(said, /1 test failed/);
+  assert.equal(prs.made.length, 1);
+  assert.equal(prs.made[0]?.draft, true);
+  assert.match(prs.made[0].body, /## The checks fail[\s\S]*1 test failed/);
+  assert.equal(card.stage, "doing");
+  assert.equal(readNote(last()), "checks-failed");
+  assert.match(last(), /draft pull request, not to merge yet/);
+  await work.refresh();
+  await settled(work);
+  assert.equal(checks.filter((c) => c === "npm test").length, 4);
 
   // The owner's hint lets it try again; this time it asks a question.
   answer = "Which colour?\nSTATUS: blocked";
-  kept.get(5)?.comments.push({
-    author: "owner",
-    body: "Try again",
-    at: now(),
-    where: "card",
-  });
+  owner("Try again");
   await work.refresh();
   await settled(work);
-  assert.equal(kept.get(5)?.stage, "planning");
-  assert.equal(readNote(kept.get(5)?.comments.at(-1)?.body ?? ""), "blocked");
+  assert.equal(card.stage, "planning");
+  assert.equal(readNote(last()), "blocked");
 
-  // Answered and back in Ready: Claude Code cannot start, so it fails.
+  // Answered and back in Ready: Claude Code cannot start. It gives up,
+  // with the draft of what is there, and waits for a comment.
   answer = null;
-  const card = kept.get(5);
-  if (card) {
-    card.comments.push({
-      author: "owner",
-      body: "Blue",
-      at: now(),
-      where: "card",
-    });
-    card.stage = "todo";
-  }
+  owner("Blue");
+  card.stage = "todo";
   await work.refresh();
   await settled(work);
-  assert.equal(kept.get(5)?.stage, "planning");
-  assert.match(
-    kept.get(5)?.comments.at(-1)?.body ?? "",
-    /The build stopped: spawn claude ENOENT/,
-  );
+  assert.equal(card.stage, "doing");
+  assert.equal(readNote(last()), "failed");
+  assert.match(last(), /The build stopped: spawn claude ENOENT/);
+  assert.match(last(), /pull\/100/);
 
-  // An answer without a status line is a failure too.
+  // A comment lets it go on; an answer that never says how it ended gives
+  // up the same way, after it was told twice to carry on.
   answer = "I did something";
-  if (card) card.stage = "todo";
+  owner("Go on");
   await work.refresh();
   await settled(work);
-  assert.match(
-    kept.get(5)?.comments.at(-1)?.body ?? "",
-    /without saying how it ended/,
-  );
+  assert.equal(card.stage, "doing");
+  assert.match(last(), /stopped 3 times without finishing/);
   work.switch("build", false);
   assert.equal(work.view().builder.on, false);
 });
@@ -520,4 +515,34 @@ test("a red check only the owner can fix becomes a question in the card", async 
   const said = kept.get(7)?.comments.at(-1)?.body ?? "";
   assert.equal(readNote(said), "blocked");
   assert.match(said, /payment provider's key/);
+});
+
+test("a builder that stops halfway is told to carry on in the same conversation", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      8,
+      {
+        title: "Half",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  const sessions: { id: string; resume: boolean }[] = [];
+  const { claude, prompts } = pretendClaude((options) => {
+    if (options.session) sessions.push(options.session);
+    writeFileSync(join(options.cwd, "app", "HALF.md"), String(sessions.length));
+    return sessions.length === 1
+      ? "The suite is still running; I'll look at it when it is done."
+      : "Built and checked.\nSTATUS: done";
+  });
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  assert.equal(kept.get(8)?.stage, "review");
+  assert.equal(sessions[1]?.resume, true);
+  assert.equal(sessions[1].id, sessions[0]?.id);
+  assert.match(prompts[1] ?? "", /nothing you started keeps running/);
 });

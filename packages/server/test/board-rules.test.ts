@@ -162,6 +162,12 @@ test("an interrupted build resumes, unless it waits for the owner after failed c
   assert.deepEqual(doing([failed, owner("Try the other port")]), [
     { lane: "build", kind: "build", number: 1 },
   ]);
+  // Gave up without a red check (it could not finish): it waits the same way.
+  const stopped = factory("Stopped", "failed");
+  assert.deepEqual(doing([stopped]), []);
+  assert.deepEqual(doing([stopped, owner("Go on")]), [
+    { lane: "build", kind: "build", number: 1 },
+  ]);
 });
 
 test("review comments on the card or the pull request are answered, first of all", () => {
