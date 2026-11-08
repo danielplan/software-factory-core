@@ -35,7 +35,7 @@ export type CopySettings = {
 
 // All copies share one git store. Downloading into
 // it at the same moment fails on git's lock, so the dashboard server's own downloads wait
-// for each other, and one that meets the runner's lock tries again.
+// for each other, and one that meets another program's lock tries again.
 let gitStoreQueue: Promise<unknown> = Promise.resolve();
 function oneAtATime<T>(work: () => Promise<T>): Promise<T> {
   const next = gitStoreQueue.then(work, work);
@@ -104,6 +104,29 @@ export class Workspace {
         `origin/${this.settings.baseBranch}`,
       );
     else await this.git("checkout", "--quiet", "--force", branch);
+    await this.git("clean", "--quiet", "-fd");
+    this.bringLocalFiles();
+  }
+
+  // A branch kept on GitHub (a card's build): continued from what GitHub
+  // has when it is there, otherwise started from the latest main.
+  async prepareSharedBranch(branch: string): Promise<void> {
+    await this.download();
+    const remote = await this.git(
+      "branch",
+      "--remotes",
+      "--list",
+      `origin/${branch}`,
+    );
+    const from = remote.trim() === "" ? this.settings.baseBranch : branch;
+    await this.git(
+      "checkout",
+      "--quiet",
+      "--force",
+      "-B",
+      branch,
+      `origin/${from}`,
+    );
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
   }

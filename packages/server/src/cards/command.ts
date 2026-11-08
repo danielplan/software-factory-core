@@ -2,22 +2,21 @@
 // owner) in the project, so planning happens where the code is: pick a card,
 // move it to planning, plan it with the owner (prototypes on its branch),
 // and once the owner agrees, write the plan into the card and move it to
-// ready, where the factory's runner takes it, on whichever computer runs it.
+// ready, where the factory's builder takes it, on whichever computer runs it.
 
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { parseArgs } from "node:util";
 
-import { findFactory, readCompany } from "@software-factory/core";
+import { findFactory } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
 import { type Cli, realCli } from "../add-ons/github/github.ts";
-import { readBoard } from "../connect/board-file.ts";
 import { STAGE_COLUMNS } from "../connect/stages.ts";
 import { Refused } from "../refused.ts";
 import { type Card, type Cards, stageNamed } from "./cards.ts";
-import { githubCards, type GitHubBoard } from "./github-cards.ts";
+import { cardsFor } from "./cards-for.ts";
 
 export const CARD_USAGE = `software-factory card list [stage]          the board's cards, with their stage
 software-factory card show <number>          a card: its text, comments, agreed plan
@@ -26,7 +25,7 @@ software-factory card move <number> <stage>  backlog, planning, ready, doing, re
 software-factory card comment <number> --body <text> | --body-file <file>
 software-factory card agree <number> --plan-file <file> [--prototype <branch>]
                                              the plan the owner agreed to, into the card,
-                                             which moves to ready for the factory's runner`;
+                                             which moves to ready for the factory's builder`;
 
 type Out = (line: string) => void;
 
@@ -163,7 +162,7 @@ async function agree(
   );
   await cards.move(number, "todo");
   out(
-    `#${String(number)} has its agreed plan and is ready: the factory's runner takes it from there.`,
+    `#${String(number)} has its agreed plan and is ready: the factory's builder takes it from there.`,
   );
 }
 
@@ -172,20 +171,9 @@ function cardsHere(from: string, cli: Cli): { cards: Cards; project: string } {
   const root = findFactory(from);
   if (!root)
     throw new Refused("There is no factory here: run it in a project.");
-  const read = readCompany(join(root, "factory.json"));
-  if ("problem" in read) throw new Refused(read.problem);
-  const { tracker } = read.company;
-  const entry = readBoard(root)[tracker];
-  if (tracker !== "github" || !entry)
-    throw new Refused(
-      tracker === "none"
-        ? "Work stays on the factory's own board: connect a GitHub board to plan cards here."
-        : `Cards from ${tracker} come later; for now, cards come from a connected GitHub board.`,
-    );
-  return {
-    cards: githubCards(cli, entry as GitHubBoard),
-    project: dirname(root),
-  };
+  const found = cardsFor(root, cli);
+  if ("problem" in found) throw new Refused(found.problem);
+  return { cards: found.cards, project: dirname(root) };
 }
 
 function line(card: Card): string {

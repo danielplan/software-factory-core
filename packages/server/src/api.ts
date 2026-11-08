@@ -37,6 +37,37 @@ export type Job = {
   log: string[];
 };
 
+// A card on the connected board, as the Board tab shows it.
+export type CardView = {
+  number: number;
+  title: string;
+  stage: Stage | null;
+  column: string;
+  url: string;
+};
+
+// What the builder is doing: on or off, the card it works on, its last
+// step, and what went wrong last.
+export type BuilderView = {
+  on: boolean;
+  working: { number: number; title: string; what: string } | null;
+  activity: string | null;
+  problem: string | null;
+};
+
+// The coach answering in the cards: on or off, and the card it answers.
+export type CoachInCardsView = { on: boolean; working: number | null };
+
+export type WorkView = {
+  cards: CardView[];
+  // Why the cards could not be read last time.
+  problem: string | null;
+  // When the board was last read (ISO time); none before the first time.
+  read: string | null;
+  builder: BuilderView;
+  coach: CoachInCardsView;
+};
+
 export type State =
   | {
       mode: "setup";
@@ -59,6 +90,9 @@ export type State =
       kits: KitView[];
       jobs: Job[];
       ideas: IdeaView[];
+      // The connected board's cards, and who works them; none without a
+      // connected board.
+      work: WorkView | null;
       // The connected boards, by tracker add-on (board.json).
       board: Board;
       // Every add-on there is, on or off.

@@ -4,7 +4,40 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
-## Unreleased
+## 0.4.0 (2026-11-08)
+
+**To upgrade:** set `"software-factory":
+"github:danielplan/software-factory-core#release-0.4.0"` in the project's
+devDependencies, `npm install`, then `npx software-factory upgrade`. Nothing
+to change by hand: the upgrade brings the factory skill's new guide
+(`board.md`).
+
+- **The Board tab shows the connected board's cards**, every one in the
+  column of its stage, read every minute and when asked (the button beside
+  the switches). Before, it showed only the factory's own ideas, so a
+  GitHub board looked empty.
+- **The builder** (what the docs called the runner): switched on on the
+  Board tab, it builds the cards in Ready one at a time, on the card's
+  branch `factory/issue-<number>` in a working copy of its own, through the
+  factory's skills. The factory then runs each changed product's verify
+  command itself, gives the builder one round to fix a failure, pushes, and
+  opens a pull request (a draft that says so when the checks still fail),
+  and moves the card to Review. Comments on the card or the pull request are
+  answered on the same branch. A card without an agreed plan, or with a
+  comment after it, goes back to Planning with the reason; a question goes
+  back to Planning; an interrupted build resumes; merged or closed cards go
+  to Done. It never merges. The rules are in `server/src/builder/decide.ts`.
+- **The coach in the cards**: switched on beside it, the coach answers what
+  the owner writes on a card in Planning, one question at a time, in a
+  read-only copy, and writes the agreed plan into the card.
+- **The factory skill's `board.md`**: how the coach and the builder work
+  through the board (status lines, what each stage asks).
+- A working copy can continue a branch kept on GitHub
+  (`Workspace.prepareSharedBranch`).
+- The factory's comments carry a hidden mark naming the kind of note, since
+  the owner and the factory may post with the same account.
+- Less space above every tab.
+- `software-factory card` says "the builder" for what it called the runner.
 
 - **A working copy runs beside the owner's checkout.** Loading a factory
   for a working copy (`loadFactory(root, available, { folder, data, shift })`)

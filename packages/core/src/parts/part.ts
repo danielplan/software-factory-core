@@ -1,5 +1,5 @@
 // A part: one program the factory starts, watches and stops (a product's
-// server, the runner), or only checks (a database). Extensions add the
+// server), or only checks (a database). Extensions add the
 // factory's own parts; kits make one for each product of their kind. The
 // launcher and the System tab read only this list.
 

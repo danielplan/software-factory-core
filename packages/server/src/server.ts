@@ -122,14 +122,12 @@ function routesFor(session: Session): Record<string, Route> {
       session.openFactory();
     },
     "POST /api/add-ons": (body) => {
-      session.switchAddOn(
-        text(body, "id"),
-        (body as { on?: unknown } | null)?.on === true,
-      );
+      session.switchAddOn(text(body, "id"), on(body));
     },
     "POST /api/connect/own-board": () => {
       session.chooseBoard("none");
     },
+    ...workRoutes(session),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
     "POST /api/parts/start": (_b, url) => launcher().start(part(url)),
@@ -306,4 +304,23 @@ function record(body: unknown, key: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null)
     throw new Refused(`Say the ${key}.`);
   return value as Record<string, unknown>;
+}
+
+// The Board tab's buttons: the builder and the coach in the cards switched
+// on or off, and the board read again.
+function workRoutes(session: Session) {
+  return {
+    "POST /api/builder": (body: unknown) => {
+      session.work.orRefuse().switch("build", on(body));
+    },
+    "POST /api/coach-in-cards": (body: unknown) => {
+      session.work.orRefuse().switch("chat", on(body));
+    },
+    "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
+  };
+}
+
+// A switch's new position from a button's body: on only when it says so.
+function on(body: unknown): boolean {
+  return (body as { on?: unknown } | null)?.on === true;
 }

@@ -8,6 +8,7 @@ import type { State } from "../../server/src/api.ts";
 export type {
   AddOnView,
   Board,
+  CardView,
   CoachView,
   Draft,
   GitHubStatus,
@@ -16,6 +17,7 @@ export type {
   IconName,
   StageMap,
   State,
+  WorkView,
 } from "../../server/src/api.ts";
 export type { GroupView } from "../../core/src/index.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";

@@ -43,6 +43,7 @@ import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
 import { switched, trackedWith } from "./add-ons/switch.ts";
+import { ConnectedWork } from "./builder/connect-work.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -75,6 +76,8 @@ export class Session {
   private toolsBase = "";
   // Just set up: connecting the tools comes first.
   private onboarding = false;
+  // The connected board's cards, the builder and the coach in the cards.
+  readonly work: ConnectedWork;
 
   constructor(options: SessionOptions) {
     this.options = options;
@@ -86,6 +89,7 @@ export class Session {
       onChange: options.onChange,
       made: () => this.root !== null,
     });
+    this.work = new ConnectedWork(options);
     const root = join(options.project, FACTORY_FOLDER);
     if (hasFactory(root)) this.open(root);
   }
@@ -118,6 +122,7 @@ export class Session {
       kits,
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
+      work: this.work.view(),
       onboarding: this.onboarding,
     };
   }
@@ -264,6 +269,7 @@ export class Session {
   }
 
   close(): void {
+    this.work.stop();
     this.stopListening?.();
     this.launcher?.stopNow();
     this.launcher?.close();
@@ -285,7 +291,7 @@ export class Session {
     });
     if (this.toolsBase) this.ideas.serveToolsAt(`${this.toolsBase}/ideas/mcp`);
     this.stopListening = this.launcher.subscribe(this.options.onChange);
-    this.options.onChange();
+    this.reload();
   }
 
   private inSetup(): boolean {
@@ -334,11 +340,6 @@ export class Session {
     return done;
   }
 
-  private factoryOrRefuse(): Factory {
-    if (!this.factory) throw new Refused("There is no factory open.");
-    return this.factory;
-  }
-
   private rootOrRefuse(): string {
     if (!this.root) throw new Refused("Name your company first.");
     return this.root;
@@ -353,7 +354,8 @@ export class Session {
   // changed it by hand).
   private changeCompany(change: (company: Company) => Company): void {
     this.reload();
-    saveCompany(this.rootOrRefuse(), change(this.factoryOrRefuse().company));
+    if (!this.factory) throw new Refused("There is no factory open.");
+    saveCompany(this.rootOrRefuse(), change(this.factory.company));
     this.reload();
   }
 
@@ -364,6 +366,7 @@ export class Session {
     if ("problem" in loaded) throw new Refused(loaded.problem);
     this.factory = loaded;
     this.launcher?.setParts(loaded.parts);
+    this.work.connect(root);
     this.options.onChange();
   }
 }

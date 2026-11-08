@@ -157,6 +157,19 @@ test("a copy is made from the base branch, never takes settings files, and links
     "A\tapp/NOTE.md\nA\tapp/pictures\n",
   );
   assert.match(commit, /^[0-9a-f]{40}$/);
+
+  // A card's build on GitHub is continued from there by another copy; a
+  // branch GitHub does not have starts from main.
+  await copy.pushCommit(commit, "factory/card-1");
+  const builds = new Workspace(
+    { source, workspaces: join(folder, "copies"), baseBranch: "main" },
+    "builds",
+  );
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(existsSync(join(builds.path, "app", "NOTE.md")), true);
+  await builds.prepareSharedBranch("factory/card-2");
+  assert.equal(existsSync(join(builds.path, "app", "NOTE.md")), false);
+
   assert.throws(
     () =>
       new Workspace(

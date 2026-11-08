@@ -17,13 +17,15 @@ export type Card = {
   column: string;
   url: string;
   labels: string[];
+  // Closed where it is tracked.
+  closed: boolean;
 };
 
 export type CardDetail = Card & {
   body: string;
   // Whether the card carries an agreed plan.
   agreed: boolean;
-  comments: { author: string; body: string }[];
+  comments: { author: string; body: string; at: string }[];
 };
 
 export type Cards = {

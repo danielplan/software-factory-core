@@ -7,13 +7,13 @@ included, plugs in the same way.
 
 ## The layers
 
-| Layer                      | Who owns it                              | What                                                                                                                          | Where                                                                                         |
-| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice       | `packages/core`, `packages/method`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
-| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, GitHub runner, System and Factory tabs | to come                                                                                       |
-| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                            | to come                                                                                       |
-| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                       | to come                                                                                       |
-| **Products and knowledge** | the company                              | its apps and services, `context/`, `runs/`, its own rules                                                                     | the company's repository                                                                      |
+| Layer                      | Who owns it                              | What                                                                                                                                                 | Where                                                                                         |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                              | `packages/core`, `packages/method`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
+| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, the board with its coach and builder, System and Factory tabs | to come                                                                                       |
+| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                   | to come                                                                                       |
+| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                              | to come                                                                                       |
+| **Products and knowledge** | the company                              | its apps and services, `context/`, `runs/`, its own rules                                                                                            | the company's repository                                                                      |
 
 The rule for any piece: if it would be true for a different company, it is
 core, an extension or a kit; otherwise it is the company's.
@@ -82,7 +82,7 @@ a draft idea, then Backlog, Planning, To do, In progress, Review and Done (`STAG
 in `packages/server/src/api.ts`). Connecting a board picks the label of
 the work the factory takes in and matches its columns to these stages; the
 factory's `board.json` keeps all of it, and only Jira's API token is kept
-in the settings. Both trackers ship with the core runner. In
+in the settings. Both trackers ship with the core; the builder works GitHub boards for now. In
 Jira, issues move with the company's own workflow's transitions,
 the coaching happens in the issue's comments, and the factory checks for
 changed issues every minute (Jira's webhooks need a public address, and the
@@ -132,18 +132,18 @@ on by name (`extensions`); the owner switches them on the dashboard's
 Add-ons page, which also lists the kits. The first add-ons are where work is tracked: a
 GitHub board and Jira Cloud (`tracker: true`). What each adds:
 
-| Point                             | What                                                                                                              | Today                                                                                     |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Parts                             | programs the factory starts, watches and stops                                                                    | extensions add their own; a kit makes the parts for each product of its kind (`partsFor`) |
-| Settings groups                   | a topic, its `.env` file, its fields; shown on the Settings tab                                                   | extensions                                                                                |
-| Guides                            | Markdown joined to an agent's instructions (the coach, the prototype maker, the builder)                          | extensions and kits                                                                       |
-| Commands                          | the usual commands for a kind of product; a product's own win                                                     | kits                                                                                      |
-| Rules                             | conventions and lessons for a kind of product                                                                     | kits                                                                                      |
-| MCP servers                       | the tools agents use on a kind of product (its documentation, its checks), written into the project's `.mcp.json` | kits                                                                                      |
-| Tabs, agent tools, workflow steps | the dashboard's tabs, the coach's tools, the runner's steps                                                       | to come, with the core extensions                                                         |
-| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                                                 | add-ons (`tracker: true`, routes, connecting steps); the runner, to come                  |
-| Code hosts                        | where branches and pull requests go: GitHub                                                                       | to come, with the runner                                                                  |
-| Detection                         | a kit recognises its kind of product in existing code                                                             | to come, with the setup page                                                              |
+| Point                             | What                                                                                                              | Today                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Parts                             | programs the factory starts, watches and stops                                                                    | extensions add their own; a kit makes the parts for each product of its kind (`partsFor`)                    |
+| Settings groups                   | a topic, its `.env` file, its fields; shown on the Settings tab                                                   | extensions                                                                                                   |
+| Guides                            | Markdown joined to an agent's instructions (the coach, the prototype maker, the builder)                          | extensions and kits                                                                                          |
+| Commands                          | the usual commands for a kind of product; a product's own win                                                     | kits                                                                                                         |
+| Rules                             | conventions and lessons for a kind of product                                                                     | kits                                                                                                         |
+| MCP servers                       | the tools agents use on a kind of product (its documentation, its checks), written into the project's `.mcp.json` | kits                                                                                                         |
+| Tabs, agent tools, workflow steps | the dashboard's tabs, the coach's tools, the builder's steps                                                      | to come, with the core extensions                                                                            |
+| Trackers                          | where work is tracked: a GitHub board, Jira Cloud                                                                 | add-ons (`tracker: true`, routes, connecting steps); the builder works GitHub boards (`server/src/builder/`) |
+| Code hosts                        | where branches and pull requests go: GitHub                                                                       | GitHub, in the builder (`server/src/builder/pull-requests.ts`)                                               |
+| Detection                         | a kit recognises its kind of product in existing code                                                             | to come, with the setup page                                                                                 |
 
 Which add-ons the core ships, what each needs, and the order they come in:
 [the add-ons](add-ons.md).

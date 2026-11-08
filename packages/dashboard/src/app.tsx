@@ -8,7 +8,7 @@ import { Dashboard } from "@/dashboard/dashboard";
 export function App() {
   const { state, connected } = useFactoryState();
   return (
-    <div className="glow-page min-h-screen bg-fixed px-4 pt-10 pb-8 sm:px-6 sm:pt-16">
+    <div className="glow-page min-h-screen bg-fixed px-4 pt-4 pb-8 sm:px-6 sm:pt-6">
       <div className="mx-auto grid w-full max-w-[1600px] gap-5">
         {!connected && (
           <div

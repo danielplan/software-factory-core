@@ -17,7 +17,7 @@ company is here: only what is true for any company.
        │ each product describes itself (product.json): kind, users, commands
   EXTENSIONS AND KITS (here, versioned)
        core extensions, on by default: Ideas tab and prototypes,
-         GitHub runner, System and Factory tabs
+         the board with its coach and builder, System and Factory tabs
        add-ons, chosen per company: made-up worlds
        kits, one per kind of product: Expo app, React web app, SvelteKit web app,
          NestJS backend, TypeScript package
@@ -68,7 +68,7 @@ idea and sets it up there.
 | `examples/acme/`           | An example company's factory folder, used by the tests                                                                                                                                      |
 
 Next: drafting each product's blueprint and the knowledge pages from the code
-for review, the runner on the GitHub board and Jira, the Ideas tab and
+for review, the builder on Jira, the Ideas tab and
 prototypes, and an upgrade command.
 
 ## Working on the core

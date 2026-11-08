@@ -24,6 +24,7 @@ type Issue = {
   url: string;
   repository: string;
   labels: string[];
+  closed: boolean;
 };
 type Item = { id: string; status: string; issue: Issue | null };
 type Project = { id: string; items: Item[] };
@@ -63,15 +64,20 @@ class GitHubCards {
     const { card } = await this.find(number);
     const read = await this.issue<{
       body: string;
-      comments: { author: { login: string }; body: string }[];
+      comments: {
+        author: { login: string } | null;
+        body: string;
+        createdAt: string;
+      }[];
     }>(number, "body,comments");
     return {
       ...card,
       body: read.body,
       agreed: planOf(read.body) !== null,
       comments: read.comments.map((c) => ({
-        author: c.author.login,
+        author: c.author?.login ?? "",
         body: c.body,
+        at: c.createdAt,
       })),
     };
   }
@@ -155,6 +161,7 @@ class GitHubCards {
       column: item.status,
       url: issue.url,
       labels: issue.labels,
+      closed: issue.closed,
     };
   }
 
@@ -215,7 +222,7 @@ class GitHubCards {
 
 const ITEMS = `id items(first: 100) { nodes { id
   fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
-  content { ... on Issue { number title url repository { nameWithOwner } labels(first: 20) { nodes { name } } } } } }`;
+  content { ... on Issue { number title url state repository { nameWithOwner } labels(first: 20) { nodes { name } } } } } }`;
 
 type Node = {
   id: string;
@@ -224,6 +231,7 @@ type Node = {
     number?: number;
     title?: string;
     url?: string;
+    state?: string;
     repository?: { nameWithOwner: string };
     labels?: { nodes: { name: string }[] };
   } | null;
@@ -250,6 +258,7 @@ function itemOf(node: Node): Item {
             url: content.url ?? "",
             repository: content.repository?.nameWithOwner ?? "",
             labels: content.labels?.nodes.map((l) => l.name) ?? [],
+            closed: content.state === "CLOSED",
           },
   };
 }

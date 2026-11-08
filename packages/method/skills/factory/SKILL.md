@@ -31,11 +31,11 @@ When the person asks to update the factory itself to a newer core, use [`upgrade
 
 ## Work from the board
 
-When the factory is connected to a board, work lives there: anyone adds cards to its backlog, and whoever runs the factory's runner builds the cards that are ready. In the project, the `npx software-factory card` command reads and moves them (`npx software-factory card help` lists what it does).
+When the factory is connected to a board, work lives there: anyone adds cards to its backlog, and the factory's builder builds the cards that are ready, on the computer where the factory is open with its builder switched on (the Board tab). The coach can plan cards in their comments there too; how both work through the board is in [board.md](board.md). In the project, the `npx software-factory card` command reads and moves them (`npx software-factory card help` lists what it does).
 
 - **Pick the work:** `npx software-factory card list` (or `list backlog`) shows the cards; `card show <number>` one card, with its comments. When the person brings a new request that belongs on the board, make it a card first: `card new "<title>" --body-file <file>`.
 - **Plan it here:** move the card to planning (`card move <number> planning`), open the run for it (its Request links the card), and plan it with the person with [`plan`](../plan/SKILL.md), prototypes included.
-- **Hand it on:** once the person agrees to the plan, `plan` writes it into the card and moves the card to ready. Then stop: the runner builds it, on whichever computer runs it. If the person wants it built here instead, say so, move the card to in progress and carry on with `build-test-first`.
+- **Hand it on:** once the person agrees to the plan, `plan` writes it into the card and moves the card to ready. Then stop: the builder builds it, on the computer where the factory runs with its builder on. If the person wants it built here instead, say so, move the card to in progress and carry on with `build-test-first`.
 
 When an extension of the factory started you (its prompt says so), also follow the guide that extension names: it says how to answer there and what that setting changes.
 
