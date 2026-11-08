@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -17,7 +17,7 @@ import {
   readCompany,
 } from "@software-factory/core";
 import { allKits } from "@software-factory/kits";
-import { templateFolder } from "@software-factory/knowledge-base";
+import { checkDocs, templateFolder } from "@software-factory/knowledge-base";
 
 import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { jiraAddOn } from "../src/add-ons/jira/index.ts";
@@ -31,6 +31,7 @@ import { upgradeFactory } from "../src/upgrade/upgrade.ts";
 
 const extensions = [githubAddOn(), jiraAddOn()].map((a) => a.extension);
 const write = (file: string, text: string) => {
+  mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, text);
 };
 
@@ -93,13 +94,26 @@ test("an old factory is brought to the core's version, step by step", async () =
   assert.equal(read.company.core, CORE_VERSION);
   assert.deepEqual(read.company.kits, ["sveltekit-app"]);
   assert.deepEqual(read.company.without, ["jira"]);
+  // 0.6.0: the product is described next to its code, and listed.
+  assert.deepEqual(read.company.products, ["web"]);
   const product = JSON.parse(
-    readFileSync(join(root, "products", "web", "product.json"), "utf8"),
-  ) as { kind: string };
+    readFileSync(join(project, "web", "product.json"), "utf8"),
+  ) as { kind: string; code?: string };
   assert.equal(product.kind, "sveltekit-app");
+  assert.equal(product.code, undefined);
   assert.match(
-    readFileSync(join(root, "products", "web", "BLUEPRINT.md"), "utf8"),
+    readFileSync(join(project, "web", "BLUEPRINT.md"), "utf8"),
     /- \*\*Kind:\*\* sveltekit-app\.\n/,
+  );
+  assert.ok(!existsSync(join(root, "products")));
+  // …and the knowledge base is in the project's docs/, and holds.
+  assert.ok(existsSync(join(project, "docs", "index.md")));
+  assert.ok(!existsSync(join(root, "context")));
+  assert.deepEqual(
+    (await checkDocs(join(project, "docs"), { knowledgeBase: true })).filter(
+      (p) => !p.hint,
+    ),
+    [],
   );
   assert.match(
     readFileSync(join(root, "AGENTS.md"), "utf8"),
@@ -140,7 +154,7 @@ test("what a migration cannot do alone is left to the owner, and said", async ()
   assert.match(said, /^Upgraded the factory from 0\.1\.0 to /);
   assert.match(
     said,
-    /Needs you:\n- Say in products\/web\/BLUEPRINT\.md that its kind is sveltekit-app\.\n- Add to factory\/AGENTS\.md: When the factory/,
+    /Needs you:\n- Say in Web's BLUEPRINT\.md that its kind is sveltekit-app\.\n- Add to factory\/AGENTS\.md: When the factory/,
   );
   assert.match(said, /Review the changes \(git diff\), then commit them\.$/);
   const lines2: string[] = [];
@@ -235,4 +249,76 @@ test("a factory on 0.4.1 names the knowledge base's check command in its ground 
     readFileSync(rules, "utf8"),
     "- After changing Markdown pages, run the knowledge base's checks (`npx software-factory check-docs`).\n",
   );
+});
+
+test("0.6.0 moves the knowledge base into the project's docs and the products next to their code, setting every link", async () => {
+  const { project, root } = oldFactory("- **Kind:** sveltekit-app.");
+  write(
+    join(root, "factory.json"),
+    JSON.stringify({
+      name: "Acme",
+      tracker: "github",
+      core: "0.5.2",
+      kits: ["sveltekit-app"],
+    }),
+  );
+  // The project's own docs, one page of the same name with other text, and
+  // links from elsewhere into the factory's folders.
+  write(
+    join(project, "docs", "design.md"),
+    "# Design\n\nSee [how work goes](../factory/context/explanation/index.md).\n",
+  );
+  write(join(project, "docs", "how-to", "index.md"), "# Our own how-tos\n");
+  write(
+    join(project, "README.md"),
+    "Read `factory/context/index.md` and [the web blueprint](factory/products/web/BLUEPRINT.md).\n",
+  );
+  write(
+    join(root, "context", "reference", "web.md"),
+    "# Web\n\n**Type:** Reference · Answers: what is web?\n\n[Blueprint](../../products/web/BLUEPRINT.md) · [Index](../index.md)\n",
+  );
+  const result = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.ok(
+    result.done.some((line) => line.startsWith("Moved the knowledge base")),
+  );
+  assert.ok(
+    result.done.some((line) =>
+      line.startsWith("Moved each product's description"),
+    ),
+  );
+  // The page with other text stays, for the owner.
+  assert.deepEqual(result.left, [
+    "factory/context/how-to/index.md stays where it is: docs/how-to/index.md has other text. Merge them by hand.",
+  ]);
+  assert.equal(
+    readFileSync(join(project, "docs", "how-to", "index.md"), "utf8"),
+    "# Our own how-tos\n",
+  );
+  assert.ok(existsSync(join(root, "context", "how-to", "index.md")));
+  // Links from the project's own pages, written paths, and the moved pages' own links.
+  assert.equal(
+    readFileSync(join(project, "docs", "design.md"), "utf8"),
+    "# Design\n\nSee [how work goes](explanation/index.md).\n",
+  );
+  assert.equal(
+    readFileSync(join(project, "README.md"), "utf8"),
+    "Read `docs/index.md` and [the web blueprint](web/BLUEPRINT.md).\n",
+  );
+  assert.equal(
+    readFileSync(join(project, "docs", "reference", "web.md"), "utf8"),
+    "# Web\n\n**Type:** Reference · Answers: what is web?\n\n[Blueprint](../../web/BLUEPRINT.md) · [Index](../index.md)\n",
+  );
+  // Done once: nothing more moves.
+  const again = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.deepEqual(again.done, ["Refreshed the skills (14 folders)."]);
 });

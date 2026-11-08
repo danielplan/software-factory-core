@@ -195,9 +195,10 @@ test("the coach plans on the map, builds the factory once the owner says so, and
     assert.ok(existsSync(join(project, "blog")));
     const shop = made.products.find((p) => p.id === "shop");
     assert.deepEqual(shop?.users, [{ who: "Customers", does: "buy tools" }]);
-    assert.ok(
-      existsSync(join(project, "factory", "products", "shop", "BLUEPRINT.md")),
-    );
+    // Its description and blueprint sit next to its code.
+    assert.ok(shop);
+    assert.ok(existsSync(join(shop.folder, "BLUEPRINT.md")));
+    assert.ok(existsSync(join(shop.folder, "product.json")));
     assert.equal(
       (await post("/api/setup/draft", { remove: "card-1" })).status,
       409,

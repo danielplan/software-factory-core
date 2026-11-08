@@ -7,7 +7,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -101,8 +101,13 @@ test("a new factory folder: the company file, the knowledge base, the history an
     readFileSync(join(root, "AGENTS.md"), "utf8"),
     "# Acme's factory\n",
   );
-  for (const file of ["context/index.md", "runs/README.md", ".gitignore"])
+  for (const file of ["runs/README.md", ".gitignore"])
     assert.ok(existsSync(join(root, file)), file);
+  // The knowledge base goes into the project's docs/, never over its own docs.
+  assert.equal(
+    readFileSync(join(root, "..", "docs", "index.md"), "utf8"),
+    "# Knowledge base\n",
+  );
   assert.throws(
     () =>
       createFactoryFolder(
@@ -117,52 +122,41 @@ test("a new factory folder: the company file, the knowledge base, the history an
   assert.ok("company" in read);
   assert.equal(read.company.tracker, "jira");
 
-  // A product near the folder keeps a relative path to its code; one far
-  // away keeps its whole path.
-  const near = join(root, "..", "shop");
-  addProduct(root, {
+  // A product is described next to its code and listed from the project's
+  // root; one outside the project is listed with its whole path.
+  const shop = join(root, "..", "apps", "shop");
+  const product = {
     id: "shop",
     name: "Shop",
     kind: "web",
-    folder: near,
+    folder: shop,
     about: "",
     users: [],
     commands: {},
     dependsOn: [],
-    port: 5173,
-  });
+  };
+  addProduct(root, { ...product, port: 5173 });
   const found = findProducts(root);
   assert.deepEqual(found.problems, []);
-  assert.equal(found.products[0]?.folder, near);
-  assert.equal(found.products[0].code, "../../../shop");
+  assert.equal(found.products[0]?.folder, resolve(shop));
+  assert.equal(found.products[0].home, resolve(shop));
   assert.match(
-    readFileSync(join(root, "products", "shop", "BLUEPRINT.md"), "utf8"),
+    readFileSync(join(shop, "BLUEPRINT.md"), "utf8"),
     /# Shop blueprint/,
   );
-  addProduct(root, {
-    id: "far",
-    name: "Far",
-    kind: "web",
-    folder: "/somewhere/else/far",
-    about: "",
-    users: [],
-    commands: {},
-    dependsOn: [],
-  });
-  assert.equal(findProducts(root).products[0]?.code, "/somewhere/else/far");
-  assert.throws(
-    () =>
-      addProduct(root, {
-        id: "shop",
-        name: "Shop",
-        kind: "web",
-        folder: near,
-        about: "",
-        users: [],
-        commands: {},
-        dependsOn: [],
-      }),
-    /There is a product "shop"/,
+  const far = mkdtempSync(join(tmpdir(), "far-"));
+  addProduct(root, { ...product, id: "far", name: "Far", folder: far });
+  const listed = readCompany(join(root, "factory.json"));
+  assert.ok("company" in listed);
+  assert.deepEqual(listed.company.products, ["apps/shop", far]);
+  assert.equal(findProducts(root).products[1]?.folder, far);
+  assert.throws(() => addProduct(root, product), /There is a product in/);
+
+  // A product the list names but that has no description is said plainly.
+  saveCompany(root, { ...listed.company, products: ["apps/shop", "gone"] });
+  assert.match(
+    findProducts(root).problems.join(),
+    /gone: there is no product\.json/,
   );
 });
 

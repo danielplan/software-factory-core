@@ -2,6 +2,8 @@
   "name": "Acme",
   "about": "Sells garden tools online.",
   "tracker": "none",
+  "extensions": [],
+  "without": [],
   "kits": ["react-web-app", "nestjs-backend"],
-  "extensions": []
+  "products": ["orders", "shop"]
 }

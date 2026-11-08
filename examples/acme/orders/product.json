@@ -2,7 +2,6 @@
   "id": "orders",
   "name": "Orders service",
   "kind": "nestjs-backend",
-  "code": "../../../orders",
   "about": "Keeps the catalogue, the customers and their orders, for the shop.",
   "users": [
     {

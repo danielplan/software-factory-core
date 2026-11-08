@@ -58,15 +58,17 @@ async function project() {
       tracker: "github",
       kits: ["web-kit"],
       extensions: [],
+      // The product is described next to its code (0.6.0): the builder's own
+      // checks find it there.
+      products: ["app"],
     }),
   );
   write(
-    "factory/products/app/product.json",
+    "app/product.json",
     JSON.stringify({
       id: "app",
       name: "App",
       kind: "web-app",
-      code: "../../../app",
       about: "The app.",
     }),
   );

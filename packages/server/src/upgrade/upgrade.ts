@@ -3,8 +3,6 @@
 // in the project, refreshed every time (the skills, the kits' MCP
 // servers); the new version in factory.json; and the factory's checks.
 
-import { join } from "node:path";
-
 import {
   compareVersions,
   CORE_VERSION,
@@ -12,7 +10,7 @@ import {
   loadFactory,
   saveCompany,
 } from "@software-factory/core";
-import { checkDocs } from "@software-factory/knowledge-base";
+import { checkKnowledge } from "../knowledge-check.ts";
 
 import { installSkills } from "../install-skills.ts";
 import { addKitServers } from "../kit-servers.ts";
@@ -79,10 +77,10 @@ async function problemsOf({
   extensions,
 }: UpgradeContext): Promise<string[]> {
   const loaded = loadFactory(root, { kits, extensions });
-  const docs = await checkDocs(join(root, "context"));
+  const docs = await checkKnowledge(root);
   return [
     ...("problem" in loaded ? [loaded.problem] : loaded.problems),
     ...themeProblems(project),
-    ...docs.map((p) => `context/${p.file}: ${p.message}`),
+    ...docs.faults,
   ];
 }

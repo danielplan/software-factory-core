@@ -18,6 +18,7 @@ import {
 } from "@software-factory/core";
 
 import { trackedWith } from "../add-ons/switch.ts";
+import { moveOut } from "./move-out.ts";
 import { Refused } from "../refused.ts";
 
 export type UpgradeContext = {
@@ -87,6 +88,23 @@ export const MIGRATIONS: Migration[] = [
         "The agents' ground rules name the command that checks the knowledge base.",
       ),
   },
+  {
+    version: "0.6.0",
+    about:
+      "The knowledge base joins the project's docs/; products are described next to their code",
+    run: moveOut,
+  },
+  {
+    version: "0.6.0",
+    about: "The agents' ground rules point to docs/ for what the company knows",
+    run: ({ root }) =>
+      replaceIn(
+        join(root, "AGENTS.md"),
+        /`context\//g,
+        "`docs/",
+        "The agents' ground rules point to docs/ for the knowledge base.",
+      ),
+  },
 ];
 
 // A product described as other code that a kit now recognises becomes that
@@ -112,7 +130,7 @@ function kindsKitsNowKnow({ root, kits }: UpgradeContext): Migrated {
     const blueprint = join(root, "products", product.id, "BLUEPRINT.md");
     if (!replaceKind(blueprint, kit.kind))
       left.push(
-        `Say in products/${product.id}/BLUEPRINT.md that its kind is ${kit.kind}.`,
+        `Say in ${product.name}'s BLUEPRINT.md that its kind is ${kit.kind}.`,
       );
   }
   if (done.length > 0) keepKitsOfProducts(root, kits);

@@ -7,7 +7,7 @@ Factory sets the scene and routes the next move through the skills. It is the en
 
 ## Approach
 
-Read the company's instructions (`AGENTS.md`), the relevant knowledge (start at context/index.md) and the current state of the products involved. Each product describes itself in its folder: its `product.json` (name, kind, who uses it, its commands) and its `BLUEPRINT.md` (kind, structure, promises, checks). If the request could change more than one product, ask which one before planning.
+Read the company's instructions (`AGENTS.md`), the relevant knowledge (start at `docs/index.md`) and the current state of the products involved. Each product describes itself in its own folder (`factory/factory.json` lists them): its `product.json` (name, kind, who uses it, its commands) and its `BLUEPRINT.md` (kind, structure, promises, checks). If the request could change more than one product, ask which one before planning.
 
 Start a new run in runs/NNN-short-name.md, numbered after the last one, with the following sections:
 

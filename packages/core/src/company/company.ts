@@ -1,8 +1,9 @@
 // The company file (factory.json, at the root of the company's factory
 // folder, on this computer): the company's name, which extensions and kits
-// its factory uses, and where its work is tracked. Everything else lives in
-// the folder: its products' descriptions (products/), its knowledge
-// (context/) and its history (runs/).
+// its factory uses, where its work is tracked, and where its products are.
+// Each product describes itself next to its code (product.json, BLUEPRINT.md);
+// what the company knows is in the project's docs/; the factory folder keeps
+// the history (runs/).
 
 import { readFileSync } from "node:fs";
 
@@ -28,6 +29,10 @@ export const companySchema = z.object({
   kits: z.array(id).default([]),
   // The core's version the factory is on (version.ts); none: the first.
   core: z.string().optional(),
+  // The products' folders, from the project's root ("apps/web"): each has its
+  // product.json and BLUEPRINT.md. None: a factory from before 0.6.0, whose
+  // products are described in its own products/ folder.
+  products: z.array(z.string().min(1)).optional(),
 });
 
 export type Company = z.infer<typeof companySchema>;

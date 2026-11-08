@@ -1,5 +1,6 @@
 // The knowledge-base rules that no standard tool checks, inside every folder
-// named `context/` (a company's knowledge base, or the template):
+// named `context/` (the template, a factory from before 0.6.0) and inside the
+// knowledge base checked as such (a project's docs/):
 // - every page sits in a Diátaxis folder, and its "**Type:**" line matches
 //   the folder and says which question the page answers ("Answers:");
 // - decision records are MADR: NNNN-title.md, front matter, the three headings;
@@ -27,11 +28,18 @@ const TYPE_START = "**Type:** ";
 const OUTSIDE =
   "Page outside the Diátaxis sections (use tutorials/, how-to/, reference/, explanation/ or decisions/)";
 
-// The knowledge base a page belongs to ("context" or "company/context"), and
-// its path inside it; null when the page is not in one.
+// A page longer than this many words gets a hint to split it: a page is about
+// a screen or two (how-to/maintain-the-knowledge-base.md).
+export const LONG_PAGE_WORDS = 1200;
+
+// The knowledge base a page belongs to ("context", "company/context", or "."
+// when the folder checked is the knowledge base itself), and its path inside
+// it; null when the page is not in one.
 export function placeInContext(
   file: string,
+  whole = false,
 ): { base: string; inside: string } | null {
+  if (whole) return { base: ".", inside: file };
   const parts = file.split("/");
   const at = parts.indexOf("context");
   if (at < 0 || at === parts.length - 1) return null;
@@ -114,19 +122,36 @@ function runHeadings(file: string, text: string): Problem[] {
     }));
 }
 
-// pages: every Markdown file under the root checked, with its text.
-export function checkRules(pages: Map<string, string>): Problem[] {
+// A page that has grown past a screen or two: a hint to split it.
+function lengthHint(file: string, text: string): Problem[] {
+  const words = text.split(/\s+/).filter(Boolean).length;
+  if (words <= LONG_PAGE_WORDS) return [];
+  return [
+    {
+      file,
+      message: `Long page (${String(words)} words): split it by the questions it answers, a screen or two each`,
+      hint: true,
+    },
+  ];
+}
+
+// pages: every Markdown file under the root checked, with its text; whole:
+// the root checked is a knowledge base itself (a project's docs/).
+export function checkRules(
+  pages: Map<string, string>,
+  whole = false,
+): Problem[] {
   const problems: Problem[] = [];
   const linked = linkedFiles(pages);
   for (const [file, text] of pages) {
-    const place = placeInContext(file);
+    const place = placeInContext(file, whole);
     if (posix.basename(file) === "BLUEPRINT.md")
       problems.push(...runHeadings(file, text));
     if (!place) continue;
     for (const message of pageProblems(place.inside, text))
       problems.push({ file, message });
     if (place.inside.startsWith("sources/")) continue;
-    problems.push(...runHeadings(file, text));
+    problems.push(...runHeadings(file, text), ...lengthHint(file, text));
     if (place.inside !== "index.md" && !linked.has(file))
       problems.push({
         file,

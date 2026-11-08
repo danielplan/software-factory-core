@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -38,7 +38,7 @@ test("help is printed, never taken for a folder; a folder or nothing starts the 
     assert.equal((await said(args, here)).code, null);
 });
 
-test("check-docs runs the knowledge base's checks of the project's factory", async () => {
+test("check-docs runs the knowledge base's checks of the project's docs", async () => {
   const outside = await said(
     ["check-docs"],
     mkdtempSync(join(tmpdir(), "none-")),
@@ -47,14 +47,44 @@ test("check-docs runs the knowledge base's checks of the project's factory", asy
   assert.match(outside.said, /no factory here/);
 
   const project = mkdtempSync(join(tmpdir(), "kb-"));
-  mkdirSync(join(project, "factory", "context"), { recursive: true });
+  mkdirSync(join(project, "factory"), { recursive: true });
   writeFileSync(join(project, "factory", "factory.json"), "{}");
+  // A factory from before 0.6.0, not upgraded yet, is told so.
+  assert.match(
+    (await said(["check-docs"], project)).said,
+    /no knowledge base yet/,
+  );
+
+  mkdirSync(join(project, "docs", "explanation"), { recursive: true });
+  const index =
+    "# Docs\n\n**Type:** Index · Answers: where is what?\n\n[Why](explanation/why.md)";
   writeFileSync(
-    join(project, "factory", "context", "index.md"),
-    "# Context\n\nSee [missing](nowhere.md).\n",
+    join(project, "docs", "index.md"),
+    `${index} · [missing](nowhere.md)\n`,
+  );
+  // A page outside the sections fails; a long page only gets a hint.
+  writeFileSync(join(project, "docs", "notes.md"), "# Notes\n");
+  writeFileSync(
+    join(project, "docs", "explanation", "why.md"),
+    `# Why\n\n**Type:** Explanation · Answers: why?\n\n${"word ".repeat(1300)}\n`,
   );
   const broken = await said(["check-docs"], project);
   assert.equal(broken.code, 1);
-  assert.match(broken.said, /index\.md/);
+  assert.match(broken.said, /docs\/index\.md/);
+  assert.match(
+    broken.said,
+    /docs\/notes\.md: Page outside the Diátaxis sections/,
+  );
+  assert.match(
+    broken.said,
+    /Hint: docs\/explanation\/why\.md: Long page \(13\d\d words\)/,
+  );
   assert.match(broken.said, /problem\(s\) in the knowledge base/);
+
+  // Only the hint left: the check holds.
+  writeFileSync(join(project, "docs", "index.md"), `${index}\n`);
+  rmSync(join(project, "docs", "notes.md"));
+  const fine = await said(["check-docs"], project);
+  assert.equal(fine.code, 0);
+  assert.match(fine.said, /Hint: /);
 });

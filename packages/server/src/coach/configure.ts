@@ -16,7 +16,7 @@ import {
   type Kit,
   withFreePorts,
 } from "@software-factory/core";
-import { checkDocs } from "@software-factory/knowledge-base";
+import { checkKnowledge } from "../knowledge-check.ts";
 
 import type { SetupProduct } from "../api.ts";
 import type { Board } from "../connect/board-file.ts";
@@ -214,14 +214,11 @@ function kitFor(
 // What the factory's checks still find: its own loading, the knowledge
 // base's rules, and the theme, if there is one.
 async function checks(shop: Workshop, root: string): Promise<string[]> {
-  const docs = await checkDocs(join(root, "context"));
+  const docs = await checkKnowledge(root);
   const found = [
     ...shop.problems(),
     ...themeProblems(shop.project),
-    ...docs.map((p) => {
-      const line = p.line ? ":" + String(p.line) : "";
-      return `context/${p.file}${line}: ${p.message}`;
-    }),
+    ...docs.faults,
   ];
   return found.length === 0
     ? ["The factory's checks find nothing wrong."]

@@ -1,0 +1,30 @@
+// The knowledge base's checks on a factory's project (its docs/), in the lines
+// the factory says them in: faults, and hints that don't fail (a long page).
+
+import { existsSync } from "node:fs";
+
+import { knowledgeBaseOf } from "@software-factory/core";
+import { checkDocs } from "@software-factory/knowledge-base";
+
+export type Said = { faults: string[]; hints: string[] };
+
+export async function checkKnowledge(root: string): Promise<Said> {
+  if (!existsSync(knowledgeBaseOf(root)))
+    return {
+      faults: [
+        "docs/: there is no knowledge base yet (a factory from before 0.6.0 gets it with `npx software-factory upgrade`)",
+      ],
+      hints: [],
+    };
+  const problems = await checkDocs(knowledgeBaseOf(root), {
+    knowledgeBase: true,
+  });
+  const said = (p: (typeof problems)[number]) => {
+    const line = p.line ? `:${String(p.line)}` : "";
+    return `docs/${p.file}${line}: ${p.message}`;
+  };
+  return {
+    faults: problems.filter((p) => !p.hint).map(said),
+    hints: problems.filter((p) => p.hint).map(said),
+  };
+}

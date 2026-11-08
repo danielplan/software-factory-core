@@ -13,7 +13,7 @@ included, plugs in the same way.
 | **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Ideas tab and prototypes, the board with its coach and builder, System and Factory tabs | to come                                                                                       |
 | **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                   | to come                                                                                       |
 | **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                              | to come                                                                                       |
-| **Products and knowledge** | the company                              | its apps and services, `context/`, `runs/`, its own rules                                                                                            | the company's repository                                                                      |
+| **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                               | the company's repository                                                                      |
 
 The rule for any piece: if it would be true for a different company, it is
 core, an extension or a kit; otherwise it is the company's.
@@ -95,15 +95,13 @@ hosts later.
 ```text
 acme/                    the project, one repository
 ├─ AGENTS.md             the project's rules, pointing to factory/AGENTS.md
-├─ shop/                 a product's code
-├─ orders/               another product's code
+├─ docs/                 what the company knows: its own docs and the
+│                        knowledge base's sections, one space
+├─ shop/                 a product's code, with product.json and BLUEPRINT.md
+├─ orders/               another product, described the same way
 └─ factory/              its factory
    ├─ AGENTS.md          the agents' ground rules and workflow
-   ├─ factory.json       the company: its kits and add-ons
-   ├─ products/shop/
-   │  ├─ product.json    the product described: kind, users, commands, code
-   │  └─ BLUEPRINT.md    its structure, promises and checks
-   ├─ context/           its knowledge base (from the template)
+   ├─ factory.json       the company: its kits, add-ons and products' folders
    ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
@@ -111,8 +109,13 @@ acme/                    the project, one repository
    └─ settings/, copies/ secrets and working copies, not in git
 ```
 
-Each product's description points at its code with a path from it
-(`../../../shop`), so the project can move as a whole.
+Each product describes itself next to its code (`shop/product.json`: kind,
+users, commands; `shop/BLUEPRINT.md`: its structure, promises and checks),
+and `factory.json` lists the products' folders from the project's root, so
+the project can move as a whole. What the company knows is one space with its
+own documentation: the project's `docs/`, the knowledge base's sections beside
+the pages it already had (from 0.6.0; before, `factory/context/` and
+`factory/products/`, which the upgrade moves).
 
 The core never names a product. It reads each product's description (see
 `productSchema` in `packages/core/src/products/product.ts`) and the company
