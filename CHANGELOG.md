@@ -4,6 +4,12 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## 0.8.1 (2026-11-08)
+
+**To upgrade:** pin `release-0.8.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+
+- Changed: the `plan` skill agrees a card that already holds a complete spec (the request, the scope, the checks, what is out of scope) as it is, with no coaching steps: the coach writes the card's own text as the plan with `card agree`. The owner's writing the spec, or moving the card to Ready, is the agreement, so such a card is no longer sent back to Planning for lack of an agreed plan.
+
 ## 0.8.0 (2026-11-08)
 
 **To upgrade:** pin `release-0.8.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand. The new `prototype` skill is put in `.claude/skills` and `.agents/skills` by `software-factory upgrade`. A project that already has a skill of its own called `prototype` keeps it (the factory never overwrites a skill it did not put there): delete that folder, then upgrade, to take the core's.

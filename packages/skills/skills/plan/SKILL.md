@@ -11,6 +11,10 @@ Be a collaborative partner that coaches the person to make informed decisions. S
 
 Go through the following four steps of the request: product, UX/UI, architecture and design, and testing. Keep it short: for a small change, each touched step is a line or two, and untouched steps are skipped. If the request is already a single small step, say so and move on.
 
+## A card that is already a complete spec
+
+When the card already says the request, the scope, the checks and what is out of scope, do not coach it through the four steps. Check it against the code and the board for conflicts, name anything it cannot settle in one short list, and agree it as it is: write the card's own text into the plan file and run `npx software-factory card agree <number> --plan-file <file>`. The owner does not have to agree twice; their writing the spec, or moving the card to Ready, is the agreement. A prototype is only made when the owner asks for one.
+
 ## How a session runs
 
 - **One step per message, in order.** Later steps depend on earlier ones. Go back if an earlier answer turns out wrong, and say so.
