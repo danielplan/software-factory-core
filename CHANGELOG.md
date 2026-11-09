@@ -4,9 +4,9 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
-## 0.9.0 (2026-11-09)
+## 0.9.1 (2026-11-09)
 
-**To upgrade:** pin `release-0.9.0`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand.
+**To upgrade:** pin `release-0.9.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand. (`v0.9.0` was tagged with the wrong version number inside and never released; use 0.9.1.)
 
 - New: the builder can end a session with `STATUS: continue`: the agreed scope is not finished and nothing blocks it. The factory then starts the next session on the card's branch, which carries on from the run file, with no question to the owner and no pull request for part of the work. It gives up (a draft pull request, the card waits in In progress) when two sessions in a row add no commit, or after twelve sessions in all. A short "progress" note goes on the card every third session.
 - Changed: the builder guide (`board.md`, "Building") says to stop only for a real problem that only the owner can solve (an account, a credential, a purchase, a decision that changes scope, data or what people see, a contradiction in the plan); size, effort and risk are not reasons to stop. Steps in a plan are an order to build in, not places to stop, and a small decision the plan leaves open is decided and written into the run file instead of asked. Before this, a large card made the builder stop with a question although nothing was wrong.
