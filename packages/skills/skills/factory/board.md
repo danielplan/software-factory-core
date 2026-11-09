@@ -57,13 +57,26 @@ own working copy; it has its own settings files, made from the examples.
 - Install packages where they are missing before running anything.
 - Screenshots: save them in the run's folder, commit them, and show them as
   `![what it shows](path/in/the/repository.png)`; the factory links them.
-- A decision the agreed plan does not settle: stop and ask instead of
-  guessing.
+- Stop only for a real problem, one that only the owner can solve: an
+  account, a credential, a purchase, a decision that changes scope, data or
+  what people see in a way the plan did not cover, or something in the plan
+  that contradicts the code. Size, effort and risk are not reasons to stop.
+- A decision the plan does not settle and that is cheap to change later:
+  decide it, write it into the run file with the reason, and carry on.
+- When the plan lists steps, they are the order to build in, not places to
+  stop. Build in small pieces that each keep the product working, and commit
+  each piece once its checks pass.
+- Your turn may end before the whole scope is built. When nothing is wrong
+  and the agreed scope is not finished, update the run file (what is done,
+  what is next) and end with `STATUS: continue`: the factory starts the next
+  session on the same branch, which reads the run file and carries on. Do not
+  open a pull request for part of the scope, and do not ask the owner whether
+  to go on. Each session must add at least one commit, or the factory stops.
 - When the agreed scope is built and checked, write the pull request's
   description: what was built, how to try it, what was checked, what was not
   checked and why. `STATUS: done`.
-- When you are stuck or need a decision: say what is done so far and ask one
-  clear question. `STATUS: blocked`.
+- When you are stuck or need a decision that is the owner's: say what is done
+  so far and ask one clear question. `STATUS: blocked`.
 
 ## Review comments (the builder, card in Review)
 

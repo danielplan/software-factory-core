@@ -548,3 +548,76 @@ test("a builder that stops halfway is told to carry on in the same conversation"
   assert.equal(sessions[1].id, sessions[0]?.id);
   assert.match(prompts[1] ?? "", /nothing you started keeps running/);
 });
+
+test("a builder that is not finished but not blocked goes on in the next session, without asking", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      9,
+      {
+        title: "Big",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  let session = 0;
+  const { claude, prompts } = pretendClaude((options) => {
+    session++;
+    writeFileSync(join(options.cwd, "app", "BIG.md"), String(session));
+    return session < 4
+      ? `Step ${String(session)} is built.\nSTATUS: continue`
+      : "Everything is built and checked.\nSTATUS: done";
+  });
+  const { work, prs } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  const card = kept.get(9);
+  assert.ok(card);
+  const notes = card.comments.map((c) => readNote(c.body));
+  assert.equal(session, 4);
+  assert.equal(card.stage, "review");
+  assert.equal(prs.made.length, 1);
+  assert.equal(prs.made[0]?.draft, false);
+  // Told once that it started, once how far it is (after three sessions),
+  // never asked a question.
+  assert.equal(notes.filter((n) => n === "progress").length, 1);
+  assert.equal(notes.includes("blocked"), false);
+  assert.match(prompts[1] ?? "", /earlier work on this branch exists/);
+  work.switch("build", false);
+});
+
+test("a builder that says it is not finished but adds nothing twice in a row is stopped with a draft", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      11,
+      {
+        title: "Stuck",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  let session = 0;
+  const { claude } = pretendClaude((options) => {
+    session++;
+    // Only the first session changes something.
+    if (session === 1)
+      writeFileSync(join(options.cwd, "app", "STUCK.md"), "one");
+    return "More to do.\nSTATUS: continue";
+  });
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  const card = kept.get(11);
+  assert.ok(card);
+  // Session 1 adds a commit, 2 and 3 add none.
+  assert.equal(session, 3);
+  assert.equal(card.stage, "doing");
+  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "failed");
+  assert.match(card.comments.at(-1)?.body ?? "", /added nothing/);
+  work.switch("build", false);
+});

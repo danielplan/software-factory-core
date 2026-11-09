@@ -11,7 +11,7 @@ import { randomUUID } from "node:crypto";
 import { type Available, type Claude } from "@software-factory/core";
 
 import type { Cards } from "../cards/cards.ts";
-import { branchOf, commitAndPush } from "./branches.ts";
+import { branchOf, commitAndPush, headOf } from "./branches.ts";
 import {
   changedFiles,
   checksFor,
@@ -35,6 +35,7 @@ import {
   readStatusLine,
 } from "./protocol.ts";
 import type { PullRequests } from "./pull-requests.ts";
+import { runSessions } from "./sessions.ts";
 
 export type ReadCopy = { path: string; prepareReadOnly: () => Promise<void> };
 export type BuildCopy = {
@@ -115,11 +116,21 @@ export class Jobs {
         "started",
       );
     }
-    const answer = await this.agent(
-      card,
-      buildPrompt(card, continued),
-      onActivity,
-    );
+    const { answer, gaveUp } = await runSessions(continued, {
+      session: (earlier) =>
+        this.agent(card, buildPrompt(card, earlier), onActivity),
+      head: async () => headOf((await this.options.copies.build()).path),
+      progress: (n, text) =>
+        this.say(
+          card.number,
+          `Session ${String(n)} done:\n\n${text}`,
+          "progress",
+        ),
+    });
+    if (gaveUp !== null) {
+      await this.giveUp(card, gaveUp, "failed", null);
+      return;
+    }
     if (answer.status === "blocked") {
       await this.say(card.number, answer.text, "blocked");
       await cards.move(card.number, "planning");

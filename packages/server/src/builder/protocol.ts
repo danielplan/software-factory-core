@@ -9,6 +9,7 @@ export const NOTES = [
   "blocked",
   "failed",
   "started",
+  "progress",
   "moved-back",
   "review-ready",
   "fixed",
@@ -16,7 +17,7 @@ export const NOTES = [
 ] as const;
 export type Note = (typeof NOTES)[number];
 
-// Notes in the planning conversation. "moved-back" and "started" only
+// Notes in the planning conversation. "moved-back", "progress" and "started" only
 // announce, so they are not the factory's last word.
 export const CONVERSATION_NOTES: readonly Note[] = [
   "question",

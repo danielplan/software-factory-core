@@ -8,6 +8,11 @@ export function branchOf(number: number): string {
   return `factory/issue-${String(number)}`;
 }
 
+// The commit the copy is on: a session that moved it did some work.
+export async function headOf(folder: string): Promise<string> {
+  return (await run("git", ["-C", folder, "rev-parse", "HEAD"])).trim();
+}
+
 // Commits whatever the builder left uncommitted (never a settings file) and
 // puts the copy's work on the card's branch on GitHub.
 export async function commitAndPush(
