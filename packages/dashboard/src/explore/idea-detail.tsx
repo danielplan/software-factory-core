@@ -7,14 +7,16 @@ import { useState } from "react";
 
 import { type IdeaPage, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
+import { StageSteps } from "@/components/stage-steps";
 import { Button } from "@/components/ui/button";
 import { exploreHash, prototypeHash, understandHash } from "@/lib/routes";
+import { ideaSteps } from "@/lib/stages";
 import { Initial, KoboldMark, Label } from "@/understand/bits";
 import { tintOf } from "@/understand/view";
 
 import { useIdeaPage, useRuns } from "./use-explore";
 import { VersionTile } from "./version-tile";
-import { runOf, sendLine, stateWords } from "./view";
+import { ideaWhy, runOf, sendLine } from "./view";
 
 export function IdeaDetail({ id }: Readonly<{ id: string }>) {
   const { data, problem } = useIdeaPage(id);
@@ -29,13 +31,16 @@ export function IdeaDetail({ id }: Readonly<{ id: string }>) {
       aria-label={idea.title}
       className="grid gap-4 rounded-2xl bg-card px-6 py-5 shadow-soft"
     >
-      <div className="flex items-baseline gap-3">
-        <h2 className="flex-1 text-2xl font-semibold tracking-[-0.01em]">
+      <div className="grid gap-x-8 gap-y-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
+        <h2 className="text-2xl font-semibold tracking-[-0.01em]">
           {idea.title}
         </h2>
-        <span className="text-[13px] text-muted-foreground">
-          {stateWords(data.state)}
-        </span>
+        <div className="grid gap-2">
+          <StageSteps steps={ideaSteps(data.stage)} whole />
+          <p className="text-center text-[13px] text-muted-foreground">
+            {ideaWhy(data)}
+          </p>
+        </div>
       </div>
       <ForWhom page={data} />
       <p className="text-[15px]">

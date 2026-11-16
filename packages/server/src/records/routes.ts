@@ -89,9 +89,10 @@ export function servedRecords(options: ServedOptions) {
     },
   });
   const cards = () => connectedCards(root, options.cli);
+  const inApp = options.inApp ?? (() => new Set<number>());
   return {
     routes: {
-      ...readRoutes(host, kobold, options.inApp ?? (() => new Set())),
+      ...readRoutes(host, kobold, inApp),
       ...personRoutes(host, kobold, project),
       ...exploreRoutes({
         host,
@@ -100,6 +101,7 @@ export function servedRecords(options: ServedOptions) {
         project,
         claude: options.claude,
         cards,
+        inApp,
       }),
       ...buildRoutes({ host, kobold, project, cards }),
     },

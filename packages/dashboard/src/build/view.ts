@@ -3,7 +3,8 @@
 // from), the answer to "did it work?", and the lines of its dialog. Kept
 // apart from the components so it is checked on its own.
 
-import type { Answered, SeenDraft, TicketView } from "../api.ts";
+import type { Answered, CardView, SeenDraft, TicketView } from "../api.ts";
+import type { IdeaStage } from "../lib/stages.ts";
 import { understandHash } from "../lib/routes.ts";
 import type { Tone } from "../understand/view.ts";
 
@@ -58,6 +59,21 @@ export function outcomeOf(outcome: NonNullable<TicketView["outcome"]>): {
   words: string;
 } {
   return OUTCOMES[outcome.worked];
+}
+
+// Where an idea's ticket is, on the idea's pipeline: worked or didn't once
+// answered; in the app once closed or in the board's last column (or
+// answered "didn't check"); being built before.
+export function ticketStage(
+  card: Pick<CardView, "closed" | "stage">,
+  ticket: Pick<TicketView, "outcome">,
+): IdeaStage {
+  const worked = ticket.outcome?.worked;
+  if (worked === "yes") return "worked";
+  if (worked === "no") return "didntWork";
+  if (worked === "unchecked" || card.closed || card.stage === "done")
+    return "inApp";
+  return "building";
 }
 
 // The dialog's first line: the card, and since when it is in Build (what

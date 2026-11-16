@@ -59,6 +59,7 @@ test("Explore lists the ideas, and one idea with its shared versions, picks and 
       title: "Wish list",
       persona: { id: "mia", name: "Mia", at: 0 },
       state: "exploring",
+      stage: "picked",
       versions: 3,
     });
     const states = Object.fromEntries(list.ideas.map((i) => [i.id, i.state]));
@@ -101,6 +102,11 @@ test("Explore lists the ideas, and one idea with its shared versions, picks and 
       ["Mia", "st3"],
     );
     assert.deepEqual(pickup.tickets, [{ issue: 109, version: "A" }]);
+    assert.deepEqual(
+      [pickup.stage, pickup.answer],
+      ["didntWork", { issue: 109, worked: "no", by: "Tobias", on: "Oct" }],
+    );
+    assert.deepEqual([wish.stage, wish.answer], ["picked", null]);
     const none = await factory.read<{ error: string }>(
       "/api/explore/idea?id=nope",
     );

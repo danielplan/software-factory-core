@@ -7,6 +7,7 @@
 
 import type { ExploreList, IdeaRow } from "@/api";
 import { PageHead } from "@/components/page-head";
+import { StageSteps } from "@/components/stage-steps";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import type { FactoryState } from "@/dashboard/dashboard";
@@ -19,6 +20,7 @@ import {
   newIdeaHash,
   prototypeHash,
 } from "@/lib/routes";
+import { ideaSteps } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 import { Initial } from "@/understand/bits";
 import { tintOf } from "@/understand/view";
@@ -26,7 +28,7 @@ import { tintOf } from "@/understand/view";
 import { IdeaDetail } from "./idea-detail";
 import { NewIdea } from "./new-idea";
 import { useExploreList } from "./use-explore";
-import { rowWords } from "./view";
+import { versionsWords } from "./view";
 
 export function ExplorePage({
   state,
@@ -154,10 +156,13 @@ function IdeaList({
             name={idea.persona?.name ?? "?"}
             tint={tintOf(idea.persona?.at ?? 0)}
           />
-          <span className="grid min-w-0">
+          <span className="grid min-w-0 gap-1">
             <span className="truncate text-sm font-semibold">{idea.title}</span>
-            <span className="text-[13px] text-muted-foreground">
-              {rowWords(idea)}
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <StageSteps steps={ideaSteps(idea.stage)} />
+              <span className="text-xs text-label">
+                {versionsWords(idea.versions)}
+              </span>
             </span>
           </span>
         </a>

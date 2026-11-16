@@ -8,12 +8,18 @@
 // - A problem is solved when a ticket for it worked; it is being solved while
 //   an idea for it is explored or in Build, or a ticket for it waits for its
 //   answer; otherwise it is open.
-// - A problem is at a stage, from heard to solved (stage.ts).
+// - A problem is at a stage, from heard to solved, and an idea from its
+//   first version to worked (stage.ts).
 // - A story is known as well as the share of its scenes (and what the persona
 //   does instead) that have evidence; it ends when its problem is solved.
 
 import type { Outcome, Records, Story, TicketLink } from "./schemas.ts";
-import { type ProblemStage, problemStage } from "./stage.ts";
+import {
+  type IdeaStage,
+  ideaStage,
+  type ProblemStage,
+  problemStage,
+} from "./stage.ts";
 
 export type IdeaState = "exploring" | "inBuild" | "worked" | "didntWork";
 export type ProblemState = "open" | "beingSolved" | "solved";
@@ -31,6 +37,7 @@ export type Derived = {
   ideas: Record<string, IdeaState>;
   problems: Record<string, ProblemState>;
   stages: Record<string, ProblemStage>;
+  ideaStages: Record<string, IdeaStage>;
   stories: Record<string, StoryState>;
   personas: Record<string, PersonaSummary>;
 };
@@ -74,10 +81,14 @@ export function derive(
       problemStage(problem, records, ideas, inApp),
     ]),
   );
+  const ideaStages = Object.fromEntries(
+    records.ideas.map((idea) => [idea.id, ideaStage(idea, records, inApp)]),
+  );
   return {
     ideas,
     problems,
     stages,
+    ideaStages,
     stories,
     personas: summaries(records, stories),
   };

@@ -11,11 +11,11 @@ import {
   madeWords,
   mainOf,
   pickWords,
-  rowWords,
+  ideaWhy,
   runOf,
   runWords,
   sendLine,
-  stateWords,
+  versionsWords,
   stillWords,
   versionTitle,
 } from "../src/explore/view.ts";
@@ -45,20 +45,40 @@ const page = (more: Partial<Line>): Line => ({
   ...more,
 });
 
-test("an idea says where it stands and how many versions are shared", () => {
-  assert.equal(stateWords("didntWork"), "It didn't work");
+test("an idea says how many versions are shared, and why it is at its stage", () => {
+  assert.equal(versionsWords(0), "no versions yet");
+  assert.equal(versionsWords(1), "1 version");
+  assert.equal(versionsWords(3), "3 versions");
+  const why = (
+    stage: IdeaPage["stage"],
+    {
+      answer = null,
+      ...more
+    }: Partial<Line> & Pick<Partial<IdeaPage>, "answer"> = {},
+  ) => ideaWhy({ ...page(more), answer, stage });
+  assert.equal(why("idea"), "No versions yet: make them in prototype mode.");
+  assert.equal(why("versions"), "Nobody has picked a version yet.");
   assert.equal(
-    rowWords({ state: "exploring", versions: 0 }),
-    "Exploring · no versions yet",
+    why("versions", { tie: true }),
+    "Two or more versions share the most picks.",
   );
   assert.equal(
-    rowWords({ state: "inBuild", versions: 1 }),
-    "In Build · 1 version",
+    why("picked", { lead: { key: "B", name: "Basket" } }),
+    "B has the most picks",
   );
+  const tickets = [{ issue: 144, version: "B2" }];
+  assert.equal(why("building", { tickets }), "In Build as #144");
   assert.equal(
-    rowWords({ state: "worked", versions: 3 }),
-    "It worked · 3 versions",
+    why("building", { tickets: [...tickets, { issue: 131, version: "B" }] }),
+    "In Build as #144 and #131",
   );
+  assert.equal(why("inApp", { tickets }), "In the app as #144: did it work?");
+  const answer = { issue: 144, worked: "yes", by: "Pia", on: "16 Nov" };
+  assert.equal(
+    why("worked", { tickets, answer }),
+    "Closed by Pia on 16 Nov: it worked",
+  );
+  assert.equal(why("didntWork"), "It didn't work");
   assert.equal(pickWords([]), "");
   assert.equal(pickWords(["Pia"]), "1 pick");
   assert.equal(pickWords(["Pia", "Luca"]), "2 picks");

@@ -1,5 +1,6 @@
-// The stage a problem is at, worked out from the records and, when the
-// board is known, which of its issues are in the app; never stored:
+// The stage a problem, and an idea, is at, worked out from the records
+// and, when the board is known, which of its issues are in the app; never
+// stored. A problem:
 //
 //   Heard (or Assumed, for a problem assumed from an idea) → Trying ideas
 //   → Building → In the app → Solved, or Didn't work at the end.
@@ -13,7 +14,7 @@
 //   work, and nothing else for it is under way.
 // - Heard: none of these yet (Assumed when it came from an idea).
 
-import type { Outcome, Problem, Records } from "./schemas.ts";
+import type { Idea, Outcome, Problem, Records } from "./schemas.ts";
 
 export const PROBLEM_STAGES = [
   "assumed",
@@ -26,24 +27,79 @@ export const PROBLEM_STAGES = [
 ] as const;
 export type ProblemStage = (typeof PROBLEM_STAGES)[number];
 
+// An idea: Idea (no versions yet) → Versions (shared, none sent) → Picked
+// (one version has the most picks, no tie) → Building (sent, its ticket
+// open) → In the app (closed, merged or in the board's last column, "did
+// it work?" not answered, or answered "didn't check") → Worked, or Didn't
+// work when every answer was no.
+export const IDEA_STAGES = [
+  "idea",
+  "versions",
+  "picked",
+  "building",
+  "inApp",
+  "worked",
+  "didntWork",
+] as const;
+export type IdeaStage = (typeof IDEA_STAGES)[number];
+
+type Answers = Map<number, Outcome["worked"]>;
+
+const answersOf = (records: Records): Answers =>
+  new Map(records.outcomes.map((o) => [o.issue, o.worked]));
+
+// Where its tickets are: worked, in the app, being built, or none of these
+// (no ticket, or every answer no).
+function ticketsStage(
+  issues: number[],
+  answers: Answers,
+  inApp: ReadonlySet<number>,
+): "worked" | "inApp" | "building" | null {
+  if (issues.some((issue) => answers.get(issue) === "yes")) return "worked";
+  const open = issues.filter((issue) => answers.get(issue) !== "no");
+  if (open.some((issue) => inApp.has(issue) || answers.has(issue)))
+    return "inApp";
+  return open.length > 0 ? "building" : null;
+}
+
+export function ideaStage(
+  idea: Idea,
+  records: Records,
+  inApp: ReadonlySet<number>,
+): IdeaStage {
+  const issues = records.ticketLinks
+    .filter((t) => "idea" in t.from && t.from.idea === idea.id)
+    .map((t) => t.issue);
+  const tickets = ticketsStage(issues, answersOf(records), inApp);
+  if (tickets) return tickets;
+  if (issues.length > 0) return "didntWork";
+  const shared = records.versions.filter(
+    (v) => v.idea === idea.id && v.sharedAt !== null,
+  );
+  const most = Math.max(0, ...shared.map((v) => v.picks.length));
+  const top = shared.filter((v) => most > 0 && v.picks.length === most);
+  if (top.length === 1) return "picked";
+  return shared.length > 0 ? "versions" : "idea";
+}
+
 export function problemStage(
   problem: Problem,
   records: Records,
   ideas: Record<string, string>,
   inApp: ReadonlySet<number>,
 ): ProblemStage {
-  const answers = new Map<number, Outcome["worked"]>(
-    records.outcomes.map((o) => [o.issue, o.worked]),
-  );
+  const answers = answersOf(records);
   const tickets = records.ticketLinks.filter((t) =>
     t.problems.includes(problem.id),
   );
   const worked = tickets.map((t) => answers.get(t.issue));
-  if (worked.includes("yes")) return "solved";
-  const open = tickets.filter((t) => answers.get(t.issue) !== "no");
-  if (open.some((t) => inApp.has(t.issue) || answers.get(t.issue)))
-    return "inApp";
-  if (open.length > 0) return "building";
+  const where = ticketsStage(
+    tickets.map((t) => t.issue),
+    answers,
+    inApp,
+  );
+  if (where === "worked") return "solved";
+  if (where) return where;
   const forIt = records.ideas.filter((idea) =>
     idea.problems.includes(problem.id),
   );

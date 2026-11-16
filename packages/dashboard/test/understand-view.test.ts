@@ -19,31 +19,10 @@ import {
   storyFrom,
   tintOf,
   stageWhy,
-  stepsOf,
   wentWords,
 } from "../src/understand/view.ts";
 
 // What the Understand pages say, from what the server sends.
-
-test("a problem's stage is a pipeline of five steps, the end Solved or Didn't work", () => {
-  assert.deepEqual(stepsOf("heard"), {
-    names: ["Heard", "Trying ideas", "Building", "In the app", "Solved"],
-    at: 0,
-    name: "Heard",
-  });
-  assert.deepEqual(stepsOf("assumed").names[0], "Assumed");
-  assert.equal(stepsOf("trying").at, 1);
-  assert.equal(stepsOf("building").at, 2);
-  assert.deepEqual(
-    [stepsOf("inApp").at, stepsOf("inApp").name],
-    [3, "In the app"],
-  );
-  assert.equal(stepsOf("solved").at, 4);
-  assert.deepEqual(
-    [stepsOf("didntWork").at, stepsOf("didntWork").names[4]],
-    [4, "Didn't work"],
-  );
-});
 
 test("why a problem is at its stage, in one plain line", () => {
   const why = (

@@ -12,66 +12,23 @@ import type {
   StoryPage,
 } from "../api.ts";
 import { understandHash } from "../lib/routes.ts";
+import { closedWords } from "../lib/stages.ts";
 
 export type Tone = "open" | "solving" | "solved" | "wrong" | "none";
 
-// The stage a story's problem is at (worked out by the server), as a
-// pipeline of five steps: Heard (or Assumed) → Trying ideas → Building →
-// In the app → Solved (or Didn't work).
 export type Stage = NonNullable<StoryCard["stage"]>;
-
-const STAGE_NAMES: Record<Stage, string> = {
-  assumed: "Assumed",
-  heard: "Heard",
-  trying: "Trying ideas",
-  building: "Building",
-  inApp: "In the app",
-  solved: "Solved",
-  didntWork: "Didn't work",
-};
-const STAGE_AT: Record<Stage, number> = {
-  assumed: 0,
-  heard: 0,
-  trying: 1,
-  building: 2,
-  inApp: 3,
-  solved: 4,
-  didntWork: 4,
-};
-
-export function stepsOf(stage: Stage): {
-  names: string[];
-  at: number;
-  name: string;
-} {
-  return {
-    names: [
-      stage === "assumed" ? "Assumed" : "Heard",
-      "Trying ideas",
-      "Building",
-      "In the app",
-      stage === "didntWork" ? "Didn't work" : "Solved",
-    ],
-    at: STAGE_AT[stage],
-    name: STAGE_NAMES[stage],
-  };
-}
 
 type WhyOf = Pick<StoryPage, "trying" | "answer">;
 const issuesOf = (why: WhyOf) =>
   listWords(why.trying.inBuild.map((n) => `#${String(n)}`));
-const closed = (why: WhyOf, worked: string) =>
-  why.answer
-    ? `Closed by ${why.answer.by} on ${why.answer.on}: ${worked}`
-    : worked.charAt(0).toUpperCase() + worked.slice(1);
 const WHY: Record<Stage, (why: WhyOf) => string> = {
   heard: () => "Heard from people. No idea for it yet.",
   assumed: () => "Assumed from an idea. Nobody has said it yet.",
   trying: (why) => `Trying: ${why.trying.exploring.join(", ")}`,
   building: (why) => `In Build as ${issuesOf(why)}`,
   inApp: (why) => `In the app as ${issuesOf(why)}: did it work?`,
-  solved: (why) => closed(why, "it worked"),
-  didntWork: (why) => closed(why, "it didn't work"),
+  solved: (why) => closedWords(why.answer, "it worked"),
+  didntWork: (why) => closedWords(why.answer, "it didn't work"),
 };
 
 // Why the problem is at its stage, in one plain line.

@@ -61,11 +61,7 @@ export function BoardCard({
       {ticket && (
         <>
           <TicketFor ticket={ticket} small />
-          <TicketFoot
-            ticket={ticket}
-            asks={card.asks}
-            onAsk={() => onAsk?.()}
-          />
+          <TicketFoot card={card} ticket={ticket} onAsk={() => onAsk?.()} />
         </>
       )}
     </div>

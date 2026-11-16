@@ -144,7 +144,12 @@ export {
   type ProblemState,
   type StoryState,
 } from "./records/derive.ts";
-export { PROBLEM_STAGES, type ProblemStage } from "./records/stage.ts";
+export {
+  IDEA_STAGES,
+  type IdeaStage,
+  PROBLEM_STAGES,
+  type ProblemStage,
+} from "./records/stage.ts";
 export {
   type RecordsChange,
   RecordsRefused,

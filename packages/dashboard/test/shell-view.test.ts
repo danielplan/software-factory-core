@@ -33,6 +33,7 @@ const row = (state: IdeaRow["state"]): IdeaRow => ({
   title: state,
   persona: null,
   state,
+  stage: "versions",
   versions: 0,
 });
 const card = (number: number, stage: CardView["stage"]): CardView => ({

@@ -1,14 +1,17 @@
 // How a card Kobble knows looks on the board: its kind (Idea · B, Fix,
 // Update) and number above the title, what it is for below it (or where a
-// fix came from), and at the bottom "Close · did it work?" while it waits
-// for the answer, or the answer once given.
+// fix came from), and at the bottom, for an idea, where it is on the
+// idea's pipeline (Building → In the app → Worked) with "Close · did it
+// work?" while it waits for the answer.
 
-import type { TicketView } from "@/api";
+import type { CardView, TicketView } from "@/api";
+import { StageSteps } from "@/components/stage-steps";
 import { Button } from "@/components/ui/button";
+import { ticketSteps } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 import { Pill } from "@/understand/bits";
 
-import { forOf, kindTone, outcomeOf } from "./view";
+import { forOf, kindTone, outcomeOf, ticketStage } from "./view";
 
 export function TicketHead({ ticket }: Readonly<{ ticket: TicketView }>) {
   return (
@@ -51,23 +54,30 @@ export function TicketFor({
 }
 
 export function TicketFoot({
+  card,
   ticket,
-  asks,
   onAsk,
-}: Readonly<{ ticket: TicketView; asks: boolean; onAsk: () => void }>) {
-  if (ticket.outcome) {
-    const { tone, words } = outcomeOf(ticket.outcome);
-    return (
-      <span className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Pill tone={tone}>{words}</Pill>
-        {ticket.outcome.by}, {ticket.outcome.on}
-      </span>
-    );
-  }
-  if (!asks) return null;
+}: Readonly<{ card: CardView; ticket: TicketView; onAsk: () => void }>) {
+  if (ticket.kind !== "idea") return null;
+  const { outcome } = ticket;
   return (
-    <Button size="sm" className="w-full" onClick={onAsk}>
-      Close · did it work?
-    </Button>
+    <>
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <StageSteps steps={ticketSteps(ticketStage(card, ticket))} />
+        {outcome && (
+          <span className="text-xs text-label">
+            {outcome.worked === "unchecked"
+              ? `${outcomeOf(outcome).words} · `
+              : ""}
+            {outcome.by}, {outcome.on}
+          </span>
+        )}
+      </span>
+      {card.asks && !outcome && (
+        <Button size="sm" className="w-full" onClick={onAsk}>
+          Close · did it work?
+        </Button>
+      )}
+    </>
   );
 }

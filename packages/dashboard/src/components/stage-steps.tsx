@@ -1,41 +1,23 @@
-// The stage a problem is at, as a small pipeline: Heard (or Assumed) →
-// Trying ideas → Building → In the app → Solved (or Didn't work). Steps
-// done are filled calmly, the current one strong in its colour, the ones
-// to come empty. Compact on a card (the dots and the current stage's
-// name), whole beside a story (every step named, the current one marked).
+// A stage as a small pipeline (lib/stages.ts), the same in Understand,
+// Explore and Build. Steps done are filled in a calm teal, the current one
+// larger in its colour, the steps to come empty. Compact on a card (the
+// dots and the current stage's name); whole on a page (every step named,
+// the current one marked).
 
+import type { StepTone, Steps } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 
-import { type Stage, stepsOf } from "./view";
-
-const NOW: Record<Stage, string> = {
-  assumed: "bg-open-foreground",
-  heard: "bg-open-foreground",
-  trying: "bg-explore",
-  building: "bg-build",
-  inApp: "bg-build",
-  solved: "bg-success",
-  didntWork: "bg-destructive",
+const NOW: Record<StepTone, string> = {
+  neutral: "bg-foreground-2",
+  amber: "bg-explore",
+  blue: "bg-build",
+  green: "bg-success",
+  pink: "bg-fresh",
 };
 
-function Dot({
-  state,
-  stage,
-}: Readonly<{ state: "done" | "now" | "later"; stage: Stage }>) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "size-2 flex-none rounded-full",
-        state === "done" && "bg-success/45",
-        state === "now" && cn("size-2.5", NOW[stage]),
-        state === "later" && "ring-1 ring-faint ring-inset",
-      )}
-    />
-  );
-}
+type State = "done" | "now" | "later";
 
-function stateAt(at: number, now: number): "done" | "now" | "later" {
+function stateAt(at: number, now: number): State {
   if (at < now) return "done";
   return at === now ? "now" : "later";
 }
@@ -46,11 +28,25 @@ function line(done: boolean, shown = true): string {
   return done ? "bg-success/45" : "bg-faint/60";
 }
 
+function Dot({ state, tone }: Readonly<{ state: State; tone: StepTone }>) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "size-2 flex-none rounded-full",
+        state === "done" && "bg-success/45",
+        state === "now" && cn("size-2.5", NOW[tone]),
+        state === "later" && "ring-1 ring-faint ring-inset",
+      )}
+    />
+  );
+}
+
 export function StageSteps({
-  stage,
+  steps,
   whole = false,
-}: Readonly<{ stage: Stage; whole?: boolean }>) {
-  const { names, at, name } = stepsOf(stage);
+}: Readonly<{ steps: Steps; whole?: boolean }>) {
+  const { names, at, name, tone } = steps;
   const label = `Stage: ${name} (${String(at + 1)} of ${String(names.length)})`;
   if (!whole)
     return (
@@ -64,14 +60,14 @@ export function StageSteps({
                   className={cn("h-px w-1.5", line(index <= at))}
                 />
               )}
-              <Dot state={stateAt(index, at)} stage={stage} />
+              <Dot state={stateAt(index, at)} tone={tone} />
             </span>
           ))}
         </span>
         <span
           className={cn(
             "text-xs font-medium text-foreground-2",
-            stage === "didntWork" && "text-open-foreground",
+            tone === "pink" && "text-open-foreground",
           )}
         >
           {name}
@@ -79,7 +75,11 @@ export function StageSteps({
       </span>
     );
   return (
-    <ol aria-label={label} className="grid grid-cols-5 gap-1">
+    <ol
+      aria-label={label}
+      className="grid gap-1"
+      style={{ gridTemplateColumns: `repeat(${String(names.length)}, 1fr)` }}
+    >
       {names.map((one, index) => (
         <li
           key={one}
@@ -88,7 +88,7 @@ export function StageSteps({
         >
           <span className="flex w-full items-center">
             <span className={cn("h-px flex-1", line(index <= at, index > 0))} />
-            <Dot state={stateAt(index, at)} stage={stage} />
+            <Dot state={stateAt(index, at)} tone={tone} />
             <span
               className={cn(
                 "h-px flex-1",
@@ -100,7 +100,7 @@ export function StageSteps({
             className={cn(
               "text-[11px] leading-tight text-label",
               index === at && "font-semibold text-foreground",
-              index === at && stage === "didntWork" && "text-open-foreground",
+              index === at && tone === "pink" && "text-open-foreground",
             )}
           >
             {one}

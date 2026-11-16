@@ -22,6 +22,7 @@ import {
   type Story,
 } from "@software-factory/core";
 
+import { lastAnswer } from "../explore/views.ts";
 import { Refused } from "../refused.ts";
 import {
   type KoboldNews,
@@ -192,15 +193,10 @@ function answerFor(
   problem: string | null,
   records: Records,
 ): StoryPage["answer"] {
-  const issues = new Set(
-    records.ticketLinks
-      .filter((t) => problem !== null && t.problems.includes(problem))
-      .map((t) => t.issue),
-  );
-  const last = records.outcomes.filter((o) => issues.has(o.issue)).at(-1);
-  return last
-    ? { issue: last.issue, worked: last.worked, by: last.by, on: last.on }
-    : null;
+  const issues = records.ticketLinks
+    .filter((t) => problem !== null && t.problems.includes(problem))
+    .map((t) => t.issue);
+  return lastAnswer(records, issues);
 }
 
 function tryingFor(

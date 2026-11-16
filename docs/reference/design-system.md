@@ -88,15 +88,37 @@ paragraph, one sentence per scene: the one where it breaks in `--open`, a
 guessed one muted and in italics, a seen one with a small raised mark that
 shows what was said, and where, on hover or focus.
 
-Where a problem stands is its stage, as a small pipeline
-(`packages/dashboard/src/understand/stage-steps.tsx`): Heard (or Assumed)
-→ Trying ideas → Building → In the app → Solved, or Didn't work at the end.
-Steps done are dots in a calm teal (`--success` at 45%), the current one
-larger in its colour (`--open-foreground` heard, `--explore` trying,
-`--build` building and in the app, `--success` solved, `--destructive`
-didn't work), the steps to come empty rings in `--faint`. On a card it is
-the dots and the current stage's name; beside a story every step is named,
-with one line of why under it. It replaces state pills in Understand.
+## Stages
+
+Where a problem, an idea or a ticket stands is its stage, one vocabulary
+everywhere, worked out in the core (`derive`, `packages/core/src/records/stage.ts`)
+and drawn by one stepper (`packages/dashboard/src/components/stage-steps.tsx`,
+steps and colours in `packages/dashboard/src/lib/stages.ts`).
+
+| Of        | Steps                                                              | Where                               |
+| --------- | ------------------------------------------------------------------ | ----------------------------------- |
+| A problem | Heard (or Assumed) → Trying ideas → Building → In the app → Solved | Understand: story cards, story page |
+| An idea   | Idea → Versions → Picked → Building → In the app → Worked          | Explore: the list, the idea's page  |
+| A ticket  | Building → In the app → Worked (the end of its idea's pipeline)    | Build: a card from an idea          |
+
+Each ends in Didn't work instead, when that was the answer. Steps done are
+dots in a calm teal (`--success` at 45%), the steps to come empty rings in
+`--faint`, and the current one larger in its colour:
+
+| Current step                             | Colour              |
+| ---------------------------------------- | ------------------- |
+| Heard, Assumed, Idea                     | `--foreground-2`    |
+| Trying ideas, Versions, Picked, Building | `--explore` (amber) |
+| In the app                               | `--build` (blue)    |
+| Solved, Worked                           | `--success` (green) |
+| Didn't work                              | `--fresh` (pink)    |
+
+On a card it is the dots and the current stage's name (on Explore with the
+number of versions beside it); on a page every step is named, with one plain
+line of why under it ("In Build as #138", "B has the most picks", "Closed by
+Luca on 14 Nov: it worked"). A story that didn't hold is crossed out and has
+no stepper; a fix or an update on Build shows none, its column says enough.
+Stages replace state pills in Understand and Explore.
 
 ## Light or dark
 

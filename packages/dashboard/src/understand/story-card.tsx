@@ -5,11 +5,12 @@
 // crossed out.
 
 import type { StoryCard } from "@/api";
+import { StageSteps } from "@/components/stage-steps";
 import { understandHash } from "@/lib/routes";
+import { problemSteps } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 
 import { Pill } from "./bits";
-import { StageSteps } from "./stage-steps";
 import { originWords } from "./view";
 
 function frame(card: StoryCard): string {
@@ -65,7 +66,7 @@ function Breaks({
 // The stage its problem is at; crossed out, that it did not hold.
 function Mark({ card }: Readonly<{ card: StoryCard }>) {
   if (card.wrong !== null) return <Pill tone="wrong">Didn't hold</Pill>;
-  return card.stage ? <StageSteps stage={card.stage} /> : null;
+  return card.stage ? <StageSteps steps={problemSteps(card.stage)} /> : null;
 }
 
 export function StoryTile({ card }: Readonly<{ card: StoryCard }>) {

@@ -4,37 +4,40 @@
 // address prototype mode shows. Kept apart from the components so it is
 // checked on its own.
 
-import type {
-  IdeaPage,
-  IdeaRow,
-  PartView,
-  PrototypePage,
-  VersionRun,
-} from "../api.ts";
+import type { IdeaPage, PartView, PrototypePage, VersionRun } from "../api.ts";
+import { closedWords } from "../lib/stages.ts";
 import { listWords } from "../understand/view.ts";
-
-const STATES: Record<IdeaRow["state"], string> = {
-  exploring: "Exploring",
-  inBuild: "In Build",
-  worked: "It worked",
-  didntWork: "It didn't work",
-};
-
-export function stateWords(state: IdeaRow["state"]): string {
-  return STATES[state];
-}
 
 function count(n: number, one: string, many: string): string {
   return n === 1 ? `1 ${one}` : `${String(n)} ${many}`;
 }
 
-// Under an idea in the list: "Exploring · 3 versions".
-export function rowWords(row: Pick<IdeaRow, "state" | "versions">): string {
-  const versions =
-    row.versions === 0
-      ? "no versions yet"
-      : count(row.versions, "version", "versions");
-  return `${stateWords(row.state)} · ${versions}`;
+// Beside an idea's stage in the list: "3 versions".
+export function versionsWords(versions: number): string {
+  return versions === 0
+    ? "no versions yet"
+    : count(versions, "version", "versions");
+}
+
+type WhyOf = Pick<IdeaPage, "lead" | "tie" | "tickets" | "answer">;
+const issueOf = (page: WhyOf) =>
+  listWords(page.tickets.map((t) => `#${String(t.issue)}`));
+const WHY: Record<IdeaPage["stage"], (page: WhyOf) => string> = {
+  idea: () => "No versions yet: make them in prototype mode.",
+  versions: (page) =>
+    page.tie
+      ? "Two or more versions share the most picks."
+      : "Nobody has picked a version yet.",
+  picked: (page) => `${page.lead?.key ?? "One"} has the most picks`,
+  building: (page) => `In Build as ${issueOf(page)}`,
+  inApp: (page) => `In the app as ${issueOf(page)}: did it work?`,
+  worked: (page) => closedWords(page.answer, "it worked"),
+  didntWork: (page) => closedWords(page.answer, "it didn't work"),
+};
+
+// Why an idea is at its stage, in one plain line.
+export function ideaWhy(page: WhyOf & Pick<IdeaPage, "stage">): string {
+  return WHY[page.stage](page);
 }
 
 // Beside a version: how many picked it.

@@ -3,11 +3,12 @@
 // one. Why it matters lives on the persona, with the real problem.
 
 import type { StoryPage } from "@/api";
+import { StageSteps } from "@/components/stage-steps";
 import { Button } from "@/components/ui/button";
+import { problemSteps } from "@/lib/stages";
 import { exploreHash, newIdeaHash } from "@/lib/routes";
 
 import { Label } from "./bits";
-import { StageSteps } from "./stage-steps";
 import { stageWhy } from "./view";
 
 const IDEA_STATES = {
@@ -39,7 +40,7 @@ export function StorySide({ page }: Readonly<{ page: StoryPage }>) {
       </div>
       {page.stage && (
         <div className="grid gap-2.5">
-          <StageSteps stage={page.stage} whole />
+          <StageSteps steps={problemSteps(page.stage)} whole />
           <p className="text-[13px] text-muted-foreground">
             {stageWhy(page.stage, page)}
           </p>

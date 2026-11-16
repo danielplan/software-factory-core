@@ -8,6 +8,7 @@
 import {
   derive,
   type Idea,
+  type IdeaStage,
   type IdeaState,
   type Records,
   type Story,
@@ -25,6 +26,8 @@ export type IdeaRow = {
   title: string;
   persona: PersonaTag | null;
   state: IdeaState;
+  // Its stage, from its first version to worked (core's derive).
+  stage: IdeaStage;
   // Its versions shared with the team.
   versions: number;
 };
@@ -74,10 +77,17 @@ export type IdeaPage = {
   tie: boolean;
   // Its GitHub issues, once a version was sent to Build.
   tickets: { issue: number; version: string }[];
+  stage: IdeaStage;
+  // The last answer to "did it work?" for it, if any.
+  answer: { issue: number; worked: string; by: string; on: string } | null;
 };
 
-export function exploreList(records: Records): ExploreList {
-  const derived = derive(records);
+// inApp: the issues the connected board shows closed or in the app.
+export function exploreList(
+  records: Records,
+  inApp: ReadonlySet<number> = new Set(),
+): ExploreList {
+  const derived = derive(records, inApp);
   const shared = records.versions.filter((v) => v.sharedAt !== null);
   return {
     ideas: records.ideas.map((idea) => ({
@@ -85,6 +95,7 @@ export function exploreList(records: Records): ExploreList {
       title: idea.title,
       persona: personaOf(records, idea),
       state: derived.ideas[idea.id] ?? "exploring",
+      stage: derived.ideaStages[idea.id] ?? "idea",
       versions: shared.filter((v) => v.idea === idea.id).length,
     })),
     stories: records.stories.flatMap((story) => {
@@ -105,11 +116,20 @@ export function exploreList(records: Records): ExploreList {
   };
 }
 
-export function ideaPage(records: Records, id: string, me: string): IdeaPage {
+export function ideaPage(
+  records: Records,
+  id: string,
+  { me, inApp = new Set() }: { me: string; inApp?: ReadonlySet<number> },
+): IdeaPage {
   const idea = records.ideas.find((one) => one.id === id);
   if (!idea) throw new Refused(`There is no idea “${id}”.`);
-  const derived = derive(records);
+  const derived = derive(records, inApp);
   const all = records.versions.filter((v) => v.idea === id);
+  const tickets = records.ticketLinks.flatMap((t) =>
+    "idea" in t.from && t.from.idea === id
+      ? [{ issue: t.issue, version: t.from.version }]
+      : [],
+  );
   const versions = all
     .filter((v) => v.sharedAt !== null)
     .map((v) => ({ ...v, mine: v.picks.includes(me) }));
@@ -125,12 +145,24 @@ export function ideaPage(records: Records, id: string, me: string): IdeaPage {
     unshared: all.length - versions.length,
     me,
     ...leadOf(versions),
-    tickets: records.ticketLinks.flatMap((t) =>
-      "idea" in t.from && t.from.idea === id
-        ? [{ issue: t.issue, version: t.from.version }]
-        : [],
+    tickets: tickets.map((t) => ({ issue: t.issue, version: t.version })),
+    stage: derived.ideaStages[id] ?? "idea",
+    answer: lastAnswer(
+      records,
+      tickets.map((t) => t.issue),
     ),
   };
+}
+
+// The last answer to "did it work?" among these issues.
+export function lastAnswer(
+  records: Records,
+  issues: number[],
+): IdeaPage["answer"] {
+  const last = records.outcomes.filter((o) => issues.includes(o.issue)).at(-1);
+  return last
+    ? { issue: last.issue, worked: last.worked, by: last.by, on: last.on }
+    : null;
 }
 
 // Which version has the most picks, and whether two share the most.

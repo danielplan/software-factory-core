@@ -36,6 +36,8 @@ export type ExploreOn = {
   claude: Parameters<typeof makeVersion>[1];
   // The connected board's cards, or refused with why there are none.
   cards: () => Cards;
+  // The issues the connected board shows closed or in the app.
+  inApp: () => ReadonlySet<number>;
 };
 
 const ownSchema = z.strictObject({
@@ -48,9 +50,12 @@ export function exploreRoutes(on: ExploreOn): Record<string, Route> {
   const me = () => whoIs(on.project);
   const version = (body: unknown) => parsed(versionAsked, body, "version");
   return {
-    "GET /api/explore": () => exploreList(store().all()),
+    "GET /api/explore": () => exploreList(store().all(), on.inApp()),
     "GET /api/explore/idea": async (_body, url) =>
-      ideaPage(store().all(), asked(url, "id", "idea"), await me()),
+      ideaPage(store().all(), asked(url, "id", "idea"), {
+        me: await me(),
+        inApp: on.inApp(),
+      }),
     "POST /api/explore/ideas": (body) => ({
       idea: ideaFromStory(store(), parsed(fromStorySchema, body, "idea")),
     }),

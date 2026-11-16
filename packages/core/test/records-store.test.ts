@@ -302,6 +302,34 @@ test("each problem is at a stage, from heard to solved, worked out and never sto
   assert.equal(derive(records).stages.invoice, "trying");
 });
 
+test("each idea is at a stage, from its first version to worked, worked out and never stored", () => {
+  assert.deepEqual(derive(SEED).ideaStages, {
+    wish: "picked",
+    remind: "idea",
+    tracking: "building",
+    monday: "building",
+    later: "worked",
+    standing: "idea",
+    size: "building",
+    pickup: "didntWork",
+  });
+  assert.equal(derive(SEED, new Set([138])).ideaStages.tracking, "inApp");
+  const records = structuredClone(SEED);
+  const wish = records.versions.filter((v) => v.idea === "wish");
+  // Two versions with the most picks: versions, nobody leads.
+  wish[0]!.picks = ["pia", "tobias"];
+  assert.equal(derive(records).ideaStages.wish, "versions");
+  // "Didn't check": in the app.
+  records.outcomes.push({
+    issue: 135,
+    worked: "unchecked",
+    seen: null,
+    by: "Anna",
+    on: "16 Nov",
+  });
+  assert.equal(derive(records).ideaStages.size, "inApp");
+});
+
 test("a factory's database is made beside its seed, filled from it once, and kept out of git", () => {
   const root = mkdtempSync(join(tmpdir(), "factory-"));
   copyFileSync(join(ACME, SEED_FILE), join(root, SEED_FILE));
