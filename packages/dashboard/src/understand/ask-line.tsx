@@ -1,5 +1,6 @@
-// The kobold's offer under a story with guessed scenes: Ask drafts a short
-// message for two people like the persona, to copy and send.
+// How much of a story is seen, in a line ("3 of 4 parts seen · 1
+// guessed"), and, while parts are guessed, the kobold's offer: Ask drafts a
+// short message for two people like the persona, to copy and send.
 
 import { Copy } from "lucide-react";
 import { useState } from "react";
@@ -9,17 +10,24 @@ import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
 import { KoboldMark } from "./bits";
-import { askWords } from "./view";
+import { knownWords } from "./view";
 
 export function AskLine({
   story,
-  guessed,
+  known,
   persona,
-}: Readonly<{ story: string; guessed: number; persona: string }>) {
+  canAsk,
+}: Readonly<{
+  story: string;
+  known: { seen: number; of: number };
+  persona: string;
+  canAsk: boolean;
+}>) {
   const [asking, setAsking] = useState(false);
   const [question, setQuestion] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const guessed = known.of > known.seen;
   const ask = async () => {
     setAsking(true);
     setProblem(null);
@@ -40,25 +48,25 @@ export function AskLine({
     setCopied(true);
   };
   return (
-    <div className="grid gap-2.5 rounded-xl border border-warning/40 bg-warning/10 px-3.5 py-2.5">
-      <div className="flex items-center gap-3">
-        <KoboldMark className="size-6" />
-        <span className="flex-1 text-sm">
-          {asking
-            ? "The kobold is writing a question…"
-            : askWords(guessed, persona)}
+    <div className="grid gap-2.5 border-t border-border-soft pt-3.5">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex-1 text-[13px] text-muted-foreground">
+          {asking ? "The kobold is writing a question…" : knownWords(known)}
         </span>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={asking}
-          onClick={() => void ask()}
-        >
-          {question ? "Ask again" : "Ask"}
-        </Button>
+        {guessed && canAsk && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={asking}
+            onClick={() => void ask()}
+          >
+            <KoboldMark className="size-5" />
+            {question ? "Ask again" : `Ask two people like ${persona}`}
+          </Button>
+        )}
       </div>
       {question && (
-        <div className="grid gap-2 rounded-lg bg-card px-3.5 py-3">
+        <div className="grid gap-2 rounded-xl bg-tint px-3.5 py-3">
           <p className="text-sm whitespace-pre-wrap">{question}</p>
           <Button
             variant="outline"

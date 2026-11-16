@@ -1,7 +1,8 @@
 // What the Understand pages say, worked out from what the server sends:
-// where a problem stands, where a story came from, where a signal went,
-// the kobold's line on what it did, and how many scenes are guessed. Kept
-// apart from the components so it is checked on its own.
+// where a story's problem stands (open or solved, or what is being tried),
+// where a story came from, the story told as sentences, where a signal
+// went, the kobold's line on what it did, and how much of a story is seen.
+// Kept apart from the components so it is checked on its own.
 
 import type {
   KoboldNews,
@@ -14,18 +15,37 @@ import { understandHash } from "../lib/routes.ts";
 
 export type Tone = "open" | "solving" | "solved" | "wrong" | "none";
 
-// The pill on a story: where its problem stands, or that it did not hold.
-export function stateOf(card: Pick<StoryCard, "problemState" | "wrong">): {
-  words: string;
-  tone: Tone;
-} {
-  if (card.wrong !== null) return { words: "Didn't hold", tone: "wrong" };
+// What a story shows of where it stands: a pill, Open or Solved (or that
+// it did not hold); or, while something is tried for its problem, a short
+// note saying what, instead of a pill.
+export type StoryMark = {
+  pill: { words: string; tone: Tone } | null;
+  note: string | null;
+};
+
+export function markOf(
+  card: Pick<StoryCard, "problemState" | "wrong" | "trying">,
+): StoryMark {
+  if (card.wrong !== null)
+    return { pill: { words: "Didn't hold", tone: "wrong" }, note: null };
   if (card.problemState === "solved")
-    return { words: "Solved", tone: "solved" };
-  if (card.problemState === "beingSolved")
-    return { words: "Being solved", tone: "solving" };
-  if (card.problemState === "open") return { words: "Open", tone: "open" };
-  return { words: "No problem yet", tone: "none" };
+    return { pill: { words: "Solved", tone: "solved" }, note: null };
+  const note = tryingWords(card.trying);
+  if (note) return { pill: null, note };
+  if (card.problemState === null) return { pill: null, note: null };
+  return { pill: { words: "Open", tone: "open" }, note: null };
+}
+
+// What is being tried for a problem, in a short line; null when nothing.
+export function tryingWords(trying: StoryCard["trying"]): string | null {
+  const issues = trying.inBuild.map((n) => `#${String(n)}`).join(", ");
+  const parts = [
+    ...(issues ? [`In Build: ${issues}`] : []),
+    ...(trying.exploring.length > 0
+      ? [`Trying: ${listWords(trying.exploring)}`]
+      : []),
+  ];
+  return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 // "A, B and C".
@@ -129,36 +149,55 @@ export function koboldLine(
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-// The scenes (and what the persona does instead) nobody has seen yet.
-export function guessedCount(seen: boolean[]): number {
-  return seen.filter((one) => !one).length;
+// How much of a story is seen, in a line: "3 of 4 parts seen · 1 guessed".
+export function knownWords(known: { seen: number; of: number }): string {
+  const guessed = known.of - known.seen;
+  const seen = `${String(known.seen)} of ${String(known.of)} parts seen`;
+  return guessed > 0 ? `${seen} · ${String(guessed)} guessed` : seen;
 }
 
-export function askWords(guessed: number, persona: string): string {
-  const scenes = guessed === 1 ? "1 scene is" : `${String(guessed)} scenes are`;
-  return `${scenes} guessed. Ask two people like ${persona}?`;
+// The story told as sentences, in order: each scene, then what the persona
+// does instead, each seen (with what shows it) or guessed, the one it
+// breaks at marked.
+export type Sentence = {
+  text: string;
+  breaks: boolean;
+  evidence: { source: string; text: string } | null;
+};
+
+export function sentencesOf(
+  page: Pick<StoryPage, "story" | "signals">,
+): Sentence[] {
+  const { story, signals } = page;
+  const told = story.scenes.map((scene) => ({
+    text: sentence(scene.text),
+    breaks: scene.breaks,
+    evidence: evidenceOf(scene.evidence, signals),
+  }));
+  if (!story.instead) return told;
+  return [
+    ...told,
+    {
+      text: sentence(`Instead, ${lowerFirst(story.instead.text)}`),
+      breaks: false,
+      evidence: evidenceOf(story.instead.evidence, signals),
+    },
+  ];
 }
 
-// Why the problem stands where it does, from the ideas for it.
-export function problemWhy(page: StoryPage): string {
-  const state = page.problem?.state;
-  const ideas = page.ideas.filter(
-    (idea) => page.problem && idea.problems.includes(page.problem.id),
-  );
-  const titled = (wanted: string[]) =>
-    listWords(
-      ideas.filter((idea) => wanted.includes(idea.state)).map((i) => i.title),
-    );
-  if (state === "solved") return "A change for it worked.";
-  if (state === "open")
-    return titled(["didntWork"])
-      ? `Tried: ${titled(["didntWork"])}, which didn't work.`
-      : "Nobody is working on it yet.";
-  const exploring = titled(["exploring"]);
-  const building = titled(["inBuild"]);
-  if (exploring) return `Being explored in ${exploring}.`;
-  if (building) return `In Build: ${building}.`;
-  return "A change for it waits for “did it work?”.";
+// A capital at the start and a full stop at the end.
+function sentence(text: string): string {
+  const trimmed = text.trim();
+  const capital = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  return /[.!?…]$/.test(capital) ? capital : `${capital}.`;
+}
+
+// After "Instead, ": "He drives" becomes "he drives"; "I" and a word in
+// capitals stay as they are.
+function lowerFirst(text: string): string {
+  const trimmed = text.trim();
+  if (/^(I\b|[A-Z]{2})/.test(trimmed)) return trimmed;
+  return trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
 }
 
 // What shows a scene: the first signal that is its evidence, with its

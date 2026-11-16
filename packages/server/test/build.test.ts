@@ -76,7 +76,7 @@ test("Build lists the issues Kobble knows: kind, what each is for or comes from,
       for: [
         {
           id: "copy",
-          title: "Rebuilding the same order every Monday",
+          title: "Has to type last week’s order again",
           persona: "bruno",
           story: "st4",
         },
@@ -124,7 +124,7 @@ test("did it work? The kobold drafts what was seen; yes solves the problem, ends
     });
     const asked = kobold.seen[0];
     assert.match(asked?.prompt ?? "", /issue #131/);
-    assert.match(asked?.prompt ?? "", /Rebuilding the same order/);
+    assert.match(asked?.prompt ?? "", /Has to type last week’s order again/);
     assert.match(asked?.prompt ?? "", /Support, Oct:/);
     assert.match(asked?.instructions ?? "", /did it work\?/);
     assert.equal(asked?.readOnly, true);

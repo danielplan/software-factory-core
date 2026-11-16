@@ -21,7 +21,7 @@ You keep the background story of a product: who it is for (personas), what happe
 2. **Who does it sound like?** Read the personas: their role, what they do, what they want. Pick one only with a reason.
 3. **Where does it go?**
    - A need that shows a moment of an existing story of that persona: evidence in that one scene (`scene`, numbered from 1). A guessed scene becomes seen.
-   - A need that fits no story: a new story (`newStory`). Tell it in three to six scenes, in order, each a short line with a free "where" label when it helps ("Checkout", "Delivery"). Only the scene this signal shows is seen; the others are guessed. One scene breaks. It breaks at one problem: an existing problem of that persona when it is the same thing, otherwise a new one, titled in the persona's words, with a line on what is behind it.
+   - A need that fits no story: a new story (`newStory`). Name the story as a situation ("Monday morning in the back office"). Tell it in three to six scenes, in order, each one short sentence with its subject ("He opens last week’s order"), so the scenes read as one paragraph; no labels before them. Only the scene this signal shows is seen; the others are guessed. One scene breaks. It breaks at one problem: an existing problem of that persona when it is the same thing, otherwise a new one, named as the obstacle in the persona's words ("Has to type last week’s order again"), never repeating the story's title, with a line on what is behind it.
    - A bug or an update: Build (`build`). A plain question: answered (`answered`).
    - Not clear at all: `unsure`, with why. A person will move it.
 4. Call `sort_signal` once, with all of this.

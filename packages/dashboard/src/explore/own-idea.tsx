@@ -176,11 +176,8 @@ function AssumedStory({ page }: Readonly<{ page: IdeaPage }>) {
         {story.scenes.map((scene, at) => (
           <li
             key={`${String(at)}-${scene.text}`}
-            className="grid grid-cols-[90px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-dashed bg-card px-3 py-2 text-sm"
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-dashed bg-card px-3 py-2 text-sm"
           >
-            <span className="text-xs text-muted-foreground">
-              {scene.where ?? ""}
-            </span>
             <span>{scene.text}</span>
             <span
               className={cn(

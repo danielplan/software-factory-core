@@ -1,7 +1,7 @@
 // Understand's second level: one persona. Their profile on the left (what
 // they want, what they are drawn from, what people like them said), and on
-// the right the real problem being solved for them, with what it sits
-// behind (Confirm while only the kobold suggested it), then their stories.
+// the right the real problem being solved for them (Confirm while only the
+// kobold suggested it), then their stories, each with where it breaks.
 
 import { useState } from "react";
 
@@ -23,6 +23,12 @@ export function PersonaView({
         {page.realProblems.map((real) => (
           <RealProblem key={real.id} page={page} id={real.id} />
         ))}
+        {page.realProblems.length === 0 && (
+          <p className="rounded-2xl bg-card px-5 py-4 text-sm text-muted-foreground shadow-soft">
+            No real problem yet. The kobold suggests one when two of{" "}
+            {page.persona.name}'s problems point the same way.
+          </p>
+        )}
         <Label>
           {page.stories.length === 1
             ? "1 story"
@@ -113,7 +119,6 @@ function RealProblem({
   const [problem, setProblem] = useState<string | null>(null);
   const real = page.realProblems.find((r) => r.id === id);
   if (!real) return null;
-  const behind = page.problems.filter((p) => p.realProblem === id);
   const confirm = async () => {
     setProblem(null);
     try {
@@ -125,30 +130,22 @@ function RealProblem({
   return (
     <section
       aria-label="The real problem"
-      className="grid gap-2 rounded-2xl border-[1.5px] border-foreground bg-card px-5 py-4"
+      className="grid gap-2 rounded-2xl bg-card px-5 py-4 ring-[1.5px] ring-foreground"
     >
       <Label>The real problem we are solving for {page.persona.name}</Label>
       <h2 className="text-[19px] leading-snug font-semibold">{real.title}</h2>
       {real.description && <p className="text-sm">{real.description}</p>}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Label>Behind</Label>
-        {behind.map((p) => (
-          <span
-            key={p.id}
-            className="rounded-full bg-open px-2.5 py-1 text-xs font-medium text-open-foreground"
-          >
-            {p.title}
-          </span>
-        ))}
-      </div>
       <div className="flex flex-wrap items-center gap-3 pt-1">
         <span className="flex-1 text-xs text-muted-foreground">
           {real.by === "kobold"
-            ? "Suggested by the kobold, because these problems point the same way"
+            ? `Suggested by the kobold: several of ${page.persona.name}’s problems point this way`
             : `Confirmed by ${real.by}`}
         </span>
+        <Button variant="outline" size="sm" disabled title="Coming later">
+          Edit
+        </Button>
         {real.by === "kobold" && (
-          <Button variant="outline" size="sm" onClick={() => void confirm()}>
+          <Button size="sm" onClick={() => void confirm()}>
             Confirm
           </Button>
         )}

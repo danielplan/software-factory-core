@@ -1,6 +1,5 @@
-// Small pieces the Understand pages share: a story's pill, its scenes as
-// squares (seen or guessed), the kobold's mark, a persona's initial, and a
-// small label.
+// Small pieces the Understand pages share: a story's pill, the kobold's
+// mark, a persona's initial, and a small label.
 
 import type { ReactNode } from "react";
 
@@ -28,29 +27,6 @@ export function Pill({
       )}
     >
       {children}
-    </span>
-  );
-}
-
-// One square per scene: filled when seen, light when guessed.
-export function Squares({ seen }: Readonly<{ seen: boolean[] }>) {
-  const known = seen.filter(Boolean).length;
-  return (
-    <span
-      className="flex gap-[3px]"
-      role="img"
-      aria-label={`${String(known)} of ${String(seen.length)} scenes seen`}
-    >
-      {seen.map((one, at) => (
-        <span
-          // The scenes keep their order; nothing is added in between.
-          key={at}
-          className={cn(
-            "size-2.5 rounded-[3px]",
-            one ? "bg-success" : "bg-surface-2",
-          )}
-        />
-      ))}
     </span>
   );
 }

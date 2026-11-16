@@ -127,9 +127,8 @@ export function makePrompt(
     ...stories.flatMap((story) => [
       `The story it is for: “${story.title}” (${story.persona}). Starts: ${story.starts || "not said"}. Wants: ${story.wants || "not said"}.`,
       ...story.scenes.map((s, at) => {
-        const where = s.where ? s.where + ": " : "";
         const breaks = s.breaks ? " (it breaks here)" : "";
-        return `${String(at + 1)}. ${where}${s.text}${breaks}`;
+        return `${String(at + 1)}. ${s.text}${breaks}`;
       }),
     ]),
   ].join("\n");

@@ -14,11 +14,9 @@ import { type Edit, newId } from "./edit.ts";
 const words = z.string().trim().min(1);
 
 const newScene = z.strictObject({
-  text: words.describe("The moment, in a short line."),
-  where: z
-    .string()
-    .optional()
-    .describe('Where it happens, a free label ("Pay", "Checkout").'),
+  text: words.describe(
+    "The moment, in one short sentence with its subject, read as part of a paragraph.",
+  ),
   shows: z
     .boolean()
     .describe("True for the scene this signal shows: only that one is seen."),
@@ -127,7 +125,7 @@ function toNewStory(
     wants: told.wants,
     scenes: told.scenes.map((scene) => ({
       text: scene.text,
-      where: scene.where?.trim() ? scene.where.trim() : null,
+      where: null,
       evidence: scene.shows ? [signal.id] : [],
       breaks: scene.breaks,
     })),

@@ -1,14 +1,16 @@
 // A story as a card: small under its persona on the overview, wider on the
-// persona's page (where it starts, what they want, where it came from).
-// A new story the kobold started has a coloured outline, one assumed from
-// an idea a dashed border, and one that turned out wrong is crossed out.
+// persona's page (with where it came from). Each says its title, where it
+// breaks, and where it stands: Open or Solved, or what is being tried for
+// its problem. A new story the kobold started has a coloured outline, one
+// assumed from an idea a dashed border, and one that turned out wrong is
+// crossed out.
 
 import type { StoryCard } from "@/api";
 import { understandHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
-import { Pill, Squares } from "./bits";
-import { originWords, stateOf } from "./view";
+import { Pill } from "./bits";
+import { markOf, originWords } from "./view";
 
 function frame(card: StoryCard): string {
   return cn(
@@ -45,69 +47,57 @@ function Title({ card }: Readonly<{ card: StoryCard }>) {
 }
 
 // What it breaks at, or why it did not hold.
-function Breaks({ card }: Readonly<{ card: StoryCard }>) {
-  if (card.wrong !== null)
-    return <span className="truncate text-xs text-label">{card.wrong}</span>;
+function Breaks({
+  card,
+  wide = false,
+}: Readonly<{ card: StoryCard; wide?: boolean }>) {
+  const text = card.wrong ?? `Breaks: ${card.problemTitle ?? "not clear yet"}`;
   return (
-    <span className="truncate text-xs text-label">
-      Breaks: {card.problemTitle ?? "not clear yet"}
+    <span
+      className={cn("text-label", wide ? "text-[13px]" : "truncate text-xs")}
+      title={text}
+    >
+      {text}
     </span>
   );
 }
 
+// Open or Solved, or what is tried for its problem.
+function Mark({ card }: Readonly<{ card: StoryCard }>) {
+  const { pill, note } = markOf(card);
+  if (pill) return <Pill tone={pill.tone}>{pill.words}</Pill>;
+  if (note)
+    return <span className="text-xs text-muted-foreground">{note}</span>;
+  return null;
+}
+
 export function StoryTile({ card }: Readonly<{ card: StoryCard }>) {
-  const state = stateOf(card);
   return (
     <a href={understandHash(card.persona, card.id)} className={frame(card)}>
       <Title card={card} />
       <Breaks card={card} />
-      <span className="flex items-center gap-2">
-        <Pill tone={state.tone}>{state.words}</Pill>
-        <span className="flex-1" />
-        <Squares seen={card.seen} />
+      <span className="flex min-h-6 items-center">
+        <Mark card={card} />
       </span>
     </a>
   );
 }
 
 export function StoryRow({ card }: Readonly<{ card: StoryCard }>) {
-  const state = stateOf(card);
-  const starts = [
-    card.starts && `Starts: ${card.starts}`,
-    card.wants && `Wants: ${card.wants}`,
-  ].filter(Boolean);
   return (
     <a
       href={understandHash(card.persona, card.id)}
-      className={cn(frame(card), "px-5 py-4")}
+      className={cn(frame(card), "gap-2 px-5 py-4")}
     >
       <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <span className="flex-1">
           <Title card={card} />
         </span>
-        <span className="text-xs text-muted-foreground">
-          {originWords(card.from)}
-        </span>
+        <span className="text-xs text-label">{originWords(card.from)}</span>
       </span>
-      {starts.length > 0 && (
-        <span className="text-sm">{starts.join(" · ")}</span>
-      )}
-      <span className="flex flex-wrap items-center gap-2 text-sm">
-        {card.wrong === null ? (
-          <>
-            <span className="text-muted-foreground">Breaks:</span>
-            <span className="font-medium">
-              {card.problemTitle ?? "not clear yet"}
-            </span>
-          </>
-        ) : (
-          <span className="text-muted-foreground">{card.wrong}</span>
-        )}
-        <Pill tone={state.tone}>{state.words}</Pill>
-      </span>
-      <span className="flex items-center gap-2 text-[13px] text-muted-foreground">
-        <Squares seen={card.seen} />
-        {card.known.seen} of {card.known.of} scenes seen
+      <Breaks card={card} wide />
+      <span className="flex min-h-6 items-center">
+        <Mark card={card} />
       </span>
     </a>
   );

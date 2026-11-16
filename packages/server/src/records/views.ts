@@ -52,7 +52,14 @@ export type StoryCard = {
   // team member who had it, if a person did).
   from:
     { signals: number } | { idea: string; title: string; by: string | null };
+  // What is being tried for its problem.
+  trying: Trying;
 };
+
+// What is being tried for a problem: the ideas for it still being
+// explored, by title, and the issues for it in Build, waiting for "did it
+// work?".
+export type Trying = { exploring: string[]; inBuild: number[] };
 
 export type PersonaCard = {
   persona: Persona;
@@ -84,13 +91,11 @@ export type StoryPage = {
   ended: boolean;
   persona: Persona;
   problem: (Problem & { state: ProblemState }) | null;
-  realProblem: RealProblem | null;
-  // The other problems the real problem sits behind.
-  alsoBehind: { id: string; title: string }[];
   // Every signal the story names, or that went to it, with its source's name.
   signals: (Signal & { sourceName: string })[];
   // The ideas for its problem, and the idea it was written from.
   ideas: (Idea & { state: IdeaState })[];
+  trying: Trying;
 };
 
 export function recordsView(records: Records): RecordsView {
@@ -127,8 +132,6 @@ export function storyPage(records: Records, id: string): StoryPage {
   const derived = derive(records);
   const problem = records.problems.find((p) => p.id === story.problem) ?? null;
   const fromIdea = "idea" in story.from ? story.from.idea : null;
-  const realProblem =
-    records.realProblems.find((r) => r.id === problem?.realProblem) ?? null;
   return {
     story,
     known: derived.stories[id]?.known ?? { seen: 0, of: 0 },
@@ -138,11 +141,6 @@ export function storyPage(records: Records, id: string): StoryPage {
       ...problem,
       state: derived.problems[problem.id] ?? "open",
     },
-    realProblem,
-    alsoBehind: records.problems
-      .filter((p) => realProblem && p.realProblem === realProblem.id)
-      .filter((p) => p.id !== problem?.id)
-      .map((p) => ({ id: p.id, title: p.title })),
     signals: signalsOf(story, records),
     ideas: records.ideas
       .filter(
@@ -154,6 +152,28 @@ export function storyPage(records: Records, id: string): StoryPage {
         ...idea,
         state: derived.ideas[idea.id] ?? "exploring",
       })),
+    trying: tryingFor(story.problem, records, derived),
+  };
+}
+
+function tryingFor(
+  problem: string | null,
+  records: Records,
+  derived: Derived,
+): Trying {
+  if (problem === null) return { exploring: [], inBuild: [] };
+  const answered = new Map(records.outcomes.map((o) => [o.issue, o.worked]));
+  return {
+    exploring: records.ideas
+      .filter((idea) => idea.problems.includes(problem))
+      .filter((idea) => derived.ideas[idea.id] === "exploring")
+      .map((idea) => idea.title),
+    inBuild: records.ticketLinks
+      .filter((ticket) => ticket.problems.includes(problem))
+      .filter(
+        (ticket) => !["yes", "no"].includes(answered.get(ticket.issue) ?? ""),
+      )
+      .map((ticket) => ticket.issue),
   };
 }
 
@@ -201,6 +221,7 @@ function storyCard(
     isNew: story.isNew,
     wrong: story.wrong,
     from: origin(story, records),
+    trying: tryingFor(story.problem, records, derived),
   };
 }
 

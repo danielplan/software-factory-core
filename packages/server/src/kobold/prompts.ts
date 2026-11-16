@@ -159,8 +159,7 @@ function storyLines(records: Records): string[] {
       ...story.scenes.map((s, at) => {
         const known = s.evidence.length > 0 ? "seen" : "guessed";
         const breaks = s.breaks ? ", breaks here" : "";
-        const where = s.where ? s.where + ": " : "";
-        return `  ${String(at + 1)}. [${known}${breaks}] ${where}${s.text}`;
+        return `  ${String(at + 1)}. [${known}${breaks}] ${s.text}`;
       }),
     ]),
   ];

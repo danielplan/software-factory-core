@@ -180,25 +180,20 @@ const WRITTEN = {
   title: "Standing order",
   weThink: "If his supplies came every Monday, Bruno would never run out.",
   story: {
-    title: "Supplies that arrive on their own",
+    title: "Sunday evening, nothing ordered",
     starts: "Sunday evening, thinking about the week",
     wants: "Flour on Monday without logging in",
     scenes: [
+      { text: "He remembers he has not ordered yet", breaks: false },
       {
-        text: "Remembers he has not ordered yet",
-        where: "Order again",
-        breaks: false,
-      },
-      {
-        text: "Forgets once, and Monday starts without flour",
-        where: "Delivery",
+        text: "He forgets once, and Monday starts without flour",
         breaks: true,
       },
     ],
     instead: "Calls the shop on Monday morning",
   },
   problem: {
-    title: "Forgets to order in time",
+    title: "Remembers to order too late",
     reading: "Ordering is a chore he does by memory.",
   },
 };

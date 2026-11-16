@@ -405,7 +405,7 @@
     {
       "id": "find",
       "persona": "mia",
-      "title": "Things vanish from the basket between morning and evening",
+      "title": "The basket is empty by evening",
       "reading": "Mia fills the basket in bits during the day and pays at night. The basket expires before she comes back.",
       "by": "Pia",
       "assumed": false,
@@ -414,7 +414,7 @@
     {
       "id": "invoice",
       "persona": "bruno",
-      "title": "Want one bill a month",
+      "title": "Gets a bill for every order",
       "reading": "Bakeries pay their suppliers monthly, so paying per order means extra bookkeeping for them.",
       "by": "kobold",
       "assumed": false,
@@ -423,7 +423,7 @@
     {
       "id": "when",
       "persona": "noah",
-      "title": "Can’t tell if the order went through, or when it comes",
+      "title": "No word that the order went through",
       "reading": "Guests have no account page to check, and the confirmation email gets missed.",
       "by": "Pia",
       "assumed": false,
@@ -432,7 +432,7 @@
     {
       "id": "size",
       "persona": "noah",
-      "title": "Unsure which size to pick",
+      "title": "Doesn’t know how the sizes run",
       "reading": "First-time buyers don’t know how this brand’s sizes run compared to what they usually wear.",
       "by": "kobold",
       "assumed": false,
@@ -441,7 +441,7 @@
     {
       "id": "amounts",
       "persona": "bruno",
-      "title": "Need to change amounts before the Monday order goes out",
+      "title": "Can’t change the amounts on a repeat order",
       "reading": "The one-tap reorder works, but Bruno’s week is never exactly the same as the last.",
       "by": "kobold",
       "assumed": false,
@@ -450,7 +450,7 @@
     {
       "id": "copy",
       "persona": "bruno",
-      "title": "Rebuilding the same order every Monday",
+      "title": "Has to type last week’s order again",
       "reading": "Bakeries order nearly the same supplies each week and type it all in again.",
       "by": "Marta",
       "assumed": false,
@@ -459,7 +459,7 @@
     {
       "id": "note",
       "persona": "ines",
-      "title": "Wants to add a note to a gift",
+      "title": "There is nowhere to add a note",
       "reading": "Only one person so far.",
       "by": "kobold",
       "assumed": false,
@@ -468,7 +468,7 @@
     {
       "id": "forget",
       "persona": "bruno",
-      "title": "Forgets to order in time",
+      "title": "Remembers to order too late",
       "reading": "Assumed from Luca’s idea. Nobody has said this yet.",
       "by": "kobold",
       "assumed": true,
@@ -477,7 +477,7 @@
     {
       "id": "slotsP",
       "persona": "mia",
-      "title": "Delivery slots are gone by the time they get home",
+      "title": "Tomorrow’s delivery slots are gone",
       "reading": "Mia orders after work, when tomorrow’s slots are already taken.",
       "by": "Pia",
       "assumed": false,
@@ -493,32 +493,28 @@
       "wants": "Dinner things, and shoes for tomorrow",
       "scenes": [
         {
-          "text": "08:05 · browses on the tram",
-          "where": "Find",
+          "text": "At 08:05 she browses on the tram",
           "evidence": ["s3"],
           "breaks": false
         },
         {
-          "text": "08:10 · adds trail shoes to the basket",
-          "where": "Fill the basket",
+          "text": "At 08:10 she adds trail shoes to the basket",
           "evidence": ["s3"],
           "breaks": false
         },
         {
-          "text": "18:30 · picks up the kids, no time",
-          "where": null,
+          "text": "At 18:30 she picks up the kids and has no time",
           "evidence": ["s2"],
           "breaks": false
         },
         {
-          "text": "21:40 · opens the app: the basket is empty",
-          "where": "Pay",
+          "text": "At 21:40 she opens the app, and the basket is empty",
           "evidence": ["s1", "s2"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Orders less, or gives up",
+        "text": "She orders less, or gives up",
         "evidence": []
       },
       "wrong": null,
@@ -531,25 +527,23 @@
     {
       "id": "st2",
       "persona": "mia",
-      "title": "Getting it delivered tomorrow",
+      "title": "Ordering after dinner",
       "starts": "Ordering at 21:00, after dinner",
       "wants": "Delivery tomorrow evening",
       "scenes": [
         {
-          "text": "Fills the basket after dinner",
-          "where": "Fill the basket",
+          "text": "She fills the basket after dinner",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Picks a delivery slot: all gone",
-          "where": "Delivery",
+          "text": "She picks a delivery slot, and they are all gone",
           "evidence": ["s12", "s13"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Orders for the day after, or not at all",
+        "text": "She orders for the day after, or not at all",
         "evidence": ["s13"]
       },
       "wrong": null,
@@ -562,25 +556,22 @@
     {
       "id": "st3",
       "persona": "mia",
-      "title": "Picking up on the way home",
+      "title": "Picking it up after work",
       "starts": "Leaving work",
       "wants": "Not to wait for delivery",
       "scenes": [
         {
-          "text": "Orders on the tram",
-          "where": "Fill the basket",
+          "text": "She orders on the tram",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Chooses pickup at checkout",
-          "where": "Pay",
+          "text": "She chooses pickup at checkout",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Picks it up at the shop",
-          "where": "Delivery",
+          "text": "She picks it up at the shop",
           "evidence": [],
           "breaks": false
         }
@@ -596,25 +587,23 @@
     {
       "id": "st4",
       "persona": "bruno",
-      "title": "The Monday order",
+      "title": "Monday morning in the back office",
       "starts": "Monday, 6:00, in the back office",
       "wants": "The same supplies as last week",
       "scenes": [
         {
-          "text": "Opens last week’s order",
-          "where": "Order again",
+          "text": "He opens last week’s order",
           "evidence": ["s10"],
           "breaks": false
         },
         {
-          "text": "Types it in again, line by line",
-          "where": "Order again",
+          "text": "He types it in again, line by line",
           "evidence": ["s10"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Half an hour, every Monday",
+        "text": "He spends half an hour on it, every Monday",
         "evidence": ["s10"]
       },
       "wrong": null,
@@ -627,25 +616,23 @@
     {
       "id": "st5",
       "persona": "bruno",
-      "title": "A busy week",
+      "title": "A busy week at the bakery",
       "starts": "A Monday before a holiday",
       "wants": "More baguette blanks than usual",
       "scenes": [
         {
-          "text": "Reorders last week in one tap",
-          "where": "Order again",
+          "text": "He reorders last week in one tap",
           "evidence": ["s11"],
           "breaks": false
         },
         {
-          "text": "Needs different amounts, can’t change them",
-          "where": "Order again",
+          "text": "He needs different amounts and can’t change them",
           "evidence": ["s11"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Places a second order",
+        "text": "He places a second order",
         "evidence": []
       },
       "wrong": null,
@@ -658,25 +645,23 @@
     {
       "id": "st6",
       "persona": "bruno",
-      "title": "Month end",
+      "title": "Paying suppliers at month end",
       "starts": "Paying suppliers on the 30th",
       "wants": "One bill for the month",
       "scenes": [
         {
-          "text": "Collects the month’s receipts",
-          "where": "Invoices",
+          "text": "He collects the month’s receipts",
           "evidence": ["s4"],
           "breaks": false
         },
         {
-          "text": "Finds one bill per order, twelve this month",
-          "where": "Invoices",
+          "text": "He finds one bill per order, twelve this month",
           "evidence": ["s4", "s5"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Asks support for a summary",
+        "text": "He asks support for a summary",
         "evidence": []
       },
       "wrong": null,
@@ -689,31 +674,28 @@
     {
       "id": "st10",
       "persona": "bruno",
-      "title": "Supplies that arrive on their own",
+      "title": "Sunday night, nothing ordered yet",
       "starts": "Sunday evening, thinking about the week",
       "wants": "Flour on Monday without logging in",
       "scenes": [
         {
-          "text": "Remembers on Sunday night he hasn’t ordered yet",
-          "where": "Order again",
+          "text": "On Sunday night he remembers he hasn’t ordered yet",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Logs in to repeat last week’s order",
-          "where": "Order again",
+          "text": "He logs in to repeat last week’s order",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Forgets once, and Monday starts without flour",
-          "where": "Delivery",
+          "text": "He forgets once, and Monday starts without flour",
           "evidence": [],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Drives to the wholesaler",
+        "text": "He drives to the wholesaler",
         "evidence": []
       },
       "wrong": null,
@@ -726,25 +708,23 @@
     {
       "id": "st7",
       "persona": "noah",
-      "title": "Choosing a size",
+      "title": "Buying trail shoes for the first time",
       "starts": "First visit, from an ad",
       "wants": "Trail shoes that fit",
       "scenes": [
         {
-          "text": "Finds the trail shoes",
-          "where": "Find",
+          "text": "He finds the trail shoes",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Not sure a 42 here is a 42 elsewhere",
-          "where": "Find",
+          "text": "He isn’t sure a 42 here is a 42 elsewhere",
           "evidence": ["s8"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Orders one size and sends it back",
+        "text": "He orders one size and sends it back",
         "evidence": ["s9"]
       },
       "wrong": null,
@@ -757,25 +737,23 @@
     {
       "id": "st8",
       "persona": "noah",
-      "title": "First order as a guest",
+      "title": "Waiting for a first order",
       "starts": "Checking out without an account",
       "wants": "To know it worked",
       "scenes": [
         {
-          "text": "Pays as a guest",
-          "where": "Pay",
+          "text": "He pays as a guest",
           "evidence": [],
           "breaks": false
         },
         {
           "text": "No confirmation email arrives",
-          "where": "Delivery",
           "evidence": ["s7"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Asks the kobold if the order went through",
+        "text": "He asks the kobold if the order went through",
         "evidence": ["s6"]
       },
       "wrong": null,
@@ -793,20 +771,18 @@
       "wants": "A gift with a few words from her",
       "scenes": [
         {
-          "text": "Picks a scarf",
-          "where": "Find",
+          "text": "She picks a scarf",
           "evidence": [],
           "breaks": false
         },
         {
-          "text": "Wants to add a note: there is no field",
-          "where": "Pay",
+          "text": "She wants to add a note, and there is no field for it",
           "evidence": ["s14"],
           "breaks": true
         }
       ],
       "instead": {
-        "text": "Sends it without a note",
+        "text": "She sends it without a note",
         "evidence": []
       },
       "wrong": null,

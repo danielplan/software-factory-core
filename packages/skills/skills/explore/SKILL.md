@@ -17,7 +17,7 @@ An idea is what the team thinks would help one persona. It starts from a story t
 
 1. Read the idea, and the persona it is for: their role, what they do, what they want, and the stories already told about them.
 2. Give the idea a short title (two to five words) and one sentence of what the team thinks it would do: "If …, <persona> would …".
-3. Tell the story the idea assumes, in three to five scenes, in order: where it starts, what the persona wants, each scene a short line with a free "where" label when it helps ("Order again", "Delivery"). One scene breaks: the moment the idea is meant to fix. Say what the persona does instead, when it helps.
+3. Tell the story the idea assumes, in three to five scenes, in order: where it starts, what the persona wants, each scene one short sentence with its subject, so the scenes read as one paragraph, with no labels before them. Name the story as a situation and its problem as the obstacle, never the same words. One scene breaks: the moment the idea is meant to fix. Say what the persona does instead, when it helps.
 4. Name the problem it breaks at, in the persona's words, with a line on what is behind it.
 5. Call `write_idea` once with all of this. Its answer says what it wrote, or what does not fit: correct it and call it again.
 

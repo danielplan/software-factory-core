@@ -63,18 +63,32 @@ Text, from the strongest: `--foreground`, `--foreground-2`,
 | `--fresh`                                    | #e64f86                                     | the outline of something new                                          |
 | `--success`, `--warning`, `--destructive`    | #12a594, #e9a23b, #d9534f                   | seen scenes and lights; starting; problems                            |
 
-Where a story or problem stands, each a background and its text:
+Where a story or problem stands, each a background and its text. A story
+is Open or Solved (or crossed out: it didn't hold); while something is tried
+for its problem it shows that in a muted line ("Trying: Wish list", "In
+Build: #138") instead of a pill. The warm pair marks an idea's ticket on
+Build.
 
-| State        | Variables                           | Light            |
-| ------------ | ----------------------------------- | ---------------- |
-| Open, new    | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
-| Being solved | `--solving`, `--solving-foreground` | #fff3df, #8a5300 |
-| Solved       | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
-| Didn't hold  | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
+| State       | Variables                           | Light            |
+| ----------- | ----------------------------------- | ---------------- |
+| Open, new   | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
+| An idea     | `--solving`, `--solving-foreground` | #fff3df, #8a5300 |
+| Solved      | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
+| Didn't hold | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
 
 Every variable has a dark value in the same file. Text on the colours it
 sits on is readable (WCAG AA, 4.5:1) in both, except `--label` and `--faint`
 in light, which are only for short labels next to stronger text.
+
+## One question per page
+
+Under a page's title, its one line says what to do there, as a question
+when the page asks something of the person: Understand asks "What’s new to
+look at?", a persona "Is this the real problem for Mia?", a story "Is this
+how it happens? What is still guessed?". A story is told as a short
+paragraph, one sentence per scene: the one where it breaks in `--open`, a
+guessed one muted and in italics, a seen one with a small raised mark that
+shows what was said, and where, on hover or focus.
 
 ## Light or dark
 

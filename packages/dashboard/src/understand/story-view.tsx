@@ -1,31 +1,39 @@
-// Understand's third level: one story. Where it starts and what the
-// persona wants, then scene by scene, each with what shows it (its source
-// and the first thing said) or guessed, the scene where it breaks marked,
-// and what they do instead. When scenes are guessed, the kobold offers to
-// draft a question for people like the persona. Beside it: the problem it
-// breaks at, the real problem behind that, and the ideas for it.
+// Understand's third level: one story, told as a short paragraph. Where it
+// starts and what the persona wants in a line above; then each scene as a
+// sentence, in order, with what they do instead last. The sentence where it
+// breaks is marked in the problem's colour; a guessed one is grey, and a
+// seen one has a small mark that shows what was said, and where, on hover
+// or focus. Under it, how much is seen, and the kobold's offer to ask
+// about what is guessed; the signals the kobold put in it that nobody has
+// looked at, to agree with or move. Beside it: the problem it breaks at and
+// the ideas for it.
 
-import type { StoryPage } from "@/api";
+import { Tooltip } from "radix-ui";
+
+import type { SignalView, StoryPage } from "@/api";
 import { cn } from "@/lib/utils";
 
-import { Initial, Label, Squares } from "./bits";
 import { AskLine } from "./ask-line";
+import { Initial } from "./bits";
+import { SortedSignal } from "./sorted-signal";
 import { StorySide } from "./story-side";
-import { evidenceOf, guessedCount, storyFrom } from "./view";
+import { type Sentence, sentencesOf, storyFrom } from "./view";
 
 export function StoryView({
   page,
   tint,
-}: Readonly<{ page: StoryPage; tint: string }>) {
+  toLookAt,
+}: Readonly<{ page: StoryPage; tint: string; toLookAt: SignalView[] }>) {
   const { story, persona } = page;
-  const parts = [...story.scenes, ...(story.instead ? [story.instead] : [])];
-  const seen = parts.map((part) => part.evidence.length > 0);
-  const from = storyFrom(page);
+  const setting = [
+    story.starts && `Starts: ${story.starts}`,
+    story.wants && `Wants: ${story.wants}`,
+  ].filter(Boolean);
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
       <section
         aria-label="The story"
-        className="grid gap-3.5 rounded-2xl bg-card px-6 py-5 shadow-soft"
+        className="grid gap-4 rounded-2xl bg-card px-6 py-5 shadow-soft"
       >
         <div className="flex flex-wrap items-center gap-2.5">
           <Initial name={persona.name} tint={tint} />
@@ -33,47 +41,34 @@ export function StoryView({
             <span className="font-semibold">{persona.name}</span>{" "}
             <span className="text-muted-foreground">{persona.role}</span>
           </span>
-          <span className="text-xs text-muted-foreground">{from}</span>
+          <span className="text-xs text-label">{storyFrom(page)}</span>
         </div>
         {story.wrong !== null && (
-          <p className="rounded-xl bg-surface px-3.5 py-2.5 text-sm">
+          <p className="rounded-xl bg-wrong px-3.5 py-2.5 text-sm text-wrong-foreground">
             It didn't hold: {story.wrong}
           </p>
         )}
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          <Box title="Starts" text={story.starts || "Not said yet"} />
-          <Box title="Wants" text={story.wants || "Not said yet"} />
-        </div>
-        <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-          <span className="flex-1">Scene by scene</span>
-          <Squares seen={seen} />
-          {page.known.seen} of {page.known.of} scenes seen
-        </div>
-        <ol className="grid gap-2">
-          {story.scenes.map((scene, at) => (
-            <Scene
-              key={`${String(at)}-${scene.text}`}
-              where={scene.where}
-              text={scene.text}
-              evidence={evidenceOf(scene.evidence, page.signals)}
-              breaks={scene.breaks}
-            />
-          ))}
-          {story.instead && (
-            <Scene
-              where="Instead"
-              text={story.instead.text}
-              evidence={evidenceOf(story.instead.evidence, page.signals)}
-              instead
-            />
-          )}
-        </ol>
-        {guessedCount(seen) > 0 && story.wrong === null && (
-          <AskLine
-            story={story.id}
-            guessed={guessedCount(seen)}
-            persona={persona.name}
-          />
+        {setting.length > 0 && (
+          <p className="text-[13px] text-muted-foreground">
+            {setting.join(" · ")}
+          </p>
+        )}
+        <Prose sentences={sentencesOf(page)} />
+        <AskLine
+          story={story.id}
+          known={page.known}
+          persona={persona.name}
+          canAsk={story.wrong === null}
+        />
+        {toLookAt.length > 0 && (
+          <div className="grid gap-2">
+            <p className="text-[13px] font-medium">
+              The kobold put these here. Does each fit?
+            </p>
+            {toLookAt.map((signal) => (
+              <SortedSignal key={signal.id} signal={signal} />
+            ))}
+          </div>
         )}
       </section>
       <StorySide page={page} />
@@ -81,69 +76,57 @@ export function StoryView({
   );
 }
 
-function Box({ title, text }: Readonly<{ title: string; text: string }>) {
+function Prose({ sentences }: Readonly<{ sentences: Sentence[] }>) {
   return (
-    <div className="grid gap-0.5 rounded-xl bg-surface px-3.5 py-2.5">
-      <Label>{title}</Label>
-      <span className="text-[15px]">{text}</span>
-    </div>
+    <Tooltip.Provider delayDuration={150}>
+      <p className="text-[17px] leading-[1.75]">
+        {sentences.map((one, at) => (
+          <span key={`${String(at)}-${one.text}`}>
+            {at > 0 && " "}
+            <span
+              className={cn(
+                "rounded-md",
+                one.breaks &&
+                  "bg-open box-decoration-clone px-1 py-0.5 text-open-foreground",
+                !one.evidence && !one.breaks && "text-muted-foreground italic",
+              )}
+            >
+              {one.text}
+            </span>
+            {one.evidence && <Evidence evidence={one.evidence} />}
+          </span>
+        ))}
+      </p>
+    </Tooltip.Provider>
   );
 }
 
-function Scene({
-  where,
-  text,
+// A seen sentence's mark: the source's first letter, raised; what was said
+// and where, on hover or focus.
+function Evidence({
   evidence,
-  breaks = false,
-  instead = false,
-}: Readonly<{
-  where: string | null;
-  text: string;
-  evidence: { source: string; text: string } | null;
-  breaks?: boolean;
-  instead?: boolean;
-}>) {
+}: Readonly<{ evidence: NonNullable<Sentence["evidence"]> }>) {
   return (
-    <li
-      className={cn(
-        "grid items-center gap-x-4 gap-y-1 rounded-xl border px-3.5 py-2.5 sm:grid-cols-[110px_minmax(0,1fr)_auto]",
-        breaks && "border-fresh bg-fresh/[0.06] ring-1 ring-fresh",
-        instead && "border-dashed",
-      )}
-    >
-      <span
-        className={cn(
-          "text-[13px] font-medium text-muted-foreground",
-          breaks && "text-fresh",
-        )}
-      >
-        {where ?? ""}
-      </span>
-      <span className="grid min-w-0 gap-0.5">
-        <span className="text-[15px] font-medium">{text}</span>
-        {evidence && (
-          <span className="truncate text-[13px] text-muted-foreground">
-            {evidence.text}
-          </span>
-        )}
-      </span>
-      <span className="flex gap-1.5">
-        {breaks && (
-          <span className="rounded-full bg-fresh px-2.5 py-0.5 text-xs font-semibold text-white">
-            breaks here
-          </span>
-        )}
-        <span
-          className={cn(
-            "rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-            evidence
-              ? "bg-solved text-solved-foreground"
-              : "bg-surface-2 text-muted-foreground",
-          )}
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          aria-label={`Seen, in ${evidence.source}: ${evidence.text}`}
+          className="relative -top-2 ml-0.5 inline-grid size-4 place-items-center rounded-full bg-solved align-baseline text-[10px] leading-none font-semibold text-solved-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {evidence ? evidence.source : "guessed"}
-        </span>
-      </span>
-    </li>
+          {evidence.source.slice(0, 1).toUpperCase()}
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          side="top"
+          sideOffset={6}
+          className="z-50 grid max-w-xs gap-1 rounded-xl bg-popover px-3.5 py-2.5 text-[13px] text-popover-foreground shadow-[0_0_0_1px_var(--border),var(--shadow-big)]"
+        >
+          <span>{evidence.text}</span>
+          <span className="text-xs text-label">{evidence.source}</span>
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   );
 }

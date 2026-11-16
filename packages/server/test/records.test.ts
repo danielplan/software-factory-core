@@ -87,12 +87,12 @@ test("the Understand pages read the records, with what is worked out from them",
     );
     assert.deepEqual(mia.stories[1], {
       id: "st2",
-      title: "Getting it delivered tomorrow",
+      title: "Ordering after dinner",
       persona: "mia",
       starts: "Ordering at 21:00, after dinner",
       wants: "Delivery tomorrow evening",
       problem: "slotsP",
-      problemTitle: "Delivery slots are gone by the time they get home",
+      problemTitle: "Tomorrow’s delivery slots are gone",
       problemState: "solved",
       known: { seen: 2, of: 3 },
       seen: [false, true, true],
@@ -100,8 +100,19 @@ test("the Understand pages read the records, with what is worked out from them",
       isNew: false,
       wrong: null,
       from: { signals: 1 },
+      trying: { exploring: [], inBuild: [] },
     });
     assert.equal(mia.stories[2]?.problemState, null);
+    // What is tried for a problem: the ideas explored, the issues in Build.
+    const trying = new Map(
+      overview.personas.flatMap((p) => p.stories).map((s) => [s.id, s.trying]),
+    );
+    assert.deepEqual(trying.get("st1"), {
+      exploring: ["Wish list", "Evening reminder"],
+      inBuild: [],
+    });
+    assert.deepEqual(trying.get("st4"), { exploring: [], inBuild: [131] });
+    assert.deepEqual(trying.get("st3"), { exploring: [], inBuild: [] });
 
     const bruno = (await read("/api/understand/persona?id=bruno"))
       .body as PersonaPage;
@@ -120,7 +131,10 @@ test("the Understand pages read the records, with what is worked out from them",
     assert.equal(story.persona.name, "Mia");
     assert.deepEqual(story.known, { seen: 4, of: 5 });
     assert.equal(story.problem?.state, "beingSolved");
-    assert.equal(story.realProblem?.id, "r_mia");
+    assert.deepEqual(story.trying, {
+      exploring: ["Wish list", "Evening reminder"],
+      inBuild: [],
+    });
     assert.deepEqual(
       story.signals.map((s) => [s.id, s.sourceName]),
       [
@@ -140,8 +154,8 @@ test("the Understand pages read the records, with what is worked out from them",
     const pickup = (await read("/api/understand/story?id=st3"))
       .body as StoryPage;
     assert.deepEqual(
-      [pickup.problem, pickup.realProblem, pickup.ideas.map((i) => i.state)],
-      [null, null, ["didntWork"]],
+      [pickup.problem, pickup.trying, pickup.ideas.map((i) => i.state)],
+      [null, { exploring: [], inBuild: [] }, ["didntWork"]],
     );
 
     for (const [path, error] of [

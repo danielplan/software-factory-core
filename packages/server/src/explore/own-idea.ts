@@ -26,11 +26,9 @@ export const WRITE_IDEA_INPUT = {
       scenes: z
         .array(
           z.strictObject({
-            text: words.describe("The moment, in a short line."),
-            where: z
-              .string()
-              .optional()
-              .describe('Where it happens, a free label ("Order again").'),
+            text: words.describe(
+              "The moment, in one short sentence with its subject, read as part of a paragraph.",
+            ),
             breaks: z
               .boolean()
               .describe("True for the one scene where it breaks."),
@@ -98,7 +96,7 @@ export function writeOwnIdea(
     wants: story.wants,
     scenes: story.scenes.map((scene) => ({
       text: scene.text,
-      where: scene.where?.trim() ? scene.where.trim() : null,
+      where: null,
       evidence: [],
       breaks: scene.breaks,
     })),

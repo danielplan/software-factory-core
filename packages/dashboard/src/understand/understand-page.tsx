@@ -1,9 +1,12 @@
 // Understand: the people this product is for, their stories, and where
 // things break for them, in three levels with a breadcrumb: every persona
 // (#understand), one persona (#understand/<persona>), one of their stories
-// (#understand/<persona>/<story>). What is shown is read again whenever
-// the records change. "Add a source" brings in something that came in.
+// (#understand/<persona>/<story>). Each level asks one question under its
+// title, so it is clear what to do there. What is shown is read again
+// whenever the records change. "Add a source" brings in something that
+// came in.
 
+import type { SignalView, StoryPage } from "@/api";
 import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
 import { understandHash, understandOf } from "@/lib/routes";
@@ -28,14 +31,21 @@ export function UnderstandPage({ open }: Readonly<{ open: string | null }>) {
     id;
   if (problem)
     return <ProblemBox title="The records cannot be read" text={problem} />;
-  if (story) return <StoryLevel id={story} tint={tint} />;
+  if (story)
+    return (
+      <StoryLevel
+        id={story}
+        tint={tint}
+        toLookAt={overview?.kobold.toLookAt ?? []}
+      />
+    );
   if (persona) return <PersonaLevel id={persona} tint={tint} />;
   return (
     <div className="grid content-start gap-4">
       <PageHead
         crumbs={[HOME]}
         title="Understand"
-        about="The people this product is for, their stories, and where things break for them."
+        about="What’s new to look at?"
         actions={<AddSource />}
       />
       {overview && (
@@ -59,7 +69,11 @@ function PersonaLevel({
       <PageHead
         crumbs={[HOME, { name: persona.name }]}
         title={persona.name}
-        about={`${persona.role}, and the stories we know about`}
+        about={
+          data.realProblems.length > 0
+            ? `Is this the real problem for ${persona.name}?`
+            : `What is the real problem for ${persona.name}?`
+        }
         actions={<AddSource />}
       />
       <PersonaView page={data} tint={tint(persona.id)} />
@@ -70,7 +84,12 @@ function PersonaLevel({
 function StoryLevel({
   id,
   tint,
-}: Readonly<{ id: string; tint: (id: string) => string }>) {
+  toLookAt,
+}: Readonly<{
+  id: string;
+  tint: (id: string) => string;
+  toLookAt: SignalView[];
+}>) {
   const { data, problem } = useStory(id);
   if (problem)
     return <ProblemBox title="This story cannot be shown" text={problem} />;
@@ -85,10 +104,22 @@ function StoryLevel({
           { name: story.title },
         ]}
         title={story.title}
-        about={`A story of ${persona.name}, ${persona.role.toLowerCase()}`}
+        about="Is this how it happens? What is still guessed?"
         actions={<AddSource />}
       />
-      <StoryView page={data} tint={tint(persona.id)} />
+      <StoryView
+        page={data}
+        tint={tint(persona.id)}
+        toLookAt={toLookAt.filter((signal) => isIn(signal, data))}
+      />
     </div>
   );
+}
+
+// What the kobold put in this story, or at its problem, that nobody has
+// looked at yet.
+function isIn(signal: SignalView, page: StoryPage): boolean {
+  const { went } = signal;
+  if (went?.to === "story") return went.story === page.story.id;
+  return went?.to === "problem" && went.problem === page.story.problem;
 }

@@ -73,14 +73,14 @@ test("a signal that comes in is sorted by the kobold into a scene of a story, wh
       [
         "sort",
         "s19",
-        "It is evidence in scene 1 of “Choosing a size”, which is seen now.",
+        "It is evidence in scene 1 of “Buying trail shoes for the first time”, which is seen now.",
         null,
       ],
     );
     // Each refusal was said to the kobold, so it could correct itself.
     assert.deepEqual(pretend.answers[0]?.slice(0, 2), [
-      "The story “Choosing a size” is noah's: only a signal that sounds like noah is evidence in it.",
-      "The story “Choosing a size” has 2 scenes.",
+      "The story “Buying trail shoes for the first time” is noah's: only a signal that sounds like noah is evidence in it.",
+      "The story “Buying trail shoes for the first time” has 2 scenes.",
     ]);
     const [run] = pretend.seen;
     assert.ok(run);
@@ -107,7 +107,7 @@ test("a signal that comes in is sorted by the kobold into a scene of a story, wh
           to: "story",
           story: "st7",
           persona: "noah",
-          title: "Choosing a size",
+          title: "Buying trail shoes for the first time",
           scene: 1,
         },
       ],
@@ -135,7 +135,7 @@ test("a signal that fits no story starts a new one, and a real problem is sugges
     starts: "The evening before sending",
     wants: "A card she wrote herself",
     scenes: [
-      { text: "Writes the card", where: "Gift", shows: false, breaks: false },
+      { text: "She writes the card", shows: false, breaks: false },
       { text: "Finds no way to add it", shows: true, breaks: true },
     ],
     instead: "Posts the card herself",
@@ -212,7 +212,7 @@ test("a signal that fits no story starts a new one, and a real problem is sugges
     assert.deepEqual(
       story?.scenes.map((s) => [s.where, s.evidence]),
       [
-        ["Gift", []],
+        [null, []],
         [null, ["s19"]],
       ],
     );
@@ -380,7 +380,7 @@ test("the kobold drafts a question about a story's guessed scenes", async () => 
       question: "Hi! When did you last send a gift?",
     });
     assert.match(pretend.seen[0]?.prompt ?? "", /two people like Ines/);
-    assert.match(pretend.seen[0]?.prompt ?? "", /- Picks a scarf/);
+    assert.match(pretend.seen[0]?.prompt ?? "", /- She picks a scarf/);
     assert.equal(pretend.seen[0]?.mcp, undefined);
 
     // Without Claude Code it says so; a story fully seen needs no question.

@@ -9,36 +9,52 @@ import type {
   StoryPage,
 } from "../src/api.ts";
 import {
-  askWords,
   evidenceOf,
-  guessedCount,
+  knownWords,
   koboldLine,
   listWords,
+  markOf,
   originWords,
-  problemWhy,
   realProblemWords,
-  stateOf,
+  sentencesOf,
   storiesWords,
   storyFrom,
   tintOf,
+  tryingWords,
   wentWords,
 } from "../src/understand/view.ts";
 
 // What the Understand pages say, from what the server sends.
 
-test("a story's pill says where its problem stands, or that it did not hold", () => {
-  const pill = (problemState: StoryCard["problemState"]) =>
-    stateOf({ problemState, wrong: null }).words;
-  assert.equal(pill("open"), "Open");
-  assert.equal(pill("beingSolved"), "Being solved");
-  assert.equal(pill("solved"), "Solved");
-  assert.equal(pill(null), "No problem yet");
+const NOTHING = { exploring: [], inBuild: [] };
+
+test("a story is Open or Solved, or says what is tried for its problem, or that it did not hold", () => {
+  const mark = (
+    problemState: StoryCard["problemState"],
+    trying: StoryCard["trying"] = NOTHING,
+  ) => markOf({ problemState, wrong: null, trying });
+  assert.deepEqual(mark("open"), {
+    pill: { words: "Open", tone: "open" },
+    note: null,
+  });
+  assert.deepEqual(mark("solved", { exploring: ["Wish list"], inBuild: [] }), {
+    pill: { words: "Solved", tone: "solved" },
+    note: null,
+  });
   assert.deepEqual(
-    stateOf({ problemState: "open", wrong: "Nobody chose it" }),
-    {
-      words: "Didn't hold",
-      tone: "wrong",
-    },
+    mark("beingSolved", { exploring: ["Wish list", "Reminder"], inBuild: [] }),
+    { pill: null, note: "Trying: Wish list and Reminder" },
+  );
+  assert.deepEqual(mark(null), { pill: null, note: null });
+  assert.deepEqual(mark("beingSolved").pill, { words: "Open", tone: "open" });
+  assert.deepEqual(
+    markOf({ problemState: "open", wrong: "Nobody chose it", trying: NOTHING }),
+    { pill: { words: "Didn't hold", tone: "wrong" }, note: null },
+  );
+  assert.equal(tryingWords(NOTHING), null);
+  assert.equal(
+    tryingWords({ exploring: ["Size finder"], inBuild: [138, 140] }),
+    "In Build: #138, #140 · Trying: Size finder",
   );
 });
 
@@ -135,53 +151,55 @@ test("the kobold's line says what it did that nobody looked at yet", () => {
   );
 });
 
-test("guessed scenes, and the line that asks about them", () => {
-  assert.equal(guessedCount([true, false, false]), 2);
-  assert.equal(
-    askWords(1, "Mia"),
-    "1 scene is guessed. Ask two people like Mia?",
-  );
-  assert.equal(
-    askWords(3, "Mia"),
-    "3 scenes are guessed. Ask two people like Mia?",
-  );
+test("how much of a story is seen, in a line", () => {
+  assert.equal(knownWords({ seen: 3, of: 4 }), "3 of 4 parts seen · 1 guessed");
+  assert.equal(knownWords({ seen: 2, of: 2 }), "2 of 2 parts seen");
 });
 
-test("why a problem stands where it does, from its ideas", () => {
-  const page = (
-    state: "open" | "beingSolved" | "solved",
-    ideas: [string, string][],
-  ) =>
-    ({
-      problem: { id: "p", state },
-      ideas: [
-        ...ideas.map(([title, s]) => ({ title, state: s, problems: ["p"] })),
-        { title: "Elsewhere", state: "exploring", problems: ["q"] },
-      ],
-    }) as unknown as StoryPage;
-  assert.equal(problemWhy(page("solved", [])), "A change for it worked.");
-  assert.equal(problemWhy(page("open", [])), "Nobody is working on it yet.");
+test("a story is told as sentences, the one it breaks at marked, what they do instead last", () => {
+  const scene = (text: string, evidence: string[] = [], breaks = false) => ({
+    text,
+    where: null,
+    evidence,
+    breaks,
+  });
+  const signals = [
+    { id: "s1", sourceName: "Support", text: "Where is it?" },
+  ] as StoryPage["signals"];
+  const told = (instead: string | null) =>
+    sentencesOf({
+      story: {
+        scenes: [
+          scene("he opens last week’s order", ["s1"]),
+          scene("He types it in again, line by line.", [], true),
+        ],
+        instead: instead === null ? null : { text: instead, evidence: [] },
+      } as unknown as StoryPage["story"],
+      signals,
+    });
+  assert.deepEqual(told("He drives to the wholesaler"), [
+    {
+      text: "He opens last week’s order.",
+      breaks: false,
+      evidence: { source: "Support", text: "Where is it?" },
+    },
+    {
+      text: "He types it in again, line by line.",
+      breaks: true,
+      evidence: null,
+    },
+    {
+      text: "Instead, he drives to the wholesaler.",
+      breaks: false,
+      evidence: null,
+    },
+  ]);
   assert.equal(
-    problemWhy(page("open", [["Pickup", "didntWork"]])),
-    "Tried: Pickup, which didn't work.",
+    told("I call the shop!").at(-1)?.text,
+    "Instead, I call the shop!",
   );
-  assert.equal(
-    problemWhy(
-      page("beingSolved", [
-        ["Wish list", "exploring"],
-        ["Reminder", "exploring"],
-      ]),
-    ),
-    "Being explored in Wish list and Reminder.",
-  );
-  assert.equal(
-    problemWhy(page("beingSolved", [["Status page", "inBuild"]])),
-    "In Build: Status page.",
-  );
-  assert.equal(
-    problemWhy(page("beingSolved", [])),
-    "A change for it waits for “did it work?”.",
-  );
+  assert.equal(told("SMS the team").at(-1)?.text, "Instead, SMS the team.");
+  assert.equal(told(null).length, 2);
 });
 
 test("a story's own page says where it came from", () => {
