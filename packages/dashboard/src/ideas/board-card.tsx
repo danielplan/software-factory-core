@@ -1,6 +1,7 @@
 import { ArrowUpRight, GitPullRequest, Loader2 } from "lucide-react";
 
-import type { CardView } from "@/api";
+import type { CardView, TicketView } from "@/api";
+import { TicketFoot, TicketFor, TicketHead } from "@/build/ticket-bits";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,39 +21,76 @@ export type Working = { who: string; what: string; steps: string[] };
 
 // A card from the connected board: its title and number, and, when the
 // builder or the coach works on it, what it is doing in a few words. It
-// opens a panel with the card's links and the steps so far.
+// opens a panel with the card's links and the steps so far. A card Kobble
+// knows also says its kind and what it is for, and, once it is in the app,
+// asks "did it work?" until a person answers.
 export function BoardCard({
   card,
   working,
-}: Readonly<{ card: CardView; working: Working | null }>) {
+  ticket = null,
+  onAsk,
+}: Readonly<{
+  card: CardView;
+  working: Working | null;
+  ticket?: TicketView | null;
+  onAsk?: () => void;
+}>) {
+  const asking = Boolean(ticket && card.asks && !ticket.outcome);
+  return (
+    <div
+      className={cn(
+        "grid min-w-0 gap-1.5 rounded-xl bg-card p-3 shadow-soft transition-shadow hover:ring-1 hover:ring-foreground/20",
+        working && "ring-2 ring-[var(--tint)]",
+        asking && "ring-2 ring-foreground",
+      )}
+    >
+      <Dialog>
+        <DialogTrigger asChild>
+          <button type="button" className="grid min-w-0 gap-1.5 text-left">
+            {ticket && <TicketHead ticket={ticket} />}
+            <span className="text-sm font-medium break-words">
+              {card.title}
+            </span>
+            {(working || !ticket) && (
+              <CardStatus number={card.number} working={working} />
+            )}
+          </button>
+        </DialogTrigger>
+        <CardPanel card={card} working={working} />
+      </Dialog>
+      {ticket && (
+        <>
+          <TicketFor ticket={ticket} small />
+          <TicketFoot
+            ticket={ticket}
+            asks={card.asks}
+            onAsk={() => onAsk?.()}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+// What works on the card now, in a few words; or its number.
+function CardStatus({
+  number,
+  working,
+}: Readonly<{ number: number; working: Working | null }>) {
   const last = working?.steps.at(-1);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "grid min-w-0 gap-1.5 rounded-xl bg-card p-3 text-left shadow-soft transition-shadow hover:ring-1 hover:ring-foreground/20",
-            working && "ring-2 ring-[var(--tint)]",
-          )}
-        >
-          <span className="text-sm font-medium break-words">{card.title}</span>
-          <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-            {working ? (
-              <>
-                <Loader2 className="size-3 shrink-0 animate-spin" aria-hidden />
-                <span className="truncate">
-                  {last ? shortStep(last) : `${working.who} is ${working.what}`}
-                </span>
-              </>
-            ) : (
-              `#${String(card.number)}`
-            )}
+    <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+      {working ? (
+        <>
+          <Loader2 className="size-3 shrink-0 animate-spin" aria-hidden />
+          <span className="truncate">
+            {last ? shortStep(last) : `${working.who} is ${working.what}`}
           </span>
-        </button>
-      </DialogTrigger>
-      <CardPanel card={card} working={working} />
-    </Dialog>
+        </>
+      ) : (
+        `#${String(number)}`
+      )}
+    </span>
   );
 }
 

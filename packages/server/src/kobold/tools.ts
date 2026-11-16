@@ -20,6 +20,20 @@ import {
 
 export const KOBOLD_HEADER = "x-kobold";
 
+const TOOL_LINES: Record<string, string> = {
+  sort_signal: "Putting it in its place",
+  suggest_real_problem: "Suggesting a real problem",
+  write_idea: "Writing the idea and its story",
+};
+
+// A line of what a job's Claude Code does, as a person sees it; null to
+// skip.
+export function plain(line: string): string | null {
+  const tool = /^Using mcp__kobold__(\w+)/.exec(line)?.[1];
+  if (tool) return TOOL_LINES[tool] ?? null;
+  return /^(Reading|Searching|Looking)/.test(line) ? line : null;
+}
+
 // What a job's tools act on; each says what it did in a line.
 export type JobTools =
   | { tool: "sort_signal"; act: (args: Sort) => string }

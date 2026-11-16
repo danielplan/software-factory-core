@@ -4,15 +4,11 @@
 // the idea is, who it is for and where the version's branch is, and carries
 // the ids in a hidden mark, the way the factory marks its own words on the
 // board: <!-- factory:kobble idea=<id> version=<key> problems=<id>,<id> -->.
-// Whether it worked is asked once the issue is closed (later).
+// Whether it worked is asked once the issue is closed (build/answer.ts).
 
-import {
-  derive,
-  RecordsRefused,
-  type RecordStore,
-  versionKey,
-} from "@software-factory/core";
+import { derive, type RecordStore, versionKey } from "@software-factory/core";
 
+import { keptLink } from "../build/answer.ts";
 import type { Cards } from "../cards/cards.ts";
 import { Refused } from "../refused.ts";
 
@@ -63,19 +59,14 @@ export async function sendToBuild(
     markOf({ idea: idea.id, version: version.key, problems: idea.problems }),
   ].join("\n");
   const card = await cards().create(idea.title, body);
-  try {
+  keptLink(card.number, () =>
     store.put("ticketLinks", {
       issue: card.number,
       kind: "idea",
       from: { idea: idea.id, version: version.key },
       problems: idea.problems,
-    });
-  } catch (error) {
-    if (error instanceof RecordsRefused)
-      throw new Refused(
-        `The issue #${String(card.number)} is made, but the records refused it: ${error.message}`,
-      );
-    throw error;
-  }
+      on: new Date().toISOString().slice(0, 10),
+    }),
+  );
   return { issue: card.number, url: card.url };
 }

@@ -14,6 +14,8 @@ export const NOTES = [
   "review-ready",
   "fixed",
   "checks-failed",
+  // The answer to "did it work?", given in Kobble.
+  "did-it-work",
 ] as const;
 export type Note = (typeof NOTES)[number];
 

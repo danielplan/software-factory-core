@@ -63,7 +63,13 @@ export function startServer(options: {
     claude: session.options.coach.claude,
     cli: options.cli ?? realCli(),
     tell,
+    // A ticket made or answered: the board is read again, and shown.
+    onTickets: () => {
+      session.work.refresh();
+      changed();
+    },
   });
+  session.work.waitFor(records.waiting);
   const routes = {
     ...routesFor(session),
     ...records.routes,

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { type BoardCard, decide, type Message } from "../src/builder/decide.ts";
+import {
+  asksIfItWorked,
+  type BoardCard,
+  decide,
+  type Message,
+} from "../src/builder/decide.ts";
 import {
   isFactory,
   linkRepositoryFiles,
@@ -37,6 +42,7 @@ function card(over: Partial<BoardCard> = {}): BoardCard {
     waitsFor: [],
     thread: [],
     pullRequest: null,
+    awaitsAnswer: false,
     ...over,
   };
 }
@@ -98,6 +104,47 @@ test("finished cards go to Done, cards in no column to the Backlog, busy ones wa
     { number: 4, stage: "backlog" },
   ]);
   assert.deepEqual(decision.jobs, []);
+});
+
+test("a card Kobble waits for is never finished silently: it asks in Done until answered", () => {
+  const merged = {
+    number: 9,
+    url: "u",
+    state: "MERGED" as const,
+    draft: false,
+    thread: [],
+  };
+  const decision = decide(
+    [
+      card({ number: 1, closed: true, awaitsAnswer: true }),
+      card({
+        number: 2,
+        stage: "review",
+        pullRequest: merged,
+        awaitsAnswer: true,
+      }),
+      card({ number: 3, stage: "done", awaitsAnswer: true }),
+      // Answered already, or not Kobble's: finished as before.
+      card({ number: 4, closed: true, stage: "done" }),
+      // Not finished yet: it is worked on as before.
+      card({ number: 5, stage: "planning", awaitsAnswer: true }),
+    ],
+    none,
+  );
+  assert.deepEqual(decision.asks, [1, 2, 3]);
+  assert.deepEqual(decision.moves, [
+    { number: 1, stage: "done" },
+    { number: 2, stage: "done" },
+  ]);
+  assert.deepEqual(
+    decision.jobs.map((j) => [j.kind, j.number]),
+    [["plan", 5]],
+  );
+  assert.equal(asksIfItWorked(card({ closed: true })), false);
+  assert.equal(
+    asksIfItWorked(card({ stage: "todo", awaitsAnswer: true })),
+    false,
+  );
 });
 
 test("the coach speaks first in Planning, then whenever the owner answers", () => {

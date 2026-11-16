@@ -1,6 +1,7 @@
 // The board as the rules need it (decide.ts): every card that is not done,
 // with its text and its thread, and its pull request where the builder
 // opened one. Cards that are done, or in the backlog, need no more reading.
+// Which issues Kobble waits for "did it work?" about comes from the records.
 
 import type { Card, Cards } from "../cards/cards.ts";
 import { branchOf } from "./branches.ts";
@@ -18,10 +19,11 @@ export async function snapshotOf(
   listed: Card[],
   cards: Cards,
   pullRequests: PullRequests,
+  waiting: ReadonlySet<number>,
 ): Promise<BoardCard[]> {
   const read: BoardCard[] = [];
   for (const card of listed)
-    read.push(await boardCard(card, cards, pullRequests));
+    read.push(await boardCard(card, cards, pullRequests, waiting));
   return read;
 }
 
@@ -29,6 +31,7 @@ async function boardCard(
   card: Card,
   cards: Cards,
   pullRequests: PullRequests,
+  waiting: ReadonlySet<number>,
 ): Promise<BoardCard> {
   const plain: BoardCard = {
     number: card.number,
@@ -41,6 +44,7 @@ async function boardCard(
     waitsFor: card.waitsFor,
     thread: [],
     pullRequest: null,
+    awaitsAnswer: waiting.has(card.number),
   };
   if (card.closed || !READ.includes(card.stage)) return plain;
   const detail = await cards.show(card.number);

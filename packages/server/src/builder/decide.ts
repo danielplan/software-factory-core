@@ -1,6 +1,9 @@
 // The board's rules: given the board, what happens next. Pure on purpose,
-// so every rule has a test (test/decide.test.ts). The card's thread is the
-// memory: the factory's notes in it (protocol.ts) say how far each card is.
+// so every rule has a test (test/board-rules.test.ts). The card's thread is
+// the memory: the factory's notes in it (protocol.ts) say how far each card
+// is. A card Kobble knows (an idea's version sent to Build) is never
+// finished silently: once it is closed or merged, or moved to Done, it waits
+// there for a person to say whether it worked.
 
 import type { Stage } from "../api.ts";
 import {
@@ -37,6 +40,9 @@ export type BoardCard = {
     draft: boolean;
     thread: Message[];
   } | null;
+  // Kobble knows its issue as an idea's version, and nobody has said yet
+  // whether it worked.
+  awaitsAnswer: boolean;
 };
 
 // The coach answers in the cards (chat); the builder builds (build).
@@ -48,6 +54,8 @@ export type Decision = {
   moves: { number: number; stage: Stage }[];
   comments: { number: number; note: Note; body: string }[];
   jobs: Job[];
+  // The cards that wait in Done for "did it work?".
+  asks: number[];
 };
 
 type Found = Decision & { order: Record<JobKind | "resumed", Job[]> };
@@ -62,6 +70,7 @@ export function decide(
     moves: [],
     comments: [],
     jobs: [],
+    asks: [],
     order: { feedback: [], resumed: [], build: [], plan: [] },
   };
   for (const card of cards) look(card, running, found);
@@ -70,12 +79,26 @@ export function decide(
     moves: found.moves,
     comments: found.comments,
     jobs: [...feedback, ...resumed, ...build, ...plan],
+    asks: found.asks,
   };
 }
 
+// Closed where it is tracked, or its pull request merged.
+function isFinished(card: Pick<BoardCard, "closed" | "pullRequest">): boolean {
+  return card.closed || card.pullRequest?.state === "MERGED";
+}
+
+// A card Kobble waits for an answer about, once it is finished or in Done:
+// it stays in Done with "did it work?" until a person answers.
+export function asksIfItWorked(
+  card: Pick<BoardCard, "closed" | "pullRequest" | "stage" | "awaitsAnswer">,
+): boolean {
+  return card.awaitsAnswer && (isFinished(card) || card.stage === "done");
+}
+
 function look(card: BoardCard, running: ReadonlySet<number>, found: Found) {
-  const finished = card.closed || card.pullRequest?.state === "MERGED";
-  if (finished) {
+  if (asksIfItWorked(card)) found.asks.push(card.number);
+  if (isFinished(card)) {
     if (card.stage !== "done")
       found.moves.push({ number: card.number, stage: "done" });
     return;

@@ -46,6 +46,9 @@ export type CardView = {
   url: string;
   // The pull request the builder opened for it, once it has.
   pullRequest: string | null;
+  closed: boolean;
+  // It waits in Done for a person to say whether it worked (Kobble).
+  asks: boolean;
 };
 
 // What the builder is doing: on or off, the card it works on, its last

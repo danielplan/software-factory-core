@@ -253,8 +253,46 @@ from a terminal, beside the card form `software-factory prototype <number>`.
 `packages/server/src/cards/`): its text says what the team thinks, the
 problems it is for and the version's branch, and ends with a hidden mark
 `<!-- factory:kobble idea=<id> version=<key> problems=<id>,… -->`. The
-records keep a ticket link to it, so the idea is in Build; the issue starts
-in Backlog. Asking "did it work?" when it closes comes later.
+records keep a ticket link to it, with the day, so the idea is in Build; the
+issue starts in Backlog.
+
+### Build and "did it work?"
+
+Build (`#build`) is the connected board as before: its columns, its cards,
+the coach and the builder, GitHub or Jira. The records add what they know
+of its issues (`GET /api/build`, `packages/server/src/build/`): a card that
+is an idea's version says so (Idea · B), with the problems it is for, each
+linked to the story that breaks at it; a fix or an update says where it
+came from. The Done column is called "In the app".
+
+**An idea's card is never finished silently.** The board's rules
+(`asksIfItWorked` in `packages/server/src/builder/decide.ts`) keep a card
+the records wait an answer for in Done, asking "did it work?", once it is
+closed, its pull request merged, or it is moved there; until a person
+answers. Fixes and updates are for no problem, so they are never asked.
+**Close · did it work?** opens a dialog with the card, what it was for and
+what the team thought, and a draft of what was seen: the kobold's job,
+like Ask (read-only, no tools, the `understand` skill), from the signals
+behind the problems (to the problem or one of its stories, never persona
+runs) heard since the ticket was made; a signal whose day is not a date is
+kept, for the kobold to read with its day (`POST /api/build/draft`). With
+nothing heard, or no Claude Code on this computer, the draft is empty and
+the person writes what they saw. The answer (`POST /api/build/answer`):
+yes, the problem is solved; no; or didn't check. It is saved as an outcome
+(what was seen, the person's name in git, the day), then written as a
+comment on the issue through the cards, with the factory's hidden mark
+`did-it-work`; when the comment cannot be written, the answer stays saved
+and the page says so. Where things stand follows from the outcome
+(`derive.ts`): yes makes the problem solved and ends its story, and the
+idea worked; no leaves the problem open and the idea did not work.
+
+**Fixes from Understand.** A bug or an update the kobold or a person sent
+to Build (`wentTo: { "to": "build" }`) gets **Make a fix ticket**, under the
+signal in Understand and on Build: a GitHub issue in Backlog, with what
+came in, where from, and the signal's id in a hidden mark
+`<!-- factory:kobble signal=<id> -->`; the records keep a ticket link (a fix
+or an update) and the signal goes to it (`POST /api/build/fix`). A ticket made or answered reads the board again,
+so the card shows at once.
 
 ## Extension points
 

@@ -103,3 +103,12 @@ export function suggestRealProblem(
   edit.save(store);
   return `Suggested: “${real.title}”, behind ${String(problems.length)} problems. A person confirms it.`;
 }
+
+// How many problems of each persona have no real problem behind them.
+export function freeProblems(store: RecordStore): Map<string, number> {
+  const free = new Map<string, number>();
+  for (const problem of store.list("problems"))
+    if (problem.realProblem === null)
+      free.set(problem.persona, (free.get(problem.persona) ?? 0) + 1);
+  return free;
+}

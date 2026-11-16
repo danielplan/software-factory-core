@@ -3,11 +3,19 @@
 // builder is on, each reading also applies the rules (decide.ts): cards
 // merged or closed go to Done, a card in Ready without an agreed plan goes
 // back to Planning, and each lane (the coach's, the builder's) starts its
-// next job when it is free. A finished job reads the board again.
+// next job when it is free. A finished job reads the board again. A card
+// Kobble waits for "did it work?" about is shown asking it, in Done, until
+// a person answers.
 
 import type { BuilderView, CardView, Stage, WorkView } from "../api.ts";
 import type { Card, Cards } from "../cards/cards.ts";
-import { type BoardCard, decide, type Job, type Lane } from "./decide.ts";
+import {
+  asksIfItWorked,
+  type BoardCard,
+  decide,
+  type Job,
+  type Lane,
+} from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
 import { markComment } from "./protocol.ts";
 import type { PullRequests } from "./pull-requests.ts";
@@ -22,6 +30,8 @@ export type BoardWorkOptions = {
   onChange: () => void;
   everyMs?: number;
   now?: () => Date;
+  // The issues Kobble waits for "did it work?" about; none without records.
+  waiting?: () => ReadonlySet<number>;
 };
 
 type Running = { job: Job; title: string; steps: string[] };
@@ -37,6 +47,11 @@ export class BoardWork {
   private cards: CardView[] = [];
   // The pull requests the builder opened, by card, from the last reading.
   private pullRequests = new Map<number, string>();
+  // The cards that ask "did it work?": closed or in Done at the last
+  // reading, and finished by the rules' last decision (a merged pull
+  // request may leave its card open).
+  private asked = new Set<number>();
+  private decided = new Set<number>();
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -65,8 +80,14 @@ export class BoardWork {
       steps: building?.steps ?? [],
       problem: this.laneProblem,
     };
+    const waiting = this.waiting();
     return {
-      cards: this.cards,
+      cards: this.cards.map((card) => ({
+        ...card,
+        asks:
+          (this.asked.has(card.number) || this.decided.has(card.number)) &&
+          waiting.has(card.number),
+      })),
       problem: this.problem,
       read: this.read,
       builder,
@@ -130,15 +151,35 @@ export class BoardWork {
     }
   }
 
+  private waiting(): ReadonlySet<number> {
+    return this.options.waiting?.() ?? new Set();
+  }
+
   private show(listed: Card[]): void {
-    this.cards = listed.map(({ number, title, stage, column, url }) => ({
-      number,
-      title,
-      stage,
-      column,
-      url,
-      pullRequest: this.pullRequests.get(number) ?? null,
-    }));
+    const waiting = this.waiting();
+    this.asked = new Set(
+      listed
+        .filter((card) =>
+          asksIfItWorked({
+            ...card,
+            pullRequest: null,
+            awaitsAnswer: waiting.has(card.number),
+          }),
+        )
+        .map((card) => card.number),
+    );
+    this.cards = listed.map(
+      ({ number, title, stage, column, url, closed }) => ({
+        number,
+        title,
+        stage,
+        column,
+        url,
+        pullRequest: this.pullRequests.get(number) ?? null,
+        closed,
+        asks: false,
+      }),
+    );
     this.problem = null;
     this.read = (this.options.now?.() ?? new Date()).toISOString();
     this.options.onChange();
@@ -146,10 +187,11 @@ export class BoardWork {
 
   private async work(listed: Card[]): Promise<void> {
     const { cards, pullRequests } = this.options;
-    const board = await snapshotOf(listed, cards, pullRequests);
+    const board = await snapshotOf(listed, cards, pullRequests, this.waiting());
     this.notePullRequests(board);
     const busy = new Set([...this.running.values()].map((r) => r.job.number));
     const decision = decide(board, busy);
+    this.decided = new Set(decision.asks);
     for (const move of decision.moves)
       if (move.stage === "done" || this.on.build) await this.move(move);
     if (this.on.build)

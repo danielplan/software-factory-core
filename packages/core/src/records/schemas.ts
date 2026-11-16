@@ -186,6 +186,9 @@ export const ticketLinkSchema = z.strictObject({
     z.strictObject({ signal: id }),
   ]),
   problems: z.array(id).default([]),
+  // The day it was made (YYYY-MM-DD), to tell what was heard since; empty
+  // when not known.
+  on: z.string().default(""),
 });
 
 // The answer to "did it work?" once an issue is closed.

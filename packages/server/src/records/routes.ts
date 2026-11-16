@@ -4,7 +4,8 @@
 // (a new source, Move, Looks good, Confirm, Ask). Like every button, a POST
 // is answered only from the factory's page or a program on this computer
 // that sends its header (server.ts). Explore's and prototype mode's routes
-// come with them (explore/routes.ts): they work on the same records.
+// come with them (explore/routes.ts), and Build's (build/routes.ts): they
+// work on the same records.
 
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
@@ -19,6 +20,9 @@ import {
 
 import type { Route } from "../add-ons/add-on.ts";
 import type { Cli } from "../add-ons/github/github.ts";
+import { buildRoutes } from "../build/routes.ts";
+import { waitingForAnswer } from "../build/views.ts";
+import type { Cards } from "../cards/cards.ts";
 import { cardsFor } from "../cards/cards-for.ts";
 import { exploreRoutes } from "../explore/routes.ts";
 import { Kobold } from "../kobold/kobold.ts";
@@ -43,27 +47,32 @@ import { whoIs } from "./who.ts";
 // change told on the page's stream as a `records-changed` event that says
 // which records changed (the page reads what it shows of them again), the
 // kobold's jobs as `kobold` events, and what runs in prototype mode as
-// `prototypes` events.
+// `prototypes` events. A change to the tickets or their answers also tells
+// the board (`onTickets`): which cards ask "did it work?" changes with them.
 export function servedRecords(options: {
   project: string;
   claude: Claude;
   // The GitHub CLI, for sending a version to Build.
   cli: Cli;
   tell: (event: string) => void;
+  onTickets: () => void;
 }) {
   const { project, tell } = options;
+  const say = (event: string, data: unknown) => {
+    tell(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
   const host = new RecordsHost(project);
   host.subscribe((changes) => {
-    tell(`event: records-changed\ndata: ${JSON.stringify({ changes })}\n\n`);
+    say("records-changed", { changes });
+    if (changes.some((c) => ["ticketLinks", "outcomes"].includes(c.kind)))
+      options.onTickets();
   });
   const kobold: Kobold = new Kobold({
     claude: options.claude,
     cwd: project,
     records: () => host.orRefuse(),
     onChange: () => {
-      tell(
-        `event: kobold\ndata: ${JSON.stringify({ jobs: kobold.view() })}\n\n`,
-      );
+      say("kobold", { jobs: kobold.view() });
     },
   });
   const root = join(project, FACTORY_FOLDER);
@@ -72,16 +81,10 @@ export function servedRecords(options: {
     root,
     records: () => host.orRefuse(),
     onChange: () => {
-      tell(
-        `event: prototypes\ndata: ${JSON.stringify({ runs: mode.view() })}\n\n`,
-      );
+      say("prototypes", { runs: mode.view() });
     },
   });
-  const cards = () => {
-    const found = cardsFor(root, options.cli);
-    if ("problem" in found) throw new Refused(found.problem);
-    return found.cards;
-  };
+  const cards = () => connectedCards(root, options.cli);
   return {
     routes: {
       ...readRoutes(host, kobold),
@@ -94,7 +97,9 @@ export function servedRecords(options: {
         claude: options.claude,
         cards,
       }),
+      ...buildRoutes({ host, kobold, project, cards }),
     },
+    waiting: () => waitingIn(host),
     serveToolsAt: (base: string) => {
       kobold.serveToolsAt(`${base}/kobold/mcp`);
     },
@@ -104,6 +109,23 @@ export function servedRecords(options: {
       host.close();
     },
   };
+}
+
+// The connected board's cards, or refused with why there are none.
+function connectedCards(root: string, cli: Cli): Cards {
+  const found = cardsFor(root, cli);
+  if ("problem" in found) throw new Refused(found.problem);
+  return found.cards;
+}
+
+// The issues Kobble waits for "did it work?" about; none before the
+// factory has its records.
+function waitingIn(host: RecordsHost): ReadonlySet<number> {
+  try {
+    return waitingForAnswer(host.orRefuse().all());
+  } catch {
+    return new Set();
+  }
 }
 
 function readRoutes(host: RecordsHost, kobold: Kobold): Record<string, Route> {

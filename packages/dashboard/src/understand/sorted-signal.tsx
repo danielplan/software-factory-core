@@ -1,10 +1,12 @@
 // A signal the kobold sorted: what was said, where it went and why, with
 // Move (put it elsewhere) and Looks good (a person agrees, and their name
-// goes on it). While the kobold works on it, what it is doing.
+// goes on it); a bug or an update sent to Build gets a fix ticket. While
+// the kobold works on it, what it is doing.
 
 import { useState } from "react";
 
 import { type KoboldJob, messageOf, post, type SignalView } from "@/api";
+import { FixTicketFor } from "@/build/fix-ticket";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
@@ -70,6 +72,7 @@ export function SortedSignal({
             Looks good
           </Button>
         )}
+        <FixTicketFor signal={signal} />
       </div>
       {moving && (
         <MoveForm

@@ -404,6 +404,7 @@ test("a version sent to Build becomes an issue with the ids in a hidden mark, an
         kind: "idea",
         from: { idea: "wish", version: "B" },
         problems: ["find"],
+        on: new Date().toISOString().slice(0, 10),
       },
     );
     const wish = await factory.read<IdeaPage>("/api/explore/idea?id=wish");

@@ -3,8 +3,9 @@
 // and its own tools (tools.ts), which write the records through the store:
 // sorting a signal that came in, suggesting a real problem when a new
 // problem joins others of one persona, and drafting a question about a
-// story's guessed scenes (the understand skill); writing a team member's own
-// idea with the story it assumes (the explore skill). Every job but asking
+// story's guessed scenes and what was seen once a change is in the app
+// ("did it work?"; the understand skill); writing a team member's own idea
+// with the story it assumes (the explore skill). Every job but the drafts
 // runs one at a time, in the order asked; the page sees each job while it
 // works and how it ended.
 
@@ -24,14 +25,15 @@ import { problemOf } from "../coach/talk.ts";
 import { Refused } from "../refused.ts";
 import { type OwnIdea, writeOwnIdea } from "../explore/own-idea.ts";
 import { askPrompt, ideaPrompt, sortPrompt, suggestPrompt } from "./prompts.ts";
-import { type JobTools, KOBOLD_HEADER } from "./tools.ts";
-import { sortSignal, suggestRealProblem } from "./writes.ts";
+import { type JobTools, KOBOLD_HEADER, plain } from "./tools.ts";
+import { freeProblems, sortSignal, suggestRealProblem } from "./writes.ts";
 
 export type KoboldJob = {
   id: string;
-  kind: "sort" | "suggest" | "ask" | "idea";
+  kind: "sort" | "suggest" | "ask" | "seen" | "idea";
   // The signal it sorts, the persona whose problems it reads, the story it
-  // asks about, or the persona an own idea is for.
+  // asks about, the issue it drafts what was seen for, or the persona an own
+  // idea is for.
   about: string;
   // What it made, once done: the new idea's id.
   made: string | null;
@@ -61,12 +63,6 @@ const RIGHTS = {
 const TIME_LIMIT_MS = 10 * 60_000;
 // The jobs the page still sees.
 const KEPT = 20;
-const TOOL_LINES: Record<string, string> = {
-  sort_signal: "Putting it in its place",
-  suggest_real_problem: "Suggesting a real problem",
-  write_idea: "Writing the idea and its story",
-};
-
 export class Kobold {
   private readonly options: KoboldOptions;
   private jobs: Running[] = [];
@@ -108,16 +104,26 @@ export class Kobold {
     if (!told) throw new Refused(`There is no story “${story}”.`);
     if (howWellKnown(told).seen === howWellKnown(told).of)
       throw new Refused("Every scene of it is seen already.");
-    const job = this.add("ask", story);
-    const result = await this.run(job, askPrompt(store.all(), told));
-    const text = result.text.trim();
-    if (!result.ok || !text) {
-      const problem = problemOf(result.error ?? "", "The kobold");
-      this.finish(job, null, problem);
-      throw new Refused(problem);
-    }
-    this.finish(job, "Drafted a question to send.", null);
-    return text;
+    const drafted = await this.draft(
+      this.add("ask", story),
+      askPrompt(store.all(), told),
+      "Drafted a question to send.",
+    );
+    if ("problem" in drafted) throw new Refused(drafted.problem);
+    return drafted.text;
+  }
+
+  // What was seen since an issue went to Build, drafted for "did it work?"
+  // from what the prompt says; or why the kobold could not.
+  async seen(
+    issue: number,
+    prompt: string,
+  ): Promise<{ text: string } | { problem: string }> {
+    return await this.draft(
+      this.add("seen", String(issue)),
+      prompt,
+      "Drafted what was seen.",
+    );
   }
 
   // The story behind a team member's own idea, all guessed, and the idea,
@@ -195,6 +201,23 @@ export class Kobold {
     });
   }
 
+  // A short text the kobold drafts for a person, with no tools.
+  private async draft(
+    job: Running,
+    prompt: string,
+    done: string,
+  ): Promise<{ text: string } | { problem: string }> {
+    const result = await this.run(job, prompt);
+    const text = result.text.trim();
+    if (!result.ok || !text) {
+      const problem = problemOf(result.error ?? "", "The kobold");
+      this.finish(job, null, problem);
+      return { problem };
+    }
+    this.finish(job, done, null);
+    return { text };
+  }
+
   private add(kind: KoboldJob["kind"], about: string): Running {
     const job: Running = {
       id: randomUUID(),
@@ -260,24 +283,8 @@ export class Kobold {
   }
 }
 
-// A line of what Claude Code does, as a person sees it; null to skip.
-function plain(line: string): string | null {
-  const tool = /^Using mcp__kobold__(\w+)/.exec(line)?.[1];
-  if (tool) return TOOL_LINES[tool] ?? null;
-  return /^(Reading|Searching|Looking)/.test(line) ? line : null;
-}
-
 // What a tool did, kept for the job's end, and said to the kobold.
 function said(done: string[], line: string): string {
   done.push(line);
   return line;
-}
-
-// How many problems of each persona have no real problem behind them.
-function freeProblems(store: RecordStore): Map<string, number> {
-  const free = new Map<string, number>();
-  for (const problem of store.list("problems"))
-    if (problem.realProblem === null)
-      free.set(problem.persona, (free.get(problem.persona) ?? 0) + 1);
-  return free;
 }

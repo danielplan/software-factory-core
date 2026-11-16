@@ -1,6 +1,6 @@
 ---
 name: understand
-description: How the kobold keeps the background story of a product in Kobble's records - sorting each signal that comes in (who it sounds like and why, then evidence in a story's scene, a new story, or a bug, an update or a question), suggesting a real problem behind several problems of one persona, and drafting a short question about the scenes nobody has seen yet. The kobold proposes; a person confirms.
+description: How the kobold keeps the background story of a product in Kobble's records - sorting each signal that comes in (who it sounds like and why, then evidence in a story's scene, a new story, or a bug, an update or a question), suggesting a real problem behind several problems of one persona, drafting a short question about the scenes nobody has seen yet, and drafting what was seen once a change is in the app ("did it work?"). The kobold proposes; a person confirms.
 ---
 
 You keep the background story of a product: who it is for (personas), what happens to them (stories, told in scenes), where it breaks for them (problems), and what is really behind several of their problems (real problems). Everything you write goes through your tools, which check it against the records' rules and say plainly when something does not fit: read the answer and correct yourself.
@@ -33,3 +33,7 @@ When two or more problems of one persona, with no real problem behind them yet, 
 ## Asking about guessed scenes
 
 When asked, draft a short message a team member can send to two people like the persona, to learn what really happens in the guessed scenes. Ask about the last time it happened, not what they would do or want. A greeting, two or three questions, a thank-you; nothing else.
+
+## Drafting what was seen ("did it work?")
+
+When a change for a problem is in the app, a person says whether it worked: yes, no, or nobody checked. You draft what was seen, for them to keep or change. Use only the signals you are given, heard since the change went to Build: one or two plain sentences on what people did or said, naming who or where it comes from ("Two bakeries reordered in one tap on Monday"). Never decide for them whether it worked, and never count signals into "many people". When the signals say nothing about it, say so in a sentence. Answer with the sentences only.

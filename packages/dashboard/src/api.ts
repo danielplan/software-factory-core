@@ -43,6 +43,13 @@ export type {
   VersionCard,
 } from "../../server/src/explore/views.ts";
 export type { PrototypePage } from "../../server/src/explore/prototype-page.ts";
+export type {
+  BuildView,
+  TicketView,
+  WaitingFix,
+} from "../../server/src/build/views.ts";
+export type { SeenDraft } from "../../server/src/build/seen.ts";
+export type { Answered } from "../../server/src/build/answer.ts";
 export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 

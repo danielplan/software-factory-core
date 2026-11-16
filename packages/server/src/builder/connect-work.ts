@@ -1,7 +1,8 @@
 // The connected board's work, put together: its cards, the builder and the
 // coach in the cards (each off until the owner switches it on), with their
 // working copies in a folder next to the project. None without a connected
-// board.
+// board. Which issues Kobble waits for "did it work?" about comes from the
+// records, once the server serves them.
 
 import { basename, dirname, join } from "node:path";
 
@@ -23,10 +24,11 @@ export type WorkSettings = {
   claude: Claude;
   available: Available;
   onChange: () => void;
+  waiting?: () => ReadonlySet<number>;
 };
 
 export function workFor(settings: WorkSettings): BoardWork | null {
-  const { root, project, cli, claude, available, onChange } = settings;
+  const { root, project, cli, claude, available, onChange, waiting } = settings;
   const found = cardsFor(root, cli);
   if ("problem" in found) return null;
   const copies = join(dirname(project), `${basename(project)}-factory-copies`);
@@ -48,7 +50,13 @@ export function workFor(settings: WorkSettings): BoardWork | null {
     available,
     copies: { chat: () => copyOf("chat"), build: () => copyOf("build") },
   });
-  return new BoardWork({ cards: found.cards, pullRequests, jobs, onChange });
+  return new BoardWork({
+    cards: found.cards,
+    pullRequests,
+    jobs,
+    onChange,
+    ...(waiting ? { waiting } : {}),
+  });
 }
 
 // The session's board work: connected once a factory with a board opens,
@@ -58,6 +66,9 @@ export class ConnectedWork {
   private work: BoardWork | null = null;
   // The board it was connected to, to see when it changes.
   private board = "";
+  // The issues Kobble waits for "did it work?" about, once the records are
+  // served (the board may connect before).
+  private waiting: () => ReadonlySet<number> = () => new Set();
 
   // From the session's options: the project and the coaches' Claude Code;
   // the GitHub CLI is the real one unless a test gives one.
@@ -74,11 +85,23 @@ export class ConnectedWork {
       claude: options.coach.claude,
       available: options.available,
       onChange: options.onChange,
+      waiting: () => this.waiting(),
     };
   }
 
   view() {
     return this.work?.view() ?? null;
+  }
+
+  // Reads the board again now (a ticket was made or answered).
+  refresh(): void {
+    void this.work?.refresh();
+  }
+
+  // Where the board learns which issues wait for "did it work?": the
+  // records.
+  waitFor(waiting: () => ReadonlySet<number>): void {
+    this.waiting = waiting;
   }
 
   // Connects to the factory's board, again when the board changed (the

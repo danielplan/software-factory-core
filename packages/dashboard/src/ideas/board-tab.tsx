@@ -1,7 +1,14 @@
 import { Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
-import { type IdeaView, post, type WorkView } from "@/api";
+import {
+  type CardView,
+  type IdeaView,
+  post,
+  type TicketView,
+  type WorkView,
+} from "@/api";
+import { useBuild } from "@/build/use-build";
 import type { FactoryState } from "@/dashboard/dashboard";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
@@ -15,17 +22,21 @@ import { STAGES } from "./stages";
 
 // The columns work moves through: Backlog holds the ideas agreed to (a
 // draft stays on Explore) and the connected board's cards, each in
-// the column of its stage.
-const COLUMNS = STAGES.filter((stage) => stage.id !== "draft");
+// the column of its stage. Done is where a change is in the app.
+const COLUMNS = STAGES.filter((stage) => stage.id !== "draft").map((stage) =>
+  stage.id === "done" ? { ...stage, title: "In the app" } : stage,
+);
 
 const SWITCHES = { coach: "/api/coach-in-cards", builder: "/api/builder" };
 
 // What the factory is doing: with a connected board, who works it (the
 // coach and the builder, each with its switch); then every piece of work in
 // the column of how far it is. Before there is any, it says where work
-// starts.
+// starts. Cards Kobble knows say what they are for, and ask "did it
+// work?" once they are in the app.
 export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   const { work } = state;
+  const build = useBuild();
   const [problem, setProblem] = useState<string | null>(null);
   const press = (path: string, body: unknown = {}) => {
     setProblem(null);
@@ -68,7 +79,13 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           press("/api/work/refresh");
         }}
       />
-      <Columns ideas={state.ideas} work={work} />
+      {build.shown}
+      <Columns
+        ideas={state.ideas}
+        work={work}
+        tickets={build.tickets}
+        onAsk={build.ask}
+      />
     </div>
   );
 }
@@ -129,7 +146,14 @@ function WhereTracked({
 function Columns({
   ideas: all,
   work,
-}: Readonly<{ ideas: IdeaView[]; work: WorkView | null }>) {
+  tickets,
+  onAsk,
+}: Readonly<{
+  ideas: IdeaView[];
+  work: WorkView | null;
+  tickets: Map<number, TicketView>;
+  onAsk: (card: CardView) => void;
+}>) {
   return (
     <div className="overflow-x-auto pb-2">
       <div
@@ -168,6 +192,10 @@ function Columns({
                   key={card.number}
                   card={card}
                   working={workingOn(work, card.number)}
+                  ticket={tickets.get(card.number) ?? null}
+                  onAsk={() => {
+                    onAsk(card);
+                  }}
                 />
               ))}
               {ideas.map((one) => (
