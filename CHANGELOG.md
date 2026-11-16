@@ -4,6 +4,10 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## Unreleased
+
+- Changed: the dashboard is called Kobble, and its thin row of icons is now a sidebar: Kobble and the product at the top (a choice when the company has several), then Today, the product's pages (Understand, Explore, Build), the company's (Customers, Products) and the factory's (Workshop, Settings), with the factory's light at the bottom. On a phone it is a bar along the top whose menu opens the same list. Build is the board, Explore holds the ideas, Workshop holds the system and the add-ons; Today, Understand, Customers and Products say what will come there. Old links (`#board`, `#ideas`, `#ideas/<id>`, `#system`, `#add-ons`) still open the same place. The command, the `factory/` folder and everything else keep their names. Nothing to do.
+
 ## 0.9.1 (2026-11-09)
 
 **To upgrade:** pin `release-0.9.1`, `npm install`, `npx software-factory upgrade`. Nothing to change by hand. (`v0.9.0` was tagged with the wrong version number inside and never released; use 0.9.1.)

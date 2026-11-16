@@ -15,7 +15,7 @@ import {
 import type { FactoryState } from "./dashboard";
 import { GroupForm } from "./settings-card";
 
-// The factory's store, in two parts: what it uses now (the board work is
+// The factory's store (on Workshop), in two parts: what it uses now (the board work is
 // tracked on, the add-ons it has, the kits of its products), then what it
 // could use, greyed. Add-ons are added or removed here, with their settings
 // while they are on; the board is changed on Settings; kits come with the
@@ -29,11 +29,8 @@ export function AddOnsTab({ state }: Readonly<{ state: FactoryState }>) {
     ...state.kits.filter(kitUsed).map((k) => k.name),
   ];
   return (
-    <div className="grid content-start gap-10 pt-[4vh]">
-      <header className="grid gap-1.5 px-1">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
-          Add-ons
-        </h1>
+    <div className="grid content-start gap-10">
+      <header className="px-1">
         <p className="text-muted-foreground">
           {inUse.length > 0
             ? `Your factory uses ${inUse.join(", ")}.`

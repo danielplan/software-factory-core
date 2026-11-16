@@ -14,7 +14,7 @@ import { IdeaCard } from "./idea-card";
 import { STAGES } from "./stages";
 
 // The columns work moves through: Backlog holds the ideas agreed to (a
-// draft stays on the Ideas tab) and the connected board's cards, each in
+// draft stays on Explore) and the connected board's cards, each in
 // the column of its stage.
 const COLUMNS = STAGES.filter((stage) => stage.id !== "draft");
 
@@ -54,7 +54,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
         <p className="px-1 text-sm text-muted-foreground">
           Nothing on the board yet. Work starts as an{" "}
           <a
-            href="#ideas"
+            href="#explore"
             className="text-foreground underline underline-offset-2"
           >
             idea
@@ -81,7 +81,7 @@ function BoardHeader({
 }: Readonly<{ now: { busy: boolean; text: string }; work: WorkView | null }>) {
   return (
     <div className="flex flex-wrap items-center gap-3 px-1">
-      <h1 className="text-[26px] font-semibold tracking-[-0.02em]">Board</h1>
+      <h1 className="text-[26px] font-semibold tracking-[-0.02em]">Build</h1>
       {!work && (
         <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm text-muted-foreground">
           {now.busy ? (

@@ -3,32 +3,25 @@ import { useEffect, useState } from "react";
 import type { State } from "@/api";
 import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
-import { NavRail, type Tab, TABS } from "@/components/nav-rail";
-import { StatusLight } from "@/components/status-light";
+import { Sidebar } from "@/components/sidebar";
 import { ConnectPage } from "@/connect/connect-page";
 import { BoardTab } from "@/ideas/board-tab";
 import { IdeasTab } from "@/ideas/ideas-tab";
+import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { SetupPage } from "@/setup-coach/setup-page";
 
-import { AddOnsTab } from "./add-ons-tab";
+import { ComingPage, isComing } from "./coming-page";
 import { SettingsTab } from "./settings-tab";
-import { SystemTab } from "./system-tab";
+import { WorkshopPage } from "./workshop-page";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
-// The tab in the address (#settings), and what is open in it
-// (#ideas/<id>), so a reload stays there. The board comes first.
-type Place = { tab: Tab | "connect"; open: string | null };
-
+// The page in the address, an old address replaced by its new one (so the
+// back button does not lead to it again).
 function placeFromHash(): Place {
-  const [asked, open] = window.location.hash.slice(1).split("/");
-  return {
-    tab:
-      asked === "connect"
-        ? "connect"
-        : (TABS.find((tab) => tab === asked) ?? "board"),
-    open: open ?? null,
-  };
+  const moved = movedHash(window.location.hash);
+  if (moved) window.history.replaceState(null, "", moved);
+  return placeOf(window.location.hash);
 }
 
 function usePlace(): Place {
@@ -46,10 +39,10 @@ function usePlace(): Place {
 }
 
 // The dashboard: before there is a company, only the setup page; once there
-// is a factory, its tabs.
+// is a factory, its pages.
 export function Dashboard({ state }: Readonly<{ state: State }>) {
   // Setting up fills the window, with nothing but the coach and the
-  // canvas: the tabs come once there is a factory.
+  // canvas: the pages come once there is a factory.
   if (state.mode === "setup") return <SetupPage state={state} />;
   return <FactoryDashboard state={state} />;
 }
@@ -57,14 +50,16 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const place = usePlace();
   // Just set up, connecting where work is tracked comes first.
-  const { tab, open } = state.onboarding
-    ? { ...place, tab: "connect" as const }
+  const { page, open } = state.onboarding
+    ? { ...place, page: "connect" as const }
     : place;
   return (
-    <div className="grid gap-5 max-sm:pt-14 sm:pl-[72px]">
-      <NavRail
-        current={tab === "connect" ? "settings" : tab}
-        status={<Overall state={state} />}
+    <div className="grid gap-5 max-md:pt-14 md:pl-[232px]">
+      <Sidebar
+        current={page === "connect" ? "settings" : page}
+        company={state.company.name}
+        products={state.products}
+        status={overallOf(state)}
       />
       {state.problems.length > 0 && (
         <ProblemBox
@@ -72,26 +67,19 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
           text={state.problems.join(" · ")}
         />
       )}
-      {tab === "connect" && <ConnectPage trackers={trackersOf(state.addOns)} />}
-      {tab === "add-ons" && <AddOnsTab state={state} />}
-      {tab === "board" && <BoardTab state={state} />}
-      {tab === "ideas" && <IdeasTab state={state} open={open} />}
-      {tab === "settings" && <SettingsTab state={state} />}
-      {tab === "system" && <SystemTab state={state} />}
+      {page === "connect" && (
+        <ConnectPage trackers={trackersOf(state.addOns)} />
+      )}
+      {isComing(page) && <ComingPage page={page} />}
+      {page === "explore" && <IdeasTab state={state} open={open} />}
+      {page === "build" && <BoardTab state={state} />}
+      {page === "workshop" && <WorkshopPage state={state} open={open} />}
+      {page === "settings" && <SettingsTab state={state} />}
     </div>
   );
 }
 
-// The whole factory's light on the rail, with its words to hover.
-function Overall({ state }: Readonly<{ state: FactoryState }>) {
-  const { lit, words } = overallOf(state);
-  return (
-    <span title={words} aria-label={words} className="flex">
-      <StatusLight light={lit} />
-    </span>
-  );
-}
-
+// The whole factory's light, and what it means in words.
 function overallOf(state: FactoryState): {
   lit: "problem" | "starting" | "running" | "stopped";
   words: string;

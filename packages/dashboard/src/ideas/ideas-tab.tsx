@@ -11,7 +11,7 @@ import { IdeaCard } from "./idea-card";
 import { IdeaWorkspace } from "./idea-workspace";
 
 // Where work starts: one big box in the middle of the screen to say what
-// to build next, and the ideas so far below it, newest first; one open in its workspace (#ideas/<id>).
+// to build next, and the ideas so far below it, newest first; one open in its workspace (#explore/<id>).
 export function IdeasTab({
   state,
   open,
@@ -48,7 +48,7 @@ function NewIdea() {
     setProblem(null);
     try {
       const { id } = await post<{ id: string }>("/api/ideas", { text });
-      window.location.hash = `ideas/${id}`;
+      window.location.hash = `explore/${id}`;
     } catch (error) {
       setProblem(messageOf(error));
       setBusy(false);

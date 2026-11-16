@@ -17,7 +17,7 @@ import { columnsOf } from "@/lib/columns";
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
 
-// The factory at a glance: how it is doing in a line, then its components
+// The factory at a glance (on Workshop): how it is doing in a line, then its components
 // in two areas side by side, the products and the factory itself,
 // each a map of parts after the parts they need; what is left to set up,
 // the lights, and what each part does.
@@ -34,9 +34,6 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
   const top = headline(state.parts);
   return (
     <div className="grid content-start gap-4">
-      <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
-        System
-      </h1>
       <Card className="flex-row flex-wrap items-center gap-3 px-5 py-4 shadow-soft">
         <StatusLight light={top.light} />
         <span className="min-w-0 flex-1 text-[15px]">{top.text}</span>
@@ -76,12 +73,12 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
           <p className="py-6 text-center text-sm text-muted-foreground">
             No products yet: describe what you want to build on the{" "}
             <a
-              href="#ideas"
+              href="#explore"
               className="text-foreground underline underline-offset-2"
             >
-              Ideas
+              Explore
             </a>{" "}
-            tab.
+            page.
           </p>
         </Area>
         <Area

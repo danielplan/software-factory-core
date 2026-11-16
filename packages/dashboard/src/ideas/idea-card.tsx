@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { stageOf } from "./stages";
 
 // An idea as a card: its title, and whether the factory is working on it
-// now or when it last changed. It opens the idea (#ideas/<id>).
+// now or when it last changed. It opens the idea (#explore/<id>).
 export function IdeaCard({
   idea,
   status = true,
@@ -19,7 +19,7 @@ export function IdeaCard({
   const stage = stageOf(idea.status);
   return (
     <a
-      href={`#ideas/${idea.id}`}
+      href={`#explore/${idea.id}`}
       className={cn(
         "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft hover:ring-1 hover:ring-foreground/20",
         idea.working && "ring-2 ring-[var(--tint)]",

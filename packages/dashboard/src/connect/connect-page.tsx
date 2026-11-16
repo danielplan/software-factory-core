@@ -37,7 +37,7 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
           <Button
             className="h-10 justify-self-start px-4"
             onClick={() => {
-              window.location.hash = "board";
+              window.location.hash = "build";
             }}
           >
             Go to the board
