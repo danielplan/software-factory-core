@@ -89,12 +89,17 @@ test("the Understand pages read the records, with what is worked out from them",
       id: "st2",
       title: "Getting it delivered tomorrow",
       persona: "mia",
+      starts: "Ordering at 21:00, after dinner",
+      wants: "Delivery tomorrow evening",
       problem: "slotsP",
+      problemTitle: "Delivery slots are gone by the time they get home",
       problemState: "solved",
       known: { seen: 2, of: 3 },
+      seen: [false, true, true],
       ended: true,
       isNew: false,
       wrong: null,
+      from: { signals: 1 },
     });
     assert.equal(mia.stories[2]?.problemState, null);
 

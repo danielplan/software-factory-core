@@ -129,10 +129,13 @@ export {
   type Story,
   type TicketLink,
   type Version,
+  SORTED_AS,
+  SOURCE_KINDS,
 } from "./records/schemas.ts";
 export { checkRecords, signalsBehind } from "./records/check.ts";
 export {
   derive,
+  howWellKnown,
   type Derived,
   type IdeaState,
   type Known,

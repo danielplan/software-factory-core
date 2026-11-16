@@ -174,6 +174,34 @@ the factory's `kobble-seed.json` when there is one: the example company's
 holds a made-up shop's personas and stories. `software-factory check`
 checks the database and the seed.
 
+### The kobold's Understand jobs
+
+The kobold is the one AI agent Kobble talks about. Its Understand jobs are
+Claude Code sessions on this computer, run like the factory's other agents
+(read-only, no `gh`, no `git push`), with the `understand` skill
+(`packages/skills/skills/understand/SKILL.md`) as their method and tools the
+server serves over MCP at `/api/kobold/mcp`, each job with its own token.
+The tools write the records through the store, so every write is checked
+like any other (`packages/server/src/kobold/`):
+
+| Job                    | When                                                                                 | What it writes                                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sort a signal          | a signal comes in (`POST /api/signals`), or a person moves one to "a new story"      | what it is, the persona it sounds like and why, and its place: evidence in a scene of a story (a guessed scene becomes seen), a new story with one problem, Build (a bug or an update), or answered |
+| Suggest a real problem | a sort gave a persona a new problem, and two or more of theirs have none behind them | a real problem behind the problems that point the same way, `by: kobold`                                                                                                                            |
+| Ask                    | a person presses Ask under a story with guessed scenes (`POST /api/understand/ask`)  | nothing: it drafts a short message for people like the persona, which the page shows to copy                                                                                                        |
+
+Sorting and suggesting run one at a time, in the order asked. The page sees
+each job while it works and how it ended (`GET /api/understand/kobold`, and
+`kobold` events on the page's stream). The kobold proposes and a person
+confirms: what it wrote says `by: kobold` until a person moves the signal
+(`POST /api/understand/move`), says it looks good
+(`POST /api/understand/looks-good`) or confirms the real problem
+(`POST /api/understand/confirm`); their name in git then goes on it. A
+person adds a source at `POST /api/sources`. The dashboard's Understand page
+(`packages/dashboard/src/understand/`) shows the three levels, every persona,
+one persona and one story, at `#understand`, `#understand/<persona>` and
+`#understand/<persona>/<story>`.
+
 ## Extension points
 
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of

@@ -15,16 +15,14 @@ import { extname, join, normalize, sep } from "node:path";
 import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
-import { answerTools } from "./coach/setup-tools.ts";
+import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
+import { readBody, send } from "./http.ts";
+import type { JobTools } from "./kobold/tools.ts";
 import { servedRecords } from "./records/routes.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
 export const PAGE_HEADER = "x-software-factory";
-// The coaches' tools, which check the coach's own token instead: the setup
-// coach's, and each idea's.
-const COACH_TOOLS = "/api/setup/mcp";
-const IDEA_TOOLS = /^\/api\/ideas\/mcp\/([\w-]+)$/;
 // A picture from the project that a setup card shows.
 const PICTURE = "/api/setup/picture";
 const HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -57,7 +55,11 @@ export function startServer(options: {
     tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
-  const records = servedRecords(session.options.project, tell);
+  const records = servedRecords({
+    project: session.options.project,
+    claude: session.options.coach.claude,
+    tell,
+  });
   const routes = {
     ...routesFor(session),
     ...records.routes,
@@ -74,12 +76,18 @@ export function startServer(options: {
     ),
   };
   const server = createServer((incoming, response) => {
-    void answer(incoming, response, { routes, watchers, ...options });
+    void answer(incoming, response, {
+      routes,
+      watchers,
+      koboldTools: records.toolsOf,
+      ...options,
+    });
   });
   server.on("listening", () => {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
+    records.serveToolsAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
   });
   server.on("close", records.close);
@@ -149,6 +157,7 @@ function routesFor(session: Session): Record<string, Route> {
 type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
+  koboldTools: (token: string) => JobTools | null;
   page: string;
   session: Session;
 };
@@ -164,11 +173,8 @@ async function answer(
     send(response, 403, { error: "Not here." });
   } else if (url.pathname === "/api/events") {
     stream(response, context);
-  } else if (url.pathname === COACH_TOOLS && incoming.method === "POST") {
-    const body = await readBody(incoming).catch(() => null);
-    await answerTools(incoming, response, context.session.coachTools(), body);
-  } else if (IDEA_TOOLS.test(url.pathname) && incoming.method === "POST") {
-    await ideaTools(incoming, response, context.session, url.pathname);
+  } else if (isAgentTools(incoming, url)) {
+    await answerAgentTools(incoming, response, url, context);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (THEME_ROUTES.has(url.pathname)) {
@@ -241,23 +247,6 @@ function sendFile(response: ServerResponse, page: string, path: string): void {
   response.end(readFileSync(file));
 }
 
-// One idea coach's tool call; an idea that is not there is said plainly.
-async function ideaTools(
-  incoming: IncomingMessage,
-  response: ServerResponse,
-  session: Session,
-  path: string,
-): Promise<void> {
-  const id = IDEA_TOOLS.exec(path)?.[1] ?? "";
-  const body = await readBody(incoming).catch(() => null);
-  try {
-    await answerTools(incoming, response, session.ideaTools(id), body);
-  } catch (error) {
-    if (!(error instanceof Refused)) throw error;
-    send(response, 404, { error: error.message });
-  }
-}
-
 function sendPicture(
   response: ServerResponse,
   session: Session,
@@ -275,25 +264,6 @@ function sendPicture(
     "x-content-type-options": "nosniff",
   });
   response.end(readFileSync(file));
-}
-
-function send(response: ServerResponse, status: number, body: unknown): void {
-  response.writeHead(status, {
-    "content-type": "application/json",
-    "cache-control": "no-store",
-  });
-  response.end(JSON.stringify(body));
-}
-
-async function readBody(incoming: IncomingMessage): Promise<unknown> {
-  let text = "";
-  for await (const chunk of incoming) text += String(chunk);
-  if (!text) return {};
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    throw new Refused("That request was not understood.");
-  }
 }
 
 function text(body: unknown, key: string): string {

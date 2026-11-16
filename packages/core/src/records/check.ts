@@ -3,7 +3,8 @@
 // `software-factory check`. Each problem is said in a line, with the record
 // it is about.
 //
-// - A signal has its source; only machine errors are counted.
+// - A signal has its source; only machine errors are counted; only a bug
+//   or an update goes to Build straight from it.
 // - A signal that feeds a problem or a story sounds like that persona, and
 //   never comes from a persona run: persona runs are not evidence.
 // - A story breaks exactly once, at a problem of the same persona, unless it
@@ -98,7 +99,9 @@ function checkSignal(signal: Signal, say: Say, { index }: Context): void {
 // persona it sounds like.
 function checkWentTo(signal: Signal, say: Say, index: Index): void {
   const to = signal.wentTo;
-  if (to === null || to.to === "answered") return;
+  if (to?.to === "build" && !["bug", "update"].includes(signal.sortedAs))
+    say("only a bug or an update goes to Build straight from a signal.");
+  if (to === null || to.to === "answered" || to.to === "build") return;
   if (to.to === "ticket") {
     if (!index.ticketLinks.has(String(to.issue)))
       say(`the ticket #${String(to.issue)} it went to is not there.`);

@@ -178,10 +178,11 @@ function plain(line: string): string | null {
   return SHOWN.test(line) ? line : null;
 }
 
-function problemOf(error: string): string {
+// Why Claude Code could not answer, in words the owner can act on.
+export function problemOf(error: string, who = "The coach"): string {
   if (/ENOENT/.test(error))
     return "Claude Code is not on this computer. Install it from claude.com/code and sign in, then try again.";
   if (/log ?in|auth|credential/i.test(error))
     return "Claude Code is not signed in. Run claude once in a terminal to sign in, then try again.";
-  return `The coach stopped: ${error || "no reason given"}. Try again.`;
+  return `${who} stopped: ${error || "no reason given"}. Try again.`;
 }

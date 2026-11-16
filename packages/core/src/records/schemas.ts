@@ -38,11 +38,13 @@ export const sourceSchema = z.strictObject({
 });
 
 // Where a signal went once it was sorted: a story, a problem, a GitHub issue,
-// or it was simply answered.
+// Build (a bug or an update whose GitHub issue is not made yet), or it was
+// simply answered.
 const wentToSchema = z.discriminatedUnion("to", [
   z.strictObject({ to: z.literal("story"), id }),
   z.strictObject({ to: z.literal("problem"), id }),
   z.strictObject({ to: z.literal("ticket"), issue }),
+  z.strictObject({ to: z.literal("build") }),
   z.strictObject({ to: z.literal("answered") }),
 ]);
 

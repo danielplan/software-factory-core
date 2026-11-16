@@ -9,6 +9,7 @@ import { BoardTab } from "@/ideas/board-tab";
 import { IdeasTab } from "@/ideas/ideas-tab";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { SetupPage } from "@/setup-coach/setup-page";
+import { UnderstandPage } from "@/understand/understand-page";
 
 import { ComingPage, isComing } from "./coming-page";
 import { SettingsTab } from "./settings-tab";
@@ -71,6 +72,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
         <ConnectPage trackers={trackersOf(state.addOns)} />
       )}
       {isComing(page) && <ComingPage page={page} />}
+      {page === "understand" && <UnderstandPage open={open} />}
       {page === "explore" && <IdeasTab state={state} open={open} />}
       {page === "build" && <BoardTab state={state} />}
       {page === "workshop" && <WorkshopPage state={state} open={open} />}

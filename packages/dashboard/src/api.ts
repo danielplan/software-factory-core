@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 
 import type { State } from "../../server/src/api.ts";
+import type { KoboldJob } from "../../server/src/kobold/kobold.ts";
 
 export type {
   AddOnView,
@@ -19,7 +20,20 @@ export type {
   State,
   WorkView,
 } from "../../server/src/api.ts";
-export type { GroupView } from "../../core/src/index.ts";
+export type { Customer, GroupView, Source } from "../../core/src/index.ts";
+export type {
+  PersonaCard,
+  PersonaPage,
+  RecordsView,
+  StoryCard,
+  StoryPage,
+  UnderstandOverview,
+} from "../../server/src/records/views.ts";
+export type {
+  KoboldNews,
+  SignalView,
+} from "../../server/src/records/signal-views.ts";
+export type { KoboldJob } from "../../server/src/kobold/kobold.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
 // The server answers buttons only from its own page, which says so.
@@ -54,6 +68,26 @@ export async function post<T>(path: string, body: unknown = {}): Promise<T> {
   );
 }
 
+// Who hears of changes on the stream besides the state: pages that show
+// records read them again when they change, and the kobold's jobs as they
+// work.
+const recordsHeard = new Set<() => void>();
+const koboldHeard = new Set<(jobs: KoboldJob[]) => void>();
+
+export function onRecordsChanged(listener: () => void): () => void {
+  recordsHeard.add(listener);
+  return () => recordsHeard.delete(listener);
+}
+
+export function onKobold(listener: (jobs: KoboldJob[]) => void): () => void {
+  koboldHeard.add(listener);
+  return () => koboldHeard.delete(listener);
+}
+
+function tellRecords(): void {
+  for (const listener of recordsHeard) listener();
+}
+
 // The factory's state, kept up to date from its stream of changes; null
 // until the first answer; `connected` false while the server is away.
 export function useFactoryState(): { state: State | null; connected: boolean } {
@@ -78,7 +112,13 @@ export function useFactoryState(): { state: State | null; connected: boolean } {
     events.onopen = () => {
       setConnected(true);
       void get<State>("/api/state").then(setState, () => undefined);
+      tellRecords();
     };
+    events.addEventListener("records-changed", tellRecords);
+    events.addEventListener("kobold", (event: MessageEvent<string>) => {
+      const { jobs } = JSON.parse(event.data) as { jobs: KoboldJob[] };
+      for (const listener of koboldHeard) listener(jobs);
+    });
     events.onerror = () => {
       setConnected(false);
     };

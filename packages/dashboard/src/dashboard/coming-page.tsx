@@ -3,11 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 // The pages still to come, each with what it will hold.
 const COMING = {
   today: { title: "Today", about: "What is waiting for you." },
-  understand: {
-    title: "Understand",
-    about:
-      "The people this product is for, their stories, and where things break for them.",
-  },
   customers: {
     title: "Customers",
     about: "The companies and people who use your products.",

@@ -53,3 +53,22 @@ export function placeOf(hash: string): Place {
   const page = PAGES.find((one) => one === asked);
   return page ? { page, open: rest } : { page: FIRST, open: null };
 }
+
+// On Understand, what is open: a persona (#understand/<persona>), or one of
+// their stories (#understand/<persona>/<story>); neither on the overview.
+export type UnderstandPlace = { persona: string | null; story: string | null };
+
+export function understandOf(open: string | null): UnderstandPlace {
+  const [persona, story] = (open ?? "")
+    .split("/")
+    .map((part) => decodeURIComponent(part));
+  return { persona: persona || null, story: (persona && story) || null };
+}
+
+// The address of the overview, a persona or a story.
+export function understandHash(persona?: string, story?: string): string {
+  const parts = [persona, persona && story].filter((part): part is string =>
+    Boolean(part),
+  );
+  return ["#understand", ...parts.map(encodeURIComponent)].join("/");
+}

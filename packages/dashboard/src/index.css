@@ -47,6 +47,14 @@
   --shadow-big: 0 30px 60px -30px rgb(40 52 90 / 0.35);
   --shadow-soft: 0 1px 3px rgb(27 31 42 / 0.08);
   --radius: 0.625rem;
+  /* Understand: a soft colour for each persona, and the mark of what is
+     new (a story the kobold started, a problem still open). */
+  --persona-1: #fde7ef;
+  --persona-2: #fff3df;
+  --persona-3: #e9eeff;
+  --persona-4: #e3f6f2;
+  --persona-5: #f1ecff;
+  --fresh: #d63f78;
   /* The factory's own gradient, from the coach's orb: the start prompt's
      ring and the setup page's glow (deeper in dark mode). */
   --gradient-1: #bfe9f7;
@@ -93,6 +101,12 @@
     --gradient-2: #3b3f7a;
     --gradient-3: #6b3550;
     --shadow-soft: 0 1px 3px rgb(0 0 0 / 0.4);
+    --persona-1: rgb(230 79 134 / 0.16);
+    --persona-2: rgb(233 162 59 / 0.16);
+    --persona-3: rgb(120 132 240 / 0.18);
+    --persona-4: rgb(47 180 124 / 0.16);
+    --persona-5: rgb(150 124 240 / 0.18);
+    --fresh: #f07aa5;
     color-scheme: dark;
   }
 }
@@ -126,6 +140,12 @@
   --color-arrow: var(--arrow);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-persona-1: var(--persona-1);
+  --color-persona-2: var(--persona-2);
+  --color-persona-3: var(--persona-3);
+  --color-persona-4: var(--persona-4);
+  --color-persona-5: var(--persona-5);
+  --color-fresh: var(--fresh);
   --shadow-big: var(--shadow-big);
   --shadow-soft: var(--shadow-soft);
   --radius-sm: calc(var(--radius) - 4px);

@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { movedHash, PAGES, placeOf } from "../src/lib/routes.ts";
+import {
+  movedHash,
+  PAGES,
+  placeOf,
+  understandHash,
+  understandOf,
+} from "../src/lib/routes.ts";
 
 test("each page has its own address, with what is open in it", () => {
   for (const page of PAGES)
@@ -46,4 +52,25 @@ test("the new addresses have not moved", () => {
   for (const page of PAGES) assert.equal(movedHash(`#${page}`), null);
   assert.equal(movedHash(""), null);
   assert.equal(movedHash("#connect"), null);
+});
+
+test("Understand opens a persona, or one of their stories", () => {
+  assert.deepEqual(placeOf("#understand/mia/st1"), {
+    page: "understand",
+    open: "mia/st1",
+  });
+  assert.deepEqual(understandOf(null), { persona: null, story: null });
+  assert.deepEqual(understandOf("mia"), { persona: "mia", story: null });
+  assert.deepEqual(understandOf("mia/"), { persona: "mia", story: null });
+  assert.deepEqual(understandOf("mia/st1"), { persona: "mia", story: "st1" });
+  assert.deepEqual(understandOf("/st1"), { persona: null, story: null });
+  assert.deepEqual(understandOf("b%C3%A4r/a%20b"), {
+    persona: "bär",
+    story: "a b",
+  });
+  assert.equal(understandHash(), "#understand");
+  assert.equal(understandHash("mia"), "#understand/mia");
+  assert.equal(understandHash("mia", "st1"), "#understand/mia/st1");
+  assert.equal(understandHash(undefined, "st1"), "#understand");
+  assert.equal(understandHash("bär", "a b"), "#understand/b%C3%A4r/a%20b");
 });

@@ -23,7 +23,9 @@ test("every skill has a name, matching its folder, and a description", () => {
   const skills = listSkills();
   assert.deepEqual(
     skills.map((skill) => skill.name),
-    ["factory", ...LOOP, "upgrade-factory"].sort((a, b) => a.localeCompare(b)),
+    ["factory", ...LOOP, "understand", "upgrade-factory"].sort((a, b) =>
+      a.localeCompare(b),
+    ),
   );
   for (const skill of skills) {
     assert.equal(basename(dirname(skill.file)), skill.name);

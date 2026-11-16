@@ -1,5 +1,6 @@
-// A pretend Claude Code for the setup coach's tests: each turn calls the
-// tools it is given over MCP, as the real one does, then answers.
+// A pretend Claude Code for the tests of the coaches and the kobold: each
+// turn calls the tools it is given over MCP, as the real one does, then
+// answers.
 
 import assert from "node:assert/strict";
 
@@ -9,8 +10,11 @@ import type { Claude, RunOptions } from "@software-factory/core";
 
 type Call = [string, Record<string, unknown>];
 
-// "<name>" in an argument is the path set in `paths` by then.
-export function pretendClaude(turns: { calls: Call[]; reply: string }[]) {
+// "<name>" in an argument is the path set in `paths` by then. Calls given
+// as a function are made when the turn comes (for what is known only then).
+export function pretendClaude(
+  turns: { calls: Call[] | (() => Call[]); reply: string }[],
+) {
   const paths: Record<string, string> = {};
   const filled = (args: Record<string, unknown>) =>
     JSON.parse(
@@ -26,6 +30,9 @@ export function pretendClaude(turns: { calls: Call[]; reply: string }[]) {
       const turn = turns[seen.length - 1];
       if (!turn) return { ok: false, text: "", error: "spawn claude ENOENT" };
       const mcp = options.mcp;
+      const calls =
+        typeof turn.calls === "function" ? turn.calls() : turn.calls;
+      if (calls.length === 0 && !mcp) return { ok: true, text: turn.reply };
       assert.ok(mcp);
       const client = new Client({ name: "pretend", version: "1.0.0" });
       await client.connect(
@@ -34,8 +41,8 @@ export function pretendClaude(turns: { calls: Call[]; reply: string }[]) {
         }),
       );
       const said: string[] = [];
-      for (const [name, args] of turn.calls) {
-        options.onActivity(`Using mcp__setup__${name}`);
+      for (const [name, args] of calls) {
+        options.onActivity(`Using mcp__${mcp.name}__${name}`);
         const result = (await client.callTool({
           name,
           arguments: filled(args),

@@ -74,6 +74,16 @@ test("where a signal went is there", () => {
       "Signal s15: the ticket #999 it went to is not there.",
     ],
   );
+  // Build takes a bug or an update straight from a signal, nothing else.
+  assert.deepEqual(
+    broken((r) => {
+      signal(r, "s15").wentTo = { to: "build" };
+      signal(r, "s17").wentTo = { to: "build" };
+    }),
+    [
+      "Signal s17: only a bug or an update goes to Build straight from a signal.",
+    ],
+  );
 });
 
 test("a signal that feeds a problem or a story sounds like that persona", () => {

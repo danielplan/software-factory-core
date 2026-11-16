@@ -7,12 +7,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
 import { ICONS } from "../api.ts";
-import { Refused } from "../refused.ts";
+import { answerMcp, toolAnswer } from "../mcp.ts";
 import type { Configuration } from "./configure.ts";
 import type { Drawing } from "./map.ts";
 
@@ -167,7 +165,7 @@ function toolsFor(on: ToolsFor): McpServer {
         "Change the map you plan with the owner, in one call: draw cards (new, or again by id), each with the cards it points to; take cards or arrows off; show the owner some cards or areas (their canvas moves there). A card is one thing: a short title, a line, an icon; or a picture from the project with a caption. Answers with what it did and the whole map.",
       inputSchema: drawInput(on.titled === true),
     },
-    (args) => answer(() => on.draw(args)),
+    (args) => toolAnswer(() => on.draw(args)),
   );
   const configure = on.configure;
   if (configure)
@@ -178,30 +176,9 @@ function toolsFor(on: ToolsFor): McpServer {
           "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked (none: the factory's own board, or the id of an add-on that tracks work), its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
         inputSchema: CONFIGURE_INPUT,
       },
-      async (args) => answerAsync(() => configure(args)),
+      async (args) => toolAnswer(() => configure(args)),
     );
   return server;
-}
-
-// A tool's answer: its lines, or why it was refused.
-function answer(act: () => string): CallToolResult {
-  try {
-    return { content: [{ type: "text", text: act() }] };
-  } catch (error) {
-    if (!(error instanceof Refused)) throw error;
-    return { content: [{ type: "text", text: error.message }], isError: true };
-  }
-}
-
-async function answerAsync(
-  act: () => Promise<string>,
-): Promise<CallToolResult> {
-  try {
-    return { content: [{ type: "text", text: await act() }] };
-  } catch (error) {
-    if (!(error instanceof Refused)) throw error;
-    return { content: [{ type: "text", text: error.message }], isError: true };
-  }
 }
 
 // One request from the coach's Claude Code: a tool call and its answer.
@@ -216,16 +193,5 @@ export async function answerTools(
     response.end(JSON.stringify({ error: "Only the setup coach." }));
     return;
   }
-  const server = toolsFor(on);
-  // No live stream from the server: each call is one request and answer.
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-    enableJsonResponse: true,
-  });
-  response.on("close", () => {
-    void transport.close();
-    void server.close();
-  });
-  await server.connect(transport);
-  await transport.handleRequest(incoming, response, body);
+  await answerMcp(incoming, response, toolsFor(on), body);
 }
