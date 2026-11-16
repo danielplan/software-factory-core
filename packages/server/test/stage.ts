@@ -113,7 +113,13 @@ export async function stage(
   mkdirSync(page);
   writeFileSync(join(page, "index.html"), "<p>The factory</p>");
   // Port 0: the system picks a free one.
-  const { server } = startServer({ session, page, port: 0, addOns });
+  const { server } = startServer({
+    session,
+    page,
+    port: 0,
+    addOns,
+    cli: connectors.cli,
+  });
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();
   assert.ok(address && typeof address === "object");

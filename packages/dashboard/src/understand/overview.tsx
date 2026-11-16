@@ -91,10 +91,7 @@ function PersonaHead({
         </span>
       </span>
       <span className="text-xs text-muted-foreground">
-        {[
-          storiesWords(card),
-          ...persona.basedOn.slice(0, 1).map((b) => `based on ${b}`),
-        ].join(" · ")}
+        {storiesWords(card)}
       </span>
     </a>
   );

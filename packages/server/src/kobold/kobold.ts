@@ -1,10 +1,12 @@
-// The kobold's Understand jobs, each a Claude Code session on this computer
-// (read-only, no GitHub, no pushing), with the understand skill as its
-// method and its own tools (tools.ts), which write the records through the
-// store: sorting a signal that came in, suggesting a real problem when a
-// new problem joins others of one persona, and drafting a question about a
-// story's guessed scenes. Sorting and suggesting run one at a time, in the
-// order asked; the page sees each job while it works and how it ended.
+// The kobold's jobs on the records, each a Claude Code session on this
+// computer (read-only, no GitHub, no pushing), with a skill as its method
+// and its own tools (tools.ts), which write the records through the store:
+// sorting a signal that came in, suggesting a real problem when a new
+// problem joins others of one persona, and drafting a question about a
+// story's guessed scenes (the understand skill); writing a team member's own
+// idea with the story it assumes (the explore skill). Every job but asking
+// runs one at a time, in the order asked; the page sees each job while it
+// works and how it ended.
 
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -20,16 +22,19 @@ import { skillsFolder } from "@software-factory/skills";
 
 import { problemOf } from "../coach/talk.ts";
 import { Refused } from "../refused.ts";
-import { askPrompt, sortPrompt, suggestPrompt } from "./prompts.ts";
+import { type OwnIdea, writeOwnIdea } from "../explore/own-idea.ts";
+import { askPrompt, ideaPrompt, sortPrompt, suggestPrompt } from "./prompts.ts";
 import { type JobTools, KOBOLD_HEADER } from "./tools.ts";
 import { sortSignal, suggestRealProblem } from "./writes.ts";
 
 export type KoboldJob = {
   id: string;
-  kind: "sort" | "suggest" | "ask";
-  // The signal it sorts, the persona whose problems it reads, or the story
-  // it asks about.
+  kind: "sort" | "suggest" | "ask" | "idea";
+  // The signal it sorts, the persona whose problems it reads, the story it
+  // asks about, or the persona an own idea is for.
   about: string;
+  // What it made, once done: the new idea's id.
+  made: string | null;
   working: boolean;
   // What it is doing now, in a few words.
   activity: string | null;
@@ -59,6 +64,7 @@ const KEPT = 20;
 const TOOL_LINES: Record<string, string> = {
   sort_signal: "Putting it in its place",
   suggest_real_problem: "Suggesting a real problem",
+  write_idea: "Writing the idea and its story",
 };
 
 export class Kobold {
@@ -114,6 +120,37 @@ export class Kobold {
     return text;
   }
 
+  // The story behind a team member's own idea, all guessed, and the idea,
+  // written by the kobold (explore skill), after the jobs asked before.
+  imagine(own: OwnIdea): KoboldJob {
+    const store = this.options.records();
+    if (!own.text.trim()) throw new Refused("Say what the idea is first.");
+    if (!store.get("personas", own.persona))
+      throw new Refused(`There is no persona “${own.persona}”.`);
+    const job = this.add("idea", own.persona);
+    this.queue(job, async () => {
+      job.tools = {
+        tool: "write_idea",
+        act: (args) => {
+          const { idea, done } = writeOwnIdea(store, own, args);
+          job.made = idea;
+          return done;
+        },
+      };
+      const result = await this.run(
+        job,
+        ideaPrompt(store.all(), own),
+        "explore",
+      );
+      if (!result.ok)
+        this.finish(job, null, problemOf(result.error ?? "", "The kobold"));
+      else if (job.made === null)
+        this.finish(job, null, `The kobold wrote no idea. ${result.text}`);
+      else this.finish(job, "Wrote the idea and the story it assumes.", null);
+    });
+    return { ...job };
+  }
+
   private async sorting(job: Running, hint: string | null): Promise<void> {
     const store = this.options.records();
     const signal = store.get("signals", job.about);
@@ -163,6 +200,7 @@ export class Kobold {
       id: randomUUID(),
       kind,
       about,
+      made: null,
       working: true,
       activity: null,
       done: null,
@@ -185,15 +223,16 @@ export class Kobold {
     );
   }
 
-  private async run(job: Running, prompt: string): Promise<ClaudeResult> {
+  private async run(
+    job: Running,
+    prompt: string,
+    skill = "understand",
+  ): Promise<ClaudeResult> {
     return await this.options.claude.run({
       cwd: this.options.cwd,
       prompt,
       ...RIGHTS,
-      instructions: readFileSync(
-        join(skillsFolder, "understand", "SKILL.md"),
-        "utf8",
-      ),
+      instructions: readFileSync(join(skillsFolder, skill, "SKILL.md"), "utf8"),
       session: { id: randomUUID(), resume: false },
       timeLimitMs: TIME_LIMIT_MS,
       ...(job.tools

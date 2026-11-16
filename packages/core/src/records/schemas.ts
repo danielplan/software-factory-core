@@ -172,6 +172,8 @@ export const versionSchema = z.strictObject({
   sharedAt: z.string().nullable().default(null),
   // The team members who picked it.
   picks: z.array(text).default([]),
+  // A picture of it, when someone made one (a web address); none is needed.
+  thumbnail: z.string().nullable().default(null),
 });
 
 // A GitHub issue the records know: an idea's version sent to Build, or a fix

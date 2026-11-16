@@ -3,20 +3,28 @@
 // later), which the kobold then sorts, and what a person does on the pages
 // (a new source, Move, Looks good, Confirm, Ask). Like every button, a POST
 // is answered only from the factory's page or a program on this computer
-// that sends its header (server.ts).
+// that sends its header (server.ts). Explore's and prototype mode's routes
+// come with them (explore/routes.ts): they work on the same records.
 
 import { randomUUID } from "node:crypto";
+import { join } from "node:path";
 
 import {
   type Claude,
+  FACTORY_FOLDER,
   importSignalSchema,
   RecordsRefused,
   type Signal,
 } from "@software-factory/core";
 
 import type { Route } from "../add-ons/add-on.ts";
+import type { Cli } from "../add-ons/github/github.ts";
+import { cardsFor } from "../cards/cards-for.ts";
+import { exploreRoutes } from "../explore/routes.ts";
 import { Kobold } from "../kobold/kobold.ts";
+import { PrototypeMode } from "../prototypes/mode.ts";
 import type { JobTools } from "../kobold/tools.ts";
+import { asked, field } from "../asked.ts";
 import { Refused } from "../refused.ts";
 import { RecordsHost } from "./host.ts";
 import {
@@ -33,11 +41,14 @@ import { whoIs } from "./who.ts";
 
 // The project's records as the server serves them: their routes, and each
 // change told on the page's stream as a `records-changed` event that says
-// which records changed (the page reads what it shows of them again), and
-// the kobold's jobs as `kobold` events.
+// which records changed (the page reads what it shows of them again), the
+// kobold's jobs as `kobold` events, and what runs in prototype mode as
+// `prototypes` events.
 export function servedRecords(options: {
   project: string;
   claude: Claude;
+  // The GitHub CLI, for sending a version to Build.
+  cli: Cli;
   tell: (event: string) => void;
 }) {
   const { project, tell } = options;
@@ -55,16 +66,41 @@ export function servedRecords(options: {
       );
     },
   });
+  const root = join(project, FACTORY_FOLDER);
+  const mode: PrototypeMode = new PrototypeMode({
+    project,
+    root,
+    records: () => host.orRefuse(),
+    onChange: () => {
+      tell(
+        `event: prototypes\ndata: ${JSON.stringify({ runs: mode.view() })}\n\n`,
+      );
+    },
+  });
+  const cards = () => {
+    const found = cardsFor(root, options.cli);
+    if ("problem" in found) throw new Refused(found.problem);
+    return found.cards;
+  };
   return {
     routes: {
       ...readRoutes(host, kobold),
       ...personRoutes(host, kobold, project),
+      ...exploreRoutes({
+        host,
+        kobold,
+        mode,
+        project,
+        claude: options.claude,
+        cards,
+      }),
     },
     serveToolsAt: (base: string) => {
       kobold.serveToolsAt(`${base}/kobold/mcp`);
     },
     toolsOf: (token: string): JobTools | null => kobold.toolsOf(token),
     close: () => {
+      mode.close();
       host.close();
     },
   };
@@ -142,19 +178,6 @@ function importSignal(host: RecordsHost, body: unknown): Signal {
     if (error instanceof RecordsRefused) throw new Refused(error.message);
     throw error;
   }
-}
-
-function asked(url: URL, key: string, what: string): string {
-  const value = url.searchParams.get(key);
-  if (!value) throw new Refused(`Say which ${what}.`);
-  return value;
-}
-
-function field(body: unknown, key: string): string {
-  const value = (body as Record<string, unknown> | null)?.[key];
-  if (typeof value !== "string" || !value)
-    throw new Refused(`Say which ${key}.`);
-  return value;
 }
 
 function refuse(what: string, id: string): never {

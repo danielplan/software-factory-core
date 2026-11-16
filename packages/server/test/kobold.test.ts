@@ -1,24 +1,17 @@
 import assert from "node:assert/strict";
-import { copyFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import {
-  type Claude,
-  RECORDS_FILE,
-  RecordStore,
-  SEED_FILE,
-} from "@software-factory/core";
+import { type Claude, RECORDS_FILE, RecordStore } from "@software-factory/core";
 
-import type { KoboldJob } from "../src/kobold/kobold.ts";
 import type { SignalView } from "../src/records/signal-views.ts";
 import type {
   PersonaPage,
-  RecordsView,
   StoryPage,
   UnderstandOverview,
 } from "../src/records/views.ts";
 import { pretendClaude } from "./pretend-claude.ts";
+import { acmeServed } from "./acme-served.ts";
 import { stage } from "./stage.ts";
 
 // The kobold's Understand jobs, with a pretend Claude Code that calls its
@@ -27,53 +20,8 @@ import { stage } from "./stage.ts";
 // problem joins another, a question is drafted for guessed scenes; and
 // what a person does: Move, Looks good, Confirm, a new source.
 
-const ACME_SEED = join(
-  import.meta.dirname,
-  "..",
-  "..",
-  "..",
-  "examples",
-  "acme",
-  "factory",
-  SEED_FILE,
-);
-
-// What the server answers a button with, in these tests.
-type Said = {
-  error: string;
-  done: string;
-  question: string;
-  job: KoboldJob;
-  source: { id: string };
-  signal: { id: string };
-};
-
 async function koboldFactory(claude: Claude) {
-  const staged = await stage(claude);
-  const root = staged.session.createCompany({ name: "Acme", about: "" });
-  copyFileSync(ACME_SEED, join(root, SEED_FILE));
-  const read = async <T>(path: string) =>
-    (await (await fetch(`${staged.base}${path}`)).json()) as T;
-  const send = async (path: string, body: unknown) => {
-    const response = await staged.post(path, body);
-    return { status: response.status, body: (await response.json()) as Said };
-  };
-  // The jobs once none of them works any more.
-  const settled = async () => {
-    for (;;) {
-      const { jobs } = await read<{ jobs: KoboldJob[] }>(
-        "/api/understand/kobold",
-      );
-      if (!jobs.some((job) => job.working)) return jobs;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-  };
-  const records = async () => (await read<RecordsView>("/api/records")).records;
-  const close = () => {
-    staged.session.close();
-    staged.server.close();
-  };
-  return { ...staged, root, read, send, settled, records, close };
+  return acmeServed(await stage(claude));
 }
 
 test("a signal that comes in is sorted by the kobold into a scene of a story, which is seen then", async () => {

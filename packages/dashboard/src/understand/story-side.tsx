@@ -4,6 +4,7 @@
 
 import type { StoryPage } from "@/api";
 import { Button } from "@/components/ui/button";
+import { exploreHash, newIdeaHash } from "@/lib/routes";
 
 import { Label, Pill } from "./bits";
 import { problemWhy, stateOf } from "./view";
@@ -69,7 +70,7 @@ export function StorySide({ page }: Readonly<{ page: StoryPage }>) {
         {page.ideas.map((idea) => (
           <a
             key={idea.id}
-            href="#explore"
+            href={exploreHash(idea.id)}
             className="flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm hover:bg-surface"
           >
             <span className="flex-1">{idea.title}</span>
@@ -80,7 +81,7 @@ export function StorySide({ page }: Readonly<{ page: StoryPage }>) {
         ))}
       </div>
       <Button asChild className="w-fit">
-        <a href="#explore">Start an idea</a>
+        <a href={newIdeaHash(page.story.id)}>Start an idea</a>
       </Button>
     </aside>
   );

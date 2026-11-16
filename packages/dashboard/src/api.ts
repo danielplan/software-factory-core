@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import type { State } from "../../server/src/api.ts";
 import type { KoboldJob } from "../../server/src/kobold/kobold.ts";
+import type { VersionRun } from "../../server/src/prototypes/mode.ts";
 
 export type {
   AddOnView,
@@ -34,6 +35,15 @@ export type {
   SignalView,
 } from "../../server/src/records/signal-views.ts";
 export type { KoboldJob } from "../../server/src/kobold/kobold.ts";
+export type {
+  ExploreList,
+  IdeaPage,
+  IdeaRow,
+  PersonaTag,
+  VersionCard,
+} from "../../server/src/explore/views.ts";
+export type { PrototypePage } from "../../server/src/explore/prototype-page.ts";
+export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
 // The server answers buttons only from its own page, which says so.
@@ -73,6 +83,7 @@ export async function post<T>(path: string, body: unknown = {}): Promise<T> {
 // work.
 const recordsHeard = new Set<() => void>();
 const koboldHeard = new Set<(jobs: KoboldJob[]) => void>();
+const prototypesHeard = new Set<(runs: VersionRun[]) => void>();
 
 export function onRecordsChanged(listener: () => void): () => void {
   recordsHeard.add(listener);
@@ -82,6 +93,14 @@ export function onRecordsChanged(listener: () => void): () => void {
 export function onKobold(listener: (jobs: KoboldJob[]) => void): () => void {
   koboldHeard.add(listener);
   return () => koboldHeard.delete(listener);
+}
+
+// What runs in prototype mode, whenever it changes.
+export function onPrototypes(
+  listener: (runs: VersionRun[]) => void,
+): () => void {
+  prototypesHeard.add(listener);
+  return () => prototypesHeard.delete(listener);
 }
 
 function tellRecords(): void {
@@ -118,6 +137,10 @@ export function useFactoryState(): { state: State | null; connected: boolean } {
     events.addEventListener("kobold", (event: MessageEvent<string>) => {
       const { jobs } = JSON.parse(event.data) as { jobs: KoboldJob[] };
       for (const listener of koboldHeard) listener(jobs);
+    });
+    events.addEventListener("prototypes", (event: MessageEvent<string>) => {
+      const { runs } = JSON.parse(event.data) as { runs: VersionRun[] };
+      for (const listener of prototypesHeard) listener(runs);
     });
     events.onerror = () => {
       setConnected(false);

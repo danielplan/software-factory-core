@@ -5,9 +5,10 @@ import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { Sidebar } from "@/components/sidebar";
 import { ConnectPage } from "@/connect/connect-page";
+import { ExplorePage } from "@/explore/explore-page";
 import { BoardTab } from "@/ideas/board-tab";
-import { IdeasTab } from "@/ideas/ideas-tab";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
+import { PrototypePage } from "@/prototype/prototype-page";
 import { SetupPage } from "@/setup-coach/setup-page";
 import { UnderstandPage } from "@/understand/understand-page";
 
@@ -54,6 +55,8 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const { page, open } = state.onboarding
     ? { ...place, page: "connect" as const }
     : place;
+  // Prototype mode fills the window, with its own bar.
+  if (page === "prototype") return <PrototypePage state={state} open={open} />;
   return (
     <div className="grid gap-5 max-md:pt-14 md:pl-[232px]">
       <Sidebar
@@ -73,7 +76,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
       )}
       {isComing(page) && <ComingPage page={page} />}
       {page === "understand" && <UnderstandPage open={open} />}
-      {page === "explore" && <IdeasTab state={state} open={open} />}
+      {page === "explore" && <ExplorePage state={state} open={open} />}
       {page === "build" && <BoardTab state={state} />}
       {page === "workshop" && <WorkshopPage state={state} open={open} />}
       {page === "settings" && <SettingsTab state={state} />}

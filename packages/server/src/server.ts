@@ -16,6 +16,7 @@ import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
+import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { readBody, send } from "./http.ts";
 import type { JobTools } from "./kobold/tools.ts";
 import { servedRecords } from "./records/routes.ts";
@@ -44,6 +45,8 @@ export function startServer(options: {
   // The built web interface (index.html and its files).
   page: string;
   port: number;
+  // The GitHub CLI (a stand-in in the tests).
+  cli?: Cli;
 }): { server: Server; changed: () => void } {
   const watchers = new Set<ServerResponse>();
   const tell = (event: string) => {
@@ -58,6 +61,7 @@ export function startServer(options: {
   const records = servedRecords({
     project: session.options.project,
     claude: session.options.coach.claude,
+    cli: options.cli ?? realCli(),
     tell,
   });
   const routes = {

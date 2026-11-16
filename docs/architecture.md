@@ -202,6 +202,60 @@ person adds a source at `POST /api/sources`. The dashboard's Understand page
 one persona and one story, at `#understand`, `#understand/<persona>` and
 `#understand/<persona>/<story>`.
 
+### Explore and prototype mode
+
+Explore (`#explore`) lists the ideas, each with who it is for, where it
+stands (exploring, in Build, it worked, it didn't work) and how many of its
+versions are shared; one idea (`#explore/<idea>`) shows the problems it is
+for, with the story that breaks at each in Understand, what the team thinks
+it would do, its shared versions side by side, and the picks: one per person
+per idea, their name in git. Its one action sends the version with the most
+picks to Build; on a tie, a person picks one first. **New idea**
+(`#explore/new`, or **Start an idea** on a story, `#explore/new/<story>`)
+starts one from a story, for its problem and persona, or from a team
+member's own: the kobold then writes the story it assumes behind it, every
+scene guessed, its problem assumed and the story written from the idea, with
+its tool `write_idea` and the `explore` skill
+(`packages/skills/skills/explore/SKILL.md`). The ideas shaped with the old
+idea coach stay listed below as ideas from before, each opening its
+workspace as it did. The server's routes are in `packages/server/src/explore/`:
+`GET /api/explore`, `GET /api/explore/idea?id=…`, `POST /api/explore/ideas`
+(from a story), `/own` (the kobold's job), `/pick`, `/discard` (an idea
+nothing came of yet) and `/send`.
+
+**Prototype mode** (`#prototype/<idea>/<version>`) runs the versions of an
+idea on this computer. Each version is its branch, `factory/<idea>/<key>`,
+in its own working copy (core's `Workspace`), in
+`<project>-prototypes/<idea>/<key>`, next to the project, so the owner's
+folder, branch and data are never touched. A version starts with the
+company's `prototype.start` command, run in its copy (and stops with
+`prototype.stop`); besides `FACTORY_BRANCH`, `FACTORY_PROJECT` and
+`FACTORY_COPY`, the command is told `FACTORY_IDEA` and `FACTORY_VERSION` (a
+card's prototype gets `FACTORY_CARD`, as before). **The start command says
+where the version runs with a line of its own on standard output,
+`FACTORY_URL=<address>`** (the last one counts): until then the version is
+starting, then it runs there, in a frame on the page. A command that starts
+its servers and ends is fine, as is one that keeps running (it is stopped
+with the version); one that ends without the line runs, with a note that it
+did not say where. Main is the product as it runs today, from the factory's
+own parts. **Make another version** is the kobold's job like a build: it
+works in the new version's copy, changes files only there, never pushes, and
+what it leaves is committed on the version's branch alone. A version is
+nobody's to see until a person presses **Share**, which puts it on Explore
+(`sharedAt`). **Try it** on Explore starts the version and opens it here.
+What runs is known only while the factory is open, told on the page's
+stream as `prototypes` events (`packages/server/src/prototypes/`):
+`GET /api/prototypes?idea=…`, `POST /api/prototypes/start`, `/stop`, `/make`
+and `/share`. `software-factory prototype <idea> <version>` does the same
+from a terminal, beside the card form `software-factory prototype <number>`.
+
+**Send to Build** makes the GitHub issue on the connected board (the cards,
+`packages/server/src/cards/`): its text says what the team thinks, the
+problems it is for and the version's branch, and ends with a hidden mark
+`<!-- factory:kobble idea=<id> version=<key> problems=<id>,… -->`. The
+records keep a ticket link to it, so the idea is in Build; the issue starts
+in Backlog. Asking "did it work?" when it closes comes later.
+
 ## Extension points
 
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of

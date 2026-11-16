@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -11,12 +12,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
+import { openRecords, SEED_FILE } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
 import { prototypeCommand } from "../src/prototypes/command.ts";
+import { inGit } from "./git-project.ts";
 
-// A card's prototype: its own copy of the project on the card's branch, and
-// the project's own commands run in it.
+const ACME_SEED = join(
+  import.meta.dirname,
+  "..",
+  "..",
+  "..",
+  "examples",
+  "acme",
+  "factory",
+  SEED_FILE,
+);
+
+// A card's prototype, or a version of an idea: its own copy of the project
+// on its branch, and the project's own commands run in it.
 
 function git(cwd: string, ...args: string[]): string {
   return execFileSync(GIT, args, { cwd, encoding: "utf8" });
@@ -131,3 +145,80 @@ test("a wrong card number, no factory and no words are said plainly", async () =
   assert.equal(none.code, 1);
   assert.match(none.said, /There is no factory here/);
 });
+
+// A project with the example company's records and an origin, as prototype
+// mode has it.
+function projectWithRecords(prototype?: object): string {
+  const parent = mkdtempSync(join(tmpdir(), "proto-"));
+  const project = join(parent, "shop");
+  const root = join(project, "factory");
+  mkdirSync(root, { recursive: true });
+  writeFileSync(
+    join(root, "factory.json"),
+    JSON.stringify({ name: "Shop", prototype }),
+  );
+  copyFileSync(ACME_SEED, join(root, SEED_FILE));
+  openRecords(root).close();
+  inGit(project);
+  return project;
+}
+
+test("a version of an idea runs in its own copy on its branch, told which idea and version", async () => {
+  const project = projectWithRecords({
+    start: `sh -c 'echo "$FACTORY_IDEA|$FACTORY_VERSION|$FACTORY_BRANCH|$0" > started.txt'`,
+    stop: 'echo stopped > "$FACTORY_PROJECT/../stopped.txt"',
+  });
+  const copy = join(project, "..", "shop-prototypes", "wish", "b");
+  const first = await said(["wish", "b", "--fresh"], project);
+  assert.equal(first.code, 0);
+  assert.match(
+    first.said,
+    /Copying version B of “wish” to .*, on factory\/wish\/b/,
+  );
+  assert.equal(
+    readFileSync(join(copy, "started.txt"), "utf8").trim(),
+    "wish|B|factory/wish/b|--fresh",
+  );
+  assert.equal(git(copy, "branch", "--show-current").trim(), "factory/wish/b");
+  assert.equal(git(project, "branch", "--show-current").trim(), "main");
+  assert.match(
+    (await said(["list"], project)).said,
+    /^wish B {2}factory\/wish\/b {2}.*wish\/b$/,
+  );
+  assert.equal((await said(["wish", "B", "--stop"], project)).code, 0);
+  assert.ok(existsSync(join(project, "..", "stopped.txt")));
+  assert.match(
+    (await said(["wish", "B", "--remove"], project)).said,
+    /Removed version B of “wish”'s copy\. The branch factory\/wish\/b stays\./,
+  );
+  assert.match(
+    (await said(["wish", "B", "--stop"], project)).said,
+    /^Version B of “wish” has no prototype copy\.$/,
+  );
+});
+
+test("a version the records do not know, or an idea without a version, is said plainly", async () => {
+  const project = projectWithRecords();
+  const unknown = await said(["wish", "Q"], project);
+  assert.equal(unknown.code, 1);
+  assert.match(unknown.said, /There is no version Q of the idea “wish”/);
+  const half = await said(["wish"], project);
+  assert.match(half.said, /not a card number, nor an idea with a version/);
+  // Without records yet, the version named, made from main.
+  const bare = projectWith();
+  inGitOrigin(bare);
+  const made = await said(["later", "a"], bare);
+  assert.equal(made.code, 0);
+  assert.match(made.said, /Nothing starts in it/);
+  assert.ok(existsSync(join(bare, "..", "shop-prototypes", "later", "a")));
+});
+
+// A project made by projectWith (already in git), given an origin that has
+// main, as a version's working copy expects.
+function inGitOrigin(project: string): void {
+  const origin = join(project, "..", "origin.git");
+  mkdirSync(origin);
+  git(origin, "init", "--quiet", "--bare", "--initial-branch=main");
+  git(project, "remote", "add", "origin", origin);
+  git(project, "push", "--quiet", "origin", "main");
+}

@@ -15,9 +15,12 @@ export const PAGES = [
 export type Page = (typeof PAGES)[number];
 
 // The page, and what is open in it: an idea on Explore, the add-ons on
-// Workshop. Connecting a board (#connect) is a page of its own, outside the
-// sidebar.
-export type Place = { page: Page | "connect"; open: string | null };
+// Workshop. Connecting a board (#connect) and prototype mode
+// (#prototype/<idea>) are pages of their own, outside the sidebar.
+export type Place = {
+  page: Page | "connect" | "prototype";
+  open: string | null;
+};
 
 // The page shown when the address names none: the work on the board.
 const FIRST: Page = "build";
@@ -49,7 +52,8 @@ export function movedHash(hash: string): string | null {
 export function placeOf(hash: string): Place {
   const moved = movedHash(hash);
   const { asked, rest } = partsOf(moved ?? hash);
-  if (asked === "connect") return { page: "connect", open: rest };
+  if (asked === "connect" || asked === "prototype")
+    return { page: asked, open: rest };
   const page = PAGES.find((one) => one === asked);
   return page ? { page, open: rest } : { page: FIRST, open: null };
 }
@@ -71,4 +75,44 @@ export function understandHash(persona?: string, story?: string): string {
     Boolean(part),
   );
   return ["#understand", ...parts.map(encodeURIComponent)].join("/");
+}
+
+// On Explore, what is open: an idea (#explore/<idea>), or the new idea
+// dialog (#explore/new), started from a story (#explore/new/<story>).
+export type ExplorePlace = {
+  idea: string | null;
+  newIdea: { story: string | null } | null;
+};
+
+export function exploreOf(open: string | null): ExplorePlace {
+  const [first = "", story] = (open ?? "")
+    .split("/")
+    .map((part) => decodeURIComponent(part));
+  if (first === "new") return { idea: null, newIdea: { story: story || null } };
+  return { idea: first || null, newIdea: null };
+}
+
+export function exploreHash(idea?: string): string {
+  return idea ? `#explore/${encodeURIComponent(idea)}` : "#explore";
+}
+
+export function newIdeaHash(story?: string): string {
+  return story ? `#explore/new/${encodeURIComponent(story)}` : "#explore/new";
+}
+
+// Prototype mode for an idea, on one of its versions (or Main, the product
+// as it runs today, when none is named).
+export function prototypeOf(open: string | null): {
+  idea: string | null;
+  version: string | null;
+} {
+  const [idea, version] = (open ?? "")
+    .split("/")
+    .map((part) => decodeURIComponent(part));
+  return { idea: idea || null, version: (idea && version) || null };
+}
+
+export function prototypeHash(idea: string, version?: string): string {
+  const parts = [idea, ...(version ? [version] : [])];
+  return ["#prototype", ...parts.map(encodeURIComponent)].join("/");
 }

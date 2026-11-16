@@ -4,6 +4,8 @@
 
 import type { Records, Signal, Story } from "@software-factory/core";
 
+import type { OwnIdea } from "../explore/own-idea.ts";
+
 // Sorting one signal: who it may sound like, and every story it may be
 // evidence in, with each scene seen or guessed.
 export function sortPrompt(
@@ -69,6 +71,25 @@ export function askPrompt(records: Records, story: Story): string {
     "",
     "Guessed:",
     ...guessed.map((text) => `- ${text}`),
+  ].join("\n");
+}
+
+// Writing a team member's own idea, with the story it assumes behind it.
+export function ideaPrompt(records: Records, own: OwnIdea): string {
+  const told = records.stories.filter(
+    (s) => s.persona === own.persona && s.wrong === null,
+  );
+  return [
+    `${own.by} has an idea for ${own.persona}. Write it with the story it assumes, as the explore skill says, with write_idea, once.`,
+    "",
+    `The idea, in their words: ${own.text.trim()}`,
+    "",
+    ...personaLines(records).filter((line) =>
+      line.startsWith(`- ${own.persona}:`),
+    ),
+    "",
+    "The stories already told about them:",
+    ...told.map((s) => `- “${s.title}”, starts: ${s.starts || "not said"}`),
   ].join("\n");
 }
 

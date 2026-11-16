@@ -129,6 +129,7 @@ export {
   type Story,
   type TicketLink,
   type Version,
+  versionKey,
   SORTED_AS,
   SOURCE_KINDS,
 } from "./records/schemas.ts";

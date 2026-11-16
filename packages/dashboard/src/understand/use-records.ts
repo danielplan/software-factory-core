@@ -17,10 +17,10 @@ import {
   type UnderstandOverview,
 } from "@/api";
 
-type Read<T> = { data: T | null; problem: string | null };
+export type Read<T> = { data: T | null; problem: string | null };
 
 // The records at this path; typed by the hooks below.
-function useRead(path: string): Read<unknown> {
+export function useRead(path: string): Read<unknown> {
   const [read, setRead] = useState<Read<unknown> & { path: string }>({
     path,
     data: null,
