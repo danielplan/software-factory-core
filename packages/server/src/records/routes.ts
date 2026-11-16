@@ -49,14 +49,18 @@ import { whoIs } from "./who.ts";
 // kobold's jobs as `kobold` events, and what runs in prototype mode as
 // `prototypes` events. A change to the tickets or their answers also tells
 // the board (`onTickets`): which cards ask "did it work?" changes with them.
-export function servedRecords(options: {
+type ServedOptions = {
   project: string;
   claude: Claude;
   // The GitHub CLI, for sending a version to Build.
   cli: Cli;
   tell: (event: string) => void;
   onTickets: () => void;
-}) {
+  // The issues the connected board shows closed or in the app.
+  inApp?: () => ReadonlySet<number>;
+};
+
+export function servedRecords(options: ServedOptions) {
   const { project, tell } = options;
   const say = (event: string, data: unknown) => {
     tell(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -87,7 +91,7 @@ export function servedRecords(options: {
   const cards = () => connectedCards(root, options.cli);
   return {
     routes: {
-      ...readRoutes(host, kobold),
+      ...readRoutes(host, kobold, options.inApp ?? (() => new Set())),
       ...personRoutes(host, kobold, project),
       ...exploreRoutes({
         host,
@@ -128,15 +132,19 @@ function waitingIn(host: RecordsHost): ReadonlySet<number> {
   }
 }
 
-function readRoutes(host: RecordsHost, kobold: Kobold): Record<string, Route> {
+function readRoutes(
+  host: RecordsHost,
+  kobold: Kobold,
+  inApp: () => ReadonlySet<number>,
+): Record<string, Route> {
   const records = () => host.orRefuse().all();
   return {
     "GET /api/records": () => recordsView(records()),
-    "GET /api/understand": () => overview(records()),
+    "GET /api/understand": () => overview(records(), inApp()),
     "GET /api/understand/persona": (_body, url) =>
-      personaPage(records(), asked(url, "id", "persona")),
+      personaPage(records(), asked(url, "id", "persona"), inApp()),
     "GET /api/understand/story": (_body, url) =>
-      storyPage(records(), asked(url, "id", "story")),
+      storyPage(records(), asked(url, "id", "story"), inApp()),
     "GET /api/understand/signal": (_body, url) =>
       signalView(records(), asked(url, "id", "signal")),
     "GET /api/understand/kobold": () => ({ jobs: kobold.view() }),

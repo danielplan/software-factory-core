@@ -244,6 +244,64 @@ test("where problems and ideas stand, and how well stories are known, are worked
   assert.equal(after.problems.size, "open");
 });
 
+test("each problem is at a stage, from heard to solved, worked out and never stored", () => {
+  assert.deepEqual(derive(SEED).stages, {
+    find: "trying",
+    invoice: "heard",
+    when: "building",
+    size: "building",
+    amounts: "building",
+    copy: "building",
+    note: "heard",
+    forget: "trying",
+    slotsP: "solved",
+  });
+  // The board says which issues are closed or in the app.
+  assert.equal(derive(SEED, new Set([138])).stages.when, "inApp");
+
+  const records = structuredClone(SEED);
+  // A problem assumed from an idea, with nothing tried for it yet.
+  records.ideas.find((idea) => idea.id === "standing")!.problems = [];
+  assert.equal(derive(records).stages.forget, "assumed");
+  // "Didn't check" is in the app, waiting.
+  records.outcomes.push({
+    issue: 135,
+    worked: "unchecked",
+    seen: null,
+    by: "Anna",
+    on: "16 Nov",
+  });
+  assert.equal(derive(records).stages.size, "inApp");
+  // "No", with nothing else under way: it didn't work.
+  records.outcomes[2]!.worked = "no";
+  assert.equal(derive(records).stages.size, "didntWork");
+  // An idea that did not work, with no ticket for the problem.
+  records.ideas.push({
+    ...records.ideas.find((idea) => idea.id === "pickup")!,
+    id: "pickup2",
+    problems: ["invoice"],
+  });
+  records.ticketLinks.push({
+    issue: 200,
+    kind: "idea",
+    from: { idea: "pickup2", version: "A" },
+    problems: [],
+    on: "",
+  });
+  records.outcomes.push({
+    issue: 200,
+    worked: "no",
+    seen: null,
+    by: "Anna",
+    on: "16 Nov",
+  });
+  assert.equal(derive(records).ideas.pickup2, "didntWork");
+  assert.equal(derive(records).stages.invoice, "didntWork");
+  // Another idea explored for it: trying again.
+  records.ideas.find((idea) => idea.id === "wish")!.problems.push("invoice");
+  assert.equal(derive(records).stages.invoice, "trying");
+});
+
 test("a factory's database is made beside its seed, filled from it once, and kept out of git", () => {
   const root = mkdtempSync(join(tmpdir(), "factory-"));
   copyFileSync(join(ACME, SEED_FILE), join(root, SEED_FILE));

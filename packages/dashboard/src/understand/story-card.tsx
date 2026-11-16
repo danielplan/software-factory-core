@@ -1,7 +1,6 @@
 // A story as a card: small under its persona on the overview, wider on the
 // persona's page (with where it came from). Each says its title, where it
-// breaks, and where it stands: Open or Solved, or what is being tried for
-// its problem. A new story the kobold started has a coloured outline, one
+// breaks, and the stage its problem is at (stage-steps.tsx). A new story the kobold started has a coloured outline, one
 // assumed from an idea a dashed border, and one that turned out wrong is
 // crossed out.
 
@@ -10,7 +9,8 @@ import { understandHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 import { Pill } from "./bits";
-import { markOf, originWords } from "./view";
+import { StageSteps } from "./stage-steps";
+import { originWords } from "./view";
 
 function frame(card: StoryCard): string {
   return cn(
@@ -62,13 +62,10 @@ function Breaks({
   );
 }
 
-// Open or Solved, or what is tried for its problem.
+// The stage its problem is at; crossed out, that it did not hold.
 function Mark({ card }: Readonly<{ card: StoryCard }>) {
-  const { pill, note } = markOf(card);
-  if (pill) return <Pill tone={pill.tone}>{pill.words}</Pill>;
-  if (note)
-    return <span className="text-xs text-muted-foreground">{note}</span>;
-  return null;
+  if (card.wrong !== null) return <Pill tone="wrong">Didn't hold</Pill>;
+  return card.stage ? <StageSteps stage={card.stage} /> : null;
 }
 
 export function StoryTile({ card }: Readonly<{ card: StoryCard }>) {

@@ -8,10 +8,12 @@
 // - A problem is solved when a ticket for it worked; it is being solved while
 //   an idea for it is explored or in Build, or a ticket for it waits for its
 //   answer; otherwise it is open.
+// - A problem is at a stage, from heard to solved (stage.ts).
 // - A story is known as well as the share of its scenes (and what the persona
 //   does instead) that have evidence; it ends when its problem is solved.
 
 import type { Outcome, Records, Story, TicketLink } from "./schemas.ts";
+import { type ProblemStage, problemStage } from "./stage.ts";
 
 export type IdeaState = "exploring" | "inBuild" | "worked" | "didntWork";
 export type ProblemState = "open" | "beingSolved" | "solved";
@@ -28,11 +30,17 @@ export type PersonaSummary = {
 export type Derived = {
   ideas: Record<string, IdeaState>;
   problems: Record<string, ProblemState>;
+  stages: Record<string, ProblemStage>;
   stories: Record<string, StoryState>;
   personas: Record<string, PersonaSummary>;
 };
 
-export function derive(records: Records): Derived {
+// inApp: the issues the connected board shows closed or in the app, when
+// it is known.
+export function derive(
+  records: Records,
+  inApp: ReadonlySet<number> = new Set(),
+): Derived {
   const answers = new Map(records.outcomes.map((o) => [o.issue, o]));
   const ideas = Object.fromEntries(
     records.ideas.map((idea) => [
@@ -60,7 +68,19 @@ export function derive(records: Records): Derived {
       },
     ]),
   );
-  return { ideas, problems, stories, personas: summaries(records, stories) };
+  const stages = Object.fromEntries(
+    records.problems.map((problem) => [
+      problem.id,
+      problemStage(problem, records, ideas, inApp),
+    ]),
+  );
+  return {
+    ideas,
+    problems,
+    stages,
+    stories,
+    personas: summaries(records, stories),
+  };
 }
 
 type Answers = Map<number, Outcome>;

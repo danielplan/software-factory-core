@@ -1,13 +1,14 @@
-// Beside a story: the problem it breaks at, where it stands (Open or
-// Solved, or what is being tried for it), and the ideas for it, with a way
-// to start one. Why it matters lives on the persona, with the real problem.
+// Beside a story: the problem it breaks at, the stage it is at with every
+// step named and a line of why, and the ideas for it, with a way to start
+// one. Why it matters lives on the persona, with the real problem.
 
 import type { StoryPage } from "@/api";
 import { Button } from "@/components/ui/button";
 import { exploreHash, newIdeaHash } from "@/lib/routes";
 
-import { Label, Pill } from "./bits";
-import { markOf } from "./view";
+import { Label } from "./bits";
+import { StageSteps } from "./stage-steps";
+import { stageWhy } from "./view";
 
 const IDEA_STATES = {
   exploring: "Exploring",
@@ -24,11 +25,6 @@ export function StorySide({ page }: Readonly<{ page: StoryPage }>) {
         It breaks at no problem: it turned out wrong.
       </aside>
     );
-  const { pill, note } = markOf({
-    problemState: problem.state,
-    wrong: null,
-    trying: page.trying,
-  });
   return (
     <aside
       aria-label="Where it breaks"
@@ -37,16 +33,18 @@ export function StorySide({ page }: Readonly<{ page: StoryPage }>) {
       <div className="grid gap-2">
         <Label>Where it breaks</Label>
         <h2 className="text-xl leading-snug font-semibold">{problem.title}</h2>
-        <div className="flex flex-wrap items-center gap-2">
-          {pill && <Pill tone={pill.tone}>{pill.words}</Pill>}
-          {note && (
-            <span className="text-[13px] text-muted-foreground">{note}</span>
-          )}
-          {problem.assumed && (
-            <span className="text-xs text-label">assumed, from an idea</span>
-          )}
-        </div>
+        {problem.assumed && (
+          <span className="text-xs text-label">assumed, from an idea</span>
+        )}
       </div>
+      {page.stage && (
+        <div className="grid gap-2.5">
+          <StageSteps stage={page.stage} whole />
+          <p className="text-[13px] text-muted-foreground">
+            {stageWhy(page.stage, page)}
+          </p>
+        </div>
+      )}
       <div className="grid gap-1.5">
         <Label>Ideas for it</Label>
         {page.ideas.length === 0 && (

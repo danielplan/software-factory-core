@@ -14,7 +14,7 @@ import type { Jobs } from "../src/builder/jobs.ts";
 import type { PullRequests } from "../src/builder/pull-requests.ts";
 import { readNote } from "../src/builder/protocol.ts";
 import type { Card, Cards } from "../src/cards/cards.ts";
-import type { RecordsView } from "../src/records/views.ts";
+import type { RecordsView, StoryPage } from "../src/records/views.ts";
 import { ACME_SEED, acmeServed } from "./acme-served.ts";
 import { inGit } from "./git-project.ts";
 import { pretendClaude } from "./pretend-claude.ts";
@@ -134,6 +134,11 @@ test("did it work? The kobold drafts what was seen; yes solves the problem, ends
       ["seen", "131", "Drafted what was seen."],
     );
 
+    // Before the answer, its problem is being built (no board here says
+    // the issue is in the app).
+    const st4 = () => factory.read<StoryPage>("/api/understand/story?id=st4");
+    const before = await st4();
+    assert.deepEqual([before.stage, before.answer], ["building", null]);
     const answered = await factory.send("/api/build/answer", {
       issue: 131,
       worked: "yes",
@@ -160,6 +165,11 @@ test("did it work? The kobold drafts what was seen; yes solves the problem, ends
 
     const { derived } = await factory.read<RecordsView>("/api/records");
     assert.equal(derived.problems.copy, "solved");
+    const after = await st4();
+    assert.deepEqual(
+      [after.stage, after.answer],
+      ["solved", { issue: 131, worked: "yes", by: "Pia", on: today }],
+    );
     assert.equal(derived.stories.st4?.ended, true);
     assert.equal(derived.ideas.monday, "worked");
     const view = await factory.read<BuildView>("/api/build");

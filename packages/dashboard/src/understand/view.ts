@@ -1,5 +1,5 @@
 // What the Understand pages say, worked out from what the server sends:
-// where a story's problem stands (open or solved, or what is being tried),
+// the stage a story's problem is at, and why,
 // where a story came from, the story told as sentences, where a signal
 // went, the kobold's line on what it did, and how much of a story is seen.
 // Kept apart from the components so it is checked on its own.
@@ -15,37 +15,68 @@ import { understandHash } from "../lib/routes.ts";
 
 export type Tone = "open" | "solving" | "solved" | "wrong" | "none";
 
-// What a story shows of where it stands: a pill, Open or Solved (or that
-// it did not hold); or, while something is tried for its problem, a short
-// note saying what, instead of a pill.
-export type StoryMark = {
-  pill: { words: string; tone: Tone } | null;
-  note: string | null;
+// The stage a story's problem is at (worked out by the server), as a
+// pipeline of five steps: Heard (or Assumed) → Trying ideas → Building →
+// In the app → Solved (or Didn't work).
+export type Stage = NonNullable<StoryCard["stage"]>;
+
+const STAGE_NAMES: Record<Stage, string> = {
+  assumed: "Assumed",
+  heard: "Heard",
+  trying: "Trying ideas",
+  building: "Building",
+  inApp: "In the app",
+  solved: "Solved",
+  didntWork: "Didn't work",
+};
+const STAGE_AT: Record<Stage, number> = {
+  assumed: 0,
+  heard: 0,
+  trying: 1,
+  building: 2,
+  inApp: 3,
+  solved: 4,
+  didntWork: 4,
 };
 
-export function markOf(
-  card: Pick<StoryCard, "problemState" | "wrong" | "trying">,
-): StoryMark {
-  if (card.wrong !== null)
-    return { pill: { words: "Didn't hold", tone: "wrong" }, note: null };
-  if (card.problemState === "solved")
-    return { pill: { words: "Solved", tone: "solved" }, note: null };
-  const note = tryingWords(card.trying);
-  if (note) return { pill: null, note };
-  if (card.problemState === null) return { pill: null, note: null };
-  return { pill: { words: "Open", tone: "open" }, note: null };
+export function stepsOf(stage: Stage): {
+  names: string[];
+  at: number;
+  name: string;
+} {
+  return {
+    names: [
+      stage === "assumed" ? "Assumed" : "Heard",
+      "Trying ideas",
+      "Building",
+      "In the app",
+      stage === "didntWork" ? "Didn't work" : "Solved",
+    ],
+    at: STAGE_AT[stage],
+    name: STAGE_NAMES[stage],
+  };
 }
 
-// What is being tried for a problem, in a short line; null when nothing.
-export function tryingWords(trying: StoryCard["trying"]): string | null {
-  const issues = trying.inBuild.map((n) => `#${String(n)}`).join(", ");
-  const parts = [
-    ...(issues ? [`In Build: ${issues}`] : []),
-    ...(trying.exploring.length > 0
-      ? [`Trying: ${listWords(trying.exploring)}`]
-      : []),
-  ];
-  return parts.length > 0 ? parts.join(" · ") : null;
+type WhyOf = Pick<StoryPage, "trying" | "answer">;
+const issuesOf = (why: WhyOf) =>
+  listWords(why.trying.inBuild.map((n) => `#${String(n)}`));
+const closed = (why: WhyOf, worked: string) =>
+  why.answer
+    ? `Closed by ${why.answer.by} on ${why.answer.on}: ${worked}`
+    : worked.charAt(0).toUpperCase() + worked.slice(1);
+const WHY: Record<Stage, (why: WhyOf) => string> = {
+  heard: () => "Heard from people. No idea for it yet.",
+  assumed: () => "Assumed from an idea. Nobody has said it yet.",
+  trying: (why) => `Trying: ${why.trying.exploring.join(", ")}`,
+  building: (why) => `In Build as ${issuesOf(why)}`,
+  inApp: (why) => `In the app as ${issuesOf(why)}: did it work?`,
+  solved: (why) => closed(why, "it worked"),
+  didntWork: (why) => closed(why, "it didn't work"),
+};
+
+// Why the problem is at its stage, in one plain line.
+export function stageWhy(stage: Stage, why: WhyOf): string {
+  return WHY[stage](why);
 }
 
 // "A, B and C".

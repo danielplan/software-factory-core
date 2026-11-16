@@ -5,7 +5,6 @@ import type {
   KoboldNews,
   PersonaCard,
   SignalView,
-  StoryCard,
   StoryPage,
 } from "../src/api.ts";
 import {
@@ -13,49 +12,72 @@ import {
   knownWords,
   koboldLine,
   listWords,
-  markOf,
   originWords,
   realProblemWords,
   sentencesOf,
   storiesWords,
   storyFrom,
   tintOf,
-  tryingWords,
+  stageWhy,
+  stepsOf,
   wentWords,
 } from "../src/understand/view.ts";
 
 // What the Understand pages say, from what the server sends.
 
-const NOTHING = { exploring: [], inBuild: [] };
+test("a problem's stage is a pipeline of five steps, the end Solved or Didn't work", () => {
+  assert.deepEqual(stepsOf("heard"), {
+    names: ["Heard", "Trying ideas", "Building", "In the app", "Solved"],
+    at: 0,
+    name: "Heard",
+  });
+  assert.deepEqual(stepsOf("assumed").names[0], "Assumed");
+  assert.equal(stepsOf("trying").at, 1);
+  assert.equal(stepsOf("building").at, 2);
+  assert.deepEqual(
+    [stepsOf("inApp").at, stepsOf("inApp").name],
+    [3, "In the app"],
+  );
+  assert.equal(stepsOf("solved").at, 4);
+  assert.deepEqual(
+    [stepsOf("didntWork").at, stepsOf("didntWork").names[4]],
+    [4, "Didn't work"],
+  );
+});
 
-test("a story is Open or Solved, or says what is tried for its problem, or that it did not hold", () => {
-  const mark = (
-    problemState: StoryCard["problemState"],
-    trying: StoryCard["trying"] = NOTHING,
-  ) => markOf({ problemState, wrong: null, trying });
-  assert.deepEqual(mark("open"), {
-    pill: { words: "Open", tone: "open" },
-    note: null,
-  });
-  assert.deepEqual(mark("solved", { exploring: ["Wish list"], inBuild: [] }), {
-    pill: { words: "Solved", tone: "solved" },
-    note: null,
-  });
-  assert.deepEqual(
-    mark("beingSolved", { exploring: ["Wish list", "Reminder"], inBuild: [] }),
-    { pill: null, note: "Trying: Wish list and Reminder" },
-  );
-  assert.deepEqual(mark(null), { pill: null, note: null });
-  assert.deepEqual(mark("beingSolved").pill, { words: "Open", tone: "open" });
-  assert.deepEqual(
-    markOf({ problemState: "open", wrong: "Nobody chose it", trying: NOTHING }),
-    { pill: { words: "Didn't hold", tone: "wrong" }, note: null },
-  );
-  assert.equal(tryingWords(NOTHING), null);
+test("why a problem is at its stage, in one plain line", () => {
+  const why = (
+    exploring: string[],
+    inBuild: number[],
+    answer: StoryPage["answer"] = null,
+  ) => ({ trying: { exploring, inBuild }, answer });
   assert.equal(
-    tryingWords({ exploring: ["Size finder"], inBuild: [138, 140] }),
-    "In Build: #138, #140 · Trying: Size finder",
+    stageWhy("heard", why([], [])),
+    "Heard from people. No idea for it yet.",
   );
+  assert.equal(
+    stageWhy("assumed", why([], [])),
+    "Assumed from an idea. Nobody has said it yet.",
+  );
+  assert.equal(
+    stageWhy("trying", why(["Wish list", "Evening reminder"], [])),
+    "Trying: Wish list, Evening reminder",
+  );
+  assert.equal(stageWhy("building", why([], [138])), "In Build as #138");
+  assert.equal(
+    stageWhy("inApp", why([], [131, 144])),
+    "In the app as #131 and #144: did it work?",
+  );
+  const answer = { issue: 127, worked: "yes", by: "Luca", on: "14 Nov" };
+  assert.equal(
+    stageWhy("solved", why([], [], answer)),
+    "Closed by Luca on 14 Nov: it worked",
+  );
+  assert.equal(
+    stageWhy("didntWork", why([], [], { ...answer, worked: "no" })),
+    "Closed by Luca on 14 Nov: it didn't work",
+  );
+  assert.equal(stageWhy("didntWork", why([], [])), "It didn't work");
 });
 
 test("lists, origins and a persona's header read as plain words", () => {

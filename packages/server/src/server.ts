@@ -20,6 +20,7 @@ import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { readBody, send } from "./http.ts";
 import type { JobTools } from "./kobold/tools.ts";
 import { servedRecords } from "./records/routes.ts";
+import { issuesInApp } from "./records/views.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -58,17 +59,7 @@ export function startServer(options: {
     tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
-  const records = servedRecords({
-    project: session.options.project,
-    claude: session.options.coach.claude,
-    cli: options.cli ?? realCli(),
-    tell,
-    // A ticket made or answered: the board is read again, and shown.
-    onTickets: () => {
-      session.work.refresh();
-      changed();
-    },
-  });
+  const records = recordsOf(session, options.cli ?? realCli(), tell, changed);
   session.work.waitFor(records.waiting);
   const routes = {
     ...routesFor(session),
@@ -235,6 +226,27 @@ function stream(
   context.watchers.add(response);
   response.on("close", () => context.watchers.delete(response));
   response.write(": connected\n\n");
+}
+
+// The project's records, served beside the session.
+function recordsOf(
+  session: Session,
+  cli: Cli,
+  tell: (event: string) => void,
+  changed: () => void,
+) {
+  return servedRecords({
+    project: session.options.project,
+    claude: session.options.coach.claude,
+    cli,
+    tell,
+    // A ticket made or answered: the board is read again, and shown.
+    onTickets: () => {
+      session.work.refresh();
+      changed();
+    },
+    inApp: () => issuesInApp(session.work.view()?.cards ?? []),
+  });
 }
 
 function sendFile(response: ServerResponse, page: string, path: string): void {

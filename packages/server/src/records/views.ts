@@ -13,6 +13,7 @@ import {
   type Persona,
   type PersonaSummary,
   type Problem,
+  type ProblemStage,
   type ProblemState,
   type RealProblem,
   type Records,
@@ -52,6 +53,8 @@ export type StoryCard = {
   // team member who had it, if a person did).
   from:
     { signals: number } | { idea: string; title: string; by: string | null };
+  // The stage its problem is at (derive's stages); none without one.
+  stage: ProblemStage | null;
   // What is being tried for its problem.
   trying: Trying;
 };
@@ -95,24 +98,47 @@ export type StoryPage = {
   signals: (Signal & { sourceName: string })[];
   // The ideas for its problem, and the idea it was written from.
   ideas: (Idea & { state: IdeaState })[];
+  stage: ProblemStage | null;
   trying: Trying;
+  // The last answer to "did it work?" for its problem, if any.
+  answer: { issue: number; worked: string; by: string; on: string } | null;
 };
 
 export function recordsView(records: Records): RecordsView {
   return { records, derived: derive(records) };
 }
 
-export function overview(records: Records): UnderstandOverview {
-  const derived = derive(records);
+// The issues a connected board shows closed or in its last column (in the
+// app), for the stage of their problems.
+export function issuesInApp(
+  cards: readonly { number: number; closed: boolean; stage: string | null }[],
+): ReadonlySet<number> {
+  return new Set(
+    cards
+      .filter((card) => card.closed || card.stage === "done")
+      .map((card) => card.number),
+  );
+}
+
+// inApp: the issues the connected board shows closed or in the app.
+export function overview(
+  records: Records,
+  inApp: ReadonlySet<number> = new Set(),
+): UnderstandOverview {
+  const derived = derive(records, inApp);
   return {
     personas: records.personas.map((p) => personaCard(p, records, derived)),
     kobold: koboldNews(records),
   };
 }
 
-export function personaPage(records: Records, id: string): PersonaPage {
+export function personaPage(
+  records: Records,
+  id: string,
+  inApp: ReadonlySet<number> = new Set(),
+): PersonaPage {
   const persona = found(records.personas, id, "persona");
-  const derived = derive(records);
+  const derived = derive(records, inApp);
   return {
     ...personaCard(persona, records, derived),
     customers: records.customers.filter((c) => c.persona === id),
@@ -127,9 +153,13 @@ export function personaPage(records: Records, id: string): PersonaPage {
   };
 }
 
-export function storyPage(records: Records, id: string): StoryPage {
+export function storyPage(
+  records: Records,
+  id: string,
+  inApp: ReadonlySet<number> = new Set(),
+): StoryPage {
   const story = found(records.stories, id, "story");
-  const derived = derive(records);
+  const derived = derive(records, inApp);
   const problem = records.problems.find((p) => p.id === story.problem) ?? null;
   const fromIdea = "idea" in story.from ? story.from.idea : null;
   return {
@@ -152,8 +182,25 @@ export function storyPage(records: Records, id: string): StoryPage {
         ...idea,
         state: derived.ideas[idea.id] ?? "exploring",
       })),
+    stage: story.problem ? (derived.stages[story.problem] ?? null) : null,
     trying: tryingFor(story.problem, records, derived),
+    answer: answerFor(story.problem, records),
   };
+}
+
+function answerFor(
+  problem: string | null,
+  records: Records,
+): StoryPage["answer"] {
+  const issues = new Set(
+    records.ticketLinks
+      .filter((t) => problem !== null && t.problems.includes(problem))
+      .map((t) => t.issue),
+  );
+  const last = records.outcomes.filter((o) => issues.has(o.issue)).at(-1);
+  return last
+    ? { issue: last.issue, worked: last.worked, by: last.by, on: last.on }
+    : null;
 }
 
 function tryingFor(
@@ -221,6 +268,7 @@ function storyCard(
     isNew: story.isNew,
     wrong: story.wrong,
     from: origin(story, records),
+    stage: story.problem ? (derived.stages[story.problem] ?? null) : null,
     trying: tryingFor(story.problem, records, derived),
   };
 }

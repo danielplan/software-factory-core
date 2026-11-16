@@ -63,15 +63,13 @@ Text, from the strongest: `--foreground`, `--foreground-2`,
 | `--fresh`                                    | #e64f86                                     | the outline of something new                                          |
 | `--success`, `--warning`, `--destructive`    | #12a594, #e9a23b, #d9534f                   | seen scenes and lights; starting; problems                            |
 
-Where a story or problem stands, each a background and its text. A story
-is Open or Solved (or crossed out: it didn't hold); while something is tried
-for its problem it shows that in a muted line ("Trying: Wish list", "In
-Build: #138") instead of a pill. The warm pair marks an idea's ticket on
+States, each a background and its text: new (`--open`), solved, a story
+that didn't hold (`--wrong`), and the warm pair for an idea's ticket on
 Build.
 
 | State       | Variables                           | Light            |
 | ----------- | ----------------------------------- | ---------------- |
-| Open, new   | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
+| New, heard  | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
 | An idea     | `--solving`, `--solving-foreground` | #fff3df, #8a5300 |
 | Solved      | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
 | Didn't hold | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
@@ -89,6 +87,16 @@ how it happens? What is still guessed?". A story is told as a short
 paragraph, one sentence per scene: the one where it breaks in `--open`, a
 guessed one muted and in italics, a seen one with a small raised mark that
 shows what was said, and where, on hover or focus.
+
+Where a problem stands is its stage, as a small pipeline
+(`packages/dashboard/src/understand/stage-steps.tsx`): Heard (or Assumed)
+→ Trying ideas → Building → In the app → Solved, or Didn't work at the end.
+Steps done are dots in a calm teal (`--success` at 45%), the current one
+larger in its colour (`--open-foreground` heard, `--explore` trying,
+`--build` building and in the app, `--success` solved, `--destructive`
+didn't work), the steps to come empty rings in `--faint`. On a card it is
+the dots and the current stage's name; beside a story every step is named,
+with one line of why under it. It replaces state pills in Understand.
 
 ## Light or dark
 

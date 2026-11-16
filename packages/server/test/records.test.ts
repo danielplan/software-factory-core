@@ -6,11 +6,12 @@ import { test } from "node:test";
 
 import { RECORDS_FILE, SEED_FILE } from "@software-factory/core";
 
-import type {
-  PersonaPage,
-  RecordsView,
-  StoryPage,
-  UnderstandOverview,
+import {
+  issuesInApp,
+  type PersonaPage,
+  type RecordsView,
+  type StoryPage,
+  type UnderstandOverview,
 } from "../src/records/views.ts";
 import { topCommand } from "../src/top-commands.ts";
 import { stage } from "./stage.ts";
@@ -100,6 +101,7 @@ test("the Understand pages read the records, with what is worked out from them",
       isNew: false,
       wrong: null,
       from: { signals: 1 },
+      stage: "solved",
       trying: { exploring: [], inBuild: [] },
     });
     assert.equal(mia.stories[2]?.problemState, null);
@@ -113,6 +115,17 @@ test("the Understand pages read the records, with what is worked out from them",
     });
     assert.deepEqual(trying.get("st4"), { exploring: [], inBuild: [131] });
     assert.deepEqual(trying.get("st3"), { exploring: [], inBuild: [] });
+    assert.deepEqual(
+      [
+        ...issuesInApp([
+          { number: 1, closed: true, stage: "review" },
+          { number: 2, closed: false, stage: "done" },
+          { number: 3, closed: false, stage: "todo" },
+          { number: 4, closed: false, stage: null },
+        ]),
+      ],
+      [1, 2],
+    );
 
     const bruno = (await read("/api/understand/persona?id=bruno"))
       .body as PersonaPage;
@@ -131,6 +144,8 @@ test("the Understand pages read the records, with what is worked out from them",
     assert.equal(story.persona.name, "Mia");
     assert.deepEqual(story.known, { seen: 4, of: 5 });
     assert.equal(story.problem?.state, "beingSolved");
+    assert.equal(story.stage, "trying");
+    assert.equal(story.answer, null);
     assert.deepEqual(story.trying, {
       exploring: ["Wish list", "Evening reminder"],
       inBuild: [],
