@@ -39,8 +39,8 @@ export function BoardCard({
   return (
     <div
       className={cn(
-        "grid min-w-0 gap-1.5 rounded-xl bg-card p-3 shadow-soft transition-shadow hover:ring-1 hover:ring-foreground/20",
-        working && "ring-2 ring-[var(--tint)]",
+        "grid min-w-0 gap-1.5 rounded-xl bg-card p-3 shadow-soft transition-shadow hover:shadow-lift",
+        working && "ring-2 ring-tint-line",
         asking && "ring-2 ring-foreground",
       )}
     >

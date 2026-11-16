@@ -63,7 +63,7 @@ function PersonaHead({
     <a
       href={understandHash(persona.id)}
       className={cn(
-        "grid gap-3 rounded-2xl px-4 py-3.5 shadow-soft transition-shadow hover:shadow-md",
+        "grid gap-3 rounded-2xl px-4 py-3.5 transition-shadow hover:shadow-lift",
         tint,
       )}
     >
@@ -71,11 +71,11 @@ function PersonaHead({
         <Initial name={persona.name} tint="bg-card" />
         <span className="grid">
           <span className="text-base font-semibold">{persona.name}</span>
-          <span className="text-xs text-muted-foreground">{persona.role}</span>
+          <span className="text-xs text-label">{persona.role}</span>
         </span>
       </span>
       {persona.description && (
-        <span className="text-[13px] leading-relaxed">
+        <span className="text-[13px] leading-[1.45] text-foreground-2">
           {persona.description}
         </span>
       )}
@@ -83,16 +83,14 @@ function PersonaHead({
         <Label>The real problem</Label>
         <span
           className={cn(
-            "text-[13px] font-medium",
+            "text-[13px] font-semibold",
             card.realProblems.length === 0 && "text-muted-foreground",
           )}
         >
           {realProblemWords(card)}
         </span>
       </span>
-      <span className="text-xs text-muted-foreground">
-        {storiesWords(card)}
-      </span>
+      <span className="text-xs text-label">{storiesWords(card)}</span>
     </a>
   );
 }
@@ -113,10 +111,10 @@ function KoboldNews({
   return (
     <section
       aria-label="What the kobold did"
-      className="grid gap-2 rounded-2xl bg-card px-4 py-3 shadow-soft"
+      className="grid gap-2 rounded-xl bg-card py-2.5 pr-3 pl-3.5 shadow-soft"
     >
-      <div className="flex items-center gap-3">
-        <KoboldMark />
+      <div className="flex items-center gap-2.5">
+        <KoboldMark className="size-6" />
         <p className="flex-1 text-sm">{line}</p>
         {toLookAt.length > 0 && (
           <Button

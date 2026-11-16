@@ -1,3 +1,4 @@
+import { PageHead } from "@/components/page-head";
 import { Card, CardContent } from "@/components/ui/card";
 
 // The pages still to come, each with what it will hold.
@@ -21,12 +22,9 @@ export function ComingPage({ page }: Readonly<{ page: Coming }>) {
   const { title, about } = COMING[page];
   return (
     <div className="grid content-start gap-4">
-      <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
-        {title}
-      </h1>
-      <Card className="py-5 shadow-soft">
+      <PageHead title={title} about={about} />
+      <Card className="py-5">
         <CardContent className="grid gap-1 px-5">
-          <p className="text-[15px]">{about}</p>
           <p className="text-sm text-muted-foreground">
             This page is coming soon.
           </p>

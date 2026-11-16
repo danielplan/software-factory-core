@@ -36,7 +36,8 @@ company is here: only what is true for any company.
 
 See [the architecture](docs/architecture.md) for the extension points and how
 companies update. [The add-ons](docs/add-ons.md) lists the parts a company
-chooses from.
+chooses from, and [the design system](docs/reference/design-system.md) how
+the dashboard looks.
 
 ## Try it
 

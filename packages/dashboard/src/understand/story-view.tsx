@@ -136,7 +136,9 @@ function Scene({
         <span
           className={cn(
             "rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-            evidence ? "bg-success/15" : "bg-surface-2 text-muted-foreground",
+            evidence
+              ? "bg-solved text-solved-foreground"
+              : "bg-surface-2 text-muted-foreground",
           )}
         >
           {evidence ? evidence.source : "guessed"}

@@ -1,8 +1,7 @@
 // Small pieces the Understand pages share: a story's pill, its scenes as
-// squares (seen or guessed), the kobold's mark, a persona's initial, the
-// header with its breadcrumb, and a plain choice list.
+// squares (seen or guessed), the kobold's mark, a persona's initial, and a
+// small label.
 
-import { Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -10,11 +9,11 @@ import { cn } from "@/lib/utils";
 import { type Tone } from "./view";
 
 const TONES: Record<Tone, string> = {
-  open: "bg-fresh/12 text-fresh",
-  solving: "bg-warning/20 text-foreground",
-  solved: "bg-success/15 text-foreground",
-  wrong: "bg-surface-2 text-muted-foreground",
-  none: "bg-surface-2 text-muted-foreground",
+  open: "bg-open text-open-foreground",
+  solving: "bg-solving text-solving-foreground",
+  solved: "bg-solved text-solved-foreground",
+  wrong: "bg-wrong text-wrong-foreground",
+  none: "bg-wrong text-wrong-foreground",
 };
 
 export function Pill({
@@ -56,17 +55,15 @@ export function Squares({ seen }: Readonly<{ seen: boolean[] }>) {
   );
 }
 
+// The kobold itself, Kobble's mascot, where it speaks or works.
 export function KoboldMark({ className }: Readonly<{ className?: string }>) {
   return (
-    <span
-      className={cn(
-        "grid size-7 flex-none place-items-center rounded-full bg-[var(--tint)] text-primary",
-        className,
-      )}
+    <img
+      src="/kobold.png"
+      alt=""
       aria-hidden
-    >
-      <Sparkles className="size-3.5" />
-    </span>
+      className={cn("size-7 flex-none object-contain", className)}
+    />
   );
 }
 
@@ -89,59 +86,7 @@ export function Initial({
   );
 }
 
-export type Crumb = { name: string; href?: string };
-
-// The page's breadcrumb (Understand › Persona › Story), its title and what
-// it is, and its buttons.
-export function PageHead({
-  crumbs,
-  title,
-  about,
-  actions,
-}: Readonly<{
-  crumbs: Crumb[];
-  title: string;
-  about: string;
-  actions?: ReactNode;
-}>) {
-  return (
-    <header className="flex flex-wrap items-end gap-x-6 gap-y-3 px-1 pt-1">
-      <div className="grid flex-1 gap-1">
-        {crumbs.length > 1 && (
-          <nav
-            aria-label="Breadcrumb"
-            className="flex items-center gap-1.5 text-[13px]"
-          >
-            {crumbs.map((crumb, at) => (
-              <span key={crumb.name} className="flex items-center gap-1.5">
-                {at > 0 && <span className="text-muted-foreground">›</span>}
-                {crumb.href ? (
-                  <a
-                    href={crumb.href}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    {crumb.name}
-                  </a>
-                ) : (
-                  <span aria-current="page" className="font-medium">
-                    {crumb.name}
-                  </span>
-                )}
-              </span>
-            ))}
-          </nav>
-        )}
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
-          {title}
-        </h1>
-        <p className="text-sm text-muted-foreground">{about}</p>
-      </div>
-      {actions}
-    </header>
-  );
-}
-
 // A small label above a part of a card.
 export function Label({ children }: Readonly<{ children: ReactNode }>) {
-  return <span className="text-xs text-muted-foreground">{children}</span>;
+  return <span className="text-xs text-label">{children}</span>;
 }

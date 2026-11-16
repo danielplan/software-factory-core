@@ -12,9 +12,11 @@ import { originWords, stateOf } from "./view";
 
 function frame(card: StoryCard): string {
   return cn(
-    "grid gap-2 rounded-2xl border bg-card px-4 py-3.5 text-left shadow-soft transition-shadow hover:shadow-md",
-    card.isNew && "border-fresh ring-1 ring-fresh",
-    "idea" in card.from && "border-2 border-dashed",
+    "grid gap-1.5 rounded-xl bg-card px-3.5 py-3 text-left shadow-soft transition-shadow hover:shadow-lift",
+    card.isNew && "ring-2 ring-fresh",
+    "idea" in card.from &&
+      card.wrong === null &&
+      "border-[1.5px] border-dashed border-faint shadow-none",
     card.wrong !== null && "bg-surface opacity-75",
   );
 }
@@ -24,19 +26,19 @@ function Title({ card }: Readonly<{ card: StoryCard }>) {
     <span className="flex items-start gap-2">
       <span
         className={cn(
-          "flex-1 text-[15px] leading-snug font-semibold",
+          "flex-1 text-sm leading-snug font-semibold",
           card.wrong !== null && "text-muted-foreground line-through",
         )}
       >
         {card.title}
       </span>
       {card.isNew && (
-        <span className="rounded-full bg-fresh/12 px-2 py-0.5 text-[11px] font-semibold text-fresh">
+        <span className="rounded-full bg-open px-2 py-0.5 text-[11px] font-semibold text-open-foreground">
           new
         </span>
       )}
       {"idea" in card.from && card.wrong === null && (
-        <span className="text-[11px] text-muted-foreground">assumed</span>
+        <span className="text-[11px] text-label">assumed</span>
       )}
     </span>
   );
@@ -45,11 +47,9 @@ function Title({ card }: Readonly<{ card: StoryCard }>) {
 // What it breaks at, or why it did not hold.
 function Breaks({ card }: Readonly<{ card: StoryCard }>) {
   if (card.wrong !== null)
-    return (
-      <span className="text-[13px] text-muted-foreground">{card.wrong}</span>
-    );
+    return <span className="truncate text-xs text-label">{card.wrong}</span>;
   return (
-    <span className="line-clamp-2 text-[13px] text-muted-foreground">
+    <span className="truncate text-xs text-label">
       Breaks: {card.problemTitle ?? "not clear yet"}
     </span>
   );

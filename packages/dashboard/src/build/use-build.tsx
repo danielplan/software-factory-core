@@ -34,7 +34,7 @@ export function useBuild() {
           role="status"
           className={cn(
             "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm",
-            said.good ? "bg-success/15" : "bg-surface-2",
+            said.good ? "bg-solved" : "bg-surface-2",
           )}
         >
           <KoboldMark className="size-6" />

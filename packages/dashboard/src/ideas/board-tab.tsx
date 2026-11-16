@@ -1,4 +1,4 @@
-import { Loader2, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -10,10 +10,11 @@ import {
 } from "@/api";
 import { useBuild } from "@/build/use-build";
 import type { FactoryState } from "@/dashboard/dashboard";
+import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 
-import { ConnectedBoard } from "@/connect/connected-board";
+import { boardOf, ConnectedBoard } from "@/connect/connected-board";
 
 import { BoardCard, type Working } from "./board-card";
 import { BoardWorkers } from "./board-workers";
@@ -51,7 +52,13 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   const shown = problem ?? work?.problem ?? work?.builder.problem ?? null;
   return (
     <div className="grid gap-3">
-      <BoardHeader now={now} work={work} />
+      <BoardHeader
+        state={state}
+        now={now}
+        onRead={() => {
+          press("/api/work/refresh");
+        }}
+      />
       {work && (
         <BoardWorkers
           work={work}
@@ -73,12 +80,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           : once you agree to its plan, it comes here.
         </p>
       )}
-      <WhereTracked
-        state={state}
-        onRead={() => {
-          press("/api/work/refresh");
-        }}
-      />
+      <ConnectedBoard state={state} brief />
       {build.shown}
       <Columns
         ideas={state.ideas}
@@ -91,53 +93,66 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
 }
 
 // The title, and what the factory is busy with when no board is connected
-// (with one, the coach's and the builder's rows say it).
+// (with one, the coach's and the builder's rows say it); with one, a way
+// to it and to read it again now, in the top bar.
 function BoardHeader({
+  state,
   now,
-  work,
-}: Readonly<{ now: { busy: boolean; text: string }; work: WorkView | null }>) {
+  onRead,
+}: Readonly<{
+  state: FactoryState;
+  now: { busy: boolean; text: string };
+  onRead: () => void;
+}>) {
+  const board = boardOf(state);
+  const where = board ? `The board on ${board.site}.` : "The board.";
+  const about = state.work ? (
+    `${where} When something has been in the app for a while, close it and say if it worked.`
+  ) : (
+    <Doing now={now} />
+  );
   return (
-    <div className="flex flex-wrap items-center gap-3 px-1">
-      <h1 className="text-[26px] font-semibold tracking-[-0.02em]">Build</h1>
-      {!work && (
-        <span className="inline-flex min-w-0 flex-1 items-center gap-1.5 text-sm text-muted-foreground">
-          {now.busy ? (
-            <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
-          ) : (
-            <span
-              aria-hidden
-              className="size-2 shrink-0 rounded-full bg-muted-foreground/40"
-            />
-          )}
-          <span className="truncate" title={now.text}>
-            {now.text}
-          </span>
-        </span>
-      )}
-    </div>
+    <PageHead
+      title="Build"
+      about={about}
+      actions={
+        state.work && (
+          <>
+            <Button variant="outline" onClick={onRead}>
+              <RefreshCw aria-hidden />
+              Read it again
+            </Button>
+            {board && (
+              <Button asChild variant="outline">
+                <a href={board.href} target="_blank" rel="noreferrer">
+                  Open on {board.site}
+                  <ArrowUpRight aria-hidden />
+                </a>
+              </Button>
+            )}
+          </>
+        )
+      }
+    />
   );
 }
 
-// Where the work is tracked, and a way to read the board again now.
-function WhereTracked({
-  state,
-  onRead,
-}: Readonly<{ state: FactoryState; onRead: () => void }>) {
-  const { work } = state;
+// What the factory is busy with, in a line.
+function Doing({ now }: Readonly<{ now: { busy: boolean; text: string } }>) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
-      <ConnectedBoard state={state} brief />
-      {work && (
-        <Button
-          variant="ghost"
-          className="h-8 gap-1.5 px-2.5 text-[13px] text-muted-foreground"
-          onClick={onRead}
-        >
-          <RefreshCw className="size-3.5" aria-hidden />
-          Read it again
-        </Button>
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      {now.busy ? (
+        <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
+      ) : (
+        <span
+          aria-hidden
+          className="size-2 shrink-0 rounded-full bg-muted-foreground/40"
+        />
       )}
-    </div>
+      <span className="truncate" title={now.text}>
+        {now.text}
+      </span>
+    </span>
   );
 }
 
@@ -171,10 +186,7 @@ function Columns({
             <section
               key={column.id}
               aria-label={column.title}
-              className="grid min-h-[60vh] content-start gap-2 rounded-2xl p-2.5"
-              style={{
-                background: `color-mix(in oklab, ${column.colour} 7%, var(--card))`,
-              }}
+              className="grid min-h-[60vh] content-start gap-2.5 rounded-2xl bg-ground p-3"
             >
               <h2 className="flex items-center gap-2 px-1.5 py-1 text-[13px] font-semibold">
                 <span

@@ -135,7 +135,7 @@ function RealProblem({
         {behind.map((p) => (
           <span
             key={p.id}
-            className="rounded-full bg-fresh/12 px-2.5 py-1 text-xs font-medium text-fresh"
+            className="rounded-full bg-open px-2.5 py-1 text-xs font-medium text-open-foreground"
           >
             {p.title}
           </span>

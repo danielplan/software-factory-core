@@ -1,0 +1,124 @@
+# Kobble's design system
+
+**Type:** Reference · Answers: how does a page of the dashboard look, and which variables and pieces does it use?
+
+Every page of the dashboard (Kobble) uses the same frame, type, colours and
+pieces, so a new page looks like the others without new styles. The values
+live in one place, `packages/dashboard/src/index.css`, as CSS variables, each
+with a light value and a dark one. A company's theme (`factory/theme.css`,
+see [the theme](../add-ons.md#the-theme)) may change the same variables.
+
+## The frame
+
+| Part      | What it is                                                                                                                                                          | Where                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                          | `packages/dashboard/src/components/shell.tsx`      |
+| Sidebar   | 232px wide, padding 16px 12px: Kobble with the kobold, the product switcher, the pages in groups, the kobold's card at the bottom.                                  | `packages/dashboard/src/components/sidebar.tsx`    |
+| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                        | `packages/dashboard/src/components/shell.tsx`      |
+| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right. | `packages/dashboard/src/components/ask-kobold.tsx` |
+| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                           | `packages/dashboard/src/components/shell.tsx`      |
+| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                 | `packages/dashboard/src/components/page-head.tsx`  |
+
+A page draws its title with `PageHead` and gives its buttons as `actions`;
+they show in the top bar. A button that belongs to one part of the page stays
+in that part. Setting up (before there is a factory), connecting a board and
+prototype mode keep their own layout, with the same variables and type.
+
+On a phone the sidebar becomes a bar along the top whose menu opens the same
+list, and the panel fills the width.
+
+## Type
+
+One font, Onest (bundled with the dashboard, so it works offline), at 400,
+500, 600 and 700.
+
+| Use                  | Size | Weight | Colour               |
+| -------------------- | ---- | ------ | -------------------- |
+| Page title           | 26px | 700    | `--foreground`       |
+| Kobble in the corner | 19px | 700    | `--foreground`       |
+| Card title           | 14px | 600    | `--foreground`       |
+| Text                 | 14px | 400    | `--foreground`       |
+| Secondary text       | 13px | 400    | `--foreground-2`     |
+| About a page or card | 14px | 400    | `--muted-foreground` |
+| Small label          | 12px | 400    | `--label`            |
+| Group in the sidebar | 11px | 600    | `--label`, uppercase |
+
+## Colours
+
+Text, from the strongest: `--foreground`, `--foreground-2`,
+`--muted-foreground`, `--label`, `--faint`.
+
+| Variable                                     | Light                                       | For                                                                   |
+| -------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------- |
+| `--ground`, `--background`                   | #f3f4f8                                     | the window, the sidebar, columns on Build                             |
+| `--panel`, `--card`, `--popover`             | #ffffff                                     | the panel, cards, menus                                               |
+| `--page`                                     | #fafbfd                                     | the page body                                                         |
+| `--primary`, `--primary-foreground`          | #171a26, #ffffff                            | the main button of a place (dark)                                     |
+| `--blue`, `--blue-foreground`                | #2b5cff, #ffffff                            | the product's tile; sparingly, an action that changes the app         |
+| `--tint`, `--tint-line`, `--tint-foreground` | #f3f5fc, #e1e6f7, #5b6074                   | the Ask field, the kobold's corner                                    |
+| `--border`, `--line-soft`, `--border-soft`   | #e3e5ee, #e8eaf1, #eef0f5                   | rings of the panel, buttons and fields; of cards; lines between parts |
+| `--hover`                                    | #e9ebf3                                     | a page in the sidebar under the mouse                                 |
+| `--understand`, `--explore`, `--build`       | #e64f86, #e9a23b, #2b5cff                   | each product page's icon                                              |
+| `--persona-1` … `--persona-5`                | #fde7ef, #fff3df, #e9eeff, #e3f6f2, #f1ecff | each persona's soft colour, in order                                  |
+| `--fresh`                                    | #e64f86                                     | the outline of something new                                          |
+| `--success`, `--warning`, `--destructive`    | #12a594, #e9a23b, #d9534f                   | seen scenes and lights; starting; problems                            |
+
+Where a story or problem stands, each a background and its text:
+
+| State        | Variables                           | Light            |
+| ------------ | ----------------------------------- | ---------------- |
+| Open, new    | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
+| Being solved | `--solving`, `--solving-foreground` | #fff3df, #8a5300 |
+| Solved       | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
+| Didn't hold  | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
+
+Every variable has a dark value in the same file. Text on the colours it
+sits on is readable (WCAG AA, 4.5:1) in both, except `--label` and `--faint`
+in light, which are only for short labels next to stronger text.
+
+## Light or dark
+
+The dark values sit in `@media (prefers-color-scheme: dark)`. Settings has a
+choice, Light or dark: System (the computer's setting, the first choice),
+Light or Dark, kept in that browser. A choice turns those rules on or off in
+the page's style sheets (`packages/dashboard/src/lib/theme-choice.ts`), the
+company's theme included, so dark values are written once.
+
+## Spacing and corners
+
+| Piece                         | Corner | Inside            |
+| ----------------------------- | ------ | ----------------- |
+| Panel                         | 16px   | see the frame     |
+| Section card (`Card`)         | 18px   | 24px              |
+| Small card (a story, an idea) | 14px   | 12px 14px         |
+| Button                        | 10px   | 36px high, 0 14px |
+| Small button                  | 10px   | 30px high, 0 11px |
+| Page in the sidebar           | 9px    | 34px high, 0 10px |
+| Pill                          | round  | 24px high, 0 10px |
+
+Parts of a page are 16px apart, cards in a list 8 to 14px.
+
+## Shadows
+
+| Variable           | For                                                |
+| ------------------ | -------------------------------------------------- |
+| `--shadow-soft`    | a card: a 1px ring in `--line-soft`, no shadow     |
+| `--shadow-lift`    | a card under the mouse                             |
+| `--shadow-current` | the page open in the sidebar, the chosen tab       |
+| `--shadow-panel`   | the panel, the product switcher, the kobold's card |
+| `--shadow-big`     | a dialog or a panel over the page                  |
+
+## Pieces
+
+- **Buttons** (`packages/dashboard/src/components/ui/button.tsx`): `default` is dark, `outline` white
+  with a ring, `blue` for an action that changes the app, `ghost` for a quiet
+  one; `size="sm"` for a small one.
+- **Cards** (`packages/dashboard/src/components/ui/card.tsx`): white, 18px corners, the soft ring.
+- **Pills** (`packages/dashboard/src/understand/bits.tsx`, `Pill`): 12px, 600, round, in a state's
+  colours.
+- **The kobold** (`KoboldMark`, the picture `packages/dashboard/public/kobold.png`): wherever the
+  kobold speaks or works, never a generic icon.
+- **Tabs** inside a page (Workshop, Light or dark): a grey track
+  (`--surface-2`) with the chosen one white and lifted.
+- **Ask the kobold**: ⌘K (Ctrl+K) goes to it, Enter asks; the answer opens
+  under it, read from the records, with a button to close it.

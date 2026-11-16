@@ -108,10 +108,13 @@ the app's own mascot or assistant), its own layout and its own name.
 
 The dashboard is built once and themed through CSS variables, so a company
 changes its look without changing the core. Its own look is calm: a light
-neutral ground, white cards with a hairline and one accent colour.
-`factory/theme.css` changes it: the server gives it to the dashboard, which
+grey ground, the page in a white panel, white cards with a hairline ring and
+dark buttons; [the design system](reference/design-system.md) lists its
+variables, type and pieces. `factory/theme.css` changes it: the server gives it to the dashboard, which
 loads it after its own styles (`packages/server/src/theme.ts`). It sets the
-variables for light and dark (colours, `--font-body`, `--radius`, shadows)
+variables for light and dark (colours, `--font-body`, `--radius`, shadows;
+dark ones inside `@media (prefers-color-scheme: dark)`, which also follow the
+light or dark choice in Settings)
 and may use the project's own files, such as its fonts, as
 `url("/api/theme/file?path=<path inside the project>")`; only files the theme
 names are given out. An upgrade never touches it.

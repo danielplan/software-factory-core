@@ -19,11 +19,20 @@ export function sortPrompt(
     signalLines(records, signal),
     ...(hint ? ["", `The person who moved it says: ${hint}`] : []),
     "",
-    ...personaLines(records),
+    ...recordLines(records),
+  ].join("\n");
+}
+
+// Answering a question someone asked about the people who use the product
+// (Ask the kobold, at the top of every page), from the records alone;
+// nothing is written.
+export function answerPrompt(records: Records, question: string): string {
+  return [
+    "Someone on the team asks the question below about the people who use the product. Answer it from the records below, in two to four short, plain sentences, naming the persona or story the answer comes from. When the records do not tell, say so in a sentence. Write nothing and call no tool.",
     "",
-    ...problemLines(records),
+    `The question: ${question.trim()}`,
     "",
-    ...storyLines(records),
+    ...recordLines(records),
   ].join("\n");
 }
 
@@ -106,6 +115,17 @@ function signalLines(records: Records, signal: Signal): string {
     ...(signal.when ? [signal.when] : []),
   ];
   return `${parts.join(", ")}:\n${signal.text}`;
+}
+
+// The personas, their problems and their stories.
+function recordLines(records: Records): string[] {
+  return [
+    ...personaLines(records),
+    "",
+    ...problemLines(records),
+    "",
+    ...storyLines(records),
+  ];
 }
 
 function personaLines(records: Records): string[] {

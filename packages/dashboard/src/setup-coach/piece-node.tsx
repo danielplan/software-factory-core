@@ -21,7 +21,7 @@ const TONE_ICON = { rule: "never", question: "question" } as const;
 const TONE = {
   fact: "",
   rule: "bg-[color-mix(in_oklab,var(--destructive)_6%,var(--card))]",
-  question: "bg-[var(--tint)]",
+  question: "bg-tint",
 } as const;
 
 // One thing on the map: an area's frame with its title, or a card to read,
@@ -101,7 +101,7 @@ function CardBody({ card }: Readonly<{ card: Card }>) {
       )}
       <span className="flex items-center gap-2 pr-6 text-[15px] leading-snug font-medium">
         {Icon && (
-          <span className="flex size-8 flex-none items-center justify-center rounded-full bg-[var(--tint)] text-primary [&_svg]:size-4">
+          <span className="flex size-8 flex-none items-center justify-center rounded-full bg-tint text-primary [&_svg]:size-4">
             <Icon aria-hidden />
           </span>
         )}

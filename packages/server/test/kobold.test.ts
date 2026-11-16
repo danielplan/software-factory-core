@@ -408,6 +408,47 @@ test("the kobold drafts a question about a story's guessed scenes", async () => 
   }
 });
 
+test("the kobold answers a question about the people who use the product, from the records", async () => {
+  const pretend = pretendClaude([
+    { calls: [], reply: "Ines buys gifts for her mother (Gift buyer)." },
+  ]);
+  const factory = await koboldFactory(pretend.claude);
+  try {
+    const answered = await factory.send("/api/understand/question", {
+      question: "  Who buys gifts?  ",
+    });
+    assert.deepEqual(answered.body, {
+      answer: "Ines buys gifts for her mother (Gift buyer).",
+    });
+    const prompt = pretend.seen[0]?.prompt ?? "";
+    assert.match(prompt, /The question: Who buys gifts\?\n/);
+    assert.match(prompt, /- ines: Ines, Gift buyer\./);
+    assert.match(prompt, /The stories \(scenes numbered from 1\):/);
+    assert.equal(pretend.seen[0]?.mcp, undefined);
+    assert.equal(pretend.seen[0]?.readOnly, true);
+
+    // Without Claude Code it says so, as everywhere; a question is needed.
+    const failed = await factory.send("/api/understand/question", {
+      question: "Who orders on Mondays?",
+    });
+    assert.match(failed.body.error, /^Claude Code is not on this computer/);
+    const [job] = await factory.settled();
+    assert.equal(job?.kind, "answer");
+    assert.equal(job.about, "Who orders on Mondays?");
+    for (const [question, error] of [
+      ["   ", "Ask a question first."],
+      ["", "Say which question."],
+    ])
+      assert.equal(
+        (await factory.send("/api/understand/question", { question })).body
+          .error,
+        error,
+      );
+  } finally {
+    factory.close();
+  }
+});
+
 test("a sort that fails says why, and the kobold's tools answer only its job at work", async () => {
   const factory = await koboldFactory(pretendClaude([]).claude);
   try {

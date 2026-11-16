@@ -4,11 +4,11 @@
 // (#understand/<persona>/<story>). What is shown is read again whenever
 // the records change. "Add a source" brings in something that came in.
 
+import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
 import { understandHash, understandOf } from "@/lib/routes";
 
 import { AddSource } from "./add-source";
-import { PageHead } from "./bits";
 import { Overview } from "./overview";
 import { PersonaView } from "./persona-view";
 import { StoryView } from "./story-view";

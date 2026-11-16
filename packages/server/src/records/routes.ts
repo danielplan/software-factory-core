@@ -1,9 +1,9 @@
 // The records' routes: reading them for the Understand pages, bringing in a
 // signal from outside (the import API; the connectors that feed it come
 // later), which the kobold then sorts, and what a person does on the pages
-// (a new source, Move, Looks good, Confirm, Ask). Like every button, a POST
-// is answered only from the factory's page or a program on this computer
-// that sends its header (server.ts). Explore's and prototype mode's routes
+// (a new source, Move, Looks good, Confirm, Ask, a question to the kobold).
+// Like every button, a POST is answered only from the factory's page or a
+// program on this computer that sends its header (server.ts). Explore's and prototype mode's routes
 // come with them (explore/routes.ts), and Build's (build/routes.ts): they
 // work on the same records.
 
@@ -179,6 +179,9 @@ function personRoutes(
     },
     "POST /api/understand/ask": async (body) => ({
       question: await kobold.ask(field(body, "story")),
+    }),
+    "POST /api/understand/question": async (body) => ({
+      answer: await kobold.answer(field(body, "question")),
     }),
   };
 }

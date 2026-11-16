@@ -12,7 +12,7 @@ export function Step({
       <span
         className={
           done
-            ? "flex size-7 flex-none items-center justify-center rounded-full bg-success/15 text-xs font-semibold text-success"
+            ? "flex size-7 flex-none items-center justify-center rounded-full bg-solved text-xs font-semibold text-solved-foreground"
             : "flex size-7 flex-none items-center justify-center rounded-full bg-surface-2 text-xs font-semibold"
         }
       >

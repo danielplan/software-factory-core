@@ -185,7 +185,7 @@ function AssumedStory({ page }: Readonly<{ page: IdeaPage }>) {
             <span
               className={cn(
                 "rounded-full px-2 py-0.5 text-xs font-semibold",
-                scene.breaks ? "bg-fresh/12 text-fresh" : "bg-surface-2",
+                scene.breaks ? "bg-open text-open-foreground" : "bg-surface-2",
               )}
             >
               {scene.breaks ? "breaks here · guessed" : "guessed"}

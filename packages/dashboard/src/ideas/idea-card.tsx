@@ -21,8 +21,8 @@ export function IdeaCard({
     <a
       href={`#explore/${idea.id}`}
       className={cn(
-        "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft hover:ring-1 hover:ring-foreground/20",
-        idea.working && "ring-2 ring-[var(--tint)]",
+        "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft hover:shadow-lift",
+        idea.working && "ring-2 ring-tint-line",
       )}
     >
       <span className="flex items-start gap-2">

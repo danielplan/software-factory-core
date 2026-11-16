@@ -1,3 +1,4 @@
+import { PageHead } from "@/components/page-head";
 import { cn } from "@/lib/utils";
 
 import { AddOnsTab } from "./add-ons-tab";
@@ -19,13 +20,13 @@ export function WorkshopPage({
   const shown = addOns ? "#workshop/add-ons" : "#workshop";
   return (
     <div className="grid content-start gap-4">
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-3 px-1 pt-1">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
-          Workshop
-        </h1>
+      <PageHead
+        title="Workshop"
+        about="The factory itself: the programs it runs, and the add-ons and kits it works with."
+      >
         <nav
           aria-label="Workshop"
-          className="flex gap-1 rounded-full bg-card p-1 shadow-soft"
+          className="flex gap-1 rounded-[14px] bg-surface-2 p-1"
         >
           {PARTS.map((part) => {
             const here = part.href === shown;
@@ -35,8 +36,8 @@ export function WorkshopPage({
                 href={part.href}
                 aria-current={here ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-3.5 py-1.5 text-sm text-muted-foreground hover:text-foreground",
-                  here && "bg-surface-2 font-medium text-foreground",
+                  "rounded-[10px] px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground",
+                  here && "bg-card text-foreground shadow-current",
                 )}
               >
                 {part.name}
@@ -44,7 +45,7 @@ export function WorkshopPage({
             );
           })}
         </nav>
-      </header>
+      </PageHead>
       {addOns ? <AddOnsTab state={state} /> : <SystemTab state={state} />}
     </div>
   );

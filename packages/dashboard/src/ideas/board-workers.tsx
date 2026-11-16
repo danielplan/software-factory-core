@@ -79,9 +79,7 @@ function Worker({
       <span
         className={cn(
           "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-          on
-            ? "bg-[var(--tint)]/12 text-[var(--tint)]"
-            : "bg-muted text-muted-foreground",
+          on ? "bg-tint text-blue" : "bg-muted text-muted-foreground",
         )}
       >
         {icon}
@@ -95,9 +93,7 @@ function Worker({
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
-              on
-                ? "bg-[var(--tint)]/12 text-[var(--tint)]"
-                : "bg-muted text-muted-foreground",
+              on ? "bg-tint text-blue" : "bg-muted text-muted-foreground",
             )}
           >
             {on ? "On" : "Off"}

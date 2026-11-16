@@ -6,6 +6,7 @@
 // the old idea coach stay below, each opening its workspace as before.
 
 import type { ExploreList, IdeaRow } from "@/api";
+import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import type { FactoryState } from "@/dashboard/dashboard";
@@ -19,7 +20,7 @@ import {
   prototypeHash,
 } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { Initial, PageHead } from "@/understand/bits";
+import { Initial } from "@/understand/bits";
 import { tintOf } from "@/understand/view";
 
 import { IdeaDetail } from "./idea-detail";
@@ -40,7 +41,6 @@ export function ExplorePage({
   return (
     <div className="grid content-start gap-4">
       <PageHead
-        crumbs={[{ name: "Explore" }]}
         title="Explore"
         about="Compare the versions made in prototype mode. Pick one and send it to Build."
         actions={<Actions shown={shown} />}
@@ -103,7 +103,7 @@ function Ideas({
 
 function Actions({ shown }: Readonly<{ shown: string | null }>) {
   return (
-    <div className="flex gap-2">
+    <>
       {shown && (
         <Button asChild variant="outline">
           <a href={prototypeHash(shown)}>Open prototype mode</a>
@@ -112,7 +112,7 @@ function Actions({ shown }: Readonly<{ shown: string | null }>) {
       <Button asChild>
         <a href={newIdeaHash()}>New idea</a>
       </Button>
-    </div>
+    </>
   );
 }
 
@@ -146,7 +146,7 @@ function IdeaList({
           href={exploreHash(idea.id)}
           aria-current={idea.id === shown ? "page" : undefined}
           className={cn(
-            "flex items-center gap-3 rounded-2xl bg-card px-4 py-3 shadow-soft hover:ring-1 hover:ring-foreground/20",
+            "flex items-center gap-3 rounded-xl bg-card px-3.5 py-3 shadow-soft transition-shadow hover:shadow-lift",
             idea.id === shown && "ring-2 ring-foreground",
           )}
         >

@@ -13,10 +13,9 @@ export function ConnectedBoard({
   state,
   brief = false,
 }: Readonly<{ state: FactoryState; brief?: boolean }>) {
-  const tracker = state.company.tracker;
-  const entry = tracker === "none" ? undefined : state.board[tracker];
-  if (!entry) return null;
-  const { name, href } = whereOf(tracker, entry);
+  const board = boardOf(state);
+  if (!board) return null;
+  const { name, href, entry } = board;
   return (
     <div className="grid gap-3">
       <p className="text-sm">
@@ -65,11 +64,21 @@ function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
   );
 }
 
-// The board's name and address, by tracker.
+// The board work is tracked on, with its name, address and the site it is
+// on; none without one.
+export function boardOf(
+  state: FactoryState,
+): { name: string; href: string; site: string; entry: Entry } | null {
+  const tracker = state.company.tracker;
+  const entry = tracker === "none" ? undefined : state.board[tracker];
+  return entry ? { ...whereOf(tracker, entry), entry } : null;
+}
+
+// The board's name, address and site, by tracker.
 function whereOf(
   tracker: string,
   entry: Entry,
-): { name: string; href: string } {
+): { name: string; href: string; site: string } {
   const field = (key: string) => {
     const value = (entry as Record<string, unknown>)[key];
     return typeof value === "string" || typeof value === "number"
@@ -80,11 +89,13 @@ function whereOf(
     return {
       name: `board ${field("board")} of ${field("repository")} on GitHub`,
       href: `https://github.com/${field("repository")}/projects`,
+      site: "GitHub",
     };
   if (tracker === "jira")
     return {
       name: `${field("project")} on Jira`,
       href: `https://${field("site")}/browse/${field("project")}`,
+      site: "Jira",
     };
-  return { name: tracker, href: "#settings" };
+  return { name: tracker, href: "#settings", site: tracker };
 }

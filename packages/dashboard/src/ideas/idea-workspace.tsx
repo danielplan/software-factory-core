@@ -97,7 +97,7 @@ function Bar({
         {idea.title}
       </span>
       {ready ? (
-        <span className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+        <span className="rounded-full bg-solved px-2.5 py-1 text-xs font-medium text-solved-foreground">
           Ready
         </span>
       ) : (

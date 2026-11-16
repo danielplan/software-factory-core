@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { State } from "@/api";
 import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
-import { Sidebar } from "@/components/sidebar";
+import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
 import { ExplorePage } from "@/explore/explore-page";
 import { BoardTab } from "@/ideas/board-tab";
@@ -58,13 +58,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   // Prototype mode fills the window, with its own bar.
   if (page === "prototype") return <PrototypePage state={state} open={open} />;
   return (
-    <div className="grid gap-5 max-md:pt-14 md:pl-[232px]">
-      <Sidebar
-        current={page === "connect" ? "settings" : page}
-        company={state.company.name}
-        products={state.products}
-        status={overallOf(state)}
-      />
+    <Shell state={state} current={page === "connect" ? "settings" : page}>
       {state.problems.length > 0 && (
         <ProblemBox
           title="Something in the factory's files does not fit"
@@ -80,25 +74,6 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
       {page === "build" && <BoardTab state={state} />}
       {page === "workshop" && <WorkshopPage state={state} open={open} />}
       {page === "settings" && <SettingsTab state={state} />}
-    </div>
+    </Shell>
   );
-}
-
-// The whole factory's light, and what it means in words.
-function overallOf(state: FactoryState): {
-  lit: "problem" | "starting" | "running" | "stopped";
-  words: string;
-} {
-  const parts = state.parts.filter((part) => part.light !== "none");
-  const running = parts.filter((part) => part.light === "running").length;
-  if (parts.some((part) => part.light === "problem"))
-    return { lit: "problem", words: "Something needs you" };
-  if (parts.some((part) => part.light === "starting"))
-    return { lit: "starting", words: "Starting" };
-  if (parts.length > 0 && running === parts.length)
-    return { lit: "running", words: "All running" };
-  return {
-    lit: "stopped",
-    words: `${String(running)} of ${String(parts.length)} running`,
-  };
 }

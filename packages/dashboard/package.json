@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@diffusionstudio/piper-wasm": "1.0.0",
+    "@fontsource-variable/onest": "5.3.1",
     "@huggingface/transformers": "4.2.0",
     "@mintplex-labs/piper-tts-web": "1.0.5",
     "@xyflow/react": "12.12.0",

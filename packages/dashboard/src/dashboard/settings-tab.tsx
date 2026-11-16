@@ -7,10 +7,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { PageHead } from "@/components/page-head";
 import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
 import type { FactoryState } from "./dashboard";
+import { LookCard } from "./look-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 
 // The factory's settings, in order: a list of the sections at the side
@@ -23,13 +25,15 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const groups = state.settings.filter((group) => !owned.has(group.id));
   const sections = [
     "Where work is tracked",
+    "Light or dark",
     ...groups.map((group) => group.name),
   ];
   return (
     <div className="grid gap-5">
-      <h1 className="px-1 pt-1 text-[26px] font-semibold tracking-[-0.02em]">
-        Settings
-      </h1>
+      <PageHead
+        title="Settings"
+        about="How the factory works here: where work is tracked, how it looks, and the settings of its parts."
+      />
       <div
         className={
           sections.length > 1
@@ -40,6 +44,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
         {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
           <TrackerCard state={state} />
+          <LookCard />
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}
@@ -60,7 +65,7 @@ function Sections({ names }: Readonly<{ names: string[] }>) {
         <button
           key={name}
           type="button"
-          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-hover hover:text-foreground"
           onClick={() => {
             document
               .getElementById(sectionId(name))

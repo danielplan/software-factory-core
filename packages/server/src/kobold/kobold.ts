@@ -4,7 +4,8 @@
 // sorting a signal that came in, suggesting a real problem when a new
 // problem joins others of one persona, and drafting a question about a
 // story's guessed scenes and what was seen once a change is in the app
-// ("did it work?"; the understand skill); writing a team member's own idea
+// ("did it work?"; the understand skill); answering a question about the
+// people who use the product, from the records (Ask the kobold); writing a team member's own idea
 // with the story it assumes (the explore skill). Every job but the drafts
 // runs one at a time, in the order asked; the page sees each job while it
 // works and how it ended.
@@ -24,16 +25,22 @@ import { skillsFolder } from "@software-factory/skills";
 import { problemOf } from "../coach/talk.ts";
 import { Refused } from "../refused.ts";
 import { type OwnIdea, writeOwnIdea } from "../explore/own-idea.ts";
-import { askPrompt, ideaPrompt, sortPrompt, suggestPrompt } from "./prompts.ts";
+import {
+  answerPrompt,
+  askPrompt,
+  ideaPrompt,
+  sortPrompt,
+  suggestPrompt,
+} from "./prompts.ts";
 import { type JobTools, KOBOLD_HEADER, plain } from "./tools.ts";
 import { freeProblems, sortSignal, suggestRealProblem } from "./writes.ts";
 
 export type KoboldJob = {
   id: string;
-  kind: "sort" | "suggest" | "ask" | "seen" | "idea";
+  kind: "sort" | "suggest" | "ask" | "seen" | "idea" | "answer";
   // The signal it sorts, the persona whose problems it reads, the story it
-  // asks about, the issue it drafts what was seen for, or the persona an own
-  // idea is for.
+  // asks about, the issue it drafts what was seen for, the persona an own
+  // idea is for, or the question it answers.
   about: string;
   // What it made, once done: the new idea's id.
   made: string | null;
@@ -104,13 +111,22 @@ export class Kobold {
     if (!told) throw new Refused(`There is no story “${story}”.`);
     if (howWellKnown(told).seen === howWellKnown(told).of)
       throw new Refused("Every scene of it is seen already.");
-    const drafted = await this.draft(
+    return await this.drafted(
       this.add("ask", story),
       askPrompt(store.all(), told),
       "Drafted a question to send.",
     );
-    if ("problem" in drafted) throw new Refused(drafted.problem);
-    return drafted.text;
+  }
+
+  // An answer to a question about the people who use the product, from the
+  // records; it reads them only and writes nothing.
+  async answer(question: string): Promise<string> {
+    if (!question.trim()) throw new Refused("Ask a question first.");
+    return await this.drafted(
+      this.add("answer", question.trim()),
+      answerPrompt(this.options.records().all(), question),
+      "Answered a question.",
+    );
   }
 
   // What was seen since an issue went to Build, drafted for "did it work?"
@@ -216,6 +232,17 @@ export class Kobold {
     }
     this.finish(job, done, null);
     return { text };
+  }
+
+  // A draft, or why not, refused.
+  private async drafted(
+    job: Running,
+    prompt: string,
+    done: string,
+  ): Promise<string> {
+    const drafted = await this.draft(job, prompt, done);
+    if ("problem" in drafted) throw new Refused(drafted.problem);
+    return drafted.text;
   }
 
   private add(kind: KoboldJob["kind"], about: string): Running {
