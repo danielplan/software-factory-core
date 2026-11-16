@@ -8,4 +8,7 @@ code (`product.json`, `BLUEPRINT.md`), and what the company knows is in `docs/`.
 Its two products are the **Shop** (`shop/`), a web app for customers, and the
 **Orders service** (`orders/`) the shop needs. Their code holds only a
 `package.json`: just enough for the kits to recognise each kind of product.
+Its Kobble records start from `factory/kobble-seed.json`: the Shop's
+personas, their stories, problems and ideas, made up as well. Running the
+factory here fills its local database from it (`kobble.db`, never in git).
 The core's tests load this company.

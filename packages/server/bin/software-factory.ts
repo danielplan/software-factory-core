@@ -4,7 +4,8 @@
 // software-factory card … (the board's cards, for planning in a coding agent)
 // software-factory prototype … (a card's prototype, in its own copy of the code)
 // software-factory upgrade (the project's factory, to this core's version)
-// software-factory check-docs (the knowledge base's checks) · help
+// software-factory check (the records' checks) · check-docs (the knowledge
+// base's checks) · help
 //
 // Run in a project, starts its factory on this computer and opens it in the
 // browser. The factory lives in the project, in its factory/ folder, found

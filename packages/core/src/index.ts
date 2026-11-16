@@ -103,6 +103,49 @@ export {
   type CopySettings,
 } from "./copies/workspace.ts";
 export { run } from "./processes.ts";
+export {
+  checkRecordsIn,
+  openRecords,
+  readSeed,
+  RECORDS_FILE,
+  SEED_FILE,
+} from "./records/files.ts";
+export {
+  KOBOLD,
+  importSignalSchema,
+  type Customer,
+  type Idea,
+  type ImportSignal,
+  type Kind,
+  type Outcome,
+  type Persona,
+  type Problem,
+  type RealProblem,
+  type RecordInput,
+  type RecordOf,
+  type Records,
+  type Signal,
+  type Source,
+  type Story,
+  type TicketLink,
+  type Version,
+} from "./records/schemas.ts";
+export { checkRecords, signalsBehind } from "./records/check.ts";
+export {
+  derive,
+  type Derived,
+  type IdeaState,
+  type Known,
+  type PersonaSummary,
+  type ProblemState,
+  type StoryState,
+} from "./records/derive.ts";
+export {
+  type RecordsChange,
+  RecordsRefused,
+  RecordStore,
+  type Writer,
+} from "./records/store.ts";
 
 export {
   compareVersions,

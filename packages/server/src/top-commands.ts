@@ -1,6 +1,7 @@
 // The commands that answer and end, before the factory's server is started:
-// help, and the knowledge base's checks in a project. A word that is neither
-// a command nor a folder is said plainly instead of being taken for a folder.
+// help, and the checks of a project's records and knowledge base. A word
+// that is neither a command nor a folder is said plainly instead of being
+// taken for a folder.
 
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
@@ -11,10 +12,12 @@ import { findFactory } from "@software-factory/core";
 import { CARD_USAGE } from "./cards/command.ts";
 import { PROTOTYPE_USAGE } from "./prototypes/command.ts";
 import { checkKnowledge } from "./knowledge-check.ts";
+import { checkRecordsHere } from "./records/check-command.ts";
 
 export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
                                              start the project's factory and open it
 software-factory new <name>                  a folder for a new idea, set up there
+software-factory check [folder]              the records' checks (factory/kobble.db and its seed)
 software-factory check-docs                  the knowledge base's checks (docs/)
 software-factory upgrade                     the project's factory, to this core's version
 software-factory help                        this help
@@ -44,6 +47,7 @@ export async function topCommand(
     return 0;
   }
   if (first === "check-docs") return checkDocsHere(from, out);
+  if (first === "check") return checkRecordsHere(from, positionals[1], out);
   // Starting the factory, and the commands answered elsewhere (card, upgrade).
   if (
     first === undefined ||

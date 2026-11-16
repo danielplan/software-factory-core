@@ -16,6 +16,7 @@ import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerTools } from "./coach/setup-tools.ts";
+import { servedRecords } from "./records/routes.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -47,13 +48,19 @@ export function startServer(options: {
   port: number;
 }): { server: Server; changed: () => void } {
   const watchers = new Set<ServerResponse>();
+  const tell = (event: string) => {
+    for (const response of watchers) response.write(event);
+  };
+  // The whole state, as the page shows it; and, for the records, only
+  // which of them changed (the page reads what it shows of them again).
   const changed = () => {
-    const data = `data: ${JSON.stringify(options.session.state())}\n\n`;
-    for (const response of watchers) response.write(data);
+    tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
+  const records = servedRecords(session.options.project, tell);
   const routes = {
     ...routesFor(session),
+    ...records.routes,
     ...addOnRoutes(
       options.addOns,
       (id) => ({
@@ -75,6 +82,7 @@ export function startServer(options: {
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
   });
+  server.on("close", records.close);
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
 }
@@ -306,7 +314,7 @@ function record(body: unknown, key: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-// The Board tab's buttons: the builder and the coach in the cards switched
+// Build's buttons: the builder and the coach in the cards switched
 // on or off, and the board read again.
 function workRoutes(session: Session) {
   return {

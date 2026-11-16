@@ -19,6 +19,7 @@ import {
   companySchema,
 } from "../company/company.ts";
 import { PRODUCT_FILE } from "../products/find-products.ts";
+import { IGNORED_RECORDS } from "../records/files.ts";
 import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
 
@@ -97,7 +98,10 @@ export function createFactoryFolder(
     join(root, "AGENTS.md"),
     readFileSync(templates.agents, "utf8").replaceAll("<company>", file.name),
   );
-  writeFileSync(join(root, ".gitignore"), "copies/\nsettings/\n");
+  writeFileSync(
+    join(root, ".gitignore"),
+    `copies/\nsettings/\n${IGNORED_RECORDS}\n`,
+  );
   return file;
 }
 

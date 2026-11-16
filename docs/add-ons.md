@@ -2,7 +2,7 @@
 
 A company chooses which parts of the factory it uses. The kernel is always
 there; every ability beyond it is an add-on, switched on or off in
-`factory.json` and on the dashboard's Add-ons page. Built-in add-ons
+`factory.json` and in the dashboard's Workshop. Built-in add-ons
 (`core: true`) are on unless the company switches them off; the others are
 off until it switches them on. An add-on says what it needs, and
 `assembleFactory` refuses a factory where something it needs is missing.
@@ -14,19 +14,19 @@ the first company's factory; they come here written for any company (see
 
 ## The kernel (always there)
 
-| Piece                                                                                                            | Here                  |
-| ---------------------------------------------------------------------------------------------------------------- | --------------------- |
-| Loading products, extensions and kits; the company file; `assembleFactory`                                       | yes                   |
-| Parts: start, watch and stop them; the System tab                                                                | yes                   |
-| Settings groups and the Settings tab                                                                             | yes                   |
-| Running Claude Code (kept open between turns), working copies                                                    | yes                   |
-| The skills the agents follow and the knowledge base with its checks                                              | yes                   |
-| The setup coach on a map; Build and Open the factory                                                             | yes                   |
-| The Add-ons page                                                                                                 | yes                   |
-| **The theme**: the dashboard takes the look of the company's own app (see below)                                 | to come               |
-| **Install, add, remove and upgrade** from the command line, on a branch of its own                               | to come               |
-| **Extension points for tabs, agent tools and workflow steps**, so the add-ons below plug in like GitHub and Jira | to come, needed first |
-| **A working copy's own environment** (its own ports and database), asked of the product or its kit               | yes (`copyEnv`)       |
+| Piece                                                                                                             | Here                  |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Loading products, extensions and kits; the company file; `assembleFactory`                                        | yes                   |
+| Parts: start, watch and stop them; the system in Workshop                                                         | yes                   |
+| Settings groups and the Settings page                                                                             | yes                   |
+| Running Claude Code (kept open between turns), working copies                                                     | yes                   |
+| The skills the agents follow and the knowledge base with its checks                                               | yes                   |
+| The setup coach on a map; Build and Open the factory                                                              | yes                   |
+| The add-ons in Workshop                                                                                           | yes                   |
+| **The theme**: the dashboard takes the look of the company's own app (see below)                                  | to come               |
+| **Install, add, remove and upgrade** from the command line, on a branch of its own                                | to come               |
+| **Extension points for pages, agent tools and workflow steps**, so the add-ons below plug in like GitHub and Jira | to come, needed first |
+| **A working copy's own environment** (its own ports and database), asked of the product or its kit                | yes (`copyEnv`)       |
 
 ## The add-ons
 
@@ -46,7 +46,7 @@ the first company's factory; they come here written for any company (see
 
 ### What each brings
 
-- **Board**: the Board tab; Planning, where a card that did not come through
+- **Board**: Build, the board's page; Planning, where a card that did not come through
   Ideas has its plan talked through in its conversation until it is agreed;
   moving cards by dragging them (Backlog, Planning, To do) or
   with a menu; a card in Review opens its pull request.
@@ -54,7 +54,7 @@ the first company's factory; they come here written for any company (see
 forward`, no public address needed) and a check every few minutes for
   anything missed; a hidden mark on the factory's own comments, because the
   owner and the factory may post with the same account.
-- **Builder** (`server/src/builder/`): the Board tab shows the connected
+- **Builder** (`server/src/builder/`): Build shows the connected
   board's cards, read every minute. Two lanes, each switched on there: the
   coach answers a card's conversation in Planning in a read-only copy of
   main, and writes the agreed plan into the card; the builder builds one card
@@ -71,7 +71,7 @@ forward`, no public address needed) and a check every few minutes for
   same branch. It never merges. Its guide (how to work through the board) is
   the factory skill's `board.md`. Still to come: starting by itself, GitHub's
   signals instead of reading every minute, Jira.
-- **Ideas**: the Ideas tab and the idea coach's guide; choice cards for real
+- **Ideas**: Explore and the idea coach's guide; choice cards for real
   choices with the coach's recommendation and the trade-offs, said early; an
   Agreed switch; pictures the owner pastes; parking, dropping and drafts; a
   short summary of the product in the coach's first prompt; the plan written
@@ -128,7 +128,7 @@ more than the theme allows is a change asked of the core.
 ## The order
 
 1. **The kernel's missing pieces**: install, add, remove and upgrade; the
-   extension points for tabs, agent tools and workflow steps; a working
+   extension points for pages, agent tools and workflow steps; a working
    copy's own environment. Then a first release.
 2. **The theme**: written again when the owner asks; the logo.
 3. **Builder** (done for GitHub boards); the Board's dragging, GitHub's signals and Jira after.
