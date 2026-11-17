@@ -1,8 +1,9 @@
-// What the Signals page works out from what the server sends: the page's
-// address for one signal, which signal is shown (so that after one is
-// fixed, explored or dismissed, and leaves the list, the next one is
-// shown), where it stands among them, and what was said in quotation
-// marks. Kept apart from the components so it is checked on its own.
+// What the Signals page works out from what the server sends: the address
+// of one signal opened, the board's column each signal goes in, what was
+// said in quotation marks, and which actions a signal gets. Kept apart from
+// the components so it is checked on its own.
+
+import type { SignalView } from "../api.ts";
 
 // #signals, or #signals/<signal>.
 export function signalsHash(id?: string): string {
@@ -15,38 +16,27 @@ export function idFrom(open: string | null): string | null {
   return decodeURIComponent(open.split("/")[0] ?? "") || null;
 }
 
-// What was shown last time, and the list it was in.
-export type Shown = { ids: string[]; shown: string | null };
+// The board's three columns, and where a signal goes: a bug (the kobold
+// sorted it so, an error or an alert) under Bugs; a need or an update under
+// Requests; everything else (a question, feedback, what is not clear yet)
+// under Feedback.
+export const COLUMNS = ["bugs", "requests", "feedback"] as const;
+export type Column = (typeof COLUMNS)[number];
 
-// The signal to show: the one the address names while it is in the list;
-// else the one shown before, while it is still there; else, when that one
-// left the list (it was handled), the one now at its place; else the first.
-export function shownOf(
-  before: Shown,
-  ids: string[],
-  wanted: string | null,
-): string | null {
-  if (wanted && ids.includes(wanted)) return wanted;
-  if (before.shown && ids.includes(before.shown)) return before.shown;
-  if (before.shown) {
-    const at = before.ids.indexOf(before.shown);
-    if (at >= 0 && ids.length > 0)
-      return ids[Math.min(at, ids.length - 1)] ?? null;
-  }
-  return ids[0] ?? null;
+export function columnOf(signal: Pick<SignalView, "sortedAs">): Column {
+  if (signal.sortedAs === "bug") return "bugs";
+  if (signal.sortedAs === "need" || signal.sortedAs === "update")
+    return "requests";
+  return "feedback";
 }
 
-// Where the one shown stands ("3 of 14"), and the ones before and after it.
-export function neighbours(
-  ids: string[],
-  shown: string | null,
-): { at: number; before: string | null; after: string | null } {
-  const at = Math.max(shown ? ids.indexOf(shown) : 0, 0);
-  return {
-    at,
-    before: ids[at - 1] ?? null,
-    after: ids[at + 1] ?? null,
-  };
+// The signals in their columns, each column in the order they came.
+export function byColumn<T extends Pick<SignalView, "sortedAs">>(
+  signals: T[],
+): Record<Column, T[]> {
+  const columns: Record<Column, T[]> = { bugs: [], requests: [], feedback: [] };
+  for (const signal of signals) columns[columnOf(signal)].push(signal);
+  return columns;
 }
 
 // What was said, in quotation marks once: marks it already has at its ends

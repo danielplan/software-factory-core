@@ -158,11 +158,15 @@
     "checkup": "Revisar mi producto",
     "empty": "Todo al día.",
     "newStory": "Nueva historia para {{name}}: {{title}}",
-    "of": "{{n}} de {{total}}",
-    "previous": "Anterior",
-    "next": "Siguiente",
     "more": "Más",
-    "openIdea": "Abrir la idea «{{title}}»"
+    "openIdea": "Abrir la idea «{{title}}»",
+    "columns": {
+      "bugs": "Errores",
+      "requests": "Peticiones",
+      "feedback": "Comentarios"
+    },
+    "nothingHere": "Nada aquí.",
+    "open": "Abrir {{text}}"
   },
   "tabs": {
     "label": "Sobre esta persona",

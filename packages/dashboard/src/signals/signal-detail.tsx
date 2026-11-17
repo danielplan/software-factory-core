@@ -1,6 +1,7 @@
-// The one signal shown on Signals, in a big card: what was said, where it
-// came from and when, who it sounds like (their little kobold), what already
-// exists for its problem when something does, and what to do with it.
+// One signal opened from the board on Signals, in its dialog: what was
+// said, where it came from and when, who it sounds like (their little
+// kobold), what already exists for its problem when something does, and
+// what to do with it.
 
 import { ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
@@ -29,10 +30,7 @@ export function SignalDetail({
 }>) {
   const [moving, setMoving] = useState(false);
   return (
-    <article
-      key={signal.id}
-      className="grid w-full max-w-2xl animate-enter gap-5 justify-self-center rounded-[22px] bg-card p-6 shadow-soft sm:p-8"
-    >
+    <article className="grid gap-5">
       <header className="grid gap-2">
         <p className="text-section">{quoted(signal.text)}</p>
         <From signal={signal} tint={tint} />

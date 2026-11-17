@@ -1,17 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import type { SignalView } from "../src/api.ts";
 import {
+  byColumn,
+  columnOf,
   idFrom,
-  neighbours,
-  triageOf,
   quoted,
-  shownOf,
   signalsHash,
+  triageOf,
 } from "../src/signals/view.ts";
 
-// Signals: what kind each one is, its address, and which one is shown,
-// the next one once a signal is handled.
+// Signals: the address of the one opened, the board's columns, what was
+// said in quotation marks, and each signal's actions.
 
 test("one signal's address, and the signal an address names", () => {
   assert.equal(signalsHash(), "#signals");
@@ -21,18 +22,27 @@ test("one signal's address, and the signal an address names", () => {
   assert.equal(idFrom("s%201"), "s 1");
 });
 
-test("the named signal first, then the one shown, then the next at its place", () => {
-  const ids = ["a", "b", "c"];
-  const none = { ids: [], shown: null };
-  assert.equal(shownOf(none, ids, null), "a");
-  assert.equal(shownOf(none, ids, "b"), "b");
-  assert.equal(shownOf(none, ids, "zzz"), "a");
-  assert.equal(shownOf({ ids, shown: "c" }, ids, null), "c");
-  // b was handled: c, now at b's place, is shown.
-  assert.equal(shownOf({ ids, shown: "b" }, ["a", "c"], "b"), "c");
-  // The last was handled: the one before it.
-  assert.equal(shownOf({ ids, shown: "c" }, ["a", "b"], "c"), "b");
-  assert.equal(shownOf({ ids, shown: "a" }, [], "a"), null);
+test("each signal goes in its column: bugs, requests, the rest as feedback", () => {
+  const as = (sortedAs: SignalView["sortedAs"]) => ({ sortedAs });
+  assert.equal(columnOf(as("bug")), "bugs");
+  assert.equal(columnOf(as("need")), "requests");
+  assert.equal(columnOf(as("update")), "requests");
+  assert.equal(columnOf(as("question")), "feedback");
+  assert.equal(columnOf(as("unsure")), "feedback");
+  const signals = [
+    { id: "a", sortedAs: "need" as const },
+    { id: "b", sortedAs: "bug" as const },
+    { id: "c", sortedAs: "need" as const },
+  ];
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(byColumn(signals)).map(([column, list]) => [
+        column,
+        list.map((one) => one.id),
+      ]),
+    ),
+    { bugs: ["b"], requests: ["a", "c"], feedback: [] },
+  );
 });
 
 test("what was said is in quotation marks once", () => {
@@ -46,29 +56,6 @@ test("what was said is in quotation marks once", () => {
     "“Checkout fails on Safari 18”",
   );
   assert.equal(quoted("  It's fine  "), "“It's fine”");
-});
-
-test("the one shown stands among them, with the ones before and after", () => {
-  assert.deepEqual(neighbours(["a", "b", "c"], "b"), {
-    at: 1,
-    before: "a",
-    after: "c",
-  });
-  assert.deepEqual(neighbours(["a", "b"], "a"), {
-    at: 0,
-    before: null,
-    after: "b",
-  });
-  assert.deepEqual(neighbours(["a"], null), {
-    at: 0,
-    before: null,
-    after: null,
-  });
-  assert.deepEqual(neighbours(["a", "b"], "gone"), {
-    at: 0,
-    before: null,
-    after: "b",
-  });
 });
 
 test("a signal's actions follow where the kobold put it", () => {

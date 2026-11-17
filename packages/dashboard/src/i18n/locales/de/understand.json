@@ -158,11 +158,15 @@
     "checkup": "Produkt prüfen",
     "empty": "Alles erledigt.",
     "newStory": "Neue Geschichte für {{name}}: {{title}}",
-    "of": "{{n}} von {{total}}",
-    "previous": "Vorheriges",
-    "next": "Nächstes",
     "more": "Mehr",
-    "openIdea": "Idee „{{title}}“ öffnen"
+    "openIdea": "Idee „{{title}}“ öffnen",
+    "columns": {
+      "bugs": "Fehler",
+      "requests": "Wünsche",
+      "feedback": "Feedback"
+    },
+    "nothingHere": "Hier ist nichts.",
+    "open": "{{text}} öffnen"
   },
   "tabs": {
     "label": "Über diese Person",

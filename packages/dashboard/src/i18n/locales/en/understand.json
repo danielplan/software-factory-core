@@ -158,11 +158,15 @@
     "checkup": "Check my product",
     "empty": "All caught up.",
     "newStory": "New story for {{name}}: {{title}}",
-    "of": "{{n}} of {{total}}",
-    "previous": "Previous",
-    "next": "Next",
     "more": "More",
-    "openIdea": "Open the idea “{{title}}”"
+    "openIdea": "Open the idea “{{title}}”",
+    "columns": {
+      "bugs": "Bugs",
+      "requests": "Requests",
+      "feedback": "Feedback"
+    },
+    "nothingHere": "Nothing here.",
+    "open": "Open {{text}}"
   },
   "tabs": {
     "label": "About this person",
