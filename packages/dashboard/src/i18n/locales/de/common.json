@@ -1,0 +1,77 @@
+{
+  "app": {
+    "closed": "Die Factory wurde beendet. Starte sie neu mit software-factory.",
+    "opening": "Factory wird geöffnet…"
+  },
+  "nav": {
+    "home": "Start",
+    "signals": "Signale",
+    "explorations": "Erkundungen",
+    "factory": "Fabrik",
+    "personas": "Personas",
+    "product": "Produkt",
+    "settings": "Einstellungen",
+    "kobold": "Dein Kobold",
+    "chatWithKobold": "Mit deinem Kobold chatten",
+    "pages": "Seiten",
+    "openMenu": "Menü öffnen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "notActive": "Nicht aktiv",
+    "needsYou": "Etwas braucht dich",
+    "idle": "Wartet"
+  },
+  "kobold": {
+    "building": "Baut {{title}}",
+    "thinking": "Denkt über {{title}} nach",
+    "planning": "Plant Karte #{{number}}",
+    "doingWith": "{{doing}}: {{activity}}",
+    "doing": {
+      "sort": "Sortiert, was hereinkam",
+      "suggest": "Liest die Probleme",
+      "ask": "Schreibt eine Frage",
+      "seen": "Schreibt auf, was beobachtet wurde",
+      "idea": "Schreibt eine Idee",
+      "answer": "Beantwortet eine Frage",
+      "check": "Macht einen Check-up"
+    }
+  },
+  "overall": {
+    "problem": "Etwas braucht dich",
+    "starting": "Startet",
+    "running": "Alles läuft",
+    "stopped": "{{running}} von {{total}} laufen"
+  },
+  "light": {
+    "running": "Läuft",
+    "stopped": "Gestoppt",
+    "starting": "Startet",
+    "problem": "Problem"
+  },
+  "stage": {
+    "assumed": "Angenommen",
+    "heard": "Gehört",
+    "trying": "Ideen im Test",
+    "building": "Im Bau",
+    "inApp": "In der App",
+    "solved": "Gelöst",
+    "didntWork": "Hat nicht geklappt",
+    "idea": "Idee",
+    "versions": "Versionen",
+    "picked": "Gewählt",
+    "worked": "Hat geklappt",
+    "label": "Phase: {{name}} ({{at}} von {{total}})"
+  },
+  "closedBy": "Geschlossen von {{by}} am {{on}}: {{what}}",
+  "breadcrumb": "Wo du bist",
+  "close": "Schließen",
+  "didNotWork": "Das hat nicht geklappt",
+  "coming": {
+    "soon": "Diese Seite kommt bald.",
+    "customers": {
+      "title": "Kunden",
+      "about": "Die Firmen und Menschen, die deine Produkte nutzen."
+    }
+  }
+}

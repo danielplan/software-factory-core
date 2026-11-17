@@ -51,9 +51,20 @@ export class RecordStore {
   }
 
   // The database in this file (made when there is none), or one in memory
-  // (":memory:"); read only, an existing one is never changed.
+  // (":memory:"); read only, an existing one is never changed. One made by
+  // a later core, whose tables this core does not know, is refused rather
+  // than changed (a new database says 0).
   static open(file: string, readOnly = false): RecordStore {
     const db = new DatabaseSync(file, { readOnly });
+    const version = Number(
+      db.prepare("PRAGMA user_version").get()?.user_version ?? 0,
+    );
+    if (version > TABLES_VERSION) {
+      db.close();
+      throw new RecordsRefused([
+        `The records were saved by a newer core (tables version ${String(version)}; this core knows ${String(TABLES_VERSION)}). Upgrade the core to open them.`,
+      ]);
+    }
     if (!readOnly) {
       for (const kind of KINDS)
         db.exec(

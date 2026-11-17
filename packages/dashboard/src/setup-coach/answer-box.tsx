@@ -1,5 +1,6 @@
 import { ArrowUp, Mic } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { CoachView } from "@/api";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ export function Answer({
   call,
   coach,
   onSay,
-  placeholder = "Answer the coach…",
+  placeholder,
   className,
   big = false,
 }: Readonly<{
@@ -27,6 +28,7 @@ export function Answer({
   // The first box on a page: a few lines to write in, the buttons below.
   big?: boolean;
 }>) {
+  const { t } = useTranslation("setup");
   const talking = useVoiceCall(call).phase !== "off";
   if (talking)
     return (
@@ -41,7 +43,7 @@ export function Answer({
   return (
     <Reply
       working={coach.working}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t("answer.placeholder")}
       className={className}
       big={big}
       onSay={onSay}
@@ -67,6 +69,7 @@ function Reply({
   onSay: (text: string) => void;
   onTalk: () => void;
 }>) {
+  const { t } = useTranslation("setup");
   const [text, setText] = useState("");
   const send = () => {
     if (!text.trim() || working) return;
@@ -87,7 +90,7 @@ function Reply({
       }}
     >
       <label htmlFor="coach-reply" className="sr-only">
-        Answer the coach
+        {t("answer.label")}
       </label>
       <textarea
         id="coach-reply"
@@ -96,8 +99,8 @@ function Reply({
         autoFocus
         placeholder={placeholder}
         className={cn(
-          "min-h-11 flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-muted-foreground",
-          big && "px-1 text-base",
+          "min-h-11 flex-1 resize-none bg-transparent py-2 text-item font-normal outline-none placeholder:text-muted-foreground",
+          big && "px-1",
         )}
         onChange={(event) => {
           setText(event.target.value);
@@ -123,15 +126,20 @@ function Buttons({
   canSend,
   onTalk,
 }: Readonly<{ big: boolean; canSend: boolean; onTalk: () => void }>) {
+  const { t } = useTranslation("setup");
   return (
     <span className={cn("flex items-center gap-2", big && "justify-end")}>
-      <IconAction label="Talk" title="Talk instead of typing" onClick={onTalk}>
+      <IconAction
+        label={t("answer.talk")}
+        title={t("answer.talkTitle")}
+        onClick={onTalk}
+      >
         <Mic aria-hidden />
       </IconAction>
       <Button
         type="submit"
         size="icon"
-        aria-label="Send"
+        aria-label={t("answer.send")}
         className="size-10 rounded-full"
         disabled={!canSend}
       >

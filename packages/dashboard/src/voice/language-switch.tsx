@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import { LANGUAGE_CODES, LANGUAGES, type Language } from "./languages";
@@ -8,11 +10,12 @@ export function LanguageSwitch({
   language,
   onChoose,
 }: Readonly<{ language: Language; onChoose: (language: Language) => void }>) {
+  const { t } = useTranslation("setup");
   return (
     <div
       role="radiogroup"
-      aria-label="The language you speak"
-      className="inline-flex shrink-0 rounded-full bg-surface-2 p-0.5 text-xs"
+      aria-label={t("voice.language")}
+      className="inline-flex shrink-0 rounded-full bg-surface-2 p-0.5 text-tag"
     >
       {LANGUAGE_CODES.map((code) => {
         const chosen = code === language;

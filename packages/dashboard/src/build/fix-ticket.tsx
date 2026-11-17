@@ -10,6 +10,7 @@ import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { Pill } from "@/understand/bits";
 
+import { t } from "../i18n/i18n.ts";
 import { kindTone } from "./view";
 
 export function FixTicketButton({ signal }: Readonly<{ signal: string }>) {
@@ -34,9 +35,9 @@ export function FixTicketButton({ signal }: Readonly<{ signal: string }>) {
         disabled={making}
         onClick={() => void make()}
       >
-        {making ? "Making the ticket…" : "Make a fix ticket"}
+        {making ? t("build:fix.making") : t("build:fix.make")}
       </Button>
-      {problem && <ProblemBox title="No ticket was made" text={problem} />}
+      {problem && <ProblemBox title={t("build:fix.failed")} text={problem} />}
     </>
   );
 }
@@ -53,23 +54,21 @@ export function WaitingFixes({ waiting }: Readonly<{ waiting: WaitingFix[] }>) {
   if (waiting.length === 0) return null;
   return (
     <section
-      aria-label="Sent from Understand"
+      aria-label={t("build:fix.waiting")}
       className="grid gap-2 rounded-2xl bg-surface-2/60 p-3"
     >
-      <h2 className="px-1 text-[13px] font-semibold">
-        Sent from Understand, waiting for a ticket
-      </h2>
+      <h2 className="px-1 text-item">{t("build:fix.waiting")}</h2>
       {waiting.map((fix) => (
         <div
           key={fix.signal}
           className="flex flex-wrap items-center gap-2 rounded-xl bg-card p-2.5 shadow-soft"
         >
           <Pill tone={kindTone(fix.kind)}>
-            {fix.kind === "update" ? "Update" : "Fix"}
+            {fix.kind === "update" ? t("build:fix.update") : t("build:fix.fix")}
           </Pill>
-          <span className="min-w-0 flex-1 text-sm">{fix.text}</span>
-          <span className="text-xs text-muted-foreground">
-            From: {fix.source}
+          <span className="min-w-0 flex-1 text-body">{fix.text}</span>
+          <span className="text-tag text-muted-foreground">
+            {t("build:fix.from", { source: fix.source })}
           </span>
           <FixTicketButton signal={fix.signal} />
         </div>

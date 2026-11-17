@@ -1,0 +1,54 @@
+{
+  "title": "Check-up",
+  "start": {
+    "title": "Check my product",
+    "lead": "The kobold goes through your product looking for bugs, errors and things that are hard to use, and tells you about each in plain words.",
+    "time": "Takes a few minutes",
+    "safe": "Nothing is changed",
+    "local": "Runs on this computer",
+    "button": "Start the check-up",
+    "again": "Check again",
+    "one": "Check {{name}}"
+  },
+  "running": {
+    "title": "The kobold is checking {{name}}…",
+    "looking": "Looking around…",
+    "found_one": "{{count}} thing found so far",
+    "found_other": "{{count}} things found so far",
+    "stop": "Stop"
+  },
+  "results": {
+    "last": "Last check-up: {{when}}",
+    "toLook_one": "{{count}} thing to look at",
+    "toLook_other": "{{count}} things to look at",
+    "clear": "Nothing worrying found",
+    "handled": "Already handled ({{count}})",
+    "failed": "The check-up of {{name}} couldn't finish: {{why}}",
+    "stopped": "The check-up of {{name}} was stopped before the end."
+  },
+  "severity": {
+    "high": "Serious",
+    "medium": "Worth fixing",
+    "low": "Small"
+  },
+  "kind": {
+    "bug": "Bug",
+    "error": "Error",
+    "ux": "Hard to use",
+    "security": "Security",
+    "performance": "Slow"
+  },
+  "finding": {
+    "fix": "How to fix it",
+    "where": "Where",
+    "in": "In {{name}}",
+    "send": "Send to Build",
+    "dismiss": "Not a problem",
+    "sent": "On Build as #{{issue}}",
+    "waiting": "On Build. To turn it into a ticket, connect a GitHub board in Settings.",
+    "onBuild": "On Build",
+    "dismissed": "Set aside"
+  },
+  "problem": "That didn't work: {{why}}",
+  "crumbSignals": "Signals"
+}

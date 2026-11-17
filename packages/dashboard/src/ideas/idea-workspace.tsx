@@ -10,6 +10,8 @@ import { CoachChat } from "@/setup-coach/coach-chat";
 import { CoachRouteContext } from "@/setup-coach/route";
 import { SetupCanvas } from "@/setup-coach/setup-canvas";
 
+import { t } from "../i18n/i18n.ts";
+
 // One idea, as setup is: its map filling the window and the conversation
 // with the idea coach docked at the side, its title and Ready above the
 // map. Ready marks the plan as agreed.
@@ -61,7 +63,7 @@ function Workspace({ idea }: Readonly<{ idea: IdeaView }>) {
         <div className="flex flex-col justify-end">
           {problem && (
             <div className="pointer-events-auto max-w-2xl">
-              <ProblemBox title="That did not work" text={problem} />
+              <ProblemBox title={t("build:idea.problem")} text={problem} />
             </div>
           )}
         </div>
@@ -88,36 +90,35 @@ function Bar({
   const ready = idea.status !== "draft";
   return (
     <div className="pointer-events-auto flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-card/90 p-1.5 pr-2 shadow-soft backdrop-blur">
-      <Button asChild variant="ghost" className="h-9 px-2.5 text-[13px]">
+      <Button asChild variant="ghost">
         <a href="#explore">
-          <ArrowLeft aria-hidden /> Explore
+          <ArrowLeft aria-hidden /> {t("build:idea.explore")}
         </a>
       </Button>
-      <span className="max-w-[28rem] truncate px-1 text-[15px] font-medium">
+      <span className="max-w-[28rem] truncate px-1 text-item">
         {idea.title}
       </span>
       {ready ? (
-        <span className="rounded-full bg-solved px-2.5 py-1 text-xs font-medium text-solved-foreground">
-          Ready
+        <span className="rounded-full bg-solved px-2.5 py-1 text-tag font-medium text-solved-foreground">
+          {t("build:idea.ready")}
         </span>
       ) : (
         <Button
-          className="h-9 px-3.5 text-[13px]"
           disabled={idea.working || idea.draft.cards.length === 0}
           onClick={press("/api/ideas/ready")}
         >
-          Ready
+          {t("build:idea.ready")}
         </Button>
       )}
       <Button
         variant="ghost"
-        className="h-9 px-2.5 text-[13px] text-muted-foreground"
+        className="text-muted-foreground"
         onClick={() => {
-          if (window.confirm("Discard this idea? It cannot be brought back."))
+          if (window.confirm(t("build:idea.discardSure")))
             press("/api/ideas/discard")();
         }}
       >
-        Discard
+        {t("build:idea.discard")}
       </Button>
     </div>
   );

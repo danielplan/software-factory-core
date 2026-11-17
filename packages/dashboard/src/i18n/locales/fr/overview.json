@@ -1,0 +1,50 @@
+{
+  "title": "Accueil",
+  "needs": {
+    "title": "Vous attend",
+    "empty": "Rien ne vous attend. Tout est à jour.",
+    "didItWork": "Ça a marché ?",
+    "review": "Vérifier le travail",
+    "send": "Envoyer en Build",
+    "vote": "Voter pour une version",
+    "look": "Jeter un œil",
+    "said_one": "{{count}} nouvelle chose dite par les gens",
+    "said_other": "{{count}} nouvelles choses dites par les gens"
+  },
+  "discovery": {
+    "title": "Discovery",
+    "empty": "Rien d'ouvert. Ajoutez ce que les gens ont dit dans Comprendre."
+  },
+  "build": {
+    "title": "Build",
+    "empty": "Rien n'est en construction pour le moment."
+  },
+  "seeAll": "Tout voir ({{count}})",
+  "open": "Ouvrir",
+  "rows": {
+    "new": "Nouveau",
+    "didntHold": "N'a pas tenu",
+    "notClear": "Pas encore clair",
+    "didItWork": "Ça a marché ?"
+  },
+  "river": {
+    "title": "Où en sont les choses",
+    "heard": "Entendus",
+    "ideas": "Idées",
+    "sent": "Envoyées en Build",
+    "inApp": "Dans l'app",
+    "worked": "Ont marché",
+    "heardWords_one": "{{count}} problème entendu",
+    "heardWords_other": "{{count}} problèmes entendus",
+    "ideasWords_one": "{{count}} idée essayée",
+    "ideasWords_other": "{{count}} idées essayées",
+    "sentWords": "{{count}} envoyées en Build",
+    "inAppWords": "{{count}} dans l'app",
+    "workedWords": "{{count}} ont marché",
+    "nothing": "Rien d'essayé pour l'instant : commencez par une idée.",
+    "soFar_one": "{{worked}} idée sur {{count}} a marché jusqu'ici",
+    "soFar_other": "{{worked}} idées sur {{count}} ont marché jusqu'ici",
+    "building_one": "{{count}} en construction",
+    "building_other": "{{count}} en construction"
+  }
+}

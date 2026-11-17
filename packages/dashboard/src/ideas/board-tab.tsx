@@ -1,5 +1,6 @@
 import { ArrowUpRight, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { Trans } from "react-i18next";
 
 import {
   type CardView,
@@ -16,17 +17,18 @@ import { Button } from "@/components/ui/button";
 
 import { boardOf, ConnectedBoard } from "@/connect/connected-board";
 
-import { BoardCard, type Working } from "./board-card";
+import { useDownToTheEnd } from "@/lib/use-down-to-the-end";
+
+import { BoardCard, jobOf, type Working } from "./board-card";
 import { BoardWorkers } from "./board-workers";
 import { IdeaCard } from "./idea-card";
+import { t } from "../i18n/i18n.ts";
 import { STAGES } from "./stages";
 
 // The columns work moves through: Backlog holds the ideas agreed to (a
 // draft stays on Explore) and the connected board's cards, each in
-// the column of its stage. Done is where a change is in the app.
-const COLUMNS = STAGES.filter((stage) => stage.id !== "draft").map((stage) =>
-  stage.id === "done" ? { ...stage, title: "In the app" } : stage,
-);
+// the column of its stage. The last is where a change is in the app.
+const COLUMNS = STAGES.filter((stage) => stage.id !== "draft");
 
 const SWITCHES = { coach: "/api/coach-in-cards", builder: "/api/builder" };
 
@@ -67,17 +69,21 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
           }}
         />
       )}
-      {shown && <ProblemBox title="That did not work" text={shown} />}
+      {shown && <ProblemBox title={t("build:page.problem")} text={shown} />}
       {empty && (
-        <p className="px-1 text-sm text-muted-foreground">
-          Nothing on the board yet. Work starts as an{" "}
-          <a
-            href="#explore"
-            className="text-foreground underline underline-offset-2"
-          >
-            idea
-          </a>
-          : once you agree to its plan, it comes here.
+        <p className="px-1 text-body text-muted-foreground">
+          <Trans
+            ns="build"
+            i18nKey="page.empty"
+            components={{
+              link: (
+                <a
+                  href="#explore"
+                  className="text-foreground underline underline-offset-2"
+                />
+              ),
+            }}
+          />
         </p>
       )}
       <ConnectedBoard state={state} brief />
@@ -92,9 +98,9 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
   );
 }
 
-// The title, and what the factory is busy with when no board is connected
-// (with one, the coach's and the builder's rows say it); with one, a way
-// to it and to read it again now, in the top bar.
+// The title, and what the factory is busy with, in a few words, when no
+// board is connected (with one, the coach's and the builder's rows say it);
+// with one, a way to it and to read it again now, in the top bar.
 function BoardHeader({
   state,
   now,
@@ -105,27 +111,23 @@ function BoardHeader({
   onRead: () => void;
 }>) {
   const board = boardOf(state);
-  const where = board ? `The board on ${board.site}.` : "The board.";
-  const about = state.work ? (
-    `${where} When something has been in the app for a while, close it and say if it worked.`
-  ) : (
-    <Doing now={now} />
-  );
+  // With a board, the coach's and builder's rows say what is going on.
+  const about = state.work ? undefined : <Doing now={now} />;
   return (
     <PageHead
-      title="Build"
+      title={t("build:page.title")}
       about={about}
       actions={
         state.work && (
           <>
             <Button variant="outline" onClick={onRead}>
               <RefreshCw aria-hidden />
-              Read it again
+              {t("build:page.refresh")}
             </Button>
             {board && (
               <Button asChild variant="outline">
                 <a href={board.href} target="_blank" rel="noreferrer">
-                  Open on {board.site}
+                  {t("build:page.openOn", { site: board.site })}
                   <ArrowUpRight aria-hidden />
                 </a>
               </Button>
@@ -169,12 +171,17 @@ function Columns({
   tickets: Map<number, TicketView>;
   onAsk: (card: CardView) => void;
 }>) {
+  const [board, height] = useDownToTheEnd("var(--board-below)");
   return (
-    <div className="overflow-x-auto pb-2">
+    <div
+      ref={board}
+      className="overflow-x-auto pb-2 [--board-below:48px] md:[--board-below:60px]"
+    >
       <div
         className="grid gap-3"
         style={{
           gridTemplateColumns: `repeat(${String(COLUMNS.length)}, minmax(12rem, 1fr))`,
+          minHeight: height,
         }}
       >
         {COLUMNS.map((column) => {
@@ -186,9 +193,9 @@ function Columns({
             <section
               key={column.id}
               aria-label={column.title}
-              className="grid min-h-[60vh] content-start gap-2.5 rounded-2xl bg-ground p-3"
+              className="grid content-start gap-2.5 rounded-2xl bg-ground p-3"
             >
-              <h2 className="flex items-center gap-2 px-1.5 py-1 text-[13px] font-semibold">
+              <h2 className="flex items-center gap-2 px-1.5 py-1 text-item">
                 <span
                   aria-hidden
                   className="size-2 rounded-full"
@@ -221,17 +228,13 @@ function Columns({
   );
 }
 
-// Who works on this card now, if anyone.
+// Who works on this card now, if anyone, and on what.
 function workingOn(work: WorkView | null, number: number): Working | null {
   const building = work?.builder.working;
   if (work && building?.number === number)
-    return {
-      who: "The builder",
-      what: building.what,
-      steps: work.builder.steps,
-    };
+    return { job: jobOf(building.what), steps: work.builder.steps };
   if (work?.coach.working === number)
-    return { who: "The coach", what: "planning", steps: work.coach.steps };
+    return { job: "plan", steps: work.coach.steps };
   return null;
 }
 
@@ -245,7 +248,10 @@ function doing(
   if (building)
     return {
       busy: true,
-      text: `The builder is ${building.what} #${String(building.number)} “${building.title}”`,
+      text: t(`build:now.${jobOf(building.what)}`, {
+        number: building.number,
+        title: building.title,
+      }),
     };
   const working = ideas.filter((one) => one.working);
   const [first] = working;
@@ -254,8 +260,8 @@ function doing(
       busy: true,
       text:
         working.length === 1
-          ? `Thinking about “${first.title}”`
-          : `Thinking about ${String(working.length)} ideas`,
+          ? t("build:now.thinkingAbout", { title: first.title })
+          : t("build:now.thinkingMany", { count: working.length }),
     };
   return waitingLine(ideas, work);
 }
@@ -266,23 +272,19 @@ function waitingLine(
   work: WorkView | null,
 ): { busy: boolean; text: string } {
   const ready = (work?.cards ?? []).filter((card) => card.stage === "todo");
+  const on = work?.builder.on ?? false;
   if (ready.length > 0)
     return {
       busy: false,
-      text: work?.builder.on
-        ? `${String(ready.length)} ready: the builder takes the next one`
-        : `${String(ready.length)} ready to build: switch the builder on`,
+      text: t(on ? "build:now.readyOn" : "build:now.readyOff", {
+        count: ready.length,
+      }),
     };
   const waiting = ideas.filter((one) => one.status === "backlog").length;
   if (waiting > 0)
-    return {
-      busy: false,
-      text: `${String(waiting)} in the backlog, waiting to be built`,
-    };
+    return { busy: false, text: t("build:now.backlog", { count: waiting }) };
   return {
     busy: false,
-    text: work?.builder.on
-      ? "The builder is waiting for work"
-      : "Waiting for work",
+    text: t(on ? "build:now.builderWaiting" : "build:now.waiting"),
   };
 }

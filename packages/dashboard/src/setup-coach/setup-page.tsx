@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { State } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -74,12 +75,13 @@ function Docked({
   problem: string | null;
 }>) {
   const { coach } = state;
+  const { t } = useTranslation("setup");
   return (
     <div className="pointer-events-none absolute inset-0 grid grid-rows-[minmax(0,1fr)_auto] gap-3 p-3 sm:p-4 lg:grid-cols-[minmax(0,1fr)_400px] lg:grid-rows-1">
       <div className="flex min-h-0 flex-col justify-end">
         {problem && (
           <div className="pointer-events-auto max-w-2xl">
-            <ProblemBox title="That did not work" text={problem} />
+            <ProblemBox title={t("problem")} text={problem} />
           </div>
         )}
       </div>

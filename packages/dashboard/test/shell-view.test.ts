@@ -7,15 +7,10 @@ import type {
   IdeaView,
   KoboldJob,
   PartView,
+  SignalView,
   WorkView,
 } from "../src/api.ts";
-import {
-  askPlaceholder,
-  countsOf,
-  isAskShortcut,
-  koboldStatus,
-  overallOf,
-} from "../src/lib/shell-view.ts";
+import { countsOf, koboldStatus, overallOf } from "../src/lib/shell-view.ts";
 import {
   applyChoice,
   choiceOf,
@@ -86,13 +81,22 @@ test("the sidebar counts only what there is: ideas exploring, tickets not in the
     countsOf([row("didntWork")], work({ cards: [card(2, "done")] })),
     {},
   );
+  // What people said that nobody has looked at, on Signals.
+  assert.deepEqual(
+    countsOf(null, null, {
+      toLookAt: [{} as SignalView, {} as SignalView],
+      newStories: [{ id: "st", title: "", persona: "" }],
+    }),
+    { signals: 3 },
+  );
+  assert.deepEqual(countsOf(null, null, { toLookAt: [], newStories: [] }), {});
 });
 
 test("the factory's light, in words", () => {
   assert.deepEqual(overallOf([]), { lit: "stopped", words: "0 of 0 running" });
   assert.deepEqual(overallOf([part("running"), part("none")]), {
     lit: "running",
-    words: "All running",
+    words: "Everything is running",
   });
   assert.deepEqual(overallOf([part("running"), part("stopped")]), {
     lit: "stopped",
@@ -102,12 +106,12 @@ test("the factory's light, in words", () => {
   assert.equal(overallOf([part("starting"), part("problem")]).lit, "problem");
 });
 
-test("the kobold's card says what it works on, or that it rests", () => {
+test("the bottom of the sidebar says whether the kobold is active, and on what", () => {
   const thinking = { title: "Wish list", working: true } as IdeaView;
-  assert.deepEqual(koboldStatus([], null, [], "All running"), {
+  assert.deepEqual(koboldStatus([], null, [], "Everything is running"), {
     busy: false,
-    title: "Kobold is resting",
-    detail: "All quiet · All running",
+    title: "Not active",
+    detail: "Everything is running",
   });
   assert.deepEqual(
     koboldStatus(
@@ -124,57 +128,35 @@ test("the kobold's card says what it works on, or that it rests", () => {
       [thinking],
       "",
     ),
-    { busy: true, title: "Kobold is building", detail: "Order status" },
+    { busy: true, title: "Active", detail: "Building: Order status" },
   );
-  assert.deepEqual(
+  assert.equal(
     koboldStatus(
       [job({ working: false }), job({ kind: "answer", working: true })],
       null,
       [thinking],
       "",
-    ),
-    {
-      busy: true,
-      title: "Kobold is answering your question",
-      detail: "Working…",
-    },
+    ).detail,
+    "Answering a question",
   );
   assert.equal(
-    koboldStatus([job({ working: true, activity: "Sorting" })], null, [], "")
+    koboldStatus([job({ working: true, activity: "Mia" })], null, [], "")
       .detail,
-    "Sorting",
+    "Sorting what came in: Mia",
   );
-  assert.deepEqual(koboldStatus([], null, [thinking], ""), {
-    busy: true,
-    title: "Kobold is thinking",
-    detail: "Wish list",
-  });
-  assert.deepEqual(
+  assert.equal(
+    koboldStatus([], null, [thinking], "").detail,
+    "Thinking about Wish list",
+  );
+  assert.equal(
     koboldStatus(
       [],
       work({ coach: { on: true, working: 12, steps: [] } }),
       [],
       "",
-    ),
-    { busy: true, title: "Kobold is planning", detail: "Card #12" },
+    ).detail,
+    "Planning card #12",
   );
-});
-
-test("the Ask field names the product, and ⌘K or Ctrl+K goes to it", () => {
-  assert.equal(askPlaceholder("Shop"), "Ask about the people who use Shop…");
-  assert.equal(
-    askPlaceholder(undefined),
-    "Ask about the people who use this product…",
-  );
-  const key = (key: string, metaKey: boolean, ctrlKey = false) => ({
-    key,
-    metaKey,
-    ctrlKey,
-  });
-  assert.equal(isAskShortcut(key("k", true)), true);
-  assert.equal(isAskShortcut(key("K", false, true)), true);
-  assert.equal(isAskShortcut(key("k", false)), false);
-  assert.equal(isAskShortcut(key("j", true)), false);
 });
 
 test("light or dark: System unless light or dark was kept, and a browser that keeps nothing is fine", () => {

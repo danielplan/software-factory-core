@@ -1,121 +1,167 @@
-// Understand's second level: one persona. Their profile on the left (what
-// they want, what they are drawn from, what people like them said), and on
-// the right the real problem being solved for them (Confirm while only the
-// kobold suggested it), then their stories, each with where it breaks.
+// Understand's second level: one persona. Who they are in one line (their
+// role, what they are based on, what they want), what really matters to
+// them (Yes, that's it while only the kobold suggested it), then three
+// tabs: their problems (each with the situation it happens in and where it
+// stands, leading to its story), everything people like them said, and
+// the tests the kobold will run as them (to come).
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, type PersonaPage, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
+import { RowList } from "@/components/row-list";
 import { Button } from "@/components/ui/button";
+import { problemRows } from "@/lib/rows";
+import { cn } from "@/lib/utils";
 
-import { Initial, Label } from "./bits";
-import { StoryRow } from "./story-card";
+import { Initial } from "./bits";
+import { useAllRecords } from "./use-records";
+import { saidOf } from "./view";
+
+const TABS = ["problems", "signals", "tests"] as const;
+type Tab = (typeof TABS)[number];
+const TAB_NAME = {
+  problems: "tabs.problems",
+  signals: "tabs.signals",
+  tests: "tabs.tests",
+} as const;
 
 export function PersonaView({
   page,
   tint,
 }: Readonly<{ page: PersonaPage; tint: string }>) {
+  const { t } = useTranslation("understand");
+  const [tab, setTab] = useState<Tab>("problems");
+  const { data: all } = useAllRecords();
+  const rows = rowsOf(page);
+  const said = all ? saidOf(all.records, page.persona.id) : [];
+  const counts: Record<Tab, number | null> = {
+    problems: rows.length,
+    signals: said.length,
+    tests: null,
+  };
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+    <div className="grid content-start gap-4">
       <Profile page={page} tint={tint} />
-      <div className="grid gap-2.5">
-        {page.realProblems.map((real) => (
-          <RealProblem key={real.id} page={page} id={real.id} />
-        ))}
-        {page.realProblems.length === 0 && (
-          <p className="rounded-2xl bg-card px-5 py-4 text-sm text-muted-foreground shadow-soft">
-            No real problem yet. The kobold suggests one when two of{" "}
-            {page.persona.name}'s problems point the same way.
-          </p>
-        )}
-        <Label>
-          {page.stories.length === 1
-            ? "1 story"
-            : `${String(page.stories.length)} stories`}
-        </Label>
-        {page.stories.map((story) => (
-          <StoryRow key={story.id} card={story} />
+      {page.realProblems.map((real) => (
+        <RealProblem key={real.id} page={page} id={real.id} />
+      ))}
+      <div
+        role="tablist"
+        aria-label={t("tabs.label")}
+        className="flex w-fit gap-1 rounded-[14px] bg-surface-2 p-1"
+      >
+        {TABS.map((one) => (
+          <button
+            key={one}
+            type="button"
+            role="tab"
+            aria-selected={tab === one}
+            onClick={() => {
+              setTab(one);
+            }}
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-item text-muted-foreground transition-colors hover:text-foreground",
+              tab === one && "bg-card text-foreground shadow-current",
+            )}
+          >
+            {t(TAB_NAME[one])}
+            {counts[one] !== null && (
+              <span className="text-tag text-muted-foreground">
+                {counts[one]}
+              </span>
+            )}
+          </button>
         ))}
       </div>
+      <section
+        role="tabpanel"
+        aria-label={t(TAB_NAME[tab])}
+        className="grid animate-enter rounded-[18px] bg-card px-5 py-3 shadow-soft"
+        key={tab}
+      >
+        {tab === "problems" && (
+          <RowList rows={rows} empty={t("person.nothingYet")} />
+        )}
+        {tab === "signals" && <Said said={said} />}
+        {tab === "tests" && (
+          <p className="py-3 text-body text-muted-foreground">
+            {t("tabs.testsSoon", { name: page.persona.name })}
+          </p>
+        )}
+      </section>
     </div>
   );
 }
 
+// Their problems, each with the situation it happens in (their name is the
+// page's).
+function rowsOf(page: PersonaPage) {
+  const titles = new Map(page.stories.map((story) => [story.id, story.title]));
+  return problemRows([page]).map((row) => ({
+    ...row,
+    who: titles.get(row.id) ?? null,
+  }));
+}
+
+// Who they are, in one line under the title.
 function Profile({
   page,
   tint,
 }: Readonly<{ page: PersonaPage; tint: string }>) {
+  const { t } = useTranslation("understand");
   const { persona } = page;
+  const about = [persona.role, ...persona.basedOn].filter(Boolean);
   return (
-    <section
-      aria-label="Who they are"
-      className="grid gap-4 rounded-2xl bg-card px-6 py-5 shadow-soft"
-    >
+    <div className="flex items-center gap-4">
       <Initial name={persona.name} tint={tint} big />
-      <div className="grid gap-0.5">
-        <span className="text-[22px] font-semibold">{persona.name}</span>
-        <span className="text-sm text-muted-foreground">{persona.role}</span>
-      </div>
-      {persona.description && (
-        <p className="text-sm leading-relaxed">{persona.description}</p>
-      )}
-      <Lines title="Wants to" lines={persona.wants} />
-      <Lines title="Based on" lines={persona.basedOn} />
-      <div className="grid gap-1.5">
-        <Label>What people like {persona.name} said</Label>
-        {page.said.length === 0 && (
-          <span className="text-[13px] text-muted-foreground">
-            Nothing yet.
+      <div className="grid min-w-0 gap-0.5">
+        <span className="text-note text-muted-foreground">
+          {about.join(" · ")}
+        </span>
+        {persona.wants.length > 0 && (
+          <span className="text-body">
+            {t("person.wantsLine", { wants: persona.wants.join(" · ") })}
           </span>
         )}
-        {page.said.map((signal) => (
-          <p key={signal.id} className="flex gap-2 text-[13px] leading-snug">
-            <span
-              className="mt-1.5 size-2 flex-none rounded-[2px] bg-primary"
-              aria-hidden
-            />
-            <span>
-              {signal.text}{" "}
-              <span className="text-muted-foreground">
-                ({signal.sourceName})
-              </span>
-            </span>
-          </p>
-        ))}
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-fit"
-        disabled
-        title="Coming later"
-      >
-        Edit persona
-      </Button>
-    </section>
-  );
-}
-
-function Lines({ title, lines }: Readonly<{ title: string; lines: string[] }>) {
-  if (lines.length === 0) return null;
-  return (
-    <div className="grid gap-1">
-      <Label>{title}</Label>
-      {lines.map((line) => (
-        <span key={line} className="text-[13px]">
-          {line}
-        </span>
-      ))}
     </div>
   );
 }
 
-// The real problem, the problems it sits behind, and who said so.
+function Said({ said }: Readonly<{ said: ReturnType<typeof saidOf> }>) {
+  const { t } = useTranslation("understand");
+  if (said.length === 0)
+    return (
+      <p className="py-3 text-body text-muted-foreground">
+        {t("person.nothingYet")}
+      </p>
+    );
+  return (
+    <ul className="grid">
+      {said.map((one) => (
+        <li
+          key={one.id}
+          className="grid gap-0.5 border-t border-border-soft py-2.5 first:border-t-0"
+        >
+          <span className="text-body">{one.text}</span>
+          <span className="text-note text-muted-foreground">
+            {[one.source, one.when].filter(Boolean).join(" · ")}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// What really matters to them, and who said so; Yes, that's it while only
+// the kobold suggested it.
 function RealProblem({
   page,
   id,
 }: Readonly<{ page: PersonaPage; id: string }>) {
+  const { t } = useTranslation("understand");
   const [problem, setProblem] = useState<string | null>(null);
   const real = page.realProblems.find((r) => r.id === id);
   if (!real) return null;
@@ -129,30 +175,23 @@ function RealProblem({
   };
   return (
     <section
-      aria-label="The real problem"
-      className="grid gap-2 rounded-2xl bg-card px-5 py-4 ring-[1.5px] ring-foreground"
+      aria-label={t("person.real")}
+      className="grid gap-1 rounded-[18px] bg-card px-5 py-4 shadow-soft"
     >
-      <Label>The real problem we are solving for {page.persona.name}</Label>
-      <h2 className="text-[19px] leading-snug font-semibold">{real.title}</h2>
-      {real.description && <p className="text-sm">{real.description}</p>}
-      <div className="flex flex-wrap items-center gap-3 pt-1">
-        <span className="flex-1 text-xs text-muted-foreground">
-          {real.by === "kobold"
-            ? `Suggested by the kobold: several of ${page.persona.name}’s problems point this way`
-            : `Confirmed by ${real.by}`}
-        </span>
-        <Button variant="outline" size="sm" disabled title="Coming later">
-          Edit
-        </Button>
-        {real.by === "kobold" && (
+      <span className="text-tag text-muted-foreground">{t("person.real")}</span>
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="flex-1 text-section">{real.title}</h2>
+        {real.by === "kobold" ? (
           <Button size="sm" onClick={() => void confirm()}>
-            Confirm
+            {t("person.confirm")}
           </Button>
+        ) : (
+          <span className="text-note text-muted-foreground">
+            {t("person.confirmedBy", { name: real.by })}
+          </span>
         )}
       </div>
-      {problem && (
-        <ProblemBox title="It could not be confirmed" text={problem} />
-      )}
+      {problem && <ProblemBox title={t("person.cantConfirm")} text={problem} />}
     </section>
   );
 }

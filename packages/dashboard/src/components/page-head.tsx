@@ -3,6 +3,7 @@
 // bar at the top of the panel, beside Ask the kobold (PageActions puts them
 // there wherever the page draws them).
 
+import { t } from "@/i18n/i18n";
 import { createContext, type ReactNode, useContext } from "react";
 import { createPortal } from "react-dom";
 
@@ -35,15 +36,13 @@ export function PageHead({
   children?: ReactNode;
 }>) {
   return (
-    <header className="grid gap-1.5 pt-1.5">
+    <header className="grid gap-1 pt-1">
       {crumbs.length > 1 && <Breadcrumb crumbs={crumbs} />}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <h1 className="text-[26px] leading-tight font-bold tracking-[-0.02em]">
-          {title}
-        </h1>
+        <h1 className="text-title">{title}</h1>
         {children}
       </div>
-      {about && <p className="text-sm text-muted-foreground">{about}</p>}
+      {about && <p className="text-body text-muted-foreground">{about}</p>}
       {actions && <PageActions>{actions}</PageActions>}
     </header>
   );
@@ -52,8 +51,8 @@ export function PageHead({
 function Breadcrumb({ crumbs }: Readonly<{ crumbs: Crumb[] }>) {
   return (
     <nav
-      aria-label="Breadcrumb"
-      className="flex items-center gap-1.5 text-[13px]"
+      aria-label={t("common:breadcrumb")}
+      className="flex items-center gap-1.5 text-note"
     >
       {crumbs.map((crumb, at) => (
         <span key={crumb.name} className="flex items-center gap-1.5">

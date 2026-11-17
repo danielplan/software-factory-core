@@ -1,0 +1,73 @@
+{
+  "title": "Produit",
+  "startAll": "Tout démarrer",
+  "stopAll": "Tout arrêter",
+  "cantRead": "Impossible de l'afficher pour le moment",
+  "didntWork": "Ça n'a pas marché",
+  "mapLabel": "Les pièces de votre produit",
+  "project": {
+    "connected": "Connecté",
+    "sub": "Le projet sur lequel travaille la factory",
+    "folder": "Dossier",
+    "branch": "Branche",
+    "noGit": "Pas un dépôt git",
+    "shared": "Partagé sur",
+    "local": "Seulement sur cet ordinateur",
+    "open": "Voir les détails du projet {{name}}"
+  },
+  "card": {
+    "open": "Voir les détails de {{name}}",
+    "builtWith": "Fait avec",
+    "usedBy": "Utilisé par",
+    "more": "+{{count}}"
+  },
+  "details": {
+    "label": "Détails",
+    "close": "Fermer"
+  },
+  "light": {
+    "running": "En marche",
+    "starting": "Démarrage",
+    "stopped": "Arrêté",
+    "problem": "Quelque chose ne va pas"
+  },
+  "status": {
+    "outside": "En marche, démarré hors de la factory",
+    "with": "Tourne avec ce qui l'utilise"
+  },
+  "buttons": {
+    "start": "Démarrer",
+    "tryAgain": "Réessayer",
+    "restart": "Redémarrer",
+    "stop": "Arrêter",
+    "open": "Ouvrir"
+  },
+  "problem": {
+    "details": "Détails techniques"
+  },
+  "groups": {
+    "language": "Langage",
+    "interface": "Interface",
+    "server": "Serveur",
+    "data": "Données",
+    "look": "Apparence",
+    "checks": "Vérifications",
+    "tools": "Outils"
+  },
+  "own": {
+    "title": "Les programmes de la factory"
+  },
+  "panel": {
+    "label": "À propos de cette carte",
+    "back": "Toutes les pièces",
+    "explain": "Chaque carte est une pièce ; les flèches montrent qui dépend de qui.",
+    "legend": "Ce que veulent dire les points",
+    "pieces_one": "{{count}} pièce",
+    "pieces_other": "{{count}} pièces",
+    "running_one": "{{count}} en marche",
+    "running_other": "{{count}} en marche",
+    "needsYou_one": "{{count}} a besoin de vous",
+    "needsYou_other": "{{count}} ont besoin de vous",
+    "connection": "Connecté à {{name}}"
+  }
+}

@@ -10,14 +10,14 @@ export const MODEL_KEY = "FACTORY_CLAUDE_MODEL";
 export const modelSettings: SettingGroup = {
   id: "ai-model",
   name: "AI model",
-  about: "Which model the factory's own Claude Code runs use.",
+  about: "Which Claude model the kobold thinks with.",
   file: "settings/factory.env",
   usedBy: [],
   fields: [
     {
       key: MODEL_KEY,
       label: "Claude model",
-      help: "A name such as opus or sonnet, or a full model id. Empty means the account's default. Only the factory's Claude Code runs use it, not Codex.",
+      help: "Leave it empty for your account's default, or write opus, sonnet or haiku.",
       kind: "text",
       pattern: "^[\\w.\\[\\]-]+$",
     },

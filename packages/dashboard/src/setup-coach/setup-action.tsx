@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type CoachView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -15,6 +16,7 @@ export function SetupAction({
   // Pressed: the voice call ends.
   onPress: () => void;
 }>) {
+  const { t } = useTranslation("setup");
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const building = coach.phase === "build";
@@ -33,13 +35,13 @@ export function SetupAction({
   };
   return (
     <div className="grid gap-3">
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t("problem")} text={problem} />}
       <Button
         className="h-11 w-full px-[22px]"
         disabled={coach.working || busy}
         onClick={() => void press()}
       >
-        {building ? "Open the factory" : "Build the factory"}
+        {building ? t("action.open") : t("action.build")}
       </Button>
     </div>
   );

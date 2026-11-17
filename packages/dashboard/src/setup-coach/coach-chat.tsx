@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { use, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type CoachView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -39,21 +40,20 @@ export function CoachStart({
   call,
 }: Readonly<{ coach: CoachView; call: VoiceCall }>) {
   const { say, problem } = useSay([], () => undefined);
+  const { t } = useTranslation("setup");
   return (
     <section
-      aria-label="The coach"
+      aria-label={t("coach")}
       className="grid w-full max-w-[640px] animate-pop gap-3"
     >
       <Answer
         call={call}
         coach={coach}
         onSay={say}
-        placeholder="What do you want to build?"
-        className="glow-ring p-3 pl-5 text-base shadow-big"
+        placeholder={t("start.placeholder")}
+        className="glow-ring p-3 pl-5 text-body shadow-big"
       />
-      {problem && (
-        <ProblemBox title="The coach could not answer" text={problem} />
-      )}
+      {problem && <ProblemBox title={t("coachProblem")} text={problem} />}
     </section>
   );
 }
@@ -80,9 +80,10 @@ export function CoachChat({
   children?: React.ReactNode;
 }>) {
   const { say, problem } = useSay(attached, onSent);
+  const { t } = useTranslation("setup");
   return (
     <aside
-      aria-label="The coach"
+      aria-label={t("coach")}
       className={cn(
         "glow-card flex min-h-0 min-w-0 animate-dock flex-col gap-4 rounded-[calc(var(--radius)+14px)] border border-border p-5 shadow-big",
         className,
@@ -91,7 +92,7 @@ export function CoachChat({
       <Conversation coach={coach} />
       {(coach.problem ?? problem) && (
         <ProblemBox
-          title="The coach could not answer"
+          title={t("coachProblem")}
           text={coach.problem ?? problem ?? ""}
         />
       )}
@@ -103,7 +104,7 @@ export function CoachChat({
 }
 
 // The end of the owner's message naming the pieces it is about, with their
-// ids for the coach.
+// ids for the coach (in English: it is read by the coach, not shown).
 export function aboutLine(attached: Attached[]): string {
   if (attached.length === 0) return "";
   const named = attached.map((a) => a.name + " [" + a.id + "]");
@@ -115,18 +116,19 @@ function AttachedChips({
   attached,
   onUnpick,
 }: Readonly<{ attached: Attached[]; onUnpick: (id: string) => void }>) {
+  const { t } = useTranslation("setup");
   if (attached.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-1.5" aria-label="About">
+    <div className="flex flex-wrap gap-1.5" aria-label={t("about.group")}>
       {attached.map((a) => (
         <span
           key={a.id}
-          className="flex items-center gap-1 rounded-full bg-surface-2 py-0.5 pr-1 pl-2.5 text-xs"
+          className="flex items-center gap-1 rounded-full bg-surface-2 py-0.5 pr-1 pl-2.5 text-tag"
         >
-          About: {a.name}
+          {t("about.chip", { name: a.name })}
           <button
             type="button"
-            aria-label={`Not about ${a.name}`}
+            aria-label={t("about.remove", { name: a.name })}
             className="flex size-5 items-center justify-center rounded-full hover:bg-card [&_svg]:size-3"
             onClick={() => {
               onUnpick(a.id);
@@ -171,7 +173,7 @@ function Bubble({
   if (mine)
     return (
       <div className="flex animate-pop justify-end">
-        <div className="max-w-[88%] rounded-2xl bg-primary px-3.5 py-2.5 text-sm leading-relaxed text-primary-foreground [overflow-wrap:anywhere]">
+        <div className="max-w-[88%] rounded-2xl bg-primary px-3.5 py-2.5 text-body text-primary-foreground [overflow-wrap:anywhere]">
           {children}
         </div>
       </div>
@@ -179,7 +181,7 @@ function Bubble({
   return (
     <div className="flex animate-pop items-start gap-2.5">
       <CoachOrb working={false} />
-      <div className="max-w-[88%] min-w-0 pt-0.5 text-sm leading-relaxed [overflow-wrap:anywhere]">
+      <div className="max-w-[88%] min-w-0 pt-0.5 text-body [overflow-wrap:anywhere]">
         {children}
       </div>
     </div>
@@ -189,18 +191,19 @@ function Bubble({
 // While the coach works: its orb turning, with what it is doing (or the
 // reply as it is written) beside it.
 function AtWork({ coach }: Readonly<{ coach: CoachView }>) {
+  const { t } = useTranslation("setup");
   return (
     <div className="flex animate-pop items-start gap-2.5">
       <CoachOrb working />
       <div
         aria-live="polite"
-        className="max-w-[88%] min-w-0 pt-0.5 text-sm leading-relaxed [overflow-wrap:anywhere]"
+        className="max-w-[88%] min-w-0 pt-0.5 text-body [overflow-wrap:anywhere]"
       >
         {coach.writing ? (
           <Said text={coach.writing} />
         ) : (
           <span className="text-muted-foreground">
-            {coach.activity ?? "Thinking…"}
+            {coach.activity ?? t("thinking")}
           </span>
         )}
       </div>

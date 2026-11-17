@@ -112,3 +112,9 @@ export function freeProblems(store: RecordStore): Map<string, number> {
       free.set(problem.persona, (free.get(problem.persona) ?? 0) + 1);
   return free;
 }
+
+// What a tool did, kept for the job's end, and said to the kobold.
+export function said(done: string[], line: string): string {
+  done.push(line);
+  return line;
+}

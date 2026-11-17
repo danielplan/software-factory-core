@@ -1,0 +1,67 @@
+{
+  "problem": "Non ha funzionato",
+  "coachProblem": "Il coach non è riuscito a rispondere",
+  "coach": "Il coach",
+  "thinking": "Ci penso…",
+  "start": {
+    "placeholder": "Cosa vuoi costruire?"
+  },
+  "answer": {
+    "label": "Rispondi al coach",
+    "placeholder": "Rispondi al coach…",
+    "send": "Invia",
+    "talk": "Parla",
+    "talkTitle": "Parla invece di scrivere"
+  },
+  "about": {
+    "group": "Di cosa parla il tuo messaggio",
+    "chip": "Su: {{name}}",
+    "remove": "Non su {{name}}"
+  },
+  "action": {
+    "build": "Costruisci la factory",
+    "open": "Apri la factory"
+  },
+  "map": {
+    "label": "La mappa",
+    "whole": "Mostra tutta la mappa",
+    "remove": "Togli questa scheda",
+    "agreed": "Confermata",
+    "guess": "Un'ipotesi, non ancora confermata."
+  },
+  "voice": {
+    "end": "Chiudi la chiamata",
+    "language": "La lingua in cui parli",
+    "level": "La tua voce",
+    "moment": {
+      "preparing": "Mi preparo…",
+      "listening": "Ti ascolto",
+      "writing": "Lo trascrivo…",
+      "thinking": "Ci penso…",
+      "speaking": "Sto parlando"
+    },
+    "status": {
+      "download": "Scarico il modello vocale, solo la prima volta (circa 0,8 GB): {{percent}}%",
+      "preparing": "Mi preparo, non parlare ancora…",
+      "listening": "Ti ascolto. Vai pure.",
+      "writing": "Trascrivo quello che hai detto…",
+      "thinking": "Ricevuto. Ci lavoro…",
+      "speaking": "Sto parlando… di' “stop” per interrompermi."
+    },
+    "noVoice": "In questo browser non c'è una voce in {{language}}, quindi le risposte non possono essere lette ad alta voce. Aggiungine una nelle impostazioni vocali del computer, oppure scegli un'altra lingua.",
+    "problem": {
+      "unsupported": "Questo browser non riesce a usare il modello vocale. Apri la factory in Chrome o Edge aggiornati.",
+      "blocked": "Il browser non ha il permesso di usare il microfono. Clicca l'icona a sinistra dell'indirizzo, consenti il microfono, poi premi di nuovo Parla.",
+      "noMicrophone": "Nessun microfono trovato. Collegane uno o collega le cuffie, poi premi di nuovo Parla.",
+      "microphoneBusy": "Un altro programma sta usando il microfono. Chiudilo (una chiamata, un registratore), poi premi di nuovo Parla.",
+      "microphoneFailed": "Il microfono si è aperto, ma non riesco a leggerne il suono. Ricarica la pagina e premi di nuovo Parla.",
+      "download": "Non sono riuscito a scaricare il modello vocale. Controlla la connessione a internet, poi premi di nuovo Parla.",
+      "voiceFailed": "Non riesco a riprodurre la voce del coach, quindi non sentirai le risposte. Controlla casse o cuffie, poi premi di nuovo Parla.",
+      "notSent": "Non sono riuscito a inviare le tue parole. Ripetile, per favore."
+    }
+  },
+  "splash": {
+    "opening": "Apro la tua factory…",
+    "label": "Kobble si sta aprendo"
+  }
+}

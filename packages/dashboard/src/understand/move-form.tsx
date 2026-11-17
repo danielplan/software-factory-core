@@ -1,8 +1,9 @@
-// Where a person moves a signal: into a scene of another story, a new
-// story (the kobold writes it, for a persona if one is picked), or Build,
-// as a bug.
+// Where a person moves something people said: into a step of another
+// story, a new story (the kobold writes it, for a person if one is
+// picked), or Build, as a bug.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post, type RecordsView, type SignalView } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -19,11 +20,7 @@ import { cn } from "@/lib/utils";
 import { useAllRecords } from "./use-records";
 
 type To = "scene" | "newStory" | "build";
-const CHOICES: { to: To; name: string }[] = [
-  { to: "scene", name: "Into a story" },
-  { to: "newStory", name: "A new story" },
-  { to: "build", name: "It's a bug" },
-];
+const CHOICES: To[] = ["scene", "newStory", "build"];
 // No persona picked: the kobold decides.
 const ANYONE = "anyone";
 
@@ -41,6 +38,7 @@ export function MoveForm({
   signal,
   onMoved,
 }: Readonly<{ signal: SignalView; onMoved: () => void }>) {
+  const { t } = useTranslation("understand");
   const records = useAllRecords().data?.records;
   const [picked, setPicked] = useState<Picked>({
     to: "scene",
@@ -84,9 +82,9 @@ export function MoveForm({
         disabled={picked.to === "scene" && !picked.story}
         onClick={() => void move()}
       >
-        {picked.to === "newStory" ? "Ask the kobold to write it" : "Move it"}
+        {picked.to === "newStory" ? t("move.write") : t("move.move")}
       </Button>
-      {problem && <ProblemBox title="It could not be moved" text={problem} />}
+      {problem && <ProblemBox title={t("move.cant")} text={problem} />}
     </div>
   );
 }
@@ -95,29 +93,30 @@ function Choices({
   to,
   onPick,
 }: Readonly<{ to: To; onPick: (to: To) => void }>) {
+  const { t } = useTranslation("understand");
   return (
     <div
       role="radiogroup"
-      aria-label="Move it to"
+      aria-label={t("move.to")}
       className="flex flex-wrap gap-1.5"
     >
       {CHOICES.map((choice) => (
         <button
-          key={choice.to}
+          key={choice}
           type="button"
           role="radio"
-          aria-checked={to === choice.to}
+          aria-checked={to === choice}
           onClick={() => {
-            onPick(choice.to);
+            onPick(choice);
           }}
           className={cn(
-            "h-8 rounded-full px-3 text-[13px]",
-            to === choice.to
+            "h-8 rounded-full px-3 text-note transition-colors",
+            to === choice
               ? "bg-foreground text-background"
               : "bg-card shadow-soft",
           )}
         >
-          {choice.name}
+          {t(`move.choice.${choice}`)}
         </button>
       ))}
     </div>
@@ -135,6 +134,7 @@ function StoryAndScene({
   picked: Picked;
   pick: (change: Partial<Picked>) => void;
 }>) {
+  const { t } = useTranslation("understand");
   const stories = records.stories.filter((s) => s.wrong === null);
   const nameOf = (id: string) =>
     records.personas.find((p) => p.id === id)?.name ?? id;
@@ -147,8 +147,11 @@ function StoryAndScene({
           pick({ story, scene: "1" });
         }}
       >
-        <SelectTrigger className="min-w-56 bg-card" aria-label="The story">
-          <SelectValue placeholder="Which story" />
+        <SelectTrigger
+          className="min-w-56 bg-card"
+          aria-label={t("move.story")}
+        >
+          <SelectValue placeholder={t("move.whichStory")} />
         </SelectTrigger>
         <SelectContent>
           {stories.map((s) => (
@@ -165,7 +168,10 @@ function StoryAndScene({
             pick({ scene });
           }}
         >
-          <SelectTrigger className="min-w-56 bg-card" aria-label="The scene">
+          <SelectTrigger
+            className="min-w-56 bg-card"
+            aria-label={t("move.step")}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -193,6 +199,7 @@ function Whose({
   persona: string;
   pick: (change: Partial<Picked>) => void;
 }>) {
+  const { t } = useTranslation("understand");
   return (
     <Select
       value={persona}
@@ -202,15 +209,15 @@ function Whose({
     >
       <SelectTrigger
         className="w-fit min-w-56 bg-card"
-        aria-label="Whose story"
+        aria-label={t("move.whose")}
       >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANYONE}>The kobold decides whose</SelectItem>
+        <SelectItem value={ANYONE}>{t("move.koboldDecides")}</SelectItem>
         {records.personas.map((p) => (
           <SelectItem key={p.id} value={p.id}>
-            A story of {p.name}
+            {t("move.storyOf", { name: p.name })}
           </SelectItem>
         ))}
       </SelectContent>

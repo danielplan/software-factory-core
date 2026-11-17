@@ -5,8 +5,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { t } from "@/i18n/i18n";
 
-// A choice from a list, with "Choose the …" until one is chosen.
+// A choice from a list, with "Choose…" until one is chosen.
 export function Pick({
   label,
   value,
@@ -25,7 +26,7 @@ export function Pick({
       disabled={options.length === 0}
     >
       <SelectTrigger aria-label={label} className="h-10 w-full bg-card">
-        <SelectValue placeholder={`Choose the ${label.toLowerCase()}…`} />
+        <SelectValue placeholder={t("settings:pick.choose")} />
       </SelectTrigger>
       <SelectContent>
         {options.map((one) => (
@@ -43,15 +44,14 @@ export function Pick({
 export function WhichWork({
   value,
   onPick,
-  noun,
-}: Readonly<{ value: string; onPick: (value: string) => void; noun: string }>) {
+}: Readonly<{ value: string; onPick: (value: string) => void }>) {
   return (
     <Pick
-      label="Work the factory takes in"
+      label={t("settings:pick.which")}
       value={value}
       options={[
-        { value: "*", label: `Every ${noun.replace(/s$/, "")} on the board` },
-        { value: "factory", label: `Only ${noun} labelled “factory”` },
+        { value: "*", label: t("settings:pick.all") },
+        { value: "factory", label: t("settings:pick.labelled") },
       ]}
       onPick={onPick}
     />

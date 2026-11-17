@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { request } from "node:http";
+import { type IncomingMessage, request } from "node:http";
 import { join } from "node:path";
+import { Readable } from "node:stream";
 import { test } from "node:test";
 
 import type { State } from "../src/api.ts";
+import { readBody } from "../src/http.ts";
 import { stage } from "./stage.ts";
 
 // The factory's folder, as the coach makes it when it names the company
@@ -96,12 +98,36 @@ test("only this computer, and only the factory's page, may press its buttons", a
     });
     assert.equal(elsewhere, 403);
     assert.equal((await fetch(`${base}/api/nothing`)).status, 404);
-    // Any other address is the page, which runs in the browser.
-    assert.match(await (await fetch(`${base}/system`)).text(), /The factory/);
+    // Any other address is the page, which runs in the browser; never in
+    // another site's frame.
+    const page = await fetch(`${base}/system`);
+    assert.match(await page.text(), /The factory/);
+    assert.equal(page.headers.get("x-frame-options"), "DENY");
+    assert.equal(page.headers.get("x-content-type-options"), "nosniff");
     assert.throws(
       () => session.createCompany({ name: " ", about: "" }),
       /Give the project a name/,
     );
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("a body too large is refused, and letters split between pieces stay whole", async () => {
+  const { session, server, post } = await stage();
+  try {
+    const big = await post("/api/setup/say", { text: "x".repeat(11 << 20) });
+    assert.equal(big.status, 413);
+    assert.match(await big.text(), /too large/);
+    // "è" is two bytes; sent in two pieces, cut between them.
+    const bytes = Buffer.from(JSON.stringify({ text: "Perché è così" }));
+    const cut = bytes.indexOf(0xc3) + 1;
+    const incoming = Object.assign(
+      Readable.from([bytes.subarray(0, cut), bytes.subarray(cut)]),
+      { headers: {} },
+    ) as unknown as IncomingMessage;
+    assert.deepEqual(await readBody(incoming), { text: "Perché è così" });
   } finally {
     session.close();
     server.close();

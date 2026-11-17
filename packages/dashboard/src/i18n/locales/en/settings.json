@@ -1,0 +1,108 @@
+{
+  "language": {
+    "title": "Language"
+  },
+  "page": {
+    "title": "Settings"
+  },
+  "tracker": {
+    "title": "Where work is tracked",
+    "now": "Now: {{name}}.",
+    "own": "the factory's own board",
+    "change": "Change"
+  },
+  "look": {
+    "title": "Light or dark",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "notKept": "This browser can't keep your choice, so it lasts until you close the page."
+  },
+  "group": {
+    "save": "Save",
+    "saved": "Saved.",
+    "savedRestart": "Saved. Restart to use it:",
+    "notSaved": "Not saved",
+    "restart": "Restart {{name}}",
+    "set": "{{label}} (set)",
+    "replace": "{{help}} Type a new one to replace it."
+  },
+  "workshop": {
+    "title": "Add-ons and kits",
+    "inUse": "In use",
+    "available": "Available",
+    "builtIn": "Comes with the factory",
+    "addOn": "Add-on",
+    "kit": "Kit",
+    "change": "Change",
+    "useInstead": "Use this instead",
+    "remove": "Remove",
+    "add": "Add",
+    "settings": "Settings",
+    "forNew": "For a new product of this kind.",
+    "tracked": "Your work is tracked here",
+    "added": "Added"
+  },
+  "connect": {
+    "title": "Where should the factory keep its work?",
+    "about": "The ideas you agree on become work on a board, and the factory builds from there. Keep it here, or use your team's board.",
+    "goToBoard": "Go to the board",
+    "ownTitle": "The factory's own board",
+    "ownText": "Work stays here, in this app. Nothing to connect.",
+    "useOwn": "Use the factory's board",
+    "ownDone": "Work stays on the factory's own board.",
+    "choices": "Where work is tracked"
+  },
+  "board": {
+    "connectedAll": "Connected to <link>{{name}}</link>: all of its work.",
+    "connectedLabel": "Connected to <link>{{name}}</link>: the work labelled “{{label}}”.",
+    "trackedAll": "Your work is tracked on <link>{{name}}</link>: all of it.",
+    "trackedLabel": "Your work is tracked on <link>{{name}}</link>: the work labelled “{{label}}”.",
+    "stages": "Stages and their columns",
+    "noColumn": "no column",
+    "github": "board {{board}} of {{repository}} on GitHub",
+    "jira": "{{project}} on Jira"
+  },
+  "pick": {
+    "choose": "Choose…",
+    "which": "Which work the factory takes",
+    "all": "All the work on the board",
+    "labelled": "Only work labelled “factory”",
+    "notOnBoard": "Not on this board",
+    "columns": "Which column is which",
+    "columnsAbout": "Matched by their names. Change any that's wrong.",
+    "columnFor": "Column for {{stage}}"
+  },
+  "github": {
+    "cli": "GitHub's command-line tool on this computer",
+    "install": "Install it",
+    "board": "Your board",
+    "boardDone": "Your board is connected",
+    "signedIn": "Signed in as {{login}}",
+    "signIn": "Sign in to GitHub",
+    "signInButton": "Sign in with GitHub",
+    "typeCode": "Type this code in the browser window that opened:",
+    "notSignedIn": "Not signed in",
+    "repository": "Repository",
+    "boardPick": "Board",
+    "allow": "Let the factory read your boards",
+    "checking": "Checking…",
+    "connect": "Connect"
+  },
+  "jira": {
+    "signedIn": "Signed in as {{name}}",
+    "login": "Your Jira and a token",
+    "check": "Check",
+    "checking": "Checking…",
+    "project": "Your project",
+    "projectPick": "Project",
+    "connect": "Connect",
+    "site": "Site",
+    "siteHelp": "For example acme.atlassian.net.",
+    "email": "Your email",
+    "emailHelp": "The one you sign in to Jira with.",
+    "token": "API token",
+    "tokenHelp": "Kept only on this computer.",
+    "createToken": "Create an API token"
+  }
+}

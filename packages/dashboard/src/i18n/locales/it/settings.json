@@ -1,0 +1,108 @@
+{
+  "language": {
+    "title": "Lingua"
+  },
+  "page": {
+    "title": "Impostazioni"
+  },
+  "tracker": {
+    "title": "Dove si tiene il lavoro",
+    "now": "Ora: {{name}}.",
+    "own": "la bacheca della factory",
+    "change": "Cambia"
+  },
+  "look": {
+    "title": "Chiaro o scuro",
+    "system": "Sistema",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "notKept": "Questo browser non può salvare la scelta: vale finché non chiudi la pagina."
+  },
+  "group": {
+    "save": "Salva",
+    "saved": "Salvato.",
+    "savedRestart": "Salvato. Riavvia per usarlo:",
+    "notSaved": "Non salvato",
+    "restart": "Riavvia {{name}}",
+    "set": "{{label}} (impostato)",
+    "replace": "{{help}} Scrivine uno nuovo per sostituirlo."
+  },
+  "workshop": {
+    "title": "Componenti aggiuntivi e kit",
+    "inUse": "In uso",
+    "available": "Disponibili",
+    "builtIn": "Incluso nella factory",
+    "addOn": "Componente aggiuntivo",
+    "kit": "Kit",
+    "change": "Cambia",
+    "useInstead": "Usa questo",
+    "remove": "Rimuovi",
+    "add": "Aggiungi",
+    "settings": "Impostazioni",
+    "forNew": "Per un nuovo prodotto di questo tipo.",
+    "tracked": "Il tuo lavoro è qui",
+    "added": "Aggiunto"
+  },
+  "connect": {
+    "title": "Dove deve tenere il lavoro la factory?",
+    "about": "Le idee su cui siete d'accordo diventano lavoro su una bacheca, e la factory costruisce da lì. Tienilo qui, o usa la bacheca del tuo team.",
+    "goToBoard": "Vai alla bacheca",
+    "ownTitle": "La bacheca della factory",
+    "ownText": "Il lavoro resta qui, in questa app. Niente da collegare.",
+    "useOwn": "Usa la bacheca della factory",
+    "ownDone": "Il lavoro resta sulla bacheca della factory.",
+    "choices": "Dove si tiene il lavoro"
+  },
+  "board": {
+    "connectedAll": "Collegata a <link>{{name}}</link>: tutto il suo lavoro.",
+    "connectedLabel": "Collegata a <link>{{name}}</link>: il lavoro con l'etichetta “{{label}}”.",
+    "trackedAll": "Il tuo lavoro è su <link>{{name}}</link>: tutto.",
+    "trackedLabel": "Il tuo lavoro è su <link>{{name}}</link>: quello con l'etichetta “{{label}}”.",
+    "stages": "Fasi e colonne",
+    "noColumn": "nessuna colonna",
+    "github": "bacheca {{board}} di {{repository}} su GitHub",
+    "jira": "{{project}} su Jira"
+  },
+  "pick": {
+    "choose": "Scegli…",
+    "which": "Quale lavoro prende la factory",
+    "all": "Tutto il lavoro sulla bacheca",
+    "labelled": "Solo il lavoro con l'etichetta “factory”",
+    "notOnBoard": "Non su questa bacheca",
+    "columns": "Quale colonna è quale",
+    "columnsAbout": "Abbinate in base ai nomi. Correggi quelle sbagliate.",
+    "columnFor": "Colonna per {{stage}}"
+  },
+  "github": {
+    "cli": "Lo strumento a riga di comando di GitHub su questo computer",
+    "install": "Installalo",
+    "board": "La tua bacheca",
+    "boardDone": "La tua bacheca è collegata",
+    "signedIn": "Accesso come {{login}}",
+    "signIn": "Accedi a GitHub",
+    "signInButton": "Accedi con GitHub",
+    "typeCode": "Scrivi questo codice nella finestra del browser che si è aperta:",
+    "notSignedIn": "Accesso non riuscito",
+    "repository": "Repository",
+    "boardPick": "Bacheca",
+    "allow": "Permetti alla factory di leggere le tue bacheche",
+    "checking": "Verifico…",
+    "connect": "Collega"
+  },
+  "jira": {
+    "signedIn": "Accesso come {{name}}",
+    "login": "Il tuo Jira e un token",
+    "check": "Verifica",
+    "checking": "Verifico…",
+    "project": "Il tuo progetto",
+    "projectPick": "Progetto",
+    "connect": "Collega",
+    "site": "Sito",
+    "siteHelp": "Per esempio acme.atlassian.net.",
+    "email": "La tua email",
+    "emailHelp": "Quella con cui accedi a Jira.",
+    "token": "Token API",
+    "tokenHelp": "Resta solo su questo computer.",
+    "createToken": "Crea un token API"
+  }
+}

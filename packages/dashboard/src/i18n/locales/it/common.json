@@ -1,0 +1,77 @@
+{
+  "app": {
+    "closed": "La factory si è fermata. Riavviala con software-factory.",
+    "opening": "Apro la factory…"
+  },
+  "nav": {
+    "home": "Home",
+    "signals": "Segnali",
+    "explorations": "Esplorazioni",
+    "factory": "Fabbrica",
+    "personas": "Personas",
+    "product": "Prodotto",
+    "settings": "Impostazioni",
+    "kobold": "Il tuo kobold",
+    "chatWithKobold": "Chatta con il tuo kobold",
+    "pages": "Pagine",
+    "openMenu": "Apri il menu"
+  },
+  "status": {
+    "active": "Attivo",
+    "notActive": "Non attivo",
+    "needsYou": "C'è qualcosa per te",
+    "idle": "In attesa"
+  },
+  "kobold": {
+    "building": "Sta costruendo {{title}}",
+    "thinking": "Sta pensando a {{title}}",
+    "planning": "Sta pianificando la scheda #{{number}}",
+    "doingWith": "{{doing}}: {{activity}}",
+    "doing": {
+      "sort": "Sta ordinando ciò che è arrivato",
+      "suggest": "Sta leggendo i problemi",
+      "ask": "Sta scrivendo una domanda",
+      "seen": "Sta annotando cosa è stato visto",
+      "idea": "Sta scrivendo un'idea",
+      "answer": "Sta rispondendo a una domanda",
+      "check": "Sta facendo un check-up"
+    }
+  },
+  "overall": {
+    "problem": "C'è qualcosa per te",
+    "starting": "Si avvia",
+    "running": "Tutto è in funzione",
+    "stopped": "{{running}} su {{total}} in funzione"
+  },
+  "light": {
+    "running": "In funzione",
+    "stopped": "Fermo",
+    "starting": "Si avvia",
+    "problem": "Problema"
+  },
+  "stage": {
+    "assumed": "Ipotizzato",
+    "heard": "Ascoltato",
+    "trying": "Idee in prova",
+    "building": "In costruzione",
+    "inApp": "Nell'app",
+    "solved": "Risolto",
+    "didntWork": "Non ha funzionato",
+    "idea": "Idea",
+    "versions": "Versioni",
+    "picked": "Scelta",
+    "worked": "Ha funzionato",
+    "label": "Fase: {{name}} ({{at}} di {{total}})"
+  },
+  "closedBy": "Chiuso da {{by}} il {{on}}: {{what}}",
+  "breadcrumb": "Dove sei",
+  "close": "Chiudi",
+  "didNotWork": "Non è andata",
+  "coming": {
+    "soon": "Questa pagina arriverà presto.",
+    "customers": {
+      "title": "Clienti",
+      "about": "Le aziende e le persone che usano i tuoi prodotti."
+    }
+  }
+}

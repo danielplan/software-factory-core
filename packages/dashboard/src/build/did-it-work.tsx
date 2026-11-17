@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { KoboldMark } from "@/understand/bits";
 
+import { t } from "../i18n/i18n.ts";
 import { TicketFor } from "./ticket-bits";
 import { seenNote, ticketLine } from "./view";
 
@@ -68,18 +69,22 @@ export function DidItWork({
     >
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Did it work?</DialogTitle>
+          <DialogTitle>{t("build:didItWork.title")}</DialogTitle>
           <DialogDescription>{ticketLine(ticket, title)}</DialogDescription>
         </DialogHeader>
         <TicketFor ticket={ticket} />
         {ticket.idea && (
-          <p className="text-sm">
-            <span className="text-muted-foreground">We think: </span>
+          <p className="text-body">
+            <span className="text-muted-foreground">
+              {t("build:didItWork.weThink")}{" "}
+            </span>
             {ticket.idea.weThink}
           </p>
         )}
         <SeenBox seen={seen} note={seenNote(draft)} onChange={setSeen} />
-        {problem && <ProblemBox title="That did not work" text={problem} />}
+        {problem && (
+          <ProblemBox title={t("build:didItWork.problem")} text={problem} />
+        )}
         <Answers
           sending={sending}
           onAnswer={(worked) => void answer(worked)}
@@ -102,28 +107,28 @@ function SeenBox({
       <div className="flex gap-2.5">
         <KoboldMark className="size-6" />
         <textarea
-          aria-label="What was seen"
+          aria-label={t("build:didItWork.seen")}
           value={seen}
           rows={3}
-          placeholder="What did you see since it is in the app?"
+          placeholder={t("build:didItWork.seenHint")}
           onChange={(event) => {
             onChange(event.target.value);
           }}
-          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-body outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       </div>
-      <p className="text-xs text-muted-foreground" role="status">
+      <p className="text-tag text-muted-foreground" role="status">
         {note}
       </p>
     </div>
   );
 }
 
-const ANSWERS: { worked: Worked; words: string }[] = [
-  { worked: "yes", words: "Yes, the problem is solved" },
-  { worked: "no", words: "No" },
-  { worked: "unchecked", words: "Didn't check" },
-];
+const ANSWERS = [
+  { worked: "yes", words: "build:didItWork.yes" },
+  { worked: "no", words: "build:didItWork.no" },
+  { worked: "unchecked", words: "build:didItWork.unchecked" },
+] as const;
 
 function Answers({
   sending,
@@ -145,11 +150,11 @@ function Answers({
             onAnswer(worked);
           }}
         >
-          {words}
+          {t(words)}
         </Button>
       ))}
       <Button variant="ghost" className="ml-auto" onClick={onCancel}>
-        Cancel
+        {t("build:didItWork.cancel")}
       </Button>
     </div>
   );

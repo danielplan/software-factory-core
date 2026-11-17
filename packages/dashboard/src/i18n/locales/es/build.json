@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Fábrica",
+    "refresh": "Actualizar",
+    "openOn": "Abrir en {{site}}",
+    "problem": "No funcionó",
+    "empty": "Aún no hay nada. El trabajo empieza como una <link>idea</link>."
+  },
+  "stages": {
+    "draft": "Borrador",
+    "backlog": "Backlog",
+    "planning": "Por planificar",
+    "todo": "Por hacer",
+    "doing": "En curso",
+    "review": "En revisión",
+    "done": "En la app"
+  },
+  "now": {
+    "plan": "Planificando #{{number}} «{{title}}»",
+    "build": "Construyendo #{{number}} «{{title}}»",
+    "review": "Respondiendo a la revisión de #{{number}} «{{title}}»",
+    "thinkingAbout": "Pensando en «{{title}}»",
+    "thinkingMany_one": "Pensando en {{count}} idea",
+    "thinkingMany_other": "Pensando en {{count}} ideas",
+    "readyOn_one": "{{count}} tarjeta lista: el constructor la toma a continuación",
+    "readyOn_other": "{{count}} tarjetas listas: el constructor toma la siguiente",
+    "readyOff_one": "{{count}} tarjeta lista para construir: enciende el constructor",
+    "readyOff_other": "{{count}} tarjetas listas para construir: enciende el constructor",
+    "backlog_one": "{{count}} tarjeta esperando en el Backlog",
+    "backlog_other": "{{count}} tarjetas esperando en el Backlog",
+    "builderWaiting": "El constructor está esperando trabajo",
+    "waiting": "Esperando trabajo"
+  },
+  "working": {
+    "plan": "Planificando",
+    "build": "Construyendo",
+    "review": "Respondiendo a la revisión"
+  },
+  "card": {
+    "noColumn": "Sin columna",
+    "starting": "Empezando…",
+    "open": "Abrir la tarjeta",
+    "pullRequest": "Abrir la pull request",
+    "running": "Ejecutando un comando",
+    "reading": "Leyendo {{file}}",
+    "editing": "Editando {{file}}",
+    "writing": "Escribiendo {{file}}"
+  },
+  "workers": {
+    "coach": "Coach",
+    "coachDoes": "Planifica las tarjetas contigo.",
+    "builder": "Constructor",
+    "builderDoes": "Construye las tarjetas y abre pull requests. Nunca fusiona.",
+    "on": "Encendido",
+    "off": "Apagado",
+    "answering": "Respondiendo en #{{number}}",
+    "nonePlanning": "No hay tarjetas por planificar",
+    "noneTodo": "No hay tarjetas por hacer",
+    "nextPlanning_one": "{{count}} tarjeta por planificar: empieza con ella",
+    "nextPlanning_other": "{{count}} tarjetas por planificar: empieza con la siguiente",
+    "nextTodo_one": "{{count}} tarjeta por hacer: empieza con ella",
+    "nextTodo_other": "{{count}} tarjetas por hacer: empieza con la siguiente",
+    "waitingPlanning_one": "{{count}} tarjeta por planificar, esperando",
+    "waitingPlanning_other": "{{count}} tarjetas por planificar, esperando",
+    "waitingTodo_one": "{{count}} tarjeta por hacer, esperando",
+    "waitingTodo_other": "{{count}} tarjetas por hacer, esperando",
+    "busy": "{{doing}} #{{number}}",
+    "busyWith": "{{doing}} #{{number}} · {{activity}}"
+  },
+  "idea": {
+    "draft": "Borrador",
+    "ready": "Lista",
+    "working": "Trabajando en ello…",
+    "today": "Hoy, {{time}}",
+    "explore": "Explorar",
+    "discard": "Descartar",
+    "discardSure": "¿Descartar esta idea? No se podrá recuperar.",
+    "problem": "No funcionó"
+  },
+  "ticket": {
+    "for": "Para:",
+    "from": "De:",
+    "noProblem": "Aún sin un problema detrás",
+    "worked": "Funcionó",
+    "didntWork": "No funcionó",
+    "unchecked": "Sin comprobar",
+    "since": "«{{title}}», en Construir desde el {{since}}.",
+    "only": "«{{title}}».",
+    "close": "Cerrar · ¿funcionó?",
+    "answeredBy": "{{by}}, {{on}}"
+  },
+  "didItWork": {
+    "title": "¿Funcionó?",
+    "weThink": "Creemos que:",
+    "seen": "Lo que notaste",
+    "seenHint": "¿Qué has notado desde que está en la app?",
+    "yes": "Sí, el problema está resuelto",
+    "no": "No",
+    "unchecked": "No lo comprobé",
+    "cancel": "Cancelar",
+    "problem": "No funcionó",
+    "notOnGitHub": "No guardado en GitHub",
+    "looking": "El kobold mira lo que la gente ha dicho desde entonces…",
+    "couldNotLook": "El kobold no pudo mirar: {{problem}} Escribe lo que has notado.",
+    "nothingHeard": "Nadie ha dicho nada desde entonces. Escribe lo que has notado.",
+    "draft_one": "El borrador del kobold, a partir de {{count}} comentario. Cámbialo como quieras.",
+    "draft_other": "El borrador del kobold, a partir de {{count}} comentarios. Cámbialo como quieras."
+  },
+  "fix": {
+    "make": "Crear un ticket de corrección",
+    "making": "Creando el ticket…",
+    "failed": "No se creó ningún ticket",
+    "waiting": "Desde Personas, esperando un ticket",
+    "fix": "Corrección",
+    "update": "Actualización",
+    "from": "De: {{source}}"
+  }
+}

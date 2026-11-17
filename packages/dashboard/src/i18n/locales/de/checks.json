@@ -1,0 +1,54 @@
+{
+  "title": "Check-up",
+  "start": {
+    "title": "Mein Produkt prüfen",
+    "lead": "Der Kobold geht dein Produkt durch, sucht nach Fehlern, Abstürzen und Umständlichem und erklärt dir jedes in einfachen Worten.",
+    "time": "Dauert ein paar Minuten",
+    "safe": "Es wird nichts geändert",
+    "local": "Läuft auf diesem Computer",
+    "button": "Check-up starten",
+    "again": "Erneut prüfen",
+    "one": "{{name}} prüfen"
+  },
+  "running": {
+    "title": "Der Kobold prüft {{name}}…",
+    "looking": "Sieht sich um…",
+    "found_one": "Bisher {{count}} Sache gefunden",
+    "found_other": "Bisher {{count}} Sachen gefunden",
+    "stop": "Stoppen"
+  },
+  "results": {
+    "last": "Letztes Check-up: {{when}}",
+    "toLook_one": "{{count}} Sache zum Ansehen",
+    "toLook_other": "{{count}} Sachen zum Ansehen",
+    "clear": "Nichts Besorgniserregendes gefunden",
+    "handled": "Schon erledigt ({{count}})",
+    "failed": "Das Check-up von {{name}} konnte nicht beendet werden: {{why}}",
+    "stopped": "Das Check-up von {{name}} wurde vor dem Ende gestoppt."
+  },
+  "severity": {
+    "high": "Ernst",
+    "medium": "Lohnt sich",
+    "low": "Klein"
+  },
+  "kind": {
+    "bug": "Fehler",
+    "error": "Absturz",
+    "ux": "Umständlich",
+    "security": "Sicherheit",
+    "performance": "Langsam"
+  },
+  "finding": {
+    "fix": "So lässt es sich beheben",
+    "where": "Wo",
+    "in": "In {{name}}",
+    "send": "An Build senden",
+    "dismiss": "Kein Problem",
+    "sent": "In Build als #{{issue}}",
+    "waiting": "In Build. Um ein Ticket daraus zu machen, verbinde in den Einstellungen ein GitHub-Board.",
+    "onBuild": "In Build",
+    "dismissed": "Beiseitegelegt"
+  },
+  "problem": "Das hat nicht geklappt: {{why}}",
+  "crumbSignals": "Signale"
+}

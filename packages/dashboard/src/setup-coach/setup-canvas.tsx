@@ -17,6 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Draft, messageOf, post } from "@/api";
 
@@ -97,6 +98,7 @@ function Canvas({
   onPick: (id: string) => void;
 }>) {
   const change = use(CanvasChange);
+  const { t } = useTranslation("setup");
   const { nodes, edges, onNodesChange } = useArranged(draft, attached);
   return (
     <ReactFlow<PieceNode, RouteEdge>
@@ -121,7 +123,7 @@ function Canvas({
       edgesFocusable={false}
       minZoom={0.2}
       maxZoom={1.5}
-      aria-label="The canvas"
+      aria-label={t("map.label")}
       style={COLOURS}
     >
       <Background gap={22} />

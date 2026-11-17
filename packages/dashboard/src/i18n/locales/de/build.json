@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Fabrik",
+    "refresh": "Aktualisieren",
+    "openOn": "Auf {{site}} öffnen",
+    "problem": "Das hat nicht geklappt",
+    "empty": "Noch nichts hier. Arbeit beginnt als <link>Idee</link>."
+  },
+  "stages": {
+    "draft": "Entwurf",
+    "backlog": "Backlog",
+    "planning": "Planung",
+    "todo": "Zu tun",
+    "doing": "In Arbeit",
+    "review": "Review",
+    "done": "In der App"
+  },
+  "now": {
+    "plan": "Plane #{{number}} „{{title}}“",
+    "build": "Baue #{{number}} „{{title}}“",
+    "review": "Beantworte das Review von #{{number}} „{{title}}“",
+    "thinkingAbout": "Denke über „{{title}}“ nach",
+    "thinkingMany_one": "Denke über {{count}} Idee nach",
+    "thinkingMany_other": "Denke über {{count}} Ideen nach",
+    "readyOn_one": "{{count}} Karte bereit: der Builder nimmt sie als Nächstes",
+    "readyOn_other": "{{count}} Karten bereit: der Builder nimmt die nächste",
+    "readyOff_one": "{{count}} Karte bereit zum Bauen: schalte den Builder ein",
+    "readyOff_other": "{{count}} Karten bereit zum Bauen: schalte den Builder ein",
+    "backlog_one": "{{count}} Karte wartet im Backlog",
+    "backlog_other": "{{count}} Karten warten im Backlog",
+    "builderWaiting": "Der Builder wartet auf Arbeit",
+    "waiting": "Wartet auf Arbeit"
+  },
+  "working": {
+    "plan": "Plant",
+    "build": "Baut",
+    "review": "Beantwortet das Review"
+  },
+  "card": {
+    "noColumn": "Keine Spalte",
+    "starting": "Startet…",
+    "open": "Karte öffnen",
+    "pullRequest": "Pull-Request öffnen",
+    "running": "Führt einen Befehl aus",
+    "reading": "Liest {{file}}",
+    "editing": "Bearbeitet {{file}}",
+    "writing": "Schreibt {{file}}"
+  },
+  "workers": {
+    "coach": "Coach",
+    "coachDoes": "Plant Karten mit dir.",
+    "builder": "Builder",
+    "builderDoes": "Baut Karten und öffnet Pull Requests. Mergt nie.",
+    "on": "An",
+    "off": "Aus",
+    "answering": "Antwortet auf #{{number}}",
+    "nonePlanning": "Keine Karten in Planung",
+    "noneTodo": "Keine Karten in Zu tun",
+    "nextPlanning_one": "{{count}} Karte in Planung: fängt damit an",
+    "nextPlanning_other": "{{count}} Karten in Planung: fängt mit der nächsten an",
+    "nextTodo_one": "{{count}} Karte in Zu tun: fängt damit an",
+    "nextTodo_other": "{{count}} Karten in Zu tun: fängt mit der nächsten an",
+    "waitingPlanning_one": "{{count}} Karte in Planung, wartet",
+    "waitingPlanning_other": "{{count}} Karten in Planung, warten",
+    "waitingTodo_one": "{{count}} Karte in Zu tun, wartet",
+    "waitingTodo_other": "{{count}} Karten in Zu tun, warten",
+    "busy": "{{doing}} #{{number}}",
+    "busyWith": "{{doing}} #{{number}} · {{activity}}"
+  },
+  "idea": {
+    "draft": "Entwurf",
+    "ready": "Bereit",
+    "working": "Wird bearbeitet…",
+    "today": "Heute, {{time}}",
+    "explore": "Erkunden",
+    "discard": "Verwerfen",
+    "discardSure": "Diese Idee verwerfen? Sie lässt sich nicht zurückholen.",
+    "problem": "Das hat nicht geklappt"
+  },
+  "ticket": {
+    "for": "Für:",
+    "from": "Von:",
+    "noProblem": "Noch kein Problem dahinter",
+    "worked": "Hat funktioniert",
+    "didntWork": "Hat nicht funktioniert",
+    "unchecked": "Nicht geprüft",
+    "since": "„{{title}}“, seit {{since}} in Bauen.",
+    "only": "„{{title}}“.",
+    "close": "Schließen · hat es funktioniert?",
+    "answeredBy": "{{by}}, {{on}}"
+  },
+  "didItWork": {
+    "title": "Hat es funktioniert?",
+    "weThink": "Wir denken:",
+    "seen": "Was dir aufgefallen ist",
+    "seenHint": "Was ist dir aufgefallen, seit es in der App ist?",
+    "yes": "Ja, das Problem ist gelöst",
+    "no": "Nein",
+    "unchecked": "Nicht geprüft",
+    "cancel": "Abbrechen",
+    "problem": "Das hat nicht geklappt",
+    "notOnGitHub": "Nicht auf GitHub gespeichert",
+    "looking": "Der Kobold schaut, was die Leute seitdem gesagt haben…",
+    "couldNotLook": "Der Kobold konnte nicht nachsehen: {{problem}} Schreib, was dir aufgefallen ist.",
+    "nothingHeard": "Seitdem hat niemand etwas gesagt. Schreib, was dir aufgefallen ist.",
+    "draft_one": "Der Entwurf des Kobolds, aus {{count}} Aussage. Ändere ihn nach Belieben.",
+    "draft_other": "Der Entwurf des Kobolds, aus {{count}} Aussagen. Ändere ihn nach Belieben."
+  },
+  "fix": {
+    "make": "Fix-Ticket erstellen",
+    "making": "Erstelle das Ticket…",
+    "failed": "Kein Ticket erstellt",
+    "waiting": "Aus Personen, wartet auf ein Ticket",
+    "fix": "Fix",
+    "update": "Update",
+    "from": "Von: {{source}}"
+  }
+}

@@ -11,13 +11,14 @@ import { ticketSteps } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 import { Pill } from "@/understand/bits";
 
+import { t } from "../i18n/i18n.ts";
 import { forOf, kindTone, outcomeOf, ticketStage } from "./view";
 
 export function TicketHead({ ticket }: Readonly<{ ticket: TicketView }>) {
   return (
     <span className="flex items-center gap-2">
       <Pill tone={kindTone(ticket.kind)}>{ticket.label}</Pill>
-      <span className="ml-auto text-xs text-muted-foreground">
+      <span className="ml-auto text-tag text-muted-foreground">
         #{String(ticket.issue)}
       </span>
     </span>
@@ -32,7 +33,9 @@ export function TicketFor({
 }: Readonly<{ ticket: TicketView; small?: boolean }>) {
   const { lead, parts } = forOf(ticket);
   return (
-    <p className={cn("text-muted-foreground", small ? "text-xs" : "text-sm")}>
+    <p
+      className={cn("text-muted-foreground", small ? "text-tag" : "text-body")}
+    >
       {lead && `${lead} `}
       {parts.map((part, at) => (
         <span key={part.title}>
@@ -65,17 +68,17 @@ export function TicketFoot({
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <StageSteps steps={ticketSteps(ticketStage(card, ticket))} />
         {outcome && (
-          <span className="text-xs text-label">
+          <span className="text-tag text-label">
             {outcome.worked === "unchecked"
               ? `${outcomeOf(outcome).words} · `
               : ""}
-            {outcome.by}, {outcome.on}
+            {t("build:ticket.answeredBy", { by: outcome.by, on: outcome.on })}
           </span>
         )}
       </span>
       {card.asks && !outcome && (
         <Button size="sm" className="w-full" onClick={onAsk}>
-          Close · did it work?
+          {t("build:ticket.close")}
         </Button>
       )}
     </>

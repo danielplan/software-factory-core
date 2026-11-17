@@ -13,11 +13,20 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+import { t } from "../i18n/i18n.ts";
 import { shortStep } from "./card-steps";
 import { stageOf } from "./stages";
 
-// Who works on a card now, if anyone: what it is doing and its steps.
-export type Working = { who: string; what: string; steps: string[] };
+// What is done on a card now: planned (by the coach or the builder), built,
+// or its review answered; and the steps so far.
+export type Job = "plan" | "build" | "review";
+export type Working = { job: Job; steps: string[] };
+
+// The builder's job, from the words the server says it with.
+export function jobOf(what: string): Job {
+  if (what.startsWith("planning")) return "plan";
+  return what.startsWith("answering") ? "review" : "build";
+}
 
 // A card from the connected board: its title and number, and, when the
 // builder or the coach works on it, what it is doing in a few words. It
@@ -48,9 +57,7 @@ export function BoardCard({
         <DialogTrigger asChild>
           <button type="button" className="grid min-w-0 gap-1.5 text-left">
             {ticket && <TicketHead ticket={ticket} />}
-            <span className="text-sm font-medium break-words">
-              {card.title}
-            </span>
+            <span className="text-item break-words">{card.title}</span>
             {(working || !ticket) && (
               <CardStatus number={card.number} working={working} />
             )}
@@ -75,12 +82,12 @@ function CardStatus({
 }: Readonly<{ number: number; working: Working | null }>) {
   const last = working?.steps.at(-1);
   return (
-    <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+    <span className="flex min-w-0 items-center gap-1.5 text-tag text-muted-foreground">
       {working ? (
         <>
           <Loader2 className="size-3 shrink-0 animate-spin" aria-hidden />
           <span className="truncate">
-            {last ? shortStep(last) : `${working.who} is ${working.what}`}
+            {last ? shortStep(last) : t(`build:working.${working.job}`)}
           </span>
         </>
       ) : (
@@ -100,14 +107,17 @@ function CardPanel({
       <DialogHeader>
         <DialogTitle className="pr-6 leading-snug">{card.title}</DialogTitle>
         <DialogDescription>
-          #{String(card.number)} · {stage || "No column"}
-          {working && ` · ${working.who} is ${working.what} it`}
+          #{String(card.number)} · {stage || t("build:card.noColumn")}
+          {working && " · "}
+          {working && t(`build:working.${working.job}`)}
         </DialogDescription>
       </DialogHeader>
       {working && (
-        <ol className="grid max-h-72 gap-1 overflow-y-auto rounded-lg bg-muted/60 p-3 text-xs">
+        <ol className="grid max-h-72 gap-1 overflow-y-auto rounded-lg bg-muted/60 p-3 text-tag">
           {working.steps.length === 0 && (
-            <li className="text-muted-foreground">Starting…</li>
+            <li className="text-muted-foreground">
+              {t("build:card.starting")}
+            </li>
           )}
           {working.steps.map((step, index) => (
             <li
@@ -123,17 +133,17 @@ function CardPanel({
         </ol>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button asChild variant="outline" className="h-9 gap-1.5 text-[13px]">
+        <Button asChild variant="outline">
           <a href={card.url} target="_blank" rel="noreferrer">
             <ArrowUpRight className="size-3.5" aria-hidden />
-            Open the card on GitHub
+            {t("build:card.open")}
           </a>
         </Button>
         {card.pullRequest && (
-          <Button asChild variant="outline" className="h-9 gap-1.5 text-[13px]">
+          <Button asChild variant="outline">
             <a href={card.pullRequest} target="_blank" rel="noreferrer">
               <GitPullRequest className="size-3.5" aria-hidden />
-              Open the pull request
+              {t("build:card.pullRequest")}
             </a>
           </Button>
         )}

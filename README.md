@@ -49,8 +49,9 @@ node <this folder>/packages/server/bin/software-factory.ts
 
 Run it in your project. It opens <http://localhost:4300>: where the project
 has no factory yet, the setup page, where the coach reads the code and sets
-up the factory with you on a canvas; then the dashboard, Kobble (Build,
-Explore, Workshop, Settings). The factory lives in the project, in `factory/`, and the
+up the factory with you on a canvas; then the dashboard, Kobble: Overview
+(the first page), Chat, Discovery (Understand, Explore and prototype mode),
+Build (the board), Workshop and Settings. The factory lives in the project, in `factory/`, and the
 project's `AGENTS.md` points to it. Run it anywhere inside the project to
 open its factory; `software-factory new <name>` makes a folder for a new
 idea and sets it up there.
@@ -69,8 +70,8 @@ idea and sets it up there.
 | `examples/acme/`           | An example company's factory folder, used by the tests                                                                                                                                      |
 
 Next: drafting each product's blueprint and the knowledge pages from the code
-for review, the builder on Jira, Explore and
-prototypes, and an upgrade command.
+for review, the builder on Jira, and Discovery's experiments and learnings
+([the proposal](docs/decisions/0001-discovery-and-build.md)).
 
 ## Working on the core
 

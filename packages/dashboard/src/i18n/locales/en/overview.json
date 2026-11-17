@@ -1,0 +1,50 @@
+{
+  "title": "Home",
+  "needs": {
+    "title": "Needs you",
+    "empty": "Nothing waiting for you. All caught up.",
+    "didItWork": "Did it work?",
+    "review": "Check the work",
+    "send": "Send to Build",
+    "vote": "Vote for a version",
+    "look": "Have a look",
+    "said_one": "{{count}} new thing people said",
+    "said_other": "{{count}} new things people said"
+  },
+  "discovery": {
+    "title": "Discovery",
+    "empty": "Nothing open. Add what people said in Understand."
+  },
+  "build": {
+    "title": "Build",
+    "empty": "Nothing is being built right now."
+  },
+  "seeAll": "See all ({{count}})",
+  "open": "Open",
+  "rows": {
+    "new": "New",
+    "didntHold": "Didn't hold",
+    "notClear": "Not clear yet",
+    "didItWork": "Did it work?"
+  },
+  "river": {
+    "title": "How things are moving",
+    "heard": "Heard",
+    "ideas": "Ideas",
+    "sent": "Sent to Build",
+    "inApp": "In the app",
+    "worked": "Worked",
+    "heardWords_one": "{{count}} problem heard",
+    "heardWords_other": "{{count}} problems heard",
+    "ideasWords_one": "{{count}} idea tried",
+    "ideasWords_other": "{{count}} ideas tried",
+    "sentWords": "{{count}} sent to Build",
+    "inAppWords": "{{count}} in the app",
+    "workedWords": "{{count}} worked",
+    "nothing": "Nothing tried yet: start with an idea.",
+    "soFar_one": "{{worked}} of {{count}} idea worked so far",
+    "soFar_other": "{{worked}} of {{count}} ideas worked so far",
+    "building_one": "{{count}} being built",
+    "building_other": "{{count}} being built"
+  }
+}

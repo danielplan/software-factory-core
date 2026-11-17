@@ -1,0 +1,73 @@
+{
+  "title": "Product",
+  "startAll": "Start all",
+  "stopAll": "Stop all",
+  "cantRead": "This can't be shown right now",
+  "didntWork": "That didn't work",
+  "mapLabel": "The pieces of your product",
+  "project": {
+    "connected": "Connected",
+    "sub": "The project the factory works on",
+    "folder": "Folder",
+    "branch": "Branch",
+    "noGit": "Not a git repository",
+    "shared": "Shared on",
+    "local": "Only on this computer",
+    "open": "Show details for the project {{name}}"
+  },
+  "card": {
+    "open": "Show details for {{name}}",
+    "builtWith": "Built with",
+    "usedBy": "Used by",
+    "more": "+{{count}}"
+  },
+  "details": {
+    "label": "Details",
+    "close": "Close"
+  },
+  "light": {
+    "running": "Running",
+    "starting": "Starting",
+    "stopped": "Stopped",
+    "problem": "Something went wrong"
+  },
+  "status": {
+    "outside": "Running, started outside the factory",
+    "with": "Runs together with what uses it"
+  },
+  "buttons": {
+    "start": "Start",
+    "tryAgain": "Try again",
+    "restart": "Restart",
+    "stop": "Stop",
+    "open": "Open"
+  },
+  "problem": {
+    "details": "Technical details"
+  },
+  "groups": {
+    "language": "Language",
+    "interface": "Interface",
+    "server": "Server",
+    "data": "Data",
+    "look": "Look",
+    "checks": "Checks",
+    "tools": "Tools"
+  },
+  "own": {
+    "title": "The factory's own programs"
+  },
+  "panel": {
+    "label": "About this map",
+    "back": "All pieces",
+    "explain": "Each card is a piece; arrows show what needs what.",
+    "legend": "What the dots mean",
+    "pieces_one": "{{count}} piece",
+    "pieces_other": "{{count}} pieces",
+    "running_one": "{{count}} running",
+    "running_other": "{{count}} running",
+    "needsYou_one": "{{count}} needs you",
+    "needsYou_other": "{{count}} need you",
+    "connection": "Connected to {{name}}"
+  }
+}

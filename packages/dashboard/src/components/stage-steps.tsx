@@ -1,10 +1,11 @@
 // A stage as a small pipeline (lib/stages.ts), the same in Understand,
 // Explore and Build. Steps done are filled in a calm teal, the current one
 // larger in its colour, the steps to come empty. Compact on a card (the
-// dots and the current stage's name); whole on a page (every step named,
-// the current one marked).
+// current stage only: its dot and its name); whole on a page (every step
+// named, the current one marked).
 
 import type { StepTone, Steps } from "@/lib/stages";
+import { t } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
 
 const NOW: Record<StepTone, string> = {
@@ -47,26 +48,20 @@ export function StageSteps({
   whole = false,
 }: Readonly<{ steps: Steps; whole?: boolean }>) {
   const { names, at, name, tone } = steps;
-  const label = `Stage: ${name} (${String(at + 1)} of ${String(names.length)})`;
+  const label = t("common:stage.label", {
+    name,
+    at: at + 1,
+    total: names.length,
+  });
+  // On a card: only where it is now, a dot in its colour and its name; the
+  // whole pipeline is on the page.
   if (!whole)
     return (
-      <span className="flex items-center gap-2" role="img" aria-label={label}>
-        <span className="flex items-center gap-[3px]">
-          {names.map((one, index) => (
-            <span key={one} className="flex items-center gap-[3px]">
-              {index > 0 && (
-                <span
-                  aria-hidden
-                  className={cn("h-px w-1.5", line(index <= at))}
-                />
-              )}
-              <Dot state={stateAt(index, at)} tone={tone} />
-            </span>
-          ))}
-        </span>
+      <span className="flex items-center gap-1.5" role="img" aria-label={label}>
+        <Dot state="now" tone={tone} />
         <span
           className={cn(
-            "text-xs font-medium text-foreground-2",
+            "text-tag font-medium text-foreground-2",
             tone === "pink" && "text-open-foreground",
           )}
         >
@@ -98,7 +93,7 @@ export function StageSteps({
           </span>
           <span
             className={cn(
-              "text-[11px] leading-tight text-label",
+              "text-tag text-label",
               index === at && "font-semibold text-foreground",
               index === at && tone === "pink" && "text-open-foreground",
             )}

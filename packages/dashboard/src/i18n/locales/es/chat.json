@@ -1,0 +1,42 @@
+{
+  "title": "Chat",
+  "newChat": "Nuevo chat",
+  "welcome": {
+    "title": "¿Qué te gustaría mejorar?",
+    "about": "Comparte una idea o pregunta por tus usuarios.",
+    "kobold": "El kobold"
+  },
+  "placeholder": {
+    "start": "Describe algo que te gustaría mejorar…",
+    "reply": "Escribe una respuesta…",
+    "steer": "Cambia lo que está haciendo el kobold…"
+  },
+  "disclaimer": "El kobold puede equivocarse.",
+  "composer": {
+    "label": "Tu mensaje",
+    "attach": "Añadir archivos",
+    "attachHint": "Añadir imágenes, PDF o archivos de texto",
+    "send": "Enviar",
+    "uploading": "Subiendo",
+    "remove": "Quitar {{name}}"
+  },
+  "files": {
+    "unreadable": "No se pudo leer este archivo.",
+    "wrongType": "Solo imágenes, PDF y archivos de texto.",
+    "tooLarge": "Demasiado grande: 7 MB como máximo."
+  },
+  "conversation": "La conversación",
+  "thinking": "Estoy pensando",
+  "writing": "Estoy escribiendo la idea",
+  "whoFor": "¿Para quién es?",
+  "noPeople": "Primero añade quién usa tu producto, en Personas.",
+  "done": "Listo: tu equipo puede explorar esta idea.",
+  "yourIdea": "Tu idea",
+  "newOnExplore": "Nueva idea en Explorar",
+  "openIdea": "Abrir la idea",
+  "couldNotWrite": "Lo siento, no pude escribirla: {{why}}",
+  "failed": "Lo siento, algo salió mal: {{why}}",
+  "forPerson": "Para {{name}}",
+  "steering": "Entendido, lo tengo en cuenta y empiezo de nuevo.",
+  "steerTag": "Cambio de rumbo"
+}

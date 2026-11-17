@@ -33,11 +33,16 @@ import {
   suggestPrompt,
 } from "./prompts.ts";
 import { type JobTools, KOBOLD_HEADER, plain } from "./tools.ts";
-import { freeProblems, sortSignal, suggestRealProblem } from "./writes.ts";
+import {
+  freeProblems,
+  said,
+  sortSignal,
+  suggestRealProblem,
+} from "./writes.ts";
 
 export type KoboldJob = {
   id: string;
-  kind: "sort" | "suggest" | "ask" | "seen" | "idea" | "answer";
+  kind: "sort" | "suggest" | "ask" | "seen" | "idea" | "answer" | "check";
   // The signal it sorts, the persona whose problems it reads, the story it
   // asks about, the issue it drafts what was seen for, the persona an own
   // idea is for, or the question it answers.
@@ -60,7 +65,13 @@ export type KoboldOptions = {
   onChange: () => void;
 };
 
-type Running = KoboldJob & { token: string; tools: JobTools | null };
+// A job as the kobold keeps it: its tools' token and tools, and what stops
+// it (a person steering it elsewhere).
+type Running = KoboldJob & {
+  token: string;
+  tools: JobTools | null;
+  stop: AbortController;
+};
 
 const RIGHTS = {
   readOnly: true,
@@ -87,7 +98,13 @@ export class Kobold {
 
   // Newest first.
   view(): KoboldJob[] {
-    return this.jobs.map(({ token: _t, tools: _x, ...job }) => job).reverse();
+    return this.jobs.map(shown).reverse();
+  }
+
+  // Tells the page the jobs again: something they did changed (a check-up's
+  // finding kept, or acted on).
+  changed(): void {
+    this.options.onChange();
   }
 
   // The tools of the job with this token, while it works.
@@ -119,14 +136,25 @@ export class Kobold {
   }
 
   // An answer to a question about the people who use the product, from the
-  // records; it reads them only and writes nothing.
-  async answer(question: string): Promise<string> {
+  // records and the files it came with (attached); it writes nothing.
+  async answer(question: string, attached: string[] = []): Promise<string> {
     if (!question.trim()) throw new Refused("Ask a question first.");
     return await this.drafted(
       this.add("answer", question.trim()),
-      answerPrompt(this.options.records().all(), question),
+      [answerPrompt(this.options.records().all(), question), ...attached].join(
+        "\n",
+      ),
       "Answered a question.",
     );
+  }
+
+  // Stops a job that is working or waits its turn, so a person can send it
+  // elsewhere: Claude Code is closed, and the job ends as stopped.
+  stop(id: string): void {
+    const job = this.jobs.find((one) => one.id === id);
+    if (!job?.working) throw new Refused("That job is not working any more.");
+    job.stop.abort();
+    this.finish(job, null, "Stopped, to go another way.");
   }
 
   // What was seen since an issue went to Build, drafted for "did it work?"
@@ -144,7 +172,7 @@ export class Kobold {
 
   // The story behind a team member's own idea, all guessed, and the idea,
   // written by the kobold (explore skill), after the jobs asked before.
-  imagine(own: OwnIdea): KoboldJob {
+  imagine(own: OwnIdea, attached: string[] = []): KoboldJob {
     const store = this.options.records();
     if (!own.text.trim()) throw new Refused("Say what the idea is first.");
     if (!store.get("personas", own.persona))
@@ -161,7 +189,7 @@ export class Kobold {
       };
       const result = await this.run(
         job,
-        ideaPrompt(store.all(), own),
+        [ideaPrompt(store.all(), own), ...attached].join("\n"),
         "explore",
       );
       if (!result.ok)
@@ -217,6 +245,20 @@ export class Kobold {
     });
   }
 
+  // A check-up of a product (checks/): the check skill and its tool to
+  // report what it finds, after the jobs asked before.
+  check(product: string, prompt: string, tools: JobTools): KoboldJob {
+    const job = this.add("check", product);
+    this.queue(job, async () => {
+      job.tools = tools;
+      const result = await this.run(job, prompt, "check");
+      if (!result.ok)
+        this.finish(job, null, problemOf(result.error ?? "", "The kobold"));
+      else this.finish(job, result.text.trim() || "Checked.", null);
+    });
+    return { ...job };
+  }
+
   // A short text the kobold drafts for a person, with no tools.
   private async draft(
     job: Running,
@@ -257,6 +299,7 @@ export class Kobold {
       problem: null,
       token: randomUUID(),
       tools: null,
+      stop: new AbortController(),
     };
     this.jobs = [...this.jobs, job].slice(-KEPT);
     this.options.onChange();
@@ -266,11 +309,12 @@ export class Kobold {
   // After the jobs asked before; a job that fails says why, and the next
   // one runs anyway.
   private queue(job: Running, work: () => Promise<void>): void {
-    this.line = this.line.then(() =>
-      work().catch((error: unknown) => {
+    this.line = this.line.then(async () => {
+      if (job.stop.signal.aborted) return;
+      await work().catch((error: unknown) => {
         this.finish(job, null, error instanceof Error ? error.message : "");
-      }),
-    );
+      });
+    });
   }
 
   private async run(
@@ -285,6 +329,7 @@ export class Kobold {
       instructions: readFileSync(join(skillsFolder, skill, "SKILL.md"), "utf8"),
       session: { id: randomUUID(), resume: false },
       timeLimitMs: TIME_LIMIT_MS,
+      stop: job.stop.signal,
       ...(job.tools
         ? {
             mcp: {
@@ -303,15 +348,16 @@ export class Kobold {
     });
   }
 
+  // Once: a job stopped by a person keeps saying so when its run ends.
   private finish(job: Running, done: string | null, problem: string | null) {
+    if (!job.working) return;
     Object.assign(job, { working: false, activity: null, done, problem });
     job.tools = null;
     this.options.onChange();
   }
 }
 
-// What a tool did, kept for the job's end, and said to the kobold.
-function said(done: string[], line: string): string {
-  done.push(line);
-  return line;
+// A job as the page sees it: without its token and tools.
+function shown({ token: _t, tools: _x, stop: _s, ...seen }: Running) {
+  return seen;
 }

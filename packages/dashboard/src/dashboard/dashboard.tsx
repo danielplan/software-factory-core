@@ -7,14 +7,19 @@ import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
 import { ExplorePage } from "@/explore/explore-page";
 import { BoardTab } from "@/ideas/board-tab";
-import { movedHash, type Place, placeOf } from "@/lib/routes";
+import { movedHash, type Page, type Place, placeOf } from "@/lib/routes";
 import { PrototypePage } from "@/prototype/prototype-page";
 import { SetupPage } from "@/setup-coach/setup-page";
 import { UnderstandPage } from "@/understand/understand-page";
 
+import { ChatPage } from "@/chat/chat-page";
+import { ChecksPage } from "@/checks/checks-page";
+import { SignalsPage } from "@/signals/signals-page";
+
 import { ComingPage, isComing } from "./coming-page";
+import { OverviewPage } from "./overview-page";
+import { ProductPage } from "@/product/product-page";
 import { SettingsTab } from "./settings-tab";
-import { WorkshopPage } from "./workshop-page";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
@@ -68,12 +73,36 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
       {page === "connect" && (
         <ConnectPage trackers={trackersOf(state.addOns)} />
       )}
-      {isComing(page) && <ComingPage page={page} />}
-      {page === "understand" && <UnderstandPage open={open} />}
-      {page === "explore" && <ExplorePage state={state} open={open} />}
-      {page === "build" && <BoardTab state={state} />}
-      {page === "workshop" && <WorkshopPage state={state} open={open} />}
-      {page === "settings" && <SettingsTab state={state} />}
+      {page !== "connect" && <PageIn page={page} state={state} open={open} />}
     </Shell>
   );
+}
+
+// One page of the dashboard, by its name.
+function PageIn({
+  page,
+  state,
+  open,
+}: Readonly<{ page: Page; state: FactoryState; open: string | null }>) {
+  if (isComing(page)) return <ComingPage page={page} />;
+  switch (page) {
+    case "today":
+      return <OverviewPage state={state} />;
+    case "chat":
+      return <ChatPage />;
+    case "checks":
+      return <ChecksPage />;
+    case "signals":
+      return <SignalsPage open={open} />;
+    case "products":
+      return <ProductPage state={state} />;
+    case "understand":
+      return <UnderstandPage open={open} />;
+    case "explore":
+      return <ExplorePage state={state} open={open} />;
+    case "build":
+      return <BoardTab state={state} />;
+    case "settings":
+      return <SettingsTab state={state} />;
+  }
 }

@@ -1,0 +1,67 @@
+{
+  "problem": "That didn't work",
+  "coachProblem": "The coach couldn't answer",
+  "coach": "The coach",
+  "thinking": "Thinking…",
+  "start": {
+    "placeholder": "What do you want to build?"
+  },
+  "answer": {
+    "label": "Answer the coach",
+    "placeholder": "Answer the coach…",
+    "send": "Send",
+    "talk": "Talk",
+    "talkTitle": "Talk instead of typing"
+  },
+  "about": {
+    "group": "What your message is about",
+    "chip": "About: {{name}}",
+    "remove": "Not about {{name}}"
+  },
+  "action": {
+    "build": "Build the factory",
+    "open": "Open the factory"
+  },
+  "map": {
+    "label": "The map",
+    "whole": "Show the whole map",
+    "remove": "Remove this card",
+    "agreed": "Agreed",
+    "guess": "A guess, not confirmed yet."
+  },
+  "voice": {
+    "end": "End call",
+    "language": "The language you speak",
+    "level": "Your voice",
+    "moment": {
+      "preparing": "Getting ready…",
+      "listening": "Listening",
+      "writing": "Writing it down…",
+      "thinking": "Thinking…",
+      "speaking": "Speaking"
+    },
+    "status": {
+      "download": "Getting the speech model, only the first time (about 0.8 GB): {{percent}}%",
+      "preparing": "Getting ready, don't talk yet…",
+      "listening": "Listening. Go ahead.",
+      "writing": "Writing down what you said…",
+      "thinking": "Got it. Working on it…",
+      "speaking": "Speaking… say “stop” to interrupt."
+    },
+    "noVoice": "There's no {{language}} voice in this browser, so the answers can't be read out loud. Add one in your computer's speech settings, or choose another language.",
+    "problem": {
+      "unsupported": "This browser can't run the speech model. Open the factory in an up-to-date Chrome or Edge.",
+      "blocked": "The browser isn't allowed to use the microphone. Click the icon left of the address bar, allow the microphone, then press Talk again.",
+      "noMicrophone": "No microphone found. Plug one in or connect your headset, then press Talk again.",
+      "microphoneBusy": "Another program is using the microphone. Close it (a call, a recorder), then press Talk again.",
+      "microphoneFailed": "The microphone opened, but its sound couldn't be read. Reload the page and press Talk again.",
+      "download": "The speech model couldn't be downloaded. Check your internet connection, then press Talk again.",
+      "voiceFailed": "The coach's voice couldn't be played, so you won't hear its answers. Check your speakers or headphones, then press Talk again.",
+      "notSent": "Your words couldn't be sent. Please say them again."
+    }
+  },
+  "splash": {
+    "opening": "Opening your factory…",
+    "label": "Kobble is opening"
+  }
+}

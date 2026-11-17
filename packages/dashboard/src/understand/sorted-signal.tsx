@@ -1,39 +1,70 @@
-// A signal the kobold sorted: what was said, where it went and why, with
-// Move (put it elsewhere) and Looks good (a person agrees, and their name
-// goes on it); a bug or an update sent to Build gets a fix ticket. While
-// the kobold works on it, what it is doing.
+// Something people said, that the kobold placed: what was said, where it
+// went (why, on a small (?)), and what a person does with it (signal-actions.tsx: Fix,
+// Explore, Dismiss; agree with where it is, or move it). While the kobold
+// works on it, what it is doing.
 
+import { CircleHelp } from "lucide-react";
+import { Tooltip } from "radix-ui";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { type KoboldJob, messageOf, post, type SignalView } from "@/api";
-import { FixTicketFor } from "@/build/fix-ticket";
-import { ProblemBox } from "@/components/problem-box";
-import { Button } from "@/components/ui/button";
+import type { KoboldJob, SignalView } from "@/api";
+import { cn } from "@/lib/utils";
 
 import { MoveForm } from "./move-form";
+import { SignalActions } from "./signal-actions";
 import { wentWords } from "./view";
 
+// In a story's own page (inStory) it says nothing of where it went: that is
+// the story shown.
 export function SortedSignal({
   signal,
   job,
-}: Readonly<{ signal: SignalView; job?: KoboldJob }>) {
+  inStory = false,
+}: Readonly<{ signal: SignalView; job?: KoboldJob; inStory?: boolean }>) {
+  const { t } = useTranslation("understand");
   const [moving, setMoving] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const went = wentWords(signal);
   const from = [signal.sourceName, signal.whoName, signal.when].filter(Boolean);
-  const agree = async () => {
-    setProblem(null);
-    try {
-      await post("/api/understand/looks-good", { signal: signal.id });
-    } catch (error) {
-      setProblem(messageOf(error));
-    }
-  };
   return (
-    <div className="grid gap-1.5 border-t border-border-soft pt-2.5 sm:pl-10">
-      <p className="text-sm">{signal.text}</p>
-      <p className="text-xs text-muted-foreground">From {from.join(" · ")}</p>
-      <p className="flex flex-wrap items-center gap-x-2 text-sm">
+    <div
+      className={cn(
+        "grid gap-1.5 border-t border-border-soft pt-2.5",
+        !inStory && "sm:pl-10",
+      )}
+    >
+      <p className="text-item">{signal.text}</p>
+      <p className="text-note text-muted-foreground">
+        {t("signal.from", { where: from.join(" · ") })}
+      </p>
+      {!inStory && <Went signal={signal} />}
+      {/* Why the kobold could not sort it, while it is still not sorted. */}
+      <JobLine job={job?.working || signal.went === null ? job : undefined} />
+      <SignalActions
+        signal={signal}
+        moving={moving}
+        onMove={() => {
+          setMoving(!moving);
+        }}
+      />
+      {moving && (
+        <MoveForm
+          signal={signal}
+          onMoved={() => {
+            setMoving(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Where it went, who it sounds like, and why.
+function Went({ signal }: Readonly<{ signal: SignalView }>) {
+  const { t } = useTranslation("understand");
+  const went = wentWords(signal);
+  return (
+    <>
+      <p className="flex flex-wrap items-center gap-x-2 text-body">
         <span aria-hidden>→</span>
         {went.href ? (
           <a
@@ -47,56 +78,57 @@ export function SortedSignal({
         )}
         {signal.soundsLikeName && (
           <span className="text-muted-foreground">
-            · sounds like {signal.soundsLikeName}
+            · {t("signal.soundsLike", { name: signal.soundsLikeName })}
           </span>
         )}
+        {signal.why && <Why why={signal.why} />}
       </p>
-      {signal.why && (
-        <p className="text-xs text-muted-foreground">{signal.why}</p>
-      )}
-      {/* Why the kobold could not sort it, while it is still not sorted. */}
-      <JobLine job={job?.working || signal.went === null ? job : undefined} />
-      <div className="flex gap-2 pt-0.5">
-        <Button
-          variant="outline"
-          size="xs"
-          aria-expanded={moving}
-          onClick={() => {
-            setMoving(!moving);
-          }}
-        >
-          Move
-        </Button>
-        {signal.went !== null && signal.by === "kobold" && (
-          <Button variant="outline" size="xs" onClick={() => void agree()}>
-            Looks good
-          </Button>
-        )}
-        <FixTicketFor signal={signal} />
-      </div>
-      {moving && (
-        <MoveForm
-          signal={signal}
-          onMoved={() => {
-            setMoving(false);
-          }}
-        />
-      )}
-      {problem && <ProblemBox title="That did not work" text={problem} />}
-    </div>
+    </>
+  );
+}
+
+// Why the kobold placed it there: on hover or focus of a small (?).
+export function Why({ why }: Readonly<{ why: string }>) {
+  const { t } = useTranslation("understand");
+  return (
+    <Tooltip.Provider delayDuration={150}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button
+            type="button"
+            aria-label={t("signal.why", { why })}
+            className="inline-grid size-5 place-items-center rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <CircleHelp aria-hidden className="size-3.5" />
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            side="top"
+            sideOffset={6}
+            className="z-50 max-w-xs rounded-xl bg-popover px-3.5 py-2.5 text-note text-popover-foreground shadow-[0_0_0_1px_var(--border),var(--shadow-big)]"
+          >
+            {why}
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
   );
 }
 
 // What the kobold is doing with it, or why it could not.
 export function JobLine({ job }: Readonly<{ job?: KoboldJob }>) {
+  const { t } = useTranslation("understand");
   if (!job) return null;
   if (job.working)
     return (
-      <p className="animate-breathe text-xs text-primary" role="status">
-        The kobold is sorting it{job.activity ? `: ${job.activity}` : "…"}
+      <p className="animate-breathe text-tag text-primary" role="status">
+        {job.activity
+          ? t("signal.readingWhat", { what: job.activity })
+          : t("signal.reading")}
       </p>
     );
   return job.problem ? (
-    <p className="text-xs text-destructive">{job.problem}</p>
+    <p className="text-tag text-destructive">{job.problem}</p>
   ) : null;
 }

@@ -1,6 +1,7 @@
 import type { GroupView } from "@/api";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
+import { t } from "@/i18n/i18n";
 
 // A secret the server says is set; its value is never sent to the page.
 const SECRET_SET = "(set)";
@@ -27,7 +28,7 @@ export function SettingInput({
       {field.kind === "choice" ? (
         <select
           id={id}
-          className="h-10 rounded-[10px] border border-input bg-card px-2 text-sm"
+          className="h-10 rounded-[10px] border border-input bg-card px-2 text-body"
           value={shown}
           onChange={(event) => {
             onType(event.target.value);
@@ -62,8 +63,8 @@ function describe(field: SettingView, typed: string | undefined) {
   const secret = field.kind === "secret";
   const set = secret && field.value === SECRET_SET;
   return {
-    label: set ? `${field.label} (set)` : field.label,
-    help: set ? `${field.help} Type a new one to replace it.` : field.help,
+    label: set ? t("settings:group.set", { label: field.label }) : field.label,
+    help: set ? t("settings:group.replace", { help: field.help }) : field.help,
     shown: typed ?? (secret ? "" : (field.value ?? "")),
   };
 }

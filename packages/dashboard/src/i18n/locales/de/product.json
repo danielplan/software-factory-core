@@ -1,0 +1,73 @@
+{
+  "title": "Produkt",
+  "startAll": "Alle starten",
+  "stopAll": "Alle stoppen",
+  "cantRead": "Das lässt sich gerade nicht anzeigen",
+  "didntWork": "Das hat nicht geklappt",
+  "mapLabel": "Die Teile deines Produkts",
+  "project": {
+    "connected": "Verbunden",
+    "sub": "Das Projekt, an dem die Factory arbeitet",
+    "folder": "Ordner",
+    "branch": "Branch",
+    "noGit": "Kein Git-Repository",
+    "shared": "Geteilt auf",
+    "local": "Nur auf diesem Computer",
+    "open": "Details zum Projekt {{name}} zeigen"
+  },
+  "card": {
+    "open": "Details zu {{name}} zeigen",
+    "builtWith": "Gebaut mit",
+    "usedBy": "Genutzt von",
+    "more": "+{{count}}"
+  },
+  "details": {
+    "label": "Details",
+    "close": "Schließen"
+  },
+  "light": {
+    "running": "Läuft",
+    "starting": "Startet",
+    "stopped": "Gestoppt",
+    "problem": "Etwas stimmt nicht"
+  },
+  "status": {
+    "outside": "Läuft, außerhalb der Factory gestartet",
+    "with": "Läuft zusammen mit dem, was es nutzt"
+  },
+  "buttons": {
+    "start": "Starten",
+    "tryAgain": "Nochmal versuchen",
+    "restart": "Neu starten",
+    "stop": "Stoppen",
+    "open": "Öffnen"
+  },
+  "problem": {
+    "details": "Technische Details"
+  },
+  "groups": {
+    "language": "Sprache",
+    "interface": "Oberfläche",
+    "server": "Server",
+    "data": "Daten",
+    "look": "Aussehen",
+    "checks": "Prüfungen",
+    "tools": "Werkzeuge"
+  },
+  "own": {
+    "title": "Die eigenen Programme der Factory"
+  },
+  "panel": {
+    "label": "Was diese Karte zeigt",
+    "back": "Alle Teile",
+    "explain": "Jede Karte ist ein Teil; Pfeile zeigen, was was braucht.",
+    "legend": "Was die Punkte bedeuten",
+    "pieces_one": "{{count}} Teil",
+    "pieces_other": "{{count}} Teile",
+    "running_one": "{{count}} läuft",
+    "running_other": "{{count}} laufen",
+    "needsYou_one": "{{count}} braucht dich",
+    "needsYou_other": "{{count}} brauchen dich",
+    "connection": "Verbunden mit {{name}}"
+  }
+}

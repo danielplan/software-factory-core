@@ -7,20 +7,20 @@ included, plugs in the same way.
 
 ## The layers
 
-| Layer                      | Who owns it                              | What                                                                                                                                                                             | Where                                                                                         |
-| -------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                                                          | `packages/core`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
-| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Explore (ideas) and prototypes, Build (the board with its coach and builder), Workshop (the system and the add-ons) | to come                                                                                       |
-| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                                               | to come                                                                                       |
-| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                                                          | to come                                                                                       |
-| **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                                                           | the company's repository                                                                      |
+| Layer                      | Who owns it                              | What                                                                                                                                                                             | Where                                                                                                               |
+| -------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                                                          | `packages/core`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard/src/voice`                       |
+| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Explore (ideas) and prototypes, Build (the board with its coach and builder), Workshop (the system and the add-ons) | `packages/server/src/explore/`, `prototypes/`, `builder/` and their dashboard pages; not yet packaged as extensions |
+| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                                               | `packages/server/src/add-ons/` (the GitHub board, Jira Cloud); made-up worlds to come                               |
+| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                                                          | `packages/kits/`                                                                                                    |
+| **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                                                           | the company's repository                                                                                            |
 
 The rule for any piece: if it would be true for a different company, it is
 core, an extension or a kit; otherwise it is the company's.
 
 ## Setting up a factory
 
-One command, run in the project (`npx software-factory`, to come), opens
+One command, run in the project (`npx software-factory`), opens
 the dashboard in the browser. Where the project has no factory yet, it
 starts with setting up: one conversation and one map, in two steps.
 **The setup coach** (Claude Code on this computer, signed in with the
@@ -198,9 +198,19 @@ confirms: what it wrote says `by: kobold` until a person moves the signal
 (`POST /api/understand/looks-good`) or confirms the real problem
 (`POST /api/understand/confirm`); their name in git then goes on it. A
 person adds a source at `POST /api/sources`. The dashboard's Understand page
-(`packages/dashboard/src/understand/`) shows the three levels, every persona,
-one persona and one story, at `#understand`, `#understand/<persona>` and
-`#understand/<persona>/<story>`.
+(`packages/dashboard/src/understand/`), called Personas, shows three
+levels: every persona in one list, one persona (their problems, what people
+like them said, and the tests to come), and one story as a timeline, at `#understand`, `#understand/<persona>` and
+`#understand/<persona>/<story>`. What came in and nobody has looked at yet is
+on Signals (`#signals`), to fix, explore or dismiss.
+
+The dashboard's Chat (`packages/server/src/chat/`) asks the same kobold
+jobs with files: `POST /api/chat/attachments` keeps a picture, a PDF or a
+text file in `factory/attachments/` (kept out of git), under a name the
+factory makes; `POST /api/chat/question` and `/idea` start an answer or an
+idea with them (a text file goes into the prompt, a picture or a PDF is
+named for the kobold to open with Read); `POST /api/chat/stop` stops a job,
+so the person can steer it with what they add.
 
 ### Explore and prototype mode
 

@@ -1,36 +1,38 @@
-// Understand: the people this product is for, their stories, and where
-// things break for them, in three levels with a breadcrumb: every persona
-// (#understand), one persona (#understand/<persona>), one of their stories
-// (#understand/<persona>/<story>). Each level asks one question under its
-// title, so it is clear what to do there. What is shown is read again
-// whenever the records change. "Add a source" brings in something that
-// came in.
+// Personas (#understand): who uses the product, in three levels with a
+// breadcrumb: every persona as a row (#understand), one persona with their
+// problems, what people like them said and their tests
+// (#understand/<persona>), one of their stories, step by step
+// (#understand/<persona>/<story>). What is shown is read again whenever the
+// records change. What comes in is added and looked at on Signals.
+
+import { useTranslation } from "react-i18next";
 
 import type { SignalView, StoryPage } from "@/api";
 import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
 import { understandHash, understandOf } from "@/lib/routes";
 
-import { AddSource } from "./add-source";
 import { Overview } from "./overview";
 import { PersonaView } from "./persona-view";
 import { StoryView } from "./story-view";
 import { useOverview, usePersona, useStory } from "./use-records";
 import { tintOf } from "./view";
 
-const HOME = { name: "Understand", href: understandHash() };
+// The breadcrumb's first step.
+function useHome() {
+  const { t } = useTranslation("understand");
+  return { name: t("page.title"), href: understandHash() };
+}
 
 export function UnderstandPage({ open }: Readonly<{ open: string | null }>) {
+  const { t } = useTranslation("understand");
+  const home = useHome();
   const { persona, story } = understandOf(open);
   const { data: overview, problem } = useOverview();
   // Each persona keeps their colour on every level.
   const order = overview?.personas.map((card) => card.persona.id) ?? [];
   const tint = (id: string) => tintOf(Math.max(order.indexOf(id), 0));
-  const personaName = (id: string) =>
-    overview?.personas.find((card) => card.persona.id === id)?.persona.name ??
-    id;
-  if (problem)
-    return <ProblemBox title="The records cannot be read" text={problem} />;
+  if (problem) return <ProblemBox title={t("page.cantRead")} text={problem} />;
   if (story)
     return (
       <StoryLevel
@@ -42,15 +44,8 @@ export function UnderstandPage({ open }: Readonly<{ open: string | null }>) {
   if (persona) return <PersonaLevel id={persona} tint={tint} />;
   return (
     <div className="grid content-start gap-4">
-      <PageHead
-        crumbs={[HOME]}
-        title="Understand"
-        about="What’s new to look at?"
-        actions={<AddSource />}
-      />
-      {overview && (
-        <Overview overview={overview} tint={tint} personaName={personaName} />
-      )}
+      <PageHead crumbs={[home]} title={t("page.title")} />
+      {overview && <Overview overview={overview} tint={tint} />}
     </div>
   );
 }
@@ -59,23 +54,16 @@ function PersonaLevel({
   id,
   tint,
 }: Readonly<{ id: string; tint: (id: string) => string }>) {
+  const { t } = useTranslation("understand");
+  const home = useHome();
   const { data, problem } = usePersona(id);
   if (problem)
-    return <ProblemBox title="This persona cannot be shown" text={problem} />;
+    return <ProblemBox title={t("page.personCantShow")} text={problem} />;
   if (!data) return null;
   const { persona } = data;
   return (
     <div className="grid content-start gap-4">
-      <PageHead
-        crumbs={[HOME, { name: persona.name }]}
-        title={persona.name}
-        about={
-          data.realProblems.length > 0
-            ? `Is this the real problem for ${persona.name}?`
-            : `What is the real problem for ${persona.name}?`
-        }
-        actions={<AddSource />}
-      />
+      <PageHead crumbs={[home, { name: persona.name }]} title={persona.name} />
       <PersonaView page={data} tint={tint(persona.id)} />
     </div>
   );
@@ -90,22 +78,22 @@ function StoryLevel({
   tint: (id: string) => string;
   toLookAt: SignalView[];
 }>) {
+  const { t } = useTranslation("understand");
+  const home = useHome();
   const { data, problem } = useStory(id);
   if (problem)
-    return <ProblemBox title="This story cannot be shown" text={problem} />;
+    return <ProblemBox title={t("page.storyCantShow")} text={problem} />;
   if (!data) return null;
   const { persona, story } = data;
   return (
     <div className="grid content-start gap-4">
       <PageHead
         crumbs={[
-          HOME,
+          home,
           { name: persona.name, href: understandHash(persona.id) },
           { name: story.title },
         ]}
         title={story.title}
-        about="Is this how it happens? What is still guessed?"
-        actions={<AddSource />}
       />
       <StoryView
         page={data}

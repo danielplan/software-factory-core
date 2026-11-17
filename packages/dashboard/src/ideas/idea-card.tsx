@@ -4,6 +4,7 @@ import type { IdeaView } from "@/api";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+import { i18next, t } from "../i18n/i18n.ts";
 import { stageOf } from "./stages";
 
 // An idea as a card: its title, and whether the factory is working on it
@@ -21,12 +22,12 @@ export function IdeaCard({
     <a
       href={`#explore/${idea.id}`}
       className={cn(
-        "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft hover:shadow-lift",
+        "grid gap-1.5 rounded-xl bg-card p-3 shadow-soft transition-shadow hover:shadow-lift",
         idea.working && "ring-2 ring-tint-line",
       )}
     >
       <span className="flex items-start gap-2">
-        <span className="flex-1 text-sm font-medium">{idea.title}</span>
+        <span className="flex-1 text-item">{idea.title}</span>
         {status && (
           <Badge
             className="border-transparent"
@@ -35,15 +36,17 @@ export function IdeaCard({
               background: `color-mix(in oklab, ${stage.colour} 14%, transparent)`,
             }}
           >
-            {stage.title === "Draft" ? "Draft" : "Ready"}
+            {stage.id === "draft"
+              ? t("build:idea.draft")
+              : t("build:idea.ready")}
           </Badge>
         )}
       </span>
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1.5 text-tag text-muted-foreground">
         {idea.working ? (
           <>
-            <Loader2 className="size-3 animate-spin" aria-hidden /> Working on
-            it…
+            <Loader2 className="size-3 animate-spin" aria-hidden />{" "}
+            {t("build:idea.working")}
           </>
         ) : (
           when(idea.updated)
@@ -53,14 +56,16 @@ export function IdeaCard({
   );
 }
 
-// "Today, 10:24", or the date.
+// "Today, 10:24", or the date, written the way the dashboard's language
+// writes them.
 function when(iso: string): string {
   const date = new Date(iso);
-  const time = date.toLocaleTimeString([], {
+  const language = i18next.language;
+  const time = date.toLocaleTimeString(language, {
     hour: "2-digit",
     minute: "2-digit",
   });
   return date.toDateString() === new Date().toDateString()
-    ? `Today, ${time}`
-    : date.toLocaleDateString();
+    ? t("build:idea.today", { time })
+    : date.toLocaleDateString(language);
 }

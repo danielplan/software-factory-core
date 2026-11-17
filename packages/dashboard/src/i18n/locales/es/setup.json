@@ -1,0 +1,67 @@
+{
+  "problem": "No ha funcionado",
+  "coachProblem": "El coach no pudo responder",
+  "coach": "El coach",
+  "thinking": "Pensando…",
+  "start": {
+    "placeholder": "¿Qué quieres construir?"
+  },
+  "answer": {
+    "label": "Responder al coach",
+    "placeholder": "Responde al coach…",
+    "send": "Enviar",
+    "talk": "Hablar",
+    "talkTitle": "Hablar en vez de escribir"
+  },
+  "about": {
+    "group": "De qué trata tu mensaje",
+    "chip": "Sobre: {{name}}",
+    "remove": "No sobre {{name}}"
+  },
+  "action": {
+    "build": "Construir la factory",
+    "open": "Abrir la factory"
+  },
+  "map": {
+    "label": "El mapa",
+    "whole": "Ver todo el mapa",
+    "remove": "Quitar esta tarjeta",
+    "agreed": "Confirmada",
+    "guess": "Una suposición, aún sin confirmar."
+  },
+  "voice": {
+    "end": "Colgar",
+    "language": "El idioma en que hablas",
+    "level": "Tu voz",
+    "moment": {
+      "preparing": "Preparándome…",
+      "listening": "Te escucho",
+      "writing": "Lo apunto…",
+      "thinking": "Pensando…",
+      "speaking": "Hablando"
+    },
+    "status": {
+      "download": "Descargando el modelo de voz, solo la primera vez (unos 0,8 GB): {{percent}} %",
+      "preparing": "Preparándome, no hables todavía…",
+      "listening": "Te escucho. Adelante.",
+      "writing": "Apuntando lo que dijiste…",
+      "thinking": "Entendido. Trabajando en ello…",
+      "speaking": "Hablando… di «stop» para interrumpirme."
+    },
+    "noVoice": "Este navegador no tiene una voz en {{language}}, así que las respuestas no se pueden leer en voz alta. Añade una en los ajustes de voz del ordenador o elige otro idioma.",
+    "problem": {
+      "unsupported": "Este navegador no puede ejecutar el modelo de voz. Abre la factory en un Chrome o Edge actualizado.",
+      "blocked": "El navegador no tiene permiso para usar el micrófono. Haz clic en el icono a la izquierda de la dirección, permite el micrófono y vuelve a pulsar Hablar.",
+      "noMicrophone": "No se encontró ningún micrófono. Conecta uno o tus auriculares y vuelve a pulsar Hablar.",
+      "microphoneBusy": "Otro programa está usando el micrófono. Ciérralo (una llamada, una grabadora) y vuelve a pulsar Hablar.",
+      "microphoneFailed": "El micrófono se abrió, pero no se puede leer su sonido. Recarga la página y vuelve a pulsar Hablar.",
+      "download": "No se pudo descargar el modelo de voz. Revisa la conexión a internet y vuelve a pulsar Hablar.",
+      "voiceFailed": "No se puede reproducir la voz del coach, así que no oirás sus respuestas. Revisa los altavoces o auriculares y vuelve a pulsar Hablar.",
+      "notSent": "No se pudieron enviar tus palabras. Repítelas, por favor."
+    }
+  },
+  "splash": {
+    "opening": "Abriendo tu factory…",
+    "label": "Kobble se está abriendo"
+  }
+}

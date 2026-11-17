@@ -1,9 +1,11 @@
-// How much of a story is seen, in a line ("3 of 4 parts seen · 1
-// guessed"), and, while parts are guessed, the kobold's offer: Ask drafts a
-// short message for two people like the persona, to copy and send.
+// How much of a story people confirmed, in a line ("3 of 4 steps
+// confirmed · 1 guessed"), and, while steps are guessed, the kobold's
+// offer: Ask drafts a short message for two people like this person, to
+// copy and send.
 
 import { Copy } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -23,6 +25,7 @@ export function AskLine({
   persona: string;
   canAsk: boolean;
 }>) {
+  const { t } = useTranslation("understand");
   const [asking, setAsking] = useState(false);
   const [question, setQuestion] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -50,8 +53,8 @@ export function AskLine({
   return (
     <div className="grid gap-2.5 border-t border-border-soft pt-3.5">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="flex-1 text-[13px] text-muted-foreground">
-          {asking ? "The kobold is writing a question…" : knownWords(known)}
+        <span className="flex-1 text-note text-muted-foreground">
+          {asking ? t("ask.writing") : knownWords(known)}
         </span>
         {guessed && canAsk && (
           <Button
@@ -61,13 +64,13 @@ export function AskLine({
             onClick={() => void ask()}
           >
             <KoboldMark className="size-5" />
-            {question ? "Ask again" : `Ask two people like ${persona}`}
+            {question ? t("ask.again") : t("ask.ask", { name: persona })}
           </Button>
         )}
       </div>
       {question && (
         <div className="grid gap-2 rounded-xl bg-tint px-3.5 py-3">
-          <p className="text-sm whitespace-pre-wrap">{question}</p>
+          <p className="text-body whitespace-pre-wrap">{question}</p>
           <Button
             variant="outline"
             size="xs"
@@ -75,13 +78,11 @@ export function AskLine({
             onClick={() => void copy()}
           >
             <Copy aria-hidden />
-            {copied ? "Copied" : "Copy to send"}
+            {copied ? t("ask.copied") : t("ask.copy")}
           </Button>
         </div>
       )}
-      {problem && (
-        <ProblemBox title="The kobold could not draft it" text={problem} />
-      )}
+      {problem && <ProblemBox title={t("ask.cantDraft")} text={problem} />}
     </div>
   );
 }

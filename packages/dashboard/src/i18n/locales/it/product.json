@@ -1,0 +1,73 @@
+{
+  "title": "Prodotto",
+  "startAll": "Avvia tutto",
+  "stopAll": "Ferma tutto",
+  "cantRead": "Al momento non si può mostrare",
+  "didntWork": "Non ha funzionato",
+  "mapLabel": "I pezzi del tuo prodotto",
+  "project": {
+    "connected": "Collegato",
+    "sub": "Il progetto su cui lavora la factory",
+    "folder": "Cartella",
+    "branch": "Branch",
+    "noGit": "Non è un repository git",
+    "shared": "Condiviso su",
+    "local": "Solo su questo computer",
+    "open": "Mostra i dettagli del progetto {{name}}"
+  },
+  "card": {
+    "open": "Mostra i dettagli di {{name}}",
+    "builtWith": "Fatto con",
+    "usedBy": "Usato da",
+    "more": "+{{count}}"
+  },
+  "details": {
+    "label": "Dettagli",
+    "close": "Chiudi"
+  },
+  "light": {
+    "running": "Attivo",
+    "starting": "In avvio",
+    "stopped": "Fermo",
+    "problem": "Qualcosa non va"
+  },
+  "status": {
+    "outside": "Attivo, avviato fuori dalla factory",
+    "with": "Gira insieme a chi lo usa"
+  },
+  "buttons": {
+    "start": "Avvia",
+    "tryAgain": "Riprova",
+    "restart": "Riavvia",
+    "stop": "Ferma",
+    "open": "Apri"
+  },
+  "problem": {
+    "details": "Dettagli tecnici"
+  },
+  "groups": {
+    "language": "Linguaggio",
+    "interface": "Interfaccia",
+    "server": "Server",
+    "data": "Dati",
+    "look": "Aspetto",
+    "checks": "Controlli",
+    "tools": "Strumenti"
+  },
+  "own": {
+    "title": "I programmi della factory"
+  },
+  "panel": {
+    "label": "Cos'è questa mappa",
+    "back": "Tutti i pezzi",
+    "explain": "Ogni card è un pezzo; le frecce mostrano chi serve a chi.",
+    "legend": "Cosa vogliono dire i pallini",
+    "pieces_one": "{{count}} pezzo",
+    "pieces_other": "{{count}} pezzi",
+    "running_one": "{{count}} attivo",
+    "running_other": "{{count}} attivi",
+    "needsYou_one": "{{count}} ha bisogno di te",
+    "needsYou_other": "{{count}} hanno bisogno di te",
+    "connection": "Collegato a {{name}}"
+  }
+}

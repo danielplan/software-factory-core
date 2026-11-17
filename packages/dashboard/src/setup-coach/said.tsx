@@ -54,12 +54,12 @@ const PARTS: Components = {
   h2: ({ children }) => <p className="font-semibold">{children}</p>,
   h3: ({ children }) => <p className="font-semibold">{children}</p>,
   code: ({ children }) => (
-    <code className="rounded bg-surface-2 px-1 py-0.5 text-[0.92em]">
+    <code className="rounded bg-surface-2 px-1 py-0.5 text-note">
       {children}
     </code>
   ),
   pre: ({ children }) => (
-    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-3 text-[0.92em] [&_code]:bg-transparent [&_code]:p-0">
+    <pre className="overflow-x-auto rounded-lg bg-surface-2 p-3 text-note [&_code]:bg-transparent [&_code]:p-0">
       {children}
     </pre>
   ),
@@ -71,7 +71,7 @@ const PARTS: Components = {
   hr: () => <hr className="border-border" />,
   table: ({ children }) => (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-left text-[0.92em]">
+      <table className="w-full border-collapse text-left text-note">
         {children}
       </table>
     </div>

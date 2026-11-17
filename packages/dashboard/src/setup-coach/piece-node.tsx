@@ -1,6 +1,7 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { CircleCheck, Trash2 } from "lucide-react";
 import { use } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -41,7 +42,7 @@ export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
           !placed && "opacity-0",
         )}
       >
-        <h2 className="piece-handle cursor-grab px-4 pt-3.5 text-sm font-semibold text-muted-foreground">
+        <h2 className="piece-handle cursor-grab px-4 pt-3.5 text-tag tracking-[0.04em] text-muted-foreground uppercase">
           {piece.title}
         </h2>
       </section>
@@ -69,10 +70,11 @@ export function PieceNodeView({ id, data }: NodeProps<PieceNode>) {
 
 function TakeOff({ id }: Readonly<{ id: string }>) {
   const change = use(CanvasChange);
+  const { t } = useTranslation("setup");
   return (
     <button
       type="button"
-      aria-label="Take the card off the map"
+      aria-label={t("map.remove")}
       className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-lg bg-card text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-surface-2 hover:text-foreground focus-visible:opacity-100 [&_svg]:size-3.5"
       onClick={() => {
         change({ remove: id });
@@ -90,6 +92,7 @@ function CardBody({ card }: Readonly<{ card: Card }>) {
   const { title, text, icon, picture, tone, confirmed } = card;
   const named = icon ?? (tone ? TONE_ICON[tone] : undefined);
   const Icon = named ? ICON[named] : null;
+  const { t } = useTranslation("setup");
   return (
     <div className="grid gap-1.5">
       {picture && (
@@ -99,7 +102,7 @@ function CardBody({ card }: Readonly<{ card: Card }>) {
           className="max-h-56 w-full rounded-lg bg-surface-2 object-contain"
         />
       )}
-      <span className="flex items-center gap-2 pr-6 text-[15px] leading-snug font-medium">
+      <span className="flex items-center gap-2 pr-6 text-item">
         {Icon && (
           <span className="flex size-8 flex-none items-center justify-center rounded-full bg-tint text-primary [&_svg]:size-4">
             <Icon aria-hidden />
@@ -108,19 +111,13 @@ function CardBody({ card }: Readonly<{ card: Card }>) {
         {title}
         {confirmed && (
           <CircleCheck
-            aria-label="Agreed"
+            aria-label={t("map.agreed")}
             className="size-4 flex-none text-success"
           />
         )}
       </span>
-      {text && (
-        <span className="text-[13px] leading-snug text-muted-foreground">
-          {text}
-        </span>
-      )}
-      {!confirmed && (
-        <span className="sr-only">A guess, not yet confirmed.</span>
-      )}
+      {text && <span className="text-note text-muted-foreground">{text}</span>}
+      {!confirmed && <span className="sr-only">{t("map.guess")}</span>}
     </div>
   );
 }

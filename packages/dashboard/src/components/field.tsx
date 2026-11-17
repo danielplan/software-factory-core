@@ -20,9 +20,9 @@ export function Field({
     <div className="grid gap-1.5">
       <Label htmlFor={id}>{label}</Label>
       {children}
-      {help && <p className="text-xs text-muted-foreground">{help}</p>}
+      {help && <p className="text-tag text-muted-foreground">{help}</p>}
       {problem && (
-        <p role="alert" className="text-xs text-destructive">
+        <p role="alert" className="text-tag text-destructive">
           {problem}
         </p>
       )}

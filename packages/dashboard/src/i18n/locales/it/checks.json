@@ -1,0 +1,54 @@
+{
+  "title": "Controllo",
+  "start": {
+    "title": "Controlla il mio prodotto",
+    "lead": "Il kobold percorre il tuo prodotto cercando bug, errori e cose difficili da usare, e te le spiega con parole semplici.",
+    "time": "Ci vuole qualche minuto",
+    "safe": "Non viene modificato nulla",
+    "local": "Gira su questo computer",
+    "button": "Avvia il controllo",
+    "again": "Controlla di nuovo",
+    "one": "Controlla {{name}}"
+  },
+  "running": {
+    "title": "Il kobold sta controllando {{name}}…",
+    "looking": "Si sta guardando intorno…",
+    "found_one": "{{count}} cosa trovata finora",
+    "found_other": "{{count}} cose trovate finora",
+    "stop": "Ferma"
+  },
+  "results": {
+    "last": "Ultimo controllo: {{when}}",
+    "toLook_one": "{{count}} cosa da guardare",
+    "toLook_other": "{{count}} cose da guardare",
+    "clear": "Niente di preoccupante",
+    "handled": "Già gestite ({{count}})",
+    "failed": "Il controllo di {{name}} non è riuscito a finire: {{why}}",
+    "stopped": "Il controllo di {{name}} è stato fermato prima della fine."
+  },
+  "severity": {
+    "high": "Grave",
+    "medium": "Da sistemare",
+    "low": "Piccola"
+  },
+  "kind": {
+    "bug": "Bug",
+    "error": "Errore",
+    "ux": "Difficile da usare",
+    "security": "Sicurezza",
+    "performance": "Lento"
+  },
+  "finding": {
+    "fix": "Come sistemarlo",
+    "where": "Dove",
+    "in": "In {{name}}",
+    "send": "Manda a Build",
+    "dismiss": "Non è un problema",
+    "sent": "In Build come #{{issue}}",
+    "waiting": "In Build. Per farne un ticket, collega una board GitHub nelle Impostazioni.",
+    "onBuild": "In Build",
+    "dismissed": "Messa da parte"
+  },
+  "problem": "Non ha funzionato: {{why}}",
+  "crumbSignals": "Segnali"
+}

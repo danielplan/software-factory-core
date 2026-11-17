@@ -1,7 +1,8 @@
-import { ArrowUpRight } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 
 import type { FactoryState } from "@/dashboard/dashboard";
 import { STAGES } from "@/ideas/stages";
+import { t } from "@/i18n/i18n";
 
 type Entry = FactoryState["board"][string];
 
@@ -16,22 +17,28 @@ export function ConnectedBoard({
   const board = boardOf(state);
   if (!board) return null;
   const { name, href, entry } = board;
+  const all = entry.label === "*";
+  const tracked = all ? "board.trackedAll" : "board.trackedLabel";
+  const connected = all ? "board.connectedAll" : "board.connectedLabel";
+  const key = brief ? tracked : connected;
   return (
     <div className="grid gap-3">
-      <p className="text-sm">
-        {brief ? "Your work is tracked on " : "Connected to "}
-        <a
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-0.5 font-medium text-primary underline-offset-2 transition-colors hover:underline"
-        >
-          {name}
-          <ArrowUpRight className="size-3.5" aria-hidden />
-        </a>
-        {entry.label === "*"
-          ? ", all of its work."
-          : `, the work labelled “${entry.label}”.`}
+      <p className="text-body">
+        <Trans
+          ns="settings"
+          i18nKey={key}
+          values={{ name, label: entry.label }}
+          components={{
+            link: (
+              <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-0.5 font-medium text-primary underline-offset-2 transition-colors hover:underline"
+              />
+            ),
+          }}
+        />
       </p>
       {!brief && <StageColumns entry={entry} />}
     </div>
@@ -39,14 +46,15 @@ export function ConnectedBoard({
 }
 
 function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
+  const { t } = useTranslation("settings");
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Stages and columns">
+    <ul className="flex flex-wrap gap-2" aria-label={t("board.stages")}>
       {STAGES.filter((stage) => stage.id !== "draft").map((stage) => {
         const column = (entry.stages as Record<string, string>)[stage.id];
         return (
           <li
             key={stage.id}
-            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs"
+            className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-tag"
           >
             <span
               aria-hidden
@@ -55,7 +63,7 @@ function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
             />
             {stage.title}
             <span className="text-muted-foreground">
-              {column ? `= ${column}` : "· no column"}
+              {column ? `= ${column}` : `· ${t("board.noColumn")}`}
             </span>
           </li>
         );
@@ -87,13 +95,16 @@ function whereOf(
   };
   if (tracker === "github")
     return {
-      name: `board ${field("board")} of ${field("repository")} on GitHub`,
+      name: t("settings:board.github", {
+        board: field("board"),
+        repository: field("repository"),
+      }),
       href: `https://github.com/${field("repository")}/projects`,
       site: "GitHub",
     };
   if (tracker === "jira")
     return {
-      name: `${field("project")} on Jira`,
+      name: t("settings:board.jira", { project: field("project") }),
       href: `https://${field("site")}/browse/${field("project")}`,
       site: "Jira",
     };

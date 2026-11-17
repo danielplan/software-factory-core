@@ -1,0 +1,67 @@
+{
+  "problem": "Das hat nicht geklappt",
+  "coachProblem": "Der Coach konnte nicht antworten",
+  "coach": "Der Coach",
+  "thinking": "Ich denke nach…",
+  "start": {
+    "placeholder": "Was möchtest du bauen?"
+  },
+  "answer": {
+    "label": "Dem Coach antworten",
+    "placeholder": "Antworte dem Coach…",
+    "send": "Senden",
+    "talk": "Sprechen",
+    "talkTitle": "Sprechen statt tippen"
+  },
+  "about": {
+    "group": "Worum es in deiner Nachricht geht",
+    "chip": "Zu: {{name}}",
+    "remove": "Nicht zu {{name}}"
+  },
+  "action": {
+    "build": "Factory bauen",
+    "open": "Factory öffnen"
+  },
+  "map": {
+    "label": "Die Karte",
+    "whole": "Ganze Karte zeigen",
+    "remove": "Diese Karte entfernen",
+    "agreed": "Bestätigt",
+    "guess": "Eine Vermutung, noch nicht bestätigt."
+  },
+  "voice": {
+    "end": "Anruf beenden",
+    "language": "Die Sprache, die du sprichst",
+    "level": "Deine Stimme",
+    "moment": {
+      "preparing": "Wird vorbereitet…",
+      "listening": "Ich höre zu",
+      "writing": "Ich schreibe mit…",
+      "thinking": "Ich denke nach…",
+      "speaking": "Ich spreche"
+    },
+    "status": {
+      "download": "Das Sprachmodell wird geladen, nur beim ersten Mal (etwa 0,8 GB): {{percent}} %",
+      "preparing": "Wird vorbereitet, sprich noch nicht…",
+      "listening": "Ich höre zu. Leg los.",
+      "writing": "Ich schreibe mit, was du gesagt hast…",
+      "thinking": "Verstanden. Ich arbeite daran…",
+      "speaking": "Ich spreche… sag „stopp“, um mich zu unterbrechen."
+    },
+    "noVoice": "In diesem Browser gibt es keine Stimme für {{language}}, deshalb können die Antworten nicht vorgelesen werden. Füge eine in den Spracheinstellungen deines Computers hinzu oder wähle eine andere Sprache.",
+    "problem": {
+      "unsupported": "Dieser Browser kann das Sprachmodell nicht ausführen. Öffne die Factory in einem aktuellen Chrome oder Edge.",
+      "blocked": "Der Browser darf das Mikrofon nicht benutzen. Klicke auf das Symbol links neben der Adresse, erlaube das Mikrofon und drücke dann wieder Sprechen.",
+      "noMicrophone": "Kein Mikrofon gefunden. Schließe eins oder dein Headset an und drücke dann wieder Sprechen.",
+      "microphoneBusy": "Ein anderes Programm benutzt das Mikrofon. Schließe es (einen Anruf, eine Aufnahme) und drücke dann wieder Sprechen.",
+      "microphoneFailed": "Das Mikrofon ist offen, aber sein Ton lässt sich nicht lesen. Lade die Seite neu und drücke wieder Sprechen.",
+      "download": "Das Sprachmodell konnte nicht geladen werden. Prüfe die Internetverbindung und drücke dann wieder Sprechen.",
+      "voiceFailed": "Die Stimme des Coachs lässt sich nicht abspielen, du hörst seine Antworten also nicht. Prüfe Lautsprecher oder Kopfhörer und drücke dann wieder Sprechen.",
+      "notSent": "Deine Worte konnten nicht gesendet werden. Sag sie bitte noch einmal."
+    }
+  },
+  "splash": {
+    "opening": "Deine Factory wird geöffnet…",
+    "label": "Kobble wird geöffnet"
+  }
+}

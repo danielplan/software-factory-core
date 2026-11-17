@@ -1,5 +1,6 @@
 import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post, type AddOnView, type Board } from "@/api";
 import { lookOf } from "@/add-ons/looks";
@@ -7,40 +8,32 @@ import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n/i18n";
 
 // The factory's own board: "none", as the company file says.
-const OWN = {
-  id: "none",
-  icon: <LayoutGrid aria-hidden />,
-  title: "The factory's own board",
-  text: "Work stays here, on the board in this app. Nothing to connect.",
-};
+const OWN = { id: "none", icon: <LayoutGrid aria-hidden /> };
 
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
 export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
+  const { t } = useTranslation("settings");
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
-          Where should the factory keep its work?
-        </h1>
-        <p className="text-muted-foreground">
-          The ideas you agree to become work on a board, and the factory builds
-          from there. Keep it here, or use the board your team already has.
-        </p>
+        <h1 className="text-title">{t("connect.title")}</h1>
+        <p className="text-body text-muted-foreground">{t("connect.about")}</p>
       </header>
       {done ? (
         <section className="grid gap-4 rounded-3xl bg-card p-6 shadow-soft">
-          <p className="text-[15px] font-medium text-success">{done}</p>
+          <p className="text-item text-success">{done}</p>
           <Button
             className="h-10 justify-self-start px-4"
             onClick={() => {
               window.location.hash = "build";
             }}
           >
-            Go to the board
+            {t("connect.goToBoard")}
           </Button>
         </section>
       ) : (
@@ -65,18 +58,9 @@ export function TrackerChoice({
   connected?: Board;
   onDone: (message: string) => void;
 }>) {
+  const { t } = useTranslation(["settings", "common"]);
   const [choice, setChoice] = useState(current);
-  const choices = [
-    OWN,
-    ...trackers
-      .filter((tracker) => TRACKER_STEPS[tracker.id])
-      .map((tracker) => ({
-        id: tracker.id,
-        icon: lookOf(tracker.id).icon,
-        title: tracker.name,
-        text: tracker.about,
-      })),
-  ];
+  const choices = choicesOf(trackers);
   const Steps = TRACKER_STEPS[choice];
   const [problem, setProblem] = useState<string | null>(null);
   // A tracker that is off is switched on to connect its board.
@@ -99,7 +83,7 @@ export function TrackerChoice({
     setProblem(null);
     post("/api/connect/own-board")
       .then(() => {
-        onDone("Work stays on the factory's own board.");
+        onDone(t("connect.ownDone"));
       })
       .catch((error: unknown) => {
         setProblem(messageOf(error));
@@ -110,7 +94,7 @@ export function TrackerChoice({
       <div
         className="grid gap-3 sm:grid-cols-3"
         role="radiogroup"
-        aria-label="Tracker"
+        aria-label={t("connect.choices")}
       >
         {choices.map((one) => (
           <ChoiceCard
@@ -127,11 +111,30 @@ export function TrackerChoice({
       </div>
       {choice === "none" && (
         <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
-          Use the factory's board
+          {t("connect.useOwn")}
         </Button>
       )}
       {Steps && <Steps onDone={onDone} connected={connected?.[choice]} />}
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t("common:didNotWork")} text={problem} />}
     </div>
   );
+}
+
+// The factory's own board, then each tracker the page has steps for.
+function choicesOf(trackers: AddOnView[]) {
+  return [
+    {
+      ...OWN,
+      title: t("settings:connect.ownTitle"),
+      text: t("settings:connect.ownText"),
+    },
+    ...trackers
+      .filter((tracker) => TRACKER_STEPS[tracker.id])
+      .map((tracker) => ({
+        id: tracker.id,
+        icon: lookOf(tracker.id).icon,
+        title: tracker.name,
+        text: tracker.about,
+      })),
+  ];
 }

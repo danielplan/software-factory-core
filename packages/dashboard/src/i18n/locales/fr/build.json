@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Fabrique",
+    "refresh": "Actualiser",
+    "openOn": "Ouvrir sur {{site}}",
+    "problem": "Ça n'a pas marché",
+    "empty": "Rien pour l'instant. Le travail commence par une <link>idée</link>."
+  },
+  "stages": {
+    "draft": "Brouillon",
+    "backlog": "Backlog",
+    "planning": "À planifier",
+    "todo": "À faire",
+    "doing": "En cours",
+    "review": "En revue",
+    "done": "Dans l'app"
+  },
+  "now": {
+    "plan": "Planifie #{{number}} « {{title}} »",
+    "build": "Construit #{{number}} « {{title}} »",
+    "review": "Répond à la revue de #{{number}} « {{title}} »",
+    "thinkingAbout": "Réfléchit à « {{title}} »",
+    "thinkingMany_one": "Réfléchit à {{count}} idée",
+    "thinkingMany_other": "Réfléchit à {{count}} idées",
+    "readyOn_one": "{{count}} carte prête : le constructeur la prend ensuite",
+    "readyOn_other": "{{count}} cartes prêtes : le constructeur prend la suivante",
+    "readyOff_one": "{{count}} carte prête à construire : active le constructeur",
+    "readyOff_other": "{{count}} cartes prêtes à construire : active le constructeur",
+    "backlog_one": "{{count}} carte en attente dans le Backlog",
+    "backlog_other": "{{count}} cartes en attente dans le Backlog",
+    "builderWaiting": "Le constructeur attend du travail",
+    "waiting": "En attente de travail"
+  },
+  "working": {
+    "plan": "Planifie",
+    "build": "Construit",
+    "review": "Répond à la revue"
+  },
+  "card": {
+    "noColumn": "Aucune colonne",
+    "starting": "Démarrage…",
+    "open": "Ouvrir la carte",
+    "pullRequest": "Ouvrir la pull request",
+    "running": "Lance une commande",
+    "reading": "Lit {{file}}",
+    "editing": "Modifie {{file}}",
+    "writing": "Écrit {{file}}"
+  },
+  "workers": {
+    "coach": "Coach",
+    "coachDoes": "Planifie les cartes avec vous.",
+    "builder": "Constructeur",
+    "builderDoes": "Construit les cartes et ouvre des pull requests. Ne fusionne jamais.",
+    "on": "Activé",
+    "off": "Désactivé",
+    "answering": "Répond sur #{{number}}",
+    "nonePlanning": "Aucune carte à planifier",
+    "noneTodo": "Aucune carte à faire",
+    "nextPlanning_one": "{{count}} carte à planifier : il s'y met",
+    "nextPlanning_other": "{{count}} cartes à planifier : il passe à la suivante",
+    "nextTodo_one": "{{count}} carte à faire : il s'y met",
+    "nextTodo_other": "{{count}} cartes à faire : il passe à la suivante",
+    "waitingPlanning_one": "{{count}} carte à planifier, en attente",
+    "waitingPlanning_other": "{{count}} cartes à planifier, en attente",
+    "waitingTodo_one": "{{count}} carte à faire, en attente",
+    "waitingTodo_other": "{{count}} cartes à faire, en attente",
+    "busy": "{{doing}} #{{number}}",
+    "busyWith": "{{doing}} #{{number}} · {{activity}}"
+  },
+  "idea": {
+    "draft": "Brouillon",
+    "ready": "Prête",
+    "working": "En cours…",
+    "today": "Aujourd'hui, {{time}}",
+    "explore": "Explorer",
+    "discard": "Abandonner",
+    "discardSure": "Abandonner cette idée ? Impossible de la récupérer.",
+    "problem": "Ça n'a pas marché"
+  },
+  "ticket": {
+    "for": "Pour :",
+    "from": "Depuis :",
+    "noProblem": "Pas encore de problème derrière",
+    "worked": "Ça a marché",
+    "didntWork": "Ça n'a pas marché",
+    "unchecked": "Pas vérifié",
+    "since": "« {{title}} », dans Construire depuis le {{since}}.",
+    "only": "« {{title}} ».",
+    "close": "Fermer · ça a marché ?",
+    "answeredBy": "{{by}}, {{on}}"
+  },
+  "didItWork": {
+    "title": "Ça a marché ?",
+    "weThink": "On pense que :",
+    "seen": "Ce que tu as remarqué",
+    "seenHint": "Qu'as-tu remarqué depuis que c'est dans l'app ?",
+    "yes": "Oui, le problème est résolu",
+    "no": "Non",
+    "unchecked": "Pas vérifié",
+    "cancel": "Annuler",
+    "problem": "Ça n'a pas marché",
+    "notOnGitHub": "Pas enregistré sur GitHub",
+    "looking": "Le kobold regarde ce que les gens ont dit depuis…",
+    "couldNotLook": "Le kobold n'a pas pu regarder : {{problem}} Écrivez ce que vous avez remarqué.",
+    "nothingHeard": "Personne n'en a parlé depuis. Écrivez ce que vous avez remarqué.",
+    "draft_one": "Le brouillon du kobold, d'après {{count}} retour. Modifiez-le à votre guise.",
+    "draft_other": "Le brouillon du kobold, d'après {{count}} retours. Modifiez-le à votre guise."
+  },
+  "fix": {
+    "make": "Créer un ticket de correction",
+    "making": "Création du ticket…",
+    "failed": "Aucun ticket créé",
+    "waiting": "Depuis Personnes, en attente d'un ticket",
+    "fix": "Correction",
+    "update": "Mise à jour",
+    "from": "Depuis : {{source}}"
+  }
+}

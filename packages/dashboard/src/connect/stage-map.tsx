@@ -1,5 +1,6 @@
 import type { StageMap } from "@/api";
 import { STAGES } from "@/ideas/stages";
+import { t } from "@/i18n/i18n";
 
 import { Pick } from "./pick";
 
@@ -25,14 +26,14 @@ export function StageMapping({
   onChange: (value: StageMap) => void;
 }>) {
   const options = [
-    { value: NONE, label: "Not on this board" },
+    { value: NONE, label: t("settings:pick.notOnBoard") },
     ...columns.map((column) => ({ value: column, label: column })),
   ];
   return (
     <div className="grid gap-2.5 rounded-2xl bg-surface-2/60 p-4">
-      <span className="text-sm font-medium">Which column is which</span>
-      <span className="text-xs text-muted-foreground">
-        Matched from the columns' names; change any that is wrong.
+      <span className="text-item">{t("settings:pick.columns")}</span>
+      <span className="text-tag text-muted-foreground">
+        {t("settings:pick.columnsAbout")}
       </span>
       {ROWS.map((stage) => {
         return (
@@ -40,7 +41,7 @@ export function StageMapping({
             key={stage.id}
             className="grid items-center gap-2 sm:grid-cols-[9rem_minmax(0,1fr)]"
           >
-            <span className="flex items-center gap-2 text-sm">
+            <span className="flex items-center gap-2 text-body">
               <span
                 aria-hidden
                 className="size-2 rounded-full"
@@ -49,7 +50,7 @@ export function StageMapping({
               {stage.title}
             </span>
             <Pick
-              label={`Column for ${stage.title}`}
+              label={t("settings:pick.columnFor", { stage: stage.title })}
               value={value[stage.id] || NONE}
               options={options}
               onPick={(picked) => {

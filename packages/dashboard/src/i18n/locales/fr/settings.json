@@ -1,0 +1,108 @@
+{
+  "language": {
+    "title": "Langue"
+  },
+  "page": {
+    "title": "Réglages"
+  },
+  "tracker": {
+    "title": "Où le travail est suivi",
+    "now": "Actuellement : {{name}}.",
+    "own": "le tableau de la factory",
+    "change": "Changer"
+  },
+  "look": {
+    "title": "Clair ou sombre",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre",
+    "notKept": "Ce navigateur ne peut pas garder votre choix : il dure jusqu'à la fermeture de la page."
+  },
+  "group": {
+    "save": "Enregistrer",
+    "saved": "Enregistré.",
+    "savedRestart": "Enregistré. Redémarrez pour l'utiliser :",
+    "notSaved": "Non enregistré",
+    "restart": "Redémarrer {{name}}",
+    "set": "{{label}} (défini)",
+    "replace": "{{help}} Saisissez-en un nouveau pour le remplacer."
+  },
+  "workshop": {
+    "title": "Modules et kits",
+    "inUse": "Utilisés",
+    "available": "Disponibles",
+    "builtIn": "Fourni avec la factory",
+    "addOn": "Extension",
+    "kit": "Kit",
+    "change": "Changer",
+    "useInstead": "Utiliser plutôt celui-ci",
+    "remove": "Retirer",
+    "add": "Ajouter",
+    "settings": "Réglages",
+    "forNew": "Pour un nouveau produit de ce type.",
+    "tracked": "Votre travail est suivi ici",
+    "added": "Ajouté"
+  },
+  "connect": {
+    "title": "Où la factory doit-elle garder son travail ?",
+    "about": "Les idées sur lesquelles vous êtes d'accord deviennent du travail sur un tableau, et la factory construit à partir de là. Gardez-le ici, ou utilisez le tableau de votre équipe.",
+    "goToBoard": "Aller au tableau",
+    "ownTitle": "Le tableau de la factory",
+    "ownText": "Le travail reste ici, dans cette app. Rien à connecter.",
+    "useOwn": "Utiliser le tableau de la factory",
+    "ownDone": "Le travail reste sur le tableau de la factory.",
+    "choices": "Où le travail est suivi"
+  },
+  "board": {
+    "connectedAll": "Connecté à <link>{{name}}</link> : tout son travail.",
+    "connectedLabel": "Connecté à <link>{{name}}</link> : le travail étiqueté « {{label}} ».",
+    "trackedAll": "Votre travail est suivi sur <link>{{name}}</link> : tout.",
+    "trackedLabel": "Votre travail est suivi sur <link>{{name}}</link> : celui étiqueté « {{label}} ».",
+    "stages": "Étapes et colonnes",
+    "noColumn": "aucune colonne",
+    "github": "tableau {{board}} de {{repository}} sur GitHub",
+    "jira": "{{project}} sur Jira"
+  },
+  "pick": {
+    "choose": "Choisir…",
+    "which": "Le travail que prend la factory",
+    "all": "Tout le travail du tableau",
+    "labelled": "Seulement le travail étiqueté « factory »",
+    "notOnBoard": "Pas sur ce tableau",
+    "columns": "Quelle colonne correspond à quoi",
+    "columnsAbout": "Associées d'après leurs noms. Corrigez celles qui sont fausses.",
+    "columnFor": "Colonne pour {{stage}}"
+  },
+  "github": {
+    "cli": "L'outil en ligne de commande de GitHub sur cet ordinateur",
+    "install": "L'installer",
+    "board": "Votre tableau",
+    "boardDone": "Votre tableau est connecté",
+    "signedIn": "Connecté en tant que {{login}}",
+    "signIn": "Se connecter à GitHub",
+    "signInButton": "Se connecter avec GitHub",
+    "typeCode": "Saisissez ce code dans la fenêtre du navigateur qui s'est ouverte :",
+    "notSignedIn": "Non connecté",
+    "repository": "Dépôt",
+    "boardPick": "Tableau",
+    "allow": "Autoriser la factory à lire vos tableaux",
+    "checking": "Vérification…",
+    "connect": "Connecter"
+  },
+  "jira": {
+    "signedIn": "Connecté en tant que {{name}}",
+    "login": "Votre Jira et un jeton",
+    "check": "Vérifier",
+    "checking": "Vérification…",
+    "project": "Votre projet",
+    "projectPick": "Projet",
+    "connect": "Connecter",
+    "site": "Site",
+    "siteHelp": "Par exemple acme.atlassian.net.",
+    "email": "Votre e-mail",
+    "emailHelp": "Celui avec lequel vous vous connectez à Jira.",
+    "token": "Jeton d'API",
+    "tokenHelp": "Gardé uniquement sur cet ordinateur.",
+    "createToken": "Créer un jeton d'API"
+  }
+}

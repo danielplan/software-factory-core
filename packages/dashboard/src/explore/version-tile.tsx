@@ -1,26 +1,34 @@
-// A version of an idea on Explore: its picture when someone made one, its
-// letter and name, phone or desktop, whether it runs on this computer, Try
-// it (starts it in prototype mode and opens it there) and Pick (one pick
-// per person per idea; pressing it again takes it back).
+// A version of an idea, everything about it on one card: its picture when
+// someone made one, its letter and name, what it is doing when it is not
+// stopped, Try it (starts it in prototype mode and opens it there) and the
+// vote (one per person per idea; voting again takes it back), with how
+// many voted for it and, on the one ahead, "Most votes".
 
-import { Monitor, Smartphone } from "lucide-react";
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { post, type VersionCard, type VersionRun } from "@/api";
 import { Button } from "@/components/ui/button";
 import { prototypeHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
-import { pickWords, runWords } from "./view";
+import { runWords, voteWords } from "./view";
+
+type OnProblem = (problem: string | null) => void;
 
 export function VersionTile({
   version,
   run,
+  ahead,
   onProblem,
 }: Readonly<{
   version: VersionCard;
   run: VersionRun;
-  onProblem: (problem: string | null) => void;
+  // It has the most votes, and no other as many.
+  ahead: boolean;
+  onProblem: OnProblem;
 }>) {
+  const { t } = useTranslation("explore");
   const asked = { idea: version.idea, version: version.key };
   const tryIt = () => {
     onProblem(null);
@@ -31,7 +39,7 @@ export function VersionTile({
         window.location.hash = prototypeHash(version.idea, version.key);
       });
   };
-  const pick = () => {
+  const vote = () => {
     onProblem(null);
     post("/api/explore/pick", asked).catch((error: unknown) => {
       onProblem(error instanceof Error ? error.message : String(error));
@@ -40,55 +48,80 @@ export function VersionTile({
   return (
     <div
       className={cn(
-        "grid content-start overflow-hidden rounded-2xl border bg-card",
-        version.mine && "ring-2 ring-foreground",
+        "grid content-start overflow-hidden rounded-xl border bg-card transition-[box-shadow,border-color] hover:shadow-lift",
+        version.mine && "border-primary/50 ring-1 ring-primary/30",
       )}
     >
       {version.thumbnail && (
         <img
           src={version.thumbnail}
-          alt={`Version ${version.key}`}
-          className="h-44 w-full bg-surface object-cover object-top"
+          alt={t("version.picture", { version: version.key })}
+          className="h-36 w-full bg-surface object-cover object-top"
         />
       )}
-      <div className="grid gap-2.5 px-4 py-3">
-        <p className="text-[15px]">
-          <b>{version.key}</b> · {version.name}
-        </p>
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            {version.surface === "phone" ? (
-              <Smartphone className="size-3.5" aria-hidden />
-            ) : (
-              <Monitor className="size-3.5" aria-hidden />
+      <div className="grid gap-3 p-3.5">
+        <div className="flex items-start gap-2">
+          <span className="grid min-w-0 flex-1 gap-0.5">
+            <span className="text-item">
+              <b className="font-semibold">{version.key}</b> · {version.name}
+            </span>
+            {run.state !== "stopped" && (
+              <span
+                className={cn(
+                  "text-tag text-muted-foreground",
+                  run.state === "running" && "font-medium text-success",
+                )}
+              >
+                {runWords(run)}
+              </span>
             )}
-            {version.surface === "phone" ? "Phone" : "Desktop"}
           </span>
-          <span
-            className={cn(
-              run.state === "running" && "font-medium text-success",
-            )}
-          >
-            {runWords(run)}
-          </span>
-        </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={tryIt}>
-            Try it
-          </Button>
-          <span className="flex-1 text-right text-xs text-muted-foreground">
-            {pickWords(version.picks)}
-          </span>
-          <Button
-            variant={version.mine ? "default" : "outline"}
-            size="sm"
-            aria-pressed={version.mine}
-            onClick={pick}
-          >
-            {version.mine ? "Picked" : "Pick"}
-          </Button>
+          {ahead && (
+            <span className="flex-none rounded-full bg-solving px-2 py-0.5 text-tag font-semibold text-solving-foreground">
+              {t("version.most")}
+            </span>
+          )}
         </div>
+        <TileActions version={version} onTry={tryIt} onVote={vote} />
       </div>
+    </div>
+  );
+}
+
+// Try it at the left; how many voted and the vote at the right.
+function TileActions({
+  version,
+  onTry,
+  onVote,
+}: Readonly<{
+  version: VersionCard;
+  onTry: () => void;
+  onVote: () => void;
+}>) {
+  const { t } = useTranslation("explore");
+  return (
+    <div className="flex items-center gap-2">
+      <Button variant="outline" size="sm" onClick={onTry}>
+        {t("version.try")}
+      </Button>
+      <span className="ml-auto text-tag text-muted-foreground">
+        {voteWords(version.picks)}
+      </span>
+      <Button
+        variant={version.mine ? "default" : "outline"}
+        size="sm"
+        aria-pressed={version.mine}
+        onClick={onVote}
+      >
+        {version.mine ? (
+          <>
+            <Check aria-hidden />
+            {t("version.yourVote")}
+          </>
+        ) : (
+          t("version.vote")
+        )}
+      </Button>
     </div>
   );
 }

@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Fabbrica",
+    "refresh": "Aggiorna",
+    "openOn": "Apri su {{site}}",
+    "problem": "Non ha funzionato",
+    "empty": "Ancora niente. Il lavoro parte da un'<link>idea</link>."
+  },
+  "stages": {
+    "draft": "Bozza",
+    "backlog": "Backlog",
+    "planning": "Da pianificare",
+    "todo": "Da fare",
+    "doing": "In corso",
+    "review": "In revisione",
+    "done": "Nell'app"
+  },
+  "now": {
+    "plan": "Pianifico #{{number}} “{{title}}”",
+    "build": "Costruisco #{{number}} “{{title}}”",
+    "review": "Rispondo alla revisione di #{{number}} “{{title}}”",
+    "thinkingAbout": "Ci penso: “{{title}}”",
+    "thinkingMany_one": "Penso a {{count}} idea",
+    "thinkingMany_other": "Penso a {{count}} idee",
+    "readyOn_one": "{{count}} scheda pronta: il costruttore la prende per prima",
+    "readyOn_other": "{{count}} schede pronte: il costruttore prende la prossima",
+    "readyOff_one": "{{count}} scheda pronta da costruire: accendi il costruttore",
+    "readyOff_other": "{{count}} schede pronte da costruire: accendi il costruttore",
+    "backlog_one": "{{count}} scheda in attesa nel Backlog",
+    "backlog_other": "{{count}} schede in attesa nel Backlog",
+    "builderWaiting": "Il costruttore aspetta del lavoro",
+    "waiting": "In attesa di lavoro"
+  },
+  "working": {
+    "plan": "Pianifica",
+    "build": "Costruisce",
+    "review": "Risponde alla revisione"
+  },
+  "card": {
+    "noColumn": "Nessuna colonna",
+    "starting": "Si parte…",
+    "open": "Apri la scheda",
+    "pullRequest": "Apri la pull request",
+    "running": "Esegue un comando",
+    "reading": "Legge {{file}}",
+    "editing": "Modifica {{file}}",
+    "writing": "Scrive {{file}}"
+  },
+  "workers": {
+    "coach": "Coach",
+    "coachDoes": "Pianifica le card con te.",
+    "builder": "Costruttore",
+    "builderDoes": "Costruisce le card e apre le pull request. Non fa mai merge.",
+    "on": "Acceso",
+    "off": "Spento",
+    "answering": "Risponde su #{{number}}",
+    "nonePlanning": "Nessuna scheda da pianificare",
+    "noneTodo": "Nessuna scheda da fare",
+    "nextPlanning_one": "{{count}} scheda da pianificare: ci lavora",
+    "nextPlanning_other": "{{count}} schede da pianificare: passa alla prossima",
+    "nextTodo_one": "{{count}} scheda da fare: ci lavora",
+    "nextTodo_other": "{{count}} schede da fare: passa alla prossima",
+    "waitingPlanning_one": "{{count}} scheda da pianificare, in attesa",
+    "waitingPlanning_other": "{{count}} schede da pianificare, in attesa",
+    "waitingTodo_one": "{{count}} scheda da fare, in attesa",
+    "waitingTodo_other": "{{count}} schede da fare, in attesa",
+    "busy": "{{doing}} #{{number}}",
+    "busyWith": "{{doing}} #{{number}} · {{activity}}"
+  },
+  "idea": {
+    "draft": "Bozza",
+    "ready": "Pronta",
+    "working": "Ci sto lavorando…",
+    "today": "Oggi, {{time}}",
+    "explore": "Esplorare",
+    "discard": "Scarta",
+    "discardSure": "Scartare questa idea? Non si potrà recuperare.",
+    "problem": "Non ha funzionato"
+  },
+  "ticket": {
+    "for": "Per:",
+    "from": "Da:",
+    "noProblem": "Ancora nessun problema dietro",
+    "worked": "Ha funzionato",
+    "didntWork": "Non ha funzionato",
+    "unchecked": "Non verificato",
+    "since": "“{{title}}”, in Costruire dal {{since}}.",
+    "only": "“{{title}}”.",
+    "close": "Chiudi · ha funzionato?",
+    "answeredBy": "{{by}}, {{on}}"
+  },
+  "didItWork": {
+    "title": "Ha funzionato?",
+    "weThink": "Pensiamo che:",
+    "seen": "Cosa hai notato",
+    "seenHint": "Cosa hai notato da quando è nell'app?",
+    "yes": "Sì, il problema è risolto",
+    "no": "No",
+    "unchecked": "Non ho verificato",
+    "cancel": "Annulla",
+    "problem": "Non ha funzionato",
+    "notOnGitHub": "Non salvato su GitHub",
+    "looking": "Il coboldo guarda cosa ha detto la gente da allora…",
+    "couldNotLook": "Il kobold non è riuscito a guardare: {{problem}} Scrivi cosa hai notato.",
+    "nothingHeard": "Da allora nessuno ne ha parlato. Scrivi cosa hai notato.",
+    "draft_one": "La bozza del kobold, da {{count}} cosa detta dalle persone. Modificala come vuoi.",
+    "draft_other": "La bozza del kobold, da {{count}} cose dette dalle persone. Modificala come vuoi."
+  },
+  "fix": {
+    "make": "Crea un ticket di correzione",
+    "making": "Creo il ticket…",
+    "failed": "Nessun ticket creato",
+    "waiting": "Da Persone, in attesa di un ticket",
+    "fix": "Correzione",
+    "update": "Aggiornamento",
+    "from": "Da: {{source}}"
+  }
+}

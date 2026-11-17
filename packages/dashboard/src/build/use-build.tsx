@@ -13,6 +13,7 @@ import { type Read, useRead } from "@/understand/use-records";
 
 import { DidItWork } from "./did-it-work";
 import { WaitingFixes } from "./fix-ticket";
+import { t } from "../i18n/i18n.ts";
 import { saidOf } from "./view";
 
 type Asking = { ticket: TicketView; title: string };
@@ -33,7 +34,7 @@ export function useBuild() {
         <div
           role="status"
           className={cn(
-            "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm",
+            "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-body",
             said.good ? "bg-solved" : "bg-surface-2",
           )}
         >
@@ -42,7 +43,10 @@ export function useBuild() {
         </div>
       )}
       {answered?.problem && (
-        <ProblemBox title="Not on GitHub" text={answered.problem} />
+        <ProblemBox
+          title={t("build:didItWork.notOnGitHub")}
+          text={answered.problem}
+        />
       )}
       <WaitingFixes waiting={data?.waiting ?? []} />
       {asking && (

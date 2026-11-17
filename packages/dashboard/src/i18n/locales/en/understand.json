@@ -1,0 +1,177 @@
+{
+  "page": {
+    "title": "Personas",
+    "cantRead": "What people said can't be read",
+    "personCantShow": "This person can't be shown",
+    "storyCantShow": "This story can't be shown"
+  },
+  "overview": {
+    "empty": "Nothing here yet. Add what people said: the kobold reads it, and what goes wrong for them shows up here.",
+    "people": "The people who use your product",
+    "open_one": "{{count}} open",
+    "open_other": "{{count}} open",
+    "signals_one": "{{count}} signal",
+    "signals_other": "{{count}} signals"
+  },
+  "why": {
+    "heard": "People have said it. No idea for it yet.",
+    "assumed": "Guessed from an idea. Nobody has said it yet.",
+    "trying": "Ideas are being tried for it.",
+    "building": "Being built as {{issues}}.",
+    "inApp": "In the app as {{issues}}. Did it work?",
+    "worked": "it worked",
+    "didntWork": "it didn't work"
+  },
+  "origin": {
+    "said_one": "From {{count}} thing people said",
+    "said_other": "From {{count}} things people said",
+    "ideaBy": "From an idea by {{name}}",
+    "idea": "From the idea “{{title}}”"
+  },
+  "notClear": "Not clear yet",
+  "went": {
+    "notYet": "Not placed yet",
+    "step": "Step {{step}} of “{{title}}”",
+    "story": "The story “{{title}}”",
+    "problem": "The problem “{{title}}”",
+    "issue": "Issue #{{issue}}",
+    "update": "Build, as an improvement",
+    "fix": "Build, as a fix",
+    "answered": "Answered"
+  },
+  "known": {
+    "seen": "{{seen}} of {{of}} steps confirmed",
+    "guessed": "{{seen}} of {{of}} steps confirmed · {{guessed}} guessed"
+  },
+  "instead": "Instead, {{text}}",
+  "person": {
+    "nothingYet": "Nothing yet.",
+    "real": "What really matters",
+    "confirmedBy": "Confirmed by {{name}}",
+    "confirm": "Yes, that's it",
+    "cantConfirm": "It couldn't be confirmed",
+    "wantsLine": "Wants to {{wants}}"
+  },
+  "story": {
+    "starts": "Starts: {{text}}",
+    "wants": "Wants: {{text}}",
+    "label": "The story",
+    "didntHold": "This story turned out wrong: {{why}}",
+    "breaksLabel": "Where it goes wrong",
+    "insteadLabel": "What they do instead",
+    "guessedLabel": "Guessed",
+    "breaksTag": "goes wrong",
+    "guessTag": "guess",
+    "seenLabel": "Confirmed by {{source}}: {{text}}",
+    "toCheck": "To check"
+  },
+  "problem": {
+    "label": "What goes wrong",
+    "labelAssumed": "What goes wrong · guessed from an idea",
+    "ideas": "Ideas for it",
+    "noIdeas": "None yet.",
+    "idea": {
+      "exploring": "Being explored",
+      "inBuild": "Being built",
+      "worked": "Worked",
+      "didntWork": "Didn't work"
+    },
+    "startIdea": "Start an idea"
+  },
+  "ask": {
+    "writing": "The kobold is writing a question…",
+    "again": "Ask again",
+    "ask": "Ask two people like {{name}}",
+    "copied": "Copied",
+    "copy": "Copy to send",
+    "cantDraft": "The kobold couldn't write it"
+  },
+  "signal": {
+    "from": "From {{where}}",
+    "looksGood": "Looks right",
+    "move": "Move",
+    "didntWork": "That didn't work",
+    "soundsLike": "sounds like {{name}}",
+    "readingWhat": "The kobold is reading it: {{what}}",
+    "reading": "The kobold is reading it…",
+    "fix": "Fix",
+    "explore": "Explore",
+    "dismiss": "Dismiss",
+    "sending": "Sending to Build…",
+    "sentNoBoard": "Sent to Build. To make it a card there, connect a GitHub board.",
+    "openSettings": "Open Settings",
+    "addTo": "Add to “{{title}}”",
+    "already": {
+      "explored": "Already explored in “{{title}}”",
+      "building": "Already in Build as #{{issue}}",
+      "fixed": "Already fixed in #{{issue}}"
+    },
+    "why": "Why: {{why}}"
+  },
+  "move": {
+    "write": "Ask the kobold to write it",
+    "move": "Move it",
+    "cant": "It couldn't be moved",
+    "to": "Move it to",
+    "choice": {
+      "scene": "Into a story",
+      "newStory": "A new story",
+      "build": "It's a bug"
+    },
+    "story": "The story",
+    "whichStory": "Which story?",
+    "step": "The step",
+    "whose": "Whose story",
+    "koboldDecides": "Let the kobold decide",
+    "storyOf": "A story of {{name}}"
+  },
+  "add": {
+    "button": "Add what people said",
+    "about": "Paste a support email, a review or notes from a call. The kobold reads it and works out who it sounds like and which story it belongs to.",
+    "cant": "It couldn't be added",
+    "send": "Add it",
+    "another": "Add another"
+  },
+  "fields": {
+    "text": "What did they say?",
+    "textHelp": "One thing, from one person.",
+    "file": "Or take it from a file",
+    "source": "Where it came from",
+    "pickSource": "Choose where it came from",
+    "newSource": "Somewhere new…",
+    "who": "Who said it",
+    "notKnown": "Don't know",
+    "when": "When",
+    "sourceName": "Name of the new place",
+    "sourceNameExample": "Support inbox",
+    "kind": "What it is",
+    "kinds": {
+      "people": "What people say or write",
+      "usage": "How people use it",
+      "errors": "Errors",
+      "alerts": "Alerts, like security updates",
+      "personaRuns": "Test runs (never counted as proof)"
+    }
+  },
+  "signals": {
+    "title": "Signals",
+    "checkup": "Check my product",
+    "list": "New signals",
+    "empty": "Nothing new. All caught up.",
+    "newStory": "New story for {{name}}: {{title}}",
+    "kind": {
+      "bug": "Bug",
+      "need": "Request",
+      "update": "Update",
+      "question": "Question",
+      "other": "Feedback"
+    }
+  },
+  "tabs": {
+    "label": "About this person",
+    "problems": "Problems",
+    "signals": "Signals",
+    "tests": "Tests",
+    "testsSoon": "Soon: ask the kobold to try the product as {{name}}."
+  }
+}

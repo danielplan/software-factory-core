@@ -1,0 +1,73 @@
+{
+  "title": "Producto",
+  "startAll": "Iniciar todo",
+  "stopAll": "Detener todo",
+  "cantRead": "Ahora mismo no se puede mostrar",
+  "didntWork": "Eso no funcionó",
+  "mapLabel": "Las piezas de tu producto",
+  "project": {
+    "connected": "Conectado",
+    "sub": "El proyecto en el que trabaja la factory",
+    "folder": "Carpeta",
+    "branch": "Rama",
+    "noGit": "No es un repositorio git",
+    "shared": "Compartido en",
+    "local": "Solo en este ordenador",
+    "open": "Ver los detalles del proyecto {{name}}"
+  },
+  "card": {
+    "open": "Ver los detalles de {{name}}",
+    "builtWith": "Hecho con",
+    "usedBy": "Lo usa",
+    "more": "+{{count}}"
+  },
+  "details": {
+    "label": "Detalles",
+    "close": "Cerrar"
+  },
+  "light": {
+    "running": "En marcha",
+    "starting": "Iniciando",
+    "stopped": "Detenido",
+    "problem": "Algo va mal"
+  },
+  "status": {
+    "outside": "En marcha, iniciado fuera de la factory",
+    "with": "Funciona junto con lo que lo usa"
+  },
+  "buttons": {
+    "start": "Iniciar",
+    "tryAgain": "Reintentar",
+    "restart": "Reiniciar",
+    "stop": "Detener",
+    "open": "Abrir"
+  },
+  "problem": {
+    "details": "Detalles técnicos"
+  },
+  "groups": {
+    "language": "Lenguaje",
+    "interface": "Interfaz",
+    "server": "Servidor",
+    "data": "Datos",
+    "look": "Aspecto",
+    "checks": "Comprobaciones",
+    "tools": "Herramientas"
+  },
+  "own": {
+    "title": "Los programas propios de la factory"
+  },
+  "panel": {
+    "label": "Sobre este mapa",
+    "back": "Todas las piezas",
+    "explain": "Cada tarjeta es una pieza; las flechas muestran qué necesita qué.",
+    "legend": "Qué significan los puntos",
+    "pieces_one": "{{count}} pieza",
+    "pieces_other": "{{count}} piezas",
+    "running_one": "{{count}} en marcha",
+    "running_other": "{{count}} en marcha",
+    "needsYou_one": "{{count}} te necesita",
+    "needsYou_other": "{{count}} te necesitan",
+    "connection": "Conectado a {{name}}"
+  }
+}

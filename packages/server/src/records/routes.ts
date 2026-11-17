@@ -15,12 +15,15 @@ import {
   FACTORY_FOLDER,
   importSignalSchema,
   RecordsRefused,
+  type RecordStore,
   type Signal,
 } from "@software-factory/core";
 
 import type { Route } from "../add-ons/add-on.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { buildRoutes } from "../build/routes.ts";
+import { checkRoutes } from "../checks/routes.ts";
+import { chatRoutes } from "../chat/routes.ts";
 import { waitingForAnswer } from "../build/views.ts";
 import type { Cards } from "../cards/cards.ts";
 import { cardsFor } from "../cards/cards-for.ts";
@@ -104,6 +107,7 @@ export function servedRecords(options: ServedOptions) {
         inApp,
       }),
       ...buildRoutes({ host, kobold, project, cards }),
+      ...jobRoutes(kobold, project, () => host.orRefuse(), cards),
     },
     waiting: () => waitingIn(host),
     serveToolsAt: (base: string) => {
@@ -114,6 +118,19 @@ export function servedRecords(options: ServedOptions) {
       mode.close();
       host.close();
     },
+  };
+}
+
+// The kobold's jobs started from the chat and the check-up.
+function jobRoutes(
+  kobold: Kobold,
+  project: string,
+  records: () => RecordStore,
+  cards: () => Cards,
+) {
+  return {
+    ...chatRoutes({ kobold, project }),
+    ...checkRoutes({ project, kobold, records, cards }),
   };
 }
 

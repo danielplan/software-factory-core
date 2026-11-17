@@ -145,6 +145,14 @@ export class WarmClaude {
         options.onActivity("Time limit reached, stopping Claude");
         this.close(id);
       }, options.timeLimitMs ?? TIME_LIMIT_MS);
+      if (options.stop?.aborted) {
+        clearTimeout(timer);
+        resolve({ ok: false, text: "", error: "Stopped." });
+        return;
+      }
+      options.stop?.addEventListener("abort", () => {
+        this.close(id);
+      });
       open.turn = { options, writing: "", resolve, timer };
       open.child.stdin.write(
         `${JSON.stringify({

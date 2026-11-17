@@ -1,6 +1,7 @@
 import { ControlButton, useReactFlow, useStore } from "@xyflow/react";
 import { Maximize } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Draft } from "@/api";
 
@@ -48,10 +49,11 @@ export function useView(draft: Draft): (cards: number) => void {
 // The whole canvas, clear of the coach: the view control's own button.
 export function WholeCanvas() {
   const fit = useFitClear();
+  const { t } = useTranslation("setup");
   return (
     <ControlButton
-      title="Show the whole canvas"
-      aria-label="Show the whole canvas"
+      title={t("map.whole")}
+      aria-label={t("map.whole")}
       onClick={() => {
         fit({ duration: 300, maxZoom: 1 });
       }}

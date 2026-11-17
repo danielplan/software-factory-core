@@ -6,6 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
+import { t } from "../i18n/i18n.ts";
+import { jobOf } from "./board-card";
+
 // Who works the board on this computer: the coach and the builder, each a
 // switch with what it does and what it is doing now.
 export function BoardWorkers({
@@ -25,13 +28,13 @@ export function BoardWorkers({
       <Worker
         id="coach"
         icon={<MessagesSquare className="size-4" aria-hidden />}
-        name="Coach"
-        does="Plans the cards in Planning with you, in their comments."
+        name={t("build:workers.coach")}
+        does={t("build:workers.coachDoes")}
         on={coach.on}
         now={
           coach.working === null
-            ? idle(coach.on, planning, "in Planning")
-            : `Answering on #${String(coach.working)}`
+            ? idle(coach.on, planning, "Planning")
+            : t("build:workers.answering", { number: coach.working })
         }
         busy={coach.working !== null}
         onChange={(on) => {
@@ -41,8 +44,8 @@ export function BoardWorkers({
       <Worker
         id="builder"
         icon={<Hammer className="size-4" aria-hidden />}
-        name="Builder"
-        does="Builds the cards in To do, one at a time, and opens a pull request for each. It never merges."
+        name={t("build:workers.builder")}
+        does={t("build:workers.builderDoes")}
         on={builder.on}
         now={builderNow(work, ready)}
         busy={builder.working !== null}
@@ -87,23 +90,20 @@ function Worker({
       <div className="grid min-w-0 flex-1 gap-0.5">
         <label
           htmlFor={label}
-          className="flex cursor-pointer items-center gap-2 text-sm font-semibold"
+          className="flex cursor-pointer items-center gap-2 text-item"
         >
           {name}
           <span
             className={cn(
-              "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
+              "rounded-full px-2 py-0.5 text-tag font-medium transition-colors",
               on ? "bg-tint text-blue" : "bg-muted text-muted-foreground",
             )}
           >
-            {on ? "On" : "Off"}
+            {on ? t("build:workers.on") : t("build:workers.off")}
           </span>
         </label>
-        <p className="text-[13px] text-muted-foreground">{does}</p>
-        <p
-          className="flex min-w-0 items-center gap-1.5 text-[13px]"
-          title={now}
-        >
+        <p className="text-note text-muted-foreground">{does}</p>
+        <p className="flex min-w-0 items-center gap-1.5 text-note" title={now}>
           {busy && (
             <Loader2 className="size-3 shrink-0 animate-spin" aria-hidden />
           )}
@@ -115,7 +115,7 @@ function Worker({
         className="mt-1"
         checked={on}
         onCheckedChange={onChange}
-        aria-label={`${name} ${on ? "on" : "off"}`}
+        aria-label={name}
       />
     </div>
   );
@@ -124,19 +124,21 @@ function Worker({
 // What the builder is doing: its card and its last step, or idle.
 function builderNow(work: WorkView, ready: number): string {
   const { working, activity, on } = work.builder;
-  if (!working) return idle(on, ready, "in To do");
-  const card = `${capital(working.what)} #${String(working.number)}`;
-  return activity ? `${card} · ${activity}` : card;
+  if (!working) return idle(on, ready, "Todo");
+  const busy = {
+    doing: t(`build:working.${jobOf(working.what)}`),
+    number: working.number,
+  };
+  return activity
+    ? t("build:workers.busyWith", { ...busy, activity })
+    : t("build:workers.busy", busy);
 }
 
 // What an idle worker says: the cards waiting for it (its badge says
 // whether it is on).
-function idle(on: boolean, count: number, where: string): string {
-  if (count === 0) return `No cards ${where}`;
-  const cards = `${String(count)} ${count === 1 ? "card" : "cards"} ${where}`;
-  return on ? `Starting on the next of ${cards}` : `${cards}, waiting`;
-}
-
-function capital(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
+function idle(on: boolean, count: number, where: "Planning" | "Todo"): string {
+  if (count === 0) return t(`build:workers.none${where}`);
+  return on
+    ? t(`build:workers.next${where}`, { count })
+    : t(`build:workers.waiting${where}`, { count });
 }

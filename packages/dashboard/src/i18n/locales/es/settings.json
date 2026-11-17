@@ -1,0 +1,108 @@
+{
+  "language": {
+    "title": "Idioma"
+  },
+  "page": {
+    "title": "Ajustes"
+  },
+  "tracker": {
+    "title": "Dónde se lleva el trabajo",
+    "now": "Ahora: {{name}}.",
+    "own": "el tablero de la factory",
+    "change": "Cambiar"
+  },
+  "look": {
+    "title": "Claro u oscuro",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "notKept": "Este navegador no puede guardar tu elección: dura hasta que cierres la página."
+  },
+  "group": {
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "savedRestart": "Guardado. Reinicia para usarlo:",
+    "notSaved": "No guardado",
+    "restart": "Reiniciar {{name}}",
+    "set": "{{label}} (definido)",
+    "replace": "{{help}} Escribe uno nuevo para reemplazarlo."
+  },
+  "workshop": {
+    "title": "Complementos y kits",
+    "inUse": "En uso",
+    "available": "Disponibles",
+    "builtIn": "Viene con la factory",
+    "addOn": "Complemento",
+    "kit": "Kit",
+    "change": "Cambiar",
+    "useInstead": "Usar este en su lugar",
+    "remove": "Quitar",
+    "add": "Añadir",
+    "settings": "Ajustes",
+    "forNew": "Para un producto nuevo de este tipo.",
+    "tracked": "Tu trabajo se lleva aquí",
+    "added": "Añadido"
+  },
+  "connect": {
+    "title": "¿Dónde debe guardar su trabajo la factory?",
+    "about": "Las ideas en las que estáis de acuerdo se convierten en trabajo en un tablero, y la factory construye desde ahí. Guárdalo aquí o usa el tablero de tu equipo.",
+    "goToBoard": "Ir al tablero",
+    "ownTitle": "El tablero de la factory",
+    "ownText": "El trabajo se queda aquí, en esta app. Nada que conectar.",
+    "useOwn": "Usar el tablero de la factory",
+    "ownDone": "El trabajo se queda en el tablero de la factory.",
+    "choices": "Dónde se lleva el trabajo"
+  },
+  "board": {
+    "connectedAll": "Conectado a <link>{{name}}</link>: todo su trabajo.",
+    "connectedLabel": "Conectado a <link>{{name}}</link>: el trabajo con la etiqueta «{{label}}».",
+    "trackedAll": "Tu trabajo se lleva en <link>{{name}}</link>: todo.",
+    "trackedLabel": "Tu trabajo se lleva en <link>{{name}}</link>: el que tiene la etiqueta «{{label}}».",
+    "stages": "Etapas y sus columnas",
+    "noColumn": "sin columna",
+    "github": "tablero {{board}} de {{repository}} en GitHub",
+    "jira": "{{project}} en Jira"
+  },
+  "pick": {
+    "choose": "Elegir…",
+    "which": "Qué trabajo toma la factory",
+    "all": "Todo el trabajo del tablero",
+    "labelled": "Solo el trabajo con la etiqueta «factory»",
+    "notOnBoard": "No está en este tablero",
+    "columns": "Qué columna es cuál",
+    "columnsAbout": "Emparejadas por sus nombres. Cambia las que estén mal.",
+    "columnFor": "Columna para {{stage}}"
+  },
+  "github": {
+    "cli": "La herramienta de línea de comandos de GitHub en este ordenador",
+    "install": "Instalarla",
+    "board": "Tu tablero",
+    "boardDone": "Tu tablero está conectado",
+    "signedIn": "Sesión iniciada como {{login}}",
+    "signIn": "Inicia sesión en GitHub",
+    "signInButton": "Iniciar sesión con GitHub",
+    "typeCode": "Escribe este código en la ventana del navegador que se abrió:",
+    "notSignedIn": "Sesión no iniciada",
+    "repository": "Repositorio",
+    "boardPick": "Tablero",
+    "allow": "Permitir que la factory lea tus tableros",
+    "checking": "Comprobando…",
+    "connect": "Conectar"
+  },
+  "jira": {
+    "signedIn": "Sesión iniciada como {{name}}",
+    "login": "Tu Jira y un token",
+    "check": "Comprobar",
+    "checking": "Comprobando…",
+    "project": "Tu proyecto",
+    "projectPick": "Proyecto",
+    "connect": "Conectar",
+    "site": "Sitio",
+    "siteHelp": "Por ejemplo acme.atlassian.net.",
+    "email": "Tu correo",
+    "emailHelp": "El que usas para entrar en Jira.",
+    "token": "Token de API",
+    "tokenHelp": "Se guarda solo en este ordenador.",
+    "createToken": "Crear un token de API"
+  }
+}

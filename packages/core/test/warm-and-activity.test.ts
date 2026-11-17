@@ -39,6 +39,8 @@ function pretendClaude() {
           child.kill();
           continue;
         }
+        // "(wait)" is a long turn: it answers only when stopped.
+        if (turn.message.content.includes("(wait)")) continue;
         const words = ["Sure,", "number", String(record.turns.length)];
         const send = (event: object) =>
           stdout.write(`${JSON.stringify(event)}\n`);
@@ -126,6 +128,34 @@ test("each conversation has its own process; a stopped one starts again and cont
   assert.equal(pretend.started.length, 3);
   const restarted = pretend.started[2]!.args;
   assert.equal(restarted[restarted.indexOf("--resume") + 1], "a");
+  warm.stop();
+});
+
+test("a turn can be stopped: Claude Code closes and the turn ends as not done", async () => {
+  const pretend = pretendClaude();
+  const warm = new WarmClaude("claude", { start: pretend.start });
+  const stop = new AbortController();
+  const long = warm.run({
+    ...base,
+    prompt: "(wait)",
+    session: { id: "s", resume: false },
+    stop: stop.signal,
+  });
+  stop.abort();
+  assert.equal((await long).ok, false);
+  const already = await warm.run({
+    ...base,
+    prompt: "Never sent",
+    session: { id: "t", resume: false },
+    stop: stop.signal,
+  });
+  assert.deepEqual(already, { ok: false, text: "", error: "Stopped." });
+  const next = await warm.run({
+    ...base,
+    prompt: "Hello again",
+    session: { id: "s", resume: true },
+  });
+  assert.equal(next.ok, true);
   warm.stop();
 });
 

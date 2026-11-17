@@ -69,19 +69,19 @@ test("the answer shows as a pill, and the dialog's lines say where the draft com
   assert.match(seenNote(null), /looking/);
   assert.match(
     seenNote({ draft: "", heard: 2, problem: "Claude Code is not here." }),
-    /could not look: Claude Code is not here\. Say what you saw\./,
+    /couldn't look: Claude Code is not here\. Write what you noticed\./,
   );
   assert.match(
     seenNote({ draft: "", heard: 0, problem: null }),
-    /Nothing was heard/,
+    /Nobody has said anything/,
   );
   assert.match(
     seenNote({ draft: "Hi", heard: 1, problem: null }),
-    /from 1 signal heard since/,
+    /from 1 thing people said\./,
   );
   assert.match(
     seenNote({ draft: "Hi", heard: 3, problem: null }),
-    /from 3 signals/,
+    /from 3 things people said/,
   );
 });
 

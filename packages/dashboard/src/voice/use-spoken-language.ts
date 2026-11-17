@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 
+import { i18next } from "@/i18n/i18n";
+
 import { browserLanguage, isLanguage, type Language } from "./languages";
 import type { VoiceCall } from "./voice-call";
 
-// The language the owner speaks, chosen beside Talk: this browser's
+// The language the owner speaks, chosen beside Talk: the dashboard's
 // language at first (English when the voice does not know it), then
 // whatever was chosen last in this browser. The call hears and answers in
 // it.
@@ -14,9 +16,9 @@ function kept(): Language {
     const chosen = localStorage.getItem(KEPT);
     if (chosen && isLanguage(chosen)) return chosen;
   } catch {
-    // Not kept in this browser: its own language, below.
+    // Not kept in this browser: the dashboard's language, below.
   }
-  return browserLanguage(navigator.language);
+  return browserLanguage(i18next.language);
 }
 
 export function useSpokenLanguage(

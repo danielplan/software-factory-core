@@ -1,25 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type {
-  KoboldNews,
-  PersonaCard,
-  SignalView,
-  StoryPage,
-} from "../src/api.ts";
+import type { SignalView, StoryPage } from "../src/api.ts";
 import {
+  alreadyOf,
+  alreadyWords,
   evidenceOf,
   knownWords,
-  koboldLine,
   listWords,
   originWords,
-  realProblemWords,
   sentencesOf,
-  storiesWords,
   storyFrom,
   tintOf,
   stageWhy,
   wentWords,
+  saidOf,
 } from "../src/understand/view.ts";
 
 // What the Understand pages say, from what the server sends.
@@ -32,20 +27,20 @@ test("why a problem is at its stage, in one plain line", () => {
   ) => ({ trying: { exploring, inBuild }, answer });
   assert.equal(
     stageWhy("heard", why([], [])),
-    "Heard from people. No idea for it yet.",
+    "People have said it. No idea for it yet.",
   );
   assert.equal(
     stageWhy("assumed", why([], [])),
-    "Assumed from an idea. Nobody has said it yet.",
+    "Guessed from an idea. Nobody has said it yet.",
   );
   assert.equal(
     stageWhy("trying", why(["Wish list", "Evening reminder"], [])),
-    "Trying: Wish list, Evening reminder",
+    "Ideas are being tried for it.",
   );
-  assert.equal(stageWhy("building", why([], [138])), "In Build as #138");
+  assert.equal(stageWhy("building", why([], [138])), "Being built as #138.");
   assert.equal(
     stageWhy("inApp", why([], [131, 144])),
-    "In the app as #131 and #144: did it work?",
+    "In the app as #131 and #144. Did it work?",
   );
   const answer = { issue: 127, worked: "yes", by: "Luca", on: "14 Nov" };
   assert.equal(
@@ -59,12 +54,12 @@ test("why a problem is at its stage, in one plain line", () => {
   assert.equal(stageWhy("didntWork", why([], [])), "It didn't work");
 });
 
-test("lists, origins and a persona's header read as plain words", () => {
+test("lists, origins and a person's header read as plain words", () => {
   assert.equal(listWords([]), "");
   assert.equal(listWords(["A"]), "A");
   assert.equal(listWords(["A", "B", "C"]), "A, B and C");
-  assert.equal(originWords({ signals: 1 }), "Written from 1 signal");
-  assert.equal(originWords({ signals: 3 }), "Written from 3 signals");
+  assert.equal(originWords({ signals: 1 }), "From 1 thing people said");
+  assert.equal(originWords({ signals: 3 }), "From 3 things people said");
   assert.equal(
     originWords({ idea: "i", title: "Wish list", by: "Luca" }),
     "From an idea by Luca",
@@ -73,35 +68,15 @@ test("lists, origins and a persona's header read as plain words", () => {
     originWords({ idea: "i", title: "Wish list", by: null }),
     "From the idea “Wish list”",
   );
-  const card = {
-    realProblems: [],
-    summary: { stories: 1, openStories: 1, realProblems: [] },
-  } as unknown as PersonaCard;
-  assert.equal(realProblemWords(card), "Not clear yet");
-  assert.equal(storiesWords(card), "1 story · 1 open");
-  assert.equal(
-    realProblemWords({
-      ...card,
-      realProblems: [{ title: "Shopping fits the gaps of a day" }],
-    } as unknown as PersonaCard),
-    "Shopping fits the gaps of a day",
-  );
-  assert.equal(
-    storiesWords({
-      ...card,
-      summary: { stories: 3, openStories: 0, realProblems: [] },
-    }),
-    "3 stories · 0 open",
-  );
 });
 
-test("where a signal went, with the page that shows it", () => {
+test("where what people said went, with the page that shows it", () => {
   const went = (to: SignalView["went"], sortedAs = "need") =>
     wentWords({ went: to, sortedAs } as SignalView);
-  assert.deepEqual(went(null), { words: "Not sorted yet", href: null });
+  assert.deepEqual(went(null), { words: "Not placed yet", href: null });
   assert.deepEqual(
     went({ to: "story", story: "st1", persona: "mia", title: "T", scene: 2 }),
-    { words: "Scene 2 of “T”", href: "#understand/mia/st1" },
+    { words: "Step 2 of “T”", href: "#understand/mia/st1" },
   );
   assert.equal(
     went({ to: "story", story: "st1", persona: "mia", title: "T", scene: null })
@@ -114,47 +89,19 @@ test("where a signal went, with the page that shows it", () => {
   );
   assert.equal(went({ to: "ticket", issue: 140 }).words, "Issue #140");
   assert.equal(went({ to: "build" }, "bug").words, "Build, as a fix");
-  assert.equal(went({ to: "build" }, "update").words, "Build, as an update");
+  assert.equal(
+    went({ to: "build" }, "update").words,
+    "Build, as an improvement",
+  );
   assert.equal(went({ to: "answered" }).words, "Answered");
 });
 
-test("the kobold's line says what it did that nobody looked at yet", () => {
-  const name = (id: string) => id.toUpperCase();
-  const signal = (went: SignalView["went"]) => ({ went }) as SignalView;
-  const news = (n: Partial<KoboldNews>): KoboldNews => ({
-    newStories: [],
-    toLookAt: [],
-    ...n,
-  });
-  assert.equal(koboldLine(news({}), name), null);
+test("how much of a story people confirmed, in a line", () => {
   assert.equal(
-    koboldLine(
-      news({
-        newStories: [{ id: "st9", title: "A gift", persona: "ines" }],
-        toLookAt: [signal({ to: "answered" }), signal(null)],
-      }),
-      name,
-    ),
-    "The kobold wrote a new story for INES: “A gift”. It sorted 1 signal nobody has looked at yet. 1 signal is not sorted yet.",
+    knownWords({ seen: 3, of: 4 }),
+    "3 of 4 steps confirmed · 1 guessed",
   );
-  assert.equal(
-    koboldLine(
-      news({
-        newStories: [
-          { id: "a", title: "A", persona: "x" },
-          { id: "b", title: "B", persona: "y" },
-        ],
-        toLookAt: [signal(null), signal(null), signal({ to: "build" })],
-      }),
-      name,
-    ),
-    "The kobold wrote 2 new stories. It sorted 1 signal nobody has looked at yet. 2 signals are not sorted yet.",
-  );
-});
-
-test("how much of a story is seen, in a line", () => {
-  assert.equal(knownWords({ seen: 3, of: 4 }), "3 of 4 parts seen · 1 guessed");
-  assert.equal(knownWords({ seen: 2, of: 2 }), "2 of 2 parts seen");
+  assert.equal(knownWords({ seen: 2, of: 2 }), "2 of 2 steps confirmed");
 });
 
 test("a story is told as sentences, the one it breaks at marked, what they do instead last", () => {
@@ -182,16 +129,19 @@ test("a story is told as sentences, the one it breaks at marked, what they do in
     {
       text: "He opens last week’s order.",
       breaks: false,
+      instead: false,
       evidence: { source: "Support", text: "Where is it?" },
     },
     {
       text: "He types it in again, line by line.",
       breaks: true,
+      instead: false,
       evidence: null,
     },
     {
       text: "Instead, he drives to the wholesaler.",
       breaks: false,
+      instead: true,
       evidence: null,
     },
   ]);
@@ -222,7 +172,7 @@ test("a story's own page says where it came from", () => {
     }) as unknown as StoryPage;
   assert.equal(
     storyFrom(page({ signals: ["s1", "s2"] })),
-    "Written from 2 signals",
+    "From 2 things people said",
   );
   assert.equal(storyFrom(page({ idea: "wish" })), "From an idea by Pia");
   assert.equal(
@@ -244,4 +194,79 @@ test("a scene's evidence is its first signal, with its source", () => {
   assert.equal(evidenceOf([], signals), null);
   assert.equal(tintOf(0), "bg-persona-1");
   assert.equal(tintOf(6), "bg-persona-2");
+});
+
+test("before choosing, a signal says what already exists for its problem", () => {
+  type Existing = SignalView["existing"];
+  const of = (existing: Existing) => alreadyOf({ existing });
+  const wish = { id: "wish", title: "Wish list" };
+  const ticket = (
+    issue: number,
+    worked: Existing["tickets"][number]["worked"],
+    idea: string | null = null,
+  ) => ({ issue, idea, worked });
+  assert.equal(of({ ideas: [], tickets: [] }), null);
+  assert.deepEqual(of({ ideas: [wish], tickets: [] }), {
+    kind: "explored",
+    idea: wish,
+  });
+  // An idea already sent to Build is no longer "being explored".
+  assert.deepEqual(of({ ideas: [wish], tickets: [ticket(12, null, "wish")] }), {
+    kind: "building",
+    issue: 12,
+  });
+  assert.deepEqual(
+    of({ ideas: [], tickets: [ticket(12, null), ticket(9, "yes")] }),
+    { kind: "fixed", issue: 9 },
+  );
+  assert.deepEqual(of({ ideas: [], tickets: [ticket(9, "unchecked")] }), {
+    kind: "fixed",
+    issue: 9,
+  });
+  // A ticket answered "no" counts for nothing.
+  assert.equal(of({ ideas: [], tickets: [ticket(9, "no", "wish")] }), null);
+  assert.equal(
+    alreadyWords({ kind: "explored", idea: wish }),
+    "Already explored in “Wish list”",
+  );
+  assert.equal(
+    alreadyWords({ kind: "building", issue: 12 }),
+    "Already in Build as #12",
+  );
+  assert.equal(
+    alreadyWords({ kind: "fixed", issue: 9 }),
+    "Already fixed in #9",
+  );
+});
+
+test("what people like a persona said: from sources of people, newest first", () => {
+  const records = {
+    sources: [
+      { id: "sup", name: "Support", kind: "people" },
+      { id: "err", name: "Errors", kind: "errors" },
+    ],
+    signals: [
+      {
+        id: "s1",
+        source: "sup",
+        text: "First",
+        when: "Mon",
+        soundsLike: "mia",
+      },
+      { id: "s2", source: "err", text: "Crash", when: "", soundsLike: "mia" },
+      { id: "s3", source: "sup", text: "Other", when: "", soundsLike: "noah" },
+      {
+        id: "s4",
+        source: "sup",
+        text: "Latest",
+        when: "Tue",
+        soundsLike: "mia",
+      },
+    ],
+  } as unknown as Parameters<typeof saidOf>[0];
+  assert.deepEqual(saidOf(records, "mia"), [
+    { id: "s4", text: "Latest", source: "Support", when: "Tue" },
+    { id: "s1", text: "First", source: "Support", when: "Mon" },
+  ]);
+  assert.deepEqual(saidOf(records, "ines"), []);
 });

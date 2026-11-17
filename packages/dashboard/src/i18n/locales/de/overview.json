@@ -1,0 +1,50 @@
+{
+  "title": "Start",
+  "needs": {
+    "title": "Wartet auf dich",
+    "empty": "Nichts wartet auf dich. Alles erledigt.",
+    "didItWork": "Hat es funktioniert?",
+    "review": "Arbeit prüfen",
+    "send": "An Build senden",
+    "vote": "Für eine Version stimmen",
+    "look": "Ansehen",
+    "said_one": "{{count}} Neues, das Leute gesagt haben",
+    "said_other": "{{count}} neue Dinge, die Leute gesagt haben"
+  },
+  "discovery": {
+    "title": "Discovery",
+    "empty": "Nichts offen. Füge unter Verstehen hinzu, was Leute gesagt haben."
+  },
+  "build": {
+    "title": "Build",
+    "empty": "Gerade wird nichts gebaut."
+  },
+  "seeAll": "Alle ansehen ({{count}})",
+  "open": "Öffnen",
+  "rows": {
+    "new": "Neu",
+    "didntHold": "Hat nicht gehalten",
+    "notClear": "Noch unklar",
+    "didItWork": "Hat es funktioniert?"
+  },
+  "river": {
+    "title": "Wie es vorangeht",
+    "heard": "Gehört",
+    "ideas": "Ideen",
+    "sent": "An Build",
+    "inApp": "In der App",
+    "worked": "Hat funktioniert",
+    "heardWords_one": "{{count}} Problem gehört",
+    "heardWords_other": "{{count}} Probleme gehört",
+    "ideasWords_one": "{{count}} Idee ausprobiert",
+    "ideasWords_other": "{{count}} Ideen ausprobiert",
+    "sentWords": "{{count}} an Build gesendet",
+    "inAppWords": "{{count}} in der App",
+    "workedWords": "{{count}} hat funktioniert",
+    "nothing": "Noch nichts ausprobiert: fang mit einer Idee an.",
+    "soFar_one": "{{worked}} von {{count}} Idee hat bisher funktioniert",
+    "soFar_other": "{{worked}} von {{count}} Ideen haben bisher funktioniert",
+    "building_one": "{{count}} im Bau",
+    "building_other": "{{count}} im Bau"
+  }
+}

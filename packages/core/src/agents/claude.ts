@@ -40,6 +40,9 @@ export type RunOptions = {
   deny?: string[];
   // Instructions added to Claude Code's own, kept for the whole conversation.
   instructions?: string;
+  // Stops the run when it fires: Claude Code is closed and the run ends as
+  // not done (a person steering the agent elsewhere).
+  stop?: AbortSignal;
 };
 
 // Claude Code's options for a run; `input` makes it take turns over standard

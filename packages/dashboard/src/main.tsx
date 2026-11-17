@@ -1,7 +1,8 @@
-import "@fontsource-variable/onest";
+import "@fontsource-variable/geist";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import "@/i18n/i18n";
 import { App } from "@/app";
 import { applyChoice, storedChoice } from "@/lib/theme-choice";
 import "./index.css";

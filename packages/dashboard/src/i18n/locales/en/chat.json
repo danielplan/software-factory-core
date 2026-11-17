@@ -1,0 +1,42 @@
+{
+  "title": "Chat",
+  "newChat": "New chat",
+  "welcome": {
+    "title": "What would you like to improve?",
+    "about": "Share an idea, or ask about your users.",
+    "kobold": "The kobold"
+  },
+  "placeholder": {
+    "start": "Describe something you'd like to improve…",
+    "reply": "Write a reply…",
+    "steer": "Change what the kobold is doing…"
+  },
+  "disclaimer": "The kobold can make mistakes.",
+  "composer": {
+    "label": "Your message",
+    "attach": "Add files",
+    "attachHint": "Add pictures, PDFs or text files",
+    "send": "Send",
+    "uploading": "Uploading",
+    "remove": "Remove {{name}}"
+  },
+  "files": {
+    "unreadable": "This file couldn't be read.",
+    "wrongType": "Only pictures, PDFs and text files.",
+    "tooLarge": "Too large: 7 MB at most."
+  },
+  "conversation": "The conversation",
+  "thinking": "Thinking",
+  "writing": "Writing it up",
+  "whoFor": "Who is it for?",
+  "noPeople": "First add who uses your product, in People.",
+  "done": "Done: it's an idea your team can explore.",
+  "yourIdea": "Your idea",
+  "newOnExplore": "New idea in Explore",
+  "openIdea": "Open the idea",
+  "couldNotWrite": "Sorry, I couldn't write it up: {{why}}",
+  "failed": "Sorry, something went wrong: {{why}}",
+  "forPerson": "For {{name}}",
+  "steering": "Got it, I'll take that into account and start again.",
+  "steerTag": "Change of plan"
+}

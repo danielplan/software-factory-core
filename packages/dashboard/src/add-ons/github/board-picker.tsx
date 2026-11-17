@@ -3,14 +3,16 @@
 // then the check; starting from the board connected now, if there is one.
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Board, get, messageOf, post, type StageMap } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { Pick, WhichWork } from "@/connect/pick";
 import { type Columns, StageMapping } from "@/connect/stage-map";
+import { t } from "@/i18n/i18n";
 
-export const SMALL = "h-9 justify-self-start px-3 text-[13px]";
+export const SMALL = "h-9 justify-self-start px-3 text-note";
 
 // The repository and its owner's board, from lists; then the check.
 export function BoardPicker({
@@ -22,6 +24,7 @@ export function BoardPicker({
   onAllow: () => void;
   onDone: (message: string) => void;
 }>) {
+  const { t } = useTranslation(["settings", "common"]);
   const choice = useBoardChoice(connected);
   const { repository, board, label, stages } = choice;
   const [checking, setChecking] = useState(false);
@@ -73,11 +76,11 @@ export function BoardPicker({
           onStages={choice.setStages}
         />
       )}
-      <WhichWork value={label} onPick={choice.setLabel} noun="cards" />
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      <WhichWork value={label} onPick={choice.setLabel} />
+      {problem && <ProblemBox title={t("common:didNotWork")} text={problem} />}
       {problem?.includes("allow it") && (
         <Button variant="outline" className={SMALL} onClick={onAllow}>
-          Allow the factory to read boards
+          {t("github.allow")}
         </Button>
       )}
       <Button
@@ -85,7 +88,7 @@ export function BoardPicker({
         disabled={!repository || !board || checking}
         onClick={() => void connect()}
       >
-        {checking ? "Checking…" : "Connect"}
+        {checking ? t("github.checking") : t("github.connect")}
       </Button>
     </div>
   );
@@ -110,13 +113,13 @@ function RepositoryAndBoard({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <Pick
-        label="Repository"
+        label={t("settings:github.repository")}
         value={repository}
         options={repositories.map((one) => ({ value: one, label: one }))}
         onPick={onRepository}
       />
       <Pick
-        label="Board"
+        label={t("settings:github.boardPick")}
         value={board}
         options={boards.map((one) => ({
           value: String(one.number),

@@ -21,12 +21,26 @@ export type Went =
   | { to: "build" }
   | { to: "answered" };
 
+// What already exists for the problem a signal is about (through its
+// story, or the problem itself): the ideas for it and the tickets for it,
+// each with its "did it work?" answer when there is one. Empty when it is
+// about no problem.
+export type Existing = {
+  ideas: { id: string; title: string }[];
+  tickets: {
+    issue: number;
+    idea: string | null;
+    worked: "yes" | "no" | "unchecked" | null;
+  }[];
+};
+
 export type SignalView = Signal & {
   sourceName: string;
   whoName: string | null;
   soundsLikeName: string | null;
   // Null while it is not sorted.
   went: Went | null;
+  existing: Existing;
 };
 
 // What the kobold did that a person has not looked at yet: the stories it
@@ -77,6 +91,32 @@ function viewOf(signal: Signal, records: Records): SignalView {
     whoName: name(records.customers, signal.who),
     soundsLikeName: name(records.personas, signal.soundsLike),
     went: wentOf(signal, records),
+    existing: existingFor(problemOf(signal, records), records),
+  };
+}
+
+// The problem a signal is about: its story's, or the problem it went to.
+function problemOf(signal: Signal, records: Records): string | null {
+  const to = signal.wentTo;
+  if (to?.to === "problem") return to.id;
+  if (to?.to !== "story") return null;
+  return records.stories.find((s) => s.id === to.id)?.problem ?? null;
+}
+
+function existingFor(problem: string | null, records: Records): Existing {
+  if (problem === null) return { ideas: [], tickets: [] };
+  const answers = new Map(records.outcomes.map((o) => [o.issue, o.worked]));
+  return {
+    ideas: records.ideas
+      .filter((idea) => idea.problems.includes(problem))
+      .map(({ id, title }) => ({ id, title })),
+    tickets: records.ticketLinks
+      .filter((ticket) => ticket.problems.includes(problem))
+      .map((ticket) => ({
+        issue: ticket.issue,
+        idea: "idea" in ticket.from ? ticket.from.idea : null,
+        worked: answers.get(ticket.issue) ?? null,
+      })),
   };
 }
 

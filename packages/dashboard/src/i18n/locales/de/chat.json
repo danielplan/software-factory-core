@@ -1,0 +1,42 @@
+{
+  "title": "Chat",
+  "newChat": "Neuer Chat",
+  "welcome": {
+    "title": "Was möchtest du verbessern?",
+    "about": "Teile eine Idee oder frag nach deinen Nutzern.",
+    "kobold": "Der Kobold"
+  },
+  "placeholder": {
+    "start": "Beschreib, was du verbessern möchtest…",
+    "reply": "Antwort schreiben…",
+    "steer": "Ändere, was der Kobold gerade tut…"
+  },
+  "disclaimer": "Der Kobold kann sich irren.",
+  "composer": {
+    "label": "Deine Nachricht",
+    "attach": "Dateien hinzufügen",
+    "attachHint": "Bilder, PDFs oder Textdateien hinzufügen",
+    "send": "Senden",
+    "uploading": "Wird hochgeladen",
+    "remove": "{{name}} entfernen"
+  },
+  "files": {
+    "unreadable": "Diese Datei konnte nicht gelesen werden.",
+    "wrongType": "Nur Bilder, PDFs und Textdateien.",
+    "tooLarge": "Zu groß: höchstens 7 MB."
+  },
+  "conversation": "Das Gespräch",
+  "thinking": "Ich denke nach",
+  "writing": "Ich schreibe die Idee auf",
+  "whoFor": "Für wen ist sie?",
+  "noPeople": "Füge zuerst hinzu, wer dein Produkt nutzt, unter Personen.",
+  "done": "Fertig: Dein Team kann die Idee jetzt erkunden.",
+  "yourIdea": "Deine Idee",
+  "newOnExplore": "Neue Idee unter Erkunden",
+  "openIdea": "Idee öffnen",
+  "couldNotWrite": "Entschuldige, ich konnte sie nicht aufschreiben: {{why}}",
+  "failed": "Entschuldige, etwas ist schiefgelaufen: {{why}}",
+  "forPerson": "Für {{name}}",
+  "steering": "Verstanden, ich berücksichtige das und fange neu an.",
+  "steerTag": "Kurswechsel"
+}

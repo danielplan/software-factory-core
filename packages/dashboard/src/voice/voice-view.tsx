@@ -1,4 +1,5 @@
 import { PhoneOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -23,6 +24,7 @@ export function VoiceView({
   coachProblem: string | null;
   onEnd: () => void;
 }>) {
+  const { t } = useTranslation("setup");
   const state = useVoiceCall(call);
   const mode = modeOf(state);
   const [language, chooseLanguage] = useSpokenLanguage(call);
@@ -34,22 +36,22 @@ export function VoiceView({
         role="status"
         className={
           status.problem
-            ? "text-center text-[13px] text-destructive"
-            : "text-xs font-medium text-muted-foreground"
+            ? "text-center text-note text-destructive"
+            : "text-tag font-medium text-muted-foreground"
         }
       >
-        {status.text || MOMENT[mode]}
+        {status.text || t(MOMENT[mode])}
       </p>
       <div className="flex w-full flex-wrap items-center gap-2">
         <LanguageSwitch language={language} onChoose={chooseLanguage} />
         <Button
           type="button"
           variant="outline"
-          className="ml-auto h-9 rounded-full px-3.5 text-[13px]"
+          className="ml-auto h-9 rounded-full px-3.5 text-note"
           onClick={onEnd}
         >
           <PhoneOff aria-hidden />
-          End call
+          {t("voice.end")}
         </Button>
       </div>
     </div>

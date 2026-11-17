@@ -12,14 +12,14 @@ export function Step({
       <span
         className={
           done
-            ? "flex size-7 flex-none items-center justify-center rounded-full bg-solved text-xs font-semibold text-solved-foreground"
-            : "flex size-7 flex-none items-center justify-center rounded-full bg-surface-2 text-xs font-semibold"
+            ? "flex size-7 flex-none items-center justify-center rounded-full bg-solved text-tag font-semibold text-solved-foreground"
+            : "flex size-7 flex-none items-center justify-center rounded-full bg-surface-2 text-tag font-semibold"
         }
       >
         {done ? "✓" : String(n)}
       </span>
       <div className="grid min-w-0 flex-1 gap-2 pt-0.5">
-        <span className="text-[15px] font-medium">{title}</span>
+        <span className="text-item">{title}</span>
         {children}
       </div>
     </li>

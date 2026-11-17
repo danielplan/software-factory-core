@@ -10,6 +10,7 @@
 //   → Worked, or Didn't work.
 
 import type { IdeaRow, StoryCard } from "../api.ts";
+import { t } from "../i18n/i18n.ts";
 
 export type ProblemStage = NonNullable<StoryCard["stage"]>;
 export type IdeaStage = IdeaRow["stage"];
@@ -25,57 +26,64 @@ export type Steps = {
   tone: StepTone;
 };
 
-const PROBLEM: Record<ProblemStage, [at: number, name: string, StepTone]> = {
-  assumed: [0, "Assumed", "neutral"],
-  heard: [0, "Heard", "neutral"],
-  trying: [1, "Trying ideas", "amber"],
-  building: [2, "Building", "amber"],
-  inApp: [3, "In the app", "blue"],
-  solved: [4, "Solved", "green"],
-  didntWork: [4, "Didn't work", "pink"],
+// Each stage's step (from 0), the key of its name, and its colour.
+type Key =
+  | "assumed"
+  | "heard"
+  | "trying"
+  | "building"
+  | "inApp"
+  | "solved"
+  | "didntWork"
+  | "idea"
+  | "versions"
+  | "picked"
+  | "worked";
+const name = (key: Key) => t(`common:stage.${key}`);
+
+const PROBLEM: Record<ProblemStage, [at: number, StepTone]> = {
+  assumed: [0, "neutral"],
+  heard: [0, "neutral"],
+  trying: [1, "amber"],
+  building: [2, "amber"],
+  inApp: [3, "blue"],
+  solved: [4, "green"],
+  didntWork: [4, "pink"],
 };
 
-const IDEA: Record<IdeaStage, [at: number, name: string, StepTone]> = {
-  idea: [0, "Idea", "neutral"],
-  versions: [1, "Versions", "amber"],
-  picked: [2, "Picked", "amber"],
-  building: [3, "Building", "amber"],
-  inApp: [4, "In the app", "blue"],
-  worked: [5, "Worked", "green"],
-  didntWork: [5, "Didn't work", "pink"],
+const IDEA: Record<IdeaStage, [at: number, StepTone]> = {
+  idea: [0, "neutral"],
+  versions: [1, "amber"],
+  picked: [2, "amber"],
+  building: [3, "amber"],
+  inApp: [4, "blue"],
+  worked: [5, "green"],
+  didntWork: [5, "pink"],
 };
 
 export function problemSteps(stage: ProblemStage): Steps {
-  const [at, name, tone] = PROBLEM[stage];
-  return {
-    names: [
-      stage === "assumed" ? "Assumed" : "Heard",
-      "Trying ideas",
-      "Building",
-      "In the app",
-      stage === "didntWork" ? "Didn't work" : "Solved",
-    ],
-    at,
-    name,
-    tone,
-  };
+  const [at, tone] = PROBLEM[stage];
+  const keys: Key[] = [
+    stage === "assumed" ? "assumed" : "heard",
+    "trying",
+    "building",
+    "inApp",
+    stage === "didntWork" ? "didntWork" : "solved",
+  ];
+  return { names: keys.map(name), at, name: name(stage), tone };
 }
 
 export function ideaSteps(stage: IdeaStage): Steps {
-  const [at, name, tone] = IDEA[stage];
-  return {
-    names: [
-      "Idea",
-      "Versions",
-      "Picked",
-      "Building",
-      "In the app",
-      stage === "didntWork" ? "Didn't work" : "Worked",
-    ],
-    at,
-    name,
-    tone,
-  };
+  const [at, tone] = IDEA[stage];
+  const keys: Key[] = [
+    "idea",
+    "versions",
+    "picked",
+    "building",
+    "inApp",
+    stage === "didntWork" ? "didntWork" : "worked",
+  ];
+  return { names: keys.map(name), at, name: name(stage), tone };
 }
 
 // A ticket's part of the idea's pipeline: from Building on.
@@ -90,12 +98,13 @@ export function ticketSteps(stage: IdeaStage): Steps {
 }
 
 // "Closed by Luca on 14 Nov: it worked", from the last answer to "did it
-// work?"; just what happened when nobody's answer is known.
+// work?"; just what happened when nobody's answer is known. What happened
+// comes already in the person's language.
 export function closedWords(
   answer: { by: string; on: string } | null,
   happened: string,
 ): string {
   return answer
-    ? `Closed by ${answer.by} on ${answer.on}: ${happened}`
+    ? t("common:closedBy", { by: answer.by, on: answer.on, what: happened })
     : happened.charAt(0).toUpperCase() + happened.slice(1);
 }

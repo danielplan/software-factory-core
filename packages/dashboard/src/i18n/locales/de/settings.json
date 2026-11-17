@@ -1,0 +1,108 @@
+{
+  "language": {
+    "title": "Sprache"
+  },
+  "page": {
+    "title": "Einstellungen"
+  },
+  "tracker": {
+    "title": "Wo die Arbeit liegt",
+    "now": "Jetzt: {{name}}.",
+    "own": "das eigene Board der Factory",
+    "change": "Ändern"
+  },
+  "look": {
+    "title": "Hell oder dunkel",
+    "system": "System",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "notKept": "Dieser Browser kann deine Wahl nicht speichern; sie gilt, bis du die Seite schließt."
+  },
+  "group": {
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "savedRestart": "Gespeichert. Neu starten, um es zu nutzen:",
+    "notSaved": "Nicht gespeichert",
+    "restart": "{{name}} neu starten",
+    "set": "{{label}} (gesetzt)",
+    "replace": "{{help}} Gib einen neuen ein, um ihn zu ersetzen."
+  },
+  "workshop": {
+    "title": "Erweiterungen und Kits",
+    "inUse": "In Gebrauch",
+    "available": "Verfügbar",
+    "builtIn": "Gehört zur Factory",
+    "addOn": "Erweiterung",
+    "kit": "Kit",
+    "change": "Ändern",
+    "useInstead": "Stattdessen nutzen",
+    "remove": "Entfernen",
+    "add": "Hinzufügen",
+    "settings": "Einstellungen",
+    "forNew": "Für ein neues Produkt dieser Art.",
+    "tracked": "Deine Arbeit liegt hier",
+    "added": "Hinzugefügt"
+  },
+  "connect": {
+    "title": "Wo soll die Factory ihre Arbeit ablegen?",
+    "about": "Ideen, auf die ihr euch einigt, werden zu Arbeit auf einem Board, und die Factory baut von dort aus. Behalte es hier oder nutze das Board deines Teams.",
+    "goToBoard": "Zum Board",
+    "ownTitle": "Das eigene Board der Factory",
+    "ownText": "Die Arbeit bleibt hier in dieser App. Nichts zu verbinden.",
+    "useOwn": "Das Board der Factory nutzen",
+    "ownDone": "Die Arbeit bleibt auf dem eigenen Board der Factory.",
+    "choices": "Wo die Arbeit liegt"
+  },
+  "board": {
+    "connectedAll": "Verbunden mit <link>{{name}}</link>: die ganze Arbeit.",
+    "connectedLabel": "Verbunden mit <link>{{name}}</link>: die Arbeit mit dem Label „{{label}}“.",
+    "trackedAll": "Deine Arbeit liegt auf <link>{{name}}</link>: alles.",
+    "trackedLabel": "Deine Arbeit liegt auf <link>{{name}}</link>: die mit dem Label „{{label}}“.",
+    "stages": "Phasen und ihre Spalten",
+    "noColumn": "keine Spalte",
+    "github": "Board {{board}} von {{repository}} auf GitHub",
+    "jira": "{{project}} auf Jira"
+  },
+  "pick": {
+    "choose": "Auswählen…",
+    "which": "Welche Arbeit die Factory übernimmt",
+    "all": "Die ganze Arbeit auf dem Board",
+    "labelled": "Nur Arbeit mit dem Label „factory“",
+    "notOnBoard": "Nicht auf diesem Board",
+    "columns": "Welche Spalte welche ist",
+    "columnsAbout": "Nach den Namen zugeordnet. Ändere, was nicht stimmt.",
+    "columnFor": "Spalte für {{stage}}"
+  },
+  "github": {
+    "cli": "Das Kommandozeilen-Tool von GitHub auf diesem Computer",
+    "install": "Installieren",
+    "board": "Dein Board",
+    "boardDone": "Dein Board ist verbunden",
+    "signedIn": "Angemeldet als {{login}}",
+    "signIn": "Bei GitHub anmelden",
+    "signInButton": "Mit GitHub anmelden",
+    "typeCode": "Gib diesen Code im geöffneten Browserfenster ein:",
+    "notSignedIn": "Nicht angemeldet",
+    "repository": "Repository",
+    "boardPick": "Board",
+    "allow": "Der Factory erlauben, deine Boards zu lesen",
+    "checking": "Wird geprüft…",
+    "connect": "Verbinden"
+  },
+  "jira": {
+    "signedIn": "Angemeldet als {{name}}",
+    "login": "Dein Jira und ein Token",
+    "check": "Prüfen",
+    "checking": "Wird geprüft…",
+    "project": "Dein Projekt",
+    "projectPick": "Projekt",
+    "connect": "Verbinden",
+    "site": "Website",
+    "siteHelp": "Zum Beispiel acme.atlassian.net.",
+    "email": "Deine E-Mail",
+    "emailHelp": "Die, mit der du dich bei Jira anmeldest.",
+    "token": "API-Token",
+    "tokenHelp": "Bleibt nur auf diesem Computer.",
+    "createToken": "API-Token erstellen"
+  }
+}

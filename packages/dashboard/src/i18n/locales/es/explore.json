@@ -1,0 +1,161 @@
+{
+  "page": {
+    "title": "Exploraciones",
+    "newIdea": "Nueva idea",
+    "cannotRead": "No se pueden cargar las ideas"
+  },
+  "groups": {
+    "before": "Ideas anteriores, del coach de ideas",
+    "plan": "Por planificar",
+    "prototypes": "Prototipos",
+    "handedOff": "Entregadas",
+    "dropped": "Descartadas"
+  },
+  "next": {
+    "versions_one": "{{count}} versión para probar",
+    "versions_other": "{{count}} versiones para probar",
+    "picked": "Lista para enviar a Build",
+    "inApp": "En la app — ¿funcionó?"
+  },
+  "why": {
+    "idea": "Aún sin versiones — crea algunas en el modo prototipo.",
+    "tie": "Dos o más versiones están empatadas.",
+    "noVotes": "Nadie ha votado todavía.",
+    "picked": "{{version}} tiene más votos.",
+    "building": "En construcción como {{issues}}.",
+    "inApp": "En la app como {{issues}} — ¿funcionó?",
+    "worked": "Funcionó.",
+    "didntWork": "No funcionó.",
+    "workedBy": "{{by}} la cerró el {{on}}: funcionó.",
+    "didntWorkBy": "{{by}} la cerró el {{on}}: no funcionó."
+  },
+  "votes_one": "{{count}} voto",
+  "votes_other": "{{count}} votos",
+  "send": {
+    "went": "La versión {{version}} pasó a Build como #{{issue}}.",
+    "noBoard": "{{version}} tiene más votos. Para enviarla a Build, conecta primero un tablero de GitHub.",
+    "lead": "{{version}} tiene más votos.",
+    "button": "Enviar {{version}} a Build",
+    "buttonNone": "Enviar a Build",
+    "noVotes": "Nadie ha votado todavía — prueba las versiones y vota.",
+    "tie": "{{versions}} están empatadas — vota para decidir.",
+    "connect": "Conectar en Ajustes"
+  },
+  "run": {
+    "stopped": "Detenida",
+    "making": "El kobold la está creando",
+    "starting": "Iniciando…",
+    "running": "En marcha",
+    "failed": "Se detuvo"
+  },
+  "version": {
+    "title": "Versión {{version}} · {{name}}",
+    "main": "Actual",
+    "kobold": "el kobold",
+    "madeBy": "Creada por {{who}}",
+    "picture": "Imagen de la versión {{version}}",
+    "most": "Más votada",
+    "try": "Probar",
+    "yourVote": "Tu voto",
+    "vote": "Votar"
+  },
+  "main": {
+    "running": "{{name}}, tal como funciona ahora",
+    "none": "Este proyecto no tiene un producto para iniciar aquí.",
+    "stopped": "El producto no está en marcha. Inícialo en la página Producto para verlo aquí."
+  },
+  "still": {
+    "cannotRun": "Este proyecto aún no puede iniciar versiones.",
+    "cannotRunMore": "Pide a quien configuró la factory que añada un comando de prototipo.",
+    "makingDoing": "El kobold la está creando: {{doing}}",
+    "making": "El kobold la está creando…",
+    "starting": "Iniciando…",
+    "stopped": "No está en marcha. Iníciala para probarla."
+  },
+  "idea": {
+    "cannotShow": "No se puede mostrar esta idea",
+    "loading": "Cargando la idea…",
+    "failed": "No funcionó",
+    "weThink": "Creemos que: {{what}}",
+    "forWhom": "Para {{name}}",
+    "forNobody": "Para",
+    "assumed": "(imaginado)"
+  },
+  "steps": {
+    "heading": "Versiones",
+    "all": "Todas las versiones"
+  },
+  "none": {
+    "confirm": "¿Descartar «{{title}}»?",
+    "unshared_one": "{{count}} versión en el modo prototipo, aún sin compartir.",
+    "unshared_other": "{{count}} versiones en el modo prototipo, aún sin compartir.",
+    "nothing": "Aún no hay versiones para probar.",
+    "discard": "Descartar",
+    "make": "Crear versiones"
+  },
+  "own": {
+    "label": "Tu idea",
+    "placeholder": "Un pedido fijo: los suministros de siempre llegan cada lunes, sin pedirlos.",
+    "forWhom": "¿Para quién es?",
+    "failed": "No se pudo escribir",
+    "draft": "Escribir la historia",
+    "couldNot": "El kobold no pudo escribirla",
+    "again": "Intentar de nuevo",
+    "writingDoing": "El kobold está escribiendo la historia: {{doing}}",
+    "writing": "El kobold está escribiendo la historia…",
+    "assumedIntro": "La historia detrás de tu idea, tal como la imagina el kobold:",
+    "discard": "Descartar",
+    "keep": "Guardar la idea",
+    "assumed": "imaginada",
+    "setting": "Empieza: {{starts}} · Quiere: {{wants}}",
+    "notSaid": "sin decir",
+    "breaksGuessed": "aquí falla · imaginado",
+    "guessed": "imaginado",
+    "assumedProblem": "Problema imaginado"
+  },
+  "new": {
+    "title": "Nueva idea",
+    "description": "Empieza una idea desde una historia o desde la tuya.",
+    "startFrom": "Empezar desde",
+    "fromStory": "Desde una historia",
+    "ownIdea": "Mi propia idea",
+    "ideaLabel": "La idea, en pocas palabras",
+    "weThinkLabel": "Qué haría (opcional)",
+    "failed": "No se pudo empezar",
+    "start": "Empezar la idea",
+    "noStories": "Aún no hay ninguna historia con un problema abierto.",
+    "goesWrong": "Falla: {{problem}}"
+  },
+  "side": {
+    "mainName": "El producto tal como es ahora",
+    "stateShared": "{{state}} · compartida",
+    "versions": "Versiones",
+    "askLabel": "¿Qué debería hacer la próxima versión?",
+    "askPlaceholder": "Describe otra versión, p. ej. «guardar con una pulsación larga»",
+    "send": "Enviar",
+    "chat": "Chat con el kobold",
+    "greeting": "Dime qué debería hacer otra versión y la creo para que la pruebes.",
+    "couldNot": "No pude crearla: {{why}}",
+    "making": "Creando la versión {{version}}…",
+    "ready": "La versión {{version}} está lista.",
+    "show": "Mostrarla",
+    "working": "El kobold está trabajando"
+  },
+  "bar": {
+    "title": "Modo prototipo",
+    "switch": "Versión",
+    "back": "Volver a Explorar",
+    "shared": "Compartida",
+    "share": "Compartir"
+  },
+  "shown": {
+    "start": "Iniciarla",
+    "mainAbout": "el producto tal como funciona hoy",
+    "window": "Abrir en una ventana",
+    "stop": "Detenerla"
+  },
+  "mode": {
+    "whichIdea": "¿Qué idea?",
+    "fromExplore": "Abre el modo prototipo desde una idea en Explorar."
+  }
+}

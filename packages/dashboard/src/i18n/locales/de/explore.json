@@ -1,0 +1,161 @@
+{
+  "page": {
+    "title": "Erkundungen",
+    "newIdea": "Neue Idee",
+    "cannotRead": "Die Ideen können nicht geladen werden"
+  },
+  "groups": {
+    "before": "Ältere Ideen, vom Ideen-Coach",
+    "plan": "Planen",
+    "prototypes": "Prototypen",
+    "handedOff": "Übergeben",
+    "dropped": "Verworfen"
+  },
+  "next": {
+    "versions_one": "{{count}} Version zum Ausprobieren",
+    "versions_other": "{{count}} Versionen zum Ausprobieren",
+    "picked": "Bereit für Build",
+    "inApp": "In der App – hat es funktioniert?"
+  },
+  "why": {
+    "idea": "Noch keine Versionen – erstelle welche im Prototyp-Modus.",
+    "tie": "Zwei oder mehr Versionen liegen gleichauf.",
+    "noVotes": "Noch hat niemand abgestimmt.",
+    "picked": "{{version}} hat die meisten Stimmen.",
+    "building": "Wird gebaut als {{issues}}.",
+    "inApp": "In der App als {{issues}} – hat es funktioniert?",
+    "worked": "Hat funktioniert.",
+    "didntWork": "Hat nicht funktioniert.",
+    "workedBy": "{{by}} hat es am {{on}} geschlossen: hat funktioniert.",
+    "didntWorkBy": "{{by}} hat es am {{on}} geschlossen: hat nicht funktioniert."
+  },
+  "votes_one": "{{count}} Stimme",
+  "votes_other": "{{count}} Stimmen",
+  "send": {
+    "went": "Version {{version}} ging als #{{issue}} an Build.",
+    "noBoard": "{{version}} hat die meisten Stimmen. Um sie an Build zu senden, verbinde zuerst ein GitHub-Board.",
+    "lead": "{{version}} hat die meisten Stimmen.",
+    "button": "{{version}} an Build senden",
+    "buttonNone": "An Build senden",
+    "noVotes": "Noch hat niemand abgestimmt – probiere die Versionen aus und stimme ab.",
+    "tie": "{{versions}} liegen gleichauf – stimme ab, um zu entscheiden.",
+    "connect": "In den Einstellungen verbinden"
+  },
+  "run": {
+    "stopped": "Gestoppt",
+    "making": "Der Kobold erstellt sie",
+    "starting": "Startet…",
+    "running": "Läuft",
+    "failed": "Wurde gestoppt"
+  },
+  "version": {
+    "title": "Version {{version}} · {{name}}",
+    "main": "Aktuell",
+    "kobold": "der Kobold",
+    "madeBy": "Erstellt von {{who}}",
+    "picture": "Bild von Version {{version}}",
+    "most": "Meiste Stimmen",
+    "try": "Ausprobieren",
+    "yourVote": "Deine Stimme",
+    "vote": "Abstimmen"
+  },
+  "main": {
+    "running": "{{name}}, wie es jetzt läuft",
+    "none": "Dieses Projekt hat hier kein Produkt zum Starten.",
+    "stopped": "Das Produkt läuft nicht. Starte es auf der Seite Produkt, um es hier zu sehen."
+  },
+  "still": {
+    "cannotRun": "Dieses Projekt kann noch keine Versionen starten.",
+    "cannotRunMore": "Bitte die Person, die die Factory eingerichtet hat, einen Prototyp-Befehl hinzuzufügen.",
+    "makingDoing": "Der Kobold erstellt sie: {{doing}}",
+    "making": "Der Kobold erstellt sie…",
+    "starting": "Startet…",
+    "stopped": "Sie läuft nicht. Starte sie, um sie auszuprobieren."
+  },
+  "idea": {
+    "cannotShow": "Diese Idee kann nicht angezeigt werden",
+    "loading": "Idee wird geladen…",
+    "failed": "Das hat nicht geklappt",
+    "weThink": "Wir glauben: {{what}}",
+    "forWhom": "Für {{name}}",
+    "forNobody": "Für",
+    "assumed": "(angenommen)"
+  },
+  "steps": {
+    "heading": "Versionen",
+    "all": "Alle Versionen"
+  },
+  "none": {
+    "confirm": "„{{title}}“ verwerfen?",
+    "unshared_one": "{{count}} Version im Prototyp-Modus, noch nicht geteilt.",
+    "unshared_other": "{{count}} Versionen im Prototyp-Modus, noch nicht geteilt.",
+    "nothing": "Noch keine Versionen zum Ausprobieren.",
+    "discard": "Verwerfen",
+    "make": "Versionen erstellen"
+  },
+  "own": {
+    "label": "Deine Idee",
+    "placeholder": "Ein Dauerauftrag: Die üblichen Lieferungen kommen jeden Montag, ohne Bestellung.",
+    "forWhom": "Für wen ist sie?",
+    "failed": "Sie konnte nicht geschrieben werden",
+    "draft": "Geschichte schreiben",
+    "couldNot": "Der Kobold konnte sie nicht schreiben",
+    "again": "Nochmal versuchen",
+    "writingDoing": "Der Kobold schreibt die Geschichte: {{doing}}",
+    "writing": "Der Kobold schreibt die Geschichte…",
+    "assumedIntro": "Die Geschichte hinter deiner Idee, wie der Kobold sie sich vorstellt:",
+    "discard": "Verwerfen",
+    "keep": "Idee behalten",
+    "assumed": "angenommen",
+    "setting": "Beginnt: {{starts}} · Will: {{wants}}",
+    "notSaid": "nicht gesagt",
+    "breaksGuessed": "hier geht es schief · angenommen",
+    "guessed": "angenommen",
+    "assumedProblem": "Angenommenes Problem"
+  },
+  "new": {
+    "title": "Neue Idee",
+    "description": "Starte eine Idee aus einer Geschichte oder aus deiner eigenen.",
+    "startFrom": "Starten mit",
+    "fromStory": "Aus einer Geschichte",
+    "ownIdea": "Meine eigene Idee",
+    "ideaLabel": "Die Idee, in wenigen Worten",
+    "weThinkLabel": "Was sie bewirken würde (optional)",
+    "failed": "Sie konnte nicht gestartet werden",
+    "start": "Idee starten",
+    "noStories": "Noch keine Geschichte mit einem offenen Problem.",
+    "goesWrong": "Geht schief: {{problem}}"
+  },
+  "side": {
+    "mainName": "Das Produkt, wie es jetzt ist",
+    "stateShared": "{{state}} · geteilt",
+    "versions": "Versionen",
+    "askLabel": "Was soll die nächste Version tun?",
+    "askPlaceholder": "Beschreibe eine weitere Version, z. B. „mit langem Drücken speichern“",
+    "send": "Senden",
+    "chat": "Chat mit dem Kobold",
+    "greeting": "Sag mir, was eine weitere Version tun soll, und ich erstelle sie zum Ausprobieren.",
+    "couldNot": "Ich konnte sie nicht erstellen: {{why}}",
+    "making": "Erstelle Version {{version}}…",
+    "ready": "Version {{version}} ist fertig.",
+    "show": "Anzeigen",
+    "working": "Der Kobold arbeitet"
+  },
+  "bar": {
+    "title": "Prototyp-Modus",
+    "switch": "Version",
+    "back": "Zurück zu Erkunden",
+    "shared": "Geteilt",
+    "share": "Teilen"
+  },
+  "shown": {
+    "start": "Starten",
+    "mainAbout": "das Produkt, wie es heute läuft",
+    "window": "In einem Fenster öffnen",
+    "stop": "Stoppen"
+  },
+  "mode": {
+    "whichIdea": "Welche Idee?",
+    "fromExplore": "Öffne den Prototyp-Modus über eine Idee in Erkunden."
+  }
+}

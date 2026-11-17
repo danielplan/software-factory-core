@@ -1,0 +1,42 @@
+{
+  "title": "Chat",
+  "newChat": "Nouvelle discussion",
+  "welcome": {
+    "title": "Qu'aimerais-tu améliorer ?",
+    "about": "Proposez une idée ou posez une question sur vos utilisateurs.",
+    "kobold": "Le kobold"
+  },
+  "placeholder": {
+    "start": "Décris ce que tu aimerais améliorer…",
+    "reply": "Écris une réponse…",
+    "steer": "Changez ce que fait le kobold…"
+  },
+  "disclaimer": "Le kobold peut se tromper.",
+  "composer": {
+    "label": "Ton message",
+    "attach": "Ajouter des fichiers",
+    "attachHint": "Ajouter des images, des PDF ou des fichiers texte",
+    "send": "Envoyer",
+    "uploading": "Envoi en cours",
+    "remove": "Retirer {{name}}"
+  },
+  "files": {
+    "unreadable": "Ce fichier n'a pas pu être lu.",
+    "wrongType": "Seulement des images, des PDF et des fichiers texte.",
+    "tooLarge": "Trop lourd : 7 Mo au maximum."
+  },
+  "conversation": "La conversation",
+  "thinking": "Je réfléchis",
+  "writing": "Je rédige l'idée",
+  "whoFor": "Pour qui ?",
+  "noPeople": "Ajoutez d'abord qui utilise votre produit, dans Personnes.",
+  "done": "C'est fait : votre équipe peut explorer cette idée.",
+  "yourIdea": "Ton idée",
+  "newOnExplore": "Nouvelle idée dans Explorer",
+  "openIdea": "Ouvrir l'idée",
+  "couldNotWrite": "Désolé, je n'ai pas pu la rédiger : {{why}}",
+  "failed": "Désolé, quelque chose n'a pas marché : {{why}}",
+  "forPerson": "Pour {{name}}",
+  "steering": "Compris, j'en tiens compte et je recommence.",
+  "steerTag": "Changement de cap"
+}

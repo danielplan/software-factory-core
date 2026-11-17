@@ -1,0 +1,54 @@
+{
+  "title": "Bilan",
+  "start": {
+    "title": "Vérifier mon produit",
+    "lead": "Le kobold parcourt votre produit à la recherche de bugs, d'erreurs et de choses difficiles à utiliser, et vous explique chacun simplement.",
+    "time": "Prend quelques minutes",
+    "safe": "Rien n'est modifié",
+    "local": "Tourne sur cet ordinateur",
+    "button": "Lancer le bilan",
+    "again": "Vérifier à nouveau",
+    "one": "Vérifier {{name}}"
+  },
+  "running": {
+    "title": "Le kobold vérifie {{name}}…",
+    "looking": "Il regarde autour…",
+    "found_one": "{{count}} chose trouvée pour l'instant",
+    "found_other": "{{count}} choses trouvées pour l'instant",
+    "stop": "Arrêter"
+  },
+  "results": {
+    "last": "Dernier bilan : {{when}}",
+    "toLook_one": "{{count}} chose à regarder",
+    "toLook_other": "{{count}} choses à regarder",
+    "clear": "Rien d'inquiétant",
+    "handled": "Déjà traitées ({{count}})",
+    "failed": "Le bilan de {{name}} n'a pas pu se terminer : {{why}}",
+    "stopped": "Le bilan de {{name}} a été arrêté avant la fin."
+  },
+  "severity": {
+    "high": "Grave",
+    "medium": "À corriger",
+    "low": "Mineur"
+  },
+  "kind": {
+    "bug": "Bug",
+    "error": "Erreur",
+    "ux": "Peu pratique",
+    "security": "Sécurité",
+    "performance": "Lent"
+  },
+  "finding": {
+    "fix": "Comment le corriger",
+    "where": "Où",
+    "in": "Dans {{name}}",
+    "send": "Envoyer à Build",
+    "dismiss": "Pas un problème",
+    "sent": "Dans Build en #{{issue}}",
+    "waiting": "Dans Build. Pour en faire un ticket, connectez un tableau GitHub dans les Réglages.",
+    "onBuild": "Dans Build",
+    "dismissed": "Mis de côté"
+  },
+  "problem": "Ça n'a pas marché : {{why}}",
+  "crumbSignals": "Signaux"
+}

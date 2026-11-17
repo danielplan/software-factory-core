@@ -17,8 +17,9 @@ import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
-import { readBody, send } from "./http.ts";
+import { PAGE_HEADERS, readBody, send, statusOf } from "./http.ts";
 import type { JobTools } from "./kobold/tools.ts";
+import { productRoutes } from "./product/routes.ts";
 import { servedRecords } from "./records/routes.ts";
 import { issuesInApp } from "./records/views.ts";
 import { Refused } from "./refused.ts";
@@ -145,6 +146,7 @@ function routesFor(session: Session): Record<string, Route> {
       session.chooseBoard("none");
     },
     ...workRoutes(session),
+    ...productRoutes(session),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
     "POST /api/parts/start": (_b, url) => launcher().start(part(url)),
@@ -208,9 +210,8 @@ async function answerApi(
     const body = incoming.method === "POST" ? await readBody(incoming) : null;
     send(response, 200, (await route(body, url)) ?? {});
   } catch (error) {
-    const refused = error instanceof Refused;
     const message = error instanceof Error ? error.message : String(error);
-    send(response, refused ? 409 : 500, { error: message });
+    send(response, statusOf(error), { error: message });
   }
 }
 
@@ -265,6 +266,7 @@ function sendFile(response: ServerResponse, page: string, path: string): void {
   }
   response.writeHead(200, {
     "content-type": TYPES[extname(file)] ?? "application/octet-stream",
+    ...PAGE_HEADERS,
   });
   response.end(readFileSync(file));
 }

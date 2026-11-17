@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { trackersOf } from "@/add-ons/trackers";
 import {
@@ -11,113 +12,75 @@ import { PageHead } from "@/components/page-head";
 import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
+import { AddOnsTab } from "./add-ons-tab";
 import type { FactoryState } from "./dashboard";
+import { LanguageCard } from "./language-card";
 import { LookCard } from "./look-card";
-import { GroupCard, sectionId, Topic } from "./settings-card";
+import { GroupCard, Topic } from "./settings-card";
 
-// The factory's settings, in order: a list of the sections at the side
-// (when there is more than one), the cards using the full width: where
-// work is tracked, then each settings group that no add-on has (an
-// add-on's are in its card on Add-ons). Each card shows what is set now
-// and saves on its own; the parts that read it can be restarted from there.
+// The factory's settings, one card under another: where work is tracked,
+// the language, light or dark, then each settings group that no add-on has
+// (an add-on's are in its card below). Each card shows what is set now and
+// saves on its own; the parts that read it can be restarted from there.
+// Under them, the add-ons and kits the factory works with (#workshop and
+// #add-ons lead here).
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
+  const { t } = useTranslation("settings");
   const owned = new Set(state.addOns.flatMap((addOn) => addOn.settings));
   const groups = state.settings.filter((group) => !owned.has(group.id));
-  const sections = [
-    "Where work is tracked",
-    "Light or dark",
-    ...groups.map((group) => group.name),
-  ];
   return (
-    <div className="grid gap-5">
-      <PageHead
-        title="Settings"
-        about="How the factory works here: where work is tracked, how it looks, and the settings of its parts."
-      />
-      <div
-        className={
-          sections.length > 1
-            ? "grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]"
-            : "grid"
-        }
-      >
-        {sections.length > 1 && <Sections names={sections} />}
-        <div className="grid gap-5">
-          <TrackerCard state={state} />
-          <LookCard />
-          {groups.map((group) => (
-            <GroupCard key={group.id} group={group} state={state} />
-          ))}
-        </div>
+    <div className="grid content-start gap-8">
+      <div className="grid max-w-3xl gap-4">
+        <PageHead title={t("page.title")} />
+        <TrackerCard state={state} />
+        <LanguageCard />
+        <LookCard />
+        {groups.map((group) => (
+          <GroupCard key={group.id} group={group} state={state} />
+        ))}
       </div>
+      <section
+        aria-labelledby="add-ons-and-kits"
+        className="grid content-start gap-4 pt-4"
+      >
+        <h2 id="add-ons-and-kits" className="text-section">
+          {t("workshop.title")}
+        </h2>
+        <AddOnsTab state={state} />
+      </section>
     </div>
   );
 }
 
-// The settings' sections, to go to one.
-function Sections({ names }: Readonly<{ names: string[] }>) {
-  return (
-    <nav
-      aria-label="Sections"
-      className="sticky top-6 grid gap-0.5 max-lg:hidden"
-    >
-      {names.map((name) => (
-        <button
-          key={name}
-          type="button"
-          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-hover hover:text-foreground"
-          onClick={() => {
-            document
-              .getElementById(sectionId(name))
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-        >
-          {name}
-        </button>
-      ))}
-    </nav>
-  );
-}
-
-// Where work is tracked: the same choice and steps as right after setup,
-// on the page; what was connected, once done.
+// Where work is tracked: what it is now, and the same choice and steps as
+// right after setup, folded away until asked for.
 function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
+  const { t } = useTranslation("settings");
   const [done, setDone] = useState<string | null>(null);
   const now =
     state.addOns.find((addOn) => addOn.id === state.company.tracker)?.name ??
-    "The factory's board";
+    t("tracker.own");
   return (
-    <Topic
-      title="Where work is tracked"
-      about={`Now: ${now}. Where the ideas you agree to become work to build.`}
-    >
+    <Topic title={t("tracker.title")} about={t("tracker.now", { name: now })}>
       <ConnectedBoard state={state} />
-      {state.company.tracker === "none" ? (
-        <TrackerChoice
-          trackers={trackersOf(state.addOns)}
-          current={state.company.tracker}
-          onDone={setDone}
-        />
-      ) : (
-        <Collapsible className="grid gap-4">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-sm font-medium">
-            Change where work is tracked
-            <ChevronDown
-              className="size-4 transition group-data-[state=open]:rotate-180"
-              aria-hidden
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <TrackerChoice
-              trackers={trackersOf(state.addOns)}
-              current={state.company.tracker}
-              connected={state.board}
-              onDone={setDone}
-            />
-          </CollapsibleContent>
-        </Collapsible>
-      )}
-      {done && <p className="text-sm font-medium text-success">{done}</p>}
+      <Collapsible className="grid gap-4">
+        <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-body font-medium">
+          {t("tracker.change")}
+          <ChevronDown
+            className="size-4 transition group-data-[state=open]:rotate-180"
+            aria-hidden
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <TrackerChoice
+            trackers={trackersOf(state.addOns)}
+            current={state.company.tracker}
+            connected={state.board}
+            onDone={setDone}
+          />
+        </CollapsibleContent>
+      </Collapsible>
+      {done && <p className="text-body font-medium text-success">{done}</p>}
     </Topic>
   );
 }

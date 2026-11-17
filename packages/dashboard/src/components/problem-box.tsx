@@ -8,7 +8,7 @@ export function ProblemBox({
   return (
     <div
       role="alert"
-      className="flex gap-3 rounded-2xl border border-destructive/20 bg-destructive/[0.07] px-4 py-3 text-sm"
+      className="flex gap-3 rounded-2xl border border-destructive/20 bg-destructive/[0.07] px-4 py-3 text-body"
     >
       <CircleAlert
         className="mt-0.5 size-4 flex-none text-destructive"

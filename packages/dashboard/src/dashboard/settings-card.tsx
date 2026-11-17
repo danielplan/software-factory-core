@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type GroupView, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -51,7 +52,7 @@ export function GroupForm({
 }
 
 // "Where work is tracked" → "settings-where-work-is-tracked".
-export function sectionId(name: string): string {
+function sectionId(name: string): string {
   return `settings-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
@@ -59,18 +60,20 @@ export function Topic({
   title,
   about,
   children,
-}: Readonly<{ title: string; about: string; children: ReactNode }>) {
+}: Readonly<{ title: string; about?: string; children: ReactNode }>) {
   return (
     <Card
       id={sectionId(title)}
       aria-label={title}
-      className="scroll-mt-6 gap-5 shadow-soft"
+      className="scroll-mt-6 gap-3 shadow-soft"
     >
-      <CardHeader>
-        <CardTitle className="text-[17px]">{title}</CardTitle>
-        <CardDescription>{about}</CardDescription>
+      <CardHeader className="gap-1">
+        <CardTitle className="text-section">{title}</CardTitle>
+        {about && (
+          <CardDescription className="text-note">{about}</CardDescription>
+        )}
       </CardHeader>
-      <CardContent className="grid gap-5">{children}</CardContent>
+      <CardContent className="grid gap-4">{children}</CardContent>
     </Card>
   );
 }
@@ -109,19 +112,22 @@ function Saving({
   usedBy: string[];
   state: FactoryState;
 }>) {
+  const { t } = useTranslation("settings");
   const running = state.parts.filter(
     (part) => usedBy.includes(part.id) && part.canStop,
   );
   return (
     <>
-      {form.problem && <ProblemBox title="Not saved" text={form.problem} />}
+      {form.problem && (
+        <ProblemBox title={t("group.notSaved")} text={form.problem} />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={() => void form.save()} disabled={!changed}>
-          Save
+          {t("group.save")}
         </Button>
         {form.saved && (
-          <span className="text-sm text-success">
-            Saved.{running.length > 0 && " It counts once restarted:"}
+          <span className="text-body text-success">
+            {running.length > 0 ? t("group.savedRestart") : t("group.saved")}
           </span>
         )}
         {form.saved &&
@@ -129,12 +135,12 @@ function Saving({
             <Button
               key={part.id}
               variant="outline"
-              className="h-9 px-3 text-[13px]"
+              className="h-9 px-3 text-note"
               onClick={() =>
                 void post(`/api/parts/${encodeURIComponent(part.id)}/restart`)
               }
             >
-              Restart {part.name}
+              {t("group.restart", { name: part.name })}
             </Button>
           ))}
       </div>

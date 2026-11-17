@@ -1,0 +1,177 @@
+{
+  "page": {
+    "title": "Personas",
+    "cantRead": "Was Menschen gesagt haben, kann nicht gelesen werden",
+    "personCantShow": "Diese Person kann nicht angezeigt werden",
+    "storyCantShow": "Diese Geschichte kann nicht angezeigt werden"
+  },
+  "overview": {
+    "empty": "Noch nichts hier. Füge hinzu, was Menschen gesagt haben: Der Kobold liest es, und hier erscheint, was für sie schiefläuft.",
+    "people": "Die Personen, die dein Produkt nutzen",
+    "open_one": "{{count}} offen",
+    "open_other": "{{count}} offen",
+    "signals_one": "{{count}} Signal",
+    "signals_other": "{{count}} Signale"
+  },
+  "why": {
+    "heard": "Menschen haben es gesagt. Noch keine Idee dafür.",
+    "assumed": "Aus einer Idee vermutet. Noch hat es niemand gesagt.",
+    "trying": "Es werden Ideen dafür ausprobiert.",
+    "building": "Wird gebaut als {{issues}}.",
+    "inApp": "In der App als {{issues}}. Hat es funktioniert?",
+    "worked": "es hat funktioniert",
+    "didntWork": "es hat nicht funktioniert"
+  },
+  "origin": {
+    "said_one": "Aus {{count}} Aussage von Menschen",
+    "said_other": "Aus {{count}} Aussagen von Menschen",
+    "ideaBy": "Aus einer Idee von {{name}}",
+    "idea": "Aus der Idee „{{title}}“"
+  },
+  "notClear": "Noch nicht klar",
+  "went": {
+    "notYet": "Noch nicht zugeordnet",
+    "step": "Schritt {{step}} von „{{title}}“",
+    "story": "Die Geschichte „{{title}}“",
+    "problem": "Das Problem „{{title}}“",
+    "issue": "Issue #{{issue}}",
+    "update": "Build, als Verbesserung",
+    "fix": "Build, als Fehlerbehebung",
+    "answered": "Beantwortet"
+  },
+  "known": {
+    "seen": "{{seen}} von {{of}} Schritten bestätigt",
+    "guessed": "{{seen}} von {{of}} Schritten bestätigt · {{guessed}} vermutet"
+  },
+  "instead": "Stattdessen: {{text}}",
+  "person": {
+    "nothingYet": "Noch nichts.",
+    "real": "Was wirklich zählt",
+    "confirmedBy": "Bestätigt von {{name}}",
+    "confirm": "Ja, genau",
+    "cantConfirm": "Es konnte nicht bestätigt werden",
+    "wantsLine": "Möchte {{wants}}"
+  },
+  "story": {
+    "starts": "Beginnt: {{text}}",
+    "wants": "Möchte: {{text}}",
+    "label": "Die Geschichte",
+    "didntHold": "Diese Geschichte hat sich als falsch erwiesen: {{why}}",
+    "breaksLabel": "Wo es schiefläuft",
+    "insteadLabel": "Was sie stattdessen tun",
+    "guessedLabel": "Vermutet",
+    "breaksTag": "läuft schief",
+    "guessTag": "Vermutung",
+    "seenLabel": "Bestätigt durch {{source}}: {{text}}",
+    "toCheck": "Zu prüfen"
+  },
+  "problem": {
+    "label": "Was schiefläuft",
+    "labelAssumed": "Was schiefläuft · aus einer Idee vermutet",
+    "ideas": "Ideen dafür",
+    "noIdeas": "Noch keine.",
+    "idea": {
+      "exploring": "Wird erkundet",
+      "inBuild": "Wird gebaut",
+      "worked": "Hat funktioniert",
+      "didntWork": "Hat nicht funktioniert"
+    },
+    "startIdea": "Idee starten"
+  },
+  "ask": {
+    "writing": "Der Kobold schreibt eine Frage…",
+    "again": "Nochmal fragen",
+    "ask": "Zwei Menschen wie {{name}} fragen",
+    "copied": "Kopiert",
+    "copy": "Zum Senden kopieren",
+    "cantDraft": "Der Kobold konnte sie nicht schreiben"
+  },
+  "signal": {
+    "from": "Von {{where}}",
+    "looksGood": "Passt",
+    "move": "Verschieben",
+    "didntWork": "Das hat nicht geklappt",
+    "soundsLike": "klingt nach {{name}}",
+    "readingWhat": "Der Kobold liest es: {{what}}",
+    "reading": "Der Kobold liest es…",
+    "fix": "Beheben",
+    "explore": "Erkunden",
+    "dismiss": "Verwerfen",
+    "sending": "Wird an Bauen gesendet…",
+    "sentNoBoard": "An Bauen gesendet. Um daraus eine Karte zu machen, verbinde ein GitHub-Board.",
+    "openSettings": "Einstellungen öffnen",
+    "addTo": "Zu „{{title}}“ hinzufügen",
+    "already": {
+      "explored": "Schon erkundet in „{{title}}“",
+      "building": "Schon in Bauen als #{{issue}}",
+      "fixed": "Schon behoben in #{{issue}}"
+    },
+    "why": "Warum: {{why}}"
+  },
+  "move": {
+    "write": "Den Kobold schreiben lassen",
+    "move": "Verschieben",
+    "cant": "Es konnte nicht verschoben werden",
+    "to": "Verschieben nach",
+    "choice": {
+      "scene": "In eine Geschichte",
+      "newStory": "Eine neue Geschichte",
+      "build": "Es ist ein Fehler"
+    },
+    "story": "Die Geschichte",
+    "whichStory": "Welche Geschichte?",
+    "step": "Der Schritt",
+    "whose": "Wessen Geschichte",
+    "koboldDecides": "Den Kobold entscheiden lassen",
+    "storyOf": "Eine Geschichte von {{name}}"
+  },
+  "add": {
+    "button": "Hinzufügen, was Menschen gesagt haben",
+    "about": "Füge eine Support-E-Mail, eine Bewertung oder Notizen aus einem Gespräch ein. Der Kobold liest es und erkennt, nach wem es klingt und zu welcher Geschichte es gehört.",
+    "cant": "Es konnte nicht hinzugefügt werden",
+    "send": "Hinzufügen",
+    "another": "Noch eins hinzufügen"
+  },
+  "fields": {
+    "text": "Was haben sie gesagt?",
+    "textHelp": "Eine Sache, von einer Person.",
+    "file": "Oder aus einer Datei übernehmen",
+    "source": "Woher es kommt",
+    "pickSource": "Wähle, woher es kommt",
+    "newSource": "Von woanders…",
+    "who": "Wer hat es gesagt",
+    "notKnown": "Weiß nicht",
+    "when": "Wann",
+    "sourceName": "Name des neuen Ortes",
+    "sourceNameExample": "Support-Postfach",
+    "kind": "Was es ist",
+    "kinds": {
+      "people": "Was Menschen sagen oder schreiben",
+      "usage": "Wie Menschen es nutzen",
+      "errors": "Fehler",
+      "alerts": "Warnungen, z. B. Sicherheitsupdates",
+      "personaRuns": "Testläufe (zählen nie als Beleg)"
+    }
+  },
+  "signals": {
+    "title": "Signale",
+    "checkup": "Produkt prüfen",
+    "list": "Neue Signale",
+    "empty": "Nichts Neues. Alles erledigt.",
+    "newStory": "Neue Geschichte für {{name}}: {{title}}",
+    "kind": {
+      "bug": "Fehler",
+      "need": "Wunsch",
+      "update": "Update",
+      "question": "Frage",
+      "other": "Feedback"
+    }
+  },
+  "tabs": {
+    "label": "Über diese Person",
+    "problems": "Probleme",
+    "signals": "Signale",
+    "tests": "Tests",
+    "testsSoon": "Bald: Lass den Kobold das Produkt als {{name}} ausprobieren."
+  }
+}

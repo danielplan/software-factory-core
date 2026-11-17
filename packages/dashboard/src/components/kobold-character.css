@@ -1,0 +1,366 @@
+/* The kobold as a little cartoon (kobold-character.tsx). Each part moves on
+   its own, with its own timing, so it feels alive rather than wobbling as
+   one piece: it drops in and squashes as it lands, its hat's tip whips and
+   catches up; then it breathes, blinks and lets its hat
+   sway a beat after its body. Thinking, it tilts its head and looks up.
+   With reduced motion it stands still, in a pleasant pose. */
+
+.kc g {
+  transform-box: fill-box;
+}
+.kc .k-whole,
+.kc .k-pose,
+.kc .k-breathe,
+.kc .k-hat {
+  transform-origin: 50% 100%;
+}
+.kc .k-shadow {
+  transform-origin: 50% 50%;
+}
+.kc .k-eyes {
+  transform-origin: 50% 50%;
+}
+.kc .k-tip,
+.kc .k-tip-catch {
+  transform-origin: 0% 100%;
+}
+
+/* Arriving: drop, squash on landing, stretch on the rebound, settle. */
+.kc[data-arrive="true"] .k-whole {
+  animation: kc-drop 1s cubic-bezier(0.3, 0, 0.3, 1) both;
+}
+.kc[data-arrive="true"] .k-shadow {
+  animation: kc-land 1s cubic-bezier(0.3, 0, 0.3, 1) both;
+}
+.kc[data-arrive="true"] .k-tip-catch {
+  animation: kc-whip 1.1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.05s both;
+}
+
+/* Always, once it is there: breathing, blinking, the hat. */
+.kc .k-breathe {
+  animation: kc-breathe 3.2s ease-in-out var(--kc-after, 0s) infinite;
+}
+.kc .k-eyes {
+  animation: kc-blink 7.4s linear var(--kc-after, 0s) infinite;
+}
+.kc .k-hat {
+  animation: kc-sway 4s ease-in-out var(--kc-after, 0s) infinite;
+}
+.kc .k-tip {
+  animation: kc-tip 4s ease-in-out calc(var(--kc-after, 0s) + 0.35s) infinite;
+}
+
+/* Idle: a small shift of weight from one foot to the other. */
+.kc[data-mood="idle"] .k-pose {
+  animation: kc-shift 6s ease-in-out var(--kc-after, 0s) infinite;
+}
+
+/* Thinking: head tilted, a slow "hmm", eyes up and to the right. */
+.kc[data-mood="thinking"] .k-pose {
+  transform: rotate(-6deg);
+  animation: kc-hmm 2.6s ease-in-out var(--kc-after, 0s) infinite;
+}
+.kc[data-mood="thinking"] .k-face {
+  transform: translate(4px, -4px);
+  animation: kc-gaze 5s ease-in-out var(--kc-after, 0s) infinite;
+}
+
+/* Calm (a small picture beside a message): it only blinks. */
+.kc[data-mood="calm"] g:not(.k-eyes) {
+  animation: none;
+}
+
+/* Talking: a little bounce, in rhythm. */
+.kc[data-mood="talking"] .k-pose {
+  animation: kc-talk 0.5s cubic-bezier(0.3, 0, 0.3, 1) var(--kc-after, 0s)
+    infinite;
+}
+
+/* Running in place: leaning forward, bobbing with a squash at each step,
+   feet in turn, the hat tip flapping back a beat late, dust and
+   speed lines behind. */
+.kc .k-foot-l,
+.kc .k-foot-r,
+.kc .k-dust,
+.kc .k-speed {
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+}
+.kc[data-mood="running"] .k-pose {
+  animation: kc-run 0.42s cubic-bezier(0.3, 0, 0.3, 1) infinite;
+}
+.kc[data-mood="running"] .k-breathe {
+  animation: none;
+}
+.kc[data-mood="running"] .k-foot-l {
+  animation: kc-step 0.42s ease-in-out infinite;
+}
+.kc[data-mood="running"] .k-foot-r {
+  animation: kc-step 0.42s ease-in-out -0.21s infinite;
+}
+.kc[data-mood="running"] .k-hat {
+  animation: kc-hat-run 0.42s ease-in-out 0.05s infinite;
+}
+.kc[data-mood="running"] .k-tip {
+  animation: kc-tip-run 0.42s ease-in-out 0.12s infinite;
+}
+.kc[data-mood="running"] .k-shadow {
+  animation: kc-run-shadow 0.21s ease-in-out infinite alternate;
+}
+.kc .k-dust {
+  animation: kc-dust 0.84s ease-out infinite;
+}
+.kc .k-speed {
+  animation: kc-speed 0.5s linear infinite;
+}
+
+/* The thought bubble: two circles rise, then the cloud, its dots pulsing. */
+.kc-bubble span {
+  animation: kc-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.kc-bubble .kc-dot {
+  animation:
+    kc-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    kc-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes kc-drop {
+  0% {
+    transform: translateY(-120px) scale(0.92, 1.1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(0) scale(1.18, 0.78);
+  }
+  60% {
+    transform: translateY(-18px) scale(0.93, 1.1);
+  }
+  76% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+  88% {
+    transform: scale(0.98, 1.02);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes kc-land {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.2;
+  }
+  45% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  60% {
+    transform: scale(0.85);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes kc-whip {
+  0% {
+    transform: rotate(0);
+  }
+  45% {
+    transform: rotate(-28deg);
+  }
+  62% {
+    transform: rotate(20deg);
+  }
+  78% {
+    transform: rotate(-9deg);
+  }
+  90% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes kc-breathe {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: scale(0.985, 1.03);
+  }
+}
+@keyframes kc-blink {
+  0%,
+  44%,
+  47%,
+  88%,
+  91%,
+  94%,
+  100% {
+    transform: none;
+  }
+  45.5%,
+  89.5%,
+  92.5% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes kc-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes kc-tip {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes kc-shift {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  30% {
+    transform: translateX(1.5px) rotate(1deg);
+  }
+  70% {
+    transform: translateX(-1.5px) rotate(-1deg);
+  }
+}
+@keyframes kc-hmm {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-9deg) translateY(-3px);
+  }
+}
+@keyframes kc-gaze {
+  0%,
+  60%,
+  100% {
+    transform: translate(4px, -4px);
+  }
+  66%,
+  76% {
+    transform: translate(-2px, -2px);
+  }
+}
+@keyframes kc-talk {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-4px) scale(0.97, 1.04);
+  }
+  70% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+}
+@keyframes kc-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+}
+@keyframes kc-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes kc-run {
+  0%,
+  50%,
+  100% {
+    transform: rotate(8deg) translateY(0) scale(1.06, 0.94);
+  }
+  25%,
+  75% {
+    transform: rotate(8deg) translateY(-11px) scale(0.96, 1.05);
+  }
+}
+@keyframes kc-step {
+  0%,
+  100% {
+    transform: translate(-9px, 0) rotate(-12deg);
+  }
+  50% {
+    transform: translate(9px, -6px) rotate(12deg);
+  }
+}
+@keyframes kc-hat-run {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+@keyframes kc-tip-run {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(-6deg);
+  }
+}
+@keyframes kc-run-shadow {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.82);
+  }
+}
+@keyframes kc-dust {
+  from {
+    opacity: 0.9;
+    transform: translateX(0) scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-22px) translateY(-8px) scale(1.4);
+  }
+}
+@keyframes kc-speed {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc *,
+  .kc-bubble * {
+    animation: none !important;
+  }
+}

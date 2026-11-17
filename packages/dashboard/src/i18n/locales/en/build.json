@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Factory",
+    "refresh": "Refresh",
+    "openOn": "Open on {{site}}",
+    "problem": "That didn't work",
+    "empty": "Nothing here yet. Work starts as an <link>idea</link>."
+  },
+  "stages": {
+    "draft": "Draft",
+    "backlog": "Backlog",
+    "planning": "Planning",
+    "todo": "To do",
+    "doing": "In progress",
+    "review": "Review",
+    "done": "In the app"
+  },
+  "now": {
+    "plan": "Planning #{{number}} “{{title}}”",
+    "build": "Building #{{number}} “{{title}}”",
+    "review": "Answering the review of #{{number}} “{{title}}”",
+    "thinkingAbout": "Thinking about “{{title}}”",
+    "thinkingMany_one": "Thinking about {{count}} idea",
+    "thinkingMany_other": "Thinking about {{count}} ideas",
+    "readyOn_one": "{{count}} card ready: the builder takes it next",
+    "readyOn_other": "{{count}} cards ready: the builder takes the next one",
+    "readyOff_one": "{{count}} card ready to build: switch the builder on",
+    "readyOff_other": "{{count}} cards ready to build: switch the builder on",
+    "backlog_one": "{{count}} card waiting in Backlog",
+    "backlog_other": "{{count}} cards waiting in Backlog",
+    "builderWaiting": "The builder is waiting for work",
+    "waiting": "Waiting for work"
+  },
+  "working": {
+    "plan": "Planning",
+    "build": "Building",
+    "review": "Answering the review"
+  },
+  "card": {
+    "noColumn": "No column",
+    "starting": "Starting…",
+    "open": "Open the card",
+    "pullRequest": "Open the pull request",
+    "running": "Running a command",
+    "reading": "Reading {{file}}",
+    "editing": "Editing {{file}}",
+    "writing": "Writing {{file}}"
+  },
+  "workers": {
+    "coach": "Coach",
+    "coachDoes": "Plans cards with you.",
+    "builder": "Builder",
+    "builderDoes": "Builds cards and opens pull requests. Never merges.",
+    "on": "On",
+    "off": "Off",
+    "answering": "Answering on #{{number}}",
+    "nonePlanning": "No cards in Planning",
+    "noneTodo": "No cards in To do",
+    "nextPlanning_one": "{{count}} card in Planning: starting on it",
+    "nextPlanning_other": "{{count}} cards in Planning: starting on the next",
+    "nextTodo_one": "{{count}} card in To do: starting on it",
+    "nextTodo_other": "{{count}} cards in To do: starting on the next",
+    "waitingPlanning_one": "{{count}} card in Planning, waiting",
+    "waitingPlanning_other": "{{count}} cards in Planning, waiting",
+    "waitingTodo_one": "{{count}} card in To do, waiting",
+    "waitingTodo_other": "{{count}} cards in To do, waiting",
+    "busy": "{{doing}} #{{number}}",
+    "busyWith": "{{doing}} #{{number}} · {{activity}}"
+  },
+  "idea": {
+    "draft": "Draft",
+    "ready": "Ready",
+    "working": "Working on it…",
+    "today": "Today, {{time}}",
+    "explore": "Explore",
+    "discard": "Discard",
+    "discardSure": "Discard this idea? It can't be brought back.",
+    "problem": "That didn't work"
+  },
+  "ticket": {
+    "for": "For:",
+    "from": "From:",
+    "noProblem": "No problem behind it yet",
+    "worked": "It worked",
+    "didntWork": "It didn't work",
+    "unchecked": "Not checked",
+    "since": "“{{title}}”, in Build since {{since}}.",
+    "only": "“{{title}}”.",
+    "close": "Close · did it work?",
+    "answeredBy": "{{by}}, {{on}}"
+  },
+  "didItWork": {
+    "title": "Did it work?",
+    "weThink": "We think:",
+    "seen": "What you noticed",
+    "seenHint": "What have you noticed since it's been in the app?",
+    "yes": "Yes, the problem is solved",
+    "no": "No",
+    "unchecked": "Didn't check",
+    "cancel": "Cancel",
+    "problem": "That didn't work",
+    "notOnGitHub": "Not saved on GitHub",
+    "looking": "The kobold is looking at what people said since…",
+    "couldNotLook": "The kobold couldn't look: {{problem}} Write what you noticed.",
+    "nothingHeard": "Nobody has said anything since. Write what you noticed.",
+    "draft_one": "The kobold's draft, from {{count}} thing people said. Edit it as you like.",
+    "draft_other": "The kobold's draft, from {{count}} things people said. Edit it as you like."
+  },
+  "fix": {
+    "make": "Make a fix ticket",
+    "making": "Making the ticket…",
+    "failed": "No ticket was made",
+    "waiting": "From People, waiting for a ticket",
+    "fix": "Fix",
+    "update": "Update",
+    "from": "From: {{source}}"
+  }
+}

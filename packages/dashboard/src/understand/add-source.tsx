@@ -1,9 +1,10 @@
-// "Add a source": something that came in (a support email, a review, notes
+// "Add what people said": something that came in (a support email, a review, notes
 // from a call), pasted or taken from a file, with where it came from, who
-// said it and when. It becomes a signal, the kobold sorts it, and the
-// dialog shows where it went, to move it or agree.
+// said it and when. The kobold reads it and places it, and the dialog
+// shows where it went, to move it or agree.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -27,6 +28,7 @@ import { JobLine, SortedSignal } from "./sorted-signal";
 import { useAllRecords, useKoboldJobs, useSignal } from "./use-records";
 
 export function AddSource() {
+  const { t } = useTranslation("understand");
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
   return (
@@ -38,14 +40,11 @@ export function AddSource() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline">Add a source</Button>
+        <Button variant="outline">{t("add.button")}</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogTitle>Add what came in</DialogTitle>
-        <DialogDescription>
-          Paste a support email, a review or notes from a call. The kobold sorts
-          it: who it sounds like, and which story it belongs to.
-        </DialogDescription>
+        <DialogTitle>{t("add.button")}</DialogTitle>
+        <DialogDescription>{t("add.about")}</DialogDescription>
         {sent ? (
           <Sorting
             signal={sent}
@@ -62,6 +61,7 @@ export function AddSource() {
 }
 
 function SignalForm({ onSent }: Readonly<{ onSent: (id: string) => void }>) {
+  const { t, i18n } = useTranslation("understand");
   const { data } = useAllRecords();
   const [said, setSaid] = useState<Said>({
     text: "",
@@ -69,7 +69,7 @@ function SignalForm({ onSent }: Readonly<{ onSent: (id: string) => void }>) {
     name: "",
     kind: "people",
     who: NOBODY,
-    when: today(),
+    when: today(i18n.language),
   });
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -101,9 +101,9 @@ function SignalForm({ onSent }: Readonly<{ onSent: (id: string) => void }>) {
         sources={data?.records.sources ?? []}
         customers={data?.records.customers ?? []}
       />
-      {problem && <ProblemBox title="It could not be added" text={problem} />}
+      {problem && <ProblemBox title={t("add.cant")} text={problem} />}
       <Button type="submit" className="w-fit" disabled={!ready || busy}>
-        Add it, and let the kobold sort it
+        {t("add.send")}
       </Button>
     </form>
   );
@@ -134,6 +134,7 @@ function Sorting({
   signal,
   onAnother,
 }: Readonly<{ signal: string; onAnother: () => void }>) {
+  const { t } = useTranslation("understand");
   const jobs = useKoboldJobs();
   const job = jobs.find((one) => one.kind === "sort" && one.about === signal);
   const { data } = useSignal(signal);
@@ -145,7 +146,7 @@ function Sorting({
         <SortedSignal signal={data} job={job} />
       )}
       <Button variant="ghost" size="sm" className="w-fit" onClick={onAnother}>
-        Add another
+        {t("add.another")}
       </Button>
     </div>
   );

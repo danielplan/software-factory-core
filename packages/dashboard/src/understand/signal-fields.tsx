@@ -1,5 +1,7 @@
-// The fields of "Add a source": what came in (typed, pasted or from a
+// The fields of "Add what people said": what came in (typed, pasted or from a
 // file), its source (or a new one, with its kind), who said it, and when.
+
+import { useTranslation } from "react-i18next";
 
 import type { Customer, Source } from "@/api";
 import { Field } from "@/components/field";
@@ -26,16 +28,17 @@ export type Said = {
   when: string;
 };
 
-const KINDS: { kind: Source["kind"]; name: string }[] = [
-  { kind: "people", name: "What people say or write" },
-  { kind: "usage", name: "How people use it" },
-  { kind: "errors", name: "Errors" },
-  { kind: "alerts", name: "Alerts, such as security updates" },
-  { kind: "personaRuns", name: "Runs by a persona (never evidence)" },
+const KINDS: Source["kind"][] = [
+  "people",
+  "usage",
+  "errors",
+  "alerts",
+  "personaRuns",
 ];
 
-export function today(): string {
-  return new Date().toLocaleDateString("en-GB", {
+// Today, short, in the dashboard's language ("17 Nov", "17 nov").
+export function today(language: string): string {
+  return new Date().toLocaleDateString(language, {
     day: "numeric",
     month: "short",
   });
@@ -52,15 +55,16 @@ export function SignalFields({
   sources: Source[];
   customers: Customer[];
 }>) {
+  const { t } = useTranslation("understand");
   const set = (change: Partial<Said>) => {
     onChange({ ...said, ...change });
   };
   return (
     <>
       <Field
-        label="What came in"
+        label={t("fields.text")}
         id="signal-text"
-        help="One thing one person said or did."
+        help={t("fields.textHelp")}
       >
         <textarea
           id="signal-text"
@@ -69,10 +73,10 @@ export function SignalFields({
           onChange={(event) => {
             set({ text: event.target.value });
           }}
-          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-body outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       </Field>
-      <Field label="Or take it from a file" id="signal-file">
+      <Field label={t("fields.file")} id="signal-file">
         <Input
           id="signal-file"
           type="file"
@@ -84,7 +88,7 @@ export function SignalFields({
           }}
         />
       </Field>
-      <Field label="Where it came from" id="signal-source">
+      <Field label={t("fields.source")} id="signal-source">
         <Select
           value={said.source}
           onValueChange={(source) => {
@@ -92,7 +96,7 @@ export function SignalFields({
           }}
         >
           <SelectTrigger id="signal-source" className="w-full bg-card">
-            <SelectValue placeholder="Pick a source" />
+            <SelectValue placeholder={t("fields.pickSource")} />
           </SelectTrigger>
           <SelectContent>
             {sources.map((s) => (
@@ -100,7 +104,7 @@ export function SignalFields({
                 {s.name}
               </SelectItem>
             ))}
-            <SelectItem value={NEW_SOURCE}>A new source…</SelectItem>
+            <SelectItem value={NEW_SOURCE}>{t("fields.newSource")}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
@@ -119,9 +123,10 @@ function WhoAndWhen({
   set: (change: Partial<Said>) => void;
   customers: Customer[];
 }>) {
+  const { t } = useTranslation("understand");
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Who said it" id="signal-who">
+      <Field label={t("fields.who")} id="signal-who">
         <Select
           value={said.who}
           onValueChange={(who) => {
@@ -132,7 +137,7 @@ function WhoAndWhen({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NOBODY}>Not known</SelectItem>
+            <SelectItem value={NOBODY}>{t("fields.notKnown")}</SelectItem>
             {customers.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
@@ -141,7 +146,7 @@ function WhoAndWhen({
           </SelectContent>
         </Select>
       </Field>
-      <Field label="When" id="signal-when">
+      <Field label={t("fields.when")} id="signal-when">
         <Input
           id="signal-when"
           value={said.when}
@@ -158,19 +163,20 @@ function NewSource({
   said,
   set,
 }: Readonly<{ said: Said; set: (change: Partial<Said>) => void }>) {
+  const { t } = useTranslation("understand");
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="The new source's name" id="source-name">
+      <Field label={t("fields.sourceName")} id="source-name">
         <Input
           id="source-name"
           value={said.name}
-          placeholder="Support inbox"
+          placeholder={t("fields.sourceNameExample")}
           onChange={(event) => {
             set({ name: event.target.value });
           }}
         />
       </Field>
-      <Field label="What it is" id="source-kind">
+      <Field label={t("fields.kind")} id="source-kind">
         <Select
           value={said.kind}
           onValueChange={(kind) => {
@@ -181,9 +187,9 @@ function NewSource({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {KINDS.map((k) => (
-              <SelectItem key={k.kind} value={k.kind}>
-                {k.name}
+            {KINDS.map((kind) => (
+              <SelectItem key={kind} value={kind}>
+                {t(`fields.kinds.${kind}`)}
               </SelectItem>
             ))}
           </SelectContent>

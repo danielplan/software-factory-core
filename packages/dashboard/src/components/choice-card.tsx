@@ -44,11 +44,12 @@ export function ChoiceCard({
         {icon}
       </span>
       <span className="flex flex-col gap-0.5">
-        <span className={cn("font-medium", big ? "text-lg" : "text-[15px]")}>
-          {title}
-        </span>
+        <span className={cn(big ? "text-section" : "text-item")}>{title}</span>
         <span
-          className={cn("text-muted-foreground", big ? "text-sm" : "text-xs")}
+          className={cn(
+            "text-muted-foreground",
+            big ? "text-body" : "text-tag",
+          )}
         >
           {text}
         </span>

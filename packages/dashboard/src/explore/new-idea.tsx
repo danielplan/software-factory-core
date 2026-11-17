@@ -4,6 +4,7 @@
 // Understand opens it with that story picked (#explore/new/<story>).
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type ExploreList, messageOf, post } from "@/api";
 import { Field } from "@/components/field";
@@ -34,6 +35,7 @@ export function NewIdea({
   list: ExploreList;
   onClose: () => void;
 }>) {
+  const { t } = useTranslation("explore");
   const [own, setOwn] = useState(false);
   return (
     <Dialog
@@ -43,18 +45,18 @@ export function NewIdea({
       }}
     >
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-        <DialogTitle>New idea</DialogTitle>
+        <DialogTitle className="text-section">{t("new.title")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Start an idea from a story, or from your own.
+          {t("new.description")}
         </DialogDescription>
         <div
           role="group"
-          aria-label="Start from"
+          aria-label={t("new.startFrom")}
           className="flex w-fit gap-1 rounded-xl bg-surface-2 p-1"
         >
           {[
-            { own: false, name: "From a story" },
-            { own: true, name: "My own idea" },
+            { own: false, name: t("new.fromStory") },
+            { own: true, name: t("new.ownIdea") },
           ].map((tab) => (
             <button
               key={tab.name}
@@ -64,7 +66,7 @@ export function NewIdea({
                 setOwn(tab.own);
               }}
               className={cn(
-                "h-9 rounded-lg px-3.5 text-sm font-medium text-muted-foreground",
+                "h-9 rounded-lg px-3.5 text-body font-medium text-muted-foreground transition-colors",
                 tab.own === own && "bg-card text-foreground shadow-soft",
               )}
             >
@@ -86,6 +88,7 @@ function FromStory({
   list,
   picked,
 }: Readonly<{ list: ExploreList; picked: string | null }>) {
+  const { t } = useTranslation("explore");
   const [story, setStory] = useState(picked);
   const [title, setTitle] = useState("");
   const [weThink, setWeThink] = useState("");
@@ -110,11 +113,8 @@ function FromStory({
         void start();
       }}
     >
-      <p className="text-sm text-muted-foreground">
-        Pick a story where something breaks. The idea is for its problem.
-      </p>
       <StoryChoices stories={list.stories} picked={story} onPick={setStory} />
-      <Field label="The idea, in a few words" id="idea-title">
+      <Field label={t("new.ideaLabel")} id="idea-title">
         <Input
           id="idea-title"
           value={title}
@@ -123,11 +123,7 @@ function FromStory({
           }}
         />
       </Field>
-      <Field
-        label="We think… (optional)"
-        id="idea-we-think"
-        help="What it would do for them, in a sentence."
-      >
+      <Field label={t("new.weThinkLabel")} id="idea-we-think">
         <Input
           id="idea-we-think"
           value={weThink}
@@ -136,13 +132,13 @@ function FromStory({
           }}
         />
       </Field>
-      {problem && <ProblemBox title="It could not be started" text={problem} />}
+      {problem && <ProblemBox title={t("new.failed")} text={problem} />}
       <Button
         type="submit"
         className="w-fit"
         disabled={!story || !title.trim()}
       >
-        Start the idea
+        {t("new.start")}
       </Button>
     </form>
   );
@@ -157,12 +153,11 @@ function StoryChoices({
   picked: string | null;
   onPick: (story: string) => void;
 }>) {
+  const { t } = useTranslation("explore");
   return (
     <div className="grid max-h-72 gap-1.5 overflow-y-auto">
       {stories.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          No story breaks at an open problem yet.
-        </p>
+        <p className="text-body text-muted-foreground">{t("new.noStories")}</p>
       )}
       {stories.map((one) => (
         <button
@@ -173,15 +168,15 @@ function StoryChoices({
             onPick(one.id);
           }}
           className={cn(
-            "flex items-center gap-3 rounded-xl border px-3 py-2 text-left hover:bg-surface",
-            one.id === picked && "border-foreground ring-1 ring-foreground",
+            "flex items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors hover:bg-surface",
+            one.id === picked && "border-primary/60 ring-1 ring-primary/40",
           )}
         >
           <Initial name={one.persona.name} tint={tintOf(one.persona.at)} />
           <span className="grid">
-            <span className="text-sm font-medium">{one.title}</span>
-            <span className="text-xs text-muted-foreground">
-              Breaks: {one.problem.title}
+            <span className="text-item">{one.title}</span>
+            <span className="text-note text-muted-foreground">
+              {t("new.goesWrong", { problem: one.problem.title })}
             </span>
           </span>
         </button>

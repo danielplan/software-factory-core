@@ -1,37 +1,46 @@
 // Where the dashboard is, from the address after the # (#explore/<id>), so
-// a reload stays there. Addresses from before the pages were renamed
-// (#board, #ideas/<id>, #system, #add-ons) still lead to the same place.
+// a reload stays there. Addresses from before the pages were renamed or
+// joined (#board, #ideas/<id>, #system, #workshop, #add-ons) still lead to
+// the same place.
 
 export const PAGES = [
   "today",
+  "signals",
+  "chat",
   "understand",
   "explore",
+  "checks",
   "build",
   "customers",
   "products",
-  "workshop",
   "settings",
 ] as const;
 export type Page = (typeof PAGES)[number];
 
-// The page, and what is open in it: an idea on Explore, the add-ons on
-// Workshop. Connecting a board (#connect) and prototype mode
+// The page, and what is open in it: an idea on Explore, a persona or a
+// story on Understand (Personas). Connecting a board (#connect) and prototype mode
 // (#prototype/<idea>) are pages of their own, outside the sidebar.
 export type Place = {
   page: Page | "connect" | "prototype";
   open: string | null;
 };
 
-// The page shown when the address names none: the work on the board.
-const FIRST: Page = "build";
+// The page shown when the address names none: the overview, with the chat
+// to suggest something at its top. The board is one click away (#build).
+const FIRST: Page = "today";
 
 // The old pages and where they are now.
 const MOVED = new Map([
   ["board", "build"],
   ["ideas", "explore"],
-  ["system", "workshop"],
-  ["add-ons", "workshop/add-ons"],
+  ["system", "products"],
+  ["workshop", "settings"],
+  ["add-ons", "settings"],
 ]);
+
+// Pages with nothing open inside them: what followed an old address is
+// dropped (#workshop/add-ons: #settings).
+const WHOLE = new Set(["settings"]);
 
 function partsOf(hash: string): { asked: string; rest: string | null } {
   const path = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -46,7 +55,8 @@ export function movedHash(hash: string): string | null {
   const { asked, rest } = partsOf(hash);
   const now = MOVED.get(asked);
   if (now === undefined) return null;
-  return rest === null || now.includes("/") ? `#${now}` : `#${now}/${rest}`;
+  const whole = rest === null || now.includes("/") || WHOLE.has(now);
+  return whole ? `#${now}` : `#${now}/${rest}`;
 }
 
 export function placeOf(hash: string): Place {

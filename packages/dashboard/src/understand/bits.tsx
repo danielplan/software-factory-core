@@ -1,8 +1,17 @@
 // Small pieces the Understand pages share: a story's pill, the kobold's
-// mark, a persona's initial, and a small label.
+// mark, a persona's face (their little monster), and a small label.
 
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
+import {
+  BLUE_HAT,
+  KoboldBody,
+  KoboldFace,
+  KoboldHat,
+  KoboldPaints,
+} from "@/components/kobold-parts";
+import { PersonaMonster } from "@/components/persona-monster";
+import { tintIndexOf } from "@/lib/monster";
 import { cn } from "@/lib/utils";
 
 import { type Tone } from "./view";
@@ -22,7 +31,7 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold whitespace-nowrap",
+        "inline-flex h-6 items-center rounded-full px-2.5 text-tag whitespace-nowrap",
         TONES[tone],
       )}
     >
@@ -31,38 +40,51 @@ export function Pill({
   );
 }
 
-// The kobold itself, Kobble's mascot, where it speaks or works.
+// The kobold itself, Kobble's mascot, where it speaks or works: drawn
+// sharp at any size from its own parts (no ears; its family has them),
+// with its blue wizard hat. Decoration beside the words it goes with.
 export function KoboldMark({ className }: Readonly<{ className?: string }>) {
+  const id = useId().replaceAll(":", "");
   return (
-    <img
-      src="/kobold.png"
-      alt=""
+    <svg
+      viewBox="20 14 160 168"
       aria-hidden
-      className={cn("size-7 flex-none object-contain", className)}
-    />
+      className={cn("size-7 flex-none", className)}
+    >
+      <KoboldPaints id={id} hat={BLUE_HAT} />
+      <KoboldBody id={id} />
+      <KoboldFace />
+      <KoboldHat id={id} />
+    </svg>
   );
 }
 
+const SIZES = { small: 24, normal: 36, big: 64 };
+
+function sizeOf(big: boolean, small: boolean): keyof typeof SIZES {
+  if (big) return "big";
+  return small ? "small" : "normal";
+}
+
+// A persona's face: their little monster (components/persona-monster.tsx),
+// chosen from their name, in the colour family of their tint. Beside their
+// name, so only decoration.
 export function Initial({
   name,
   tint,
   big = false,
-}: Readonly<{ name: string; tint: string; big?: boolean }>) {
+  small = false,
+}: Readonly<{ name: string; tint: string; big?: boolean; small?: boolean }>) {
   return (
-    <span
-      className={cn(
-        "grid flex-none place-items-center rounded-full font-semibold",
-        big ? "size-16 text-2xl" : "size-9 text-sm",
-        tint,
-      )}
-      aria-hidden
-    >
-      {name.slice(0, 1).toUpperCase()}
-    </span>
+    <PersonaMonster
+      seed={name}
+      tint={tintIndexOf(tint)}
+      size={SIZES[sizeOf(big, small)]}
+    />
   );
 }
 
 // A small label above a part of a card.
 export function Label({ children }: Readonly<{ children: ReactNode }>) {
-  return <span className="text-xs text-label">{children}</span>;
+  return <span className="text-tag text-muted-foreground">{children}</span>;
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Board, get, type GitHubStatus, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -18,12 +19,13 @@ export function GitHubSteps({
   // The board connected now: its step is done, and picking starts there.
   connected?: Board[string];
 }>) {
+  const { t } = useTranslation(["settings", "common"]);
   const { status, problem, act } = useGitHub();
   if (!status) return null;
   return (
     <section className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft">
       <ol className="grid gap-5">
-        <Step n={1} title="The GitHub CLI on this computer" done={status.cli}>
+        <Step n={1} title={t("github.cli")} done={status.cli}>
           {!status.cli && (
             <Button
               variant="outline"
@@ -32,14 +34,14 @@ export function GitHubSteps({
                 act("/api/add-ons/github/install");
               }}
             >
-              Install it
+              {t("github.install")}
             </Button>
           )}
         </Step>
         <SignIn status={status} act={act} />
         <Step
           n={3}
-          title={connected ? "Your board, connected" : "Your board"}
+          title={connected ? t("github.boardDone") : t("github.board")}
           done={Boolean(connected)}
         >
           {status.login && (
@@ -53,7 +55,7 @@ export function GitHubSteps({
           )}
         </Step>
       </ol>
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t("common:didNotWork")} text={problem} />}
     </section>
   );
 }
@@ -91,12 +93,15 @@ function useGitHub() {
 }
 
 function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
+  const { t } = useTranslation("settings");
   const signing = status.signingIn;
   return (
     <Step
       n={2}
       title={
-        status.login ? `Signed in as ${status.login}` : "Sign in to GitHub"
+        status.login
+          ? t("github.signedIn", { login: status.login })
+          : t("github.signIn")
       }
       done={status.login !== null}
     >
@@ -107,21 +112,21 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
             act("/api/add-ons/github/sign-in");
           }}
         >
-          Sign in with GitHub
+          {t("github.signInButton")}
         </Button>
       )}
       {signing?.code && (
         <div className="grid gap-1 rounded-2xl bg-surface-2 p-4">
-          <span className="text-sm text-muted-foreground">
-            Type this code in the browser window that opened:
+          <span className="text-body text-muted-foreground">
+            {t("github.typeCode")}
           </span>
-          <span className="text-2xl font-semibold tracking-[0.12em] tabular-nums">
+          <span className="text-section tracking-[0.12em] tabular-nums">
             {signing.code}
           </span>
         </div>
       )}
       {signing?.problem && (
-        <ProblemBox title="Not signed in" text={signing.problem} />
+        <ProblemBox title={t("github.notSignedIn")} text={signing.problem} />
       )}
     </Step>
   );

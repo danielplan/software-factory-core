@@ -1,38 +1,48 @@
 // What the Explore page and prototype mode say, worked out from what the
-// server sends: where an idea stands, its versions in a line, the line
-// above "Send to Build", a version's picks and what it is doing, and which
-// address prototype mode shows. Kept apart from the components so it is
-// checked on its own.
+// server sends, in the dashboard's language: the ideas by step, what is
+// next for each, why an idea is at its stage, a version's votes and what
+// it is doing, what the send row says, and which address prototype mode
+// shows. Kept apart from the components so it is checked on its own.
 
-import type { IdeaPage, PartView, PrototypePage, VersionRun } from "../api.ts";
-import { closedWords } from "../lib/stages.ts";
-import { listWords } from "../understand/view.ts";
+import type {
+  Board,
+  IdeaPage,
+  IdeaRow,
+  PartView,
+  PrototypePage,
+  VersionRun,
+} from "../api.ts";
+import { i18next, t } from "../i18n/i18n.ts";
 
-function count(n: number, one: string, many: string): string {
-  return n === 1 ? `1 ${one}` : `${String(n)} ${many}`;
-}
-
-// Beside an idea's stage in the list: "3 versions".
-export function versionsWords(versions: number): string {
-  return versions === 0
-    ? "no versions yet"
-    : count(versions, "version", "versions");
+// "A, B and C", in the dashboard's language.
+export function listOf(items: string[]): string {
+  return new Intl.ListFormat(i18next.language, {
+    style: "long",
+    type: "conjunction",
+  }).format(items);
 }
 
 type WhyOf = Pick<IdeaPage, "lead" | "tie" | "tickets" | "answer">;
-const issueOf = (page: WhyOf) =>
-  listWords(page.tickets.map((t) => `#${String(t.issue)}`));
+const issuesOf = (page: WhyOf) =>
+  listOf(page.tickets.map((ticket) => `#${String(ticket.issue)}`));
+// It worked, or not; and who closed it when, once someone answered.
+function closed(page: WhyOf, worked: boolean): string {
+  if (!page.answer)
+    return t(worked ? "explore:why.worked" : "explore:why.didntWork");
+  const { by, on } = page.answer;
+  return t(worked ? "explore:why.workedBy" : "explore:why.didntWorkBy", {
+    by,
+    on,
+  });
+}
 const WHY: Record<IdeaPage["stage"], (page: WhyOf) => string> = {
-  idea: () => "No versions yet: make them in prototype mode.",
-  versions: (page) =>
-    page.tie
-      ? "Two or more versions share the most picks."
-      : "Nobody has picked a version yet.",
-  picked: (page) => `${page.lead?.key ?? "One"} has the most picks`,
-  building: (page) => `In Build as ${issueOf(page)}`,
-  inApp: (page) => `In the app as ${issueOf(page)}: did it work?`,
-  worked: (page) => closedWords(page.answer, "it worked"),
-  didntWork: (page) => closedWords(page.answer, "it didn't work"),
+  idea: () => t("explore:why.idea"),
+  versions: (page) => t(page.tie ? "explore:why.tie" : "explore:why.noVotes"),
+  picked: (page) => t("explore:why.picked", { version: page.lead?.key ?? "?" }),
+  building: (page) => t("explore:why.building", { issues: issuesOf(page) }),
+  inApp: (page) => t("explore:why.inApp", { issues: issuesOf(page) }),
+  worked: (page) => closed(page, true),
+  didntWork: (page) => closed(page, false),
 };
 
 // Why an idea is at its stage, in one plain line.
@@ -40,52 +50,111 @@ export function ideaWhy(page: WhyOf & Pick<IdeaPage, "stage">): string {
   return WHY[page.stage](page);
 }
 
-// Beside a version: how many picked it.
-export function pickWords(picks: string[]): string {
-  return picks.length === 0 ? "" : count(picks.length, "pick", "picks");
+// What is next for an idea, on its card in the grid; nothing when its
+// stage already says it all.
+export function ideaNext(
+  idea: Pick<IdeaRow, "stage" | "versions">,
+): string | null {
+  if (idea.stage === "versions")
+    return t("explore:next.versions", { count: idea.versions });
+  if (idea.stage === "picked") return t("explore:next.picked");
+  if (idea.stage === "inApp") return t("explore:next.inApp");
+  return null;
 }
 
-// The line above the one action, and the action: send the version with the
-// most picks to Build, or pick one first.
+// The ideas by step, in order: Plan (no versions yet), Prototypes
+// (versions to try and vote on), Handed off (sent to Build, in the app, or
+// worked), Dropped (it didn't work).
+export const STEPS = ["plan", "prototypes", "handedOff", "dropped"] as const;
+export type Step = (typeof STEPS)[number];
+
+const STEP_OF: Record<IdeaRow["stage"], Step> = {
+  idea: "plan",
+  versions: "prototypes",
+  picked: "prototypes",
+  building: "handedOff",
+  inApp: "handedOff",
+  worked: "handedOff",
+  didntWork: "dropped",
+};
+
+export function ideaGroups(
+  ideas: IdeaRow[],
+): { step: Step; ideas: IdeaRow[] }[] {
+  return STEPS.map((step) => ({
+    step,
+    ideas: ideas.filter((idea) => STEP_OF[idea.stage] === step),
+  }));
+}
+
+// On a version: how many voted for it.
+export function voteWords(picks: string[]): string {
+  return t("explore:votes", { count: picks.length });
+}
+
+// Sending to Build makes an issue on a connected GitHub board; the
+// factory's own board, or another tracker, cannot take one yet.
+export function canSend(tracker: string, board: Board): boolean {
+  return tracker === "github" && board.github !== undefined;
+}
+
+// The send row under the versions: the version with the most votes, ready
+// to send; why it cannot be sent yet (no GitHub board, a tie, or no vote);
+// or where it went once sent.
 export function sendLine(
   page: Pick<IdeaPage, "lead" | "tie" | "versions" | "state" | "tickets">,
-): { words: string; button: string | null; version: string | null } {
+  sendable = true,
+): {
+  words: string;
+  button: string | null;
+  version: string | null;
+  connect: boolean;
+} {
   const [ticket] = page.tickets;
   if (page.state !== "exploring" && ticket)
     return {
-      words: `Version ${ticket.version} went to Build as issue #${String(ticket.issue)}.`,
+      words: t("explore:send.went", {
+        version: ticket.version,
+        issue: ticket.issue,
+      }),
       button: null,
       version: null,
+      connect: false,
+    };
+  if (page.lead && !sendable)
+    return {
+      words: t("explore:send.noBoard", { version: page.lead.key }),
+      button: null,
+      version: null,
+      connect: true,
     };
   if (page.lead)
     return {
-      words: `Most picks: ${page.lead.key}, ${page.lead.name.toLowerCase()}.`,
-      button: `Send ${page.lead.key} to Build`,
+      words: t("explore:send.lead", { version: page.lead.key }),
+      button: t("explore:send.button", { version: page.lead.key }),
       version: page.lead.key,
+      connect: false,
     };
+  return {
+    words: waitingWords(page),
+    button: t("explore:send.buttonNone"),
+    version: null,
+    connect: false,
+  };
+}
+
+// Why nothing can be sent yet: versions tied for the most votes, or none.
+function waitingWords(page: Pick<IdeaPage, "tie" | "versions">): string {
+  if (!page.tie) return t("explore:send.noVotes");
   const most = Math.max(0, ...page.versions.map((v) => v.picks.length));
   const tied = page.versions
     .filter((v) => most > 0 && v.picks.length === most)
     .map((v) => v.key);
-  return {
-    words: page.tie
-      ? `${listWords(tied)} have the same picks: pick one.`
-      : "Nobody picked one yet: try them, then pick.",
-    button: "Pick one to send",
-    version: null,
-  };
+  return t("explore:send.tie", { versions: listOf(tied) });
 }
 
-const RUNS: Record<VersionRun["state"], string> = {
-  stopped: "Stopped",
-  making: "The kobold is making it",
-  starting: "Starting",
-  running: "Running",
-  failed: "It stopped",
-};
-
 export function runWords(run: Pick<VersionRun, "state">): string {
-  return RUNS[run.state];
+  return t(`explore:run.${run.state}`);
 }
 
 // The run of a version, from what runs now; stopped when not known.
@@ -110,12 +179,17 @@ export function runOf(
 export function versionTitle(
   version: { key: string; name: string } | null,
 ): string {
-  return version ? `Version ${version.key} · ${version.name}` : "Main";
+  return version
+    ? t("explore:version.title", { version: version.key, name: version.name })
+    : t("explore:version.main");
 }
 
-// Who made a version: "made by the kobold, Luca".
+// Who made a version: "Made by the kobold and Luca".
 export function madeWords(madeBy: string[]): string {
-  return `made by ${listWords(madeBy.map((who) => (who === "kobold" ? "the kobold" : who)))}`;
+  const who = madeBy.map((one) =>
+    one === "kobold" ? t("explore:version.kobold") : one,
+  );
+  return t("explore:version.madeBy", { who: listOf(who) });
 }
 
 // What prototype mode shows for Main: the first product that runs, or why
@@ -127,13 +201,15 @@ export function mainOf(parts: PartView[]): {
   const products = parts.filter((p) => p.area === "products");
   const running = products.find((p) => p.light === "running" && p.link);
   if (running?.link)
-    return { url: running.link, words: `${running.name} as it runs now` };
+    return {
+      url: running.link,
+      words: t("explore:main.running", { name: running.name }),
+    };
   return {
     url: null,
-    words:
-      products.length === 0
-        ? "This project has no product to run here."
-        : "The product is not running: start it on Workshop to see it here.",
+    words: t(
+      products.length === 0 ? "explore:main.none" : "explore:main.stopped",
+    ),
   };
 }
 
@@ -142,13 +218,12 @@ export function stillWords(
   page: Pick<PrototypePage, "canRun">,
   run: VersionRun,
 ): string {
-  if (!page.canRun)
-    return 'This project cannot run versions yet: its factory.json names no prototype command ("prototype": { "start": "…" }). The prototype skill says what the command does.';
+  if (!page.canRun) return t("explore:still.cannotRun");
   if (run.state === "making")
     return run.activity
-      ? `The kobold is making it: ${run.activity}`
-      : "The kobold is making it.";
-  if (run.state === "starting") return "Starting it…";
+      ? t("explore:still.makingDoing", { doing: run.activity })
+      : t("explore:still.making");
+  if (run.state === "starting") return t("explore:still.starting");
   if (run.problem) return run.problem;
-  return "It is not running. Start it to try it.";
+  return t("explore:still.stopped");
 }

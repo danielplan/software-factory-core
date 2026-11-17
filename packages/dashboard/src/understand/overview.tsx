@@ -1,159 +1,84 @@
-// Understand's first level: every persona side by side, each in a soft
-// colour of their own, with the stories we know about them below; at the
-// top, the kobold's line about what it did that nobody has looked at yet,
-// which opens the list to move or agree with.
+// Personas, the first level of Understand: one card with a row per person
+// who uses the product, each leading to their page: who they are, how many
+// of their problems are still open and how many things people like them
+// said. What came in to look at is on Signals now.
 
-import { useState } from "react";
+import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import type { PersonaCard, UnderstandOverview } from "@/api";
-import { Button } from "@/components/ui/button";
+import type { PersonaCard, RecordsView, UnderstandOverview } from "@/api";
 import { understandHash } from "@/lib/routes";
-import { cn } from "@/lib/utils";
 
-import { Initial, KoboldMark, Label } from "./bits";
-import { SortedSignal } from "./sorted-signal";
-import { StoryTile } from "./story-card";
-import { useKoboldJobs } from "./use-records";
-import { koboldLine, realProblemWords, storiesWords } from "./view";
+import { Initial } from "./bits";
+import { useAllRecords } from "./use-records";
+import { saidOf } from "./view";
 
 export function Overview({
   overview,
   tint,
-  personaName,
 }: Readonly<{
   overview: UnderstandOverview;
   tint: (persona: string) => string;
-  personaName: (persona: string) => string;
 }>) {
+  const { t } = useTranslation("understand");
+  const { data: all } = useAllRecords();
   if (overview.personas.length === 0)
     return (
-      <p className="rounded-2xl bg-card px-5 py-4 text-sm text-muted-foreground shadow-soft">
-        No personas yet. Add a source: the kobold sorts what people say, and the
-        people and their stories show up here.
+      <p className="rounded-[18px] bg-card px-5 py-4 text-body text-muted-foreground shadow-soft">
+        {t("overview.empty")}
       </p>
     );
   return (
-    <div className="grid gap-4">
-      <KoboldNews overview={overview} personaName={personaName} />
-      <div className="grid items-start gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
-        {overview.personas.map((card) => (
-          <section
-            key={card.persona.id}
-            aria-label={card.persona.name}
-            className="grid min-w-0 gap-2"
-          >
-            <PersonaHead card={card} tint={tint(card.persona.id)} />
-            {card.stories.map((story) => (
-              <StoryTile key={story.id} card={story} />
-            ))}
-          </section>
-        ))}
-      </div>
-      <Legend />
-    </div>
+    <ul
+      aria-label={t("overview.people")}
+      className="grid animate-enter rounded-[18px] bg-card p-2 shadow-soft"
+    >
+      {overview.personas.map((card) => (
+        <li
+          key={card.persona.id}
+          className="border-t border-border-soft first:border-t-0"
+        >
+          <PersonRow card={card} tint={tint(card.persona.id)} all={all} />
+        </li>
+      ))}
+    </ul>
   );
 }
 
-function PersonaHead({
+function PersonRow({
   card,
   tint,
-}: Readonly<{ card: PersonaCard; tint: string }>) {
-  const { persona } = card;
+  all,
+}: Readonly<{ card: PersonaCard; tint: string; all: RecordsView | null }>) {
+  const { t } = useTranslation("understand");
+  const { persona, summary } = card;
+  const said = all ? saidOf(all.records, persona.id).length : null;
   return (
     <a
       href={understandHash(persona.id)}
-      className={cn(
-        "grid gap-3 rounded-2xl px-4 py-3.5 transition-shadow hover:shadow-lift",
-        tint,
-      )}
+      className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="flex items-center gap-2.5">
-        <Initial name={persona.name} tint="bg-card" />
-        <span className="grid">
-          <span className="text-base font-semibold">{persona.name}</span>
-          <span className="text-xs text-label">{persona.role}</span>
+      <Initial name={persona.name} tint={tint} />
+      <span className="grid min-w-0 flex-1">
+        <span className="truncate text-item">{persona.name}</span>
+        <span className="truncate text-note text-muted-foreground">
+          {persona.role}
         </span>
       </span>
-      {persona.description && (
-        <span className="text-[13px] leading-[1.45] text-foreground-2">
-          {persona.description}
+      {summary.openStories > 0 && (
+        <span className="rounded-full bg-open px-2 py-0.5 text-tag text-open-foreground">
+          {t("overview.open", { count: summary.openStories })}
         </span>
       )}
-      <span className="grid gap-0.5 rounded-xl bg-card/75 px-2.5 py-2">
-        <Label>The real problem</Label>
-        <span
-          className={cn(
-            "text-[13px] font-semibold",
-            card.realProblems.length === 0 && "text-muted-foreground",
-          )}
-        >
-          {realProblemWords(card)}
+      {said !== null && (
+        <span className="w-24 text-right text-note text-muted-foreground max-sm:hidden">
+          {t("overview.signals", { count: said })}
         </span>
-      </span>
-      <span className="text-xs text-label">{storiesWords(card)}</span>
+      )}
+      <ChevronRight
+        aria-hidden
+        className="size-4 flex-none text-muted-foreground"
+      />
     </a>
-  );
-}
-
-// The kobold's line, and the signals it sorted that nobody has looked at.
-function KoboldNews({
-  overview,
-  personaName,
-}: Readonly<{
-  overview: UnderstandOverview;
-  personaName: (persona: string) => string;
-}>) {
-  const [open, setOpen] = useState(false);
-  const jobs = useKoboldJobs();
-  const line = koboldLine(overview.kobold, personaName);
-  if (!line)
-    return (
-      <p className="px-1 text-sm text-muted-foreground">
-        Nothing new to look at.
-      </p>
-    );
-  const { toLookAt } = overview.kobold;
-  return (
-    <section
-      aria-label="What the kobold did"
-      className="grid gap-2 rounded-xl bg-card py-2.5 pr-3 pl-3.5 shadow-soft"
-    >
-      <div className="flex items-center gap-2.5">
-        <KoboldMark className="size-6" />
-        <p className="flex-1 text-sm">{line}</p>
-        {toLookAt.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            aria-expanded={open}
-            onClick={() => {
-              setOpen(!open);
-            }}
-          >
-            {open ? "Close" : "Look"}
-          </Button>
-        )}
-      </div>
-      {open &&
-        toLookAt.map((signal) => (
-          <SortedSignal
-            key={signal.id}
-            signal={signal}
-            job={jobs.find(
-              (job) => job.kind === "sort" && job.about === signal.id,
-            )}
-          />
-        ))}
-    </section>
-  );
-}
-
-function Legend() {
-  return (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-muted-foreground">
-      <span>coloured outline: a new story</span>
-      <span>dashed: assumed, from an idea</span>
-      <span>crossed out: didn't hold</span>
-    </p>
   );
 }

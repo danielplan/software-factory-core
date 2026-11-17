@@ -4,6 +4,7 @@
 // apart from the components so it is checked on its own.
 
 import type { Answered, CardView, SeenDraft, TicketView } from "../api.ts";
+import { t } from "../i18n/i18n.ts";
 import type { IdeaStage } from "../lib/stages.ts";
 import { understandHash } from "../lib/routes.ts";
 import type { Tone } from "../understand/view.ts";
@@ -29,7 +30,7 @@ export function forOf(ticket: Pick<TicketView, "for" | "from">): {
 } {
   if (ticket.for.length > 0)
     return {
-      lead: "For:",
+      lead: t("build:ticket.for"),
       parts: ticket.for.map((problem) => ({
         title: problem.title,
         href: problem.story
@@ -38,27 +39,28 @@ export function forOf(ticket: Pick<TicketView, "for" | "from">): {
       })),
     };
   if (ticket.from)
-    return { lead: "From:", parts: [{ title: ticket.from, href: null }] };
+    return {
+      lead: t("build:ticket.from"),
+      parts: [{ title: ticket.from, href: null }],
+    };
   return {
     lead: "",
-    parts: [{ title: "No problem behind it yet", href: null }],
+    parts: [{ title: t("build:ticket.noProblem"), href: null }],
   };
 }
 
-const OUTCOMES: Record<
-  NonNullable<TicketView["outcome"]>["worked"],
-  { tone: Tone; words: string }
-> = {
-  yes: { tone: "solved", words: "It worked" },
-  no: { tone: "wrong", words: "It didn't work" },
-  unchecked: { tone: "none", words: "Not checked" },
-};
+const OUTCOMES = {
+  yes: { tone: "solved", words: "build:ticket.worked" },
+  no: { tone: "wrong", words: "build:ticket.didntWork" },
+  unchecked: { tone: "none", words: "build:ticket.unchecked" },
+} as const;
 
 export function outcomeOf(outcome: NonNullable<TicketView["outcome"]>): {
   tone: Tone;
   words: string;
 } {
-  return OUTCOMES[outcome.worked];
+  const { tone, words } = OUTCOMES[outcome.worked];
+  return { tone, words: t(words) };
 }
 
 // Where an idea's ticket is, on the idea's pipeline: worked or didn't once
@@ -83,21 +85,18 @@ export function ticketLine(
   title: string,
 ): string {
   return ticket.since
-    ? `“${title}”, in Build since ${ticket.since}.`
-    : `“${title}”.`;
+    ? t("build:ticket.since", { title, since: ticket.since })
+    : t("build:ticket.only", { title });
 }
 
 // Under the draft of what was seen: what the kobold is doing, what it drew
 // from, or why there is nothing to start from.
 export function seenNote(draft: SeenDraft | null): string {
-  if (draft === null) return "The kobold is looking at what was heard since…";
+  if (draft === null) return t("build:didItWork.looking");
   if (draft.problem)
-    return `The kobold could not look: ${draft.problem} Say what you saw.`;
-  if (draft.heard === 0)
-    return "Nothing was heard about it since it went to Build. Say what you saw, if anything.";
-  const signals =
-    draft.heard === 1 ? "1 signal" : `${String(draft.heard)} signals`;
-  return `The kobold's draft, from ${signals} heard since. Change it as you like.`;
+    return t("build:didItWork.couldNotLook", { problem: draft.problem });
+  if (draft.heard === 0) return t("build:didItWork.nothingHeard");
+  return t("build:didItWork.draft", { count: draft.heard });
 }
 
 // The line on Build once answered, green when it worked.

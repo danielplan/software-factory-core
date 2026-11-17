@@ -1,17 +1,14 @@
 // What the Understand pages say, worked out from what the server sends:
 // the stage a story's problem is at, and why,
 // where a story came from, the story told as sentences, where a signal
-// went, the kobold's line on what it did, and how much of a story is seen.
+// went, what people like a persona said, and how much of a story is seen.
 // Kept apart from the components so it is checked on its own.
 
-import type {
-  KoboldNews,
-  PersonaCard,
-  SignalView,
-  StoryCard,
-  StoryPage,
-} from "../api.ts";
+import type { RecordsView, SignalView, StoryCard, StoryPage } from "../api.ts";
+import { i18next, t } from "../i18n/i18n.ts";
 import { understandHash } from "../lib/routes.ts";
+
+type Records = RecordsView["records"];
 import { closedWords } from "../lib/stages.ts";
 
 export type Tone = "open" | "solving" | "solved" | "wrong" | "none";
@@ -22,13 +19,13 @@ type WhyOf = Pick<StoryPage, "trying" | "answer">;
 const issuesOf = (why: WhyOf) =>
   listWords(why.trying.inBuild.map((n) => `#${String(n)}`));
 const WHY: Record<Stage, (why: WhyOf) => string> = {
-  heard: () => "Heard from people. No idea for it yet.",
-  assumed: () => "Assumed from an idea. Nobody has said it yet.",
-  trying: (why) => `Trying: ${why.trying.exploring.join(", ")}`,
-  building: (why) => `In Build as ${issuesOf(why)}`,
-  inApp: (why) => `In the app as ${issuesOf(why)}: did it work?`,
-  solved: (why) => closedWords(why.answer, "it worked"),
-  didntWork: (why) => closedWords(why.answer, "it didn't work"),
+  heard: () => t("understand:why.heard"),
+  assumed: () => t("understand:why.assumed"),
+  trying: () => t("understand:why.trying"),
+  building: (why) => t("understand:why.building", { issues: issuesOf(why) }),
+  inApp: (why) => t("understand:why.inApp", { issues: issuesOf(why) }),
+  solved: (why) => closedWords(why.answer, t("understand:why.worked")),
+  didntWork: (why) => closedWords(why.answer, t("understand:why.didntWork")),
 };
 
 // Why the problem is at its stage, in one plain line.
@@ -36,23 +33,20 @@ export function stageWhy(stage: Stage, why: WhyOf): string {
   return WHY[stage](why);
 }
 
-// "A, B and C".
+// "A, B and C", in the dashboard's language (the platform's own list
+// format; British English, with no comma before "and").
 export function listWords(items: string[]): string {
-  if (items.length < 2) return items.join("");
-  return `${items.slice(0, -1).join(", ")} and ${items.at(-1) ?? ""}`;
-}
-
-function count(n: number, one: string, many: string): string {
-  return n === 1 ? `1 ${one}` : `${String(n)} ${many}`;
+  const language = i18next.language === "en" ? "en-GB" : i18next.language;
+  return new Intl.ListFormat(language, { type: "conjunction" }).format(items);
 }
 
 // Where a story came from.
 export function originWords(from: StoryCard["from"]): string {
   if ("signals" in from)
-    return `Written from ${count(from.signals, "signal", "signals")}`;
+    return t("understand:origin.said", { count: from.signals });
   return from.by
-    ? `From an idea by ${from.by}`
-    : `From the idea “${from.title}”`;
+    ? t("understand:origin.ideaBy", { name: from.by })
+    : t("understand:origin.idea", { title: from.title });
 }
 
 // Where the story on its own page came from.
@@ -67,14 +61,27 @@ export function storyFrom(page: Pick<StoryPage, "story" | "ideas">): string {
   });
 }
 
-// The persona's header: their real problem, and their stories.
-export function realProblemWords(card: PersonaCard): string {
-  return card.realProblems[0]?.title ?? "Not clear yet";
-}
-
-export function storiesWords(card: PersonaCard): string {
-  const { stories, openStories } = card.summary;
-  return `${count(stories, "story", "stories")} · ${String(openStories)} open`;
+// Everything people like this persona said (a signal that sounds like them,
+// from a source of people, as the server's own list), newest first: what
+// was said, where from and when.
+export function saidOf(
+  records: Pick<Records, "signals" | "sources">,
+  persona: string,
+): { id: string; text: string; source: string; when: string }[] {
+  const people = new Map(
+    records.sources
+      .filter((source) => source.kind === "people")
+      .map((source) => [source.id, source.name]),
+  );
+  return records.signals
+    .filter((signal) => signal.soundsLike === persona)
+    .flatMap((signal) => {
+      const source = people.get(signal.source);
+      return source === undefined
+        ? []
+        : [{ id: signal.id, text: signal.text, source, when: signal.when }];
+    })
+    .reverse();
 }
 
 // Where a signal went, in words, and the page that shows it, if any.
@@ -83,73 +90,52 @@ export function wentWords(signal: Pick<SignalView, "went" | "sortedAs">): {
   href: string | null;
 } {
   const { went } = signal;
-  if (went === null) return { words: "Not sorted yet", href: null };
+  if (went === null) return { words: t("understand:went.notYet"), href: null };
   if (went.to === "story")
     return {
       words: went.scene
-        ? `Scene ${String(went.scene)} of “${went.title}”`
-        : `The story “${went.title}”`,
+        ? t("understand:went.step", { step: went.scene, title: went.title })
+        : t("understand:went.story", { title: went.title }),
       href: understandHash(went.persona, went.story),
     };
   if (went.to === "problem")
     return {
-      words: `The problem “${went.title}”`,
+      words: t("understand:went.problem", { title: went.title }),
       href: understandHash(went.persona),
     };
   if (went.to === "ticket")
-    return { words: `Issue #${String(went.issue)}`, href: null };
+    return {
+      words: t("understand:went.issue", { issue: went.issue }),
+      href: null,
+    };
   if (went.to === "build")
     return {
       words:
         signal.sortedAs === "update"
-          ? "Build, as an update"
-          : "Build, as a fix",
+          ? t("understand:went.update")
+          : t("understand:went.fix"),
       href: null,
     };
-  return { words: "Answered", href: null };
+  return { words: t("understand:went.answered"), href: null };
 }
 
-// The kobold's line at the top of Understand: the stories it started and
-// the signals it sorted that nobody has looked at yet; null when there are
-// none.
-export function koboldLine(
-  news: KoboldNews,
-  personaName: (id: string) => string,
-): string | null {
-  const parts: string[] = [];
-  const [first] = news.newStories;
-  if (news.newStories.length === 1 && first)
-    parts.push(
-      `The kobold wrote a new story for ${personaName(first.persona)}: “${first.title}”.`,
-    );
-  else if (news.newStories.length > 1)
-    parts.push(
-      `The kobold wrote ${String(news.newStories.length)} new stories.`,
-    );
-  const sorted = news.toLookAt.filter((s) => s.went !== null).length;
-  const waiting = news.toLookAt.length - sorted;
-  if (sorted > 0)
-    parts.push(
-      `It sorted ${count(sorted, "signal", "signals")} nobody has looked at yet.`,
-    );
-  if (waiting > 0)
-    parts.push(`${count(waiting, "signal is", "signals are")} not sorted yet.`);
-  return parts.length > 0 ? parts.join(" ") : null;
-}
-
-// How much of a story is seen, in a line: "3 of 4 parts seen · 1 guessed".
+// How much of a story people confirmed, in a line: "3 of 4 steps
+// confirmed · 1 guessed".
 export function knownWords(known: { seen: number; of: number }): string {
   const guessed = known.of - known.seen;
-  const seen = `${String(known.seen)} of ${String(known.of)} parts seen`;
-  return guessed > 0 ? `${seen} · ${String(guessed)} guessed` : seen;
+  const words = { seen: known.seen, of: known.of, guessed };
+  return guessed > 0
+    ? t("understand:known.guessed", words)
+    : t("understand:known.seen", words);
 }
 
 // The story told as sentences, in order: each scene, then what the persona
-// does instead, each seen (with what shows it) or guessed, the one it
-// breaks at marked.
+// does instead (marked), each seen (with what shows it) or guessed, the one
+// it breaks at marked.
 export type Sentence = {
   text: string;
   breaks: boolean;
+  instead: boolean;
   evidence: { source: string; text: string } | null;
 };
 
@@ -160,14 +146,18 @@ export function sentencesOf(
   const told = story.scenes.map((scene) => ({
     text: sentence(scene.text),
     breaks: scene.breaks,
+    instead: false,
     evidence: evidenceOf(scene.evidence, signals),
   }));
   if (!story.instead) return told;
   return [
     ...told,
     {
-      text: sentence(`Instead, ${lowerFirst(story.instead.text)}`),
+      text: sentence(
+        t("understand:instead", { text: lowerFirst(story.instead.text) }),
+      ),
       breaks: false,
+      instead: true,
       evidence: evidenceOf(story.instead.evidence, signals),
     },
   ];
@@ -209,4 +199,39 @@ const TINTS = [
 
 export function tintOf(index: number): string {
   return TINTS[index % TINTS.length] ?? "bg-persona-1";
+}
+
+// What already exists for the problem a signal is about, the furthest
+// along first: a ticket that worked or is in the app ("did it work?"
+// answered yes, or not checked), then one being built (not answered), then
+// an idea being explored (with no ticket yet). A ticket answered no counts
+// for nothing. Null when there is none.
+export type Already =
+  | { kind: "fixed" | "building"; issue: number }
+  | { kind: "explored"; idea: { id: string; title: string } };
+
+export function alreadyOf(
+  signal: Pick<SignalView, "existing">,
+): Already | null {
+  const { ideas, tickets } = signal.existing;
+  const fixed = tickets.find(
+    (t) => t.worked === "yes" || t.worked === "unchecked",
+  );
+  if (fixed) return { kind: "fixed", issue: fixed.issue };
+  const building = tickets.find((t) => t.worked === null);
+  if (building) return { kind: "building", issue: building.issue };
+  const sent = new Set(tickets.map((t) => t.idea));
+  const explored = ideas.find((idea) => !sent.has(idea.id));
+  return explored ? { kind: "explored", idea: explored } : null;
+}
+
+// The words for what already exists.
+export function alreadyWords(already: Already): string {
+  if (already.kind === "explored")
+    return t("understand:signal.already.explored", {
+      title: already.idea.title,
+    });
+  return t(`understand:signal.already.${already.kind}`, {
+    issue: already.issue,
+  });
 }

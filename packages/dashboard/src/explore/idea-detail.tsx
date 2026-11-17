@@ -1,189 +1,168 @@
-// One idea on Explore: who it is for and which problem (with its story in
-// Understand), what we think it would do, its shared versions side by side
-// to try and pick, and the one action: send the version with the most picks
-// to Build. Without versions, a way to prototype mode, where they are made.
+// One idea, in a dialog over Explore's grid (#explore/<idea>): its title
+// and where it stands in one line, then in a small block who it is for,
+// which problem (with its story in Understand) and what we think it would
+// do; then its versions, to try and vote for, and the row to send one to
+// Build (idea-steps.tsx). Closing it goes back to the grid.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { type IdeaPage, messageOf, post } from "@/api";
+import type { IdeaPage } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
-import { StageSteps } from "@/components/stage-steps";
-import { Button } from "@/components/ui/button";
-import { exploreHash, prototypeHash, understandHash } from "@/lib/routes";
+import { DOT } from "@/components/row-list";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { understandHash } from "@/lib/routes";
 import { ideaSteps } from "@/lib/stages";
-import { Initial, KoboldMark, Label } from "@/understand/bits";
+import { cn } from "@/lib/utils";
+import { Initial } from "@/understand/bits";
 import { tintOf } from "@/understand/view";
 
+import { IdeaSteps } from "./idea-steps";
 import { useIdeaPage, useRuns } from "./use-explore";
-import { VersionTile } from "./version-tile";
-import { ideaWhy, runOf, sendLine } from "./view";
+import { ideaWhy } from "./view";
 
-export function IdeaDetail({ id }: Readonly<{ id: string }>) {
+export function IdeaDialog({
+  id,
+  sendable,
+  onClose,
+}: Readonly<{ id: string | null; sendable: boolean; onClose: () => void }>) {
+  return (
+    <Dialog
+      open={id !== null}
+      onOpenChange={(now) => {
+        if (!now) onClose();
+      }}
+    >
+      <DialogContent className="max-h-[90dvh] gap-0 overflow-y-auto rounded-[22px] p-0 sm:max-w-3xl">
+        {id && <IdeaDetail key={id} id={id} sendable={sendable} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function IdeaDetail({
+  id,
+  sendable,
+}: Readonly<{ id: string; sendable: boolean }>) {
+  const { t } = useTranslation("explore");
   const { data, problem } = useIdeaPage(id);
   const runs = useRuns(id);
-  const [sending, setSending] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
   if (problem)
-    return <ProblemBox title="This idea cannot be shown" text={problem} />;
-  if (!data) return null;
+    return (
+      <div className="p-6">
+        <DialogTitle className="sr-only">{t("idea.cannotShow")}</DialogTitle>
+        <ProblemBox title={t("idea.cannotShow")} text={problem} />
+      </div>
+    );
+  if (!data)
+    return <DialogTitle className="sr-only">{t("idea.loading")}</DialogTitle>;
   const { idea } = data;
   return (
-    <section
-      aria-label={idea.title}
-      className="grid gap-4 rounded-2xl bg-card px-6 py-5 shadow-soft"
-    >
-      <div className="grid gap-x-8 gap-y-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
-        <h2 className="text-2xl font-semibold tracking-[-0.01em]">
-          {idea.title}
-        </h2>
-        <div className="grid gap-2">
-          <StageSteps steps={ideaSteps(data.stage)} whole />
-          <p className="text-center text-[13px] text-muted-foreground">
-            {ideaWhy(data)}
-          </p>
-        </div>
+    <div className="grid gap-4 p-5 sm:p-6">
+      <div className="grid gap-1 pr-8">
+        <DialogTitle className="text-section">{idea.title}</DialogTitle>
+        <DialogDescription asChild>
+          <Status page={data} />
+        </DialogDescription>
       </div>
-      <ForWhom page={data} />
-      <p className="text-[15px]">
-        <span className="text-muted-foreground">We think </span>
-        {idea.weThink}
-      </p>
-      {data.versions.length === 0 ? (
-        <NoVersions page={data} />
-      ) : (
-        <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {data.versions.map((version) => (
-              <VersionTile
-                key={version.key}
-                version={version}
-                run={runOf(runs, idea.id, version.key)}
-                onProblem={setSending}
-              />
-            ))}
-          </div>
-          {data.unshared > 0 && (
-            <p className="text-[13px] text-muted-foreground">
-              {data.unshared} more in prototype mode, not shared yet.
-            </p>
-          )}
-          <SendBar page={data} onProblem={setSending} />
-        </>
-      )}
-      {sending && <ProblemBox title="That did not work" text={sending} />}
-    </section>
+      <Context page={data} />
+      <IdeaSteps
+        page={data}
+        runs={runs}
+        sendable={sendable}
+        onProblem={setFailed}
+      />
+      {failed && <ProblemBox title={t("idea.failed")} text={failed} />}
+    </div>
   );
 }
 
-// Who it is for, and the problem with the story that breaks at it.
+// Where the idea stands, in one line: its stage and why.
+function Status({ page }: Readonly<{ page: IdeaPage }>) {
+  const steps = ideaSteps(page.stage);
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 text-note text-muted-foreground">
+      <span
+        aria-hidden
+        className={cn("size-2 rounded-full", DOT[steps.tone])}
+      />
+      <span className="font-medium text-foreground-2">{steps.name}</span>
+      <span aria-hidden>·</span>
+      {ideaWhy(page)}
+    </p>
+  );
+}
+
+// Who it is for and the problem, then what we think, in one small block.
+function Context({ page }: Readonly<{ page: IdeaPage }>) {
+  const { t } = useTranslation("explore");
+  const { persona, idea } = page;
+  return (
+    <div className="flex gap-3 rounded-xl bg-surface px-4 py-3">
+      <Initial
+        name={persona?.name ?? "?"}
+        tint={tintOf(persona?.at ?? 0)}
+        small
+      />
+      <div className="grid min-w-0 gap-1">
+        <ForWhom page={page} />
+        {idea.weThink && (
+          <p className="text-body text-muted-foreground">
+            {t("idea.weThink", { what: idea.weThink })}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// "For Mia · The basket is empty by evening", each problem it is for (its
+// story in Understand), or the story it assumes.
 function ForWhom({ page }: Readonly<{ page: IdeaPage }>) {
-  const { persona } = page;
-  const tint = tintOf(persona?.at ?? 0);
+  const { t } = useTranslation("explore");
   const story = page.assumed;
   return (
-    <div className="grid gap-1.5">
-      {page.for.map((one) => (
-        <p key={one.problem} className="flex items-center gap-2.5 text-[15px]">
-          <Initial name={persona?.name ?? "?"} tint={tint} />
-          <span>
-            For{" "}
-            {one.story ? (
-              <a
-                href={understandHash(one.story.persona, one.story.id)}
-                className="font-semibold underline-offset-4 hover:underline"
-              >
-                {one.title}
-              </a>
-            ) : (
-              <b>{one.title}</b>
-            )}
-            {persona && ` (${persona.name})`}
-            {one.assumed && (
-              <span className="text-muted-foreground"> · assumed</span>
-            )}
-          </span>
-        </p>
-      ))}
-      {page.for.length === 0 && persona && (
-        <p className="flex items-center gap-2.5 text-[15px]">
-          <Initial name={persona.name} tint={tint} />
-          <span>
-            For <b>{persona.name}</b>
-            {story && (
-              <>
-                {", in "}
-                <a
-                  href={understandHash(story.persona, story.id)}
-                  className="underline-offset-4 hover:underline"
-                >
-                  {story.title}
-                </a>
-              </>
-            )}
-          </span>
-        </p>
-      )}
-    </div>
-  );
-}
-
-function NoVersions({ page }: Readonly<{ page: IdeaPage }>) {
-  const discard = () => {
-    if (!window.confirm(`Throw “${page.idea.title}” away?`)) return;
-    void post("/api/explore/discard", { idea: page.idea.id }).then(() => {
-      window.location.hash = exploreHash();
-    });
-  };
-  return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface px-4 py-4">
-      <KoboldMark />
-      <span className="flex-1 text-sm">
-        No versions yet.
-        {page.unshared > 0
-          ? ` ${String(page.unshared)} in prototype mode, not shared yet.`
-          : " Make some in prototype mode and share them here."}
+    <p className="text-body">
+      <span className="font-medium">
+        {page.persona
+          ? t("idea.forWhom", { name: page.persona.name })
+          : t("idea.forNobody")}
       </span>
-      {page.unshared === 0 && page.tickets.length === 0 && (
-        <Button variant="ghost" size="sm" onClick={discard}>
-          Throw it away
-        </Button>
+      {page.for.map((one) => (
+        <span key={one.problem}>
+          <span className="text-muted-foreground"> · </span>
+          {one.story ? (
+            <a
+              href={understandHash(one.story.persona, one.story.id)}
+              className="font-semibold underline-offset-4 hover:underline"
+            >
+              {one.title}
+            </a>
+          ) : (
+            <b>{one.title}</b>
+          )}
+          {one.assumed && (
+            <span className="text-muted-foreground"> {t("idea.assumed")}</span>
+          )}
+        </span>
+      ))}
+      {page.for.length === 0 && story && (
+        <>
+          <span className="text-muted-foreground"> · </span>
+          <a
+            href={understandHash(story.persona, story.id)}
+            className="underline-offset-4 hover:underline"
+          >
+            {story.title}
+          </a>
+        </>
       )}
-      <Button asChild variant="outline" size="sm">
-        <a href={prototypeHash(page.idea.id)}>Open prototype mode</a>
-      </Button>
-    </div>
-  );
-}
-
-// The line about the picks, and "Send B to Build".
-function SendBar({
-  page,
-  onProblem,
-}: Readonly<{ page: IdeaPage; onProblem: (problem: string | null) => void }>) {
-  const [busy, setBusy] = useState(false);
-  const line = sendLine(page);
-  const send = async () => {
-    if (!line.version) return;
-    setBusy(true);
-    onProblem(null);
-    try {
-      await post("/api/explore/send", {
-        idea: page.idea.id,
-        version: line.version,
-      });
-    } catch (error) {
-      onProblem(messageOf(error));
-    }
-    setBusy(false);
-  };
-  return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface px-4 py-3.5">
-      <span className="flex-1 text-sm">{line.words}</span>
-      {line.button && (
-        <Button disabled={!line.version || busy} onClick={() => void send()}>
-          {line.button}
-        </Button>
-      )}
-      {!line.button && <Label>In Build</Label>}
-    </div>
+    </p>
   );
 }

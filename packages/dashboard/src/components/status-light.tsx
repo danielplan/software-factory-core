@@ -1,11 +1,22 @@
 import type { Light } from "@/api";
+import { t } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
 
+// Each light's word, in the person's language when it is read (so a new
+// language shows at once).
 export const LABEL: Record<Light, string> = {
-  running: "Running",
-  stopped: "Stopped",
-  starting: "Starting",
-  problem: "Problem",
+  get running() {
+    return t("common:light.running");
+  },
+  get stopped() {
+    return t("common:light.stopped");
+  },
+  get starting() {
+    return t("common:light.starting");
+  },
+  get problem() {
+    return t("common:light.problem");
+  },
   none: "",
 };
 
@@ -21,8 +32,6 @@ const LOOK: Record<Light, string> = {
     "bg-destructive shadow-[0_0_0_5px_color-mix(in_srgb,var(--destructive)_15%,transparent)]",
   none: "hidden",
 };
-
-export const LIGHTS: Light[] = ["running", "starting", "stopped", "problem"];
 
 export function StatusLight({
   light,

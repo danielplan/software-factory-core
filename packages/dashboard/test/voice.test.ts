@@ -318,7 +318,7 @@ test("the line under the voice", () => {
   assert.match(statusLine(at({ phase: "thinking" }), null).text, /Working/);
   assert.match(statusLine(at({ phase: "speaking" }), null).text, /stop/);
   assert.deepEqual(statusLine(at({ problem: "no-voice" }), null), {
-    text: "There's no Deutsch voice in this browser, so the answers can't be read out. Add one in the computer's speech settings, or choose another language.",
+    text: "There's no Deutsch voice in this browser, so the answers can't be read out loud. Add one in your computer's speech settings, or choose another language.",
     problem: true,
   });
   assert.match(statusLine(at({ problem: "blocked" }), null).text, /allow/);

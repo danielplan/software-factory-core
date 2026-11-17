@@ -1,0 +1,77 @@
+{
+  "app": {
+    "closed": "The factory has stopped. Start it again with software-factory.",
+    "opening": "Opening the factory…"
+  },
+  "nav": {
+    "home": "Home",
+    "signals": "Signals",
+    "explorations": "Explorations",
+    "factory": "Factory",
+    "personas": "Personas",
+    "product": "Product",
+    "settings": "Settings",
+    "kobold": "Your kobold",
+    "chatWithKobold": "Chat with your kobold",
+    "pages": "Pages",
+    "openMenu": "Open the menu"
+  },
+  "status": {
+    "active": "Active",
+    "notActive": "Not active",
+    "needsYou": "Something needs you",
+    "idle": "Idle"
+  },
+  "kobold": {
+    "building": "Building: {{title}}",
+    "thinking": "Thinking about {{title}}",
+    "planning": "Planning card #{{number}}",
+    "doingWith": "{{doing}}: {{activity}}",
+    "doing": {
+      "sort": "Sorting what came in",
+      "suggest": "Reading the problems",
+      "ask": "Writing a question",
+      "seen": "Writing down what was seen",
+      "idea": "Writing an idea",
+      "answer": "Answering a question",
+      "check": "Running a check-up"
+    }
+  },
+  "overall": {
+    "problem": "Something needs you",
+    "starting": "Starting",
+    "running": "Everything is running",
+    "stopped": "{{running}} of {{total}} running"
+  },
+  "light": {
+    "running": "Running",
+    "stopped": "Stopped",
+    "starting": "Starting",
+    "problem": "Problem"
+  },
+  "stage": {
+    "assumed": "Assumed",
+    "heard": "Heard",
+    "trying": "Trying ideas",
+    "building": "Building",
+    "inApp": "In the app",
+    "solved": "Solved",
+    "didntWork": "Didn't work",
+    "idea": "Idea",
+    "versions": "Versions",
+    "picked": "Picked",
+    "worked": "Worked",
+    "label": "Stage: {{name}} ({{at}} of {{total}})"
+  },
+  "closedBy": "Closed by {{by}} on {{on}}: {{what}}",
+  "breadcrumb": "Where you are",
+  "close": "Close",
+  "didNotWork": "That didn't work",
+  "coming": {
+    "soon": "This page is coming soon.",
+    "customers": {
+      "title": "Customers",
+      "about": "The companies and people who use your products."
+    }
+  }
+}

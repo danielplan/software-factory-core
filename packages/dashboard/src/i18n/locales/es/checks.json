@@ -1,0 +1,54 @@
+{
+  "title": "Revisión",
+  "start": {
+    "title": "Revisar mi producto",
+    "lead": "El kobold recorre tu producto buscando errores, fallos y cosas difíciles de usar, y te explica cada uno con palabras sencillas.",
+    "time": "Tarda unos minutos",
+    "safe": "No se cambia nada",
+    "local": "Funciona en este ordenador",
+    "button": "Empezar la revisión",
+    "again": "Revisar de nuevo",
+    "one": "Revisar {{name}}"
+  },
+  "running": {
+    "title": "El kobold está revisando {{name}}…",
+    "looking": "Mirando alrededor…",
+    "found_one": "{{count}} cosa encontrada hasta ahora",
+    "found_other": "{{count}} cosas encontradas hasta ahora",
+    "stop": "Detener"
+  },
+  "results": {
+    "last": "Última revisión: {{when}}",
+    "toLook_one": "{{count}} cosa que mirar",
+    "toLook_other": "{{count}} cosas que mirar",
+    "clear": "Nada preocupante",
+    "handled": "Ya atendidas ({{count}})",
+    "failed": "La revisión de {{name}} no pudo terminar: {{why}}",
+    "stopped": "La revisión de {{name}} se detuvo antes del final."
+  },
+  "severity": {
+    "high": "Grave",
+    "medium": "Conviene arreglarlo",
+    "low": "Menor"
+  },
+  "kind": {
+    "bug": "Error",
+    "error": "Fallo",
+    "ux": "Difícil de usar",
+    "security": "Seguridad",
+    "performance": "Lento"
+  },
+  "finding": {
+    "fix": "Cómo arreglarlo",
+    "where": "Dónde",
+    "in": "En {{name}}",
+    "send": "Enviar a Build",
+    "dismiss": "No es un problema",
+    "sent": "En Build como #{{issue}}",
+    "waiting": "En Build. Para convertirlo en un ticket, conecta un tablero de GitHub en Ajustes.",
+    "onBuild": "En Build",
+    "dismissed": "Apartado"
+  },
+  "problem": "No ha funcionado: {{why}}",
+  "crumbSignals": "Señales"
+}

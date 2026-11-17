@@ -3,6 +3,7 @@
 
 import { Monitor, Moon, Sun } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   applyChoice,
@@ -14,13 +15,14 @@ import { cn } from "@/lib/utils";
 
 import { Topic } from "./settings-card";
 
-const CHOICES: { choice: ThemeChoice; name: string; icon: ReactNode }[] = [
-  { choice: "system", name: "System", icon: <Monitor aria-hidden /> },
-  { choice: "light", name: "Light", icon: <Sun aria-hidden /> },
-  { choice: "dark", name: "Dark", icon: <Moon aria-hidden /> },
+const CHOICES: { choice: ThemeChoice; icon: ReactNode }[] = [
+  { choice: "system", icon: <Monitor aria-hidden /> },
+  { choice: "light", icon: <Sun aria-hidden /> },
+  { choice: "dark", icon: <Moon aria-hidden /> },
 ];
 
 export function LookCard() {
+  const { t } = useTranslation("settings");
   const [chosen, setChosen] = useState(() => storedChoice(() => localStorage));
   const [kept, setKept] = useState(true);
   const choose = (choice: ThemeChoice) => {
@@ -29,16 +31,13 @@ export function LookCard() {
     applyChoice(document.styleSheets, choice);
   };
   return (
-    <Topic
-      title="Light or dark"
-      about="System follows your computer's setting. The choice is kept in this browser."
-    >
+    <Topic title={t("look.title")}>
       <div
         role="radiogroup"
-        aria-label="Light or dark"
+        aria-label={t("look.title")}
         className="flex w-fit gap-1 rounded-[14px] bg-surface-2 p-1"
       >
-        {CHOICES.map(({ choice, name, icon }) => (
+        {CHOICES.map(({ choice, icon }) => (
           <button
             key={choice}
             type="button"
@@ -48,20 +47,17 @@ export function LookCard() {
               choose(choice);
             }}
             className={cn(
-              "inline-flex h-9 items-center gap-2 rounded-[10px] px-3.5 text-sm font-medium text-muted-foreground hover:text-foreground [&_svg]:size-4",
+              "inline-flex h-9 items-center gap-2 rounded-[10px] px-3.5 text-body font-medium text-muted-foreground transition-colors hover:text-foreground [&_svg]:size-4",
               chosen === choice && "bg-card text-foreground shadow-current",
             )}
           >
             {icon}
-            {name}
+            {t(`look.${choice}`)}
           </button>
         ))}
       </div>
       {!kept && (
-        <p className="text-sm text-muted-foreground">
-          This browser keeps nothing for this page, so the choice lasts until
-          the page is closed.
-        </p>
+        <p className="text-body text-muted-foreground">{t("look.notKept")}</p>
       )}
     </Topic>
   );

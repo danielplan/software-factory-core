@@ -403,3 +403,20 @@ test("the checks look at the database and the seed, where there are, and make no
   assert.deepEqual(checked, [RECORDS_FILE, SEED_FILE]);
   assert.match(problems[0] ?? "", /^kobble\.db: .*no such table/);
 });
+
+test("records saved by a newer core are refused, never changed", () => {
+  const file = join(mkdtempSync(join(tmpdir(), "records-")), RECORDS_FILE);
+  RecordStore.open(file).close();
+  const db = new DatabaseSync(file);
+  assert.equal(db.prepare("PRAGMA user_version").get()?.user_version, 1);
+  db.exec("PRAGMA user_version = 2");
+  db.close();
+  for (const readOnly of [false, true])
+    assert.match(
+      refusal(() => RecordStore.open(file, readOnly))[0] ?? "",
+      /newer core \(tables version 2; this core knows 1\)/,
+    );
+  const after = new DatabaseSync(file);
+  assert.equal(after.prepare("PRAGMA user_version").get()?.user_version, 2);
+  after.close();
+});
