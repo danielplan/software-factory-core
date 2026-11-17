@@ -132,7 +132,7 @@ export function completed(exploration: Exploration, board: Board): Board {
   if (!board.things.some((one) => one.kind === "problem"))
     fixed.push({ id: "problem", kind: "problem", ...fresh });
   if (
-    exploration.signals.length > 0 &&
+    exploration.heard.length > 0 &&
     !board.things.some((one) => one.kind === "heard")
   )
     fixed.push({ id: "heard", kind: "heard", ...fresh });
@@ -146,7 +146,7 @@ function line(thing: Thing, exploration: Exploration): string {
     case "problem":
       return `${head}: ${exploration.problem || "not said yet"}`;
     case "heard":
-      return `${head}: ${String(exploration.signals.length)} signals`;
+      return `${head}: ${exploration.heard.map((one) => one.text).join(" / ")}`;
     case "note":
       return `${head}: ${thing.text}`;
     case "choice":

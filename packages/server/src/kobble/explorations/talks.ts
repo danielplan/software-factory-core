@@ -176,10 +176,7 @@ export class ExplorationTalks {
     const store = this.options.store();
     const exploration = store.get("explorations", id);
     if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
-    const heard = store
-      .all("signals")
-      .filter((signal) => exploration.signals.includes(signal.id))
-      .map((signal) => `- ${signal.text}`);
+    const heard = exploration.heard.map((one) => `- ${one.text}`);
     const did = this.done.get(id) ?? [];
     this.done.delete(id);
     const prompt = [

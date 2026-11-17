@@ -18,6 +18,7 @@ import {
   type Company,
   companySchema,
 } from "../company/company.ts";
+import { IGNORED_SIGNALS } from "../kobble/ignored.ts";
 import { PRODUCT_FILE } from "../products/find-products.ts";
 import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
@@ -97,7 +98,10 @@ export function createFactoryFolder(
     join(root, "AGENTS.md"),
     readFileSync(templates.agents, "utf8").replaceAll("<company>", file.name),
   );
-  writeFileSync(join(root, ".gitignore"), "copies/\nsettings/\n");
+  writeFileSync(
+    join(root, ".gitignore"),
+    `copies/\nsettings/\n${IGNORED_SIGNALS}\n`,
+  );
   return file;
 }
 

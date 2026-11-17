@@ -1,6 +1,6 @@
 // What `software-factory check` looks at in Kobble's files: that each file
-// fits, and that what a record names is there (a signal's persona, an
-// exploration's or a test's signals and personas). Each problem starts with where it is.
+// fits, and that what a record names is there (the personas, and an
+// exploration's copy of each signal it heard). Each problem starts with where it is.
 
 import { existsSync } from "node:fs";
 
@@ -37,33 +37,32 @@ export function checkKobbleIn(factory: string): {
     has: (id: string) => ids === null || ids.some((one) => one.id === id),
   });
   const persona = known(personas);
-  const signal = known(signals);
-  // Each file, with the personas and signals it names.
+  // Each file, with the personas it names and what else it misses. An
+  // exploration keeps its own copy of what it heard: the signal files
+  // themselves stay on the computer that read the live app.
   const naming = [
     ...signals.map((one) => ({
       where: `signals/${one.id}.json`,
       personas: one.persona ? [one.persona] : [],
-      signals: [],
+      missing: [],
     })),
     ...explorations.map((one) => ({
       where: `explorations/${one.id}/exploration.json`,
       personas: one.personas,
-      signals: one.signals,
+      missing: one.signals
+        .filter((id) => !one.heard.some((heard) => heard.id === id))
+        .map((id) => `copy of the signal “${id}” it heard`),
     })),
     ...tests.map((one) => ({
       where: `tests/${one.id}.json`,
       personas: [one.persona],
-      signals: one.signals,
+      missing: [],
     })),
   ];
-  for (const { where, ...named } of naming) {
+  for (const { where, personas: named, missing } of naming) {
     const gone = [
-      ...named.personas
-        .filter((id) => !persona.has(id))
-        .map((id) => `persona “${id}”`),
-      ...named.signals
-        .filter((id) => !signal.has(id))
-        .map((id) => `signal “${id}”`),
+      ...named.filter((id) => !persona.has(id)).map((id) => `persona “${id}”`),
+      ...missing,
     ];
     for (const what of gone)
       problems.push(`${KOBBLE_FOLDER}/${where}: there is no ${what}.`);

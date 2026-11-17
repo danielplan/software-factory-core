@@ -4,6 +4,7 @@
   "status": "waiting",
   "personas": ["noah"],
   "signals": [],
+  "heard": [],
   "problem": "First-time buyers check out as guests and wait for the email to know the order worked.",
   "created": "2026-11-16T10:00:00.000Z",
   "work": null

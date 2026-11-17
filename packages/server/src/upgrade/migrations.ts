@@ -4,18 +4,23 @@
 // have to make by hand comes with one here; what a migration cannot decide
 // alone, it leaves to the owner, said in a line.
 
+import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 
 import {
   type Company,
   COMPANY_FILE,
   type Extension,
   findProducts,
+  IGNORED_SIGNALS,
+  ignoreSignals,
   type Kit,
   readCompany,
   saveCompany,
 } from "@software-factory/core";
+
+import { GIT } from "@software-factory/knowledge-base";
 
 import { trackedWith } from "../add-ons/switch.ts";
 import { moveOut } from "./move-out.ts";
@@ -105,7 +110,32 @@ export const MIGRATIONS: Migration[] = [
         "The agents' ground rules point to docs/ for the knowledge base.",
       ),
   },
+  {
+    version: "0.11.1",
+    about: "Signal files stay on this computer, out of git",
+    run: signalsOutOfGit,
+  },
 ];
+
+// The factory's .gitignore names the signal files' folder; signal files
+// already in git are left to the owner, with the command that takes them out.
+function signalsOutOfGit({ project, root }: UpgradeContext): Migrated {
+  const done = ignoreSignals(root)
+    ? [`Added ${IGNORED_SIGNALS} to the factory's .gitignore.`]
+    : [];
+  const tracked = spawnSync(
+    GIT,
+    ["ls-files", "--", join(relative(project, root), "kobble", "signals")],
+    { cwd: project, encoding: "utf8" },
+  );
+  const left =
+    tracked.status === 0 && tracked.stdout.trim() !== ""
+      ? [
+          `Signal files are tracked in git; remove them from git with \`git rm -r --cached ${relative(project, root)}/kobble/signals\` (the files stay on this computer).`,
+        ]
+      : [];
+  return { done, left };
+}
 
 // A product described as other code that a kit now recognises becomes that
 // kit's kind; the company's kits follow its products.

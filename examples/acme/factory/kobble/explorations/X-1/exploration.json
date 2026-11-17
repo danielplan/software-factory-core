@@ -4,6 +4,7 @@
   "status": "exploring",
   "personas": ["mia"],
   "signals": [],
+  "heard": [],
   "problem": "People fill the basket on their phone in the morning, and when they come back in the evening to pay, the basket is empty.",
   "created": "2026-11-10T09:00:00.000Z",
   "work": null

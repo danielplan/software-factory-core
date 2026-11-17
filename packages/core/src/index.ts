@@ -123,6 +123,7 @@ export {
   type Board,
   type BoardLink,
   type Exploration,
+  type Heard,
   type KobblePersona,
   type KobbleSignal,
   type PersonaTest,
@@ -131,8 +132,10 @@ export {
   type Thing,
 } from "./kobble/schemas.ts";
 export { checkKobbleIn } from "./kobble/check.ts";
+export { IGNORED_SIGNALS, ignoreSignals } from "./kobble/ignored.ts";
 export {
   type Conversation,
+  heardOf,
   KOBBLE_FOLDER,
   type KobbleKind,
   KobbleRefused,

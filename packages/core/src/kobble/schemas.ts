@@ -63,12 +63,25 @@ export const EXPLORATION_STATUSES = [
   "dropped",
 ] as const;
 
+// What an exploration heard: its own copy of each signal's words, so the
+// exploration reads the same on a teammate's computer, where the signal
+// files are not (they stay on the computer that read the live app).
+const heardSchema = z.strictObject({
+  id: fileId,
+  type: z.enum(SIGNAL_TYPES),
+  source: z.enum(SIGNAL_SOURCES),
+  persona: fileId.nullable(),
+  at: time,
+  text,
+});
+
 export const explorationSchema = z.strictObject({
   id: fileId.regex(/^X-\d+$/, "an exploration's id is X- and a number"),
   title: text,
   status: z.enum(EXPLORATION_STATUSES),
   personas: z.array(fileId),
   signals: z.array(fileId),
+  heard: z.array(heardSchema),
   problem: z.string(),
   created: time,
   // The GitHub issue it was handed off as.
@@ -215,6 +228,7 @@ export const syncStateSchema = z.strictObject({
 
 export type KobbleSignal = z.infer<typeof kobbleSignalSchema>;
 export type Exploration = z.infer<typeof explorationSchema>;
+export type Heard = z.infer<typeof heardSchema>;
 export type KobblePersona = z.infer<typeof kobblePersonaSchema>;
 export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;

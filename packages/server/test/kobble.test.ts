@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -233,6 +239,20 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
     const x1 = factory.store.get("explorations", "X-1");
     assert.deepEqual(x1?.signals, ["S-0004"]);
     assert.deepEqual(factory.store.get("signals", "S-0004")?.to, "X-1");
+    assert.deepEqual(
+      factory.store.get("explorations", "X-1")?.heard.map((one) => one.id),
+      ["S-0004"],
+    );
+    // The exploration still says what it heard where the signal file is not
+    // (it stays on the computer that read the live app).
+    rmSync(join(factory.store.root, "signals", "S-0004.json"));
+    const page = await factory.read<{
+      heard: { id: string; personaName: string | null }[];
+    }>("/api/kobble/exploration?id=X-1");
+    assert.deepEqual(
+      page.heard.map((one) => [one.id, one.personaName]),
+      [["S-0004", "Mia"]],
+    );
 
     // Nothing found: a new exploration, waiting.
     const made = await factory.press("/api/kobble/signals/explore", {
@@ -246,6 +266,16 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
         status: "waiting",
         personas: ["bruno"],
         signals: ["S-0006"],
+        heard: [
+          {
+            id: "S-0006",
+            type: "request",
+            source: "usage",
+            persona: "bruno",
+            at: "2026-11-16T09:20:00.000Z",
+            text: "The assistant could not repeat last Monday's order. It can only show it.",
+          },
+        ],
         problem:
           "The assistant could not repeat last Monday's order. It can only show it.",
         created: "",

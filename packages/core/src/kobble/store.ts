@@ -32,6 +32,7 @@ import { z } from "zod";
 
 import { messageOf } from "../products/product.ts";
 import { fromEarlier } from "./board-shape.ts";
+import { ignoreSignals } from "./ignored.ts";
 import {
   type Board,
   boardSchema,
@@ -39,6 +40,7 @@ import {
   explorationSchema,
   type KobblePersona,
   kobblePersonaSchema,
+  type Heard,
   type KobbleSignal,
   kobbleSignalSchema,
   type PersonaTest,
@@ -90,9 +92,11 @@ const NEVER: SyncState = { last: null, cursor: null };
 
 export class KobbleStore {
   readonly root: string;
+  private readonly factory: string;
 
   // root: the factory's folder in the product's repository.
   constructor(factory: string) {
+    this.factory = factory;
     this.root = join(factory, KOBBLE_FOLDER);
   }
 
@@ -126,6 +130,8 @@ export class KobbleStore {
         `This ${NAMED[kind]} does not fit: ${z.prettifyError(parsed.error)}`,
       );
     const id = (parsed.data as { id: string }).id;
+    // Signal files stay on this computer (ignored.ts).
+    if (kind === "signals") ignoreSignals(this.factory);
     writeAtomically(this.fileOf(kind, id), parsed.data);
     return parsed.data;
   }
@@ -228,6 +234,19 @@ export class KobbleStore {
     writeText(join(this.root, "explorations", id, "handoff.md"), text);
   }
 
+  // An exploration written before it kept what it heard: its copy, from
+  // the signal files on this computer.
+  private withHeard(data: unknown): unknown {
+    if (typeof data !== "object" || data === null || "heard" in data)
+      return data;
+    const ids = (data as { signals?: unknown }).signals;
+    const heard = (Array.isArray(ids) ? ids : []).flatMap((id) => {
+      const signal = typeof id === "string" ? this.get("signals", id) : null;
+      return signal ? [heardOf(signal)] : [];
+    });
+    return { ...data, heard };
+  }
+
   private explorationOrRefuse(id: string): void {
     if (!this.get("explorations", id))
       throw new KobbleRefused(`There is no exploration “${id}”.`);
@@ -261,7 +280,10 @@ export class KobbleStore {
     file: string,
   ): Kinds[K] {
     const name = file.slice(this.root.length + 1);
-    const parsed = SCHEMAS[kind].safeParse(readJson(file, name));
+    const data = readJson(file, name);
+    const parsed = SCHEMAS[kind].safeParse(
+      kind === "explorations" ? this.withHeard(data) : data,
+    );
     if (!parsed.success)
       throw new KobbleRefused(
         `${name} does not fit: ${z.prettifyError(parsed.error)}`,
@@ -270,6 +292,12 @@ export class KobbleStore {
       throw new KobbleRefused(`${name} has the id of another ${NAMED[kind]}.`);
     return parsed.data;
   }
+}
+
+// A signal as an exploration keeps it.
+export function heardOf(signal: KobbleSignal): Heard {
+  const { id, type, source, persona, at, text } = signal;
+  return { id, type, source, persona, at, text };
 }
 
 function readJson(file: string, name: string): unknown {

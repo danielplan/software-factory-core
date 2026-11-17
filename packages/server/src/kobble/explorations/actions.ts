@@ -61,6 +61,7 @@ export function newExploration(
     status: "waiting",
     personas: persona ? [persona] : [],
     signals: [],
+    heard: [],
     problem: problem || title,
     created: now.toISOString(),
     work: null,

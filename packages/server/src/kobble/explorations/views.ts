@@ -8,13 +8,14 @@ import {
   type Exploration,
   type Face,
   faceOf,
+  type Heard,
   type KobbleStore,
   type PersonaTest,
   type Thing,
 } from "@software-factory/core";
 
 import type { VersionRun } from "../../prototypes/mode.ts";
-import { type SignalRow, signalRows } from "../views.ts";
+
 import { completed } from "./board-things.ts";
 import type { TalkView } from "./talks.ts";
 
@@ -52,7 +53,8 @@ export type TestResult = {
 export type ExplorationPage = {
   exploration: Exploration;
   personas: PersonaTag[];
-  heard: SignalRow[];
+  // What it heard, from its own copy, with each persona's name and face.
+  heard: (Heard & { personaName: string | null; personaFace: Face | null })[];
   board: Board;
   runs: VersionRun[];
   tests: Record<string, TestResult | null>;
@@ -121,13 +123,18 @@ export function explorationPage(
 ): ExplorationPage {
   const board = completed(exploration, store.board(exploration.id));
   const tests = store.all("tests");
-  const heard = store
-    .all("signals")
-    .filter((signal) => exploration.signals.includes(signal.id));
+
   return {
     exploration,
     personas: tagsOf(store, exploration.personas),
-    heard: signalRows(heard, store.all("personas")),
+    heard: exploration.heard.map((one) => {
+      const persona = one.persona ? store.get("personas", one.persona) : null;
+      return {
+        ...one,
+        personaName: persona?.name ?? null,
+        personaFace: persona ? faceOf(persona) : null,
+      };
+    }),
     board,
     runs: more.runs,
     tests: Object.fromEntries(

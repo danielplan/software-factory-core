@@ -205,7 +205,7 @@ function PersonaBody({
       <Tabs
         tabs={[
           {
-            name: "Signals",
+            name: "Signals on this computer",
             count: signals.length,
             href: personaHash(persona.id),
             on: tab === "signals",

@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   alreadyFor,
+  heardOf,
   type Exploration,
   type KobbleSignal,
   titleOf,
@@ -17,6 +18,7 @@ const exploration = (more: Partial<Exploration>): Exploration => ({
   status: "exploring",
   personas: [],
   signals: [],
+  heard: [],
   problem:
     "People fill the basket in the morning and find it empty in the evening.",
   created: "2026-11-10T09:00:00.000Z",
@@ -69,7 +71,7 @@ test("a signal about an open exploration finds it", () => {
   });
 });
 
-test("an exploration's own signals count as what it is about", () => {
+test("what an exploration heard counts as what it is about", () => {
   const heard: KobbleSignal = {
     ...fixedSignal,
     id: "S-0002",
@@ -82,13 +84,11 @@ test("an exploration's own signals count as what it is about", () => {
     title: "Paying once a month",
     problem: "",
     signals: ["S-0002"],
+    heard: [heardOf(heard)],
   });
   assert.equal(
-    alreadyFor(
-      "Could we get a monthly invoice for our orders?",
-      [monthly],
-      [heard],
-    )?.id,
+    alreadyFor("Could we get a monthly invoice for our orders?", [monthly], [])
+      ?.id,
     "X-2",
   );
 });

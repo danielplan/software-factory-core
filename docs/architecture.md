@@ -106,7 +106,8 @@ acme/                    the project, one repository
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
    ├─ runs/              its history
-   ├─ kobble/            signals, explorations and personas, one file each, in git
+   ├─ kobble/            explorations, personas, tests, one file each, in git;
+   │                     its signals/ stay on this computer (not in git)
    └─ settings/, copies/ secrets and working copies, not in git
 ```
 
@@ -129,7 +130,13 @@ Explorations, then the Factory board. It keeps its records as files in the
 product's repository: `factory/kobble/signals/S-0001.json`,
 `factory/kobble/explorations/X-1/exploration.json`,
 `factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
-into git, so the team shares them like the code. Each is JSON, checked
+into git, so the team shares them like the code, except the signals: what
+people said stays on the computer that read the live app (the factory's
+`.gitignore` names `kobble/signals/`), since git would keep it for ever. An
+exploration keeps its own copy of what it heard (`heard` in
+`exploration.json`: each signal's id, type, source, persona, time and
+words), so it reads the same on a teammate's computer; a persona's page
+shows the signals on this computer. Each is JSON, checked
 against its schema (`packages/core/src/kobble/schemas.ts`) when it is read
 and written, and written whole (to a file beside it, then renamed).
 

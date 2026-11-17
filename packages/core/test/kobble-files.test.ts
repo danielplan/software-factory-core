@@ -14,6 +14,8 @@ import { test } from "node:test";
 
 import {
   checkKobbleIn,
+  heardOf,
+  ignoreSignals,
   faceFor,
   faceOf,
   type KobbleSignal,
@@ -80,6 +82,7 @@ test("each record is one pretty JSON file, read back the same", () => {
     status: "waiting",
     personas: [],
     signals: ["S-0002"],
+    heard: [],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
     work: null,
@@ -181,6 +184,7 @@ test("records are removed, and the sync's place is kept", () => {
     status: "dropped",
     personas: [],
     signals: [],
+    heard: [],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
     work: null,
@@ -279,7 +283,7 @@ test("the check reads Kobble's files and finds what is not there", () => {
   );
   assert.match(
     problems[1] ?? "",
-    /X-1\/exploration.json: there is no signal “S-0404”/,
+    /X-1\/exploration.json: there is no copy of the signal “S-0404” it heard/,
   );
   // A persona's file that does not fit: said once, and what names
   // personas is not checked against the rest.
@@ -380,4 +384,46 @@ test("a board in the first shape is read as things and arrows; arrows must join 
   assert.equal(store.pictureFile("X-2", "../x.png"), null);
   store.savePicture("X-2", "a.png", new Uint8Array([1]));
   assert.ok(store.pictureFile("X-2", "a.png"));
+});
+
+test("an exploration keeps its own copy of what it heard; signal files stay out of git", () => {
+  const factory = acmeFactory();
+  const store = new KobbleStore(factory);
+  store.put("signals", signal("S-0002", { text: "The basket was empty." }));
+  assert.match(
+    readFileSync(join(factory, ".gitignore"), "utf8"),
+    /^kobble\/signals\/$/m,
+  );
+  assert.equal(ignoreSignals(factory), false);
+  // An exploration from before it kept a copy: read with one, from the
+  // signal files on this computer.
+  const x1 = JSON.parse(
+    readFileSync(
+      join(store.root, "explorations", "X-1", "exploration.json"),
+      "utf8",
+    ),
+  ) as Record<string, unknown>;
+  delete x1.heard;
+  writeFileSync(
+    join(store.root, "explorations", "X-1", "exploration.json"),
+    JSON.stringify({ ...x1, signals: ["S-0002", "S-0404"] }),
+  );
+  const read = store.get("explorations", "X-1");
+  assert.deepEqual(
+    read?.heard.map((one) => [one.id, one.text]),
+    [["S-0002", "The basket was empty."]],
+  );
+  assert.deepEqual(heardOf(signal("S-0009")), {
+    id: "S-0009",
+    type: "bug",
+    source: "app",
+    persona: null,
+    at: "2026-11-17T08:00:00.000Z",
+    text: "Something broke.",
+  });
+  // The check asks for the copy, not the signal file.
+  assert.match(
+    checkKobbleIn(factory).problems.join("\n"),
+    /X-1\/exploration.json: there is no copy of the signal “S-0404” it heard/,
+  );
 });
