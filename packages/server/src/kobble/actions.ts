@@ -4,6 +4,9 @@
 
 import {
   type Exploration,
+  faceFor,
+  PERSONA_COLORS,
+  PERSONA_HATS,
   type KobblePersona,
   type KobbleSignal,
   type KobbleStore,
@@ -77,6 +80,10 @@ const newPersonaSchema = z.object({
   name: z.string().trim().min(1, "Say the persona's name."),
   place: z.string().trim().default(""),
   about: z.string().trim().default(""),
+  // The face picked in the dialog; worked out from the id when not given.
+  face: z
+    .object({ hat: z.enum(PERSONA_HATS), color: z.enum(PERSONA_COLORS) })
+    .optional(),
 });
 
 // A persona a person on the team adds, with an id made from the name.
@@ -84,7 +91,7 @@ export function addPersona(store: KobbleStore, body: unknown): KobblePersona {
   const parsed = newPersonaSchema.safeParse(body);
   if (!parsed.success)
     throw new Refused(parsed.error.issues.map((i) => i.message).join(" "));
-  const { name, place, about } = parsed.data;
+  const { name, place, about, face } = parsed.data;
   const base =
     name
       .toLowerCase()
@@ -105,5 +112,6 @@ export function addPersona(store: KobbleStore, body: unknown): KobblePersona {
     about,
     origin: "developer",
     customers: [],
+    face: face ?? faceFor(id),
   });
 }

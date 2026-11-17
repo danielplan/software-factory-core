@@ -4,5 +4,9 @@
   "place": "Commuter shopper · on her phone",
   "about": "Shops on her phone on the way home and pays at night, when the kids are asleep.",
   "origin": "developer",
-  "customers": ["c-2841"]
+  "customers": ["c-2841"],
+  "face": {
+    "hat": "phones",
+    "color": "pink"
+  }
 }

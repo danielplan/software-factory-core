@@ -11,27 +11,45 @@
    A company's theme (factory/theme.css, loaded after this) changes these
    variables to look like its own app; the factory keeps its layout. */
 :root {
-  --font-body: "Onest Variable", Onest, system-ui, sans-serif;
+  --font-body: "Inter Variable", Inter, system-ui, sans-serif;
+  /* Kobble's name beside the kobold. */
+  --font-name: "Bricolage Grotesque Variable", "Inter Variable", sans-serif;
   /* The ground the sidebar sits on, and the panel the page sits in. */
-  --ground: #f3f4f8;
-  --background: #f3f4f8;
+  --ground: #f5f6f8;
+  --background: #f5f6f8;
   --panel: #ffffff;
   --page: #fafbfd;
   /* Text, from the strongest to the faintest. */
-  --foreground: #171a26;
-  --foreground-2: #3d4152;
-  --muted-foreground: #565b6f;
+  --foreground: #141824;
+  --foreground-2: #3b4252;
+  --muted-foreground: #667085;
   --label: #7a8096;
-  --faint: #9aa0b4;
+  --faint: #98a0b0;
   --card: #ffffff;
-  --card-foreground: #171a26;
+  --card-foreground: #141824;
   --popover: #ffffff;
   --popover-foreground: #171a26;
   /* Buttons are dark; the blue is for the product and things in the app. */
-  --primary: #171a26;
+  --primary: #141824;
   --primary-foreground: #ffffff;
-  --blue: #2b5cff;
+  --blue: #3156d8;
   --blue-foreground: #ffffff;
+  /* The pale blue wash of what is picked: the current page in the
+     sidebar (with its text), a picked row. */
+  --wash: #ecf0ff;
+  --wash-foreground: #2948bc;
+  --picked: #f5f7ff;
+  /* Where a signal came from, and what kind it is. */
+  --source-app: #1f9a6e;
+  --source-usage: #0f7f8c;
+  --source-errors: #e5484d;
+  --source-test: #3156d8;
+  --type-bug: #e5484d;
+  --type-request: #3156d8;
+  --type-feedback: #e9a23b;
+  /* "Found in usage". */
+  --usage: #e6f4f5;
+  --usage-foreground: #0f7f8c;
   /* The faint blue: the kobold's corner, the Ask field. */
   --tint: #f3f5fc;
   --tint-line: #e1e6f7;
@@ -43,11 +61,11 @@
   --accent-foreground: #171a26;
   --destructive: #d9534f;
   /* Lines: around the panel, buttons and fields; around cards; between. */
-  --border: #e3e5ee;
-  --line-soft: #e8eaf1;
-  --border-soft: #eef0f5;
-  --input: #e3e5ee;
-  --ring: #2b5cff;
+  --border: #e7e9ef;
+  --line-soft: #e7e9ef;
+  --border-soft: #f0f2f5;
+  --input: #e7e9ef;
+  --ring: #3156d8;
   --link: #171a26;
   --hover: #e9ebf3;
   --success: #12a594;
@@ -60,7 +78,7 @@
   /* Each page's own colour, on its icon in the sidebar. */
   --understand: #e64f86;
   --explore: #e9a23b;
-  --build: #2b5cff;
+  --build: #3156d8;
   /* Where a story or problem stands, each a background and its text. */
   --open: #fde7ef;
   --open-foreground: #a1214f;
@@ -87,6 +105,8 @@
   --shadow-lift: 0 0 0 1px #d6d9e4, 0 6px 16px -12px rgb(23 26 38 / 0.35);
   --shadow-current: 0 1px 2px rgb(23 26 38 / 0.08);
   --shadow-panel: 0 0 0 1px var(--border);
+  /* A card: white, radius 20px, a hairline ring and a breath of shadow. */
+  --shadow-card: 0 0 0 1px var(--line-soft), 0 1px 2px rgb(20 24 36 / 0.03);
   --shadow-big: 0 30px 60px -30px rgb(23 26 38 / 0.45);
   --radius: 0.625rem;
   /* The factory's own gradient, from the coach's orb: the start prompt's
@@ -115,6 +135,18 @@
     --primary-foreground: #14171f;
     --blue: #7393ff;
     --blue-foreground: #0e1016;
+    --wash: #1f2742;
+    --wash-foreground: #a9bbff;
+    --picked: #1d2333;
+    --source-app: #3cc08f;
+    --source-usage: #3bb4c1;
+    --source-errors: #f07275;
+    --source-test: #7393ff;
+    --type-bug: #f07275;
+    --type-request: #7393ff;
+    --type-feedback: #efb75e;
+    --usage: rgb(59 180 193 / 0.16);
+    --usage-foreground: #7fd3dc;
     --tint: #1b2030;
     --tint-line: #2b3452;
     --tint-foreground: #a8aec2;
@@ -181,6 +213,19 @@
   --color-page: var(--page);
   --color-blue: var(--blue);
   --color-blue-foreground: var(--blue-foreground);
+  --color-wash: var(--wash);
+  --color-wash-foreground: var(--wash-foreground);
+  --color-picked: var(--picked);
+  --color-source-app: var(--source-app);
+  --color-source-usage: var(--source-usage);
+  --color-source-errors: var(--source-errors);
+  --color-source-test: var(--source-test);
+  --color-type-bug: var(--type-bug);
+  --color-type-request: var(--type-request);
+  --color-type-feedback: var(--type-feedback);
+  --color-usage: var(--usage);
+  --color-usage-foreground: var(--usage-foreground);
+  --font-display: var(--font-name);
   --color-tint: var(--tint);
   --color-tint-line: var(--tint-line);
   --color-tint-foreground: var(--tint-foreground);
@@ -232,6 +277,7 @@
   --shadow-lift: var(--shadow-lift);
   --shadow-current: var(--shadow-current);
   --shadow-panel: var(--shadow-panel);
+  --shadow-card: var(--shadow-card);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);

@@ -1,18 +1,19 @@
-// Personas: the made-up people who stand for the app's customers, each with
-// where they are, whether someone on the team added them or they were found
-// in how the app is used, and how many signals came from them. New persona
-// adds one. A persona's page (#personas/<id>) shows who they are and every
-// signal from them, whatever became of it.
+// Personas: the made-up people who stand for the app's customers, each
+// with their kobold, where they are, whether someone on the team added them
+// or they were found in how the app is used, and how many signals came from
+// them. New persona adds one. A persona's page (#personas/<id>) shows who
+// they are and every signal from them, whatever became of it.
 
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 
-import type { KobblePersonaPage, PersonaRow } from "@/api";
-import { PageHead } from "@/components/page-head";
+import type { KobblePersonaPage, PersonaRow, SignalRow } from "@/api";
+import { PersonaFace } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { personaHash } from "@/lib/routes";
-import { PersonaFace, SourceIcon, TypeChip } from "@/signals/bits";
+import { cn } from "@/lib/utils";
+import { CARD, Chevron, Head, ROW, SourceIcon, TypeChip } from "@/signals/bits";
 import {
   agoOf,
   countWords,
@@ -20,7 +21,6 @@ import {
   SOURCE_WORDS,
   statusWords,
 } from "@/signals/view";
-import { cn } from "@/lib/utils";
 import { type Read, useRead } from "@/understand/use-records";
 
 import { NewPersona } from "./new-persona";
@@ -35,17 +35,18 @@ function PersonaList() {
   }>;
   const [adding, setAdding] = useState(false);
   return (
-    <div className="grid content-start gap-4">
-      <PageHead
+    <>
+      <Head
         title="Personas"
-        about="The people who use the app, anonymised. Each one stands for some of its customers."
-        actions={
+        right={
           <Button
+            variant="ring"
+            size="pill"
             onClick={() => {
               setAdding(true);
             }}
           >
-            <Plus aria-hidden />
+            <Plus aria-hidden strokeWidth={2.2} />
             New persona
           </Button>
         }
@@ -54,12 +55,9 @@ function PersonaList() {
         <ProblemBox title="The personas cannot be read" text={problem} />
       )}
       {data && (
-        <nav
-          aria-label="Personas"
-          className="grid overflow-hidden rounded-2xl bg-card shadow-soft"
-        >
+        <nav aria-label="Personas" className={CARD}>
           {data.personas.length === 0 && (
-            <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+            <p className="p-[50px] text-center text-sm text-muted-foreground">
               No personas yet. Add the first: New persona.
             </p>
           )}
@@ -74,28 +72,25 @@ function PersonaList() {
           setAdding(false);
         }}
       />
-    </div>
+    </>
   );
 }
 
 function PersonaLine({ persona }: Readonly<{ persona: PersonaRow }>) {
   return (
-    <a
-      href={personaHash(persona.id)}
-      className="flex items-center gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface"
-    >
-      <PersonaFace id={persona.id} name={persona.name} />
+    <a href={personaHash(persona.id)} className={cn(ROW, "hover:bg-surface")}>
+      <PersonaFace face={persona.face} size={40} />
       <span className="grid min-w-0 flex-1">
-        <span className="truncate text-sm font-semibold">{persona.name}</span>
-        <span className="truncate text-xs text-muted-foreground">
+        <span className="truncate font-semibold">{persona.name}</span>
+        <span className="truncate text-[12.5px] text-muted-foreground">
           {persona.place}
         </span>
       </span>
       <OriginChip origin={persona.origin} />
-      <span className="w-20 text-right text-xs text-muted-foreground max-sm:hidden">
+      <span className="w-20 text-right text-[12.5px] text-muted-foreground max-sm:hidden">
         {countWords(persona.signals, "signal", "signals")}
       </span>
-      <ChevronRight aria-hidden className="size-4 flex-none text-faint" />
+      <Chevron />
     </a>
   );
 }
@@ -104,10 +99,10 @@ function OriginChip({ origin }: Readonly<{ origin: PersonaRow["origin"] }>) {
   return (
     <span
       className={cn(
-        "inline-flex h-[26px] flex-none items-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex h-[26px] flex-none items-center rounded-full px-2.5 text-xs font-medium whitespace-nowrap max-sm:hidden",
         origin === "usage"
-          ? "bg-solved text-solved-foreground"
-          : "text-foreground-2 shadow-soft",
+          ? "bg-usage text-usage-foreground"
+          : "text-foreground-2 shadow-[inset_0_0_0_1px_var(--line-soft)]",
       )}
     >
       {originWords(origin)}
@@ -119,67 +114,78 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
   const { data, problem } = useRead(
     `/api/kobble/persona?id=${encodeURIComponent(id)}`,
   ) as Read<KobblePersonaPage>;
-  const now = new Date();
   return (
-    <div className="grid content-start gap-4">
-      <PageHead
-        crumbs={[
-          { name: "Personas", href: personaHash() },
-          { name: data?.persona.name ?? id },
-        ]}
-        title={data?.persona.name ?? ""}
-      />
+    <div>
+      <a
+        href={personaHash()}
+        className="mb-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
+      >
+        <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
+        Personas
+      </a>
       {problem && (
         <ProblemBox title="This persona cannot be read" text={problem} />
       )}
-      {data && (
-        <>
-          <section
-            aria-label="Who they are"
-            className="flex items-start gap-4 rounded-2xl bg-card px-6 py-5 shadow-soft"
-          >
-            <PersonaFace id={data.persona.id} name={data.persona.name} big />
-            <span className="grid gap-1">
-              <span className="text-sm text-muted-foreground">
-                {[data.persona.place, originWords(data.persona.origin)]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </span>
-              {data.persona.about && (
-                <p className="max-w-[640px] text-sm leading-relaxed">
-                  {data.persona.about}
-                </p>
-              )}
-            </span>
-          </section>
-          <h2 className="px-1 text-sm font-medium text-muted-foreground">
-            Signals · {String(data.signals.length)}
-          </h2>
-          <div className="grid overflow-hidden rounded-2xl bg-card shadow-soft">
-            {data.signals.length === 0 && (
-              <p className="px-5 py-8 text-center text-sm text-muted-foreground">
-                No signals from {data.persona.name} yet.
-              </p>
-            )}
-            {data.signals.map((signal) => (
-              <div
-                key={signal.id}
-                className="flex items-start gap-3 border-t border-border-soft px-5 py-3.5 first:border-t-0"
-              >
-                <SourceIcon source={signal.source} />
-                <span className="grid min-w-0 flex-1 gap-0.5">
-                  <span className="text-sm">{signal.text}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {SOURCE_WORDS[signal.source]} · {agoOf(signal.at, now)} ·{" "}
-                    {statusWords(signal)}
-                  </span>
-                </span>
-                <TypeChip type={signal.type} />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {data && <PersonaBody page={data} />}
+    </div>
+  );
+}
+
+function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
+  const { persona, signals } = page;
+  return (
+    <>
+      <div className="mb-[22px] flex items-center gap-4">
+        <PersonaFace face={persona.face} size={64} />
+        <div className="grid flex-1 gap-0.5">
+          <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-0.025em]">
+            {persona.name}
+          </h1>
+          <span className="text-[12.5px] text-muted-foreground">
+            {[persona.place, originWords(persona.origin).toLowerCase()]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
+          {persona.about && (
+            <p className="mt-1.5 max-w-[640px] text-foreground-2">
+              {persona.about}
+            </p>
+          )}
+        </div>
+        <Button variant="ring" size="pill" disabled title="Coming later">
+          <Pencil aria-hidden strokeWidth={2} className="size-[15px]" />
+          Edit
+        </Button>
+      </div>
+      <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.01em]">
+        Signals <span className="text-faint">{signals.length}</span>
+      </h2>
+      <div className={CARD}>
+        {signals.length === 0 && (
+          <p className="p-[50px] text-center text-sm text-muted-foreground">
+            No signals from {persona.name} yet.
+          </p>
+        )}
+        {signals.map((signal) => (
+          <SignalLine key={signal.id} signal={signal} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function SignalLine({ signal }: Readonly<{ signal: SignalRow }>) {
+  return (
+    <div className={ROW}>
+      <SourceIcon source={signal.source} size={32} />
+      <span className="grid min-w-0 flex-1">
+        <span>{signal.text}</span>
+        <span className="text-[12.5px] text-muted-foreground">
+          {SOURCE_WORDS[signal.source]} · {agoOf(signal.at, new Date())} ·{" "}
+          {statusWords(signal)}
+        </span>
+      </span>
+      <TypeChip type={signal.type} />
     </div>
   );
 }

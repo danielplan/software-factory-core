@@ -321,7 +321,9 @@ issue comes with the Factory board), **Explore** (added to the exploration
 found, or a new one that waits) or **Dismiss** (`POST
 /api/kobble/signals/fix`, `/explore`, `/dismiss`). The Personas page lists
 the personas with their signals (`GET /api/kobble/personas`,
-`/api/kobble/persona?id=…`) and adds one (`POST /api/kobble/personas`).
+`/api/kobble/persona?id=…`) and adds one (`POST /api/kobble/personas`). A persona's
+file may give its kobold's face (`face`: a hat and a colour); otherwise it
+comes from the persona's id (`packages/core/src/kobble/face.ts`).
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 

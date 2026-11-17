@@ -1,9 +1,18 @@
-// "New persona", in a small dialog: a name, where they are, and a few words
-// about who they are. Someone on the team adds them ("Added by you").
+// "New persona", in a small dialog: their kobold (picked from the name;
+// Shuffle picks another), a name, where they are, and a few words about who
+// they are. Someone on the team adds them ("Added by you").
 
 import { useState } from "react";
 
-import { messageOf, post } from "@/api";
+import {
+  type Face,
+  faceFor,
+  messageOf,
+  PERSONA_COLORS,
+  PERSONA_HATS,
+  post,
+} from "@/api";
+import { PersonaFace } from "@/components/kobold-face";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,19 +27,42 @@ import { personaHash } from "@/lib/routes";
 type Values = { name: string; place: string; about: string };
 const EMPTY: Values = { name: "", place: "", about: "" };
 
+// The next face for Shuffle: a stride through every hat and colour that
+// visits them all before it comes back, so it feels picked by chance.
+const ALL = PERSONA_HATS.length * PERSONA_COLORS.length;
+const STRIDE = 5;
+
+function shuffled(face: Face): Face {
+  const at =
+    PERSONA_HATS.indexOf(face.hat) +
+    PERSONA_HATS.length * PERSONA_COLORS.indexOf(face.color);
+  const next = (at + STRIDE) % ALL;
+  return {
+    hat: PERSONA_HATS[next % PERSONA_HATS.length] ?? face.hat,
+    color: PERSONA_COLORS[Math.floor(next / PERSONA_HATS.length)] ?? face.color,
+  };
+}
+
 export function NewPersona({
   open,
   onClose,
 }: Readonly<{ open: boolean; onClose: () => void }>) {
   const [values, setValues] = useState<Values>(EMPTY);
+  // Picked by Shuffle; until then the face follows the name.
+  const [picked, pick] = useState<Face | null>(null);
+  const face = picked ?? faceFor(values.name.trim().toLowerCase() || "new");
   const [problem, setProblem] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
   const add = () => {
     setBusy(true);
-    post<{ persona: { id: string } }>("/api/kobble/personas", values).then(
+    post<{ persona: { id: string } }>("/api/kobble/personas", {
+      ...values,
+      face,
+    }).then(
       ({ persona }) => {
         setBusy(false);
         setValues(EMPTY);
+        pick(null);
         onClose();
         window.location.hash = personaHash(persona.id);
       },
@@ -59,6 +91,19 @@ export function NewPersona({
             add();
           }}
         >
+          <div className="flex items-center gap-4">
+            <PersonaFace face={face} size={64} />
+            <Button
+              type="button"
+              variant="ring"
+              size="pill-sm"
+              onClick={() => {
+                pick(shuffled(face));
+              }}
+            >
+              Shuffle
+            </Button>
+          </div>
           <Fields
             values={values}
             problem={problem}
@@ -68,6 +113,7 @@ export function NewPersona({
           />
           <Button
             type="submit"
+            size="pill"
             className="w-fit"
             disabled={busy || !values.name.trim()}
           >

@@ -159,6 +159,15 @@ export {
 
 export { alreadyFor, titleOf } from "./kobble/already.ts";
 export {
+  type Face,
+  faceFor,
+  type PersonaColor,
+  type PersonaHat,
+  faceOf,
+  PERSONA_COLORS,
+  PERSONA_HATS,
+} from "./kobble/face.ts";
+export {
   liveExportSchema,
   type LiveEvent,
   type LiveExport,

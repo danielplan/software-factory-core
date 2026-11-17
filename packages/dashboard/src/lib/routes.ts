@@ -17,6 +17,13 @@ export const PAGES = [
 ] as const;
 export type Page = (typeof PAGES)[number];
 
+// Kobble's own pages, which sit right on the ground with their buttons in
+// their header (the older ones keep their panel).
+export const ON_THE_GROUND: ReadonlySet<Page> = new Set([
+  "signals",
+  "personas",
+]);
+
 // The page, and what is open in it: an idea on Explore, the add-ons on
 // Workshop. Connecting a board (#connect) and prototype mode
 // (#prototype/<idea>) are pages of their own, outside the sidebar.

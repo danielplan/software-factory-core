@@ -3,6 +3,7 @@
 
 import type { ReactNode } from "react";
 
+import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
 import { type Tone } from "./view";
@@ -33,14 +34,7 @@ export function Pill({
 
 // The kobold itself, Kobble's mascot, where it speaks or works.
 export function KoboldMark({ className }: Readonly<{ className?: string }>) {
-  return (
-    <img
-      src="/kobold.png"
-      alt=""
-      aria-hidden
-      className={cn("size-7 flex-none object-contain", className)}
-    />
-  );
+  return <KoboldHead className={cn("size-7", className)} />;
 }
 
 export function Initial({

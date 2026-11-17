@@ -1,44 +1,73 @@
-// Small pieces the Signals and Personas pages share: a signal's source as a
-// round icon, its type as a chip, and a persona's face.
+// Small pieces Kobble's pages share: the page's header with its buttons on
+// the right, a white card, a signal's source as a round icon, its type as a
+// tinted pill, a persona's face (or an empty tile), a chevron, and the
+// toast that says what a button did.
 
-import { Activity, Bug, FlaskConical, MessageSquarePlus } from "lucide-react";
+import {
+  Activity,
+  Bug,
+  ChevronRight,
+  FlaskConical,
+  SquarePlus,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
-import type { SignalRow } from "@/api";
+import type { Face, SignalRow } from "@/api";
+import { KoboldHead, NoFace, PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
-import { Initial } from "@/understand/bits";
-import { tintOf } from "@/understand/view";
 
-import { SOURCE_WORDS, tintIndexOf, TYPE_WORDS } from "./view";
+import { SOURCE_WORDS, TYPE_WORDS } from "./view";
+
+// A white card: radius 20px, a hairline ring.
+export const CARD = "overflow-hidden rounded-[20px] bg-card shadow-card";
+// A row in a card, with a line above all but the first.
+export const ROW =
+  "flex w-full items-center gap-3.5 border-t border-border-soft px-5 py-3.5 text-left first:border-t-0";
+
+export function Head({
+  title,
+  right,
+}: Readonly<{ title: string; right?: ReactNode }>) {
+  return (
+    <header className="mb-1.5 flex flex-wrap items-end justify-between gap-4">
+      <h1 className="text-[32px] leading-[1.15] font-bold tracking-[-0.025em]">
+        {title}
+      </h1>
+      {right && (
+        <div className="flex flex-wrap items-center gap-2.5">{right}</div>
+      )}
+    </header>
+  );
+}
 
 const SOURCES: Record<SignalRow["source"], { icon: typeof Bug; tone: string }> =
   {
-    app: { icon: MessageSquarePlus, tone: "bg-success/10 text-success" },
-    usage: { icon: Activity, tone: "bg-blue/10 text-blue" },
-    errors: { icon: Bug, tone: "bg-destructive/10 text-destructive" },
-    test: { icon: FlaskConical, tone: "bg-explore/15 text-solving-foreground" },
+    app: { icon: SquarePlus, tone: "bg-source-app/10 text-source-app" },
+    usage: { icon: Activity, tone: "bg-source-usage/10 text-source-usage" },
+    errors: { icon: Bug, tone: "bg-source-errors/10 text-source-errors" },
+    test: { icon: FlaskConical, tone: "bg-source-test/10 text-source-test" },
   };
 
 export function SourceIcon({
   source,
-}: Readonly<{ source: SignalRow["source"] }>) {
+  size = 34,
+}: Readonly<{ source: SignalRow["source"]; size?: number }>) {
   const { icon: Icon, tone } = SOURCES[source];
   return (
     <span
       title={SOURCE_WORDS[source]}
-      className={cn(
-        "grid size-[34px] flex-none place-items-center rounded-full",
-        tone,
-      )}
+      style={{ width: size, height: size }}
+      className={cn("grid flex-none place-items-center rounded-full", tone)}
     >
-      <Icon aria-hidden className="size-4" />
+      <Icon aria-hidden strokeWidth={2} style={{ width: size / 2 }} />
     </span>
   );
 }
 
 const TYPES: Record<SignalRow["type"], string> = {
-  bug: "bg-destructive/10 text-destructive",
-  request: "bg-blue/10 text-blue",
-  feedback: "bg-solving text-solving-foreground",
+  bug: "bg-type-bug/10 text-type-bug",
+  request: "bg-type-request/10 text-type-request",
+  feedback: "bg-type-feedback/10 text-type-feedback",
 };
 
 export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {
@@ -54,21 +83,43 @@ export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {
   );
 }
 
-// A persona's face, or an empty one for someone unknown.
-export function PersonaFace({
-  id,
-  name,
-  big = false,
-}: Readonly<{ id: string | null; name: string | null; big?: boolean }>) {
-  if (!id || !name)
-    return (
-      <span
-        aria-hidden
-        className={cn(
-          "flex-none rounded-full bg-surface-2",
-          big ? "size-16" : "size-9",
-        )}
-      />
-    );
-  return <Initial name={name} tint={tintOf(tintIndexOf(id))} big={big} />;
+// A persona's face, or an empty tile for someone no persona stands for.
+export function FaceOf({
+  face,
+  size,
+}: Readonly<{ face: Face | null; size: number }>) {
+  return face ? (
+    <PersonaFace face={face} size={size} />
+  ) : (
+    <NoFace size={size} />
+  );
+}
+
+export function Chevron() {
+  return (
+    <ChevronRight aria-hidden className="ml-1.5 size-4 flex-none text-faint" />
+  );
+}
+
+// What the last button did, at the bottom of the window, until OK.
+export function Toast({
+  text,
+  onOk,
+}: Readonly<{ text: string; onOk: () => void }>) {
+  return (
+    <div
+      role="status"
+      className="fixed bottom-[26px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2.5 rounded-[14px] bg-primary px-4 py-[11px] text-[13px] text-primary-foreground shadow-big"
+    >
+      <KoboldHead size={20} />
+      {text}
+      <button
+        type="button"
+        onClick={onOk}
+        className="font-semibold text-[#9fb4ff] dark:text-blue"
+      >
+        OK
+      </button>
+    </div>
+  );
 }

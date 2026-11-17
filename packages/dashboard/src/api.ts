@@ -21,7 +21,14 @@ export type {
   State,
   WorkView,
 } from "../../server/src/api.ts";
-export type { Customer, GroupView, Source } from "../../core/src/index.ts";
+export type {
+  Customer,
+  Face,
+  GroupView,
+  PersonaColor,
+  PersonaHat,
+  Source,
+} from "../../core/src/index.ts";
 export type {
   PersonaCard,
   PersonaPage,
@@ -59,6 +66,13 @@ export type { SeenDraft } from "../../server/src/build/seen.ts";
 export type { Answered } from "../../server/src/build/answer.ts";
 export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
+
+// A persona's face from its id, and the hats and colours to pick from.
+export {
+  faceFor,
+  PERSONA_COLORS,
+  PERSONA_HATS,
+} from "../../core/src/kobble/face.ts";
 
 // The server answers buttons only from its own page, which says so.
 const PAGE_HEADER = "x-software-factory";

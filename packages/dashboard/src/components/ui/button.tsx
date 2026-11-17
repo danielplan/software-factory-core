@@ -14,6 +14,7 @@ const buttonVariants = cva(
         outline:
           "border border-border bg-card text-foreground hover:bg-surface",
         blue: "bg-blue text-blue-foreground hover:bg-blue/90",
+        ring: "bg-card text-foreground-2 shadow-card hover:bg-surface",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -25,6 +26,9 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-[30px] gap-1.5 px-[11px] text-xs has-[>svg]:px-2.5",
         lg: "h-10 px-6 has-[>svg]:px-4",
+        pill: "h-10 gap-2 rounded-full px-[18px] text-[13.5px] font-semibold",
+        "pill-sm":
+          "h-[34px] gap-2 rounded-full px-3.5 text-[13px] font-semibold",
         icon: "size-9",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",

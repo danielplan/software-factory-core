@@ -118,3 +118,10 @@ export function isAskShortcut(
 ): boolean {
   return (key.metaKey || key.ctrlKey) && key.key.toLowerCase() === "k";
 }
+
+// The short line under "Your kobold": what it is doing, or Idle.
+export function koboldLine(kobold: KoboldStatus): string {
+  if (!kobold.busy) return "Idle";
+  const doing = kobold.title.replace(/^Kobold is /, "");
+  return doing.charAt(0).toUpperCase() + doing.slice(1);
+}

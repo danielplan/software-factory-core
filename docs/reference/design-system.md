@@ -10,14 +10,14 @@ see [the theme](../add-ons.md#the-theme)) may change the same variables.
 
 ## The frame
 
-| Part      | What it is                                                                                                                                                          | Where                                              |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                          | `packages/dashboard/src/components/shell.tsx`      |
-| Sidebar   | 232px wide, padding 16px 12px: Kobble with the kobold, the product switcher, the pages in groups, the kobold's card at the bottom.                                  | `packages/dashboard/src/components/sidebar.tsx`    |
-| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                        | `packages/dashboard/src/components/shell.tsx`      |
-| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right. | `packages/dashboard/src/components/ask-kobold.tsx` |
-| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                           | `packages/dashboard/src/components/shell.tsx`      |
-| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                 | `packages/dashboard/src/components/page-head.tsx`  |
+| Part      | What it is                                                                                                                                                                                                                                        | Where                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                                                                        | `packages/dashboard/src/components/shell.tsx`      |
+| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", the product switcher (only with several products), Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`    |
+| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                                                                                                      | `packages/dashboard/src/components/shell.tsx`      |
+| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right.                                                                               | `packages/dashboard/src/components/ask-kobold.tsx` |
+| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                                                                                                         | `packages/dashboard/src/components/shell.tsx`      |
+| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                                                                                               | `packages/dashboard/src/components/page-head.tsx`  |
 
 A page draws its title with `PageHead` and gives its buttons as `actions`;
 they show in the top bar. A button that belongs to one part of the page stays
@@ -27,10 +27,34 @@ prototype mode keep their own layout, with the same variables and type.
 On a phone the sidebar becomes a bar along the top whose menu opens the same
 list, and the panel fills the width.
 
+## Kobble's pages
+
+Signals and Personas sit right on the ground, without the panel: at most
+1120px wide, padding 34px 40px 60px. Their header has the title (32px, 700,
+letter-spacing -0.025em) and the page's buttons on the right. Cards are
+white with radius 20px and `--shadow-card`; rows in a card have a line
+(`--border-soft`) between them. Buttons are pills (`size="pill"`): dark for
+the main one, white with a ring (`variant="ring"`) for the others. A picked
+row is `--picked`; the current page in the sidebar `--wash` with
+`--wash-foreground`. A signal's source is a round icon in its colour
+(`--source-app`, `--source-usage`, `--source-errors`, `--source-test`) and
+its type a tinted pill (`--type-bug`, `--type-request`, `--type-feedback`);
+"Found in usage" is `--usage`.
+
+## Faces
+
+The kobold and the personas are drawn as kobolds
+(`packages/dashboard/src/components/kobold-face.tsx`): long ears, a round
+head, two eyes, and a hat. Kobble's kobold is light blue with its blue
+floppy cap. A persona has a hat (phones, toque, cap or beret) and a colour
+(pink, amber, blue, teal, violet, green or slate), each a tile, a skin and a
+hat colour; its file may say which (`face`), otherwise they come from its id
+and never change. Someone no persona stands for is an empty grey tile.
+
 ## Type
 
-One font, Onest (bundled with the dashboard, so it works offline), at 400,
-500, 600 and 700.
+Inter (bundled with the dashboard, so it works offline) for everything, and
+Bricolage Grotesque for the name "kobble" beside the kobold (`font-display`).
 
 | Use                  | Size | Weight | Colour               |
 | -------------------- | ---- | ------ | -------------------- |
@@ -50,13 +74,13 @@ Text, from the strongest: `--foreground`, `--foreground-2`,
 
 | Variable                                     | Light                                       | For                                                                   |
 | -------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------- |
-| `--ground`, `--background`                   | #f3f4f8                                     | the window, the sidebar, columns on Build                             |
+| `--ground`, `--background`                   | #f5f6f8                                     | the window and Kobble's pages, columns on Build                       |
 | `--panel`, `--card`, `--popover`             | #ffffff                                     | the panel, cards, menus                                               |
 | `--page`                                     | #fafbfd                                     | the page body                                                         |
-| `--primary`, `--primary-foreground`          | #171a26, #ffffff                            | the main button of a place (dark)                                     |
-| `--blue`, `--blue-foreground`                | #2b5cff, #ffffff                            | the product's tile; sparingly, an action that changes the app         |
+| `--primary`, `--primary-foreground`          | #141824, #ffffff                            | the main button of a place (dark)                                     |
+| `--blue`, `--blue-foreground`                | #3156d8, #ffffff                            | the product's tile; sparingly, an action that changes the app         |
 | `--tint`, `--tint-line`, `--tint-foreground` | #f3f5fc, #e1e6f7, #5b6074                   | the Ask field, the kobold's corner                                    |
-| `--border`, `--line-soft`, `--border-soft`   | #e3e5ee, #e8eaf1, #eef0f5                   | rings of the panel, buttons and fields; of cards; lines between parts |
+| `--border`, `--line-soft`, `--border-soft`   | #e7e9ef, #e7e9ef, #f0f2f5                   | rings of the panel, buttons and fields; of cards; lines between parts |
 | `--hover`                                    | #e9ebf3                                     | a page in the sidebar under the mouse                                 |
 | `--understand`, `--explore`, `--build`       | #e64f86, #e9a23b, #2b5cff                   | each product page's icon                                              |
 | `--persona-1` … `--persona-5`                | #fde7ef, #fff3df, #e9eeff, #e3f6f2, #f1ecff | each persona's soft colour, in order                                  |

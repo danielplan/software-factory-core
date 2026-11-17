@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { SignalRow } from "../src/api.ts";
-import { countsOf } from "../src/lib/shell-view.ts";
+import { countsOf, koboldLine } from "../src/lib/shell-view.ts";
 import {
   agoOf,
   alreadyLine,
@@ -30,6 +30,7 @@ const row = (more: Partial<SignalRow> = {}): SignalRow => ({
   customer: null,
   persona: null,
   personaName: null,
+  personaFace: null,
   at: "2026-11-17T09:50:00.000Z",
   text: "It broke.",
   status: "new",
@@ -124,4 +125,15 @@ test("the sidebar counts the new signals as a badge", () => {
   assert.deepEqual(countsOf(null, null, 3), { signals: 3 });
   assert.deepEqual(countsOf(null, null, 0), {});
   assert.deepEqual(countsOf(null, null), {});
+});
+
+test("the kobold's card says what it does, or Idle", () => {
+  assert.equal(
+    koboldLine({ busy: false, title: "Kobold is resting", detail: "" }),
+    "Idle",
+  );
+  assert.equal(
+    koboldLine({ busy: true, title: "Kobold is building", detail: "#12" }),
+    "Building",
+  );
 });

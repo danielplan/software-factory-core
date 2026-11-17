@@ -4,5 +4,9 @@
   "place": "First-time buyer · guest checkout",
   "about": "Has never ordered here before and checks out as a guest. Careful with shops he does not know.",
   "origin": "usage",
-  "customers": ["c-7712"]
+  "customers": ["c-7712"],
+  "face": {
+    "hat": "cap",
+    "color": "blue"
+  }
 }

@@ -84,7 +84,7 @@ function PageBody({
     case "connect":
       return <ConnectPage trackers={trackersOf(state.addOns)} />;
     case "signals":
-      return <SignalsPage />;
+      return <SignalsPage open={open} />;
     case "personas":
       return <PersonasPage open={open} />;
     case "understand":

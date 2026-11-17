@@ -14,10 +14,14 @@ import { test } from "node:test";
 
 import {
   checkRecordsIn,
+  faceFor,
+  faceOf,
   type KobbleSignal,
   KobbleRefused,
   KobbleStore,
   liveExportSchema,
+  PERSONA_COLORS,
+  PERSONA_HATS,
   takeInEvents,
 } from "../src/index.ts";
 import { signalFromEvent } from "../src/kobble/live.ts";
@@ -284,5 +288,43 @@ test("the check reads Kobble's files and finds what is not there", () => {
   assert.equal(
     checkRecordsIn(mkdtempSync(join(tmpdir(), "none-"))).checked.length,
     0,
+  );
+});
+
+test("a persona's face is its own, or always the same one from its id", () => {
+  assert.deepEqual(faceFor("mia"), faceFor("mia"));
+  const faces = new Set(
+    ["mia", "bruno", "noah", "ines", "zoe", "office-manager"].map((id) =>
+      JSON.stringify(faceFor(id)),
+    ),
+  );
+  assert.ok(faces.size > 2);
+  for (const id of ["a", "b", "c", "d", "e"]) {
+    const face = faceFor(id);
+    assert.ok(PERSONA_HATS.includes(face.hat));
+    assert.ok(PERSONA_COLORS.includes(face.color));
+  }
+  const own = { hat: "toque" as const, color: "slate" as const };
+  assert.deepEqual(faceOf({ id: "mia", face: own }), own);
+  assert.deepEqual(faceOf({ id: "mia" }), faceFor("mia"));
+  const store = emptyFactory();
+  const persona = {
+    id: "mia",
+    name: "Mia",
+    place: "",
+    about: "",
+    origin: "developer" as const,
+    customers: [],
+  };
+  store.put("personas", { ...persona, face: own });
+  assert.deepEqual(store.get("personas", "mia")?.face, own);
+  assert.match(
+    refusal(() =>
+      store.put("personas", {
+        ...persona,
+        face: { hat: "flop" as "cap", color: "blue" },
+      }),
+    ),
+    /hat/,
   );
 });

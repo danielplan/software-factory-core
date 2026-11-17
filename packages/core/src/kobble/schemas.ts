@@ -5,6 +5,8 @@
 
 import { z } from "zod";
 
+import { PERSONA_COLORS, PERSONA_HATS } from "./face.ts";
+
 // An id that is also a file or folder name: letters, digits and dashes.
 const fileId = z
   .string()
@@ -83,6 +85,14 @@ export const kobblePersonaSchema = z.strictObject({
   origin: z.enum(PERSONA_ORIGINS),
   // The anonymous customer ids it stands for.
   customers: z.array(text),
+  // Its kobold's hat and colour; worked out from the id when not given
+  // (face.ts).
+  face: z
+    .strictObject({
+      hat: z.enum(PERSONA_HATS),
+      color: z.enum(PERSONA_COLORS),
+    })
+    .optional(),
 });
 
 // When the live app was last read, and where to go on from next time.

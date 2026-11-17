@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 
-import { KobbleStore } from "@software-factory/core";
+import { faceFor, KobbleStore } from "@software-factory/core";
 
 import type {
   PersonaPage,
@@ -295,8 +295,14 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
         ["noah", "usage", 1],
       ],
     );
+    // Each has a face: its own, or the one from its id.
+    assert.deepEqual(personas[1]?.face, { hat: "phones", color: "pink" });
     const mia = await factory.read<PersonaPage>("/api/kobble/persona?id=mia");
     assert.equal(mia.persona.name, "Mia");
+    assert.deepEqual(mia.signals[0]?.personaFace, {
+      hat: "phones",
+      color: "pink",
+    });
     assert.deepEqual(
       mia.signals.map((s) => [s.id, s.status]),
       [
@@ -319,11 +325,23 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
       about: "Sends gifts early.",
       origin: "developer",
       customers: [],
+      face: faceFor("gift-buyer"),
     });
     const twin = await factory.press("/api/kobble/personas", {
       name: "Gift buyer",
+      face: { hat: "beret", color: "violet" },
     });
     assert.equal((twin.body.persona as { id: string }).id, "gift-buyer-2");
+    assert.deepEqual((twin.body.persona as { face: unknown }).face, {
+      hat: "beret",
+      color: "violet",
+    });
+    // The kobold's own floppy cap is never a persona's.
+    const flop = await factory.press("/api/kobble/personas", {
+      name: "Copy",
+      face: { hat: "flop", color: "blue" },
+    });
+    assert.equal(flop.status, 409);
     const nameless = await factory.press("/api/kobble/personas", { name: " " });
     assert.equal(nameless.status, 409);
     assert.equal(nameless.body.error, "Say the persona's name.");
