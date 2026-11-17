@@ -66,6 +66,7 @@ export function exploreSignal(
           signals: [signal.id],
           problem: signal.text,
           created: now.toISOString(),
+          work: null,
         },
   );
   const explored = store.put("signals", {

@@ -34,8 +34,9 @@ export type TestOptions = {
   // The project, where the agents run (they read nothing in it).
   cwd: string;
   store: () => KobbleStore;
-  // The address of the app under test, started on this computer.
-  app: () => Promise<string>;
+  // The address of the app under test, started on this computer: the app
+  // as it is now (main), or a prototype's branch.
+  app: (on: string) => Promise<string>;
   // A browser the persona agent uses through MCP.
   browser: () => Promise<Browser>;
   onChange: () => void;
@@ -74,9 +75,13 @@ export class PersonaTests {
 
   // A new test, queued; it runs when the ones before it are done.
   start(body: unknown): PersonaTest {
-    const { persona, task } = z
-      .object({ persona: z.string().min(1), task: z.string().trim().min(1) })
-      .catch({ persona: "", task: "" })
+    const { persona, task, on } = z
+      .object({
+        persona: z.string().min(1),
+        task: z.string().trim().min(1),
+        on: z.string().default("main"),
+      })
+      .catch({ persona: "", task: "", on: "main" })
       .parse(body);
     if (!task) throw new Refused("Say what the persona should try.");
     const store = this.options.store();
@@ -86,7 +91,7 @@ export class PersonaTests {
       id: store.nextId("tests"),
       persona,
       task,
-      on: "main",
+      on,
       status: "queued",
       started: null,
       ended: null,
@@ -137,7 +142,7 @@ export class PersonaTests {
       const test = this.update(id, { status: "running", started: this.now() });
       const persona = this.options.store().get("personas", test.persona);
       if (!persona) throw new TestProblem("Its persona is gone.");
-      const app = await this.options.app();
+      const app = await this.options.app(test.on);
       browser = await this.options.browser();
       const steps = await this.use(test, persona, app, browser.url);
       this.update(id, { steps });

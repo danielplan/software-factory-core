@@ -8,7 +8,7 @@
 import { type ReactNode, useState } from "react";
 
 import type { FactoryState } from "@/dashboard/dashboard";
-import { useExploreList } from "@/explore/use-explore";
+import { useExplorations } from "@/explorations/explorations-page";
 import { ON_THE_GROUND, type Page } from "@/lib/routes";
 import { countsOf, koboldStatus, overallOf } from "@/lib/shell-view";
 import { useSignals } from "@/signals/use-signals";
@@ -21,9 +21,15 @@ import { Sidebar } from "./sidebar";
 export function Shell({
   state,
   current,
+  fill = false,
   children,
-}: Readonly<{ state: FactoryState; current: Page; children: ReactNode }>) {
-  const { data: explore } = useExploreList();
+}: Readonly<{
+  state: FactoryState;
+  current: Page;
+  fill?: boolean;
+  children: ReactNode;
+}>) {
+  const { data: explorations } = useExplorations();
   const { data: signals } = useSignals();
   const jobs = useKoboldJobs();
   // A factory works on one repository: the Ask field speaks of its first
@@ -35,23 +41,42 @@ export function Shell({
       <Sidebar
         current={current}
         counts={countsOf(
-          explore?.ideas ?? null,
+          explorations?.exploring.length ?? 0,
           state.work,
           signals?.counts.new,
         )}
         kobold={koboldStatus(jobs, state.work, state.ideas, overall.words)}
         light={overall.lit}
       />
-      {ON_THE_GROUND.has(current) ? (
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-[60px] sm:px-10 sm:pt-[34px]">
-            {children}
-          </div>
-        </main>
-      ) : (
-        <Panel product={product}>{children}</Panel>
-      )}
+      <Body fill={fill} current={current} product={product}>
+        {children}
+      </Body>
     </div>
+  );
+}
+
+// The page: filling the space (an exploration), on the ground (Kobble's
+// pages), or in the older pages' panel.
+function Body({
+  fill,
+  current,
+  product,
+  children,
+}: Readonly<{
+  fill: boolean;
+  current: Page;
+  product: string | undefined;
+  children: ReactNode;
+}>) {
+  if (fill) return <main className="min-w-0 flex-1">{children}</main>;
+  if (!ON_THE_GROUND.has(current))
+    return <Panel product={product}>{children}</Panel>;
+  return (
+    <main className="min-w-0 flex-1">
+      <div className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-[60px] sm:px-10 sm:pt-[34px]">
+        {children}
+      </div>
+    </main>
   );
 }
 

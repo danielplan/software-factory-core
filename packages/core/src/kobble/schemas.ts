@@ -71,6 +71,39 @@ export const explorationSchema = z.strictObject({
   signals: z.array(fileId),
   problem: z.string(),
   created: time,
+  // The GitHub issue it was handed off as.
+  work: z.number().int().positive().nullable(),
+});
+
+// A prototype's branch: proto/X-<n>-<key>, the key in small letters.
+export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
+
+// The canvas of an exploration (board.json beside it): the question, the
+// ways to answer it (options A, B, C…), a prototype for some of them, and
+// notes. A prototype is a sketch until it is agreed; one at most is agreed.
+const optionKey = z
+  .string()
+  .regex(/^[A-Z]$/, "an option is one capital letter");
+
+export const boardSchema = z.strictObject({
+  question: z.string(),
+  options: z.array(
+    z.strictObject({ key: optionKey, name: text, difference: z.string() }),
+  ),
+  prototypes: z.array(
+    z.strictObject({
+      key: optionKey,
+      name: text,
+      difference: z.string(),
+      branch: z
+        .string()
+        .regex(PROTOTYPE_BRANCH, "a prototype's branch is proto/X-<n>-<key>"),
+      agreed: z.boolean(),
+      // Its persona tests, the last one last.
+      tests: z.array(fileId),
+    }),
+  ),
+  notes: z.array(text),
 });
 
 export const PERSONA_ORIGINS = ["developer", "usage"] as const;
@@ -113,8 +146,8 @@ export const personaTestSchema = z.strictObject({
   id: fileId.regex(/^T-\d{4,}$/, "a test's id is T- and four digits"),
   persona: fileId,
   task: text,
-  // What it ran on: the app as it is now (main); prototype branches later.
-  on: z.literal("main"),
+  // What it ran on: the app as it is now (main), or a prototype's branch.
+  on: z.union([z.literal("main"), z.string().regex(PROTOTYPE_BRANCH)]),
   status: z.enum(TEST_STATUSES),
   started: time.nullable(),
   ended: time.nullable(),
@@ -137,3 +170,4 @@ export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;
 export type PersonaTest = z.infer<typeof personaTestSchema>;
 export type TestStep = z.infer<typeof stepSchema>;
+export type Board = z.infer<typeof boardSchema>;

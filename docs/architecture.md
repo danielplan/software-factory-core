@@ -339,6 +339,27 @@ A test that cannot run says why in its `problem` (no product with a web
 address, the product does not start, no browser, Claude Code missing). The
 routes: `POST /api/kobble/tests` (`persona`, `task`), `GET
 /api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`.
+
+**Explorations** (`#explore`) are where the team works out what to build
+for a problem, with the kobold
+(`packages/server/src/kobble/explorations/`). Each has its canvas in
+`explorations/X-1/board.json`: the question, the options (A, B, C…), a
+prototype for some of them and notes; and the conversation with the kobold
+in `conversation.md`, with Claude Code's conversation id to go on with it.
+The conversation is the idea coach's talk (`coach/talk.ts`) with one tool,
+`board`, which changes the board while the kobold talks; its guide is
+`packages/skills/guides/exploration-coach.md`. **Make** builds an option's
+prototype on its branch `proto/X-<n>-<key>`, in a copy of the code next to
+the project, like a version in prototype mode; **Open** runs it with the
+project's `prototype.start` command, one at a time; **Test** starts a
+persona test on that branch, as the exploration's first persona; **Agree**
+marks one prototype agreed (one at most). **Hand off** writes `handoff.md`
+and makes a GitHub issue on the connected board with the problem, the
+agreed prototype's branch and what was learned (notes and tests); the
+exploration keeps the issue's number as `work`. The routes are under
+`/api/kobble/explorations` (`GET` the list, `GET /api/kobble/exploration?id=…`,
+`POST` new, `/start`, `/say`, `/make`, `/open`, `/test`, `/agree`,
+`/hand-off`, `/drop`).
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 

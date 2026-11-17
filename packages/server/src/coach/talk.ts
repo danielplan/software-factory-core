@@ -16,6 +16,7 @@ import { COACH_HEADER } from "./setup-tools.ts";
 // The coach's own tools, in plain words for the owner.
 const TOOL_LINES: Record<string, string> = {
   draw: "Drawing on the map",
+  board: "Changing the board",
   configure: "Setting up the factory",
 };
 const TOOL_PREFIX = "Using mcp__setup__";
@@ -48,8 +49,14 @@ export class Talk {
     claude: Claude;
     cwd: string;
     onChange: () => void;
-    // A conversation to go on with, kept from before.
-    kept?: { conversation: string; messages: CoachMessage[]; map: Draft };
+    // A conversation to go on with, kept from before; `started` when it is
+    // known whether Claude Code has it (otherwise: once the coach answered).
+    kept?: {
+      conversation: string;
+      messages: CoachMessage[];
+      map: Draft;
+      started?: boolean;
+    };
   }) {
     this.claude = options.claude;
     this.cwd = options.cwd;
@@ -57,7 +64,9 @@ export class Talk {
     this.conversation = options.kept?.conversation ?? randomUUID();
     // Going on with a conversation once the coach has answered in it.
     this.started =
-      options.kept?.messages.some((m) => m.from === "coach") ?? false;
+      options.kept?.started ??
+      options.kept?.messages.some((m) => m.from === "coach") ??
+      false;
     this.messages = options.kept?.messages ?? [];
     this.map = options.kept?.map ?? EMPTY;
   }

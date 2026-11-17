@@ -15,3 +15,20 @@ export function field(body: unknown, key: string): string {
     throw new Refused(`Say which ${key}.`);
   return value;
 }
+
+export function optionalText(body: unknown, key: string): string | undefined {
+  const value = (body as Record<string, unknown> | null)?.[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+export function record(body: unknown, key: string): Record<string, unknown> {
+  const value = (body as Record<string, unknown> | null)?.[key];
+  if (typeof value !== "object" || value === null)
+    throw new Refused(`Say the ${key}.`);
+  return value as Record<string, unknown>;
+}
+
+// A switch's new position from a button's body: on only when it says so.
+export function on(body: unknown): boolean {
+  return (body as { on?: unknown } | null)?.on === true;
+}

@@ -3,7 +3,6 @@ import { test } from "node:test";
 
 import type {
   CardView,
-  IdeaRow,
   IdeaView,
   KoboldJob,
   PartView,
@@ -21,14 +20,6 @@ import { lightOnly, type RuleLike } from "../src/lib/light-only.ts";
 // The frame around every page: the sidebar's counts, the kobold's card,
 // the factory's light, the Ask field; and the light or dark choice.
 
-const row = (state: IdeaRow["state"]): IdeaRow => ({
-  id: state,
-  title: state,
-  persona: null,
-  state,
-  stage: "versions",
-  versions: 0,
-});
 const card = (number: number, stage: CardView["stage"]): CardView => ({
   number,
   title: `Card ${String(number)}`,
@@ -66,19 +57,16 @@ const job = (more: Partial<KoboldJob>): KoboldJob => ({
 });
 const part = (light: PartView["light"]) => ({ light }) as PartView;
 
-test("the sidebar counts only what there is: ideas exploring, tickets not in the app", () => {
-  assert.deepEqual(countsOf(null, null), {});
+test("the sidebar counts only what there is: explorations, tickets not in the app", () => {
+  assert.deepEqual(countsOf(0, null), {});
   assert.deepEqual(
     countsOf(
-      [row("exploring"), row("exploring"), row("inBuild"), row("worked")],
+      2,
       work({ cards: [card(1, "todo"), card(2, "done"), card(3, null)] }),
     ),
     { explore: 2, build: 2 },
   );
-  assert.deepEqual(
-    countsOf([row("didntWork")], work({ cards: [card(2, "done")] })),
-    {},
-  );
+  assert.deepEqual(countsOf(0, work({ cards: [card(2, "done")] })), {});
 });
 
 test("the factory's light, in words", () => {

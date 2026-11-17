@@ -1,0 +1,17 @@
+{
+  "question": "How do businesses pay once a month?",
+  "options": [
+    {
+      "key": "A",
+      "name": "A monthly invoice",
+      "difference": "All orders of the month on one invoice, paid by transfer"
+    },
+    {
+      "key": "B",
+      "name": "Pay later at checkout",
+      "difference": "Choose “pay at the end of the month” when ordering"
+    }
+  ],
+  "prototypes": [],
+  "notes": []
+}

@@ -14,7 +14,9 @@ import {
 } from "@software-factory/core";
 
 import type { Route } from "../add-ons/add-on.ts";
+import type { Cli } from "../add-ons/github/github.ts";
 import { asked, field } from "../asked.ts";
+import { cardsFor } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";
 import {
   addPersona,
@@ -22,6 +24,8 @@ import {
   exploreSignal,
   fixSignal,
 } from "./actions.ts";
+import type { BoardTools } from "./explorations/board-tools.ts";
+import { branchParts, servedExplorations } from "./explorations/routes.ts";
 import { liveSettings } from "./live-source.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
@@ -37,7 +41,10 @@ type KobbleOptions = {
   project: string;
   tell: (event: string) => void;
   claude: Claude;
-  // What a persona test runs on: the app's address, and a browser.
+  // The GitHub CLI, for handing off to the connected board.
+  cli: Cli;
+  // What a persona test runs on: the app's address (as it is now), and a
+  // browser.
   testsRunOn: { app: () => Promise<string>; browser: () => Promise<Browser> };
 };
 
@@ -72,9 +79,7 @@ export function servedKobble(options: KobbleOptions) {
       changed(what);
       return answer;
     };
-  const tests = testRoutes(options, store, () => {
-    changed("tests");
-  });
+  const { explorations, tests } = explorationsAndTests(options, store, changed);
   const routes: Record<string, Route> = {
     "GET /api/kobble/signals": () =>
       kept(() => signalsView(store(), sync.view())),
@@ -83,35 +88,78 @@ export function servedKobble(options: KobbleOptions) {
       return { added: added.length, sync: sync.view() };
     },
     ...buttonRoutes(store, changing),
-    "GET /api/kobble/personas": () => kept(() => personasView(store())),
-    "GET /api/kobble/persona": (_body, url) =>
-      kept(() => personaPage(store(), asked(url, "id", "persona"))),
     ...tests.routes,
+    ...keptAll({
+      ...explorations.routes,
+      "POST /api/kobble/explorations/test": explorations.testRoute(tests.tests),
+    }),
   };
   return {
     routes,
+    // Where the server answers the kobold's board tools.
+    serveToolsAt: (base: string) => {
+      explorations.talks.serveToolsAt(`${base}/kobble/explorations/mcp`);
+    },
+    boardTools: (id: string): BoardTools => explorations.talks.tools(id),
     start: () => {
       if (maybe()) tests.recover();
       sync.start();
     },
     close: () => {
       sync.close();
+      explorations.close();
     },
   };
+}
+
+// The explorations, and persona tests, which may run on a prototype of one.
+function explorationsAndTests(
+  options: KobbleOptions,
+  store: () => KobbleStore,
+  changed: (what: string) => void,
+) {
+  const factory = join(options.project, FACTORY_FOLDER);
+  const explorations = servedExplorations({
+    project: options.project,
+    root: factory,
+    claude: options.claude,
+    store,
+    cards: () => {
+      const found = cardsFor(factory, options.cli);
+      if ("problem" in found) throw new Refused(found.problem);
+      return found.cards;
+    },
+    onChange: () => {
+      changed("explorations");
+    },
+  });
+  const tests = testRoutes(options, store, {
+    onChange: () => {
+      changed("tests");
+    },
+    prototype: (on) => {
+      const parts = branchParts(on);
+      if (!parts) throw new Refused(`“${on}” is not a prototype's branch.`);
+      return explorations.prototypes.address(parts.exploration, parts.key);
+    },
+  });
+  return { explorations, tests };
 }
 
 // Persona tests: start one, a persona's tests, one test.
 function testRoutes(
   options: KobbleOptions,
   store: () => KobbleStore,
-  onChange: () => void,
-): { routes: Record<string, Route>; recover: () => void } {
+  more: { onChange: () => void; prototype: (on: string) => Promise<string> },
+) {
   const tests = new PersonaTests({
     claude: options.claude,
     cwd: options.project,
     store,
-    ...options.testsRunOn,
-    onChange,
+    app: (on) =>
+      on === "main" ? options.testsRunOn.app() : more.prototype(on),
+    browser: options.testsRunOn.browser,
+    onChange: more.onChange,
   });
   const routes: Record<string, Route> = {
     "GET /api/kobble/tests": (_body, url) =>
@@ -125,18 +173,33 @@ function testRoutes(
   };
   return {
     routes,
+    tests,
     recover: () => {
       tests.recover();
     },
   };
 }
 
-// The buttons: Fix, Explore (or Add to), Dismiss, and New persona.
+// Routes whose records may not fit: refused with why.
+function keptAll(routes: Record<string, Route>): Record<string, Route> {
+  return Object.fromEntries(
+    Object.entries(routes).map(([name, route]) => [
+      name,
+      (body: unknown, url: URL) => kept(() => route(body, url)),
+    ]),
+  );
+}
+
+// The buttons: Fix, Explore (or Add to), Dismiss; the personas, and New
+// persona.
 function buttonRoutes(
   store: () => KobbleStore,
   changing: (what: string, act: Route) => Route,
 ): Record<string, Route> {
   return {
+    "GET /api/kobble/personas": () => kept(() => personasView(store())),
+    "GET /api/kobble/persona": (_body, url) =>
+      kept(() => personaPage(store(), asked(url, "id", "persona"))),
     "POST /api/kobble/signals/fix": changing("signals", (body) => ({
       signal: fixSignal(store(), field(body, "id")),
     })),

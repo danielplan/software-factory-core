@@ -1,23 +1,10 @@
-// What Explore and prototype mode read from the server, read again whenever
-// the records change; and what runs in prototype mode, as it changes.
+// What prototype mode reads from the server, read again whenever the
+// records change; and what runs in prototype mode, as it changes.
 
 import { useEffect, useState } from "react";
 
-import {
-  type ExploreList,
-  get,
-  type IdeaPage,
-  onPrototypes,
-  type PrototypePage,
-  type VersionRun,
-} from "@/api";
+import { get, onPrototypes, type PrototypePage, type VersionRun } from "@/api";
 import { type Read, useRead } from "@/understand/use-records";
-
-export const useExploreList = () =>
-  useRead("/api/explore") as Read<ExploreList>;
-
-export const useIdeaPage = (id: string) =>
-  useRead(`/api/explore/idea?id=${encodeURIComponent(id)}`) as Read<IdeaPage>;
 
 export const usePrototypePage = (idea: string) =>
   useRead(

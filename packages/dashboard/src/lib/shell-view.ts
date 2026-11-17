@@ -4,27 +4,17 @@
 // factory's light, and the Ask field's words. Kept apart from the
 // components so it is checked on its own.
 
-import type {
-  IdeaRow,
-  IdeaView,
-  KoboldJob,
-  Light,
-  PartView,
-  WorkView,
-} from "../api.ts";
+import type { IdeaView, KoboldJob, Light, PartView, WorkView } from "../api.ts";
 import type { Page } from "./routes.ts";
 
 // Only real numbers, and only when there is something to count: the new
-// signals, the ideas being explored, and the board's tickets not yet in the
-// app.
+// signals, the explorations being explored, and the board's tickets not
+// yet in the app.
 export function countsOf(
-  ideas: IdeaRow[] | null,
+  exploring: number,
   work: WorkView | null,
   fresh = 0,
 ): Partial<Record<Page, number>> {
-  const exploring = (ideas ?? []).filter(
-    (one) => one.state === "exploring",
-  ).length;
   const open = (work?.cards ?? []).filter(
     (card) => card.stage !== "done",
   ).length;

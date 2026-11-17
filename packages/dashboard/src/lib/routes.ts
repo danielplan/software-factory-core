@@ -21,6 +21,7 @@ export type Page = (typeof PAGES)[number];
 // their header (the older ones keep their panel).
 export const ON_THE_GROUND: ReadonlySet<Page> = new Set([
   "signals",
+  "explore",
   "personas",
 ]);
 

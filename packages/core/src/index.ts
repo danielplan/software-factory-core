@@ -174,6 +174,7 @@ export {
 } from "./kobble/live.ts";
 export {
   type Already,
+  type Board,
   type Exploration,
   type KobblePersona,
   type KobbleSignal,
@@ -182,6 +183,7 @@ export {
   type TestStep,
 } from "./kobble/schemas.ts";
 export {
+  type Conversation,
   KOBBLE_FOLDER,
   type KobbleKind,
   KobbleRefused,

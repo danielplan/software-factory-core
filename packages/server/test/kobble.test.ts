@@ -223,35 +223,35 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
 
     // Nothing found: a new exploration, waiting.
     const made = await factory.press("/api/kobble/signals/explore", {
-      id: "S-0005",
+      id: "S-0006",
     });
     assert.deepEqual(
       { ...(made.body.exploration as object), created: "" },
       {
-        id: "X-2",
-        title:
-          "Could we get one invoice at the end of the month for all our orders?",
+        id: "X-4",
+        title: "The assistant could not repeat last Monday's order",
         status: "waiting",
         personas: ["bruno"],
-        signals: ["S-0005"],
+        signals: ["S-0006"],
         problem:
-          "Could we get one invoice at the end of the month for all our orders?",
+          "The assistant could not repeat last Monday's order. It can only show it.",
         created: "",
+        work: null,
       },
     );
-    await factory.press("/api/kobble/signals/dismiss", { id: "S-0006" });
-    assert.equal(factory.store.get("signals", "S-0006")?.status, "dismissed");
+    await factory.press("/api/kobble/signals/dismiss", { id: "S-0005" });
+    assert.equal(factory.store.get("signals", "S-0005")?.status, "dismissed");
 
     // Handled signals leave the list, and are not handled twice.
     const view = await factory.read<SignalsView>("/api/kobble/signals");
     assert.equal(view.counts.new, 6);
     const again = await factory.press("/api/kobble/signals/dismiss", {
-      id: "S-0006",
+      id: "S-0005",
     });
     assert.equal(again.status, 409);
     assert.equal(
       again.body.error,
-      "Signal S-0006 is handled already (dismissed).",
+      "Signal S-0005 is handled already (dismissed).",
     );
     assert.equal(
       (await factory.press("/api/kobble/signals/fix", { id: "S-0404" })).body
@@ -277,7 +277,7 @@ test("an exploration that is no longer open gets no more signals", async () => {
     const made = await factory.press("/api/kobble/signals/explore", {
       id: "S-0011",
     });
-    assert.equal((made.body.exploration as { id: string }).id, "X-2");
+    assert.equal((made.body.exploration as { id: string }).id, "X-4");
   } finally {
     factory.close();
   }
@@ -318,7 +318,7 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
     );
     assert.deepEqual(
       mia.tests.map((t) => t.id),
-      ["T-0002", "T-0001"],
+      ["T-0003", "T-0002", "T-0001"],
     );
     const none = await fetch(`${factory.base}/api/kobble/persona?id=zoe`);
     assert.equal(none.status, 409);

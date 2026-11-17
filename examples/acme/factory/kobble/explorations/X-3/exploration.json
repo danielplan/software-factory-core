@@ -1,0 +1,10 @@
+{
+  "id": "X-3",
+  "title": "Guests cannot tell if the order went through",
+  "status": "waiting",
+  "personas": ["noah"],
+  "signals": [],
+  "problem": "First-time buyers check out as guests and wait for the email to know the order worked.",
+  "created": "2026-11-16T10:00:00.000Z",
+  "work": null
+}

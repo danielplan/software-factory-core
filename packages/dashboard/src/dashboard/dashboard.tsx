@@ -5,7 +5,8 @@ import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
-import { ExplorePage } from "@/explore/explore-page";
+import { ExplorationPage } from "@/explorations/exploration-page";
+import { ExplorationsPage } from "@/explorations/explorations-page";
 import { BoardTab } from "@/ideas/board-tab";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { PersonasPage } from "@/personas/personas-page";
@@ -59,7 +60,12 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   // Prototype mode fills the window, with its own bar.
   if (page === "prototype") return <PrototypePage state={state} open={open} />;
   return (
-    <Shell state={state} current={page === "connect" ? "settings" : page}>
+    <Shell
+      state={state}
+      current={page === "connect" ? "settings" : page}
+      // An exploration fills the space beside the sidebar.
+      fill={page === "explore" && open !== null}
+    >
       {state.problems.length > 0 && (
         <ProblemBox
           title="Something in the factory's files does not fit"
@@ -90,7 +96,7 @@ function PageBody({
     case "understand":
       return <UnderstandPage open={open} />;
     case "explore":
-      return <ExplorePage state={state} open={open} />;
+      return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
     case "build":
       return <BoardTab state={state} />;
     case "workshop":

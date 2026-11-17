@@ -5,7 +5,7 @@
 // without a saved profile, over HTTP on a free port.
 
 import { spawn } from "node:child_process";
-import { createServer } from "node:net";
+import { type AddressInfo, createServer } from "node:net";
 
 import type { Launcher } from "@software-factory/launcher";
 
@@ -90,16 +90,13 @@ async function answering(url: string): Promise<void> {
   throw new Error("it did not answer within a minute");
 }
 
-function freePort(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const server = createServer();
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      const port = typeof address === "object" && address ? address.port : 0;
-      server.close(() => {
-        resolve(port);
-      });
-    });
+// A port nobody uses now: the system picks one, and it is given back.
+async function freePort(): Promise<number> {
+  const probe = createServer();
+  await new Promise<void>((done, fail) => {
+    probe.once("error", fail).listen({ port: 0, host: "127.0.0.1" }, done);
   });
+  const { port } = probe.address() as AddressInfo;
+  await new Promise((done) => probe.close(done));
+  return port;
 }

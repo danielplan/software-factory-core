@@ -1,0 +1,39 @@
+{
+  "question": "How does the basket wait until they pay?",
+  "options": [
+    {
+      "key": "A",
+      "name": "Keep it on the phone",
+      "difference": "The basket stays in this phone's browser for 30 days"
+    },
+    {
+      "key": "B",
+      "name": "Bring it back by email",
+      "difference": "One tap sends a link that opens the basket on any device"
+    },
+    {
+      "key": "C",
+      "name": "Remind them at night",
+      "difference": "A reminder at 8 pm with what is in the basket"
+    }
+  ],
+  "prototypes": [
+    {
+      "key": "A",
+      "name": "Keep it on the phone",
+      "difference": "The basket stays in this phone's browser for 30 days",
+      "branch": "proto/X-1-a",
+      "agreed": false,
+      "tests": []
+    },
+    {
+      "key": "B",
+      "name": "Bring it back by email",
+      "difference": "One tap sends a link that opens the basket on any device",
+      "branch": "proto/X-1-b",
+      "agreed": true,
+      "tests": ["T-0003"]
+    }
+  ],
+  "notes": ["Mia often pays on the laptop at home, not on the phone"]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "X-2",
+  "title": "One invoice a month for businesses",
+  "status": "exploring",
+  "personas": ["bruno"],
+  "signals": [],
+  "problem": "Bakeries and cafés order every week but pay their suppliers once a month. Today each order is paid on its own.",
+  "created": "2026-11-14T08:00:00.000Z",
+  "work": null
+}

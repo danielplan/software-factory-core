@@ -29,6 +29,8 @@ export function checkKobbleIn(factory: string): {
   const explorations = read(() => store.all("explorations")) ?? [];
   const tests = read(() => store.all("tests")) ?? [];
   read(() => [store.sync()]);
+  // Each exploration's board fits.
+  for (const one of explorations) read(() => [store.board(one.id)]);
   const known = (ids: { id: string }[] | null) => ({
     has: (id: string) => ids === null || ids.some((one) => one.id === id),
   });

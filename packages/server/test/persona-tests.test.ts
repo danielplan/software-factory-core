@@ -115,8 +115,8 @@ test("a persona test uses the app as the persona and files what surprised them",
       task: "Find the right size for trail shoes",
     });
     assert.equal(started.status, 200);
-    assert.equal(started.body.test.id, "T-0003");
-    const page = await factory.finished("T-0003");
+    assert.equal(started.body.test.id, "T-0004");
+    const page = await factory.finished("T-0004");
     assert.equal(page.test.status, "done");
     assert.equal(page.test.problem, null);
     assert.deepEqual(page.test.steps, DIARY.steps);
@@ -143,7 +143,7 @@ test("a persona test uses the app as the persona and files what surprised them",
     );
     assert.deepEqual(
       tests.map((t) => t.id),
-      ["T-0003"],
+      ["T-0004"],
     );
   } finally {
     factory.close();
@@ -213,7 +213,7 @@ test("a test left running when the factory stopped says it did not finish", () =
   const store = new KobbleStore(folder);
   const done = store.get("tests", "T-0001");
   assert.ok(done);
-  store.put("tests", { ...done, id: "T-0003", status: "running", ended: null });
+  store.put("tests", { ...done, id: "T-0009", status: "running", ended: null });
   const tests = new PersonaTests({
     claude: standIn([]).claude,
     cwd: folder,
@@ -224,7 +224,7 @@ test("a test left running when the factory stopped says it did not finish", () =
     now: () => new Date("2026-11-17T10:00:00.000Z"),
   });
   tests.recover();
-  const left = store.get("tests", "T-0003");
+  const left = store.get("tests", "T-0009");
   assert.ok(left);
   assert.equal(left.status, "failed");
   assert.equal(left.ended, "2026-11-17T10:00:00.000Z");

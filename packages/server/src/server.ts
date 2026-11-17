@@ -18,6 +18,8 @@ import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { readBody, send } from "./http.ts";
+import { on, optionalText, record } from "./asked.ts";
+import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
 import type { JobTools } from "./kobold/tools.ts";
 import { servedRecords } from "./records/routes.ts";
@@ -62,9 +64,10 @@ export function startServer(options: {
     tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
-  const records = recordsOf(session, options.cli ?? realCli(), tell, changed);
+  const cli = options.cli ?? realCli();
+  const records = recordsOf(session, cli, tell, changed);
   session.work.waitFor(records.waiting);
-  const kobble = kobbleOf(session, tell, options.testsRunOn);
+  const kobble = kobbleOf(session, tell, { ...options, cli });
   const routes = {
     ...routesFor(session),
     ...records.routes,
@@ -86,6 +89,7 @@ export function startServer(options: {
       routes,
       watchers,
       koboldTools: records.toolsOf,
+      boardTools: kobble.boardTools,
       ...options,
     });
   });
@@ -95,6 +99,7 @@ export function startServer(options: {
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
     records.serveToolsAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
+    kobble.serveToolsAt(`http://localhost:${String(port)}/api`);
     kobble.start();
   });
   server.on("close", records.close);
@@ -166,6 +171,7 @@ type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
   koboldTools: (token: string) => JobTools | null;
+  boardTools: (id: string) => BoardTools;
   page: string;
   session: Session;
 };
@@ -301,18 +307,6 @@ function text(body: unknown, key: string): string {
   return value;
 }
 
-function optionalText(body: unknown, key: string): string | undefined {
-  const value = (body as Record<string, unknown> | null)?.[key];
-  return typeof value === "string" ? value : undefined;
-}
-
-function record(body: unknown, key: string): Record<string, unknown> {
-  const value = (body as Record<string, unknown> | null)?.[key];
-  if (typeof value !== "object" || value === null)
-    throw new Refused(`Say the ${key}.`);
-  return value as Record<string, unknown>;
-}
-
 // Build's buttons: the builder and the coach in the cards switched
 // on or off, and the board read again.
 function workRoutes(session: Session) {
@@ -325,9 +319,4 @@ function workRoutes(session: Session) {
     },
     "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
   };
-}
-
-// A switch's new position from a button's body: on only when it says so.
-function on(body: unknown): boolean {
-  return (body as { on?: unknown } | null)?.on === true;
 }

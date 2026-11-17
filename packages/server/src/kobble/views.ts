@@ -47,7 +47,7 @@ export function signalsView(store: KobbleStore, sync: SyncView): SignalsView {
     store.all("signals").filter((signal) => signal.status === "new"),
   );
   return {
-    signals: withNames(fresh, store.all("personas")),
+    signals: signalRows(fresh, store.all("personas")),
     counts: { new: fresh.length },
     sync,
   };
@@ -73,7 +73,7 @@ export function personaPage(store: KobbleStore, id: string): PersonaPage {
     .filter((signal) => signal.persona === persona.id);
   return {
     persona: { ...persona, face: faceOf(persona) },
-    signals: withNames(newestFirst(theirs), [persona]),
+    signals: signalRows(newestFirst(theirs), [persona]),
     tests: testsOf(store, persona.id),
   };
 }
@@ -98,7 +98,7 @@ export function testPage(store: KobbleStore, id: string): TestPage {
   return {
     test,
     persona: { ...persona, face: faceOf(persona) },
-    signals: withNames(filed, [persona]),
+    signals: signalRows(filed, [persona]),
   };
 }
 
@@ -108,7 +108,8 @@ function newestFirst(signals: KobbleSignal[]): KobbleSignal[] {
   );
 }
 
-function withNames(
+// Signals with their persona's name and face.
+export function signalRows(
   signals: KobbleSignal[],
   personas: KobblePersona[],
 ): SignalRow[] {

@@ -52,10 +52,14 @@ export type {
 export type { PersonaTest } from "../../core/src/index.ts";
 export type { SyncView } from "../../server/src/kobble/sync.ts";
 export type {
-  ExploreList,
+  ExplorationPage,
+  ExplorationRow,
+  ExplorationsView,
+  TestResult,
+} from "../../server/src/kobble/explorations/views.ts";
+export type {
   IdeaPage,
   IdeaRow,
-  PersonaTag,
   VersionCard,
 } from "../../server/src/explore/views.ts";
 export type { PrototypePage } from "../../server/src/explore/prototype-page.ts";

@@ -82,6 +82,7 @@ test("each record is one pretty JSON file, read back the same", () => {
     signals: ["S-0002"],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
+    work: null,
   });
   const file = join(store.root, "signals", "S-0002.json");
   const text = readFileSync(file, "utf8");
@@ -182,6 +183,7 @@ test("records are removed, and the sync's place is kept", () => {
     signals: [],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
+    work: null,
   });
   store.remove("explorations", "X-3");
   assert.equal(existsSync(join(store.root, "explorations", "X-3")), false);
@@ -241,7 +243,7 @@ test("the example company's export comes in once, with what exists already", () 
     ]),
     [
       ["S-0004", "bug", "mia", "X-1"],
-      ["S-0005", "request", "bruno", null],
+      ["S-0005", "request", "bruno", "X-2"],
       ["S-0006", "request", "bruno", null],
       ["S-0007", "bug", null, "#41"],
       ["S-0008", "bug", null, null],

@@ -45,6 +45,9 @@ export type ModeOptions = {
   root: string;
   records: () => RecordStore;
   onChange: () => void;
+  // Where a version's copy is, when it is not a version in the records (an
+  // exploration's prototype).
+  copyOf?: (idea: string, version: string) => PrototypeCopy;
 };
 
 // The last lines a failed command printed, to say why.
@@ -87,6 +90,7 @@ export class PrototypeMode {
 
   // The version's copy, as its record says.
   copyOf(idea: string, version: string): PrototypeCopy {
+    if (this.options.copyOf) return this.options.copyOf(idea, version);
     const found = this.options
       .records()
       .get("versions", versionKey(idea, version));

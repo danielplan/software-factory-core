@@ -20,6 +20,7 @@ const exploration = (more: Partial<Exploration>): Exploration => ({
   problem:
     "People fill the basket in the morning and find it empty in the evening.",
   created: "2026-11-10T09:00:00.000Z",
+  work: null,
   ...more,
 });
 
