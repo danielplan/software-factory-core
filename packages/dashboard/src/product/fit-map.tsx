@@ -27,6 +27,8 @@ export function FitMap() {
   const ready = useNodesInitialized();
   const width = useStore((store) => store.width);
   const height = useStore((store) => store.height);
+  // Moving the view before the map can pan and zoom is lost.
+  const movable = useStore((store) => store.panZoom !== null);
   const fit = useCallback(() => {
     const nodes = flow.getNodes();
     if (nodes.length === 0 || width === 0) return;
@@ -42,8 +44,8 @@ export function FitMap() {
     void flow.setViewport(leftWhenWide(centred, bounds, width));
   }, [flow, width, height]);
   useEffect(() => {
-    if (ready) fit();
-  }, [ready, fit]);
+    if (ready && movable) fit();
+  }, [ready, movable, fit]);
   return (
     <Controls
       showInteractive={false}
