@@ -14,7 +14,7 @@
   "next": {
     "versions_one": "{{count}} Version zum Ausprobieren",
     "versions_other": "{{count}} Versionen zum Ausprobieren",
-    "picked": "Bereit für Build",
+    "picked": "Bereit für die Fabrik",
     "inApp": "In der App – hat es funktioniert?"
   },
   "why": {
@@ -32,11 +32,11 @@
   "votes_one": "{{count}} Stimme",
   "votes_other": "{{count}} Stimmen",
   "send": {
-    "went": "Version {{version}} ging als #{{issue}} an Build.",
-    "noBoard": "{{version}} hat die meisten Stimmen. Um sie an Build zu senden, verbinde zuerst ein GitHub-Board.",
+    "went": "Version {{version}} ging als #{{issue}} an die Fabrik.",
+    "noBoard": "{{version}} hat die meisten Stimmen. Um sie an die Fabrik zu senden, verbinde zuerst ein GitHub-Board.",
     "lead": "{{version}} hat die meisten Stimmen.",
-    "button": "{{version}} an Build senden",
-    "buttonNone": "An Build senden",
+    "button": "{{version}} an die Fabrik senden",
+    "buttonNone": "An die Fabrik senden",
     "noVotes": "Noch hat niemand abgestimmt – probiere die Versionen aus und stimme ab.",
     "tie": "{{versions}} liegen gleichauf – stimme ab, um zu entscheiden.",
     "connect": "In den Einstellungen verbinden"
@@ -97,6 +97,8 @@
     "label": "Deine Idee",
     "placeholder": "Ein Dauerauftrag: Die üblichen Lieferungen kommen jeden Montag, ohne Bestellung.",
     "forWhom": "Für wen ist sie?",
+    "noPersonas": "Noch keine Personas: Sie entstehen aus dem, was Leute gesagt haben, unter Signale.",
+    "toPersonas": "Personas öffnen",
     "failed": "Sie konnte nicht geschrieben werden",
     "draft": "Geschichte schreiben",
     "couldNot": "Der Kobold konnte sie nicht schreiben",
@@ -144,7 +146,7 @@
   "bar": {
     "title": "Prototyp-Modus",
     "switch": "Version",
-    "back": "Zurück zu Erkunden",
+    "back": "Zurück zu Erkundungen",
     "shared": "Geteilt",
     "share": "Teilen"
   },
@@ -156,6 +158,6 @@
   },
   "mode": {
     "whichIdea": "Welche Idee?",
-    "fromExplore": "Öffne den Prototyp-Modus über eine Idee in Erkunden."
+    "fromExplore": "Öffne den Prototyp-Modus über eine Idee in Erkundungen."
   }
 }

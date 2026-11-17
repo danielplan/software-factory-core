@@ -67,8 +67,10 @@ const active = (detail: string): KoboldStatus => ({
   detail,
 });
 
-// What a job on the records is doing, with what it says it does now.
+// What a job on the records is doing, with what it says it does now; or
+// that it waits for the jobs asked before it.
 function doing(job: KoboldJob): string {
+  if (job.waiting) return t("common:kobold.waiting");
   const what = t(`common:kobold.doing.${job.kind}`);
   return job.activity
     ? t("common:kobold.doingWith", { doing: what, activity: job.activity })
@@ -76,7 +78,8 @@ function doing(job: KoboldJob): string {
 }
 
 // Whether the kobold is active, and on what: the card it builds, a job on
-// the records, an idea it thinks about, a card it plans; not active
+// the records (one at work before one waiting its turn), an idea it thinks
+// about, a card it plans; not active
 // otherwise, with the factory's light in words.
 export function koboldStatus(
   jobs: KoboldJob[],
@@ -87,7 +90,9 @@ export function koboldStatus(
   const building = work?.builder.working;
   if (building)
     return active(t("common:kobold.building", { title: building.title }));
-  const job = jobs.find((one) => one.working);
+  const job =
+    jobs.find((one) => one.working && !one.waiting) ??
+    jobs.find((one) => one.working);
   if (job) return active(doing(job));
   const thinking = ideas.find((one) => one.working);
   if (thinking)

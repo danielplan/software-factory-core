@@ -19,6 +19,8 @@ import {
   steered,
 } from "@/lib/chat-view";
 
+import { refusalWords } from "./refusals";
+
 let kept: Said[] = [];
 let next = 1;
 
@@ -51,7 +53,8 @@ function useAsk(conversation: ReturnType<typeof useConversation>) {
   const { add, replace } = conversation;
   const { t, i18n } = useTranslation("chat");
   const { language } = i18n;
-  const sorry = (error: unknown) => t("failed", { why: messageOf(error) });
+  const sorry = (error: unknown) =>
+    t("failed", { why: refusalWords(messageOf(error)) });
   const replaceIfStill = (at: number, one: Saying) => {
     if (kept.some((each) => each.id === at && "thinking" in each))
       replace(at, one);

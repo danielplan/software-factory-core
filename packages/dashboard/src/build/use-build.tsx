@@ -1,7 +1,7 @@
 // What Build adds to the board from the records: the issues Kobble knows
 // (read again whenever the records change), the "did it work?" dialog for
 // the card being closed, the line that says what the answer changed, and
-// what Understand sent to Build that waits for a ticket.
+// what Signals sent to the Factory that waits for a ticket (and how many).
 
 import { useState } from "react";
 
@@ -28,6 +28,7 @@ export function useBuild() {
     if (ticket) setAsking({ ticket, title: card.title });
   };
   const said = answered && saidOf(answered);
+  const waiting = data?.waiting ?? [];
   const shown = (
     <>
       {said && (
@@ -48,7 +49,7 @@ export function useBuild() {
           text={answered.problem}
         />
       )}
-      <WaitingFixes waiting={data?.waiting ?? []} />
+      <WaitingFixes waiting={waiting} />
       {asking && (
         <DidItWork
           ticket={asking.ticket}
@@ -64,5 +65,5 @@ export function useBuild() {
       )}
     </>
   );
-  return { tickets, ask, shown };
+  return { tickets, ask, shown, waiting: waiting.length };
 }

@@ -1,13 +1,14 @@
 // A check-up of the product: the kobold reads a product's code, read only
 // (the check skill), and reports each problem it finds with its tool, where
-// it is (a file that must exist in the project) and what happens to a
-// person. One check runs per product at a time; each product keeps its last
-// one (findings.ts). A person sends a finding to Build, where it becomes a
+// it is (a file and a line that must exist in the project) and what happens
+// to a person. One check runs per product at a time; what each finds is
+// added to what the ones before found (findings.ts), and the kobold is told
+// those, so it looks further instead of finding them again. A person sends a finding to Build, where it becomes a
 // bug sent from the records (a signal from the kobold's check-up) and a fix
-// ticket when the connected board can make one; or says it is not a problem.
+// ticket when the connected board can make one; or says it is not a problem,
+// and may bring it back.
 
-import { existsSync } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { join } from "node:path";
 
 import {
   FACTORY_FOLDER,
@@ -21,12 +22,14 @@ import type { Cards } from "../cards/cards.ts";
 import type { Kobold, KoboldJob } from "../kobold/kobold.ts";
 import { Refused } from "../refused.ts";
 import {
+  alike,
   type Check,
   ChecksFile,
   type Finding,
   type FindingInput,
 } from "./findings.ts";
 import { checkPrompt, type Language } from "./prompt.ts";
+import { checkPlace } from "./where.ts";
 
 // The most findings one check keeps: few and good.
 const MOST = 15;
@@ -93,9 +96,10 @@ export class Checks {
         throw new Refused(`${one.name} is being checked already.`);
     }
     for (const one of products) {
+      const known = this.file.of(one.id)?.findings ?? [];
       const job = this.on.kobold.check(
         one.id,
-        checkPrompt(one, this.on.project, language),
+        checkPrompt(one, this.on.project, { language, known }),
         {
           tool: "report_finding",
           act: (args) => this.found(one.id, args),
@@ -115,6 +119,14 @@ export class Checks {
 
   dismiss(product: string, finding: string): void {
     this.act(product, finding, { status: "dismissed" });
+  }
+
+  // A finding set aside, brought back to look at again.
+  restore(product: string, id: string): void {
+    const finding = this.of(product, id);
+    if (finding.status !== "dismissed")
+      throw new Refused("That finding is not set aside.");
+    this.change(product, id, { status: "open" });
   }
 
   // A finding sent to Build: a bug from the check-up in the records, then
@@ -156,17 +168,19 @@ export class Checks {
     return findProducts(join(this.on.project, FACTORY_FOLDER)).products;
   }
 
-  // What the kobold reported, kept when it points at a file in the project.
+  // What the kobold reported, kept when it points at a line of a file in
+  // the project and is not known already.
   private found(product: string, input: FindingInput): string {
-    const file = input.where.replace(/:\d+(:\d+)?$/, "").trim();
-    const path = resolve(this.on.project, file);
-    const inside = !relative(this.on.project, path).startsWith(`..${sep}`);
-    if (!inside || !existsSync(path))
+    checkPlace(this.on.project, input.where);
+    const check = this.file.of(product);
+    const known = check?.findings.find((one) => alike(one, input));
+    if (known?.status === "dismissed")
       throw new Refused(
-        `There is no file “${file}” in the project: say where it is from the project's root, like shop/src/cart.ts:42.`,
+        "A person said that one is not a problem: leave it out.",
       );
-    const kept = this.file.of(product)?.findings.length ?? 0;
-    if (kept >= MOST)
+    if (known || check?.incoming.some((one) => alike(one, input)))
+      throw new Refused("That one is known already: look for others.");
+    if ((check?.incoming.length ?? 0) >= MOST)
       throw new Refused(
         `That is ${String(MOST)} already: keep only the most important ones.`,
       );
@@ -182,17 +196,20 @@ export class Checks {
     let state: Check["state"] = "done";
     if (stopped) state = "stopped";
     else if (job.problem) state = "failed";
-    return this.file.change(product, (one) => ({
-      ...one,
-      ended: new Date().toISOString(),
+    return this.file.ended(product, {
       state,
       said: job?.problem ?? job?.done ?? null,
-    }));
+    });
+  }
+
+  private of(product: string, id: string): Finding {
+    const finding = this.file.of(product)?.findings.find((f) => f.id === id);
+    if (!finding) throw new Refused("That finding is not there any more.");
+    return finding;
   }
 
   private open(product: string, id: string): Finding {
-    const finding = this.file.of(product)?.findings.find((f) => f.id === id);
-    if (!finding) throw new Refused("That finding is not there any more.");
+    const finding = this.of(product, id);
     if (finding.status !== "open")
       throw new Refused("Someone has acted on that finding already.");
     return finding;
@@ -200,6 +217,10 @@ export class Checks {
 
   private act(product: string, id: string, change: Partial<Finding>): void {
     this.open(product, id);
+    this.change(product, id, change);
+  }
+
+  private change(product: string, id: string, change: Partial<Finding>) {
     this.file.change(product, (check) => ({
       ...check,
       findings: check.findings.map((f) =>

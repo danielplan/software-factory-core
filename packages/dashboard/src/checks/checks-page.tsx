@@ -3,7 +3,9 @@
 // Before any check, a friendly start card; while one runs, the kobold at
 // work and what it found so far; then the findings as cards, the most
 // serious first, each to send to Build or set aside, and those already
-// handled folded away. Check again at the top.
+// handled folded away. Each check looks at part of the code, so what it
+// finds adds to what was found before (a short note says so), and the last
+// findings stay while a new check runs. Check again at the top.
 
 import { CircleCheck } from "lucide-react";
 import { useState } from "react";
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/collapsible";
 import { LANGUAGES } from "@/lib/language-choice";
 
+import { refusalWords } from "../chat/refusals";
 import { FindingCard, SeverityPill } from "./finding-card";
 import { RunningCard, StartCard } from "./start-card";
 import { useChecks } from "./use-checks";
@@ -34,7 +37,7 @@ export function ChecksPage() {
   const press = (path: string, body: object) => {
     setSaid(null);
     post(path, body).then(reload, (error: unknown) => {
-      setSaid(messageOf(error));
+      setSaid(refusalWords(messageOf(error)));
     });
   };
   const start = (product?: string) => {
@@ -131,15 +134,20 @@ function Results({
   return (
     <div className="grid gap-6">
       {view.lastEnded && (
-        <p className="text-note text-muted-foreground">
-          {t("results.last", {
-            when: new Date(view.lastEnded).toLocaleString(i18n.language, {
-              dateStyle: "medium",
-              timeStyle: "short",
-            }),
-          })}
-          {open > 0 && ` · ${t("results.toLook", { count: open })}`}
-        </p>
+        <div className="grid gap-0.5 text-note text-muted-foreground">
+          <p>
+            {t("results.last", {
+              when: new Date(view.lastEnded).toLocaleString(i18n.language, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }),
+            })}
+            {view.running.length === 0 &&
+              ` · ${t("results.found", { count: view.found })}`}
+            {open > 0 && ` · ${t("results.toLook", { count: open })}`}
+          </p>
+          <p>{t("results.sample")}</p>
+        </div>
       )}
       {view.allClear && <AllClear />}
       {view.open.map((group) => (

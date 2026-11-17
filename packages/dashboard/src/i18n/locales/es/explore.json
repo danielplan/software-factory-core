@@ -14,7 +14,7 @@
   "next": {
     "versions_one": "{{count}} versión para probar",
     "versions_other": "{{count}} versiones para probar",
-    "picked": "Lista para enviar a Build",
+    "picked": "Lista para enviar a la Fábrica",
     "inApp": "En la app — ¿funcionó?"
   },
   "why": {
@@ -32,11 +32,11 @@
   "votes_one": "{{count}} voto",
   "votes_other": "{{count}} votos",
   "send": {
-    "went": "La versión {{version}} pasó a Build como #{{issue}}.",
-    "noBoard": "{{version}} tiene más votos. Para enviarla a Build, conecta primero un tablero de GitHub.",
+    "went": "La versión {{version}} pasó a la Fábrica como #{{issue}}.",
+    "noBoard": "{{version}} tiene más votos. Para enviarla a la Fábrica, conecta primero un tablero de GitHub.",
     "lead": "{{version}} tiene más votos.",
-    "button": "Enviar {{version}} a Build",
-    "buttonNone": "Enviar a Build",
+    "button": "Enviar {{version}} a la Fábrica",
+    "buttonNone": "Enviar a la Fábrica",
     "noVotes": "Nadie ha votado todavía — prueba las versiones y vota.",
     "tie": "{{versions}} están empatadas — vota para decidir.",
     "connect": "Conectar en Ajustes"
@@ -97,6 +97,8 @@
     "label": "Tu idea",
     "placeholder": "Un pedido fijo: los suministros de siempre llegan cada lunes, sin pedirlos.",
     "forWhom": "¿Para quién es?",
+    "noPersonas": "Aún no hay personas: nacen de lo que dijo la gente, en Señales.",
+    "toPersonas": "Abrir Personas",
     "failed": "No se pudo escribir",
     "draft": "Escribir la historia",
     "couldNot": "El kobold no pudo escribirla",
@@ -144,7 +146,7 @@
   "bar": {
     "title": "Modo prototipo",
     "switch": "Versión",
-    "back": "Volver a Explorar",
+    "back": "Volver a Exploraciones",
     "shared": "Compartida",
     "share": "Compartir"
   },
@@ -156,6 +158,6 @@
   },
   "mode": {
     "whichIdea": "¿Qué idea?",
-    "fromExplore": "Abre el modo prototipo desde una idea en Explorar."
+    "fromExplore": "Abre el modo prototipo desde una idea en Exploraciones."
   }
 }

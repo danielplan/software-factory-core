@@ -24,7 +24,10 @@
     "clear": "Rien d'inquiétant",
     "handled": "Déjà traitées ({{count}})",
     "failed": "Le bilan de {{name}} n'a pas pu se terminer : {{why}}",
-    "stopped": "Le bilan de {{name}} a été arrêté avant la fin."
+    "stopped": "Le bilan de {{name}} a été arrêté avant la fin.",
+    "sample": "Chaque check-up regarde une partie du code : relance-le pour aller plus loin.",
+    "found_one": "{{count}} nouveau cette fois",
+    "found_other": "{{count}} nouveaux cette fois"
   },
   "severity": {
     "high": "Grave",
@@ -47,8 +50,25 @@
     "sent": "Dans Build en #{{issue}}",
     "waiting": "Dans Build. Pour en faire un ticket, connectez un tableau GitHub dans les Réglages.",
     "onBuild": "Dans Build",
-    "dismissed": "Mis de côté"
+    "dismissed": "Mis de côté",
+    "new": "Nouveau",
+    "restore": "Remettre"
   },
   "problem": "Ça n'a pas marché : {{why}}",
-  "crumbSignals": "Signaux"
+  "crumbSignals": "Signaux",
+  "activity": {
+    "reading": "Lit le code de « {{part}} »…",
+    "notes": "Lit les notes du produit…",
+    "tests": "Lit les tests…",
+    "searching": "Cherche {{what}}…",
+    "searchingCode": "Fouille le code…",
+    "files": "Se repère dans les fichiers…",
+    "writing": "Note un problème trouvé…"
+  },
+  "refused": {
+    "notRunning": "Ce check-up n'est plus en cours.",
+    "gone": "Ce point n'est plus là.",
+    "acted": "Quelqu'un s'en est déjà occupé.",
+    "notSetAside": "Ce point n'a pas été mis de côté."
+  }
 }

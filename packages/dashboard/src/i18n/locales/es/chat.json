@@ -38,5 +38,24 @@
   "failed": "Lo siento, algo salió mal: {{why}}",
   "forPerson": "Para {{name}}",
   "steering": "Entendido, lo tengo en cuenta y empiezo de nuevo.",
-  "steerTag": "Cambio de rumbo"
+  "steerTag": "Cambio de rumbo",
+  "refused": {
+    "question": "Escribe primero una pregunta.",
+    "text": "Escribe primero la idea.",
+    "persona": "Di para quién es la idea.",
+    "files": "Envía cinco archivos como mucho, cada uno adjuntado aquí antes.",
+    "language": "La factory no habla ese idioma.",
+    "name": "Ponle al archivo un nombre de 200 letras como mucho.",
+    "type": "Aquí solo se pueden adjuntar imágenes, PDF y archivos de texto.",
+    "data": "Ese archivo no se puede leer.",
+    "empty": "Ese archivo está vacío.",
+    "large": "Ese archivo pesa más de 7 MB.",
+    "mismatch": "Ese archivo no es del tipo que dice.",
+    "notText": "Ese archivo de texto no se puede leer: guárdalo como texto plano (UTF-8).",
+    "product": "Di qué producto.",
+    "finding": "Di qué hallazgo.",
+    "otherwise": "No se entendió esa petición.",
+    "tooLarge": "Esa petición es demasiado grande."
+  },
+  "gone": "El archivo «{{name}}» ya no está."
 }

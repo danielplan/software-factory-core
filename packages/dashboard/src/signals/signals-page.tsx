@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { understandHash } from "@/lib/routes";
 import { useDownToTheEnd } from "@/lib/use-down-to-the-end";
+import { cn } from "@/lib/utils";
 import { AddSource } from "@/understand/add-source";
 import { KoboldMark } from "@/understand/bits";
 import { useKoboldJobs, useOverview } from "@/understand/use-records";
@@ -83,7 +84,9 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
   );
 }
 
-// The three columns, down to the end of the page as on Factory.
+// The three columns, down to the end of the page as on Factory. On a phone
+// they stack instead, those with something in them first and the empty ones
+// last as a single line, so nothing waits off to the side.
 function Board({
   signals,
   tint,
@@ -97,14 +100,17 @@ function Board({
       className="overflow-x-auto pb-2 [--board-below:48px] md:[--board-below:60px]"
     >
       <div
-        className="grid grid-cols-[repeat(3,minmax(15rem,1fr))] gap-3"
+        className="grid content-start gap-3 md:grid-cols-[repeat(3,minmax(15rem,1fr))] md:content-stretch"
         style={{ minHeight: height }}
       >
         {COLUMNS.map((column) => (
           <section
             key={column}
             aria-label={t(`signals.columns.${column}`)}
-            className="grid content-start gap-2.5 rounded-2xl bg-ground p-3"
+            className={cn(
+              "grid content-start gap-2.5 rounded-2xl bg-ground p-3",
+              columns[column].length === 0 && "max-md:order-last max-md:py-1.5",
+            )}
           >
             <h2 className="flex items-center gap-2 px-1.5 py-1 text-item [&_svg]:size-4">
               {ICONS[column]}
@@ -114,7 +120,7 @@ function Board({
               </span>
             </h2>
             {columns[column].length === 0 && (
-              <p className="px-1.5 text-note text-muted-foreground">
+              <p className="px-1.5 text-note text-muted-foreground max-md:hidden">
                 {t("signals.nothingHere")}
               </p>
             )}

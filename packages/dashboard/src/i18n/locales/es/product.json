@@ -43,7 +43,12 @@
     "open": "Abrir"
   },
   "problem": {
-    "details": "Detalles técnicos"
+    "details": "Detalles técnicos",
+    "aFolder": "otra carpeta",
+    "elsewhere": "La dirección {{port}} la usa un programa de otra carpeta",
+    "elsewhereText": "{{name}} la necesita, pero la usa otro programa (quizá otra copia de este proyecto). Detenlo y luego pulsa Reintentar.",
+    "taken": "La dirección {{port}} la usa otro programa",
+    "takenText": "{{name}} la necesita. Cierra el otro programa (quizá una ventana antigua) y luego pulsa Reintentar."
   },
   "groups": {
     "language": "Lenguaje",

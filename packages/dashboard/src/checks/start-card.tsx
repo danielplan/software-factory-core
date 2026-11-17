@@ -1,8 +1,8 @@
 // The check-up's two moments before results: the start, a card that says
 // in one line what the kobold does, one button (and one per product when
 // there are several), and a small note: how long, nothing changed, here;
-// and while it runs, the kobold at work on a product, what it looks at,
-// how much it found so far, and Stop.
+// and while it runs, the kobold at work on a product, what it looks at in
+// plain words (activity.ts), how much it found so far, and Stop.
 
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { KoboldCharacter } from "@/components/kobold-character";
 
+import { activityWords } from "./activity";
 import type { CheckView } from "./view";
 
 export function StartCard({
@@ -79,10 +80,10 @@ export function RunningCard({
       <div role="status" className="grid min-w-0 flex-1 gap-0.5">
         <b className="text-item">{t("running.title", { name })}</b>
         <span className="truncate text-note text-muted-foreground motion-safe:animate-breathe">
-          {check.activity ?? t("running.looking")}
+          {activityWords(check.activity)}
         </span>
         <span className="text-note text-muted-foreground">
-          {t("running.found", { count: check.findings.length })}
+          {t("running.found", { count: check.incoming.length })}
         </span>
       </div>
       <Button variant="outline" onClick={onStop}>

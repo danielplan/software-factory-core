@@ -90,7 +90,7 @@ test("the send row sends the version with the most votes, or says why it cannot 
     sendLine(page({ lead: { key: "B", name: "Basket keeps it" } })),
     {
       words: "B has the most votes.",
-      button: "Send B to Build",
+      button: "Send B to the Factory",
       version: "B",
       connect: false,
     },
@@ -107,7 +107,7 @@ test("the send row sends the version with the most votes, or says why it cannot 
   );
   assert.deepEqual(tied, {
     words: "A and B are tied — vote to decide.",
-    button: "Send to Build",
+    button: "Send to the Factory",
     version: null,
     connect: false,
   });
@@ -118,7 +118,7 @@ test("the send row sends the version with the most votes, or says why it cannot 
   assert.deepEqual(
     sendLine(page({ state: "inBuild", tickets: [{ issue: 9, version: "B" }] })),
     {
-      words: "Version B went to Build as #9.",
+      words: "Version B went to the Factory as #9.",
       button: null,
       version: null,
       connect: false,
@@ -127,7 +127,7 @@ test("the send row sends the version with the most votes, or says why it cannot 
   // Without a GitHub board, it says so up front instead of failing.
   assert.deepEqual(sendLine(page({ lead: { key: "B", name: "B" } }), false), {
     words:
-      "B has the most votes. To send it to Build, connect a GitHub board first.",
+      "B has the most votes. To send it to the Factory, connect a GitHub board first.",
     button: null,
     version: null,
     connect: true,
@@ -257,7 +257,7 @@ test("each idea's card says what is next, only when its stage doesn't", () => {
   assert.equal(next("idea"), null);
   assert.equal(next("versions", 1), "1 version to try");
   assert.equal(next("versions", 3), "3 versions to try");
-  assert.equal(next("picked"), "Ready to send to Build");
+  assert.equal(next("picked"), "Ready to send to the Factory");
   assert.equal(next("building"), null);
   assert.equal(next("inApp"), "In the app — did it work?");
   assert.equal(next("worked"), null);

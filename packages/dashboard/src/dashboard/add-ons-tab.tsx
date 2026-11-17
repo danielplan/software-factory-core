@@ -8,6 +8,7 @@ import { type AddOnView, type KitView, messageOf, post } from "@/api";
 import { IconTile } from "@/add-ons/looks";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
+import { addOnWords, kitWords } from "@/lib/server-words";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -132,9 +133,9 @@ function AddOnTile({
   return (
     <Tile
       id={addOn.id}
-      name={addOn.name}
+      name={addOnWords(addOn).name}
       from={addOn.builtIn ? t("workshop.builtIn") : t("workshop.addOn")}
-      about={addOn.about}
+      about={addOnWords(addOn).about}
       idle={!used}
     >
       <div className="flex min-h-9 items-center gap-3">
@@ -221,9 +222,9 @@ function KitTile({ kit, users }: Readonly<{ kit: KitView; users: string[] }>) {
   return (
     <Tile
       id={kit.id}
-      name={kit.name}
+      name={kitWords(kit).name}
       from={t("workshop.kit")}
-      about={kit.about}
+      about={kitWords(kit).about}
       idle={users.length === 0}
     >
       <div className="flex min-h-9 flex-wrap items-center gap-1.5">

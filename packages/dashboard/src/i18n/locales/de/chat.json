@@ -38,5 +38,24 @@
   "failed": "Entschuldige, etwas ist schiefgelaufen: {{why}}",
   "forPerson": "Für {{name}}",
   "steering": "Verstanden, ich berücksichtige das und fange neu an.",
-  "steerTag": "Kurswechsel"
+  "steerTag": "Kurswechsel",
+  "refused": {
+    "question": "Schreib zuerst eine Frage.",
+    "text": "Schreib zuerst die Idee.",
+    "persona": "Sag, für wen die Idee ist.",
+    "files": "Schick höchstens fünf Dateien, jede zuerst hier angehängt.",
+    "language": "Diese Sprache spricht die Factory nicht.",
+    "name": "Gib der Datei einen Namen mit höchstens 200 Zeichen.",
+    "type": "Hier lassen sich nur Bilder, PDFs und Textdateien anhängen.",
+    "data": "Diese Datei lässt sich nicht lesen.",
+    "empty": "Diese Datei ist leer.",
+    "large": "Diese Datei ist größer als 7 MB.",
+    "mismatch": "Diese Datei ist nicht, was ihr Typ sagt.",
+    "notText": "Diese Textdatei lässt sich nicht lesen: speichere sie als reinen Text (UTF-8).",
+    "product": "Sag, welches Produkt.",
+    "finding": "Sag, welcher Fund.",
+    "otherwise": "Diese Anfrage wurde nicht verstanden.",
+    "tooLarge": "Diese Anfrage ist zu groß."
+  },
+  "gone": "Die Datei „{{name}}“ ist nicht mehr da."
 }

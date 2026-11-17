@@ -1,7 +1,8 @@
 // "New idea", in a dialog: from a story where something breaks (the idea is
 // for its problem and its persona), or your own idea, for which the kobold
-// writes the story it assumes (own-idea.tsx). "Start an idea" on a story in
-// Understand opens it with that story picked (#explore/new/<story>).
+// writes the story it assumes (own-idea.tsx). "Start an idea" on a story on
+// Personas opens it with that story picked (#explore/new/<story>). With no
+// story to start from, it opens on your own idea.
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -36,7 +37,8 @@ export function NewIdea({
   onClose: () => void;
 }>) {
   const { t } = useTranslation("explore");
-  const [own, setOwn] = useState(false);
+  const [chosen, setOwn] = useState<boolean | null>(null);
+  const own = chosen ?? (story === null && list.stories.length === 0);
   return (
     <Dialog
       open={open}

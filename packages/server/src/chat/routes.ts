@@ -2,16 +2,17 @@
 // or an idea written with the files a message came with, and a job of the
 // kobold stopped, so a person can steer it: the page then asks again with
 // what they added. Like every button, a POST is answered only from the
-// factory's page (server.ts).
+// factory's page (server.ts). What does not fit is refused in a plain
+// sentence (fitted.ts).
 
 import { z } from "zod";
 
 import type { Route } from "../add-ons/add-on.ts";
-import { field } from "../asked.ts";
 import type { Kobold } from "../kobold/kobold.ts";
-import { parsed } from "../records/person.ts";
 import { whoIs } from "../records/who.ts";
+import { Refused } from "../refused.ts";
 import { attachedLines, filesSchema, storeAttachment } from "./attachments.ts";
+import { fitted, SAID } from "./fitted.ts";
 
 // The dashboard's language: the kobold answers, and writes an idea, in it.
 const LANGUAGES = {
@@ -38,6 +39,32 @@ const ideaSchema = z.strictObject({
   language: languageSchema,
 });
 
+const stopSchema = z.strictObject({ job: z.string().min(1) });
+
+// An answer to a question; when it was stopped (a person steering it), the
+// job's own reason, not why Claude Code ended.
+async function answered(
+  kobold: Kobold,
+  question: string,
+  more: string[],
+): Promise<string> {
+  const before = new Set(kobold.view().map((job) => job.id));
+  try {
+    return await kobold.answer(question, more);
+  } catch (error) {
+    if (!(error instanceof Refused)) throw error;
+    const job = kobold
+      .view()
+      .find(
+        (one) =>
+          !before.has(one.id) &&
+          one.kind === "answer" &&
+          one.about === question.trim(),
+      );
+    throw new Refused(job?.problem ?? error.message);
+  }
+}
+
 // The line that asks for the person's language, after what they attached.
 function inLanguage(
   what: string,
@@ -56,23 +83,15 @@ export function chatRoutes(on: {
       file: storeAttachment(project, body),
     }),
     "POST /api/chat/question": async (body) => {
-      const { question, files, language } = parsed(
-        questionSchema,
-        body,
-        "question",
-      );
+      const { question, files, language } = fitted(questionSchema, body, SAID);
       const more = [
         ...attachedLines(project, files),
         ...inLanguage("Answer", language),
       ];
-      return { answer: await kobold.answer(question, more) };
+      return { answer: await answered(kobold, question, more) };
     },
     "POST /api/chat/idea": async (body) => {
-      const { text, persona, files, language } = parsed(
-        ideaSchema,
-        body,
-        "idea",
-      );
+      const { text, persona, files, language } = fitted(ideaSchema, body, SAID);
       const attached = [
         ...attachedLines(project, files),
         ...inLanguage("Write the idea and its story", language),
@@ -81,7 +100,7 @@ export function chatRoutes(on: {
       return { job: kobold.imagine({ text, persona, by }, attached) };
     },
     "POST /api/chat/stop": (body) => {
-      kobold.stop(field(body, "job"));
+      kobold.stop(fitted(stopSchema, body, { job: SAID.otherwise }).job);
     },
   };
 }

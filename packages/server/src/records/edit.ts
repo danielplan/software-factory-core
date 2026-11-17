@@ -91,3 +91,18 @@ export class Edit {
 export function newId(prefix: string): string {
   return `${prefix}-${randomUUID().slice(0, 8)}`;
 }
+
+// A record's id made from its name ("Shop reviews!" is shop-reviews), with
+// a number after it when the id is taken.
+export function idFrom(name: string, taken: Set<string>, fallback: string) {
+  const base =
+    name
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || fallback;
+  let key = base;
+  let n = 1;
+  while (taken.has(key)) key = `${base}-${String(++n)}`;
+  return key;
+}

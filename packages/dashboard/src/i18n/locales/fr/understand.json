@@ -35,8 +35,8 @@
     "story": "L'histoire « {{title}} »",
     "problem": "Le problème « {{title}} »",
     "issue": "Ticket #{{issue}}",
-    "update": "Build, comme amélioration",
-    "fix": "Build, comme correction",
+    "update": "Fabrique, comme amélioration",
+    "fix": "Fabrique, comme correction",
     "answered": "Répondu"
   },
   "known": {
@@ -94,16 +94,17 @@
     "soundsLike": "ressemble à {{name}}",
     "readingWhat": "Le kobold le lit : {{what}}",
     "reading": "Le kobold le lit…",
+    "waiting": "Attend son tour…",
     "fix": "Corriger",
     "explore": "Explorer",
     "dismiss": "Ignorer",
-    "sending": "Envoi vers Construire…",
-    "sentNoBoard": "Envoyé vers Construire. Pour en faire une carte, connecte un tableau GitHub.",
+    "sending": "Envoi vers la Fabrique…",
+    "sentNoBoard": "Envoyé à la Fabrique. Pour en faire une carte, connectez un tableau GitHub.",
     "openSettings": "Ouvrir les Réglages",
     "addTo": "Ajouter à « {{title}} »",
     "already": {
       "explored": "Déjà exploré dans « {{title}} »",
-      "building": "Déjà dans Construire comme #{{issue}}",
+      "building": "Déjà dans la Fabrique comme #{{issue}}",
       "fixed": "Déjà corrigé dans #{{issue}}"
     },
     "why": "Pourquoi : {{why}}"

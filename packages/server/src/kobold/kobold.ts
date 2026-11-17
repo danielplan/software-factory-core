@@ -18,7 +18,9 @@ import {
   type Claude,
   type ClaudeResult,
   howWellKnown,
+  KOBOLD,
   type RecordStore,
+  type Signal,
 } from "@software-factory/core";
 import { skillsFolder } from "@software-factory/skills";
 
@@ -32,6 +34,7 @@ import {
   sortPrompt,
   suggestPrompt,
 } from "./prompts.ts";
+import { type KoboldJob, kept, newJob, type Running, shown } from "./job.ts";
 import { type JobTools, KOBOLD_HEADER, plain } from "./tools.ts";
 import {
   freeProblems,
@@ -40,22 +43,7 @@ import {
   suggestRealProblem,
 } from "./writes.ts";
 
-export type KoboldJob = {
-  id: string;
-  kind: "sort" | "suggest" | "ask" | "seen" | "idea" | "answer" | "check";
-  // The signal it sorts, the persona whose problems it reads, the story it
-  // asks about, the issue it drafts what was seen for, the persona an own
-  // idea is for, or the question it answers.
-  about: string;
-  // What it made, once done: the new idea's id.
-  made: string | null;
-  working: boolean;
-  // What it is doing now, in a few words.
-  activity: string | null;
-  // What it did, in a line, once done; or why it could not.
-  done: string | null;
-  problem: string | null;
-};
+export type { KoboldJob } from "./job.ts";
 
 export type KoboldOptions = {
   claude: Claude;
@@ -65,22 +53,12 @@ export type KoboldOptions = {
   onChange: () => void;
 };
 
-// A job as the kobold keeps it: its tools' token and tools, and what stops
-// it (a person steering it elsewhere).
-type Running = KoboldJob & {
-  token: string;
-  tools: JobTools | null;
-  stop: AbortController;
-};
-
 const RIGHTS = {
   readOnly: true,
   tools: ["Read", "Grep", "Glob"],
   deny: ["Read(**/.env*)"],
 };
 const TIME_LIMIT_MS = 10 * 60_000;
-// The jobs the page still sees.
-const KEPT = 20;
 export class Kobold {
   private readonly options: KoboldOptions;
   private jobs: Running[] = [];
@@ -117,7 +95,7 @@ export class Kobold {
   sort(signal: string, hint: string | null = null): KoboldJob {
     const job = this.add("sort", signal);
     this.queue(job, () => this.sorting(job, hint));
-    return { ...job };
+    return shown(job);
   }
 
   // A short question for people like the story's persona, about its guessed
@@ -129,7 +107,7 @@ export class Kobold {
     if (howWellKnown(told).seen === howWellKnown(told).of)
       throw new Refused("Every scene of it is seen already.");
     return await this.drafted(
-      this.add("ask", story),
+      this.add("ask", story, false),
       askPrompt(store.all(), told),
       "Drafted a question to send.",
     );
@@ -140,7 +118,7 @@ export class Kobold {
   async answer(question: string, attached: string[] = []): Promise<string> {
     if (!question.trim()) throw new Refused("Ask a question first.");
     return await this.drafted(
-      this.add("answer", question.trim()),
+      this.add("answer", question.trim(), false),
       [answerPrompt(this.options.records().all(), question), ...attached].join(
         "\n",
       ),
@@ -164,7 +142,7 @@ export class Kobold {
     prompt: string,
   ): Promise<{ text: string } | { problem: string }> {
     return await this.draft(
-      this.add("seen", String(issue)),
+      this.add("seen", String(issue), false),
       prompt,
       "Drafted what was seen.",
     );
@@ -198,7 +176,7 @@ export class Kobold {
         this.finish(job, null, `The kobold wrote no idea. ${result.text}`);
       else this.finish(job, "Wrote the idea and the story it assumes.", null);
     });
-    return { ...job };
+    return shown(job);
   }
 
   private async sorting(job: Running, hint: string | null): Promise<void> {
@@ -206,6 +184,10 @@ export class Kobold {
     const signal = store.get("signals", job.about);
     if (!signal) {
       this.finish(job, null, "The signal is not there any more.");
+      return;
+    }
+    if (hint === null && placedByPerson(signal)) {
+      this.finish(job, `Already placed by ${signal.by}.`, null);
       return;
     }
     const before = freeProblems(store);
@@ -222,11 +204,18 @@ export class Kobold {
       this.finish(job, null, `The kobold did not sort it. ${result.text}`);
     else {
       this.finish(job, last, null);
-      const persona = store.get("signals", job.about)?.soundsLike;
-      const now = freeProblems(store).get(persona ?? "") ?? 0;
-      if (persona && now >= 2 && now > (before.get(persona) ?? 0))
-        this.suggest(persona);
+      this.suggestAfter(job.about, before);
     }
+  }
+
+  // A real problem suggested when the sort gave a persona a new problem,
+  // and two or more of theirs have none behind them.
+  private suggestAfter(signal: string, before: Map<string, number>): void {
+    const store = this.options.records();
+    const persona = store.get("signals", signal)?.soundsLike;
+    const now = freeProblems(store).get(persona ?? "") ?? 0;
+    if (persona && now >= 2 && now > (before.get(persona) ?? 0))
+      this.suggest(persona);
   }
 
   private suggest(persona: string): void {
@@ -256,7 +245,7 @@ export class Kobold {
         this.finish(job, null, problemOf(result.error ?? "", "The kobold"));
       else this.finish(job, result.text.trim() || "Checked.", null);
     });
-    return { ...job };
+    return shown(job);
   }
 
   // A short text the kobold drafts for a person, with no tools.
@@ -287,21 +276,10 @@ export class Kobold {
     return drafted.text;
   }
 
-  private add(kind: KoboldJob["kind"], about: string): Running {
-    const job: Running = {
-      id: randomUUID(),
-      kind,
-      about,
-      made: null,
-      working: true,
-      activity: null,
-      done: null,
-      problem: null,
-      token: randomUUID(),
-      tools: null,
-      stop: new AbortController(),
-    };
-    this.jobs = [...this.jobs, job].slice(-KEPT);
+  // A new job; one that runs after the jobs asked before waits until then.
+  private add(kind: KoboldJob["kind"], about: string, waiting = true) {
+    const job = newJob(kind, about, waiting);
+    this.jobs = kept([...this.jobs, job]);
     this.options.onChange();
     return job;
   }
@@ -311,6 +289,8 @@ export class Kobold {
   private queue(job: Running, work: () => Promise<void>): void {
     this.line = this.line.then(async () => {
       if (job.stop.signal.aborted) return;
+      job.waiting = false;
+      this.options.onChange();
       await work().catch((error: unknown) => {
         this.finish(job, null, error instanceof Error ? error.message : "");
       });
@@ -351,13 +331,20 @@ export class Kobold {
   // Once: a job stopped by a person keeps saying so when its run ends.
   private finish(job: Running, done: string | null, problem: string | null) {
     if (!job.working) return;
-    Object.assign(job, { working: false, activity: null, done, problem });
+    Object.assign(job, {
+      working: false,
+      waiting: false,
+      activity: null,
+      done,
+      problem,
+    });
     job.tools = null;
     this.options.onChange();
   }
 }
 
-// A job as the page sees it: without its token and tools.
-function shown({ token: _t, tools: _x, stop: _s, ...seen }: Running) {
-  return seen;
+// A signal a person placed (moved it, or said it looks good): a sort asked
+// before then leaves their choice as it is.
+function placedByPerson(signal: Signal): boolean {
+  return signal.by !== KOBOLD && signal.wentTo !== null;
 }

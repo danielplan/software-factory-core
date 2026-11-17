@@ -1,7 +1,8 @@
 // One thing the check-up found, as a card: how serious it is and what kind
 // (an icon and a word, never colour alone), the problem in plain words,
-// what happens to a person, how to fix it, and where it is; then Send to
-// Build or Not a problem, and what came of it.
+// what happens to a person, how to fix it, and where it is, marked New when
+// the last check found it; then Send to Build or Not a problem, what came of
+// it, and Bring back for one set aside.
 
 import {
   Bug,
@@ -21,6 +22,7 @@ import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { refusalWords } from "../chat/refusals";
 import type { Found, Severity } from "./view";
 
 const SEVERITY: Record<Severity, { look: string; icon: ReactNode }> = {
@@ -71,6 +73,11 @@ export function FindingCard({
           {KIND[finding.kind]}
           {t(`kind.${finding.kind}`)}
         </span>
+        {finding.fresh && (
+          <span className="rounded-full bg-tint px-2 py-0.5 text-tag text-tint-foreground">
+            {t("finding.new")}
+          </span>
+        )}
         {showProduct && (
           <span className="ml-auto text-tag text-muted-foreground">
             {t("finding.in", { name: finding.productName })}
@@ -113,6 +120,9 @@ function Actions({ finding }: Readonly<{ finding: Found }>) {
   const [said, setSaid] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const body = { product: finding.product, finding: finding.id };
+  const failed = (error: unknown) => {
+    setProblem(refusalWords(messageOf(error)));
+  };
   const send = async () => {
     setProblem(null);
     try {
@@ -126,14 +136,12 @@ function Actions({ finding }: Readonly<{ finding: Found }>) {
           : t("finding.sent", { issue: sent.issue }),
       );
     } catch (error) {
-      setProblem(messageOf(error));
+      failed(error);
     }
   };
-  const dismiss = () => {
+  const press = (path: string) => () => {
     setProblem(null);
-    post("/api/checks/dismiss", body).catch((error: unknown) => {
-      setProblem(messageOf(error));
-    });
+    post(path, body).catch(failed);
   };
   return (
     <div className="grid gap-2 pt-1">
@@ -142,14 +150,29 @@ function Actions({ finding }: Readonly<{ finding: Found }>) {
           <Button size="sm" onClick={() => void send()}>
             {t("finding.send")}
           </Button>
-          <Button size="sm" variant="outline" onClick={dismiss}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={press("/api/checks/dismiss")}
+          >
             {t("finding.dismiss")}
           </Button>
         </div>
       ) : (
-        <p className="text-note text-muted-foreground">
-          {said ?? statusWords(finding, t)}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-note text-muted-foreground">
+            {said ?? statusWords(finding, t)}
+          </p>
+          {finding.status === "dismissed" && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={press("/api/checks/restore")}
+            >
+              {t("finding.restore")}
+            </Button>
+          )}
+        </div>
       )}
       {said && finding.status === "open" && (
         <p className="text-note text-muted-foreground">{said}</p>

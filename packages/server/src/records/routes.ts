@@ -1,7 +1,8 @@
 // The records' routes: reading them for the Understand pages, bringing in a
 // signal from outside (the import API; the connectors that feed it come
 // later), which the kobold then sorts, and what a person does on the pages
-// (a new source, Move, Looks good, Confirm, Ask, a question to the kobold).
+// (a new source, a new persona, Move, Looks good, Confirm, Ask, a question
+// to the kobold).
 // Like every button, a POST is answered only from the factory's page or a
 // program on this computer that sends its header (server.ts). Explore's and prototype mode's routes
 // come with them (explore/routes.ts), and Build's (build/routes.ts): they
@@ -35,7 +36,9 @@ import { asked, field } from "../asked.ts";
 import { Refused } from "../refused.ts";
 import { RecordsHost } from "./host.ts";
 import {
+  addPersona,
   addSource,
+  confirmPersona,
   confirmRealProblem,
   looksGood,
   moveSchema,
@@ -184,12 +187,20 @@ function personRoutes(
   const store = () => host.orRefuse();
   return {
     "POST /api/sources": (body) => ({ source: addSource(store(), body) }),
+    "POST /api/personas": async (body) => ({
+      persona: addPersona(store(), body, await whoIs(project)),
+    }),
+    "POST /api/personas/confirm": async (body) => {
+      confirmPersona(store(), field(body, "persona"), await whoIs(project));
+    },
     "POST /api/understand/move": async (body) => {
       const move = parsed(moveSchema, body, "move");
       const { signal, to } = move;
       if (to.to !== "newStory")
         return { done: moveSignal(store(), signal, to, await whoIs(project)) };
       if (!store().get("signals", signal)) refuse("signal", signal);
+      if (to.persona && !store().get("personas", to.persona))
+        refuse("persona", to.persona);
       const of = to.persona ? ` of the persona ${to.persona}` : "";
       const hint = `it starts a new story${of}; it does not belong where it was.`;
       return { job: kobold.sort(signal, hint) };

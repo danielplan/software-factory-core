@@ -38,5 +38,24 @@
   "failed": "Désolé, quelque chose n'a pas marché : {{why}}",
   "forPerson": "Pour {{name}}",
   "steering": "Compris, j'en tiens compte et je recommence.",
-  "steerTag": "Changement de cap"
+  "steerTag": "Changement de cap",
+  "refused": {
+    "question": "Écris d'abord une question.",
+    "text": "Écris d'abord l'idée.",
+    "persona": "Dis pour qui est l'idée.",
+    "files": "Envoie cinq fichiers au plus, chacun joint ici d'abord.",
+    "language": "La factory ne parle pas cette langue.",
+    "name": "Donne un nom au fichier, de 200 lettres au plus.",
+    "type": "Ici, on ne peut joindre que des images, des PDF et des fichiers texte.",
+    "data": "Ce fichier ne peut pas être lu.",
+    "empty": "Ce fichier est vide.",
+    "large": "Ce fichier dépasse 7 Mo.",
+    "mismatch": "Ce fichier n'est pas du type qu'il annonce.",
+    "notText": "Ce fichier texte ne peut pas être lu : enregistre-le en texte brut (UTF-8).",
+    "product": "Dis quel produit.",
+    "finding": "Dis quel point.",
+    "otherwise": "Cette demande n'a pas été comprise.",
+    "tooLarge": "Cette demande est trop grande."
+  },
+  "gone": "Le fichier « {{name}} » n'est plus là."
 }

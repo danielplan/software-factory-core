@@ -184,5 +184,7 @@ export function problemOf(error: string, who = "The coach"): string {
     return "Claude Code is not on this computer. Install it from claude.com/code and sign in, then try again.";
   if (/log ?in|auth|credential/i.test(error))
     return "Claude Code is not signed in. Run claude once in a terminal to sign in, then try again.";
-  return `${who} stopped: ${error || "no reason given"}. Try again.`;
+  let why = error.trim();
+  while (why.endsWith(".")) why = why.slice(0, -1);
+  return `${who} stopped: ${why || "no reason given"}. Try again.`;
 }

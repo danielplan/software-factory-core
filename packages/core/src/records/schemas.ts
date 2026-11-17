@@ -84,6 +84,9 @@ export const personaSchema = z.strictObject({
   wants: z.array(text).default([]),
   // What the persona is drawn from: interviews, customers, how people use it.
   basedOn: z.array(text).default([]),
+  // Who made it: the kobold (from a signal no persona fit, until a person
+  // confirms it) or a team member; not said for a persona written by hand.
+  by: by.optional(),
 });
 
 // A real customer, who is like one of the personas.

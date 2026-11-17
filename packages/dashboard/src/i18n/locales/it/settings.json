@@ -107,5 +107,55 @@
   "sections": {
     "general": "Generali",
     "work": "Lavoro"
+  },
+  "known": {
+    "kits": {
+      "expo-app": {
+        "name": "App Expo",
+        "about": "Un'app per telefono fatta con Expo e React Native."
+      },
+      "nestjs-backend": {
+        "name": "Backend NestJS",
+        "about": "Un server fatto con NestJS."
+      },
+      "other-code": {
+        "name": "Altro codice",
+        "about": "Qualsiasi altro codice: un sito, un servizio o uno strumento, avviato e controllato con i suoi comandi."
+      },
+      "react-web-app": {
+        "name": "App web React",
+        "about": "Un'app web fatta con React e Vite."
+      },
+      "sveltekit-app": {
+        "name": "App web SvelteKit",
+        "about": "Un'app web fatta con SvelteKit."
+      },
+      "typescript-package": {
+        "name": "Pacchetto TypeScript",
+        "about": "Codice condiviso che usano altri prodotti (tipi, schemi, regole), distribuito come pacchetto."
+      }
+    },
+    "addOns": {
+      "github": {
+        "name": "Bacheca GitHub",
+        "about": "Il lavoro tenuto su una bacheca GitHub, tramite la GitHub CLI."
+      },
+      "jira": {
+        "name": "Jira Cloud",
+        "about": "Il lavoro tenuto in un progetto Jira Cloud, con un token API."
+      }
+    },
+    "groups": {
+      "ai-model": {
+        "name": "Modello AI",
+        "about": "Con quale modello Claude pensa il kobold."
+      }
+    },
+    "fields": {
+      "FACTORY_CLAUDE_MODEL": {
+        "label": "Modello Claude",
+        "help": "Lascialo vuoto per quello predefinito del tuo account, oppure scrivi opus, sonnet o haiku."
+      }
+    }
   }
 }

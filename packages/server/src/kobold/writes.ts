@@ -1,14 +1,20 @@
 // What the kobold writes to the records, through its tools (tools.ts): the
 // signal it is sorting, sorted and put in its place (one signal, never
-// counted or merged with others), and a real problem it suggests behind two
-// or more problems of one persona. Everything it writes says `by: kobold`
+// counted or merged with others), with a new persona when none fits it, and
+// a real problem it suggests behind two or more problems of one persona. Everything it writes says `by: kobold`
 // until a person confirms it, and the store checks it like any write.
 
-import { KOBOLD, type RecordStore, SORTED_AS } from "@software-factory/core";
+import {
+  KOBOLD,
+  type RecordStore,
+  type Signal,
+  SORTED_AS,
+} from "@software-factory/core";
 import { z } from "zod";
 
 import { Refused } from "../refused.ts";
 import { Edit, newId } from "../records/edit.ts";
+import { newPersonaSchema, putPersona } from "../records/person.ts";
 import { place, placeSchema } from "../records/placing.ts";
 
 export const SORT_INPUT = {
@@ -20,7 +26,14 @@ export const SORT_INPUT = {
   soundsLike: z
     .string()
     .nullable()
-    .describe("The persona's id it sounds like, or null when it is not clear."),
+    .describe(
+      "The persona's id it sounds like, or null when it is not clear or when you give newPersona.",
+    ),
+  newPersona: newPersonaSchema
+    .optional()
+    .describe(
+      "Only when no persona plausibly fits and the signal clearly comes from one kind of user: a new persona it sounds like, for a person to confirm. Leave soundsLike null then.",
+    ),
   why: z
     .string()
     .trim()
@@ -45,15 +58,17 @@ export const SUGGEST_INPUT = {
 export type Sort = z.infer<z.ZodObject<typeof SORT_INPUT>>;
 export type Suggest = z.infer<z.ZodObject<typeof SUGGEST_INPUT>>;
 
-// The signal sorted and placed; what was done, in a line.
+// The signal sorted and placed, with the persona the kobold made for it
+// when none fit; what was done, in a line.
 export function sortSignal(store: RecordStore, id: string, sort: Sort) {
   const edit = new Edit(store);
   const signal = edit.get("signals", id, "signal");
-  if (sort.soundsLike !== null)
-    edit.get("personas", sort.soundsLike, "persona");
+  const made = sort.newPersona ? madePersona(edit, signal, sort) : null;
+  const soundsLike = made?.id ?? sort.soundsLike;
+  if (soundsLike !== null) edit.get("personas", soundsLike, "persona");
   if (sort.place.to === "scene") {
     const story = edit.get("stories", sort.place.story, "story");
-    if (sort.soundsLike !== story.persona)
+    if (soundsLike !== story.persona)
       throw new Refused(
         `The story “${story.title}” is ${story.persona}'s: only a signal that sounds like ${story.persona} is evidence in it.`,
       );
@@ -61,13 +76,29 @@ export function sortSignal(store: RecordStore, id: string, sort: Sort) {
   const sorted = {
     ...signal,
     sortedAs: sort.sortedAs,
-    soundsLike: sort.soundsLike,
+    soundsLike,
     why: sort.why,
     by: KOBOLD,
   };
   const done = place(edit, sorted, sort.place, KOBOLD);
   edit.save(store);
-  return done;
+  return made
+    ? `New persona: ${made.name}, ${made.role}, for a person to confirm. ${done}`
+    : done;
+}
+
+// The persona the kobold makes for a signal no persona fits; never for one
+// it gave a persona already, nor from a persona run.
+function madePersona(edit: Edit, signal: Signal, sort: Sort) {
+  if (sort.soundsLike !== null)
+    throw new Refused(
+      "Give either soundsLike or newPersona: a signal sounds like one persona.",
+    );
+  if (edit.find("sources", signal.source)?.kind === "personaRuns")
+    throw new Refused(
+      "A persona run never makes a persona: it is a check, not a real person.",
+    );
+  return putPersona(edit, sort.newPersona, KOBOLD);
 }
 
 // A real problem behind two or more problems of the persona, none of which

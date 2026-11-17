@@ -39,6 +39,7 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { lightWords, PartButtons, PartProblem } from "@/dashboard/part-card";
 import { useRead } from "@/understand/use-records";
 
+import { kitWords } from "@/lib/server-words";
 import { useDownToTheEnd } from "@/lib/use-down-to-the-end";
 
 import { ChooseContext } from "./choose";
@@ -47,6 +48,10 @@ import { type MapNode, mapOf, type Product } from "./map";
 import { ProductNodeView, ProjectNodeView } from "./nodes";
 
 type Press = (path: string) => void;
+
+// The map fits its box, but never so small that the cards can't be read
+// (their words at about 12px at least): a wider map is dragged sideways.
+const FIT = { padding: 0.35, maxZoom: 1, minZoom: 0.85 };
 
 const NODE_TYPES: NodeTypes = {
   project: ProjectNodeView,
@@ -139,12 +144,8 @@ function ProductMap({
   const [chosen, choose] = useState<string | null>(null);
   // Down to the end of the page: the page's padding and the frame below.
   const [area, height] = useDownToTheEnd("3.25rem");
-  const { parts, kits } = state;
-  const map = useMemo(() => {
-    const kindOf = (product: Product) =>
-      kits.find((kit) => kit.id === product.kit)?.name ?? product.kind;
-    return mapOf(page, parts, kindOf);
-  }, [page, parts, kits]);
+  const { parts } = state;
+  const map = useMap(page, state);
   useEscape(() => {
     choose(null);
   });
@@ -184,14 +185,18 @@ function ProductMap({
             elementsSelectable={false}
             edgesFocusable={false}
             fitView
-            fitViewOptions={{ padding: 0.35, maxZoom: 1 }}
+            fitViewOptions={FIT}
             minZoom={0.3}
             maxZoom={1.5}
             aria-label={t("mapLabel")}
             style={COLOURS}
           >
             <Background variant={BackgroundVariant.Dots} gap={18} size={1.5} />
-            <Controls showInteractive={false} position="bottom-left" />
+            <Controls
+              showInteractive={false}
+              position="bottom-left"
+              fitViewOptions={FIT}
+            />
           </ReactFlow>
         </ChooseContext.Provider>
       </div>
@@ -207,6 +212,17 @@ function ProductMap({
       />
     </div>
   );
+}
+
+// The map's cards and arrows; each product named by its kit, in the
+// dashboard's language.
+function useMap(page: Page, { parts, kits }: FactoryState) {
+  return useMemo(() => {
+    const kindOf = (product: Product) =>
+      kits.map(kitWords).find((kit) => kit.id === product.kit)?.name ??
+      product.kind;
+    return mapOf(page, parts, kindOf);
+  }, [page, parts, kits]);
 }
 
 // Escape goes back to the map's overview.

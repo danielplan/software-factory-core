@@ -9,6 +9,7 @@ import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n/i18n";
+import { addOnWords } from "@/lib/server-words";
 
 // The factory's own board: "none", as the company file says.
 const OWN = { id: "none", icon: <LayoutGrid aria-hidden /> };
@@ -149,8 +150,8 @@ function choicesOf(trackers: AddOnView[]) {
         return {
           id: tracker.id,
           icon: lookOf(tracker.id).icon,
-          title: tracker.name,
-          text: short ? t(short) : tracker.about,
+          title: addOnWords(tracker).name,
+          text: short ? t(short) : addOnWords(tracker).about,
         };
       }),
   ];

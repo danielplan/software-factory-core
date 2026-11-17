@@ -1,6 +1,7 @@
-// The Overview's river: how far things get, from what was heard to what
-// worked. Each stage counts what reached it at least (an idea in the app
-// was also sent to Build), so the river narrows from left to right; its
+// Home's river: how far things get, from what was heard to what worked.
+// Heard is what came in: the signals still to look at and the problems
+// heard. Each later stage counts what reached it at least (an idea in the
+// app was also sent to the Factory), so the river narrows to the right; its
 // width at each stage is how much is there. Worked out from what the
 // server already sends; the shape is drawn by components/river.tsx. Kept
 // apart from the components so it is checked on its own.
@@ -12,7 +13,7 @@ import { exploreHash } from "./routes.ts";
 export type RiverStage = {
   label: string;
   count: number;
-  // What the count means, in a few words ("3 sent to Build").
+  // What the count means, in a few words ("3 sent to the Factory").
   words: string;
   href: string;
   // Its colour, a CSS variable.
@@ -30,10 +31,11 @@ const IN_APP = new Set<IdeaRow["stage"]>(["inApp", "worked", "didntWork"]);
 export function riverOf(
   personas: PersonaCard[],
   ideas: IdeaRow[],
+  signals = 0,
 ): { stages: RiverStage[]; headline: string } {
   const heard = personas.reduce(
     (all, card) => all + card.stories.filter((s) => s.wrong === null).length,
-    0,
+    signals,
   );
   const count = (stages: Set<IdeaRow["stage"]>) =>
     ideas.filter((idea) => stages.has(idea.stage)).length;
@@ -46,7 +48,7 @@ export function riverOf(
       label: t("overview:river.heard"),
       count: heard,
       words: t("overview:river.heardWords", { count: heard }),
-      href: "#understand",
+      href: signals > 0 ? "#signals" : "#understand",
       colour: "--river-heard",
     },
     {

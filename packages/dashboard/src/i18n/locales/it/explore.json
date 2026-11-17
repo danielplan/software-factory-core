@@ -14,7 +14,7 @@
   "next": {
     "versions_one": "{{count}} versione da provare",
     "versions_other": "{{count}} versioni da provare",
-    "picked": "Pronta da mandare in Build",
+    "picked": "Pronta da mandare alla Fabbrica",
     "inApp": "Nell'app — ha funzionato?"
   },
   "why": {
@@ -32,11 +32,11 @@
   "votes_one": "{{count}} voto",
   "votes_other": "{{count}} voti",
   "send": {
-    "went": "La versione {{version}} è andata in Build come #{{issue}}.",
-    "noBoard": "{{version}} ha più voti. Per mandarla in Build, collega prima una board GitHub.",
+    "went": "La versione {{version}} è andata alla Fabbrica come #{{issue}}.",
+    "noBoard": "{{version}} ha più voti. Per mandarla alla Fabbrica, collega prima una board GitHub.",
     "lead": "{{version}} ha più voti.",
-    "button": "Manda {{version}} in Build",
-    "buttonNone": "Manda in Build",
+    "button": "Manda {{version}} alla Fabbrica",
+    "buttonNone": "Manda alla Fabbrica",
     "noVotes": "Nessuno ha ancora votato — prova le versioni e vota.",
     "tie": "{{versions}} sono in parità — vota per decidere.",
     "connect": "Collega nelle Impostazioni"
@@ -97,6 +97,8 @@
     "label": "La tua idea",
     "placeholder": "Un ordine fisso: le solite forniture arrivano ogni lunedì, senza ordinarle.",
     "forWhom": "Per chi è?",
+    "noPersonas": "Ancora nessuna persona: nascono da quello che dicono le persone, in Segnali.",
+    "toPersonas": "Apri Personas",
     "failed": "Impossibile scriverla",
     "draft": "Scrivi la storia",
     "couldNot": "Il kobold non è riuscito a scriverla",
@@ -144,7 +146,7 @@
   "bar": {
     "title": "Modalità prototipo",
     "switch": "Versione",
-    "back": "Torna a Esplorare",
+    "back": "Torna a Esplorazioni",
     "shared": "Condivisa",
     "share": "Condividi"
   },
@@ -156,6 +158,6 @@
   },
   "mode": {
     "whichIdea": "Quale idea?",
-    "fromExplore": "Apri la modalità prototipo da un'idea in Esplorare."
+    "fromExplore": "Apri la modalità prototipo da un'idea in Esplorazioni."
   }
 }

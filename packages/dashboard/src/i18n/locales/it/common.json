@@ -27,6 +27,7 @@
     "thinking": "Sta pensando a {{title}}",
     "planning": "Sta pianificando la scheda #{{number}}",
     "doingWith": "{{doing}}: {{activity}}",
+    "waiting": "In attesa del suo turno",
     "doing": {
       "sort": "Sta ordinando ciò che è arrivato",
       "suggest": "Sta leggendo i problemi",

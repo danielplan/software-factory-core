@@ -84,7 +84,7 @@
     "worked": "Hat funktioniert",
     "didntWork": "Hat nicht funktioniert",
     "unchecked": "Nicht geprüft",
-    "since": "„{{title}}“, seit {{since}} in Bauen.",
+    "since": "„{{title}}“, seit {{since}} in der Fabrik.",
     "only": "„{{title}}“.",
     "close": "Schließen · hat es funktioniert?",
     "answeredBy": "{{by}}, {{on}}"
@@ -110,7 +110,7 @@
     "make": "Fix-Ticket erstellen",
     "making": "Erstelle das Ticket…",
     "failed": "Kein Ticket erstellt",
-    "waiting": "Aus Personen, wartet auf ein Ticket",
+    "waiting": "Aus Signale, wartet auf ein Ticket",
     "fix": "Fix",
     "update": "Update",
     "from": "Von: {{source}}"

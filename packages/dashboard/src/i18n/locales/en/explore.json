@@ -14,7 +14,7 @@
   "next": {
     "versions_one": "{{count}} version to try",
     "versions_other": "{{count}} versions to try",
-    "picked": "Ready to send to Build",
+    "picked": "Ready to send to the Factory",
     "inApp": "In the app — did it work?"
   },
   "why": {
@@ -32,11 +32,11 @@
   "votes_one": "{{count}} vote",
   "votes_other": "{{count}} votes",
   "send": {
-    "went": "Version {{version}} went to Build as #{{issue}}.",
-    "noBoard": "{{version}} has the most votes. To send it to Build, connect a GitHub board first.",
+    "went": "Version {{version}} went to the Factory as #{{issue}}.",
+    "noBoard": "{{version}} has the most votes. To send it to the Factory, connect a GitHub board first.",
     "lead": "{{version}} has the most votes.",
-    "button": "Send {{version}} to Build",
-    "buttonNone": "Send to Build",
+    "button": "Send {{version}} to the Factory",
+    "buttonNone": "Send to the Factory",
     "noVotes": "Nobody has voted yet — try the versions and vote.",
     "tie": "{{versions}} are tied — vote to decide.",
     "connect": "Connect in Settings"
@@ -97,6 +97,8 @@
     "label": "Your idea",
     "placeholder": "A standing order: the usual supplies arrive every Monday, no need to order.",
     "forWhom": "Who is it for?",
+    "noPersonas": "No personas yet: they come from what people said, on Signals.",
+    "toPersonas": "Open Personas",
     "failed": "It couldn't be written",
     "draft": "Write the story",
     "couldNot": "The kobold couldn't write it",
@@ -144,7 +146,7 @@
   "bar": {
     "title": "Prototype mode",
     "switch": "Version",
-    "back": "Back to Explore",
+    "back": "Back to Explorations",
     "shared": "Shared",
     "share": "Share"
   },
@@ -156,6 +158,6 @@
   },
   "mode": {
     "whichIdea": "Which idea?",
-    "fromExplore": "Open prototype mode from an idea on Explore."
+    "fromExplore": "Open prototype mode from an idea on Explorations."
   }
 }

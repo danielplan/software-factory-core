@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { type IdeaPage, type KoboldJob, messageOf, post } from "@/api";
 import type { PersonaTag } from "@/api";
+import { Field } from "@/components/field";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { exploreHash } from "@/lib/routes";
@@ -47,19 +48,22 @@ export function OwnIdea({ personas }: Readonly<{ personas: PersonaTag[] }>) {
     );
   return (
     <div className="grid gap-4">
-      <textarea
-        aria-label={t("own.label")}
-        value={text}
-        rows={3}
-        placeholder={t("own.placeholder")}
-        onChange={(event) => {
-          setText(event.target.value);
-        }}
-        className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-body outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      />
+      <Field label={t("own.label")} id="own-idea">
+        <textarea
+          id="own-idea"
+          value={text}
+          rows={3}
+          placeholder={t("own.placeholder")}
+          onChange={(event) => {
+            setText(event.target.value);
+          }}
+          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-body outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        />
+      </Field>
       <div className="grid gap-1.5">
         <span className="text-body font-medium">{t("own.forWhom")}</span>
-        <div className="flex flex-wrap gap-2">
+        {personas.length === 0 && <NoPersonas />}
+        <div className="flex flex-wrap gap-2 empty:hidden">
           {personas.map((one) => (
             <button
               key={one.id}
@@ -89,6 +93,22 @@ export function OwnIdea({ personas }: Readonly<{ personas: PersonaTag[] }>) {
         {t("own.draft")}
       </Button>
     </div>
+  );
+}
+
+// No persona to choose yet: where they come from, and a way there.
+function NoPersonas() {
+  const { t } = useTranslation("explore");
+  return (
+    <p className="text-note text-muted-foreground">
+      {t("own.noPersonas")}{" "}
+      <a
+        href="#understand"
+        className="font-medium text-primary underline-offset-2 hover:underline"
+      >
+        {t("own.toPersonas")}
+      </a>
+    </p>
   );
 }
 

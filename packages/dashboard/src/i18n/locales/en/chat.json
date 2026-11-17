@@ -38,5 +38,24 @@
   "failed": "Sorry, something went wrong: {{why}}",
   "forPerson": "For {{name}}",
   "steering": "Got it, I'll take that into account and start again.",
-  "steerTag": "Change of plan"
+  "steerTag": "Change of plan",
+  "refused": {
+    "question": "Write a question first.",
+    "text": "Write the idea first.",
+    "persona": "Say who the idea is for.",
+    "files": "Send at most five files, each attached here first.",
+    "language": "That language is not one the factory speaks.",
+    "name": "Give the file a name, of 200 letters at most.",
+    "type": "Only pictures, PDFs and text files can be attached here.",
+    "data": "That file could not be read.",
+    "empty": "That file is empty.",
+    "large": "That file is larger than 7 MB.",
+    "mismatch": "That file is not what its type says.",
+    "notText": "That text file could not be read: save it as plain text (UTF-8).",
+    "product": "Say which product.",
+    "finding": "Say which finding.",
+    "otherwise": "That request was not understood.",
+    "tooLarge": "That request is too large."
+  },
+  "gone": "The file “{{name}}” is not there any more."
 }

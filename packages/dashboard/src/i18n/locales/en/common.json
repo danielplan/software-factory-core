@@ -27,6 +27,7 @@
     "thinking": "Thinking about {{title}}",
     "planning": "Planning card #{{number}}",
     "doingWith": "{{doing}}: {{activity}}",
+    "waiting": "Waiting its turn",
     "doing": {
       "sort": "Sorting what came in",
       "suggest": "Reading the problems",

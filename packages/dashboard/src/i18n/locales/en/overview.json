@@ -5,18 +5,25 @@
     "empty": "Nothing waiting for you. All caught up.",
     "didItWork": "Did it work?",
     "review": "Check the work",
-    "send": "Send to Build",
+    "send": "Send to the Factory",
     "vote": "Vote for a version",
     "look": "Have a look",
-    "said_one": "{{count}} new thing people said",
-    "said_other": "{{count}} new things people said"
+    "ticket": "Make the ticket",
+    "signals_one": "{{count}} new signal",
+    "signals_other": "{{count}} new signals",
+    "stories_one": "{{count}} new story from the kobold",
+    "stories_other": "{{count}} new stories from the kobold",
+    "serious_one": "{{count}} serious problem the Check-up found",
+    "serious_other": "{{count}} serious problems the Check-up found",
+    "found_one": "{{count}} thing the Check-up found",
+    "found_other": "{{count}} things the Check-up found",
+    "fixes_one": "{{count}} fix waiting for a ticket",
+    "fixes_other": "{{count}} fixes waiting for a ticket"
   },
-  "discovery": {
-    "title": "Discovery",
-    "empty": "Nothing open. Add what people said in Understand."
+  "problems": {
+    "empty": "Nothing open. Add what people said on Signals."
   },
-  "build": {
-    "title": "Build",
+  "work": {
     "empty": "Nothing is being built right now."
   },
   "seeAll": "See all ({{count}})",
@@ -31,14 +38,14 @@
     "title": "How things are moving",
     "heard": "Heard",
     "ideas": "Ideas",
-    "sent": "Sent to Build",
+    "sent": "Sent to the Factory",
     "inApp": "In the app",
     "worked": "Worked",
-    "heardWords_one": "{{count}} problem heard",
-    "heardWords_other": "{{count}} problems heard",
+    "heardWords_one": "{{count}} thing heard",
+    "heardWords_other": "{{count}} things heard",
     "ideasWords_one": "{{count}} idea tried",
     "ideasWords_other": "{{count}} ideas tried",
-    "sentWords": "{{count}} sent to Build",
+    "sentWords": "{{count}} sent to the Factory",
     "inAppWords": "{{count}} in the app",
     "workedWords": "{{count}} worked",
     "nothing": "Nothing tried yet: start with an idea.",

@@ -14,7 +14,7 @@
   "next": {
     "versions_one": "{{count}} version à essayer",
     "versions_other": "{{count}} versions à essayer",
-    "picked": "Prête à envoyer à Build",
+    "picked": "Prête à envoyer à la Fabrique",
     "inApp": "Dans l'app — ça a marché ?"
   },
   "why": {
@@ -32,11 +32,11 @@
   "votes_one": "{{count}} vote",
   "votes_other": "{{count}} votes",
   "send": {
-    "went": "La version {{version}} est partie dans Build comme #{{issue}}.",
-    "noBoard": "{{version}} a le plus de votes. Pour l'envoyer à Build, connectez d'abord un tableau GitHub.",
+    "went": "La version {{version}} est partie à la Fabrique comme #{{issue}}.",
+    "noBoard": "{{version}} a le plus de votes. Pour l'envoyer à la Fabrique, connectez d'abord un tableau GitHub.",
     "lead": "{{version}} a le plus de votes.",
-    "button": "Envoyer {{version}} à Build",
-    "buttonNone": "Envoyer à Build",
+    "button": "Envoyer {{version}} à la Fabrique",
+    "buttonNone": "Envoyer à la Fabrique",
     "noVotes": "Personne n'a encore voté — essayez les versions et votez.",
     "tie": "{{versions}} sont à égalité — votez pour départager.",
     "connect": "Connecter dans les Réglages"
@@ -97,6 +97,8 @@
     "label": "Votre idée",
     "placeholder": "Une commande fixe : les fournitures habituelles arrivent chaque lundi, sans commander.",
     "forWhom": "Pour qui ?",
+    "noPersonas": "Pas encore de personas : elles naissent de ce que les gens ont dit, dans Signaux.",
+    "toPersonas": "Ouvrir Personas",
     "failed": "Impossible de l'écrire",
     "draft": "Écrire l'histoire",
     "couldNot": "Le kobold n'a pas pu l'écrire",
@@ -144,7 +146,7 @@
   "bar": {
     "title": "Mode prototype",
     "switch": "Version",
-    "back": "Retour à Explorer",
+    "back": "Retour aux Explorations",
     "shared": "Partagée",
     "share": "Partager"
   },
@@ -156,6 +158,6 @@
   },
   "mode": {
     "whichIdea": "Quelle idée ?",
-    "fromExplore": "Ouvrez le mode prototype depuis une idée dans Explorer."
+    "fromExplore": "Ouvrez le mode prototype depuis une idée dans Explorations."
   }
 }

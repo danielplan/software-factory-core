@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { activityWords, searchedWords } from "../src/checks/activity.ts";
 import {
   type CheckView,
   checkupOf,
@@ -9,8 +10,9 @@ import {
   startable,
 } from "../src/checks/view.ts";
 
-// The Check-up page: the open findings by how serious they are, the
-// handled ones apart, what runs, and whether all is clear.
+// The Check-up page: the open findings by how serious they are (new ones
+// first), the handled ones apart, what runs, whether all is clear, and what
+// the kobold does in plain words.
 
 const finding = (id: string, more: Partial<Finding> = {}): Finding => ({
   id,
@@ -22,6 +24,7 @@ const finding = (id: string, more: Partial<Finding> = {}): Finding => ({
   suggestion: "",
   status: "open",
   issue: null,
+  fresh: false,
   ...more,
 });
 
@@ -33,6 +36,8 @@ const check = (product: string, more: Partial<CheckView> = {}): CheckView => ({
   state: "done",
   said: null,
   findings: [],
+  incoming: [],
+  kept: 0,
   activity: null,
   ...more,
 });
@@ -100,4 +105,65 @@ test("all clear once a check is done with nothing open; a running one is not sta
   const failed = checkupOf(view([check("shop", { state: "failed" })]));
   assert.equal(failed.failed.length, 1);
   assert.equal(failed.allClear, false);
+});
+
+test("the new ones first within how serious they are, and how many were new as the server counted", () => {
+  const read = checkupOf(
+    view([
+      check("shop", {
+        kept: 1,
+        findings: [finding("old"), finding("new", { fresh: true })],
+      }),
+      check("orders", { kept: 2 }),
+    ]),
+  );
+  assert.deepEqual(
+    read.open[0]?.findings.map((one) => one.id),
+    ["new", "old"],
+  );
+  assert.equal(read.found, 3);
+});
+
+test("what the kobold does, in plain words: never a search as written", () => {
+  assert.equal(activityWords(null), "Looking around…");
+  assert.equal(
+    activityWords("Reading apps/web/src/lib/records/RecordSheet.svelte"),
+    "Reading the code of “records”…",
+  );
+  assert.equal(
+    activityWords("Reading packages/spec/src/groups.ts"),
+    "Reading the code of “groups”…",
+  );
+  assert.equal(
+    activityWords("Reading apps/api/BLUEPRINT.md"),
+    "Reading the product's notes…",
+  );
+  assert.equal(
+    activityWords("Reading apps/api/test/cart.test.ts"),
+    "Reading the tests…",
+  );
+  assert.equal(
+    activityWords("Reading how values (money, dates) are checked."),
+    "Looking around…",
+  );
+  assert.equal(
+    activityWords(
+      "Searching for “(?i)util:http|ssrf|internal address|private network”",
+    ),
+    "Looking for “ssrf”, “internal address”…",
+  );
+  assert.equal(
+    activityWords("Searching for “sql\\.raw\\(”"),
+    "Searching the code…",
+  );
+  assert.deepEqual(searchedWords("^\\s+(async )?(catalog|visible)\\("), []);
+  assert.equal(
+    activityWords("Looking for files **/*.svelte"),
+    "Finding its way around the files…",
+  );
+  assert.equal(
+    activityWords("Writing down a problem it found"),
+    "Writing down a problem it found…",
+  );
+  assert.equal(activityWords("Running: npm test"), "Looking around…");
 });

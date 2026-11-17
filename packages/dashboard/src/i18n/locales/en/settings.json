@@ -107,5 +107,55 @@
   "sections": {
     "general": "General",
     "work": "Work"
+  },
+  "known": {
+    "kits": {
+      "expo-app": {
+        "name": "Expo app",
+        "about": "A phone app made with Expo and React Native."
+      },
+      "nestjs-backend": {
+        "name": "NestJS backend",
+        "about": "A server made with NestJS."
+      },
+      "other-code": {
+        "name": "Other code",
+        "about": "Any other code: a website, a service or a tool, started and checked with its own commands."
+      },
+      "react-web-app": {
+        "name": "React web app",
+        "about": "A web app made with React and Vite."
+      },
+      "sveltekit-app": {
+        "name": "SvelteKit web app",
+        "about": "A web app made with SvelteKit."
+      },
+      "typescript-package": {
+        "name": "TypeScript package",
+        "about": "Shared code other products use (types, schemas, rules), given out as a package."
+      }
+    },
+    "addOns": {
+      "github": {
+        "name": "GitHub board",
+        "about": "Work tracked on a GitHub board, through the GitHub CLI."
+      },
+      "jira": {
+        "name": "Jira Cloud",
+        "about": "Work tracked in a Jira Cloud project, with an API token."
+      }
+    },
+    "groups": {
+      "ai-model": {
+        "name": "AI model",
+        "about": "Which Claude model the kobold thinks with."
+      }
+    },
+    "fields": {
+      "FACTORY_CLAUDE_MODEL": {
+        "label": "Claude model",
+        "help": "Leave it empty for your account's default, or write opus, sonnet or haiku."
+      }
+    }
   }
 }

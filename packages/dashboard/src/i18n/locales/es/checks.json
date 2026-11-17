@@ -24,7 +24,10 @@
     "clear": "Nada preocupante",
     "handled": "Ya atendidas ({{count}})",
     "failed": "La revisión de {{name}} no pudo terminar: {{why}}",
-    "stopped": "La revisión de {{name}} se detuvo antes del final."
+    "stopped": "La revisión de {{name}} se detuvo antes del final.",
+    "sample": "Cada check-up mira una parte del código: vuelve a lanzarlo para mirar más allá.",
+    "found_one": "{{count}} nuevo esta vez",
+    "found_other": "{{count}} nuevos esta vez"
   },
   "severity": {
     "high": "Grave",
@@ -47,8 +50,25 @@
     "sent": "En Build como #{{issue}}",
     "waiting": "En Build. Para convertirlo en un ticket, conecta un tablero de GitHub en Ajustes.",
     "onBuild": "En Build",
-    "dismissed": "Apartado"
+    "dismissed": "Apartado",
+    "new": "Nuevo",
+    "restore": "Recuperar"
   },
   "problem": "No ha funcionado: {{why}}",
-  "crumbSignals": "Señales"
+  "crumbSignals": "Señales",
+  "activity": {
+    "reading": "Lee el código de «{{part}}»…",
+    "notes": "Lee las notas del producto…",
+    "tests": "Lee las pruebas…",
+    "searching": "Busca {{what}}…",
+    "searchingCode": "Busca en el código…",
+    "files": "Se orienta entre los archivos…",
+    "writing": "Anota un problema encontrado…"
+  },
+  "refused": {
+    "notRunning": "Ese check-up ya no está en marcha.",
+    "gone": "Ese hallazgo ya no está.",
+    "acted": "Alguien ya se ha ocupado de ese hallazgo.",
+    "notSetAside": "Ese hallazgo no estaba apartado."
+  }
 }

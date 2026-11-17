@@ -38,5 +38,24 @@
   "failed": "Scusa, qualcosa è andato storto: {{why}}",
   "forPerson": "Per {{name}}",
   "steering": "Ricevuto, ne tengo conto e ricomincio.",
-  "steerTag": "Cambio di rotta"
+  "steerTag": "Cambio di rotta",
+  "refused": {
+    "question": "Scrivi prima una domanda.",
+    "text": "Scrivi prima l'idea.",
+    "persona": "Di' per chi è l'idea.",
+    "files": "Manda al massimo cinque file, ognuno allegato prima qui.",
+    "language": "La factory non parla questa lingua.",
+    "name": "Dai un nome al file, di 200 lettere al massimo.",
+    "type": "Qui si possono allegare solo immagini, PDF e file di testo.",
+    "data": "Questo file non si riesce a leggere.",
+    "empty": "Questo file è vuoto.",
+    "large": "Questo file supera i 7 MB.",
+    "mismatch": "Questo file non è del tipo che dichiara.",
+    "notText": "Questo file di testo non si riesce a leggere: salvalo come testo semplice (UTF-8).",
+    "product": "Di' quale prodotto.",
+    "finding": "Di' quale segnalazione.",
+    "otherwise": "Questa richiesta non è stata capita.",
+    "tooLarge": "Questa richiesta è troppo grande."
+  },
+  "gone": "Il file “{{name}}” non c'è più."
 }

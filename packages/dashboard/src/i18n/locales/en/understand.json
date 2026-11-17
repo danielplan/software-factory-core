@@ -35,8 +35,8 @@
     "story": "The story “{{title}}”",
     "problem": "The problem “{{title}}”",
     "issue": "Issue #{{issue}}",
-    "update": "Build, as an improvement",
-    "fix": "Build, as a fix",
+    "update": "Factory, as an improvement",
+    "fix": "Factory, as a fix",
     "answered": "Answered"
   },
   "known": {
@@ -94,16 +94,17 @@
     "soundsLike": "sounds like {{name}}",
     "readingWhat": "The kobold is reading it: {{what}}",
     "reading": "The kobold is reading it…",
+    "waiting": "Waiting its turn…",
     "fix": "Fix",
     "explore": "Explore",
     "dismiss": "Dismiss",
-    "sending": "Sending to Build…",
-    "sentNoBoard": "Sent to Build. To make it a card there, connect a GitHub board.",
+    "sending": "Sending to the Factory…",
+    "sentNoBoard": "Sent to the Factory. To make it a card there, connect a GitHub board.",
     "openSettings": "Open Settings",
     "addTo": "Add to “{{title}}”",
     "already": {
       "explored": "Already explored in “{{title}}”",
-      "building": "Already in Build as #{{issue}}",
+      "building": "Already in the Factory as #{{issue}}",
       "fixed": "Already fixed in #{{issue}}"
     },
     "why": "Why: {{why}}"

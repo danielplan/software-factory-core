@@ -35,8 +35,8 @@
     "story": "Die Geschichte „{{title}}“",
     "problem": "Das Problem „{{title}}“",
     "issue": "Issue #{{issue}}",
-    "update": "Build, als Verbesserung",
-    "fix": "Build, als Fehlerbehebung",
+    "update": "Fabrik, als Verbesserung",
+    "fix": "Fabrik, als Fehlerbehebung",
     "answered": "Beantwortet"
   },
   "known": {
@@ -94,16 +94,17 @@
     "soundsLike": "klingt nach {{name}}",
     "readingWhat": "Der Kobold liest es: {{what}}",
     "reading": "Der Kobold liest es…",
+    "waiting": "Wartet, bis es dran ist…",
     "fix": "Beheben",
     "explore": "Erkunden",
     "dismiss": "Verwerfen",
-    "sending": "Wird an Bauen gesendet…",
-    "sentNoBoard": "An Bauen gesendet. Um daraus eine Karte zu machen, verbinde ein GitHub-Board.",
+    "sending": "Wird an die Fabrik gesendet…",
+    "sentNoBoard": "An die Fabrik gesendet. Um daraus eine Karte zu machen, verbinde ein GitHub-Board.",
     "openSettings": "Einstellungen öffnen",
     "addTo": "Zu „{{title}}“ hinzufügen",
     "already": {
       "explored": "Schon erkundet in „{{title}}“",
-      "building": "Schon in Bauen als #{{issue}}",
+      "building": "Schon in der Fabrik als #{{issue}}",
       "fixed": "Schon behoben in #{{issue}}"
     },
     "why": "Warum: {{why}}"

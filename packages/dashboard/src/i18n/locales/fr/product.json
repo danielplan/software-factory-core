@@ -43,7 +43,12 @@
     "open": "Ouvrir"
   },
   "problem": {
-    "details": "Détails techniques"
+    "details": "Détails techniques",
+    "aFolder": "un autre dossier",
+    "elsewhere": "L'adresse {{port}} est prise par un programme d'un autre dossier",
+    "elsewhereText": "{{name}} en a besoin, mais un autre programme l'utilise (peut-être une autre copie de ce projet). Arrêtez-le, puis appuyez sur Réessayer.",
+    "taken": "L'adresse {{port}} est prise par un autre programme",
+    "takenText": "{{name}} en a besoin. Fermez l'autre programme (peut-être une ancienne fenêtre), puis appuyez sur Réessayer."
   },
   "groups": {
     "language": "Langage",

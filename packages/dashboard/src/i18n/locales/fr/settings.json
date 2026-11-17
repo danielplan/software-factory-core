@@ -107,5 +107,55 @@
   "sections": {
     "general": "Général",
     "work": "Travail"
+  },
+  "known": {
+    "kits": {
+      "expo-app": {
+        "name": "App Expo",
+        "about": "Une app pour téléphone faite avec Expo et React Native."
+      },
+      "nestjs-backend": {
+        "name": "Backend NestJS",
+        "about": "Un serveur fait avec NestJS."
+      },
+      "other-code": {
+        "name": "Autre code",
+        "about": "Tout autre code : un site, un service ou un outil, lancé et vérifié avec ses propres commandes."
+      },
+      "react-web-app": {
+        "name": "App web React",
+        "about": "Une app web faite avec React et Vite."
+      },
+      "sveltekit-app": {
+        "name": "App web SvelteKit",
+        "about": "Une app web faite avec SvelteKit."
+      },
+      "typescript-package": {
+        "name": "Paquet TypeScript",
+        "about": "Du code partagé que d'autres produits utilisent (types, schémas, règles), distribué en paquet."
+      }
+    },
+    "addOns": {
+      "github": {
+        "name": "Tableau GitHub",
+        "about": "Le travail suivi sur un tableau GitHub, via la GitHub CLI."
+      },
+      "jira": {
+        "name": "Jira Cloud",
+        "about": "Le travail suivi dans un projet Jira Cloud, avec un jeton d'API."
+      }
+    },
+    "groups": {
+      "ai-model": {
+        "name": "Modèle d'IA",
+        "about": "Le modèle Claude avec lequel le kobold réfléchit."
+      }
+    },
+    "fields": {
+      "FACTORY_CLAUDE_MODEL": {
+        "label": "Modèle Claude",
+        "help": "Laissez vide pour celui par défaut de votre compte, ou écrivez opus, sonnet ou haiku."
+      }
+    }
   }
 }

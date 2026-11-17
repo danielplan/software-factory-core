@@ -37,12 +37,19 @@ test("each stage counts what reached it at least, and the headline says how it g
     [
       ["Heard", 3],
       ["Ideas", 7],
-      ["Sent to Build", 5],
+      ["Sent to the Factory", 5],
       ["In the app", 3],
       ["Worked", 1],
     ],
   );
-  assert.equal(river.stages[2]?.words, "5 sent to Build");
+  assert.equal(river.stages[2]?.words, "5 sent to the Factory");
+  assert.equal(river.stages[0]?.href, "#understand");
+  // What came in and is still to look at on Signals is heard too.
+  const [heard] = riverOf([persona([{}])], [], 4).stages;
+  assert.deepEqual(
+    [heard?.count, heard?.words, heard?.href],
+    [5, "5 things heard", "#signals"],
+  );
   assert.equal(river.headline, "1 of 7 ideas worked so far · 2 being built");
   assert.equal(
     riverOf([], [idea("worked")]).headline,

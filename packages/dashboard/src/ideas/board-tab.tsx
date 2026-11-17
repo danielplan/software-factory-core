@@ -48,9 +48,7 @@ export function BoardTab({ state }: Readonly<{ state: FactoryState }>) {
     });
   };
   const now = doing(state.ideas, work);
-  const empty =
-    !state.ideas.some((one) => one.status !== "draft") &&
-    (work?.cards.length ?? 0) === 0;
+  const empty = nothingYet(state, build.waiting);
   const shown = problem ?? work?.problem ?? work?.builder.problem ?? null;
   return (
     <div className="grid gap-3">
@@ -225,6 +223,15 @@ function Columns({
         })}
       </div>
     </div>
+  );
+}
+
+// Nothing at all: no idea agreed to, no card, no fix waiting for one.
+function nothingYet(state: FactoryState, waiting: number): boolean {
+  return (
+    !state.ideas.some((one) => one.status !== "draft") &&
+    (state.work?.cards.length ?? 0) === 0 &&
+    waiting === 0
   );
 }
 

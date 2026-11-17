@@ -5,18 +5,25 @@
     "empty": "Niente in attesa. Sei in pari.",
     "didItWork": "Ha funzionato?",
     "review": "Controlla il lavoro",
-    "send": "Manda in Build",
+    "send": "Manda alla Fabbrica",
     "vote": "Vota una versione",
     "look": "Dai un'occhiata",
-    "said_one": "{{count}} cosa nuova detta dalle persone",
-    "said_other": "{{count}} cose nuove dette dalle persone"
+    "ticket": "Crea il ticket",
+    "signals_one": "{{count}} nuovo segnale",
+    "signals_other": "{{count}} nuovi segnali",
+    "stories_one": "{{count}} nuova storia dal kobold",
+    "stories_other": "{{count}} nuove storie dal kobold",
+    "serious_one": "{{count}} problema serio trovato dal Controllo",
+    "serious_other": "{{count}} problemi seri trovati dal Controllo",
+    "found_one": "{{count}} cosa trovata dal Controllo",
+    "found_other": "{{count}} cose trovate dal Controllo",
+    "fixes_one": "{{count}} correzione in attesa di un ticket",
+    "fixes_other": "{{count}} correzioni in attesa di un ticket"
   },
-  "discovery": {
-    "title": "Discovery",
-    "empty": "Niente di aperto. Aggiungi quello che dicono le persone in Capire."
+  "problems": {
+    "empty": "Niente di aperto. Aggiungi quello che dicono le persone in Segnali."
   },
-  "build": {
-    "title": "Build",
+  "work": {
     "empty": "Al momento non si sta costruendo niente."
   },
   "seeAll": "Vedi tutti ({{count}})",
@@ -31,14 +38,14 @@
     "title": "Come stanno andando le cose",
     "heard": "Sentiti",
     "ideas": "Idee",
-    "sent": "Mandate in Build",
+    "sent": "Mandate alla Fabbrica",
     "inApp": "Nell'app",
     "worked": "Hanno funzionato",
-    "heardWords_one": "{{count}} problema sentito",
-    "heardWords_other": "{{count}} problemi sentiti",
+    "heardWords_one": "{{count}} cosa sentita",
+    "heardWords_other": "{{count}} cose sentite",
     "ideasWords_one": "{{count}} idea provata",
     "ideasWords_other": "{{count}} idee provate",
-    "sentWords": "{{count}} mandate in Build",
+    "sentWords": "{{count}} mandate alla Fabbrica",
     "inAppWords": "{{count}} nell'app",
     "workedWords": "{{count}} hanno funzionato",
     "nothing": "Ancora niente da provare: inizia con un'idea.",

@@ -51,7 +51,7 @@ function serverFor(tools: JobTools): McpServer {
       "sort_signal",
       {
         description:
-          "Sort the signal you were given and put it in its place, in one call: what it is (sortedAs), the persona it sounds like and why, and where it goes: evidence in one scene of an existing story (a guessed scene becomes seen), a new story you write from it, Build (a bug or an update), answered (a plain question), or unsure. Answers with what it did, or why it does not fit.",
+          "Sort the signal you were given and put it in its place, in one call: what it is (sortedAs), the persona it sounds like and why (or, when none fits, a new persona for a person to confirm), and where it goes: evidence in one scene of an existing story (a guessed scene becomes seen), a new story you write from it, Build (a bug or an update), answered (a plain question), or unsure. Answers with what it did, or why it does not fit.",
         inputSchema: SORT_INPUT,
       },
       (args) => toolAnswer(() => tools.act(args)),

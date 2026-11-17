@@ -5,18 +5,25 @@
     "empty": "Rien ne vous attend. Tout est à jour.",
     "didItWork": "Ça a marché ?",
     "review": "Vérifier le travail",
-    "send": "Envoyer en Build",
+    "send": "Envoyer à la Fabrique",
     "vote": "Voter pour une version",
     "look": "Jeter un œil",
-    "said_one": "{{count}} nouvelle chose dite par les gens",
-    "said_other": "{{count}} nouvelles choses dites par les gens"
+    "ticket": "Créer le ticket",
+    "signals_one": "{{count}} nouveau signal",
+    "signals_other": "{{count}} nouveaux signaux",
+    "stories_one": "{{count}} nouvelle histoire du kobold",
+    "stories_other": "{{count}} nouvelles histoires du kobold",
+    "serious_one": "{{count}} problème grave trouvé par le Bilan",
+    "serious_other": "{{count}} problèmes graves trouvés par le Bilan",
+    "found_one": "{{count}} chose trouvée par le Bilan",
+    "found_other": "{{count}} choses trouvées par le Bilan",
+    "fixes_one": "{{count}} correction en attente d'un ticket",
+    "fixes_other": "{{count}} corrections en attente d'un ticket"
   },
-  "discovery": {
-    "title": "Discovery",
-    "empty": "Rien d'ouvert. Ajoutez ce que les gens ont dit dans Comprendre."
+  "problems": {
+    "empty": "Rien d'ouvert. Ajoutez ce que les gens ont dit dans Signaux."
   },
-  "build": {
-    "title": "Build",
+  "work": {
     "empty": "Rien n'est en construction pour le moment."
   },
   "seeAll": "Tout voir ({{count}})",
@@ -31,14 +38,14 @@
     "title": "Où en sont les choses",
     "heard": "Entendus",
     "ideas": "Idées",
-    "sent": "Envoyées en Build",
+    "sent": "Envoyées à la Fabrique",
     "inApp": "Dans l'app",
     "worked": "Ont marché",
-    "heardWords_one": "{{count}} problème entendu",
-    "heardWords_other": "{{count}} problèmes entendus",
+    "heardWords_one": "{{count}} chose entendue",
+    "heardWords_other": "{{count}} choses entendues",
     "ideasWords_one": "{{count}} idée essayée",
     "ideasWords_other": "{{count}} idées essayées",
-    "sentWords": "{{count}} envoyées en Build",
+    "sentWords": "{{count}} envoyées à la Fabrique",
     "inAppWords": "{{count}} dans l'app",
     "workedWords": "{{count}} ont marché",
     "nothing": "Rien d'essayé pour l'instant : commencez par une idée.",

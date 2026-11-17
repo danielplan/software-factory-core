@@ -43,7 +43,12 @@
     "open": "Öffnen"
   },
   "problem": {
-    "details": "Technische Details"
+    "details": "Technische Details",
+    "aFolder": "einen anderen Ordner",
+    "elsewhere": "Adresse {{port}} wird von einem Programm aus einem anderen Ordner benutzt",
+    "elsewhereText": "{{name}} braucht sie, aber ein anderes Programm benutzt sie (vielleicht eine andere Kopie dieses Projekts). Beende es, dann drücke Nochmal versuchen.",
+    "taken": "Adresse {{port}} wird von einem anderen Programm benutzt",
+    "takenText": "{{name}} braucht sie. Schließe das andere Programm (vielleicht ein älteres Fenster), dann drücke Nochmal versuchen."
   },
   "groups": {
     "language": "Sprache",

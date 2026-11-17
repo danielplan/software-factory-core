@@ -62,7 +62,7 @@ test("the answer shows as a pill, and the dialog's lines say where the draft com
   });
   assert.equal(
     ticketLine(ticket(), "Monday order list"),
-    "“Monday order list”, in Build since 2026-11-16.",
+    "“Monday order list”, in the Factory since 2026-11-16.",
   );
   assert.equal(ticketLine(ticket({ since: "" }), "X"), "“X”.");
 

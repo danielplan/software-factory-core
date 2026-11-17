@@ -5,18 +5,25 @@
     "empty": "Nichts wartet auf dich. Alles erledigt.",
     "didItWork": "Hat es funktioniert?",
     "review": "Arbeit prüfen",
-    "send": "An Build senden",
+    "send": "An die Fabrik senden",
     "vote": "Für eine Version stimmen",
     "look": "Ansehen",
-    "said_one": "{{count}} Neues, das Leute gesagt haben",
-    "said_other": "{{count}} neue Dinge, die Leute gesagt haben"
+    "ticket": "Ticket anlegen",
+    "signals_one": "{{count}} neues Signal",
+    "signals_other": "{{count}} neue Signale",
+    "stories_one": "{{count}} neue Geschichte vom Kobold",
+    "stories_other": "{{count}} neue Geschichten vom Kobold",
+    "serious_one": "{{count}} ernstes Problem aus dem Check-up",
+    "serious_other": "{{count}} ernste Probleme aus dem Check-up",
+    "found_one": "{{count}} Fund aus dem Check-up",
+    "found_other": "{{count}} Funde aus dem Check-up",
+    "fixes_one": "{{count}} Korrektur wartet auf ein Ticket",
+    "fixes_other": "{{count}} Korrekturen warten auf ein Ticket"
   },
-  "discovery": {
-    "title": "Discovery",
-    "empty": "Nichts offen. Füge unter Verstehen hinzu, was Leute gesagt haben."
+  "problems": {
+    "empty": "Nichts offen. Füge unter Signale hinzu, was Leute gesagt haben."
   },
-  "build": {
-    "title": "Build",
+  "work": {
     "empty": "Gerade wird nichts gebaut."
   },
   "seeAll": "Alle ansehen ({{count}})",
@@ -31,14 +38,14 @@
     "title": "Wie es vorangeht",
     "heard": "Gehört",
     "ideas": "Ideen",
-    "sent": "An Build",
+    "sent": "An die Fabrik",
     "inApp": "In der App",
     "worked": "Hat funktioniert",
-    "heardWords_one": "{{count}} Problem gehört",
-    "heardWords_other": "{{count}} Probleme gehört",
+    "heardWords_one": "{{count}} Sache gehört",
+    "heardWords_other": "{{count}} Dinge gehört",
     "ideasWords_one": "{{count}} Idee ausprobiert",
     "ideasWords_other": "{{count}} Ideen ausprobiert",
-    "sentWords": "{{count}} an Build gesendet",
+    "sentWords": "{{count}} an die Fabrik gesendet",
     "inAppWords": "{{count}} in der App",
     "workedWords": "{{count}} hat funktioniert",
     "nothing": "Noch nichts ausprobiert: fang mit einer Idee an.",

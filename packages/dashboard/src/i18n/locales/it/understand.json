@@ -35,8 +35,8 @@
     "story": "La storia “{{title}}”",
     "problem": "Il problema “{{title}}”",
     "issue": "Issue #{{issue}}",
-    "update": "Build, come miglioramento",
-    "fix": "Build, come correzione",
+    "update": "Fabbrica, come miglioramento",
+    "fix": "Fabbrica, come correzione",
     "answered": "Risposto"
   },
   "known": {
@@ -94,16 +94,17 @@
     "soundsLike": "sembra {{name}}",
     "readingWhat": "Il kobold lo sta leggendo: {{what}}",
     "reading": "Il kobold lo sta leggendo…",
+    "waiting": "In attesa del suo turno…",
     "fix": "Correggi",
     "explore": "Esplora",
     "dismiss": "Ignora",
-    "sending": "Invio a Costruire…",
-    "sentNoBoard": "Inviato a Costruire. Per farne una card, collega una board GitHub.",
+    "sending": "Invio alla Fabbrica…",
+    "sentNoBoard": "Inviato alla Fabbrica. Per farne una scheda, collega una board GitHub.",
     "openSettings": "Apri Impostazioni",
     "addTo": "Aggiungi a “{{title}}”",
     "already": {
       "explored": "Già esplorato in “{{title}}”",
-      "building": "Già in Costruire come #{{issue}}",
+      "building": "Già in Fabbrica come #{{issue}}",
       "fixed": "Già risolto in #{{issue}}"
     },
     "why": "Perché: {{why}}"

@@ -24,15 +24,17 @@ export function sortPrompt(
 }
 
 // Answering a question someone asked about the people who use the product
-// (Ask the kobold, at the top of every page), from the records alone;
-// nothing is written.
+// (the Chat), from the records alone, with what people said lately, sorted
+// or not yet; nothing is written.
 export function answerPrompt(records: Records, question: string): string {
   return [
-    "Someone on the team asks the question below about the people who use the product. Answer it from the records below, in two to four short, plain sentences, naming the persona or story the answer comes from. When the records do not tell, say so in a sentence. Write nothing and call no tool.",
+    "Someone on the team asks the question below about the people who use the product. Answer it from the records below, in two to four short, plain sentences, naming the persona, story or signal the answer comes from. A signal is one thing one person said: never count signals into “many people”. When the records do not tell, say so in a sentence. Write nothing and call no tool.",
     "",
     `The question: ${question.trim()}`,
     "",
     ...recordLines(records),
+    "",
+    ...saidLines(records),
   ].join("\n");
 }
 
@@ -115,6 +117,34 @@ function signalLines(records: Records, signal: Signal): string {
     ...(signal.when ? [signal.when] : []),
   ];
   return `${parts.join(", ")}:\n${signal.text}`;
+}
+
+// The signals that came in last, newest first, each on a line: where it
+// came from, when, who it sounds like and the place it went, if any.
+const SAID_SHOWN = 50;
+const SAID_LENGTH = 400;
+
+function saidLines(records: Records): string[] {
+  const newest = records.signals.slice(-SAID_SHOWN).reverse();
+  const older = records.signals.length - newest.length;
+  return [
+    "What people said, the latest signals:",
+    ...newest.map((signal) => {
+      const source = records.sources.find((s) => s.id === signal.source);
+      const kind =
+        source?.kind === "personaRuns" ? "a persona run, not real people" : "";
+      const about = [
+        source?.name ?? signal.source,
+        kind,
+        signal.when,
+        signal.soundsLike ? `sounds like ${signal.soundsLike}` : "",
+        signal.wentTo ? `went to ${signal.wentTo.to}` : "not sorted yet",
+      ].filter(Boolean);
+      const text = signal.text.replaceAll(/\s+/g, " ").slice(0, SAID_LENGTH);
+      return `- ${signal.id} (${about.join(", ")}): ${text}`;
+    }),
+    ...(older > 0 ? [`(and ${String(older)} older signals not shown)`] : []),
+  ];
 }
 
 // The personas, their problems and their stories.

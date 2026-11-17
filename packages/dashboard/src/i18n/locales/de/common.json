@@ -27,6 +27,7 @@
     "thinking": "Denkt über {{title}} nach",
     "planning": "Plant Karte #{{number}}",
     "doingWith": "{{doing}}: {{activity}}",
+    "waiting": "Wartet, bis es dran ist",
     "doing": {
       "sort": "Sortiert, was hereinkam",
       "suggest": "Liest die Probleme",

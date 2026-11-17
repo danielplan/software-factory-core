@@ -24,7 +24,10 @@
     "clear": "Nothing worrying found",
     "handled": "Already handled ({{count}})",
     "failed": "The check-up of {{name}} couldn't finish: {{why}}",
-    "stopped": "The check-up of {{name}} was stopped before the end."
+    "stopped": "The check-up of {{name}} was stopped before the end.",
+    "sample": "Each check-up looks at part of the code: run it again to look further.",
+    "found_one": "{{count}} new this time",
+    "found_other": "{{count}} new this time"
   },
   "severity": {
     "high": "Serious",
@@ -47,8 +50,25 @@
     "sent": "On Build as #{{issue}}",
     "waiting": "On Build. To turn it into a ticket, connect a GitHub board in Settings.",
     "onBuild": "On Build",
-    "dismissed": "Set aside"
+    "dismissed": "Set aside",
+    "new": "New",
+    "restore": "Bring back"
   },
   "problem": "That didn't work: {{why}}",
-  "crumbSignals": "Signals"
+  "crumbSignals": "Signals",
+  "activity": {
+    "reading": "Reading the code of “{{part}}”…",
+    "notes": "Reading the product's notes…",
+    "tests": "Reading the tests…",
+    "searching": "Looking for {{what}}…",
+    "searchingCode": "Searching the code…",
+    "files": "Finding its way around the files…",
+    "writing": "Writing down a problem it found…"
+  },
+  "refused": {
+    "notRunning": "That check-up is not running any more.",
+    "gone": "That finding is not there any more.",
+    "acted": "Someone has acted on that finding already.",
+    "notSetAside": "That finding is not set aside."
+  }
 }

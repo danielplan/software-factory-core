@@ -1,8 +1,9 @@
 // What the Check-up page shows, worked out from what the server sends
 // (GET /api/checks): which products are being checked, the open findings
-// grouped by how serious they are (most serious first), the ones already
-// handled apart, and when the last check ended. Kept apart from the
-// components so it is checked on its own.
+// grouped by how serious they are (most serious first, the new ones first
+// within each), the ones already handled apart, when the last check ended
+// and how many it found that were new. Kept apart from the components so
+// it is checked on its own.
 
 import type {
   CheckView,
@@ -27,6 +28,8 @@ export type CheckupView = {
   handled: Found[];
   // When the last check ended, if one did (ISO time).
   lastEnded: string | null;
+  // How many the last checks found that were new, as the server counted.
+  found: number;
   // A check ended (done) and found nothing still open.
   allClear: boolean;
   // Checks that could not finish, with why.
@@ -54,10 +57,13 @@ export function checkupOf(view: ChecksView | null): CheckupView {
     running,
     open: SEVERITIES.map((severity) => ({
       severity,
-      findings: open.filter((one) => one.severity === severity),
+      findings: open
+        .filter((one) => one.severity === severity)
+        .toSorted((a, b) => Number(b.fresh) - Number(a.fresh)),
     })).filter((group) => group.findings.length > 0),
     handled: all.filter((one) => one.status !== "open"),
     lastEnded: ended.at(-1) ?? null,
+    found: checks.reduce((all, check) => all + check.kept, 0),
     allClear:
       running.length === 0 &&
       open.length === 0 &&

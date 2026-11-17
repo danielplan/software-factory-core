@@ -43,7 +43,12 @@
     "open": "Apri"
   },
   "problem": {
-    "details": "Dettagli tecnici"
+    "details": "Dettagli tecnici",
+    "aFolder": "un'altra cartella",
+    "elsewhere": "L'indirizzo {{port}} è usato da un programma di un'altra cartella",
+    "elsewhereText": "{{name}} ne ha bisogno, ma lo usa un altro programma (forse un'altra copia di questo progetto). Fermalo, poi premi Riprova.",
+    "taken": "L'indirizzo {{port}} è usato da un altro programma",
+    "takenText": "{{name}} ne ha bisogno. Chiudi l'altro programma (forse una finestra vecchia), poi premi Riprova."
   },
   "groups": {
     "language": "Linguaggio",

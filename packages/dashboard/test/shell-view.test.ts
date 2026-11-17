@@ -61,6 +61,7 @@ const job = (more: Partial<KoboldJob>): KoboldJob => ({
   about: "s1",
   made: null,
   working: false,
+  waiting: false,
   activity: null,
   done: null,
   problem: null,
@@ -144,6 +145,18 @@ test("the bottom of the sidebar says whether the kobold is active, and on what",
       .detail,
     "Sorting what came in: Mia",
   );
+  // One at work comes before one waiting its turn; alone, waiting says so.
+  const waiting = job({ working: true, waiting: true });
+  assert.equal(
+    koboldStatus([waiting, job({ kind: "check", working: true })], null, [], "")
+      .detail,
+    "Running a check-up",
+  );
+  assert.deepEqual(koboldStatus([waiting], null, [], ""), {
+    busy: true,
+    title: "Active",
+    detail: "Waiting its turn",
+  });
   assert.equal(
     koboldStatus([], null, [thinking], "").detail,
     "Thinking about Wish list",

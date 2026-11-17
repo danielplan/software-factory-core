@@ -88,10 +88,10 @@ test("where what people said went, with the page that shows it", () => {
     { words: "The problem “Lost”", href: "#understand/mia" },
   );
   assert.equal(went({ to: "ticket", issue: 140 }).words, "Issue #140");
-  assert.equal(went({ to: "build" }, "bug").words, "Build, as a fix");
+  assert.equal(went({ to: "build" }, "bug").words, "Factory, as a fix");
   assert.equal(
     went({ to: "build" }, "update").words,
-    "Build, as an improvement",
+    "Factory, as an improvement",
   );
   assert.equal(went({ to: "answered" }).words, "Answered");
 });
@@ -231,7 +231,7 @@ test("before choosing, a signal says what already exists for its problem", () =>
   );
   assert.equal(
     alreadyWords({ kind: "building", issue: 12 }),
-    "Already in Build as #12",
+    "Already in the Factory as #12",
   );
   assert.equal(
     alreadyWords({ kind: "fixed", issue: 9 }),

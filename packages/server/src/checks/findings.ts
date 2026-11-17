@@ -1,11 +1,13 @@
 // What a check-up found, and where it is kept: one file in the factory's
-// folder, checks.json, with the last check of each product and its
-// findings. Like the records' database it is about this computer's copy of
-// the code at one moment, so git ignores it (the factory's .gitignore names
-// it as soon as the first check starts). A finding is the kobold's, as the
-// kobold reported it with its tool, until a person sends it to Build or says
-// it is not a problem.
-
+// folder, checks.json, with each product's findings and its last check.
+// Like the records' database it is about this computer's copy of the code
+// at one moment, so git ignores it (the factory's .gitignore names it as
+// soon as the first check starts). A finding is the kobold's, as the kobold
+// reported it with its tool, until a person sends it to Build or says it is
+// not a problem (and may bring it back). Each check looks at part of the
+// code, so what one finds is added to what the ones before found: while it
+// runs its findings wait apart, and the last ones stay as they were; when
+// it ends they join them, marked new.
 import { randomUUID } from "node:crypto";
 import {
   appendFileSync,
@@ -20,6 +22,7 @@ import { FACTORY_FOLDER } from "@software-factory/core";
 import { z } from "zod";
 
 import { Refused } from "../refused.ts";
+import { placeOf } from "./where.ts";
 
 const FILE = "checks.json";
 
@@ -76,6 +79,8 @@ const findingSchema = z.object({
   // board could make one) or not a problem.
   status: z.enum(["open", "sent", "dismissed"]),
   issue: z.number().int().positive().nullable().default(null),
+  // Found by the last check, not by one before it.
+  fresh: z.boolean().default(false),
 });
 export type Finding = z.infer<typeof findingSchema>;
 
@@ -88,7 +93,13 @@ const checkSchema = z.object({
   state: z.enum(["running", "done", "stopped", "failed"]),
   // What the kobold said at the end, or why it could not.
   said: z.string().nullable(),
+  // Everything found so far, by this check and the ones before it.
   findings: z.array(findingSchema),
+  // What the running check has found, until it ends.
+  incoming: z.array(findingSchema).default([]),
+  // How many the last check found and kept, counted here (never the
+  // kobold's own count).
+  kept: z.number().int().min(0).default(0),
 });
 export type Check = z.infer<typeof checkSchema>;
 
@@ -122,19 +133,38 @@ export class ChecksFile {
     return this.all().find((one) => one.product === product) ?? null;
   }
 
-  // A new check of a product, in place of its last one.
+  // A new check of a product: what was found before stays as it is (and
+  // when the last check ended) until it ends.
   started(product: string, job: string): Check {
+    const before = this.of(product);
     const check: Check = {
       product,
       job,
       started: new Date().toISOString(),
-      ended: null,
+      ended: before?.ended ?? null,
       state: "running",
       said: null,
-      findings: [],
+      findings: before?.findings ?? [],
+      incoming: [],
+      kept: before?.kept ?? 0,
     };
     this.save([...this.all().filter((one) => one.product !== product), check]);
     return check;
+  }
+
+  // A check ended: what it found joins what was found before, marked new.
+  ended(product: string, how: Pick<Check, "state" | "said">): Check {
+    return this.change(product, (check) => ({
+      ...check,
+      ...how,
+      ended: new Date().toISOString(),
+      findings: [
+        ...check.findings.map((one) => ({ ...one, fresh: false })),
+        ...check.incoming.map((one) => ({ ...one, fresh: true })),
+      ],
+      incoming: [],
+      kept: check.incoming.length,
+    }));
   }
 
   // Changes the check of a product, refused when there is none.
@@ -148,17 +178,18 @@ export class ChecksFile {
     return changed;
   }
 
-  // A finding the kobold reported, kept open.
+  // A finding the kobold reported, kept open with the running check's.
   found(product: string, input: FindingInput): Finding {
     const finding: Finding = {
       ...input,
       id: randomUUID(),
       status: "open",
       issue: null,
+      fresh: true,
     };
     this.change(product, (check) => ({
       ...check,
-      findings: [...check.findings, finding],
+      incoming: [...check.incoming, finding],
     }));
     return finding;
   }
@@ -185,4 +216,21 @@ export class ChecksFile {
       `${last === undefined || last === "" ? "" : "\n"}${FILE}\n`,
     );
   }
+}
+
+// Whether two findings are the same problem: at the same place, or with
+// the same title in the same file (a later check may cite another line).
+export function alike(
+  one: Pick<Finding, "where" | "title">,
+  other: Pick<Finding, "where" | "title">,
+): boolean {
+  const a = placeOf(one.where);
+  const b = placeOf(other.where);
+  if (a.file !== b.file) return false;
+  return a.line === b.line || sameWords(one.title, other.title);
+}
+
+function sameWords(a: string, b: string): boolean {
+  const words = (text: string) => text.trim().toLowerCase().split(/\s+/);
+  return words(a).join(" ") === words(b).join(" ");
 }

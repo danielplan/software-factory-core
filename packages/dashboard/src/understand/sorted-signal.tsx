@@ -120,6 +120,12 @@ export function Why({ why }: Readonly<{ why: string }>) {
 export function JobLine({ job }: Readonly<{ job?: KoboldJob }>) {
   const { t } = useTranslation("understand");
   if (!job) return null;
+  if (job.waiting)
+    return (
+      <p className="text-tag text-muted-foreground" role="status">
+        {t("signal.waiting")}
+      </p>
+    );
   if (job.working)
     return (
       <p className="animate-breathe text-tag text-primary" role="status">

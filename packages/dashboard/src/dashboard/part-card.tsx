@@ -12,6 +12,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { t } from "@/i18n/i18n";
+import { plainProblem } from "@/product/plain-problem";
 
 const LIGHT = {
   running: "product:light.running",
@@ -30,15 +31,17 @@ export function lightWords(part: PartView): string {
   return t(LIGHT[part.light]);
 }
 
+// What went wrong, in plain words; folders and logs behind "details".
 export function PartProblem({
   problem,
 }: Readonly<{ problem: NonNullable<PartView["problem"]> }>) {
   const { t: say } = useTranslation("product");
+  const plain = plainProblem(problem);
   return (
     <div className="grid min-w-0 gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-note [overflow-wrap:anywhere]">
-      <p className="font-medium text-destructive">{problem.title}</p>
-      <p className="text-foreground/80">{problem.text}</p>
-      {problem.details.length > 0 && (
+      <p className="font-medium text-destructive">{plain.title}</p>
+      <p className="text-foreground/80">{plain.text}</p>
+      {plain.details.length > 0 && (
         <Collapsible>
           <CollapsibleTrigger className="inline-flex items-center gap-1 text-tag text-muted-foreground underline-offset-2 hover:underline">
             {say("problem.details")}{" "}
@@ -46,7 +49,7 @@ export function PartProblem({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <pre className="mt-1 max-h-40 overflow-auto text-tag whitespace-pre-wrap">
-              {problem.details.join("\n")}
+              {plain.details.join("\n")}
             </pre>
           </CollapsibleContent>
         </Collapsible>

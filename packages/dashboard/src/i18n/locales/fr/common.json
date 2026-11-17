@@ -27,6 +27,7 @@
     "thinking": "Réfléchit à {{title}}",
     "planning": "Planifie la carte #{{number}}",
     "doingWith": "{{doing}} : {{activity}}",
+    "waiting": "Attend son tour",
     "doing": {
       "sort": "Trie ce qui est arrivé",
       "suggest": "Lit les problèmes",

@@ -107,5 +107,55 @@
   "sections": {
     "general": "Allgemein",
     "work": "Arbeit"
+  },
+  "known": {
+    "kits": {
+      "expo-app": {
+        "name": "Expo-App",
+        "about": "Eine Handy-App, gebaut mit Expo und React Native."
+      },
+      "nestjs-backend": {
+        "name": "NestJS-Backend",
+        "about": "Ein Server, gebaut mit NestJS."
+      },
+      "other-code": {
+        "name": "Anderer Code",
+        "about": "Jeder andere Code: eine Website, ein Dienst oder ein Werkzeug, gestartet und geprüft mit eigenen Befehlen."
+      },
+      "react-web-app": {
+        "name": "React-Web-App",
+        "about": "Eine Web-App, gebaut mit React und Vite."
+      },
+      "sveltekit-app": {
+        "name": "SvelteKit-Web-App",
+        "about": "Eine Web-App, gebaut mit SvelteKit."
+      },
+      "typescript-package": {
+        "name": "TypeScript-Paket",
+        "about": "Gemeinsamer Code, den andere Produkte nutzen (Typen, Schemas, Regeln), als Paket weitergegeben."
+      }
+    },
+    "addOns": {
+      "github": {
+        "name": "GitHub-Board",
+        "about": "Arbeit auf einem GitHub-Board, über die GitHub CLI."
+      },
+      "jira": {
+        "name": "Jira Cloud",
+        "about": "Arbeit in einem Jira-Cloud-Projekt, mit einem API-Token."
+      }
+    },
+    "groups": {
+      "ai-model": {
+        "name": "KI-Modell",
+        "about": "Mit welchem Claude-Modell der Kobold denkt."
+      }
+    },
+    "fields": {
+      "FACTORY_CLAUDE_MODEL": {
+        "label": "Claude-Modell",
+        "help": "Leer lassen für das Standardmodell deines Kontos, oder opus, sonnet oder haiku schreiben."
+      }
+    }
   }
 }

@@ -43,7 +43,12 @@
     "open": "Open"
   },
   "problem": {
-    "details": "Technical details"
+    "details": "Technical details",
+    "aFolder": "another folder",
+    "elsewhere": "Address {{port}} is taken by a program from another folder",
+    "elsewhereText": "{{name}} needs it, but another program uses it (perhaps another copy of this project). Stop that one, then press Try again.",
+    "taken": "Address {{port}} is taken by another program",
+    "takenText": "{{name}} needs it. Close the other program (perhaps an older window), then press Try again."
   },
   "groups": {
     "language": "Language",

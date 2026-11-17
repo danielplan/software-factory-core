@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 
 import type { FactoryState } from "./dashboard";
+import { fieldWords, groupWords } from "@/lib/server-words";
+
 import { SettingInput } from "./setting-input";
 
 // A settings group in its own card: what is set now, Save, and the parts
@@ -21,8 +23,9 @@ export function GroupCard({
   group,
   state,
 }: Readonly<{ group: GroupView; state: FactoryState }>) {
+  const words = groupWords(group);
   return (
-    <Topic title={group.name} about={group.about}>
+    <Topic title={words.name} about={words.about}>
       <GroupForm group={group} state={state} />
     </Topic>
   );
@@ -89,7 +92,7 @@ function Fields({ group, form }: Readonly<{ group: GroupView; form: Form }>) {
         <SettingInput
           key={field.key}
           id={`${group.id}-${field.key}`}
-          field={field}
+          field={fieldWords(field)}
           typed={form.values[field.key]}
           problem={form.refused[field.key]}
           onType={(value) => {

@@ -142,7 +142,9 @@ function ProjectFacts({ project }: Readonly<{ project: Project }>) {
   return (
     <dl className="grid gap-2 text-body">
       <Line label={t("project.folder")}>
-        <span className="font-mono text-tag break-all">{project.folder}</span>
+        <span title={project.folder} className="break-all">
+          {lastFolder(project.folder)}
+        </span>
       </Line>
       <Line label={t("project.branch")}>
         {project.branch ?? t("project.noGit")}
@@ -153,6 +155,10 @@ function ProjectFacts({ project }: Readonly<{ project: Project }>) {
     </dl>
   );
 }
+
+// The folder's own name; the whole of it shows on hovering.
+const lastFolder = (folder: string) =>
+  folder.split(/[/\\]/).findLast((part) => part !== "") ?? folder;
 
 // The stack's groups as the server names them, in the page's language.
 const GROUPS = {

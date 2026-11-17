@@ -139,7 +139,7 @@ rebuilt from them), with the same store and pages.
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Source       | where signals come from, and what kind: people, usage, errors, alerts, or persona runs                                                                 |
 | Signal       | one thing someone said or did, single and never counted (only machine errors say how often); who it sounds like, why, who sorted it, and where it went |
-| Persona      | a made-up person who stands for a kind of user: role, what they want, what they are based on                                                           |
+| Persona      | a made-up person who stands for a kind of user: role, what they want, what they are based on, and who made it (`by`, the kobold until confirmed)       |
 | Customer     | a real customer, who is like one persona                                                                                                               |
 | Story        | what a persona goes through, in scenes; a scene with signals as evidence is seen, one without is guessed; it breaks once, at one problem               |
 | Problem      | a few signals read together, with what is behind them; assumed when it only comes from an idea                                                         |
@@ -184,20 +184,31 @@ server serves over MCP at `/api/kobold/mcp`, each job with its own token.
 The tools write the records through the store, so every write is checked
 like any other (`packages/server/src/kobold/`):
 
-| Job                    | When                                                                                 | What it writes                                                                                                                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sort a signal          | a signal comes in (`POST /api/signals`), or a person moves one to "a new story"      | what it is, the persona it sounds like and why, and its place: evidence in a scene of a story (a guessed scene becomes seen), a new story with one problem, Build (a bug or an update), or answered |
-| Suggest a real problem | a sort gave a persona a new problem, and two or more of theirs have none behind them | a real problem behind the problems that point the same way, `by: kobold`                                                                                                                            |
-| Ask                    | a person presses Ask under a story with guessed scenes (`POST /api/understand/ask`)  | nothing: it drafts a short message for people like the persona, which the page shows to copy                                                                                                        |
+| Job                    | When                                                                                 | What it writes                                                                                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sort a signal          | a signal comes in (`POST /api/signals`), or a person moves one to "a new story"      | what it is, the persona it sounds like and why (a new persona, `by: kobold`, when none fits), and its place: evidence in a scene of a story (a guessed scene becomes seen), a new story with one problem, Build (a bug or an update), or answered |
+| Suggest a real problem | a sort gave a persona a new problem, and two or more of theirs have none behind them | a real problem behind the problems that point the same way, `by: kobold`                                                                                                                                                                          |
+| Ask                    | a person presses Ask under a story with guessed scenes (`POST /api/understand/ask`)  | nothing: it drafts a short message for people like the persona, which the page shows to copy                                                                                                                                                      |
 
-Sorting and suggesting run one at a time, in the order asked. The page sees
-each job while it works and how it ended (`GET /api/understand/kobold`, and
-`kobold` events on the page's stream). The kobold proposes and a person
-confirms: what it wrote says `by: kobold` until a person moves the signal
+Sorting, suggesting, ideas and check-ups run one at a time, in the order
+asked; a job says `waiting` until its turn comes. A sort that waited while a
+person placed its signal leaves their choice as it is ("Already placed by
+…"). The page sees each job while it works and how it ended
+(`GET /api/understand/kobold`, and `kobold` events on the page's stream),
+never its tools' token. A question (the Chat) is answered at once, from the
+personas, problems and stories and the fifty signals that came in last,
+sorted or not. The kobold proposes and a person confirms: what it wrote says
+`by: kobold` until a person moves the signal
 (`POST /api/understand/move`), says it looks good
-(`POST /api/understand/looks-good`) or confirms the real problem
-(`POST /api/understand/confirm`); their name in git then goes on it. A
-person adds a source at `POST /api/sources`. The dashboard's Understand page
+(`POST /api/understand/looks-good`, which also confirms a persona the
+kobold made for it) or confirms the real problem
+(`POST /api/understand/confirm`) or the persona
+(`POST /api/personas/confirm`); their name in git then goes on it. A
+person adds a source at `POST /api/sources` and a persona at
+`POST /api/personas` (a name, a role, and what they do and want, if said);
+a second persona with the same name or role is refused, by the kobold too.
+A product starts with no personas: the kobold makes them as signals come
+in, so stories can follow. The dashboard's Understand page
 (`packages/dashboard/src/understand/`), called Personas, shows three
 levels: every persona in one list, one persona (their problems, what people
 like them said, and the tests to come), and one story as a timeline, at `#understand`, `#understand/<persona>` and

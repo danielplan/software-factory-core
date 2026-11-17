@@ -24,7 +24,10 @@
     "clear": "Nichts Besorgniserregendes gefunden",
     "handled": "Schon erledigt ({{count}})",
     "failed": "Das Check-up von {{name}} konnte nicht beendet werden: {{why}}",
-    "stopped": "Das Check-up von {{name}} wurde vor dem Ende gestoppt."
+    "stopped": "Das Check-up von {{name}} wurde vor dem Ende gestoppt.",
+    "sample": "Jeder Check-up sieht sich einen Teil des Codes an: starte ihn erneut, um weiterzusuchen.",
+    "found_one": "{{count}} neu diesmal",
+    "found_other": "{{count}} neu diesmal"
   },
   "severity": {
     "high": "Ernst",
@@ -47,8 +50,25 @@
     "sent": "In Build als #{{issue}}",
     "waiting": "In Build. Um ein Ticket daraus zu machen, verbinde in den Einstellungen ein GitHub-Board.",
     "onBuild": "In Build",
-    "dismissed": "Beiseitegelegt"
+    "dismissed": "Beiseitegelegt",
+    "new": "Neu",
+    "restore": "Zurückholen"
   },
   "problem": "Das hat nicht geklappt: {{why}}",
-  "crumbSignals": "Signale"
+  "crumbSignals": "Signale",
+  "activity": {
+    "reading": "Liest den Code von „{{part}}“…",
+    "notes": "Liest die Notizen zum Produkt…",
+    "tests": "Liest die Tests…",
+    "searching": "Sucht nach {{what}}…",
+    "searchingCode": "Durchsucht den Code…",
+    "files": "Verschafft sich einen Überblick über die Dateien…",
+    "writing": "Notiert ein gefundenes Problem…"
+  },
+  "refused": {
+    "notRunning": "Dieser Check-up läuft nicht mehr.",
+    "gone": "Dieser Fund ist nicht mehr da.",
+    "acted": "Jemand hat sich schon darum gekümmert.",
+    "notSetAside": "Dieser Fund wurde nicht beiseitegelegt."
+  }
 }

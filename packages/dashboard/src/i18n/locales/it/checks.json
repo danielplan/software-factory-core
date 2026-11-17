@@ -24,7 +24,10 @@
     "clear": "Niente di preoccupante",
     "handled": "Già gestite ({{count}})",
     "failed": "Il controllo di {{name}} non è riuscito a finire: {{why}}",
-    "stopped": "Il controllo di {{name}} è stato fermato prima della fine."
+    "stopped": "Il controllo di {{name}} è stato fermato prima della fine.",
+    "sample": "Ogni check-up guarda una parte del codice: rifallo per guardare oltre.",
+    "found_one": "{{count}} nuovo questa volta",
+    "found_other": "{{count}} nuovi questa volta"
   },
   "severity": {
     "high": "Grave",
@@ -47,8 +50,25 @@
     "sent": "In Build come #{{issue}}",
     "waiting": "In Build. Per farne un ticket, collega una board GitHub nelle Impostazioni.",
     "onBuild": "In Build",
-    "dismissed": "Messa da parte"
+    "dismissed": "Messa da parte",
+    "new": "Nuovo",
+    "restore": "Ripristina"
   },
   "problem": "Non ha funzionato: {{why}}",
-  "crumbSignals": "Segnali"
+  "crumbSignals": "Segnali",
+  "activity": {
+    "reading": "Legge il codice di “{{part}}”…",
+    "notes": "Legge le note del prodotto…",
+    "tests": "Legge i test…",
+    "searching": "Cerca {{what}}…",
+    "searchingCode": "Cerca nel codice…",
+    "files": "Si orienta tra i file…",
+    "writing": "Annota un problema trovato…"
+  },
+  "refused": {
+    "notRunning": "Quel check-up non è più in corso.",
+    "gone": "Quella segnalazione non c'è più.",
+    "acted": "Qualcuno se n'è già occupato.",
+    "notSetAside": "Quella segnalazione non è stata messa da parte."
+  }
 }

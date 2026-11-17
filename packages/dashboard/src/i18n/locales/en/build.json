@@ -84,7 +84,7 @@
     "worked": "It worked",
     "didntWork": "It didn't work",
     "unchecked": "Not checked",
-    "since": "“{{title}}”, in Build since {{since}}.",
+    "since": "“{{title}}”, in the Factory since {{since}}.",
     "only": "“{{title}}”.",
     "close": "Close · did it work?",
     "answeredBy": "{{by}}, {{on}}"
@@ -110,7 +110,7 @@
     "make": "Make a fix ticket",
     "making": "Making the ticket…",
     "failed": "No ticket was made",
-    "waiting": "From People, waiting for a ticket",
+    "waiting": "From Signals, waiting for a ticket",
     "fix": "Fix",
     "update": "Update",
     "from": "From: {{source}}"

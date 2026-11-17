@@ -84,7 +84,7 @@
     "worked": "Funcionó",
     "didntWork": "No funcionó",
     "unchecked": "Sin comprobar",
-    "since": "«{{title}}», en Construir desde el {{since}}.",
+    "since": "«{{title}}», en la Fábrica desde el {{since}}.",
     "only": "«{{title}}».",
     "close": "Cerrar · ¿funcionó?",
     "answeredBy": "{{by}}, {{on}}"
@@ -110,7 +110,7 @@
     "make": "Crear un ticket de corrección",
     "making": "Creando el ticket…",
     "failed": "No se creó ningún ticket",
-    "waiting": "Desde Personas, esperando un ticket",
+    "waiting": "Desde Señales, esperando un ticket",
     "fix": "Corrección",
     "update": "Actualización",
     "from": "De: {{source}}"

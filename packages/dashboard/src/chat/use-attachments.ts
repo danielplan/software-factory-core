@@ -9,6 +9,8 @@ import { messageOf, post } from "@/api";
 import { t } from "@/i18n/i18n";
 import type { Sent } from "@/lib/chat-view";
 
+import { refusalWords } from "./refusals";
+
 export const ACCEPTED =
   "image/png,image/jpeg,image/gif,image/webp,application/pdf,text/plain,text/markdown,text/csv,application/json";
 const MOST = 5;
@@ -75,7 +77,7 @@ export function useAttachments() {
       );
       change(key, { sent: { ...stored, preview } });
     } catch (error) {
-      change(key, { problem: messageOf(error) });
+      change(key, { problem: refusalWords(messageOf(error)) });
     }
   };
   const attach = (chosen: File[]) => {

@@ -79,8 +79,8 @@ const understand = (
 test("nothing yet: nothing needs you and both lists are empty", () => {
   const view = overviewOf(null, null, null);
   assert.deepEqual(view.needs, []);
-  assert.deepEqual(view.discovery, { rows: [], more: 0 });
-  assert.deepEqual(view.build, { rows: [], more: 0 });
+  assert.deepEqual(view.problems, { rows: [], more: 0 });
+  assert.deepEqual(view.work, { rows: [], more: 0 });
 });
 
 test("what needs you comes by name, the most pressing first", () => {
@@ -94,20 +94,61 @@ test("what needs you comes by name, the most pressing first", () => {
     [
       ["Did it work?", "Card 2"],
       ["Check the work", "Card 1"],
-      ["Send to Build", "Reminder"],
+      ["Send to the Factory", "Reminder"],
       ["Vote for a version", "Wish list"],
-      ["Have a look", "3 new things people said"],
+      ["Have a look", "3 new signals"],
     ],
   );
   assert.equal(view.needs[2]?.href, "#explore/Reminder");
+  assert.equal(view.needs[4]?.href, "#signals");
   // Each has its own id, so two cards with the same title stay apart.
   assert.deepEqual(
     view.needs.map((need) => need.id),
-    ["card-2", "card-1", "idea-Reminder", "idea-Wish list", "check"],
+    ["card-2", "card-1", "idea-Reminder", "idea-Wish list", "signals"],
   );
 });
 
-test("Discovery lists the open problems; Build the cards not done, or the ideas being built without a board", () => {
+test("what waits elsewhere is counted and always shows: serious findings first, the rest after the named ones", () => {
+  const view = overviewOf(
+    {
+      personas: [],
+      kobold: { ...news(2), newStories: [{ id: "s", title: "", persona: "" }] },
+    },
+    [idea("Wish list", "versions"), idea("Reminder", "picked")],
+    work([card(1, "review"), card(2, "done", true)]),
+    {
+      findings: [
+        { severity: "low" },
+        { severity: "high" },
+        { severity: "medium" },
+      ],
+      fixes: 1,
+    },
+  );
+  assert.deepEqual(
+    view.needs.map((need) => [need.about, need.href]),
+    [
+      ["1 serious problem the Check-up found", "#checks"],
+      ["1 fix waiting for a ticket", "#build"],
+      ["2 new signals", "#signals"],
+      ["1 new story from the kobold", "#understand"],
+      ["2 things the Check-up found", "#checks"],
+    ],
+  );
+  // Fewer counted ones leave room for the named ones, up to five.
+  const some = overviewOf(
+    null,
+    [idea("Reminder", "picked")],
+    work([card(1, "review")]),
+    { findings: [{ severity: "high" }], fixes: 0 },
+  );
+  assert.deepEqual(
+    some.needs.map((need) => need.id),
+    ["serious", "card-1", "idea-Reminder"],
+  );
+});
+
+test("Personas' part lists the open problems; the Factory's the cards not done, or the ideas being built without a board", () => {
   const view = overviewOf(
     understand([
       persona("Mia", [
@@ -120,19 +161,19 @@ test("Discovery lists the open problems; Build the cards not done, or the ideas 
     work([card(1, "backlog"), card(2, "done"), card(3, "doing", false)]),
   );
   assert.deepEqual(
-    view.discovery.rows.map((row) => [row.title, row.status, row.fresh]),
+    view.problems.rows.map((row) => [row.title, row.status, row.fresh]),
     [
       ["Problem c", "Heard", true],
       ["Problem a", "Building", false],
     ],
   );
   assert.deepEqual(
-    view.build.rows.map((row) => row.title),
+    view.work.rows.map((row) => row.title),
     ["Card 1", "Card 3"],
   );
   const noBoard = overviewOf(null, [idea("Size finder", "building")], null);
   assert.deepEqual(
-    noBoard.build.rows.map((row) => [row.title, row.status, row.who]),
+    noBoard.work.rows.map((row) => [row.title, row.status, row.who]),
     [["Size finder", "Building", "Mia"]],
   );
 });
@@ -140,8 +181,8 @@ test("Discovery lists the open problems; Build the cards not done, or the ideas 
 test("a part shows five rows and says how many more there are", () => {
   const many = Array.from({ length: 7 }, (_, at) => card(at + 1, "todo"));
   const view = overviewOf(null, null, work(many));
-  assert.equal(view.build.rows.length, 5);
-  assert.equal(view.build.more, 2);
+  assert.equal(view.work.rows.length, 5);
+  assert.equal(view.work.more, 2);
 });
 
 test("problems: new first, then those that most need a person; a story that didn't hold last", () => {

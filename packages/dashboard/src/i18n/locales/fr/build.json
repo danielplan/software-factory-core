@@ -84,7 +84,7 @@
     "worked": "Ça a marché",
     "didntWork": "Ça n'a pas marché",
     "unchecked": "Pas vérifié",
-    "since": "« {{title}} », dans Construire depuis le {{since}}.",
+    "since": "« {{title}} », dans la Fabrique depuis le {{since}}.",
     "only": "« {{title}} ».",
     "close": "Fermer · ça a marché ?",
     "answeredBy": "{{by}}, {{on}}"
@@ -110,7 +110,7 @@
     "make": "Créer un ticket de correction",
     "making": "Création du ticket…",
     "failed": "Aucun ticket créé",
-    "waiting": "Depuis Personnes, en attente d'un ticket",
+    "waiting": "Depuis Signaux, en attente d'un ticket",
     "fix": "Correction",
     "update": "Mise à jour",
     "from": "Depuis : {{source}}"

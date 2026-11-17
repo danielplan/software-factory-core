@@ -1,6 +1,6 @@
-// "Make a fix ticket" for a bug or an update sorted in Understand and sent
-// to Build: it becomes a GitHub issue in Backlog, and the signal goes to
-// it. On Understand under the signal, and on Build in the list of what
+// "Make a fix ticket" for a bug or an update sorted on Signals and sent to
+// the Factory: it becomes a GitHub issue in Backlog, and the signal goes to
+// it. On Signals under the signal, and on the Factory in the list of what
 // waits for a ticket.
 
 import { useState } from "react";
@@ -42,14 +42,15 @@ export function FixTicketButton({ signal }: Readonly<{ signal: string }>) {
   );
 }
 
-// Under a sorted signal: the button, when it went to Build.
+// Under a sorted signal: the button, when it went to the Factory.
 export function FixTicketFor({ signal }: Readonly<{ signal: SignalView }>) {
   return signal.went?.to === "build" ? (
     <FixTicketButton signal={signal.id} />
   ) : null;
 }
 
-// What Understand sent to Build that has no ticket yet.
+// What Signals sent to the Factory that has no ticket yet. On a phone the
+// text takes its own full line, so it is never squeezed between the rest.
 export function WaitingFixes({ waiting }: Readonly<{ waiting: WaitingFix[] }>) {
   if (waiting.length === 0) return null;
   return (
@@ -66,7 +67,9 @@ export function WaitingFixes({ waiting }: Readonly<{ waiting: WaitingFix[] }>) {
           <Pill tone={kindTone(fix.kind)}>
             {fix.kind === "update" ? t("build:fix.update") : t("build:fix.fix")}
           </Pill>
-          <span className="min-w-0 flex-1 text-body">{fix.text}</span>
+          <span className="order-last basis-full text-body [overflow-wrap:anywhere] sm:order-none sm:min-w-0 sm:flex-1 sm:basis-0">
+            {fix.text}
+          </span>
           <span className="text-tag text-muted-foreground">
             {t("build:fix.from", { source: fix.source })}
           </span>
