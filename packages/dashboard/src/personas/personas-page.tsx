@@ -15,7 +15,7 @@ import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, Chevron, Head, ROW } from "@/signals/bits";
 import { countWords, originWords, personaPlaceOf } from "@/signals/view";
-import { type Read, useRead } from "@/understand/use-records";
+import { type Read, useRead } from "@/lib/use-read";
 
 import { NewPersona } from "./new-persona";
 import { SignalLine } from "./signal-line";

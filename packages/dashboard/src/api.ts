@@ -4,8 +4,6 @@
 import { useEffect, useState } from "react";
 
 import type { State } from "../../server/src/api.ts";
-import type { KoboldJob } from "../../server/src/kobold/kobold.ts";
-import type { VersionRun } from "../../server/src/prototypes/mode.ts";
 
 export type {
   AddOnView,
@@ -22,26 +20,11 @@ export type {
   WorkView,
 } from "../../server/src/api.ts";
 export type {
-  Customer,
   Face,
   GroupView,
   PersonaColor,
   PersonaHat,
-  Source,
 } from "../../core/src/index.ts";
-export type {
-  PersonaCard,
-  PersonaPage,
-  RecordsView,
-  StoryCard,
-  StoryPage,
-  UnderstandOverview,
-} from "../../server/src/records/views.ts";
-export type {
-  KoboldNews,
-  SignalView,
-} from "../../server/src/records/signal-views.ts";
-export type { KoboldJob } from "../../server/src/kobold/kobold.ts";
 export type {
   PersonaPage as KobblePersonaPage,
   PersonaRow,
@@ -52,24 +35,15 @@ export type {
 export type { PersonaTest } from "../../core/src/index.ts";
 export type { SyncView } from "../../server/src/kobble/sync.ts";
 export type {
+  FactoryCard,
+  FactoryView,
+} from "../../server/src/kobble/factory-view.ts";
+export type {
   ExplorationPage,
   ExplorationRow,
   ExplorationsView,
   TestResult,
 } from "../../server/src/kobble/explorations/views.ts";
-export type {
-  IdeaPage,
-  IdeaRow,
-  VersionCard,
-} from "../../server/src/explore/views.ts";
-export type { PrototypePage } from "../../server/src/explore/prototype-page.ts";
-export type {
-  BuildView,
-  TicketView,
-  WaitingFix,
-} from "../../server/src/build/views.ts";
-export type { SeenDraft } from "../../server/src/build/seen.ts";
-export type { Answered } from "../../server/src/build/answer.ts";
 export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
@@ -112,33 +86,18 @@ export async function post<T>(path: string, body: unknown = {}): Promise<T> {
   );
 }
 
-// Who hears of changes on the stream besides the state: pages that show
-// records read them again when they change, and the kobold's jobs as they
-// work.
-const recordsHeard = new Set<() => void>();
-const koboldHeard = new Set<(jobs: KoboldJob[]) => void>();
-const prototypesHeard = new Set<(runs: VersionRun[]) => void>();
+// Pages that show Kobble's files (signals, explorations, personas, tests,
+// the Factory board) read them again whenever the stream says they
+// changed.
+const kobbleHeard = new Set<() => void>();
 
-export function onRecordsChanged(listener: () => void): () => void {
-  recordsHeard.add(listener);
-  return () => recordsHeard.delete(listener);
+export function onKobbleChanged(listener: () => void): () => void {
+  kobbleHeard.add(listener);
+  return () => kobbleHeard.delete(listener);
 }
 
-export function onKobold(listener: (jobs: KoboldJob[]) => void): () => void {
-  koboldHeard.add(listener);
-  return () => koboldHeard.delete(listener);
-}
-
-// What runs in prototype mode, whenever it changes.
-export function onPrototypes(
-  listener: (runs: VersionRun[]) => void,
-): () => void {
-  prototypesHeard.add(listener);
-  return () => prototypesHeard.delete(listener);
-}
-
-function tellRecords(): void {
-  for (const listener of recordsHeard) listener();
+function tellKobble(): void {
+  for (const listener of kobbleHeard) listener();
 }
 
 // The factory's state, kept up to date from its stream of changes; null
@@ -165,20 +124,9 @@ export function useFactoryState(): { state: State | null; connected: boolean } {
     events.onopen = () => {
       setConnected(true);
       void get<State>("/api/state").then(setState, () => undefined);
-      tellRecords();
+      tellKobble();
     };
-    events.addEventListener("records-changed", tellRecords);
-    // Kobble's files changed (signals, explorations, personas): the pages
-    // that read them read again, like the records.
-    events.addEventListener("kobble-changed", tellRecords);
-    events.addEventListener("kobold", (event: MessageEvent<string>) => {
-      const { jobs } = JSON.parse(event.data) as { jobs: KoboldJob[] };
-      for (const listener of koboldHeard) listener(jobs);
-    });
-    events.addEventListener("prototypes", (event: MessageEvent<string>) => {
-      const { runs } = JSON.parse(event.data) as { runs: VersionRun[] };
-      for (const listener of prototypesHeard) listener(runs);
-    });
+    events.addEventListener("kobble-changed", tellKobble);
     events.onerror = () => {
       setConnected(false);
     };

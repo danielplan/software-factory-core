@@ -72,8 +72,7 @@ the same commits and pull requests, and every copy of the code has them.
 The project's own `AGENTS.md` (and `CLAUDE.md`) point to the factory's
 rules, so any agent working in the code finds them. What must not be shared
 stays out of git (`factory/.gitignore`): the settings with their secrets
-(`settings/`), the agents' working copies (`copies/`) and the records'
-local database (`kobble.db`). The command finds
+(`settings/`) and the agents' working copies (`copies/`). The command finds
 the factory from anywhere inside the project.
 
 **Where work is tracked** is chosen right after the factory opens, and
@@ -108,8 +107,6 @@ acme/                    the project, one repository
    ├─ setup.json         the setup conversation and its map, kept
    ├─ runs/              its history
    ├─ kobble/            signals, explorations and personas, one file each, in git
-   ├─ kobble-seed.json   records to start from (the example company has one)
-   ├─ kobble.db          the records, a local database, not in git
    └─ settings/, copies/ secrets and working copies, not in git
 ```
 
@@ -125,181 +122,11 @@ The core never names a product. It reads each product's description (see
 `productSchema` in `packages/core/src/products/product.ts`) and the company
 file (`companySchema` in `packages/core/src/company/company.ts`).
 
-## The records
+## Kobble's files
 
-Kobble (the dashboard's name) keeps the background story of a product:
-who it is for, what happens to them, where things break, and what turned
-out to work. These records live in a local SQLite database in the factory's
-folder, `kobble.db`, through Node's own `node:sqlite` (no other library). It
-is named in the factory's `.gitignore` as soon as it is made, so it never
-goes into git; one person works with it at a time. Sharing the records with
-the team through git comes later (records as small files, the database
-rebuilt from them), with the same store and pages.
-
-| Record       | What                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Source       | where signals come from, and what kind: people, usage, errors, alerts, or persona runs                                                                 |
-| Signal       | one thing someone said or did, single and never counted (only machine errors say how often); who it sounds like, why, who sorted it, and where it went |
-| Persona      | a made-up person who stands for a kind of user: role, what they want, what they are based on                                                           |
-| Customer     | a real customer, who is like one persona                                                                                                               |
-| Story        | what a persona goes through, in scenes; a scene with signals as evidence is seen, one without is guessed; it breaks once, at one problem               |
-| Problem      | a few signals read together, with what is behind them; assumed when it only comes from an idea                                                         |
-| Real problem | what is really being solved for a persona, behind two or more of their problems                                                                        |
-| Idea         | what the team thinks would help, started from a problem or by a team member                                                                            |
-| Version      | a version of an idea; its branch is the prototype                                                                                                      |
-| Ticket       | a GitHub issue the records know: an idea's version sent to Build, or a fix or an update from a signal                                                  |
-| Outcome      | the answer to "did it work?" once its issue is closed                                                                                                  |
-
-The schemas, the store, the rules and what is worked out from the records
-are in `packages/core/src/records/`. Every write is checked against the
-rules as a whole, in one transaction, and refused with a plain reason when it
-would break one (`check.ts`): a signal has its source and only machine
-errors are counted; a story breaks exactly once, at a problem of the same
-persona, unless it is marked wrong; a problem has signals behind it, or is
-assumed and comes from an idea's story; a real problem sits behind at least
-two problems of one persona; a signal that feeds a story or a problem
-sounds like that persona; a ticket comes from a version or from a signal;
-persona runs are never evidence. Where a problem or an idea stands, and how
-well a story is known (its seen scenes out of all of them), are worked out
-each time and never stored (`derive.ts`).
-
-The server opens the records once the project has its factory (in setup
-there are none yet) and serves them for the Understand pages:
-`GET /api/understand`, `/api/understand/persona?id=…`,
-`/api/understand/story?id=…`, and everything at `GET /api/records`.
-Signals come in through `POST /api/signals` (connectors that feed it come
-later). Each change is told on the page's stream as a `records-changed`
-event naming the records, beside the whole state
-(`packages/server/src/records/`). An empty database is filled from
-the factory's `kobble-seed.json` when there is one: the example company's
-holds a made-up shop's personas and stories. `software-factory check`
-checks the database and the seed.
-
-### The kobold's Understand jobs
-
-The kobold is the one AI agent Kobble talks about. Its Understand jobs are
-Claude Code sessions on this computer, run like the factory's other agents
-(read-only, no `gh`, no `git push`), with the `understand` skill
-(`packages/skills/skills/understand/SKILL.md`) as their method and tools the
-server serves over MCP at `/api/kobold/mcp`, each job with its own token.
-The tools write the records through the store, so every write is checked
-like any other (`packages/server/src/kobold/`):
-
-| Job                    | When                                                                                 | What it writes                                                                                                                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sort a signal          | a signal comes in (`POST /api/signals`), or a person moves one to "a new story"      | what it is, the persona it sounds like and why, and its place: evidence in a scene of a story (a guessed scene becomes seen), a new story with one problem, Build (a bug or an update), or answered |
-| Suggest a real problem | a sort gave a persona a new problem, and two or more of theirs have none behind them | a real problem behind the problems that point the same way, `by: kobold`                                                                                                                            |
-| Ask                    | a person presses Ask under a story with guessed scenes (`POST /api/understand/ask`)  | nothing: it drafts a short message for people like the persona, which the page shows to copy                                                                                                        |
-
-Sorting and suggesting run one at a time, in the order asked. The page sees
-each job while it works and how it ended (`GET /api/understand/kobold`, and
-`kobold` events on the page's stream). The kobold proposes and a person
-confirms: what it wrote says `by: kobold` until a person moves the signal
-(`POST /api/understand/move`), says it looks good
-(`POST /api/understand/looks-good`) or confirms the real problem
-(`POST /api/understand/confirm`); their name in git then goes on it. A
-person adds a source at `POST /api/sources`. The dashboard's Understand page
-(`packages/dashboard/src/understand/`) shows the three levels, every persona,
-one persona and one story, at `#understand`, `#understand/<persona>` and
-`#understand/<persona>/<story>`.
-
-### Explore and prototype mode
-
-Explore (`#explore`) lists the ideas, each with who it is for, where it
-stands (exploring, in Build, it worked, it didn't work) and how many of its
-versions are shared; one idea (`#explore/<idea>`) shows the problems it is
-for, with the story that breaks at each in Understand, what the team thinks
-it would do, its shared versions side by side, and the picks: one per person
-per idea, their name in git. Its one action sends the version with the most
-picks to Build; on a tie, a person picks one first. **New idea**
-(`#explore/new`, or **Start an idea** on a story, `#explore/new/<story>`)
-starts one from a story, for its problem and persona, or from a team
-member's own: the kobold then writes the story it assumes behind it, every
-scene guessed, its problem assumed and the story written from the idea, with
-its tool `write_idea` and the `explore` skill
-(`packages/skills/skills/explore/SKILL.md`). The ideas shaped with the old
-idea coach stay listed below as ideas from before, each opening its
-workspace as it did. The server's routes are in `packages/server/src/explore/`:
-`GET /api/explore`, `GET /api/explore/idea?id=…`, `POST /api/explore/ideas`
-(from a story), `/own` (the kobold's job), `/pick`, `/discard` (an idea
-nothing came of yet) and `/send`.
-
-**Prototype mode** (`#prototype/<idea>/<version>`) runs the versions of an
-idea on this computer. Each version is its branch, `factory/<idea>/<key>`,
-in its own working copy (core's `Workspace`), in
-`<project>-prototypes/<idea>/<key>`, next to the project, so the owner's
-folder, branch and data are never touched. A version starts with the
-company's `prototype.start` command, run in its copy (and stops with
-`prototype.stop`); besides `FACTORY_BRANCH`, `FACTORY_PROJECT` and
-`FACTORY_COPY`, the command is told `FACTORY_IDEA` and `FACTORY_VERSION` (a
-card's prototype gets `FACTORY_CARD`, as before). **The start command says
-where the version runs with a line of its own on standard output,
-`FACTORY_URL=<address>`** (the last one counts): until then the version is
-starting, then it runs there, in a frame on the page. A command that starts
-its servers and ends is fine, as is one that keeps running (it is stopped
-with the version); one that ends without the line runs, with a note that it
-did not say where. Main is the product as it runs today, from the factory's
-own parts. **Make another version** is the kobold's job like a build: it
-works in the new version's copy, changes files only there, never pushes, and
-what it leaves is committed on the version's branch alone. A version is
-nobody's to see until a person presses **Share**, which puts it on Explore
-(`sharedAt`). **Try it** on Explore starts the version and opens it here.
-What runs is known only while the factory is open, told on the page's
-stream as `prototypes` events (`packages/server/src/prototypes/`):
-`GET /api/prototypes?idea=…`, `POST /api/prototypes/start`, `/stop`, `/make`
-and `/share`. `software-factory prototype <idea> <version>` does the same
-from a terminal, beside the card form `software-factory prototype <number>`.
-
-**Send to Build** makes the GitHub issue on the connected board (the cards,
-`packages/server/src/cards/`): its text says what the team thinks, the
-problems it is for and the version's branch, and ends with a hidden mark
-`<!-- factory:kobble idea=<id> version=<key> problems=<id>,… -->`. The
-records keep a ticket link to it, with the day, so the idea is in Build; the
-issue starts in Backlog.
-
-### Build and "did it work?"
-
-Build (`#build`) is the connected board as before: its columns, its cards,
-the coach and the builder, GitHub or Jira. The records add what they know
-of its issues (`GET /api/build`, `packages/server/src/build/`): a card that
-is an idea's version says so (Idea · B), with the problems it is for, each
-linked to the story that breaks at it; a fix or an update says where it
-came from. The Done column is called "In the app".
-
-**An idea's card is never finished silently.** The board's rules
-(`asksIfItWorked` in `packages/server/src/builder/decide.ts`) keep a card
-the records wait an answer for in Done, asking "did it work?", once it is
-closed, its pull request merged, or it is moved there; until a person
-answers. Fixes and updates are for no problem, so they are never asked.
-**Close · did it work?** opens a dialog with the card, what it was for and
-what the team thought, and a draft of what was seen: the kobold's job,
-like Ask (read-only, no tools, the `understand` skill), from the signals
-behind the problems (to the problem or one of its stories, never persona
-runs) heard since the ticket was made; a signal whose day is not a date is
-kept, for the kobold to read with its day (`POST /api/build/draft`). With
-nothing heard, or no Claude Code on this computer, the draft is empty and
-the person writes what they saw. The answer (`POST /api/build/answer`):
-yes, the problem is solved; no; or didn't check. It is saved as an outcome
-(what was seen, the person's name in git, the day), then written as a
-comment on the issue through the cards, with the factory's hidden mark
-`did-it-work`; when the comment cannot be written, the answer stays saved
-and the page says so. Where things stand follows from the outcome
-(`derive.ts`): yes makes the problem solved and ends its story, and the
-idea worked; no leaves the problem open and the idea did not work.
-
-**Fixes from Understand.** A bug or an update the kobold or a person sent
-to Build (`wentTo: { "to": "build" }`) gets **Make a fix ticket**, under the
-signal in Understand and on Build: a GitHub issue in Backlog, with what
-came in, where from, and the signal's id in a hidden mark
-`<!-- factory:kobble signal=<id> -->`; the records keep a ticket link (a fix
-or an update) and the signal goes to it (`POST /api/build/fix`). A ticket made or answered reads the board again,
-so the card shows at once.
-
-### Signals and personas as files
-
-Kobble's new pipeline (Signals, then Explorations, then the Factory board)
-keeps its records as files in the product's repository, beside the old
-records while they are replaced: `factory/kobble/signals/S-0001.json`,
+Kobble (the dashboard's name) works through one pipeline: Signals, then
+Explorations, then the Factory board. It keeps its records as files in the
+product's repository: `factory/kobble/signals/S-0001.json`,
 `factory/kobble/explorations/X-1/exploration.json`,
 `factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
 into git, so the team shares them like the code. Each is JSON, checked
@@ -316,8 +143,9 @@ open exploration that covers at least half of the signal's content words,
 or a fixed signal that says nearly the same. The kobold takes this over
 later.
 
-On the Signals page each signal gets **Fix** (marked fixed; the GitHub
-issue comes with the Factory board), **Explore** (added to the exploration
+On the Signals page each signal gets **Fix** (a GitHub issue on the
+connected board, in To do, with the signal's id in a hidden mark
+`<!-- factory:kobble signal=<id> -->`; the signal goes to it), **Explore** (added to the exploration
 found, or a new one that waits) or **Dismiss** (`POST
 /api/kobble/signals/fix`, `/explore`, `/dismiss`). The Personas page lists
 the personas with their signals (`GET /api/kobble/personas`,
@@ -372,6 +200,14 @@ routes are under `/api/kobble/explorations` (`GET` the list,
 `/picture`, `/make`, `/open`, `/test`, `/hand-off`, `/drop`).
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
+
+**The Factory board** (`#build`, `GET /api/kobble/factory`,
+`packages/server/src/kobble/factory-view.ts`) shows the connected GitHub
+board's cards, as the builder last read them, in four columns: To do (with
+the board's Backlog and Planning), Building, Review and Done. A card says
+where it came from: an exploration whose `work` is its number, with the
+agreed prototype, or a fixed signal. The builder and its switch work as
+before.
 
 ## Extension points
 

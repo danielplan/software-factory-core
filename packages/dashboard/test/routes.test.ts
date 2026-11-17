@@ -1,19 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  exploreHash,
-  exploreOf,
-  movedHash,
-  newIdeaHash,
-  PAGES,
-  placeOf,
-  prototypeHash,
-  prototypeOf,
-  personaHash,
-  understandHash,
-  understandOf,
-} from "../src/lib/routes.ts";
+import { movedHash, PAGES, placeOf, personaHash } from "../src/lib/routes.ts";
 
 test("a persona has its own address", () => {
   assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
@@ -61,6 +49,9 @@ test("the old addresses lead to the new pages", () => {
   assert.equal(movedHash("#today"), "#signals");
   assert.equal(movedHash("#customers"), "#personas");
   assert.equal(movedHash("#products"), "#workshop");
+  assert.equal(movedHash("#understand/mia/st1"), "#personas/mia/st1");
+  assert.equal(movedHash("#prototype/wish/b"), "#explore/");
+  assert.deepEqual(placeOf("#prototype/wish"), { page: "explore", open: null });
   assert.deepEqual(placeOf("#ideas/idea-1"), {
     page: "explore",
     open: "idea-1",
@@ -72,51 +63,4 @@ test("the new addresses have not moved", () => {
   for (const page of PAGES) assert.equal(movedHash(`#${page}`), null);
   assert.equal(movedHash(""), null);
   assert.equal(movedHash("#connect"), null);
-});
-
-test("Understand opens a persona, or one of their stories", () => {
-  assert.deepEqual(placeOf("#understand/mia/st1"), {
-    page: "understand",
-    open: "mia/st1",
-  });
-  assert.deepEqual(understandOf(null), { persona: null, story: null });
-  assert.deepEqual(understandOf("mia"), { persona: "mia", story: null });
-  assert.deepEqual(understandOf("mia/"), { persona: "mia", story: null });
-  assert.deepEqual(understandOf("mia/st1"), { persona: "mia", story: "st1" });
-  assert.deepEqual(understandOf("/st1"), { persona: null, story: null });
-  assert.deepEqual(understandOf("b%C3%A4r/a%20b"), {
-    persona: "bär",
-    story: "a b",
-  });
-  assert.equal(understandHash(), "#understand");
-  assert.equal(understandHash("mia"), "#understand/mia");
-  assert.equal(understandHash("mia", "st1"), "#understand/mia/st1");
-  assert.equal(understandHash(undefined, "st1"), "#understand");
-  assert.equal(understandHash("bär", "a b"), "#understand/b%C3%A4r/a%20b");
-});
-
-test("Explore opens an idea, or the new idea dialog, with a story picked", () => {
-  assert.deepEqual(exploreOf(null), { idea: null, newIdea: null });
-  assert.deepEqual(exploreOf("wish"), { idea: "wish", newIdea: null });
-  assert.deepEqual(exploreOf("new"), { idea: null, newIdea: { story: null } });
-  assert.deepEqual(exploreOf("new/st%201"), {
-    idea: null,
-    newIdea: { story: "st 1" },
-  });
-  assert.equal(exploreHash(), "#explore");
-  assert.equal(exploreHash("wish list"), "#explore/wish%20list");
-  assert.equal(newIdeaHash(), "#explore/new");
-  assert.equal(newIdeaHash("st1"), "#explore/new/st1");
-});
-
-test("prototype mode is a page of its own, on an idea and one of its versions", () => {
-  assert.deepEqual(placeOf("#prototype/wish/B"), {
-    page: "prototype",
-    open: "wish/B",
-  });
-  assert.deepEqual(prototypeOf("wish/B"), { idea: "wish", version: "B" });
-  assert.deepEqual(prototypeOf("wish"), { idea: "wish", version: null });
-  assert.deepEqual(prototypeOf(null), { idea: null, version: null });
-  assert.equal(prototypeHash("wish"), "#prototype/wish");
-  assert.equal(prototypeHash("wish", "B"), "#prototype/wish/B");
 });

@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 
 import type { FactoryState } from "@/dashboard/dashboard";
-import { STAGES } from "@/ideas/stages";
+import { STAGES } from "./stages";
 
 type Entry = FactoryState["board"][string];
 

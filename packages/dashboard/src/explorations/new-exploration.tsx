@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { type Read, useRead } from "@/understand/use-records";
+import { type Read, useRead } from "@/lib/use-read";
 
 export function NewExploration({
   open,

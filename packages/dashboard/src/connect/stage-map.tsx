@@ -1,5 +1,5 @@
 import type { StageMap } from "@/api";
-import { STAGES } from "@/ideas/stages";
+import { STAGES } from "./stages";
 
 import { Pick } from "./pick";
 

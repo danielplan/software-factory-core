@@ -16,6 +16,8 @@ import {
 import type { Route } from "../add-ons/add-on.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { asked, field } from "../asked.ts";
+import type { WorkView } from "../api.ts";
+import type { Cards } from "../cards/cards.ts";
 import { cardsFor } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";
 import {
@@ -29,6 +31,7 @@ import { branchParts, servedExplorations } from "./explorations/routes.ts";
 import { liveSettings } from "./live-source.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
+import { factoryView } from "./factory-view.ts";
 import {
   personaPage,
   personasView,
@@ -41,8 +44,11 @@ type KobbleOptions = {
   project: string;
   tell: (event: string) => void;
   claude: Claude;
-  // The GitHub CLI, for handing off to the connected board.
+  // The GitHub CLI, for the connected board (Fix, Hand off).
   cli: Cli;
+  // The connected board's cards as the builder last read them; none
+  // without a board.
+  work: () => WorkView | null;
   // What a persona test runs on: the app's address (as it is now), and a
   // browser.
   testsRunOn: { app: () => Promise<string>; browser: () => Promise<Browser> };
@@ -70,24 +76,20 @@ export function servedKobble(options: KobbleOptions) {
       changed("signals");
     },
   });
-  // A change to the records, told to the page; a record that does not fit
-  // is refused with why.
-  const changing =
-    (what: string, act: Route): Route =>
-    async (body, url) => {
-      const answer = await kept(() => act(body, url));
-      changed(what);
-      return answer;
-    };
+  const changing = changingWith(changed);
   const { explorations, tests } = explorationsAndTests(options, store, changed);
   const routes: Record<string, Route> = {
     "GET /api/kobble/signals": () =>
-      kept(() => signalsView(store(), sync.view())),
+      kept(() => signalsView(store(), sync.view(), options.work())),
+    "GET /api/kobble/factory": () =>
+      kept(() => factoryView(store(), options.work())),
     "POST /api/kobble/sync": async () => {
       const added = await sync.sync();
       return { added: added.length, sync: sync.view() };
     },
-    ...buttonRoutes(store, changing),
+    ...buttonRoutes(store, changing, () =>
+      connectedCards(factory, options.cli),
+    ),
     ...tests.routes,
     ...keptAll({
       ...explorations.routes,
@@ -112,6 +114,28 @@ export function servedKobble(options: KobbleOptions) {
   };
 }
 
+// A change to the records, told to the page; a record that does not fit is
+// refused with why.
+function changingWith(changed: (what: string) => void) {
+  return (what: string, act: Route): Route =>
+    async (body, url) => {
+      const answer = await kept(() => act(body, url));
+      changed(what);
+      return answer;
+    };
+}
+
+// The connected board's cards; refused with how to connect one when there
+// is none.
+function connectedCards(factory: string, cli: Cli): Cards {
+  const found = cardsFor(factory, cli);
+  if ("problem" in found)
+    throw new Refused(
+      `No GitHub board is connected, so there is nowhere to put it. ${found.problem} Connect one in Settings, under Where work is tracked.`,
+    );
+  return found.cards;
+}
+
 // The explorations, and persona tests, which may run on a prototype of one.
 function explorationsAndTests(
   options: KobbleOptions,
@@ -124,11 +148,7 @@ function explorationsAndTests(
     root: factory,
     claude: options.claude,
     store,
-    cards: () => {
-      const found = cardsFor(factory, options.cli);
-      if ("problem" in found) throw new Refused(found.problem);
-      return found.cards;
-    },
+    cards: () => connectedCards(factory, options.cli),
     onChange: () => {
       changed("explorations");
     },
@@ -195,13 +215,14 @@ function keptAll(routes: Record<string, Route>): Record<string, Route> {
 function buttonRoutes(
   store: () => KobbleStore,
   changing: (what: string, act: Route) => Route,
+  cards: () => Cards,
 ): Record<string, Route> {
   return {
     "GET /api/kobble/personas": () => kept(() => personasView(store())),
     "GET /api/kobble/persona": (_body, url) =>
       kept(() => personaPage(store(), asked(url, "id", "persona"))),
-    "POST /api/kobble/signals/fix": changing("signals", (body) => ({
-      signal: fixSignal(store(), field(body, "id")),
+    "POST /api/kobble/signals/fix": changing("signals", async (body) => ({
+      signal: await fixSignal(store(), field(body, "id"), cards),
     })),
     "POST /api/kobble/signals/explore": changing("signals", (body) =>
       exploreSignal(store(), field(body, "id")),

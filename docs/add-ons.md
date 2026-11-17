@@ -108,7 +108,7 @@ the app's own mascot or assistant), its own layout and its own name.
 
 The dashboard is built once and themed through CSS variables, so a company
 changes its look without changing the core. Its own look is calm: a light
-grey ground, the page in a white panel, white cards with a hairline ring and
+grey ground with a white sidebar, white cards with a hairline ring and
 dark buttons; [the design system](reference/design-system.md) lists its
 variables, type and pieces. `factory/theme.css` changes it: the server gives it to the dashboard, which
 loads it after its own styles (`packages/server/src/theme.ts`). It sets the

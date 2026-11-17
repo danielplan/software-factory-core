@@ -13,7 +13,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 import {
-  checkRecordsIn,
+  checkKobbleIn,
   faceFor,
   faceOf,
   type KobbleSignal,
@@ -264,14 +264,14 @@ test("the example company's export comes in once, with what exists already", () 
 
 test("the check reads Kobble's files and finds what is not there", () => {
   const factory = acmeFactory();
-  assert.deepEqual(checkRecordsIn(factory).problems, []);
+  assert.deepEqual(checkKobbleIn(factory).problems, []);
   const store = new KobbleStore(factory);
   store.put("signals", signal("S-0002", { persona: "zoe" }));
   const exploration = store.get("explorations", "X-1");
   assert.ok(exploration);
   store.put("explorations", { ...exploration, signals: ["S-0404"] });
-  const { checked, problems } = checkRecordsIn(factory);
-  assert.ok(checked.includes("kobble/"));
+  const { checked, problems } = checkKobbleIn(factory);
+  assert.ok(checked);
   assert.equal(problems.length, 2);
   assert.match(
     problems[0] ?? "",
@@ -284,12 +284,12 @@ test("the check reads Kobble's files and finds what is not there", () => {
   // A persona's file that does not fit: said once, and what names
   // personas is not checked against the rest.
   writeFileSync(join(store.root, "personas", "bad.json"), "[]");
-  const broken = checkRecordsIn(factory).problems;
+  const broken = checkKobbleIn(factory).problems;
   assert.equal(broken.length, 2);
   assert.match(broken[0] ?? "", /^kobble\/personas\/bad.json does not fit/);
   assert.equal(
-    checkRecordsIn(mkdtempSync(join(tmpdir(), "none-"))).checked.length,
-    0,
+    checkKobbleIn(mkdtempSync(join(tmpdir(), "none-"))).checked,
+    false,
   );
 });
 
@@ -374,7 +374,7 @@ test("a board in the first shape is read as things and arrows; arrows must join 
     links: [{ id: "l", from: "problem", to: "gone", label: "" }],
   });
   assert.match(
-    checkRecordsIn(factory).problems.join("\n"),
+    checkKobbleIn(factory).problems.join("\n"),
     /X-2\/board.json: the arrow l joins a thing that is not there/,
   );
   assert.equal(store.pictureFile("X-2", "../x.png"), null);

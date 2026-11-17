@@ -1,5 +1,5 @@
-// software-factory prototype …: a card's prototype, or a version of an
-// idea, in its own copy of the project's code (copies.ts), so the owner's
+// software-factory prototype …: a card's prototype, or an exploration's
+// prototype of an option, in its own copy of the project's code (copies.ts), so the owner's
 // folder, its branch and its data are never touched. The core makes the copy
 // and keeps track of it; what running the prototype means (servers,
 // database, made-up data) is the project's own and is named in the company
@@ -9,13 +9,7 @@ import { spawnSync, type StdioOptions } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-import {
-  type Company,
-  findFactory,
-  RECORDS_FILE,
-  RecordStore,
-  versionKey,
-} from "@software-factory/core";
+import { type Company, findFactory } from "@software-factory/core";
 
 import { Refused } from "../refused.ts";
 import {
@@ -35,9 +29,9 @@ export const PROTOTYPE_USAGE = `software-factory prototype <number> [options]
                                              start (or restart) the card's prototype in its own
                                              copy of the code; the options go to the project's
                                              start command
-software-factory prototype <idea> <version> [options]
-                                             the same for a version of an idea (prototype mode)
-software-factory prototype <number> --stop   stop it (the copy stays); also <idea> <version> --stop
+software-factory prototype <exploration> <option> [options]
+                                             the same for an exploration's prototype (X-1 b)
+software-factory prototype <number> --stop   stop it (the copy stays); also <exploration> <option> --stop
 software-factory prototype <number> --remove stop it and delete the copy (the branch stays)
 software-factory prototype list              the prototypes and where their code is`;
 
@@ -86,42 +80,22 @@ type Context = {
   stdio: StdioOptions;
 };
 
-// A card by its number (#7 or 7), or a version by its idea and key; the
-// words after them.
+// A card by its number (#7 or 7), or an exploration's prototype by the
+// exploration and the option (X-1 b, on proto/X-1-b); the words after them.
 function copyAsked(root: string, [first = "", ...rest]: string[]) {
   const project = dirname(root);
   if (/^#?\d+$/.test(first) && Number(first.replace("#", "")) > 0)
     return { copy: cardCopy(project, Number(first.replace("#", ""))), rest };
   const [key, ...more] = rest;
-  if (key === undefined || key.startsWith("-"))
+  if (!/^X-\d+$/.test(first) || key === undefined || !/^[a-z]$/i.test(key))
     throw new Refused(
-      `“${first}” is not a card number, nor an idea with a version.\n\n${PROTOTYPE_USAGE}`,
+      `“${first}” is not a card number, nor an exploration with an option.\n\n${PROTOTYPE_USAGE}`,
     );
-  const version = recordedVersion(root, first, key);
+  const branch = `proto/${first}-${key.toLowerCase()}`;
   return {
-    copy: versionCopy(project, first, version.key, version.branch),
+    copy: versionCopy(project, first, key.toUpperCase(), branch),
     rest: more,
   };
-}
-
-// The version as the records know it (with its branch); without records
-// yet, the one named.
-function recordedVersion(root: string, idea: string, key: string) {
-  const file = join(root, RECORDS_FILE);
-  if (!existsSync(file)) return { key: key.toUpperCase(), branch: undefined };
-  const store = RecordStore.open(file, true);
-  try {
-    const found =
-      store.get("versions", versionKey(idea, key)) ??
-      store.get("versions", versionKey(idea, key.toUpperCase()));
-    if (!found)
-      throw new Refused(
-        `There is no version ${key} of the idea “${idea}”: make one in prototype mode first.`,
-      );
-    return found;
-  } finally {
-    store.close();
-  }
 }
 
 function list(project: string, out: Out): void {

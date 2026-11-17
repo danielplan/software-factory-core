@@ -14,6 +14,7 @@ import {
 } from "@software-factory/core";
 import { z } from "zod";
 
+import type { Cards } from "../cards/cards.ts";
 import { Refused } from "../refused.ts";
 
 // A new signal, not handled yet.
@@ -25,10 +26,31 @@ function fresh(store: KobbleStore, id: string): KobbleSignal {
   return signal;
 }
 
-// Fix: the signal goes to the factory to be fixed. The GitHub issue for it
-// comes with the Factory board; until then the signal is only marked fixed.
-export function fixSignal(store: KobbleStore, id: string): KobbleSignal {
-  return store.put("signals", { ...fresh(store, id), status: "fixed" });
+// Fix: a GitHub issue on the connected board, in To do, with what the
+// signal says and where it came from; the signal goes to it.
+export async function fixSignal(
+  store: KobbleStore,
+  id: string,
+  cards: () => Cards,
+): Promise<KobbleSignal> {
+  const signal = fresh(store, id);
+  const board = cards();
+  const card = await board.create(
+    titleOf(signal.text),
+    [
+      signal.text,
+      "",
+      `From ${[signal.source === "app" ? "the app" : signal.source, signal.persona, signal.at.slice(0, 10)].filter(Boolean).join(", ")}.`,
+      "",
+      `<!-- factory:kobble signal=${signal.id} -->`,
+    ].join("\n"),
+  );
+  await board.move(card.number, "todo");
+  return store.put("signals", {
+    ...fresh(store, id),
+    status: "fixed",
+    to: `#${String(card.number)}`,
+  });
 }
 
 export function dismissSignal(store: KobbleStore, id: string): KobbleSignal {

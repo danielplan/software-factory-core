@@ -9,7 +9,3 @@ export const STAGES = [
   { id: "review", title: "Review", colour: "#e0609a" },
   { id: "done", title: "Done", colour: "#2fb47c" },
 ] as const;
-
-export function stageOf(status: string) {
-  return STAGES.find((stage) => stage.id === status) ?? STAGES[0];
-}

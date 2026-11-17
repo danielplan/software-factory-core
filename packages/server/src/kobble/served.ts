@@ -20,6 +20,7 @@ export function kobbleOf(
     tell,
     claude: session.options.coach.claude,
     cli: more.cli,
+    work: () => session.work.view(),
     testsRunOn: testsRunOn ?? {
       app: () => appAddress(() => session.launcherOrRefuse()),
       browser: playwrightBrowser,

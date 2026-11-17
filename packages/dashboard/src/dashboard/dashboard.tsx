@@ -7,13 +7,11 @@ import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
 import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
-import { BoardTab } from "@/ideas/board-tab";
+import { FactoryPage } from "@/factory/factory-page";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { PersonasPage } from "@/personas/personas-page";
-import { PrototypePage } from "@/prototype/prototype-page";
 import { SetupPage } from "@/setup-coach/setup-page";
 import { SignalsPage } from "@/signals/signals-page";
-import { UnderstandPage } from "@/understand/understand-page";
 
 import { SettingsTab } from "./settings-tab";
 import { WorkshopPage } from "./workshop-page";
@@ -57,8 +55,6 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const { page, open } = state.onboarding
     ? { ...place, page: "connect" as const }
     : place;
-  // Prototype mode fills the window, with its own bar.
-  if (page === "prototype") return <PrototypePage state={state} open={open} />;
   return (
     <Shell
       state={state}
@@ -83,7 +79,7 @@ function PageBody({
   open,
 }: Readonly<{
   state: FactoryState;
-  page: Exclude<Place["page"], "prototype">;
+  page: Place["page"];
   open: string | null;
 }>) {
   switch (page) {
@@ -93,12 +89,10 @@ function PageBody({
       return <SignalsPage open={open} />;
     case "personas":
       return <PersonasPage open={open} />;
-    case "understand":
-      return <UnderstandPage open={open} />;
     case "explore":
       return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
     case "build":
-      return <BoardTab state={state} />;
+      return <FactoryPage state={state} />;
     case "workshop":
       return <WorkshopPage state={state} open={open} />;
     case "settings":

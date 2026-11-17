@@ -9,13 +9,17 @@ import {
   type PersonaTest,
 } from "@software-factory/core";
 
+import type { WorkView } from "../api.ts";
 import { Refused } from "../refused.ts";
+import { columnOf } from "./factory-view.ts";
 import type { SyncView } from "./sync.ts";
 
 // A signal with the name and face of its persona, when it has one.
 export type SignalRow = KobbleSignal & {
   personaName: string | null;
   personaFace: Face | null;
+  // The column of the work it was already fixed in, when the board shows it.
+  workColumn?: string | null;
 };
 
 export type SignalsView = {
@@ -42,12 +46,20 @@ export type TestPage = {
   signals: SignalRow[];
 };
 
-export function signalsView(store: KobbleStore, sync: SyncView): SignalsView {
+export function signalsView(
+  store: KobbleStore,
+  sync: SyncView,
+  work: WorkView | null,
+): SignalsView {
   const fresh = newestFirst(
     store.all("signals").filter((signal) => signal.status === "new"),
   );
   return {
-    signals: signalRows(fresh, store.all("personas")),
+    signals: signalRows(fresh, store.all("personas")).map((row) => ({
+      ...row,
+      workColumn:
+        row.already?.kind === "work" ? columnOf(row.already.id, work) : null,
+    })),
     counts: { new: fresh.length },
     sync,
   };

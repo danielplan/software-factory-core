@@ -10,28 +10,24 @@ see [the theme](../add-ons.md#the-theme)) may change the same variables.
 
 ## The frame
 
-| Part      | What it is                                                                                                                                                                                     | Where                                              |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                     | `packages/dashboard/src/components/shell.tsx`      |
-| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`    |
-| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                                                   | `packages/dashboard/src/components/shell.tsx`      |
-| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right.                            | `packages/dashboard/src/components/ask-kobold.tsx` |
-| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                                                      | `packages/dashboard/src/components/shell.tsx`      |
-| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                                            | `packages/dashboard/src/components/page-head.tsx`  |
+| Part      | What it is                                                                                                                                                                                     | Where                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                     | `packages/dashboard/src/components/shell.tsx`     |
+| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`   |
+| Page      | On the ground beside the sidebar, at most 1120px wide, padding 34px 40px 60px (16px at the sides on a phone); an exploration fills the whole space.                                            | `packages/dashboard/src/components/shell.tsx`     |
+| Page head | The title (32px, bold, letter-spacing -0.025em) with the page's buttons on the right, and one line about the page (14px, `--muted-foreground`).                                                | `packages/dashboard/src/components/page-head.tsx` |
 
 A page draws its title with `PageHead` and gives its buttons as `actions`;
-they show in the top bar. A button that belongs to one part of the page stays
-in that part. Setting up (before there is a factory), connecting a board and
-prototype mode keep their own layout, with the same variables and type.
+they show on the right of the title. A button that belongs to one part of
+the page stays in that part. Setting up (before there is a factory) keeps
+its own layout, with the same variables and type.
 
 On a phone the sidebar becomes a bar along the top whose menu opens the same
-list, and the panel fills the width.
+list, and the page fills the width.
 
 ## Kobble's pages
 
-Signals and Personas sit right on the ground, without the panel: at most
-1120px wide, padding 34px 40px 60px. Their header has the title (32px, 700,
-letter-spacing -0.025em) and the page's buttons on the right. Cards are
+Every page looks the same. Cards are
 white with radius 20px and `--shadow-card`; rows in a card have a line
 (`--border-soft`) between them. Buttons are pills (`size="pill"`): dark for
 the main one, white with a ring (`variant="ring"`) for the others. A picked
@@ -102,48 +98,6 @@ Text on the colours it sits on is readable (WCAG AA, 4.5:1), except
 `--label` and `--faint`, which are only for short labels next to stronger
 text.
 
-## One question per page
-
-Under a page's title, its one line says what to do there, as a question
-when the page asks something of the person: Understand asks "What’s new to
-look at?", a persona "Is this the real problem for Mia?", a story "Is this
-how it happens? What is still guessed?". A story is told as a short
-paragraph, one sentence per scene: the one where it breaks in `--open`, a
-guessed one muted and in italics, a seen one with a small raised mark that
-shows what was said, and where, on hover or focus.
-
-## Stages
-
-Where a problem, an idea or a ticket stands is its stage, one vocabulary
-everywhere, worked out in the core (`derive`, `packages/core/src/records/stage.ts`)
-and drawn by one stepper (`packages/dashboard/src/components/stage-steps.tsx`,
-steps and colours in `packages/dashboard/src/lib/stages.ts`).
-
-| Of        | Steps                                                              | Where                               |
-| --------- | ------------------------------------------------------------------ | ----------------------------------- |
-| A problem | Heard (or Assumed) → Trying ideas → Building → In the app → Solved | Understand: story cards, story page |
-| An idea   | Idea → Versions → Picked → Building → In the app → Worked          | Explore: the list, the idea's page  |
-| A ticket  | Building → In the app → Worked (the end of its idea's pipeline)    | Build: a card from an idea          |
-
-Each ends in Didn't work instead, when that was the answer. Steps done are
-dots in a calm teal (`--success` at 45%), the steps to come empty rings in
-`--faint`, and the current one larger in its colour:
-
-| Current step                             | Colour              |
-| ---------------------------------------- | ------------------- |
-| Heard, Assumed, Idea                     | `--foreground-2`    |
-| Trying ideas, Versions, Picked, Building | `--explore` (amber) |
-| In the app                               | `--build` (blue)    |
-| Solved, Worked                           | `--success` (green) |
-| Didn't work                              | `--fresh` (pink)    |
-
-On a card it is the dots and the current stage's name (on Explore with the
-number of versions beside it); on a page every step is named, with one plain
-line of why under it ("In Build as #138", "B has the most picks", "Closed by
-Luca on 14 Nov: it worked"). A story that didn't hold is crossed out and has
-no stepper; a fix or an update on Build shows none, its column says enough.
-Stages replace state pills in Understand and Explore.
-
 ## Light only
 
 The dashboard is light only for now: `color-scheme: light`, no dark values,
@@ -152,15 +106,14 @@ the page's style sheets (`packages/dashboard/src/lib/light-only.ts`).
 
 ## Spacing and corners
 
-| Piece                         | Corner | Inside            |
-| ----------------------------- | ------ | ----------------- |
-| Panel                         | 16px   | see the frame     |
-| Section card (`Card`)         | 18px   | 24px              |
-| Small card (a story, an idea) | 14px   | 12px 14px         |
-| Button                        | 10px   | 36px high, 0 14px |
-| Small button                  | 10px   | 30px high, 0 11px |
-| Page in the sidebar           | 9px    | 34px high, 0 10px |
-| Pill                          | round  | 24px high, 0 10px |
+| Piece               | Corner | Inside            |
+| ------------------- | ------ | ----------------- |
+| Card (`Card`)       | 20px   | 24px              |
+| A thing on a board  | 14px   | 12px              |
+| Button              | 10px   | 36px high, 0 14px |
+| Small button        | 10px   | 30px high, 0 11px |
+| Page in the sidebar | 9px    | 34px high, 0 10px |
+| Pill                | round  | 24px high, 0 10px |
 
 Parts of a page are 16px apart, cards in a list 8 to 14px.
 
@@ -171,7 +124,8 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 | `--shadow-soft`    | a card: a 1px ring in `--line-soft`, no shadow |
 | `--shadow-lift`    | a card under the mouse                         |
 | `--shadow-current` | the page open in the sidebar, the chosen tab   |
-| `--shadow-panel`   | the panel, the kobold's card                   |
+| `--shadow-card`    | a card: a 1px ring and a breath of shadow      |
+| `--shadow-panel`   | the kobold's card                              |
 | `--shadow-big`     | a dialog or a panel over the page              |
 
 ## Pieces
@@ -179,12 +133,8 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 - **Buttons** (`packages/dashboard/src/components/ui/button.tsx`): `default` is dark, `outline` white
   with a ring, `blue` for an action that changes the app, `ghost` for a quiet
   one; `size="sm"` for a small one.
-- **Cards** (`packages/dashboard/src/components/ui/card.tsx`): white, 18px corners, the soft ring.
-- **Pills** (`packages/dashboard/src/understand/bits.tsx`, `Pill`): 12px, 600, round, in a state's
-  colours.
-- **The kobold** (`KoboldMark`, the picture `packages/dashboard/public/kobold.png`): wherever the
+- **Cards** (`packages/dashboard/src/components/ui/card.tsx`): white, 20px corners, `--shadow-card`.
+- **The kobold** (`KoboldHead` in `packages/dashboard/src/components/kobold-face.tsx`): wherever the
   kobold speaks or works, never a generic icon.
 - **Tabs** inside a page (Workshop): a grey track
   (`--surface-2`) with the chosen one white and lifted.
-- **Ask the kobold**: ⌘K (Ctrl+K) goes to it, Enter asks; the answer opens
-  under it, read from the records, with a button to close it.

@@ -21,7 +21,7 @@ import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, Chevron, ROW } from "@/signals/bits";
 import { agoOf, countWords } from "@/signals/view";
-import { type Read, useRead } from "@/understand/use-records";
+import { type Read, useRead } from "@/lib/use-read";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";

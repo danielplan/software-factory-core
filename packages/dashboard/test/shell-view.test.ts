@@ -1,24 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type {
-  CardView,
-  IdeaView,
-  KoboldJob,
-  PartView,
-  WorkView,
-} from "../src/api.ts";
-import {
-  askPlaceholder,
-  countsOf,
-  isAskShortcut,
-  koboldStatus,
-  overallOf,
-} from "../src/lib/shell-view.ts";
+import type { CardView, IdeaView, PartView, WorkView } from "../src/api.ts";
+import { countsOf, koboldStatus, overallOf } from "../src/lib/shell-view.ts";
 import { lightOnly, type RuleLike } from "../src/lib/light-only.ts";
 
 // The frame around every page: the sidebar's counts, the kobold's card,
-// the factory's light, the Ask field; and the light or dark choice.
+// the factory's light; and light only.
 
 const card = (number: number, stage: CardView["stage"]): CardView => ({
   number,
@@ -42,17 +30,6 @@ const work = (more: Partial<WorkView> = {}): WorkView => ({
     problem: null,
   },
   coach: { on: true, working: null, steps: [] },
-  ...more,
-});
-const job = (more: Partial<KoboldJob>): KoboldJob => ({
-  id: "j",
-  kind: "sort",
-  about: "s1",
-  made: null,
-  working: false,
-  activity: null,
-  done: null,
-  problem: null,
   ...more,
 });
 const part = (light: PartView["light"]) => ({ light }) as PartView;
@@ -85,14 +62,13 @@ test("the factory's light, in words", () => {
 
 test("the kobold's card says what it works on, or that it rests", () => {
   const thinking = { title: "Wish list", working: true } as IdeaView;
-  assert.deepEqual(koboldStatus([], null, [], "All running"), {
+  assert.deepEqual(koboldStatus(null, [], "All running"), {
     busy: false,
     title: "Kobold is resting",
     detail: "All quiet · All running",
   });
   assert.deepEqual(
     koboldStatus(
-      [job({ working: true, activity: "Reading the records" })],
       work({
         builder: {
           on: true,
@@ -107,55 +83,15 @@ test("the kobold's card says what it works on, or that it rests", () => {
     ),
     { busy: true, title: "Kobold is building", detail: "Order status" },
   );
-  assert.deepEqual(
-    koboldStatus(
-      [job({ working: false }), job({ kind: "answer", working: true })],
-      null,
-      [thinking],
-      "",
-    ),
-    {
-      busy: true,
-      title: "Kobold is answering your question",
-      detail: "Working…",
-    },
-  );
-  assert.equal(
-    koboldStatus([job({ working: true, activity: "Sorting" })], null, [], "")
-      .detail,
-    "Sorting",
-  );
-  assert.deepEqual(koboldStatus([], null, [thinking], ""), {
+  assert.deepEqual(koboldStatus(null, [thinking], ""), {
     busy: true,
     title: "Kobold is thinking",
     detail: "Wish list",
   });
   assert.deepEqual(
-    koboldStatus(
-      [],
-      work({ coach: { on: true, working: 12, steps: [] } }),
-      [],
-      "",
-    ),
+    koboldStatus(work({ coach: { on: true, working: 12, steps: [] } }), [], ""),
     { busy: true, title: "Kobold is planning", detail: "Card #12" },
   );
-});
-
-test("the Ask field names the product, and ⌘K or Ctrl+K goes to it", () => {
-  assert.equal(askPlaceholder("Shop"), "Ask about the people who use Shop…");
-  assert.equal(
-    askPlaceholder(undefined),
-    "Ask about the people who use this product…",
-  );
-  const key = (key: string, metaKey: boolean, ctrlKey = false) => ({
-    key,
-    metaKey,
-    ctrlKey,
-  });
-  assert.equal(isAskShortcut(key("k", true)), true);
-  assert.equal(isAskShortcut(key("K", false, true)), true);
-  assert.equal(isAskShortcut(key("k", false)), false);
-  assert.equal(isAskShortcut(key("j", true)), false);
 });
 
 test("light only: every rule for a computer set to dark is switched off", () => {

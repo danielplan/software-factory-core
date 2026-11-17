@@ -57,12 +57,17 @@ test("work found already: one plain line, and Explore becomes Add to", () => {
   assert.deepEqual(alreadyLine(explored), {
     words: "Already explored in",
     what: "X-2 · Hours for the accountant",
+    column: null,
   });
   assert.equal(exploreWords(explored), "Add to X-2");
-  const fixed = row({ already: { kind: "work", id: "#41", title: "Email" } });
+  const fixed = row({
+    already: { kind: "work", id: "#41", title: "Email" },
+    workColumn: "Done",
+  });
   assert.deepEqual(alreadyLine(fixed), {
     words: "Already fixed in",
     what: "#41 · Email",
+    column: "(Done)",
   });
   assert.equal(exploreWords(fixed), "Explore");
   assert.equal(alreadyLine(row()), null);

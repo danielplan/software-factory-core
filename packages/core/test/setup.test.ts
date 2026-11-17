@@ -103,10 +103,10 @@ test("a new factory folder: the company file, the knowledge base, the history an
   );
   for (const file of ["runs/README.md", ".gitignore"])
     assert.ok(existsSync(join(root, file)), file);
-  // What is never shared: secrets, working copies, the records' database.
+  // What is never shared: secrets and working copies.
   assert.equal(
     readFileSync(join(root, ".gitignore"), "utf8"),
-    "copies/\nsettings/\nkobble.db*\n",
+    "copies/\nsettings/\n",
   );
   // The knowledge base goes into the project's docs/, never over its own docs.
   assert.equal(

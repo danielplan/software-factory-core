@@ -21,9 +21,6 @@ import { readBody, send } from "./http.ts";
 import { on, optionalText, record } from "./asked.ts";
 import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
-import type { JobTools } from "./kobold/tools.ts";
-import { servedRecords } from "./records/routes.ts";
-import { issuesInApp } from "./records/views.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -58,19 +55,15 @@ export function startServer(options: {
   const tell = (event: string) => {
     for (const response of watchers) response.write(event);
   };
-  // The whole state, as the page shows it; and, for the records, only
-  // which of them changed (the page reads what it shows of them again).
+  // The whole state, as the page shows it.
   const changed = () => {
     tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
   const cli = options.cli ?? realCli();
-  const records = recordsOf(session, cli, tell, changed);
-  session.work.waitFor(records.waiting);
   const kobble = kobbleOf(session, tell, { ...options, cli });
   const routes = {
     ...routesFor(session),
-    ...records.routes,
     ...kobble.routes,
     ...addOnRoutes(
       options.addOns,
@@ -88,7 +81,6 @@ export function startServer(options: {
     void answer(incoming, response, {
       routes,
       watchers,
-      koboldTools: records.toolsOf,
       boardTools: kobble.boardTools,
       ...options,
     });
@@ -97,12 +89,10 @@ export function startServer(options: {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
-    records.serveToolsAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
     kobble.serveToolsAt(`http://localhost:${String(port)}/api`);
     kobble.start();
   });
-  server.on("close", records.close);
   server.on("close", kobble.close);
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
@@ -170,7 +160,6 @@ function routesFor(session: Session): Record<string, Route> {
 type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
-  koboldTools: (token: string) => JobTools | null;
   boardTools: (id: string) => BoardTools;
   page: string;
   session: Session;
@@ -239,27 +228,6 @@ function stream(
   context.watchers.add(response);
   response.on("close", () => context.watchers.delete(response));
   response.write(": connected\n\n");
-}
-
-// The project's records, served beside the session.
-function recordsOf(
-  session: Session,
-  cli: Cli,
-  tell: (event: string) => void,
-  changed: () => void,
-) {
-  return servedRecords({
-    project: session.options.project,
-    claude: session.options.coach.claude,
-    cli,
-    tell,
-    // A ticket made or answered: the board is read again, and shown.
-    onTickets: () => {
-      session.work.refresh();
-      changed();
-    },
-    inApp: () => issuesInApp(session.work.view()?.cards ?? []),
-  });
 }
 
 function sendFile(response: ServerResponse, page: string, path: string): void {

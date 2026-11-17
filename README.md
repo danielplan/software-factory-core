@@ -16,7 +16,7 @@ company is here: only what is true for any company.
        ▲ the factory reads, plans, prototypes, builds and checks them
        │ each product describes itself (product.json): kind, users, commands
   EXTENSIONS AND KITS (here, versioned)
-       core extensions, on by default: Explore (ideas) and prototypes,
+       core extensions, on by default: Explorations and their prototypes,
          Build (the board with its coach and builder), Workshop
        add-ons, chosen per company: made-up worlds
        kits, one per kind of product: Expo app, React web app, SvelteKit web app,
@@ -49,8 +49,8 @@ node <this folder>/packages/server/bin/software-factory.ts
 
 Run it in your project. It opens <http://localhost:4300>: where the project
 has no factory yet, the setup page, where the coach reads the code and sets
-up the factory with you on a canvas; then the dashboard, Kobble (Build,
-Explore, Workshop, Settings). The factory lives in the project, in `factory/`, and the
+up the factory with you on a canvas; then the dashboard, Kobble (Signals,
+Explorations, Factory, Personas, Workshop, Settings). The factory lives in the project, in `factory/`, and the
 project's `AGENTS.md` points to it. Run it anywhere inside the project to
 open its factory; `software-factory new <name>` makes a folder for a new
 idea and sets it up there.

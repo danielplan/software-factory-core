@@ -1,6 +1,6 @@
 // The agents' own tools, served over MCP by the factory's server: the setup
-// coach's, each idea coach's, those of the kobold's job at work, and the
-// board tool of the kobold in each exploration. Each
+// coach's, each idea coach's, and the board tools of the kobold in each
+// exploration. Each
 // checks the token only its own Claude Code is given, instead of the page's
 // header.
 
@@ -12,23 +12,18 @@ import {
   type BoardTools,
 } from "./kobble/explorations/board-tools.ts";
 import { readBody, send } from "./http.ts";
-import { answerKoboldTools, type JobTools } from "./kobold/tools.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
 const COACH_TOOLS = "/api/setup/mcp";
 const IDEA_TOOLS = /^\/api\/ideas\/mcp\/([\w-]+)$/;
-const KOBOLD_TOOLS = "/api/kobold/mcp";
 const BOARD_TOOLS = /^\/api\/kobble\/explorations\/mcp\/(X-\d+)$/;
 
 export function isAgentTools(incoming: IncomingMessage, url: URL): boolean {
   const path = url.pathname;
   return (
     incoming.method === "POST" &&
-    (path === COACH_TOOLS ||
-      path === KOBOLD_TOOLS ||
-      IDEA_TOOLS.test(path) ||
-      BOARD_TOOLS.test(path))
+    (path === COACH_TOOLS || IDEA_TOOLS.test(path) || BOARD_TOOLS.test(path))
   );
 }
 
@@ -38,7 +33,6 @@ export async function answerAgentTools(
   url: URL,
   on: {
     session: Session;
-    koboldTools: (token: string) => JobTools | null;
     boardTools: (id: string) => BoardTools;
   },
 ): Promise<void> {
@@ -47,8 +41,6 @@ export async function answerAgentTools(
   if (board) await boardTools(incoming, response, on.boardTools, board, body);
   else if (url.pathname === COACH_TOOLS)
     await answerTools(incoming, response, on.session.coachTools(), body);
-  else if (url.pathname === KOBOLD_TOOLS)
-    await answerKoboldTools(incoming, response, body, on.koboldTools);
   else await ideaTools(incoming, response, on.session, url.pathname, body);
 }
 

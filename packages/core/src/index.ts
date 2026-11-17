@@ -103,60 +103,6 @@ export {
   type CopySettings,
 } from "./copies/workspace.ts";
 export { run } from "./processes.ts";
-export {
-  checkRecordsIn,
-  openRecords,
-  readSeed,
-  RECORDS_FILE,
-  SEED_FILE,
-} from "./records/files.ts";
-export {
-  KOBOLD,
-  importSignalSchema,
-  type Customer,
-  type Idea,
-  type ImportSignal,
-  type Kind,
-  type Outcome,
-  type Persona,
-  type Problem,
-  type RealProblem,
-  type RecordInput,
-  type RecordOf,
-  type Records,
-  type Signal,
-  type Source,
-  type Story,
-  type TicketLink,
-  type Version,
-  versionKey,
-  SORTED_AS,
-  SOURCE_KINDS,
-} from "./records/schemas.ts";
-export { checkRecords, signalsBehind } from "./records/check.ts";
-export {
-  derive,
-  howWellKnown,
-  type Derived,
-  type IdeaState,
-  type Known,
-  type PersonaSummary,
-  type ProblemState,
-  type StoryState,
-} from "./records/derive.ts";
-export {
-  IDEA_STAGES,
-  type IdeaStage,
-  PROBLEM_STAGES,
-  type ProblemStage,
-} from "./records/stage.ts";
-export {
-  type RecordsChange,
-  RecordsRefused,
-  RecordStore,
-  type Writer,
-} from "./records/store.ts";
-
 export { alreadyFor, titleOf } from "./kobble/already.ts";
 export {
   type Face,
@@ -184,6 +130,7 @@ export {
   type TestStep,
   type Thing,
 } from "./kobble/schemas.ts";
+export { checkKobbleIn } from "./kobble/check.ts";
 export {
   type Conversation,
   KOBBLE_FOLDER,

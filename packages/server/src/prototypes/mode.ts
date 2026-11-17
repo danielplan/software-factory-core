@@ -1,4 +1,4 @@
-// Prototype mode: the versions of an idea, each running in its own copy of
+// Running prototypes: an exploration's prototypes, each in its own copy of
 // the code (copies.ts), started with the company's `prototype.start` command
 // and stopped with its `prototype.stop`. The start command says where the
 // running version is with a line `FACTORY_URL=<address>`: until then the
@@ -12,15 +12,12 @@ import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { createInterface } from "node:readline";
 
-import { type RecordStore, versionKey } from "@software-factory/core";
-
 import { Refused } from "../refused.ts";
 import {
   companyOf,
   NO_START,
   type PrototypeCopy,
   urlIn,
-  versionCopy,
   versionWorkspace,
 } from "./copies.ts";
 
@@ -43,11 +40,9 @@ export type ModeOptions = {
   project: string;
   // The factory's folder (its company file names the commands).
   root: string;
-  records: () => RecordStore;
   onChange: () => void;
-  // Where a version's copy is, when it is not a version in the records (an
-  // exploration's prototype).
-  copyOf?: (idea: string, version: string) => PrototypeCopy;
+  // Where a prototype's copy is (an exploration's prototype of an option).
+  copyOf: (idea: string, version: string) => PrototypeCopy;
 };
 
 // The last lines a failed command printed, to say why.
@@ -70,7 +65,7 @@ export class PrototypeMode {
   // What a version is doing now; a version not seen yet is stopped.
   runOf(idea: string, version: string): VersionRun {
     return (
-      this.runs.get(versionKey(idea, version)) ?? {
+      this.runs.get(keyOf(idea, version)) ?? {
         idea,
         version,
         state: "stopped",
@@ -84,19 +79,12 @@ export class PrototypeMode {
   // Changes what is known of a version, and says so.
   set(idea: string, version: string, change: Partial<VersionRun>): void {
     const run = { ...this.runOf(idea, version), ...change };
-    this.runs.set(versionKey(idea, version), run);
+    this.runs.set(keyOf(idea, version), run);
     this.options.onChange();
   }
 
-  // The version's copy, as its record says.
   copyOf(idea: string, version: string): PrototypeCopy {
-    if (this.options.copyOf) return this.options.copyOf(idea, version);
-    const found = this.options
-      .records()
-      .get("versions", versionKey(idea, version));
-    if (!found)
-      throw new Refused(`There is no version ${version} of “${idea}”.`);
-    return versionCopy(this.options.project, idea, found.key, found.branch);
+    return this.options.copyOf(idea, version);
   }
 
   // Starts the version with the project's start command, in its copy (made
@@ -127,7 +115,7 @@ export class PrototypeMode {
   // project's stop command, if it has one.
   async stop(idea: string, version: string): Promise<void> {
     const copy = this.copyOf(idea, version);
-    this.end(versionKey(idea, version));
+    this.end(keyOf(idea, version));
     const stop = companyOf(this.options.root).prototype?.stop;
     if (stop && existsSync(copy.folder)) {
       const { code, lines } = await this.finished(spawnIn(copy, stop));
@@ -152,7 +140,7 @@ export class PrototypeMode {
     copy: PrototypeCopy,
     command: string,
   ): void {
-    const key = versionKey(idea, version);
+    const key = keyOf(idea, version);
     const child = spawnIn(copy, command);
     this.children.set(key, child);
     const heard = (line: string) => {
@@ -230,4 +218,8 @@ function said(lines: string[]): string {
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function keyOf(idea: string, version: string): string {
+  return `${idea}/${version}`;
 }

@@ -12,12 +12,12 @@ import { findFactory } from "@software-factory/core";
 import { CARD_USAGE } from "./cards/command.ts";
 import { PROTOTYPE_USAGE } from "./prototypes/command.ts";
 import { checkKnowledge } from "./knowledge-check.ts";
-import { checkRecordsHere } from "./records/check-command.ts";
+import { checkRecordsHere } from "./check-command.ts";
 
 export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
                                              start the project's factory and open it
 software-factory new <name>                  a folder for a new idea, set up there
-software-factory check [folder]              the records' checks (factory/kobble.db and its seed)
+software-factory check [folder]              the checks of Kobble's files (factory/kobble/)
 software-factory check-docs                  the knowledge base's checks (docs/)
 software-factory upgrade                     the project's factory, to this core's version
 software-factory help                        this help

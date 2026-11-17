@@ -57,9 +57,6 @@ export class ExplorationPrototypes {
     this.mode = new PrototypeMode({
       project: options.project,
       root: options.root,
-      records: () => {
-        throw new Refused("Explorations keep no records there.");
-      },
       onChange: options.onChange,
       copyOf: (exploration, key) => {
         const made = prototypeOf(options.store().board(exploration), key);

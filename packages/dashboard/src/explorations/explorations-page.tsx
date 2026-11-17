@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CARD, Chevron, Head, ROW } from "@/signals/bits";
 import { countWords } from "@/signals/view";
-import { type Read, useRead } from "@/understand/use-records";
+import { type Read, useRead } from "@/lib/use-read";
 
 import { Faces, Preview } from "./bits";
 import { NewExploration } from "./new-exploration";

@@ -212,7 +212,10 @@ type Act = "fix" | "explore" | "dismiss";
 
 // What a button did, in words.
 function doneWords(act: Act, signal: SignalRow, answer: unknown): string {
-  if (act === "fix") return `${signal.id} goes to the factory to be fixed`;
+  if (act === "fix") {
+    const fixed = (answer as { signal: { to: string | null } }).signal.to;
+    return `${fixed ?? signal.id} is in the factory's To do`;
+  }
   if (act === "dismiss") return "Dismissed";
   const { exploration } = answer as { exploration: { id: string } };
   return signal.already?.kind === "exploration"

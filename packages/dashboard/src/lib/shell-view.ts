@@ -1,10 +1,10 @@
 // What the frame around every page says, worked out from what the server
 // sends: the small counts beside the pages in the sidebar, the kobold's
 // card at its bottom (what it is working on, or that it rests), the whole
-// factory's light, and the Ask field's words. Kept apart from the
+// factory's light. Kept apart from the
 // components so it is checked on its own.
 
-import type { IdeaView, KoboldJob, Light, PartView, WorkView } from "../api.ts";
+import type { IdeaView, Light, PartView, WorkView } from "../api.ts";
 import type { Page } from "./routes.ts";
 
 // Only real numbers, and only when there is something to count: the new
@@ -46,20 +46,10 @@ export function overallOf(parts: PartView[]): {
 
 export type KoboldStatus = { busy: boolean; title: string; detail: string };
 
-const DOING: Record<KoboldJob["kind"], string> = {
-  sort: "sorting what came in",
-  suggest: "reading the problems",
-  ask: "drafting a question",
-  seen: "drafting what was seen",
-  idea: "writing an idea",
-  answer: "answering your question",
-};
-
 // What the kobold is working on, from what the factory knows: the card it
-// builds, a job on the records, an idea it thinks about, a card it plans;
+// builds, an idea it thinks about, a card it plans;
 // resting otherwise, with the factory's light in words.
 export function koboldStatus(
-  jobs: KoboldJob[],
   work: WorkView | null,
   ideas: IdeaView[],
   quiet: string,
@@ -67,13 +57,6 @@ export function koboldStatus(
   const building = work?.builder.working;
   if (building)
     return { busy: true, title: "Kobold is building", detail: building.title };
-  const job = jobs.find((one) => one.working);
-  if (job)
-    return {
-      busy: true,
-      title: `Kobold is ${DOING[job.kind]}`,
-      detail: job.activity ?? "Working…",
-    };
   const thinking = ideas.find((one) => one.working);
   if (thinking)
     return {
@@ -93,20 +76,6 @@ export function koboldStatus(
     title: "Kobold is resting",
     detail: `All quiet · ${quiet}`,
   };
-}
-
-// The Ask field's words, about the product chosen.
-export function askPlaceholder(product: string | undefined): string {
-  return product
-    ? `Ask about the people who use ${product}…`
-    : "Ask about the people who use this product…";
-}
-
-// ⌘K, or Ctrl+K on a computer without ⌘, goes to the Ask field.
-export function isAskShortcut(
-  key: Readonly<{ key: string; metaKey: boolean; ctrlKey: boolean }>,
-): boolean {
-  return (key.metaKey || key.ctrlKey) && key.key.toLowerCase() === "k";
 }
 
 // The short line under "Your kobold": what it is doing, or Idle.

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { type ExplorationPage as Page, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
-import { type Read, useRead } from "@/understand/use-records";
+import { type Read, useRead } from "@/lib/use-read";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";

@@ -30,7 +30,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
     <div className="grid gap-5">
       <PageHead
         title="Settings"
-        about="How the factory works here: where work is tracked, how it looks, and the settings of its parts."
+        about="How the factory works here: where work is tracked, and the settings of its parts."
       />
       <div
         className={

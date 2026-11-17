@@ -6,7 +6,10 @@
 
 import type { SignalRow, SyncView } from "../api.ts";
 
-type Signal = Pick<SignalRow, "type" | "source" | "personaName" | "already">;
+type Signal = Pick<
+  SignalRow,
+  "type" | "source" | "personaName" | "already" | "workColumn"
+>;
 
 export const TYPE_WORDS: Record<Signal["type"], string> = {
   bug: "Bug",
@@ -40,8 +43,8 @@ export function exploreWords(signal: Pick<Signal, "already">): string {
 // The one plain line about work that exists already ("Already explored in"
 // and "X-1 · its title"), or null.
 export function alreadyLine(
-  signal: Pick<Signal, "already">,
-): { words: string; what: string } | null {
+  signal: Pick<Signal, "already" | "workColumn">,
+): { words: string; what: string; column: string | null } | null {
   const { already } = signal;
   if (!already) return null;
   return {
@@ -50,6 +53,10 @@ export function alreadyLine(
         ? "Already explored in"
         : "Already fixed in",
     what: `${already.id} · ${already.title}`,
+    column:
+      already.kind === "work" && signal.workColumn
+        ? `(${signal.workColumn})`
+        : null,
   };
 }
 

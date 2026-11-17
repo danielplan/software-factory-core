@@ -7,10 +7,19 @@ import { pathToFileURL } from "node:url";
 
 import { faceFor, KobbleStore } from "@software-factory/core";
 
-import type {
-  PersonaPage,
-  PersonaRow,
-  SignalsView,
+import type { CardView, WorkView } from "../src/api.ts";
+import type { Cards } from "../src/cards/cards.ts";
+import { fixSignal } from "../src/kobble/actions.ts";
+import {
+  columnOf,
+  factoryView,
+  type FactoryView,
+} from "../src/kobble/factory-view.ts";
+import {
+  type PersonaPage,
+  type PersonaRow,
+  type SignalsView,
+  signalsView,
 } from "../src/kobble/views.ts";
 import { stage } from "./stage.ts";
 
@@ -209,11 +218,13 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
         .status,
       403,
     );
+    // Fix needs a connected board, and says how to connect one.
     const fixed = await factory.press("/api/kobble/signals/fix", {
       id: "S-0008",
     });
-    assert.equal((fixed.body.signal as { status: string }).status, "fixed");
-    assert.equal(factory.store.get("signals", "S-0008")?.to, null);
+    assert.equal(fixed.status, 409);
+    assert.match(String(fixed.body.error), /^No GitHub board is connected/);
+    assert.equal(factory.store.get("signals", "S-0008")?.status, "new");
 
     // Already explored in X-1: added to it.
     await factory.press("/api/kobble/signals/explore", { id: "S-0004" });
@@ -244,7 +255,7 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
 
     // Handled signals leave the list, and are not handled twice.
     const view = await factory.read<SignalsView>("/api/kobble/signals");
-    assert.equal(view.counts.new, 6);
+    assert.equal(view.counts.new, 7);
     const again = await factory.press("/api/kobble/signals/dismiss", {
       id: "S-0005",
     });
@@ -370,6 +381,103 @@ test("a Kobble file that does not fit is refused with its name", async () => {
       ((await response.json()) as { error: string }).error,
       /^personas\/mia.json does not fit/,
     );
+  } finally {
+    factory.close();
+  }
+});
+
+test("Fix makes an issue in To do and the signal goes to it; the Factory board shows where things are", async () => {
+  const factory = await kobbleFactory(pathToFileURL(EXPORT).href);
+  try {
+    await factory.press("/api/kobble/sync");
+    const made: string[] = [];
+    const moved: [number, string][] = [];
+    const cards = {
+      create: (title: string) => {
+        made.push(title);
+        return Promise.resolve({ number: 77, url: "https://example.com/77" });
+      },
+      move: (number: number, stage: string) => {
+        moved.push([number, stage]);
+        return Promise.resolve();
+      },
+    } as unknown as Cards;
+    const signal = await fixSignal(factory.store, "S-0008", () => cards);
+    assert.equal(signal.status, "fixed");
+    assert.equal(signal.to, "#77");
+    assert.deepEqual(made, [
+      "Checkout stopped with an error: the payment service took too long to answer",
+    ]);
+    assert.deepEqual(moved, [[77, "todo"]]);
+    const x1 = factory.store.get("explorations", "X-1");
+    assert.ok(x1);
+    factory.store.put("explorations", { ...x1, work: 51 });
+    const card = (
+      number: number,
+      stage: CardView["stage"],
+      closed = false,
+    ): CardView => ({
+      number,
+      title: `Card ${String(number)}`,
+      stage,
+      column: "",
+      url: "",
+      pullRequest: null,
+      closed,
+      asks: false,
+    });
+    const work = {
+      cards: [
+        card(77, "todo"),
+        card(51, "doing"),
+        card(41, "review", true),
+        card(9, null),
+        card(12, "review"),
+      ],
+      problem: null,
+      read: null,
+      builder: {
+        on: true,
+        working: { number: 51, title: "Basket", what: "" },
+        activity: null,
+        steps: [],
+        problem: null,
+      },
+      coach: { on: false, working: null, steps: [] },
+    } as WorkView;
+    const view = factoryView(factory.store, work);
+    assert.deepEqual(
+      view.columns.map((column) => [
+        column.id,
+        column.cards.map((c) => c.number),
+      ]),
+      [
+        ["todo", [77, 9]],
+        ["building", [51]],
+        ["review", [12]],
+        ["done", [41]],
+      ],
+    );
+    assert.deepEqual(view.columns[1]?.cards[0]?.from, {
+      exploration: "X-1",
+      key: "B",
+    });
+    assert.equal(view.columns[0]?.cards[0]?.fix, true);
+    assert.equal(view.builder.working, "#51 · Basket");
+    assert.equal(columnOf("#41", work), "Done");
+    assert.equal(columnOf("#5", work), null);
+    assert.deepEqual(factoryView(factory.store, null).connected, false);
+    const signals = signalsView(
+      factory.store,
+      { connected: true, last: null, problem: null },
+      work,
+    );
+    assert.equal(
+      signals.signals.find((s) => s.id === "S-0007")?.workColumn,
+      "Done",
+    );
+    const page = await factory.read<FactoryView>("/api/kobble/factory");
+    assert.equal(page.connected, false);
   } finally {
     factory.close();
   }

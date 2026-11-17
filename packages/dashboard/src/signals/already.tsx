@@ -13,6 +13,7 @@ export function Already({ signal }: Readonly<{ signal: SignalRow }>) {
   const words = (
     <span className="flex-1">
       {line.words} <b className="font-semibold">{line.what}</b>
+      {line.column ? ` ${line.column}` : ""}
     </span>
   );
   if (signal.already?.kind === "work")

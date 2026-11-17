@@ -1,0 +1,34 @@
+// software-factory check [folder]: the checks of Kobble's files in the
+// project's factory (factory/kobble/): that each fits, and that what each
+// names is there. Nothing is made or changed. Each problem is said in a
+// line, and the command fails when there is any.
+
+import { resolve } from "node:path";
+
+import { checkKobbleIn, findFactory } from "@software-factory/core";
+
+type Out = (line: string) => void;
+
+export function checkRecordsHere(
+  from: string,
+  folder: string | undefined,
+  out: Out,
+): number {
+  const root = findFactory(resolve(from, folder ?? "."));
+  if (!root) {
+    out("There is no factory here: run it in a project.");
+    return 1;
+  }
+  const { checked, problems } = checkKobbleIn(root);
+  if (!checked) {
+    out("There are no Kobble files yet: nothing to check.");
+    return 0;
+  }
+  for (const problem of problems) out(problem);
+  out(
+    problems.length > 0
+      ? `\n${String(problems.length)} problem(s) in Kobble's files.`
+      : "Kobble's files hold (kobble/): every rule is kept.",
+  );
+  return problems.length > 0 ? 1 : 0;
+}
