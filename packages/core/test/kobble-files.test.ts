@@ -240,14 +240,14 @@ test("the example company's export comes in once, with what exists already", () 
       one.already?.id ?? null,
     ]),
     [
-      ["S-0002", "bug", "mia", "X-1"],
-      ["S-0003", "request", "bruno", null],
-      ["S-0004", "request", "bruno", null],
-      ["S-0005", "bug", null, "#41"],
-      ["S-0006", "bug", null, null],
-      ["S-0007", "feedback", "noah", null],
+      ["S-0004", "bug", "mia", "X-1"],
+      ["S-0005", "request", "bruno", null],
+      ["S-0006", "request", "bruno", null],
+      ["S-0007", "bug", null, "#41"],
       ["S-0008", "bug", null, null],
-      ["S-0009", "request", "mia", "X-1"],
+      ["S-0009", "feedback", "noah", null],
+      ["S-0010", "bug", null, null],
+      ["S-0011", "request", "mia", "X-1"],
     ],
   );
   assert.deepEqual(added[3]?.already, {
@@ -257,7 +257,7 @@ test("the example company's export comes in once, with what exists already", () 
   });
   // The same events again: nothing new.
   assert.deepEqual(takeInEvents(store, live.events), []);
-  assert.equal(store.all("signals").length, live.events.length + 1);
+  assert.equal(store.all("signals").length, live.events.length + 3);
 });
 
 test("the check reads Kobble's files and finds what is not there", () => {

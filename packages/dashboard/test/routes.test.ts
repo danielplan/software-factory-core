@@ -19,6 +19,11 @@ test("a persona has its own address", () => {
   assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
   assert.equal(personaHash(), "#personas");
   assert.equal(personaHash("gift buyer"), "#personas/gift%20buyer");
+  assert.equal(personaHash("mia", {}), "#personas/mia/tests");
+  assert.equal(
+    personaHash("mia", { test: "T-0001" }),
+    "#personas/mia/tests/T-0001",
+  );
 });
 
 test("each page has its own address, with what is open in it", () => {

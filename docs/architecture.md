@@ -324,6 +324,21 @@ the personas with their signals (`GET /api/kobble/personas`,
 `/api/kobble/persona?id=…`) and adds one (`POST /api/kobble/personas`). A persona's
 file may give its kobold's face (`face`: a hat and a colour); otherwise it
 comes from the persona's id (`packages/core/src/kobble/face.ts`).
+
+**Persona tests** (`factory/kobble/tests/T-0001.json`) let the kobold use the
+app as one persona would, on this computer only and never the live app
+(`packages/server/src/kobble/persona-tests.ts`, with the `persona-test`
+skill). The product starts as the factory starts it (the launcher, with its
+kit's command and port); the persona agent sees it only through a browser,
+Playwright's MCP server (`npx @playwright/mcp`, headless, no saved profile),
+and keeps a diary of each step: what it did, what it expected, and whether
+that happened. Then the analyst turns the diary into signals (`bug` or
+`feedback`, source `test`, the persona set, in the person's words), which go
+through the same "already" check. One test runs at a time; the others wait.
+A test that cannot run says why in its `problem` (no product with a web
+address, the product does not start, no browser, Claude Code missing). The
+routes: `POST /api/kobble/tests` (`persona`, `task`), `GET
+/api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`.
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 

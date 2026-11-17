@@ -114,3 +114,30 @@ export function statusWords(signal: Pick<SignalRow, "status" | "to">): string {
     return signal.to ? `Fixed in ${signal.to}` : "Sent to be fixed";
   return signal.status === "new" ? "New" : "Dismissed";
 }
+
+export const TEST_WORDS: Record<
+  "queued" | "running" | "done" | "failed",
+  string
+> = {
+  queued: "Waiting",
+  running: "Running",
+  done: "Done",
+  failed: "Failed",
+};
+
+// On a persona's page, what is open: their signals (#personas/<id>), their
+// tests (#personas/<id>/tests) or one test (#personas/<id>/tests/<test>).
+export function personaPlaceOf(open: string): {
+  persona: string;
+  tab: "signals" | "tests";
+  test: string | null;
+} {
+  const [persona = "", tab, test] = open
+    .split("/")
+    .map((part) => decodeURIComponent(part));
+  return {
+    persona,
+    tab: tab === "tests" ? "tests" : "signals",
+    test: tab === "tests" && test ? test : null,
+  };
+}

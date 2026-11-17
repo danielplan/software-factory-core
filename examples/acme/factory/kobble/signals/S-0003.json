@@ -1,0 +1,13 @@
+{
+  "id": "S-0003",
+  "type": "feedback",
+  "source": "test",
+  "sourceId": null,
+  "customer": null,
+  "persona": "mia",
+  "at": "2026-11-15T19:42:00.000Z",
+  "text": "I could not tell if the delivery would come in the evening, after work.",
+  "status": "new",
+  "to": null,
+  "already": null
+}

@@ -177,7 +177,9 @@ export {
   type Exploration,
   type KobblePersona,
   type KobbleSignal,
+  type PersonaTest,
   type SyncState,
+  type TestStep,
 } from "./kobble/schemas.ts";
 export {
   KOBBLE_FOLDER,
@@ -185,7 +187,11 @@ export {
   KobbleRefused,
   KobbleStore,
 } from "./kobble/store.ts";
-export { takeInEvents } from "./kobble/take-in.ts";
+export {
+  type Finding,
+  takeInEvents,
+  takeInFindings,
+} from "./kobble/take-in.ts";
 
 export {
   compareVersions,

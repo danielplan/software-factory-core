@@ -1,0 +1,23 @@
+{
+  "id": "T-0002",
+  "persona": "mia",
+  "task": "Find a watering can and see what it costs with delivery",
+  "on": "main",
+  "status": "done",
+  "started": "2026-11-16T18:05:00.000Z",
+  "ended": "2026-11-16T18:11:00.000Z",
+  "steps": [
+    {
+      "did": "Searched for watering can",
+      "expected": "A few watering cans show up",
+      "asExpected": true
+    },
+    {
+      "did": "Opened the first one",
+      "expected": "I see the price and the delivery cost",
+      "asExpected": true
+    }
+  ],
+  "signals": [],
+  "problem": null
+}

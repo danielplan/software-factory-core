@@ -26,3 +26,32 @@ export function takeInEvents(
   }
   return added;
 }
+
+// What a persona test found, as new signals from that persona (source
+// test), each through the same "already" check.
+export function takeInFindings(
+  store: KobbleStore,
+  found: { persona: string; at: string; findings: Finding[] },
+): KobbleSignal[] {
+  const signals = store.all("signals");
+  const explorations = store.all("explorations");
+  return found.findings.map((finding) => {
+    const signal = store.put("signals", {
+      id: store.nextId("signals"),
+      type: finding.type,
+      source: "test",
+      sourceId: null,
+      customer: null,
+      persona: found.persona,
+      at: found.at,
+      text: finding.text,
+      status: "new",
+      to: null,
+      already: alreadyFor(finding.text, explorations, signals),
+    });
+    signals.push(signal);
+    return signal;
+  });
+}
+
+export type Finding = { type: "bug" | "feedback"; text: string };

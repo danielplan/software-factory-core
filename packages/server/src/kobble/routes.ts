@@ -6,6 +6,7 @@
 import { join } from "node:path";
 
 import {
+  type Claude,
   FACTORY_FOLDER,
   hasFactory,
   KobbleRefused,
@@ -22,12 +23,22 @@ import {
   fixSignal,
 } from "./actions.ts";
 import { liveSettings } from "./live-source.ts";
+import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
-import { personaPage, personasView, signalsView } from "./views.ts";
+import {
+  personaPage,
+  personasView,
+  signalsView,
+  testPage,
+  testsOf,
+} from "./views.ts";
 
 type KobbleOptions = {
   project: string;
   tell: (event: string) => void;
+  claude: Claude;
+  // What a persona test runs on: the app's address, and a browser.
+  testsRunOn: { app: () => Promise<string>; browser: () => Promise<Browser> };
 };
 
 export function servedKobble(options: KobbleOptions) {
@@ -61,6 +72,9 @@ export function servedKobble(options: KobbleOptions) {
       changed(what);
       return answer;
     };
+  const tests = testRoutes(options, store, () => {
+    changed("tests");
+  });
   const routes: Record<string, Route> = {
     "GET /api/kobble/signals": () =>
       kept(() => signalsView(store(), sync.view())),
@@ -72,14 +86,47 @@ export function servedKobble(options: KobbleOptions) {
     "GET /api/kobble/personas": () => kept(() => personasView(store())),
     "GET /api/kobble/persona": (_body, url) =>
       kept(() => personaPage(store(), asked(url, "id", "persona"))),
+    ...tests.routes,
   };
   return {
     routes,
     start: () => {
+      if (maybe()) tests.recover();
       sync.start();
     },
     close: () => {
       sync.close();
+    },
+  };
+}
+
+// Persona tests: start one, a persona's tests, one test.
+function testRoutes(
+  options: KobbleOptions,
+  store: () => KobbleStore,
+  onChange: () => void,
+): { routes: Record<string, Route>; recover: () => void } {
+  const tests = new PersonaTests({
+    claude: options.claude,
+    cwd: options.project,
+    store,
+    ...options.testsRunOn,
+    onChange,
+  });
+  const routes: Record<string, Route> = {
+    "GET /api/kobble/tests": (_body, url) =>
+      kept(() => ({
+        tests: testsOf(store(), asked(url, "persona", "persona")),
+      })),
+    "GET /api/kobble/test": (_body, url) =>
+      kept(() => testPage(store(), asked(url, "id", "test"))),
+    "POST /api/kobble/tests": (body) =>
+      kept(() => ({ test: tests.start(body) })),
+  };
+  return {
+    routes,
+    recover: () => {
+      tests.recover();
     },
   };
 }

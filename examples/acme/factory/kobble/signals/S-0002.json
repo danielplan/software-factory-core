@@ -1,0 +1,17 @@
+{
+  "id": "S-0002",
+  "type": "bug",
+  "source": "test",
+  "sourceId": null,
+  "customer": null,
+  "persona": "mia",
+  "at": "2026-11-15T19:42:00.000Z",
+  "text": "I put gloves in the basket, closed the shop and came back later: the basket was empty.",
+  "status": "new",
+  "to": null,
+  "already": {
+    "kind": "exploration",
+    "id": "X-1",
+    "title": "The basket is empty when people come back to pay"
+  }
+}

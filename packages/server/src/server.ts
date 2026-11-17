@@ -18,7 +18,7 @@ import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { readBody, send } from "./http.ts";
-import { servedKobble } from "./kobble/routes.ts";
+import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
 import type { JobTools } from "./kobold/tools.ts";
 import { servedRecords } from "./records/routes.ts";
 import { issuesInApp } from "./records/views.ts";
@@ -49,6 +49,8 @@ export function startServer(options: {
   port: number;
   // The GitHub CLI (a stand-in in the tests).
   cli?: Cli;
+  // What persona tests run on (stand-ins in the tests).
+  testsRunOn?: TestsRunOn;
 }): { server: Server; changed: () => void } {
   const watchers = new Set<ServerResponse>();
   const tell = (event: string) => {
@@ -62,7 +64,7 @@ export function startServer(options: {
   const { session } = options;
   const records = recordsOf(session, options.cli ?? realCli(), tell, changed);
   session.work.waitFor(records.waiting);
-  const kobble = servedKobble({ project: session.options.project, tell });
+  const kobble = kobbleOf(session, tell, options.testsRunOn);
   const routes = {
     ...routesFor(session),
     ...records.routes,
@@ -95,10 +97,8 @@ export function startServer(options: {
     options.session.begin();
     kobble.start();
   });
-  server.on("close", () => {
-    records.close();
-    kobble.close();
-  });
+  server.on("close", records.close);
+  server.on("close", kobble.close);
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
 }

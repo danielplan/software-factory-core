@@ -83,6 +83,11 @@ export async function stage(
   },
   // What the setup coach can set up a board with; none by default.
   trackers: TrackerSetup[] = [],
+  // What persona tests run on; by default no app, said plainly.
+  testsRunOn: Parameters<typeof startServer>[0]["testsRunOn"] = {
+    app: () => Promise.reject(new Error("There is no app in the tests.")),
+    browser: () => Promise.reject(new Error("There is no browser.")),
+  },
 ) {
   const home = mkdtempSync(join(tmpdir(), "setup-"));
   const project = join(home, "project");
@@ -119,6 +124,7 @@ export async function stage(
     port: 0,
     addOns,
     cli: connectors.cli,
+    testsRunOn,
   });
   await new Promise((resolve) => server.once("listening", resolve));
   const address = server.address();

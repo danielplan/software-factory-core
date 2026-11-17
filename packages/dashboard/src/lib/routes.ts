@@ -130,7 +130,12 @@ export function prototypeHash(idea: string, version?: string): string {
   return ["#prototype", ...parts.map(encodeURIComponent)].join("/");
 }
 
-// A persona's page (#personas/<id>), or the list.
-export function personaHash(id?: string): string {
-  return id ? `#personas/${encodeURIComponent(id)}` : "#personas";
+// A persona's page (#personas/<id>), its tests or one of them, or the list.
+export function personaHash(id?: string, tests?: { test?: string }): string {
+  if (!id) return "#personas";
+  const base = `#personas/${encodeURIComponent(id)}`;
+  if (!tests) return base;
+  return tests.test
+    ? `${base}/tests/${encodeURIComponent(tests.test)}`
+    : `${base}/tests`;
 }

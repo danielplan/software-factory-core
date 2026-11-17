@@ -95,6 +95,35 @@ export const kobblePersonaSchema = z.strictObject({
     .optional(),
 });
 
+export const TEST_STATUSES = ["queued", "running", "done", "failed"] as const;
+
+// One step of a persona test, from the persona agent's diary: what it did,
+// what it expected, whether that happened, and a note in its own words.
+const stepSchema = z.strictObject({
+  did: text,
+  expected: text,
+  asExpected: z.boolean(),
+  note: z.string().optional(),
+});
+
+// A persona test: an agent uses the app as the persona would, on this
+// computer only (never the live app), and what surprised it becomes
+// signals.
+export const personaTestSchema = z.strictObject({
+  id: fileId.regex(/^T-\d{4,}$/, "a test's id is T- and four digits"),
+  persona: fileId,
+  task: text,
+  // What it ran on: the app as it is now (main); prototype branches later.
+  on: z.literal("main"),
+  status: z.enum(TEST_STATUSES),
+  started: time.nullable(),
+  ended: time.nullable(),
+  steps: z.array(stepSchema),
+  signals: z.array(fileId),
+  // Why it failed, in plain words.
+  problem: z.string().nullable(),
+});
+
 // When the live app was last read, and where to go on from next time.
 export const syncStateSchema = z.strictObject({
   last: time.nullable(),
@@ -106,3 +135,5 @@ export type Exploration = z.infer<typeof explorationSchema>;
 export type KobblePersona = z.infer<typeof kobblePersonaSchema>;
 export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;
+export type PersonaTest = z.infer<typeof personaTestSchema>;
+export type TestStep = z.infer<typeof stepSchema>;

@@ -47,7 +47,9 @@ export type {
   PersonaRow,
   SignalRow,
   SignalsView,
+  TestPage,
 } from "../../server/src/kobble/views.ts";
+export type { PersonaTest } from "../../core/src/index.ts";
 export type { SyncView } from "../../server/src/kobble/sync.ts";
 export type {
   ExploreList,

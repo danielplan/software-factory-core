@@ -1,0 +1,35 @@
+{
+  "id": "T-0001",
+  "persona": "mia",
+  "task": "Fill the basket on the way home and pay later in the evening",
+  "on": "main",
+  "status": "done",
+  "started": "2026-11-15T19:30:00.000Z",
+  "ended": "2026-11-15T19:42:00.000Z",
+  "steps": [
+    {
+      "did": "Opened the shop on the phone",
+      "expected": "I see the garden tools",
+      "asExpected": true
+    },
+    {
+      "did": "Put a pair of gloves in the basket",
+      "expected": "The basket shows the gloves",
+      "asExpected": true
+    },
+    {
+      "did": "Closed the shop and opened it again later",
+      "expected": "The gloves are still in the basket",
+      "asExpected": false,
+      "note": "The basket was empty."
+    },
+    {
+      "did": "Looked for when the delivery comes",
+      "expected": "I can pick the evening",
+      "asExpected": false,
+      "note": "It only says 2–3 days."
+    }
+  ],
+  "signals": ["S-0002", "S-0003"],
+  "problem": null
+}

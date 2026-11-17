@@ -5,6 +5,7 @@
 //   signals/S-0001.json
 //   explorations/X-1/exploration.json
 //   personas/<id>.json
+//   tests/T-0001.json    persona tests
 //   sync.json            when the live app was last read, and the cursor
 //
 // The files are JSON, not Markdown with front matter: the platform reads and
@@ -34,6 +35,8 @@ import {
   kobblePersonaSchema,
   type KobbleSignal,
   kobbleSignalSchema,
+  type PersonaTest,
+  personaTestSchema,
   type SyncState,
   syncStateSchema,
 } from "./schemas.ts";
@@ -47,6 +50,7 @@ type Kinds = {
   signals: KobbleSignal;
   explorations: Exploration;
   personas: KobblePersona;
+  tests: PersonaTest;
 };
 export type KobbleKind = keyof Kinds;
 
@@ -54,6 +58,7 @@ const SCHEMAS: { [K in KobbleKind]: z.ZodType<Kinds[K]> } = {
   signals: kobbleSignalSchema,
   explorations: explorationSchema,
   personas: kobblePersonaSchema,
+  tests: personaTestSchema,
 };
 
 // What one record is called in a sentence.
@@ -61,6 +66,7 @@ const NAMED: Record<KobbleKind, string> = {
   signals: "signal",
   explorations: "exploration",
   personas: "persona",
+  tests: "test",
 };
 
 const SYNC_FILE = "sync.json";
@@ -119,14 +125,13 @@ export class KobbleStore {
     );
   }
 
-  // The next free id: S-0001, S-0002… for signals, X-1, X-2… for
-  // explorations.
-  nextId(kind: "signals" | "explorations"): string {
+  // The next free id: S-0001, S-0002… for signals, T-0001… for tests,
+  // X-1, X-2… for explorations.
+  nextId(kind: "signals" | "explorations" | "tests"): string {
     const numbers = this.ids(kind).map((id) => Number(id.replace(/^\D+/, "")));
     const next = Math.max(0, ...numbers.filter(Number.isFinite)) + 1;
-    return kind === "signals"
-      ? `S-${String(next).padStart(4, "0")}`
-      : `X-${String(next)}`;
+    if (kind === "explorations") return `X-${String(next)}`;
+    return `${kind === "signals" ? "S" : "T"}-${String(next).padStart(4, "0")}`;
   }
 
   sync(): SyncState {

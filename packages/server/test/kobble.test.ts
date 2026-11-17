@@ -54,8 +54,12 @@ test("before the live app is set up, sync is simply off", async () => {
   const factory = await kobbleFactory();
   try {
     const view = await factory.read<SignalsView>("/api/kobble/signals");
-    assert.deepEqual(view.signals, []);
-    assert.deepEqual(view.counts, { new: 0 });
+    // Only the two the example's persona test filed.
+    assert.deepEqual(
+      view.signals.map((s) => s.id),
+      ["S-0003", "S-0002"],
+    );
+    assert.deepEqual(view.counts, { new: 2 });
     assert.deepEqual(view.sync, {
       connected: false,
       last: null,
@@ -91,13 +95,13 @@ test("a sync takes in the export once, newest first, with what exists already", 
       told += new TextDecoder().decode(value);
     }
     const view = await factory.read<SignalsView>("/api/kobble/signals");
-    assert.equal(view.counts.new, 8);
+    assert.equal(view.counts.new, 10);
     assert.deepEqual(
       view.signals.slice(0, 3).map((s) => [s.id, s.personaName, s.already?.id]),
       [
-        ["S-0009", "Mia", "X-1"],
-        ["S-0008", null, undefined],
-        ["S-0007", "Noah", undefined],
+        ["S-0011", "Mia", "X-1"],
+        ["S-0010", null, undefined],
+        ["S-0009", "Noah", undefined],
       ],
     );
     assert.equal(view.sync.connected, true);
@@ -106,7 +110,7 @@ test("a sync takes in the export once, newest first, with what exists already", 
     assert.deepEqual(factory.store.sync().cursor, "2026-11-17T08:40:00.000Z");
     // The same export again: nothing new.
     assert.equal((await factory.press("/api/kobble/sync")).body.added, 0);
-    assert.equal(factory.store.all("signals").length, 9);
+    assert.equal(factory.store.all("signals").length, 11);
   } finally {
     await stream.cancel();
     factory.close();
@@ -145,7 +149,7 @@ test("the live app is asked from the cursor, with the token", async () => {
     const failed = await factory.press("/api/kobble/sync");
     assert.deepEqual(failed.body.added, 0);
     const view = await factory.read<SignalsView>("/api/kobble/signals");
-    assert.equal(view.counts.new, 8);
+    assert.equal(view.counts.new, 10);
     assert.match(view.sync.problem ?? "", /does not accept the token/);
     status = 500;
     await factory.press("/api/kobble/sync");
@@ -201,25 +205,25 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
     await factory.press("/api/kobble/sync");
     // Only the factory's page may press them.
     assert.equal(
-      (await factory.post("/api/kobble/signals/fix", { id: "S-0002" }, false))
+      (await factory.post("/api/kobble/signals/fix", { id: "S-0004" }, false))
         .status,
       403,
     );
     const fixed = await factory.press("/api/kobble/signals/fix", {
-      id: "S-0006",
+      id: "S-0008",
     });
     assert.equal((fixed.body.signal as { status: string }).status, "fixed");
-    assert.equal(factory.store.get("signals", "S-0006")?.to, null);
+    assert.equal(factory.store.get("signals", "S-0008")?.to, null);
 
     // Already explored in X-1: added to it.
-    await factory.press("/api/kobble/signals/explore", { id: "S-0002" });
+    await factory.press("/api/kobble/signals/explore", { id: "S-0004" });
     const x1 = factory.store.get("explorations", "X-1");
-    assert.deepEqual(x1?.signals, ["S-0002"]);
-    assert.deepEqual(factory.store.get("signals", "S-0002")?.to, "X-1");
+    assert.deepEqual(x1?.signals, ["S-0004"]);
+    assert.deepEqual(factory.store.get("signals", "S-0004")?.to, "X-1");
 
     // Nothing found: a new exploration, waiting.
     const made = await factory.press("/api/kobble/signals/explore", {
-      id: "S-0003",
+      id: "S-0005",
     });
     assert.deepEqual(
       { ...(made.body.exploration as object), created: "" },
@@ -229,25 +233,25 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
           "Could we get one invoice at the end of the month for all our orders?",
         status: "waiting",
         personas: ["bruno"],
-        signals: ["S-0003"],
+        signals: ["S-0005"],
         problem:
           "Could we get one invoice at the end of the month for all our orders?",
         created: "",
       },
     );
-    await factory.press("/api/kobble/signals/dismiss", { id: "S-0004" });
-    assert.equal(factory.store.get("signals", "S-0004")?.status, "dismissed");
+    await factory.press("/api/kobble/signals/dismiss", { id: "S-0006" });
+    assert.equal(factory.store.get("signals", "S-0006")?.status, "dismissed");
 
     // Handled signals leave the list, and are not handled twice.
     const view = await factory.read<SignalsView>("/api/kobble/signals");
-    assert.equal(view.counts.new, 4);
+    assert.equal(view.counts.new, 6);
     const again = await factory.press("/api/kobble/signals/dismiss", {
-      id: "S-0004",
+      id: "S-0006",
     });
     assert.equal(again.status, 409);
     assert.equal(
       again.body.error,
-      "Signal S-0004 is handled already (dismissed).",
+      "Signal S-0006 is handled already (dismissed).",
     );
     assert.equal(
       (await factory.press("/api/kobble/signals/fix", { id: "S-0404" })).body
@@ -271,7 +275,7 @@ test("an exploration that is no longer open gets no more signals", async () => {
     assert.ok(x1);
     factory.store.put("explorations", { ...x1, status: "dropped" });
     const made = await factory.press("/api/kobble/signals/explore", {
-      id: "S-0009",
+      id: "S-0011",
     });
     assert.equal((made.body.exploration as { id: string }).id, "X-2");
   } finally {
@@ -283,7 +287,7 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
   const factory = await kobbleFactory(pathToFileURL(EXPORT).href);
   try {
     await factory.press("/api/kobble/sync");
-    await factory.press("/api/kobble/signals/dismiss", { id: "S-0002" });
+    await factory.press("/api/kobble/signals/dismiss", { id: "S-0004" });
     const { personas } = await factory.read<{ personas: PersonaRow[] }>(
       "/api/kobble/personas",
     );
@@ -291,7 +295,7 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
       personas.map((p) => [p.id, p.origin, p.signals]),
       [
         ["bruno", "developer", 2],
-        ["mia", "developer", 2],
+        ["mia", "developer", 4],
         ["noah", "usage", 1],
       ],
     );
@@ -306,9 +310,15 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
     assert.deepEqual(
       mia.signals.map((s) => [s.id, s.status]),
       [
-        ["S-0009", "new"],
-        ["S-0002", "dismissed"],
+        ["S-0011", "new"],
+        ["S-0004", "dismissed"],
+        ["S-0003", "new"],
+        ["S-0002", "new"],
       ],
+    );
+    assert.deepEqual(
+      mia.tests.map((t) => t.id),
+      ["T-0002", "T-0001"],
     );
     const none = await fetch(`${factory.base}/api/kobble/persona?id=zoe`);
     assert.equal(none.status, 409);

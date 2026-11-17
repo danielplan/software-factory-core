@@ -10,6 +10,7 @@ import {
   exploreWords,
   nextAfter,
   originWords,
+  personaPlaceOf,
   primaryOf,
   shownOf,
   statusWords,
@@ -136,4 +137,22 @@ test("the kobold's card says what it does, or Idle", () => {
     koboldLine({ busy: true, title: "Kobold is building", detail: "#12" }),
     "Building",
   );
+});
+
+test("a persona's page opens on their signals, their tests or one test", () => {
+  assert.deepEqual(personaPlaceOf("mia"), {
+    persona: "mia",
+    tab: "signals",
+    test: null,
+  });
+  assert.deepEqual(personaPlaceOf("mia/tests"), {
+    persona: "mia",
+    tab: "tests",
+    test: null,
+  });
+  assert.deepEqual(personaPlaceOf("mia/tests/T-0001"), {
+    persona: "mia",
+    tab: "tests",
+    test: "T-0001",
+  });
 });

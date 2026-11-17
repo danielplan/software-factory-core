@@ -7,26 +7,26 @@
 import { ChevronLeft, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 
-import type { KobblePersonaPage, PersonaRow, SignalRow } from "@/api";
+import type { KobblePersonaPage, PersonaRow } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { CARD, Chevron, Head, ROW, SourceIcon, TypeChip } from "@/signals/bits";
-import {
-  agoOf,
-  countWords,
-  originWords,
-  SOURCE_WORDS,
-  statusWords,
-} from "@/signals/view";
+import { CARD, Chevron, Head, ROW } from "@/signals/bits";
+import { countWords, originWords, personaPlaceOf } from "@/signals/view";
 import { type Read, useRead } from "@/understand/use-records";
 
 import { NewPersona } from "./new-persona";
+import { SignalLine } from "./signal-line";
+import { Tabs } from "./test-bits";
+import { TestRun, TestsTab } from "./tests";
 
 export function PersonasPage({ open }: Readonly<{ open: string | null }>) {
-  return open ? <PersonaView id={open} /> : <PersonaList />;
+  if (!open) return <PersonaList />;
+  const place = personaPlaceOf(open);
+  if (place.test) return <TestRun id={place.test} />;
+  return <PersonaView id={place.persona} tab={place.tab} />;
 }
 
 function PersonaList() {
@@ -110,7 +110,10 @@ function OriginChip({ origin }: Readonly<{ origin: PersonaRow["origin"] }>) {
   );
 }
 
-function PersonaView({ id }: Readonly<{ id: string }>) {
+function PersonaView({
+  id,
+  tab,
+}: Readonly<{ id: string; tab: "signals" | "tests" }>) {
   const { data, problem } = useRead(
     `/api/kobble/persona?id=${encodeURIComponent(id)}`,
   ) as Read<KobblePersonaPage>;
@@ -126,12 +129,15 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
       {problem && (
         <ProblemBox title="This persona cannot be read" text={problem} />
       )}
-      {data && <PersonaBody page={data} />}
+      {data && <PersonaBody page={data} tab={tab} />}
     </div>
   );
 }
 
-function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
+function PersonaBody({
+  page,
+  tab,
+}: Readonly<{ page: KobblePersonaPage; tab: "signals" | "tests" }>) {
   const { persona, signals } = page;
   return (
     <>
@@ -157,35 +163,36 @@ function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
           Edit
         </Button>
       </div>
-      <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.01em]">
-        Signals <span className="text-faint">{signals.length}</span>
-      </h2>
-      <div className={CARD}>
-        {signals.length === 0 && (
-          <p className="p-[50px] text-center text-sm text-muted-foreground">
-            No signals from {persona.name} yet.
-          </p>
-        )}
-        {signals.map((signal) => (
-          <SignalLine key={signal.id} signal={signal} />
-        ))}
-      </div>
+      <Tabs
+        tabs={[
+          {
+            name: "Signals",
+            count: signals.length,
+            href: personaHash(persona.id),
+            on: tab === "signals",
+          },
+          {
+            name: "Tests",
+            count: page.tests.length,
+            href: personaHash(persona.id, {}),
+            on: tab === "tests",
+          },
+        ]}
+      />
+      {tab === "tests" ? (
+        <TestsTab page={page} />
+      ) : (
+        <div className={CARD}>
+          {signals.length === 0 && (
+            <p className="p-[50px] text-center text-sm text-muted-foreground">
+              No signals from {persona.name} yet.
+            </p>
+          )}
+          {signals.map((signal) => (
+            <SignalLine key={signal.id} signal={signal} />
+          ))}
+        </div>
+      )}
     </>
-  );
-}
-
-function SignalLine({ signal }: Readonly<{ signal: SignalRow }>) {
-  return (
-    <div className={ROW}>
-      <SourceIcon source={signal.source} size={32} />
-      <span className="grid min-w-0 flex-1">
-        <span>{signal.text}</span>
-        <span className="text-[12.5px] text-muted-foreground">
-          {SOURCE_WORDS[signal.source]} · {agoOf(signal.at, new Date())} ·{" "}
-          {statusWords(signal)}
-        </span>
-      </span>
-      <TypeChip type={signal.type} />
-    </div>
   );
 }

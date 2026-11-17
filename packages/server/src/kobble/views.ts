@@ -6,6 +6,7 @@ import {
   type KobblePersona,
   type KobbleSignal,
   type KobbleStore,
+  type PersonaTest,
 } from "@software-factory/core";
 
 import { Refused } from "../refused.ts";
@@ -29,7 +30,17 @@ type WithFace = KobblePersona & { face: Face };
 
 export type PersonaRow = WithFace & { signals: number };
 
-export type PersonaPage = { persona: WithFace; signals: SignalRow[] };
+export type PersonaPage = {
+  persona: WithFace;
+  signals: SignalRow[];
+  tests: PersonaTest[];
+};
+
+export type TestPage = {
+  test: PersonaTest;
+  persona: WithFace;
+  signals: SignalRow[];
+};
 
 export function signalsView(store: KobbleStore, sync: SyncView): SignalsView {
   const fresh = newestFirst(
@@ -63,6 +74,31 @@ export function personaPage(store: KobbleStore, id: string): PersonaPage {
   return {
     persona: { ...persona, face: faceOf(persona) },
     signals: withNames(newestFirst(theirs), [persona]),
+    tests: testsOf(store, persona.id),
+  };
+}
+
+// A persona's tests, the last one first.
+export function testsOf(store: KobbleStore, persona: string): PersonaTest[] {
+  return store
+    .all("tests")
+    .filter((test) => test.persona === persona)
+    .reverse();
+}
+
+// One test, its persona, and the signals it filed.
+export function testPage(store: KobbleStore, id: string): TestPage {
+  const test = store.get("tests", id);
+  if (!test) throw new Refused(`There is no test “${id}”.`);
+  const persona = store.get("personas", test.persona);
+  if (!persona) throw new Refused(`There is no persona “${test.persona}”.`);
+  const filed = store
+    .all("signals")
+    .filter((signal) => test.signals.includes(signal.id));
+  return {
+    test,
+    persona: { ...persona, face: faceOf(persona) },
+    signals: withNames(filed, [persona]),
   };
 }
 
