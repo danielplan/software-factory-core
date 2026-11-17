@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+## 0.11.0 (2026-11-17)
+
+**To upgrade:** pin `release-0.11.0`, `npm install`, `npx software-factory upgrade`. Kobble is now Signals, Explorations, Factory and Personas, kept as files in `factory/kobble/`. **To do, if you like:** set `KOBBLE_LIVE_URL` and `KOBBLE_LIVE_TOKEN` in the project's `.env` once the app offers the live export, and delete the old `factory/kobble.db`, `factory/kobble-seed.json` and the `kobble.db*` line in `factory/.gitignore`.
+
 - New: the Factory page (`#build`, Factory in the sidebar) is the connected GitHub board in four columns: To do (with the board's Backlog and Planning), Building, Review and Done. Each card shows its number and title, and the exploration and prototype it was handed off from, or a Fix chip. The builder's switch and what it builds are a quiet line in the header, with Read it again and Open on GitHub. Without a board the page says so and leads to connecting one. New endpoint: `GET /api/kobble/factory`. Nothing to do.
 - Changed: Fix on a signal now makes a GitHub issue on the connected board, in To do, with the signal's words and its id in a hidden mark (`<!-- factory:kobble signal=<id> -->`), and the signal goes to it (`to` is `#<number>`). Without a connected board, Fix is refused and says how to connect one. "Already fixed in #n" says the card's column, such as (Done). Nothing to do.
 - Changed: every page has the same look: on the grey ground, the title with the page's buttons on the right, white cards with radius 20px. Workshop and Settings too. The white panel and the bar at its top with Ask the kobold are gone. Nothing to do.
