@@ -10,14 +10,14 @@ see [the theme](../add-ons.md#the-theme)) may change the same variables.
 
 ## The frame
 
-| Part      | What it is                                                                                                                                                                                                                                        | Where                                              |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                                                                        | `packages/dashboard/src/components/shell.tsx`      |
-| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", the product switcher (only with several products), Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`    |
-| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                                                                                                      | `packages/dashboard/src/components/shell.tsx`      |
-| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right.                                                                               | `packages/dashboard/src/components/ask-kobold.tsx` |
-| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                                                                                                         | `packages/dashboard/src/components/shell.tsx`      |
-| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                                                                                               | `packages/dashboard/src/components/page-head.tsx`  |
+| Part      | What it is                                                                                                                                                                                     | Where                                              |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                     | `packages/dashboard/src/components/shell.tsx`      |
+| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`    |
+| Panel     | The page's white panel (`--panel`), 8px from the window's edges, radius 16px, a 1px ring (`--shadow-panel`).                                                                                   | `packages/dashboard/src/components/shell.tsx`      |
+| Top bar   | At the top of the panel, at least 60px high, padding 10px 22px, a line under it (`--border-soft`): Ask the kobold at the left, the page's own buttons at the right.                            | `packages/dashboard/src/components/ask-kobold.tsx` |
+| Page body | Under the top bar, `--page`, padding 22px 30px 32px (16px at the sides on a phone), its parts 16px apart.                                                                                      | `packages/dashboard/src/components/shell.tsx`      |
+| Page head | The breadcrumb (on a page inside another), the title (26px, bold, letter-spacing -0.02em) and one line about the page (14px, `--muted-foreground`).                                            | `packages/dashboard/src/components/page-head.tsx`  |
 
 A page draws its title with `PageHead` and gives its buttons as `actions`;
 they show in the top bar. A button that belongs to one part of the page stays
@@ -168,13 +168,13 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 
 ## Shadows
 
-| Variable           | For                                                |
-| ------------------ | -------------------------------------------------- |
-| `--shadow-soft`    | a card: a 1px ring in `--line-soft`, no shadow     |
-| `--shadow-lift`    | a card under the mouse                             |
-| `--shadow-current` | the page open in the sidebar, the chosen tab       |
-| `--shadow-panel`   | the panel, the product switcher, the kobold's card |
-| `--shadow-big`     | a dialog or a panel over the page                  |
+| Variable           | For                                            |
+| ------------------ | ---------------------------------------------- |
+| `--shadow-soft`    | a card: a 1px ring in `--line-soft`, no shadow |
+| `--shadow-lift`    | a card under the mouse                         |
+| `--shadow-current` | the page open in the sidebar, the chosen tab   |
+| `--shadow-panel`   | the panel, the kobold's card                   |
+| `--shadow-big`     | a dialog or a panel over the page              |
 
 ## Pieces
 

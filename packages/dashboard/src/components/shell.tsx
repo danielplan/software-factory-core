@@ -23,23 +23,17 @@ export function Shell({
   current,
   children,
 }: Readonly<{ state: FactoryState; current: Page; children: ReactNode }>) {
-  const [picked, choose] = useState<string | null>(null);
   const { data: explore } = useExploreList();
   const { data: signals } = useSignals();
   const jobs = useKoboldJobs();
-  const { products } = state;
-  // The one picked, while it is still there; the first one otherwise.
-  const chosen =
-    products.find((one) => one.id === picked) ?? products[0] ?? null;
+  // A factory works on one repository: the Ask field speaks of its first
+  // product, with no choice in the sidebar.
+  const product = state.products[0]?.name;
   const overall = overallOf(state.parts);
   return (
     <div className="flex min-h-dvh bg-ground max-md:pt-14 md:pl-64">
       <Sidebar
         current={current}
-        company={state.company.name}
-        products={products}
-        chosen={chosen?.id ?? ""}
-        onChoose={choose}
         counts={countsOf(
           explore?.ideas ?? null,
           state.work,
@@ -55,7 +49,7 @@ export function Shell({
           </div>
         </main>
       ) : (
-        <Panel product={chosen?.name}>{children}</Panel>
+        <Panel product={product}>{children}</Panel>
       )}
     </div>
   );

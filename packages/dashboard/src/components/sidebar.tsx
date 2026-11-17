@@ -1,5 +1,4 @@
 import {
-  ChevronsUpDown,
   FlaskConical,
   Inbox,
   Menu,
@@ -8,7 +7,6 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
-import { Select as SelectPrimitive } from "radix-ui";
 import { type ReactNode, useState } from "react";
 
 import type { Light } from "@/api";
@@ -21,7 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { SelectContent, SelectItem } from "@/components/ui/select";
 import type { Page } from "@/lib/routes";
 import { koboldLine, type KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
@@ -53,21 +50,14 @@ const QUIET: Item[] = [
 // The pages whose count is something waiting for you, shown as a badge.
 const BADGED = new Set<Page>(["signals"]);
 
-export type Product = { id: string; name: string };
-
 type SidebarProps = Readonly<{
   current: Page;
-  company: string;
-  products: Product[];
-  chosen: string;
-  onChoose: (id: string) => void;
   counts: Partial<Record<Page, number>>;
   kobold: KoboldStatus;
   light: Light;
 }>;
 
-// The way around the dashboard: Kobble at the top (and the product, when
-// the company has several), the pages with a count where there is
+// The way around the dashboard: Kobble at the top, the pages with a count where there is
 // something to count, the kobold's card at the bottom and Settings and
 // Workshop under it. White, at the left of a wide screen; on a phone, a bar
 // along the top whose menu opens the same list from the side.
@@ -116,7 +106,6 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
         <KoboldHead size={32} />
         kobble
       </span>
-      {props.products.length > 1 && <ProductChoice {...props} />}
       <Pages current={current} counts={counts} onGo={onGo} />
       <KoboldCard kobold={kobold} />
       <nav aria-label="The factory" className="mt-1.5 flex items-center">
@@ -170,36 +159,6 @@ function KoboldCard({ kobold }: Readonly<{ kobold: KoboldStatus }>) {
         </span>
       </div>
     </div>
-  );
-}
-
-// The product the pages are about, when the company has several.
-function ProductChoice({
-  products,
-  chosen,
-  onChoose,
-}: Pick<SidebarProps, "products" | "chosen" | "onChoose">) {
-  const name = products.find((one) => one.id === chosen)?.name ?? "";
-  return (
-    <SelectPrimitive.Root value={chosen} onValueChange={onChoose}>
-      <SelectPrimitive.Trigger
-        aria-label="Product"
-        className="mb-[18px] flex h-10 w-full items-center gap-2 rounded-xl bg-ground px-3 text-sm font-medium outline-none hover:bg-hover focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      >
-        <span className="truncate">{name}</span>
-        <ChevronsUpDown
-          aria-hidden
-          className="ml-auto size-4 flex-none text-muted-foreground"
-        />
-      </SelectPrimitive.Trigger>
-      <SelectContent position="popper" className="w-[224px]">
-        {products.map((one) => (
-          <SelectItem key={one.id} value={one.id}>
-            {one.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </SelectPrimitive.Root>
   );
 }
 
