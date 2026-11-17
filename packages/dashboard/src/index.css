@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-/* Dark mode follows the computer's setting, or the choice made in
-   Settings (lib/theme-choice.ts turns these rules on or off). */
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* The dashboard is light only for now: no dark colours, and a company's
+   theme's dark rules are switched off (lib/light-only.ts). */
 
 /* Kobble's look (docs/reference/design-system.md): a light grey ground
    with the sidebar on it, the page in a white panel beside it, white cards
@@ -110,97 +109,12 @@
   --shadow-big: 0 30px 60px -30px rgb(23 26 38 / 0.45);
   --radius: 0.625rem;
   /* The factory's own gradient, from the coach's orb: the start prompt's
-     ring and the setup page's glow (deeper in dark mode). */
+     ring and the setup page's glow. */
   --gradient-1: #bfe9f7;
   --gradient-2: #c7cbfb;
   --gradient-3: #f8cfe0;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #0e1016;
-    --background: #0e1016;
-    --panel: #161922;
-    --page: #13161e;
-    --foreground: #eceef4;
-    --foreground-2: #c9ccd8;
-    --muted-foreground: #a1a7ba;
-    --label: #8d93a8;
-    --faint: #6d7388;
-    --card: #1b1f29;
-    --card-foreground: #eceef4;
-    --popover: #1b1f29;
-    --popover-foreground: #eceef4;
-    --primary: #eceef4;
-    --primary-foreground: #14171f;
-    --blue: #7393ff;
-    --blue-foreground: #0e1016;
-    --wash: #1f2742;
-    --wash-foreground: #a9bbff;
-    --picked: #1d2333;
-    --source-app: #3cc08f;
-    --source-usage: #3bb4c1;
-    --source-errors: #f07275;
-    --source-test: #7393ff;
-    --type-bug: #f07275;
-    --type-request: #7393ff;
-    --type-feedback: #efb75e;
-    --usage: rgb(59 180 193 / 0.16);
-    --usage-foreground: #7fd3dc;
-    --tint: #1b2030;
-    --tint-line: #2b3452;
-    --tint-foreground: #a8aec2;
-    --secondary: #232835;
-    --secondary-foreground: #eceef4;
-    --muted: #1b1f29;
-    --accent: #252b38;
-    --accent-foreground: #eceef4;
-    --destructive: #e8726e;
-    --border: #2a2f3c;
-    --line-soft: #262b37;
-    --border-soft: #222733;
-    --input: #303644;
-    --ring: #7393ff;
-    --link: #eceef4;
-    --hover: #1f2430;
-    --success: #2bbfa9;
-    --warning: #e8b058;
-    --stopped: #6f778a;
-    --arrow: #4a5263;
-    --dot: #2c3240;
-    --surface: #1e222d;
-    --surface-2: #252a36;
-    --understand: #f07aa5;
-    --explore: #efb75e;
-    --build: #7393ff;
-    --open: rgb(230 79 134 / 0.18);
-    --open-foreground: #f6a3c3;
-    --solving: rgb(233 162 59 / 0.18);
-    --solving-foreground: #f1c47f;
-    --solved: rgb(18 165 148 / 0.2);
-    --solved-foreground: #73d8c8;
-    --wrong: #232835;
-    --wrong-foreground: #9aa0b4;
-    --persona-1: rgb(230 79 134 / 0.16);
-    --persona-2: rgb(233 162 59 / 0.16);
-    --persona-3: rgb(115 147 255 / 0.18);
-    --persona-4: rgb(18 165 148 / 0.18);
-    --persona-5: rgb(150 124 240 / 0.18);
-    --fresh: #f07aa5;
-    --glow-a: rgb(47 180 124 / 0.12);
-    --glow-b: rgb(176 108 196 / 0.12);
-    --glow-c: rgb(96 116 214 / 0.14);
-    --glow-base: #1a1f28;
-    --shadow-lift: 0 0 0 1px #363c4b, 0 6px 16px -12px rgb(0 0 0 / 0.7);
-    --shadow-current: 0 1px 2px rgb(0 0 0 / 0.5);
-    --shadow-big: 0 30px 60px -30px rgb(0 0 0 / 0.7);
-    --gradient-1: #2b5a6b;
-    --gradient-2: #3b3f7a;
-    --gradient-3: #6b3550;
-    color-scheme: dark;
-  }
-}
-
 @theme inline {
   --font-sans: var(--font-body);
   --color-ground: var(--ground);

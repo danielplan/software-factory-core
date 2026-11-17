@@ -116,7 +116,7 @@ export function Toast({
       <button
         type="button"
         onClick={onOk}
-        className="font-semibold text-[#9fb4ff] dark:text-blue"
+        className="font-semibold text-[#9fb4ff]"
       >
         OK
       </button>

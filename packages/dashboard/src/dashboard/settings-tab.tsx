@@ -12,7 +12,6 @@ import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
 import type { FactoryState } from "./dashboard";
-import { LookCard } from "./look-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 
 // The factory's settings, in order: a list of the sections at the side
@@ -25,7 +24,6 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const groups = state.settings.filter((group) => !owned.has(group.id));
   const sections = [
     "Where work is tracked",
-    "Light or dark",
     ...groups.map((group) => group.name),
   ];
   return (
@@ -44,7 +42,6 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
         {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
           <TrackerCard state={state} />
-          <LookCard />
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}

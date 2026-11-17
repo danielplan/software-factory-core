@@ -4,16 +4,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "@/app";
-import { applyChoice, storedChoice } from "@/lib/theme-choice";
+import { lightOnly } from "@/lib/light-only";
 import "./index.css";
 
-// Light or dark as chosen in Settings, on the factory's styles and, once it
-// has loaded, on the company's theme.
+// Light only, also for the company's theme once it has loaded.
 const followChoice = () => {
-  applyChoice(
-    document.styleSheets,
-    storedChoice(() => localStorage),
-  );
+  lightOnly(document.styleSheets);
 };
 
 // The company's theme (the server's /theme.css, empty without one), last,

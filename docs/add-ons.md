@@ -112,9 +112,9 @@ grey ground, the page in a white panel, white cards with a hairline ring and
 dark buttons; [the design system](reference/design-system.md) lists its
 variables, type and pieces. `factory/theme.css` changes it: the server gives it to the dashboard, which
 loads it after its own styles (`packages/server/src/theme.ts`). It sets the
-variables for light and dark (colours, `--font-body`, `--radius`, shadows;
-dark ones inside `@media (prefers-color-scheme: dark)`, which also follow the
-light or dark choice in Settings)
+variables (colours, `--font-body`, `--radius`, shadows; the dashboard is
+light only for now, so rules inside `@media (prefers-color-scheme: dark)` are
+switched off)
 and may use the project's own files, such as its fonts, as
 `url("/api/theme/file?path=<path inside the project>")`; only files the theme
 names are given out. An upgrade never touches it.

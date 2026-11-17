@@ -16,14 +16,7 @@ import {
   koboldStatus,
   overallOf,
 } from "../src/lib/shell-view.ts";
-import {
-  applyChoice,
-  choiceOf,
-  keepChoice,
-  mediaFor,
-  type RuleLike,
-  storedChoice,
-} from "../src/lib/theme-choice.ts";
+import { lightOnly, type RuleLike } from "../src/lib/light-only.ts";
 
 // The frame around every page: the sidebar's counts, the kobold's card,
 // the factory's light, the Ask field; and the light or dark choice.
@@ -177,47 +170,7 @@ test("the Ask field names the product, and ⌘K or Ctrl+K goes to it", () => {
   assert.equal(isAskShortcut(key("j", true)), false);
 });
 
-test("light or dark: System unless light or dark was kept, and a browser that keeps nothing is fine", () => {
-  assert.equal(choiceOf("dark"), "dark");
-  assert.equal(choiceOf("light"), "light");
-  assert.equal(choiceOf("purple"), "system");
-  assert.equal(choiceOf(null), "system");
-
-  const kept = new Map<string, string>();
-  const storage = {
-    getItem: (key: string) => kept.get(key) ?? null,
-    setItem: (key: string, value: string) => {
-      kept.set(key, value);
-    },
-  };
-  assert.equal(
-    storedChoice(() => storage),
-    "system",
-  );
-  assert.equal(
-    keepChoice(() => storage, "dark"),
-    true,
-  );
-  assert.equal(
-    storedChoice(() => storage),
-    "dark",
-  );
-
-  const blocked = () => {
-    throw new Error("The storage is blocked.");
-  };
-  assert.equal(storedChoice(blocked), "system");
-  assert.equal(keepChoice(blocked, "light"), false);
-});
-
-test("a choice turns the dark rules on or off where they are, and System gives them back", () => {
-  assert.equal(mediaFor("dark", "(prefers-color-scheme: dark)"), "all");
-  assert.equal(mediaFor("light", "(prefers-color-scheme: dark)"), "not all");
-  assert.equal(
-    mediaFor("system", "(prefers-color-scheme: dark)"),
-    "(prefers-color-scheme: dark)",
-  );
-
+test("light only: every rule for a computer set to dark is switched off", () => {
   const media = (mediaText: string, cssRules: RuleLike[] = []): RuleLike => ({
     cssText: "",
     media: { mediaText },
@@ -233,18 +186,9 @@ test("a choice turns the dark rules on or off where they are, and System gives t
       throw new Error("A style sheet from elsewhere cannot be read.");
     },
   };
-  const sheets = [{ cssRules: [plain, dark, wide, layer] }, foreign];
-
-  applyChoice(sheets, "dark");
+  lightOnly([{ cssRules: [plain, dark, wide, layer] }, foreign]);
   assert.deepEqual(
     [dark, nested, wide].map((rule) => rule.media?.mediaText),
-    ["all", "all", "(min-width: 768px)"],
-  );
-  applyChoice(sheets, "light");
-  assert.equal(dark.media?.mediaText, "not all");
-  applyChoice(sheets, "system");
-  assert.deepEqual(
-    [dark, nested].map((rule) => rule.media?.mediaText),
-    ["(prefers-color-scheme: dark)", "(prefers-color-scheme:dark)"],
+    ["not all", "not all", "(min-width: 768px)"],
   );
 });

@@ -5,7 +5,7 @@
 Every page of the dashboard (Kobble) uses the same frame, type, colours and
 pieces, so a new page looks like the others without new styles. The values
 live in one place, `packages/dashboard/src/index.css`, as CSS variables, each
-with a light value and a dark one. A company's theme (`factory/theme.css`,
+with its light value (the dashboard is light only for now). A company's theme (`factory/theme.css`,
 see [the theme](../add-ons.md#the-theme)) may change the same variables.
 
 ## The frame
@@ -98,9 +98,9 @@ Build.
 | Solved      | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
 | Didn't hold | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
 
-Every variable has a dark value in the same file. Text on the colours it
-sits on is readable (WCAG AA, 4.5:1) in both, except `--label` and `--faint`
-in light, which are only for short labels next to stronger text.
+Text on the colours it sits on is readable (WCAG AA, 4.5:1), except
+`--label` and `--faint`, which are only for short labels next to stronger
+text.
 
 ## One question per page
 
@@ -144,13 +144,11 @@ Luca on 14 Nov: it worked"). A story that didn't hold is crossed out and has
 no stepper; a fix or an update on Build shows none, its column says enough.
 Stages replace state pills in Understand and Explore.
 
-## Light or dark
+## Light only
 
-The dark values sit in `@media (prefers-color-scheme: dark)`. Settings has a
-choice, Light or dark: System (the computer's setting, the first choice),
-Light or Dark, kept in that browser. A choice turns those rules on or off in
-the page's style sheets (`packages/dashboard/src/lib/theme-choice.ts`), the
-company's theme included, so dark values are written once.
+The dashboard is light only for now: `color-scheme: light`, no dark values,
+and a company theme's rules for a computer set to dark are switched off in
+the page's style sheets (`packages/dashboard/src/lib/light-only.ts`).
 
 ## Spacing and corners
 
@@ -186,7 +184,7 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
   colours.
 - **The kobold** (`KoboldMark`, the picture `packages/dashboard/public/kobold.png`): wherever the
   kobold speaks or works, never a generic icon.
-- **Tabs** inside a page (Workshop, Light or dark): a grey track
+- **Tabs** inside a page (Workshop): a grey track
   (`--surface-2`) with the chosen one white and lifted.
 - **Ask the kobold**: ⌘K (Ctrl+K) goes to it, Enter asks; the answer opens
   under it, read from the records, with a button to close it.
