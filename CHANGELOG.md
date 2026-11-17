@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+## 0.11.1 (2026-11-17)
+
+**To upgrade:** pin `release-0.11.1`, `npm install`, `npx software-factory upgrade`. The empty pages say what goes there, and the live app is connected from the Signals page. Nothing to do: connecting writes `KOBBLE_LIVE_URL` and `KOBBLE_LIVE_TOKEN` to the project's `.env` for you (and adds `.env` to `.gitignore` when it is not there).
+
 - New: Connect on the Signals page, before the live app is connected: what Kobble reads, the export's address and token, and an example of what will come. Connect reads the export once with the token and says plainly what is wrong; when it works, it keeps `KOBBLE_LIVE_URL` and `KOBBLE_LIVE_TOKEN` in the project's `.env` (adding `.env` to the project's `.gitignore` when it is not there) and reads at once, then every 30 minutes. The token is never sent back to the page. New endpoints: `POST /api/kobble/connect` (`url`, `token`), `POST /api/kobble/disconnect`, `GET /api/kobble/handled`. Nothing to do.
 - New: Settings, The live app: the address Kobble reads from (never the token), and Disconnect, which takes both lines out of `.env`. Nothing to do.
 - Changed: the empty pages say what goes there. Signals with nothing new: "All quiet", when the kobold looks again, and the signals already handled. Explorations with none: what an exploration is, Explore a signal and Start from your own idea. Personas with none: "Who are you building for?" and New persona. An empty column on the Factory board says "Nothing here". The sync's state (`GET /api/kobble/signals`, `sync`) also has `address` and `next`. Nothing to do.
