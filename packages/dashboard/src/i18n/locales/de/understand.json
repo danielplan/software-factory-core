@@ -156,16 +156,13 @@
   "signals": {
     "title": "Signale",
     "checkup": "Produkt prüfen",
-    "list": "Neue Signale",
-    "empty": "Nichts Neues. Alles erledigt.",
+    "empty": "Alles erledigt.",
     "newStory": "Neue Geschichte für {{name}}: {{title}}",
-    "kind": {
-      "bug": "Fehler",
-      "need": "Wunsch",
-      "update": "Update",
-      "question": "Frage",
-      "other": "Feedback"
-    }
+    "of": "{{n}} von {{total}}",
+    "previous": "Vorheriges",
+    "next": "Nächstes",
+    "more": "Mehr",
+    "openIdea": "Idee „{{title}}“ öffnen"
   },
   "tabs": {
     "label": "Über diese Person",

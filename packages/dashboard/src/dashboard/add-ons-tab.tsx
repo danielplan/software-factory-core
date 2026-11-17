@@ -64,7 +64,7 @@ function Shelf({
       <h3 className="px-1 text-tag tracking-[0.06em] text-label uppercase">
         {title}
       </h3>
-      <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {children}
       </div>
     </section>

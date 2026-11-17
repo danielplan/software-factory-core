@@ -156,16 +156,13 @@
   "signals": {
     "title": "Signals",
     "checkup": "Check my product",
-    "list": "New signals",
-    "empty": "Nothing new. All caught up.",
+    "empty": "All caught up.",
     "newStory": "New story for {{name}}: {{title}}",
-    "kind": {
-      "bug": "Bug",
-      "need": "Request",
-      "update": "Update",
-      "question": "Question",
-      "other": "Feedback"
-    }
+    "of": "{{n}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "more": "More",
+    "openIdea": "Open the idea “{{title}}”"
   },
   "tabs": {
     "label": "About this person",

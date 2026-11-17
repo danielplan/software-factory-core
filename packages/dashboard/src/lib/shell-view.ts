@@ -24,7 +24,9 @@ export function countsOf(
   work: WorkView | null,
   news: KoboldNews | null = null,
 ): Partial<Record<Page, number>> {
-  const fresh = news ? news.toLookAt.length + news.newStories.length : 0;
+  // Only what is to go through one at a time on Signals (the kobold's new
+  // stories are a line above it, not counted).
+  const fresh = news ? news.toLookAt.length : 0;
   const exploring = (ideas ?? []).filter(
     (one) => one.state === "exploring",
   ).length;

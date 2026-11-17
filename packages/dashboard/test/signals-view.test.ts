@@ -3,7 +3,8 @@ import { test } from "node:test";
 
 import {
   idFrom,
-  kindOf,
+  neighbours,
+  triageOf,
   quoted,
   shownOf,
   signalsHash,
@@ -11,14 +12,6 @@ import {
 
 // Signals: what kind each one is, its address, and which one is shown,
 // the next one once a signal is handled.
-
-test("a signal's kind comes from how the kobold sorted it", () => {
-  assert.equal(kindOf({ sortedAs: "bug" }), "bug");
-  assert.equal(kindOf({ sortedAs: "need" }), "need");
-  assert.equal(kindOf({ sortedAs: "update" }), "update");
-  assert.equal(kindOf({ sortedAs: "question" }), "question");
-  assert.equal(kindOf({ sortedAs: "unsure" }), "other");
-});
 
 test("one signal's address, and the signal an address names", () => {
   assert.equal(signalsHash(), "#signals");
@@ -53,4 +46,51 @@ test("what was said is in quotation marks once", () => {
     "“Checkout fails on Safari 18”",
   );
   assert.equal(quoted("  It's fine  "), "“It's fine”");
+});
+
+test("the one shown stands among them, with the ones before and after", () => {
+  assert.deepEqual(neighbours(["a", "b", "c"], "b"), {
+    at: 1,
+    before: "a",
+    after: "c",
+  });
+  assert.deepEqual(neighbours(["a", "b"], "a"), {
+    at: 0,
+    before: null,
+    after: "b",
+  });
+  assert.deepEqual(neighbours(["a"], null), {
+    at: 0,
+    before: null,
+    after: null,
+  });
+  assert.deepEqual(neighbours(["a", "b"], "gone"), {
+    at: 0,
+    before: null,
+    after: "b",
+  });
+});
+
+test("a signal's actions follow where the kobold put it", () => {
+  const idea = { id: "wish", title: "Wish list" };
+  assert.deepEqual(triageOf("story", true, idea), {
+    fix: true,
+    dismiss: true,
+    addTo: idea,
+    agreeInMenu: false,
+  });
+  assert.deepEqual(triageOf("story", true, null), {
+    fix: true,
+    dismiss: true,
+    addTo: null,
+    agreeInMenu: true,
+  });
+  assert.deepEqual(triageOf("build", false, idea), {
+    fix: false,
+    dismiss: true,
+    addTo: null,
+    agreeInMenu: false,
+  });
+  assert.equal(triageOf("ticket", true, null).fix, false);
+  assert.equal(triageOf("answered", true, null).dismiss, false);
 });

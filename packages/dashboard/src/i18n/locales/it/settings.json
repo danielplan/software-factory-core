@@ -6,10 +6,7 @@
     "title": "Impostazioni"
   },
   "tracker": {
-    "title": "Dove si tiene il lavoro",
-    "now": "Ora: {{name}}.",
-    "own": "la bacheca della factory",
-    "change": "Cambia"
+    "title": "Dove si tiene il lavoro"
   },
   "look": {
     "title": "Chiaro o scuro",
@@ -48,10 +45,12 @@
     "about": "Le idee su cui siete d'accordo diventano lavoro su una bacheca, e la factory costruisce da lì. Tienilo qui, o usa la bacheca del tuo team.",
     "goToBoard": "Vai alla bacheca",
     "ownTitle": "La bacheca della factory",
-    "ownText": "Il lavoro resta qui, in questa app. Niente da collegare.",
+    "ownText": "Resta qui. Niente da collegare.",
     "useOwn": "Usa la bacheca della factory",
     "ownDone": "Il lavoro resta sulla bacheca della factory.",
-    "choices": "Dove si tiene il lavoro"
+    "choices": "Dove si tiene il lavoro",
+    "githubShort": "Schede sulla tua board GitHub.",
+    "jiraShort": "Issue nel tuo progetto Jira."
   },
   "board": {
     "connectedAll": "Collegata a <link>{{name}}</link>: tutto il suo lavoro.",
@@ -104,5 +103,9 @@
     "token": "Token API",
     "tokenHelp": "Resta solo su questo computer.",
     "createToken": "Crea un token API"
+  },
+  "sections": {
+    "general": "Generali",
+    "work": "Lavoro"
   }
 }

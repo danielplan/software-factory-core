@@ -156,16 +156,13 @@
   "signals": {
     "title": "Señales",
     "checkup": "Revisar mi producto",
-    "list": "Señales nuevas",
-    "empty": "Nada nuevo. Todo al día.",
+    "empty": "Todo al día.",
     "newStory": "Nueva historia para {{name}}: {{title}}",
-    "kind": {
-      "bug": "Error",
-      "need": "Petición",
-      "update": "Actualización",
-      "question": "Pregunta",
-      "other": "Comentario"
-    }
+    "of": "{{n}} de {{total}}",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "more": "Más",
+    "openIdea": "Abrir la idea «{{title}}»"
   },
   "tabs": {
     "label": "Sobre esta persona",

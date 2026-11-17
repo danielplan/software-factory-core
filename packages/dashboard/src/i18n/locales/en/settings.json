@@ -6,10 +6,7 @@
     "title": "Settings"
   },
   "tracker": {
-    "title": "Where work is tracked",
-    "now": "Now: {{name}}.",
-    "own": "the factory's own board",
-    "change": "Change"
+    "title": "Where work is tracked"
   },
   "look": {
     "title": "Light or dark",
@@ -48,10 +45,12 @@
     "about": "The ideas you agree on become work on a board, and the factory builds from there. Keep it here, or use your team's board.",
     "goToBoard": "Go to the board",
     "ownTitle": "The factory's own board",
-    "ownText": "Work stays here, in this app. Nothing to connect.",
+    "ownText": "Kept here. Nothing to connect.",
     "useOwn": "Use the factory's board",
     "ownDone": "Work stays on the factory's own board.",
-    "choices": "Where work is tracked"
+    "choices": "Where work is tracked",
+    "githubShort": "Cards on your GitHub board.",
+    "jiraShort": "Issues in your Jira project."
   },
   "board": {
     "connectedAll": "Connected to <link>{{name}}</link>: all of its work.",
@@ -104,5 +103,9 @@
     "token": "API token",
     "tokenHelp": "Kept only on this computer.",
     "createToken": "Create an API token"
+  },
+  "sections": {
+    "general": "General",
+    "work": "Work"
   }
 }

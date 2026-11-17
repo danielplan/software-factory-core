@@ -6,10 +6,7 @@
     "title": "Einstellungen"
   },
   "tracker": {
-    "title": "Wo die Arbeit liegt",
-    "now": "Jetzt: {{name}}.",
-    "own": "das eigene Board der Factory",
-    "change": "Ändern"
+    "title": "Wo die Arbeit liegt"
   },
   "look": {
     "title": "Hell oder dunkel",
@@ -48,10 +45,12 @@
     "about": "Ideen, auf die ihr euch einigt, werden zu Arbeit auf einem Board, und die Factory baut von dort aus. Behalte es hier oder nutze das Board deines Teams.",
     "goToBoard": "Zum Board",
     "ownTitle": "Das eigene Board der Factory",
-    "ownText": "Die Arbeit bleibt hier in dieser App. Nichts zu verbinden.",
+    "ownText": "Bleibt hier. Nichts zu verbinden.",
     "useOwn": "Das Board der Factory nutzen",
     "ownDone": "Die Arbeit bleibt auf dem eigenen Board der Factory.",
-    "choices": "Wo die Arbeit liegt"
+    "choices": "Wo die Arbeit liegt",
+    "githubShort": "Karten auf deinem GitHub-Board.",
+    "jiraShort": "Vorgänge in deinem Jira-Projekt."
   },
   "board": {
     "connectedAll": "Verbunden mit <link>{{name}}</link>: die ganze Arbeit.",
@@ -104,5 +103,9 @@
     "token": "API-Token",
     "tokenHelp": "Bleibt nur auf diesem Computer.",
     "createToken": "API-Token erstellen"
+  },
+  "sections": {
+    "general": "Allgemein",
+    "work": "Arbeit"
   }
 }

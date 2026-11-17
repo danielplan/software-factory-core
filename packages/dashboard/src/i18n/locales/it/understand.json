@@ -156,16 +156,13 @@
   "signals": {
     "title": "Segnali",
     "checkup": "Controlla il prodotto",
-    "list": "Nuovi segnali",
-    "empty": "Niente di nuovo. Tutto in ordine.",
+    "empty": "Tutto in ordine.",
     "newStory": "Nuova storia per {{name}}: {{title}}",
-    "kind": {
-      "bug": "Bug",
-      "need": "Richiesta",
-      "update": "Aggiornamento",
-      "question": "Domanda",
-      "other": "Feedback"
-    }
+    "of": "{{n}} di {{total}}",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "more": "Altro",
+    "openIdea": "Apri l'idea “{{title}}”"
   },
   "tabs": {
     "label": "Su questa persona",

@@ -6,10 +6,7 @@
     "title": "Ajustes"
   },
   "tracker": {
-    "title": "Dónde se lleva el trabajo",
-    "now": "Ahora: {{name}}.",
-    "own": "el tablero de la factory",
-    "change": "Cambiar"
+    "title": "Dónde se lleva el trabajo"
   },
   "look": {
     "title": "Claro u oscuro",
@@ -48,10 +45,12 @@
     "about": "Las ideas en las que estáis de acuerdo se convierten en trabajo en un tablero, y la factory construye desde ahí. Guárdalo aquí o usa el tablero de tu equipo.",
     "goToBoard": "Ir al tablero",
     "ownTitle": "El tablero de la factory",
-    "ownText": "El trabajo se queda aquí, en esta app. Nada que conectar.",
+    "ownText": "Se queda aquí. Nada que conectar.",
     "useOwn": "Usar el tablero de la factory",
     "ownDone": "El trabajo se queda en el tablero de la factory.",
-    "choices": "Dónde se lleva el trabajo"
+    "choices": "Dónde se lleva el trabajo",
+    "githubShort": "Tarjetas en tu tablero de GitHub.",
+    "jiraShort": "Incidencias en tu proyecto de Jira."
   },
   "board": {
     "connectedAll": "Conectado a <link>{{name}}</link>: todo su trabajo.",
@@ -104,5 +103,9 @@
     "token": "Token de API",
     "tokenHelp": "Se guarda solo en este ordenador.",
     "createToken": "Crear un token de API"
+  },
+  "sections": {
+    "general": "General",
+    "work": "Trabajo"
   }
 }

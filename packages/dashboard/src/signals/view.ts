@@ -1,24 +1,8 @@
-// What the Signals page works out from what the server sends: what kind of
-// thing a signal is (from how the kobold sorted it), the page's address for
-// one signal, and which signal is shown, so that after one is fixed,
-// explored or dismissed (and leaves the list) the next one is shown. Kept
-// apart from the components so it is checked on its own.
-
-import type { SignalView } from "../api.ts";
-
-export type SignalKind = "bug" | "need" | "update" | "question" | "other";
-
-export function kindOf(signal: Pick<SignalView, "sortedAs">): SignalKind {
-  switch (signal.sortedAs) {
-    case "bug":
-    case "need":
-    case "update":
-    case "question":
-      return signal.sortedAs;
-    default:
-      return "other";
-  }
-}
+// What the Signals page works out from what the server sends: the page's
+// address for one signal, which signal is shown (so that after one is
+// fixed, explored or dismissed, and leaves the list, the next one is
+// shown), where it stands among them, and what was said in quotation
+// marks. Kept apart from the components so it is checked on its own.
 
 // #signals, or #signals/<signal>.
 export function signalsHash(id?: string): string {
@@ -52,6 +36,19 @@ export function shownOf(
   return ids[0] ?? null;
 }
 
+// Where the one shown stands ("3 of 14"), and the ones before and after it.
+export function neighbours(
+  ids: string[],
+  shown: string | null,
+): { at: number; before: string | null; after: string | null } {
+  const at = Math.max(shown ? ids.indexOf(shown) : 0, 0);
+  return {
+    at,
+    before: ids[at - 1] ?? null,
+    after: ids[at + 1] ?? null,
+  };
+}
+
 // What was said, in quotation marks once: marks it already has at its ends
 // (straight or curly, single or double) are taken off first.
 const MARKS = new Set(['"', "“", "”", "'", "‘", "’", "„", "«", "»"]);
@@ -70,4 +67,29 @@ export function quoted(text: string): string {
   )
     to -= 1;
   return `“${text.slice(from, to)}”`;
+}
+
+// Which actions a signal gets, from where the kobold put it: Fix unless it
+// is in Build already; Dismiss unless it is dismissed; "Add to" the idea
+// already explored for its problem (when a person can still agree) in
+// place of Explore; and agreeing ("Looks right") in the menu otherwise.
+export type Triage = {
+  fix: boolean;
+  dismiss: boolean;
+  addTo: { id: string; title: string } | null;
+  agreeInMenu: boolean;
+};
+
+export function triageOf(
+  went: string | undefined,
+  agreeable: boolean,
+  explored: { id: string; title: string } | null,
+): Triage {
+  const addTo = agreeable && explored ? explored : null;
+  return {
+    fix: went !== "build" && went !== "ticket",
+    dismiss: went !== "answered",
+    addTo,
+    agreeInMenu: agreeable && !addTo,
+  };
 }

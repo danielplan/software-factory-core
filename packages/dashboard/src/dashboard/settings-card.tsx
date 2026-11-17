@@ -65,15 +65,17 @@ export function Topic({
     <Card
       id={sectionId(title)}
       aria-label={title}
-      className="scroll-mt-6 gap-3 shadow-soft"
+      className="h-full scroll-mt-6 gap-4 py-5 shadow-soft"
     >
-      <CardHeader className="gap-1">
-        <CardTitle className="text-section">{title}</CardTitle>
+      <CardHeader className="gap-1 px-5">
+        <CardTitle className="text-item">{title}</CardTitle>
         {about && (
           <CardDescription className="text-note">{about}</CardDescription>
         )}
       </CardHeader>
-      <CardContent className="grid gap-4">{children}</CardContent>
+      <CardContent className="grid content-start gap-4 px-5">
+        {children}
+      </CardContent>
     </Card>
   );
 }

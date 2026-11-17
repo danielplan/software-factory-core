@@ -51,12 +51,16 @@ export function TrackerChoice({
   current,
   connected,
   onDone,
+  settled = false,
 }: Readonly<{
   trackers: AddOnView[];
   current: string;
   // The boards connected now, by tracker: their steps start from them.
   connected?: Board;
   onDone: (message: string) => void;
+  // In Settings, where a choice is already made: no button to use the
+  // factory's own board when it is the one in use (setting up needs it).
+  settled?: boolean;
 }>) {
   const { t } = useTranslation(["settings", "common"]);
   const [choice, setChoice] = useState(current);
@@ -109,7 +113,7 @@ export function TrackerChoice({
           />
         ))}
       </div>
-      {choice === "none" && (
+      {choice === "none" && !(settled && current === "none") && (
         <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
           {t("connect.useOwn")}
         </Button>
@@ -119,6 +123,16 @@ export function TrackerChoice({
     </div>
   );
 }
+
+// One short line for the trackers the page knows (their own description,
+// from the server, is longer and in English).
+const SHORT: Record<
+  string,
+  "settings:connect.githubShort" | "settings:connect.jiraShort"
+> = {
+  github: "settings:connect.githubShort",
+  jira: "settings:connect.jiraShort",
+};
 
 // The factory's own board, then each tracker the page has steps for.
 function choicesOf(trackers: AddOnView[]) {
@@ -130,11 +144,14 @@ function choicesOf(trackers: AddOnView[]) {
     },
     ...trackers
       .filter((tracker) => TRACKER_STEPS[tracker.id])
-      .map((tracker) => ({
-        id: tracker.id,
-        icon: lookOf(tracker.id).icon,
-        title: tracker.name,
-        text: tracker.about,
-      })),
+      .map((tracker) => {
+        const short = SHORT[tracker.id];
+        return {
+          id: tracker.id,
+          icon: lookOf(tracker.id).icon,
+          title: tracker.name,
+          text: short ? t(short) : tracker.about,
+        };
+      }),
   ];
 }

@@ -156,16 +156,13 @@
   "signals": {
     "title": "Signaux",
     "checkup": "Vérifier mon produit",
-    "list": "Nouveaux signaux",
-    "empty": "Rien de nouveau. Tout est à jour.",
+    "empty": "Tout est à jour.",
     "newStory": "Nouvelle histoire pour {{name}} : {{title}}",
-    "kind": {
-      "bug": "Bug",
-      "need": "Demande",
-      "update": "Mise à jour",
-      "question": "Question",
-      "other": "Retour"
-    }
+    "of": "{{n}} sur {{total}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "more": "Plus",
+    "openIdea": "Ouvrir l'idée « {{title}} »"
   },
   "tabs": {
     "label": "À propos de cette personne",

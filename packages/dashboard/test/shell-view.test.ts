@@ -87,7 +87,7 @@ test("the sidebar counts only what there is: ideas exploring, tickets not in the
       toLookAt: [{} as SignalView, {} as SignalView],
       newStories: [{ id: "st", title: "", persona: "" }],
     }),
-    { signals: 3 },
+    { signals: 2 },
   );
   assert.deepEqual(countsOf(null, null, { toLookAt: [], newStories: [] }), {});
 });

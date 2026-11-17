@@ -6,10 +6,7 @@
     "title": "Réglages"
   },
   "tracker": {
-    "title": "Où le travail est suivi",
-    "now": "Actuellement : {{name}}.",
-    "own": "le tableau de la factory",
-    "change": "Changer"
+    "title": "Où le travail est suivi"
   },
   "look": {
     "title": "Clair ou sombre",
@@ -48,10 +45,12 @@
     "about": "Les idées sur lesquelles vous êtes d'accord deviennent du travail sur un tableau, et la factory construit à partir de là. Gardez-le ici, ou utilisez le tableau de votre équipe.",
     "goToBoard": "Aller au tableau",
     "ownTitle": "Le tableau de la factory",
-    "ownText": "Le travail reste ici, dans cette app. Rien à connecter.",
+    "ownText": "Reste ici. Rien à connecter.",
     "useOwn": "Utiliser le tableau de la factory",
     "ownDone": "Le travail reste sur le tableau de la factory.",
-    "choices": "Où le travail est suivi"
+    "choices": "Où le travail est suivi",
+    "githubShort": "Des cartes sur votre tableau GitHub.",
+    "jiraShort": "Des tickets dans votre projet Jira."
   },
   "board": {
     "connectedAll": "Connecté à <link>{{name}}</link> : tout son travail.",
@@ -104,5 +103,9 @@
     "token": "Jeton d'API",
     "tokenHelp": "Gardé uniquement sur cet ordinateur.",
     "createToken": "Créer un jeton d'API"
+  },
+  "sections": {
+    "general": "Général",
+    "work": "Travail"
   }
 }

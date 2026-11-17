@@ -16,8 +16,16 @@ import { newIdeaHash } from "@/lib/routes";
 
 import { alreadyOf, alreadyWords } from "./view";
 
-const move = (signal: string, to: "build" | "answered") =>
+export const move = (signal: string, to: "build" | "answered") =>
   post("/api/understand/move", { signal, to: { to } });
+
+// A person agrees with where the kobold put it (their name goes on it).
+export const agreeWith = (signal: string) =>
+  post("/api/understand/looks-good", { signal });
+
+// Whether a person can still agree with where the kobold put it.
+export const canAgree = (signal: SignalView) =>
+  signal.went !== null && signal.by === "kobold";
 
 // `quiet` leaves out the line of what already exists, for a page that
 // shows it its own way (Signals).
@@ -84,8 +92,9 @@ export function SignalActions({
 }
 
 // Doing one of the actions: busy while it goes, what went wrong, and
-// whether a fix stayed without a card (no board to take it).
-function useActs(signal: SignalView) {
+// whether a fix stayed without a card (no board to take it). Signals uses
+// it too, with its own layout.
+export function useActs(signal: SignalView) {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [noBoard, setNoBoard] = useState(false);
@@ -111,7 +120,7 @@ function useActs(signal: SignalView) {
   return { busy, problem, setProblem, noBoard, run, fix };
 }
 
-function storyOf(signal: SignalView): string | undefined {
+export function storyOf(signal: SignalView): string | undefined {
   return signal.went?.to === "story" ? signal.went.story : undefined;
 }
 
@@ -127,14 +136,12 @@ function Agree({
   onProblem: (problem: string | null) => void;
 }>) {
   const { t } = useTranslation("understand");
-  if (signal.went === null || signal.by !== "kobold") return null;
+  if (!canAgree(signal)) return null;
   const agree = () => {
     onProblem(null);
-    post("/api/understand/looks-good", { signal: signal.id }).catch(
-      (error: unknown) => {
-        onProblem(messageOf(error));
-      },
-    );
+    agreeWith(signal.id).catch((error: unknown) => {
+      onProblem(messageOf(error));
+    });
   };
   return (
     <Button variant="outline" size="xs" onClick={agree}>
@@ -145,7 +152,7 @@ function Agree({
   );
 }
 
-function NoBoard() {
+export function NoBoard() {
   const { t } = useTranslation("understand");
   return (
     <p className="flex flex-wrap items-center gap-2 text-note text-muted-foreground">
