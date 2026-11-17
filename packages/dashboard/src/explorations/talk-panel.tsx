@@ -8,17 +8,34 @@ import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 
-export function TalkPanel({ page }: Readonly<{ page: ExplorationPage }>) {
-  const { talk, exploration } = page;
+import { nameOf } from "./board/nodes";
+
+export function TalkPanel({
+  page,
+  attached,
+  onSent,
+  onDetach,
+}: Readonly<{
+  page: ExplorationPage;
+  attached: string[];
+  onSent: () => void;
+  onDetach: (thing: string) => void;
+}>) {
+  const { exploration } = page;
   const [text, setText] = useState("");
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
-  const busy = talk.writing !== null;
+  const busy = page.talk.writing !== null;
   const send = () => {
     setRefused(null);
-    post("/api/kobble/explorations/say", { id: exploration.id, text }).then(
+    post("/api/kobble/explorations/say", {
+      id: exploration.id,
+      text,
+      attached,
+    }).then(
       () => {
         setText("");
+        onSent();
       },
       (error: unknown) => {
         setRefused(messageOf(error));
@@ -36,26 +53,10 @@ export function TalkPanel({ page }: Readonly<{ page: ExplorationPage }>) {
           </span>
         </span>
       </div>
-      <div className="flex flex-1 flex-col gap-2.5 overflow-auto px-4 py-3.5">
-        {talk.messages.map((message, at) =>
-          message.from === "kobold" ? (
-            <Kobold key={at} text={message.text} />
-          ) : (
-            <div
-              key={at}
-              className="max-w-[85%] self-end rounded-[14px_4px_14px_14px] bg-blue px-3 py-[9px] text-[13.5px] leading-[1.45] text-blue-foreground"
-            >
-              {message.text}
-            </div>
-          ),
-        )}
-        {busy && <Kobold text={talk.writing || talk.activity || "…"} />}
-        {(talk.problem ?? refused) && (
-          <p role="alert" className="text-[12.5px] text-destructive">
-            {talk.problem ?? refused}
-          </p>
-        )}
-      </div>
+      <Messages page={page} refused={refused} />
+      {open && attached.length > 0 && (
+        <Attached page={page} attached={attached} onDetach={onDetach} />
+      )}
       {open && (
         <form
           className="flex gap-2 border-t border-border-soft p-3"
@@ -82,6 +83,37 @@ export function TalkPanel({ page }: Readonly<{ page: ExplorationPage }>) {
   );
 }
 
+function Messages({
+  page,
+  refused,
+}: Readonly<{ page: ExplorationPage; refused: string | null }>) {
+  const { talk } = page;
+  return (
+    <div className="flex flex-1 flex-col gap-2.5 overflow-auto px-4 py-3.5">
+      {talk.messages.map((message, at) =>
+        message.from === "kobold" ? (
+          <Kobold key={at} text={message.text} />
+        ) : (
+          <div
+            key={at}
+            className="max-w-[85%] self-end rounded-[14px_4px_14px_14px] bg-blue px-3 py-[9px] text-[13.5px] leading-[1.45] text-blue-foreground"
+          >
+            {message.text}
+          </div>
+        ),
+      )}
+      {talk.writing !== null && (
+        <Kobold text={talk.writing || talk.activity || "…"} />
+      )}
+      {(talk.problem ?? refused) && (
+        <p role="alert" className="text-[12.5px] text-destructive">
+          {talk.problem ?? refused}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Kobold({ text }: Readonly<{ text: string }>) {
   return (
     <div className="flex gap-2">
@@ -89,6 +121,38 @@ function Kobold({ text }: Readonly<{ text: string }>) {
       <div className="rounded-[4px_14px_14px_14px] bg-ground px-3 py-[9px] text-[13.5px] leading-[1.45] whitespace-pre-wrap">
         {text}
       </div>
+    </div>
+  );
+}
+
+// The things attached to what is typed next, each with a way to take it off.
+function Attached({
+  page,
+  attached,
+  onDetach,
+}: Readonly<{
+  page: ExplorationPage;
+  attached: string[];
+  onDetach: (thing: string) => void;
+}>) {
+  return (
+    <div className="flex flex-wrap gap-1.5 border-t border-border-soft px-3 pt-2.5">
+      {attached.map((id) => {
+        const thing = page.board.things.find((one) => one.id === id);
+        return thing ? (
+          <button
+            key={id}
+            type="button"
+            onClick={() => {
+              onDetach(id);
+            }}
+            className="inline-flex h-6 max-w-[200px] items-center gap-1 rounded-full bg-wash px-2.5 text-xs text-wash-foreground"
+            title="Take it off"
+          >
+            <span className="truncate">{nameOf(thing)}</span> ×
+          </button>
+        ) : null;
+      })}
     </div>
   );
 }

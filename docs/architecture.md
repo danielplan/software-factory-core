@@ -342,24 +342,34 @@ routes: `POST /api/kobble/tests` (`persona`, `task`), `GET
 
 **Explorations** (`#explore`) are where the team works out what to build
 for a problem, with the kobold
-(`packages/server/src/kobble/explorations/`). Each has its canvas in
-`explorations/X-1/board.json`: the question, the options (A, B, C…), a
-prototype for some of them and notes; and the conversation with the kobold
-in `conversation.md`, with Claude Code's conversation id to go on with it.
-The conversation is the idea coach's talk (`coach/talk.ts`) with one tool,
-`board`, which changes the board while the kobold talks; its guide is
-`packages/skills/guides/exploration-coach.md`. **Make** builds an option's
-prototype on its branch `proto/X-<n>-<key>`, in a copy of the code next to
-the project, like a version in prototype mode; **Open** runs it with the
-project's `prototype.start` command, one at a time; **Test** starts a
-persona test on that branch, as the exploration's first persona; **Agree**
-marks one prototype agreed (one at most). **Hand off** writes `handoff.md`
-and makes a GitHub issue on the connected board with the problem, the
-agreed prototype's branch and what was learned (notes and tests); the
-exploration keeps the issue's number as `work`. The routes are under
-`/api/kobble/explorations` (`GET` the list, `GET /api/kobble/exploration?id=…`,
-`POST` new, `/start`, `/say`, `/make`, `/open`, `/test`, `/agree`,
-`/hand-off`, `/drop`).
+(`packages/server/src/kobble/explorations/`). Each has one board, a real
+canvas (React Flow, laid out left to right along its arrows with ELK, pan
+and zoom), kept in `explorations/X-1/board.json`: its things (the problem,
+what we heard, notes, choices with options A, B, C, prototypes, diagrams in
+Mermaid, pictures a person pasted or dropped in, kept in `pictures/`), the
+arrows between them with short labels, the places people dragged things
+to, and whether each is a sketch or agreed. A board in the first shape
+(a question, options, prototypes and notes in lists) is read as things and
+arrows (`packages/core/src/kobble/board-shape.ts`). The conversation with
+the kobold is in `conversation.md`, with Claude Code's conversation id to
+go on with it; it is the idea coach's talk (`coach/talk.ts`) with the
+board's tools over MCP (`board-tools.ts`: look at the board, add notes,
+diagrams and choices, change and remove things, link and unlink, point at
+a thing, mark it agreed or a sketch). Its guide is
+`packages/skills/guides/exploration-coach.md`. People move things, switch
+sketch and agreed, choose an option, add pictures and click things to
+attach them to what they type next; the kobold hears what they did with
+their next words. **Make** builds an option's prototype on its branch
+`proto/X-<n>-<key>`, in a copy of the code next to the project, like a
+version in prototype mode; **Open** runs it with the project's
+`prototype.start` command, one at a time, and the board shows it live;
+**Test** starts a persona test on that branch, as the exploration's first
+persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the
+connected board with the problem, the agreed prototype's branch and what
+was learned; the exploration keeps the issue's number as `work`. The
+routes are under `/api/kobble/explorations` (`GET` the list,
+`GET /api/kobble/exploration?id=…`, `POST` new, `/start`, `/say`, `/board`,
+`/picture`, `/make`, `/open`, `/test`, `/hand-off`, `/drop`).
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 

@@ -14,7 +14,8 @@ import { guidesFolder } from "@software-factory/skills";
 import { EMPTY } from "../../coach/map.ts";
 import { Talk } from "../../coach/talk.ts";
 import { Refused } from "../../refused.ts";
-import { type BoardChange, boardText, changeBoard } from "./board-edit.ts";
+import { type Act, applyAct } from "./board-acts.ts";
+import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
 
 const RIGHTS = {
@@ -28,6 +29,9 @@ export type TalkView = {
   writing: string | null;
   activity: string | null;
   problem: string | null;
+  // The thing the kobold points at, and how many times it pointed (so the
+  // page moves there again when it points at the same thing).
+  pointed: { thing: string; times: number } | null;
 };
 
 type TalksOptions = {
@@ -39,6 +43,12 @@ type TalksOptions = {
 
 export class ExplorationTalks {
   private readonly talks = new Map<string, Talk>();
+  private readonly pointed = new Map<
+    string,
+    { thing: string; times: number }
+  >();
+  // What people did on a board since the kobold last heard, by exploration.
+  private readonly done = new Map<string, string[]>();
   private toolsUrl = "";
   private readonly options: TalksOptions;
 
@@ -60,6 +70,7 @@ export class ExplorationTalks {
         writing: null,
         activity: null,
         problem: null,
+        pointed: null,
       };
     return {
       messages: talk.messages.map((m) => ({
@@ -69,14 +80,30 @@ export class ExplorationTalks {
       writing: talk.writing,
       activity: talk.activity,
       problem: talk.problem,
+      pointed: this.pointed.get(id) ?? null,
     };
   }
 
-  // A person's words; the kobold answers with the board in front of it.
-  async say(id: string, text: string): Promise<void> {
+  // What a person did on the board, for the kobold to hear next time.
+  personDid(id: string, words: string): void {
+    this.done.set(id, [...(this.done.get(id) ?? []), words]);
+  }
+
+  // A person's words, with the things they attached from the board; the
+  // kobold answers with the board in front of it.
+  async say(id: string, text: string, attached: string[] = []): Promise<void> {
     const talk = this.talk(id);
     const said = talk.heard(text);
-    await this.answer(id, talk, said);
+    const board = this.options.store().board(id);
+    const named = attached.flatMap((thing) => {
+      const found = board.things.find((one) => one.id === thing);
+      return found ? [`${found.kind} ${found.id}`] : [];
+    });
+    const more =
+      named.length > 0
+        ? `\n\n(They attached, from the board: ${named.join(", ")}.)`
+        : "";
+    await this.answer(id, talk, `${said}${more}`);
   }
 
   // The kobold's first look, when the exploration starts.
@@ -86,28 +113,63 @@ export class ExplorationTalks {
     await this.answer(
       id,
       talk,
-      "We start this exploration. Read the problem and what we heard, put a question and two or three ways to answer it on the board, and ask what matters most.",
+      "We start this exploration. Read the problem and what we heard, put a choice with two or three ways on the board (and a diagram if it helps), link the problem to it, and ask what matters most.",
     );
   }
 
   tools(id: string): BoardTools {
     const talk = this.talk(id);
-    return { token: talk.token, change: (change) => this.change(id, change) };
+    return {
+      token: talk.token,
+      act: (act) => this.act(id, act, "kobold").said,
+      look: () => this.look(id),
+      point: (thing) => {
+        const store = this.options.store();
+        const exploration = store.get("explorations", id);
+        if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+        if (
+          !completed(exploration, store.board(id)).things.some(
+            (one) => one.id === thing,
+          )
+        )
+          throw new Refused(`There is no thing “${thing}” on the board.`);
+        const times = (this.pointed.get(id)?.times ?? 0) + 1;
+        this.pointed.set(id, { thing, times });
+        this.options.onChange();
+        return `Pointing at ${thing}.`;
+      },
+      rename: ({ title, problem }) => {
+        const store = this.options.store();
+        const exploration = store.get("explorations", id);
+        if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+        store.put("explorations", {
+          ...exploration,
+          title: title?.trim() || exploration.title,
+          problem: problem?.trim() || exploration.problem,
+        });
+        this.options.onChange();
+        return this.look(id);
+      },
+    };
   }
 
-  private change(id: string, change: BoardChange): string {
+  // A change to the board, by the kobold or a person; what it did and the
+  // board now.
+  act(id: string, act: Act, by: "kobold" | "person"): { said: string } {
     const store = this.options.store();
     const exploration = store.get("explorations", id);
     if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
-    const { title, problem } = change;
-    const now = store.put("explorations", {
-      ...exploration,
-      title: title?.trim() || exploration.title,
-      problem: problem?.trim() ?? exploration.problem,
-    });
-    const board = store.saveBoard(id, changeBoard(store.board(id), change));
+    const done = applyAct(completed(exploration, store.board(id)), act, by);
+    store.saveBoard(id, done.board);
     this.options.onChange();
-    return boardText(now, board);
+    return { said: `${done.said}\n\n${this.look(id)}` };
+  }
+
+  private look(id: string): string {
+    const store = this.options.store();
+    const exploration = store.get("explorations", id);
+    if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+    return boardText(exploration, store.board(id));
   }
 
   private async answer(id: string, talk: Talk, said: string): Promise<void> {
@@ -118,8 +180,13 @@ export class ExplorationTalks {
       .all("signals")
       .filter((signal) => exploration.signals.includes(signal.id))
       .map((signal) => `- ${signal.text}`);
+    const did = this.done.get(id) ?? [];
+    this.done.delete(id);
     const prompt = [
       said,
+      ...(did.length > 0
+        ? ["", `(Since you last spoke, they ${did.join("; ")}.)`]
+        : []),
       "",
       "(The board now:",
       boardText(exploration, store.board(id)),

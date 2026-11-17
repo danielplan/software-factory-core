@@ -1,0 +1,145 @@
+// The card every thing on the board sits in: a dashed outline while it is
+// a sketch, a solid green one once agreed; a bar on top to drag it by, with
+// its kind, its title and its Sketch or Agreed badge (a click switches it);
+// a ring while the kobold points at it or a person attached it. Drawn
+// invisibly until the board has laid it out.
+
+import { Handle, Position } from "@xyflow/react";
+import { Check, GripVertical, X } from "lucide-react";
+import { createContext, type ReactNode, use } from "react";
+
+import { messageOf, post } from "@/api";
+import { cn } from "@/lib/utils";
+
+import type { Thing, ThingData } from "./nodes";
+
+const KIND: Record<Thing["kind"], string> = {
+  problem: "The problem",
+  heard: "What we heard",
+  note: "Note",
+  choice: "Choice",
+  prototype: "Prototype",
+  diagram: "Diagram",
+  picture: "Picture",
+};
+
+// Where a button on the board says why it did not work (the page shows it).
+export const BoardProblem = createContext<(problem: string | null) => void>(
+  () => undefined,
+);
+
+// What a person does on the board; why it did not work is said.
+export function useBoardDo(exploration: string) {
+  const say = use(BoardProblem);
+  return (path: string, body: Record<string, unknown>) => {
+    say(null);
+    post(`/api/kobble/explorations/${path}`, {
+      id: exploration,
+      ...body,
+    }).catch((error: unknown) => {
+      say(messageOf(error));
+    });
+  };
+}
+
+function AgreeTick({ data }: Readonly<{ data: ThingData }>) {
+  const { thing, page } = data;
+  const act = useBoardDo(page.exploration.id);
+  return (
+    <button
+      type="button"
+      aria-pressed={thing.agreed}
+      aria-label={
+        thing.agreed
+          ? "Agreed: click to make it a sketch"
+          : "Sketch: click to agree"
+      }
+      onClick={() => {
+        act("board", {
+          do: { act: "agree", id: thing.id, agreed: !thing.agreed },
+        });
+      }}
+      className={cn(
+        "nodrag inline-flex h-5 flex-none items-center gap-1 rounded-full px-2 text-[11px] font-medium",
+        thing.agreed
+          ? "bg-[#e3f5ee] text-[#197653]"
+          : "text-faint shadow-[inset_0_0_0_1px_var(--line-soft)] hover:text-muted-foreground",
+      )}
+    >
+      {thing.agreed && <Check aria-hidden className="size-3" />}
+      {thing.agreed ? "Agreed" : "Sketch"}
+    </button>
+  );
+}
+
+// Solid green once agreed; dashed while a sketch.
+function outlineOf(agreed: boolean, tone: "card" | "note"): string {
+  const ground = tone === "note" ? "bg-[#fffbea]" : "bg-card";
+  if (agreed) return cn(ground, "border-solid border-[#12a594]");
+  const line = tone === "note" ? "border-[#e8d58a]" : "border-[#d3d7e0]";
+  return cn(ground, "border-dashed", line);
+}
+
+// The person's own pictures and notes can be taken off.
+function RemoveButton({ data }: Readonly<{ data: ThingData }>) {
+  const { thing, page } = data;
+  const act = useBoardDo(page.exploration.id);
+  if (
+    thing.by !== "person" ||
+    !(thing.kind === "picture" || thing.kind === "note")
+  )
+    return null;
+  return (
+    <button
+      type="button"
+      aria-label="Remove it"
+      className="nodrag grid size-5 place-items-center rounded-full text-faint hover:text-foreground"
+      onClick={() => {
+        act("board", { do: { act: "remove", id: thing.id } });
+      }}
+    >
+      <X aria-hidden className="size-3.5" />
+    </button>
+  );
+}
+
+export function Frame({
+  data,
+  title,
+  tone = "card",
+  children,
+}: Readonly<{
+  data: ThingData;
+  title?: string;
+  tone?: "card" | "note";
+  children: ReactNode;
+}>) {
+  const { thing, pointed, attached, placed } = data;
+  return (
+    <article
+      aria-label={title ? `${KIND[thing.kind]}: ${title}` : KIND[thing.kind]}
+      className={cn(
+        "grid gap-2 rounded-[14px] border-[1.5px] p-3 text-left text-[13px] transition-[opacity,box-shadow] duration-300",
+        outlineOf(thing.agreed, tone),
+        pointed && "ring-4 ring-blue/40",
+        attached && "ring-2 ring-blue ring-offset-2",
+        !placed && "opacity-0",
+      )}
+    >
+      <Handle type="target" position={Position.Left} className="opacity-0" />
+      <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
+        <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
+        <span className="flex-none">{KIND[thing.kind]}</span>
+        <span className="ml-auto flex items-center gap-1">
+          <AgreeTick data={data} />
+          <RemoveButton data={data} />
+        </span>
+      </header>
+      {title && (
+        <div className="text-[13.5px] font-semibold leading-snug">{title}</div>
+      )}
+      {children}
+      <Handle type="source" position={Position.Right} className="opacity-0" />
+    </article>
+  );
+}

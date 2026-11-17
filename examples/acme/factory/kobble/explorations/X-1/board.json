@@ -1,39 +1,110 @@
 {
-  "question": "How does the basket wait until they pay?",
-  "options": [
+  "things": [
     {
-      "key": "A",
-      "name": "Keep it on the phone",
-      "difference": "The basket stays in this phone's browser for 30 days"
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "problem",
+      "kind": "problem"
     },
     {
-      "key": "B",
-      "name": "Bring it back by email",
-      "difference": "One tap sends a link that opens the basket on any device"
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "choice-1",
+      "kind": "choice",
+      "title": "How does the basket wait until they pay?",
+      "options": [
+        {
+          "key": "A",
+          "name": "Keep it on the phone",
+          "difference": "The basket stays in this phone's browser for 30 days"
+        },
+        {
+          "key": "B",
+          "name": "Bring it back by email",
+          "difference": "One tap sends a link that opens the basket on any device"
+        },
+        {
+          "key": "C",
+          "name": "Remind them at night",
+          "difference": "A reminder at 8 pm with what is in the basket"
+        }
+      ],
+      "chosen": "B"
     },
     {
-      "key": "C",
-      "name": "Remind them at night",
-      "difference": "A reminder at 8 pm with what is in the basket"
-    }
-  ],
-  "prototypes": [
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "diagram-1",
+      "kind": "diagram",
+      "title": "Mia's day with the basket",
+      "diagram": "flowchart LR\n  A[Fills the basket on the tram] --> B[Taps Send me this basket]\n  B --> C[Email with a link]\n  C --> D[Opens it on the laptop at night]\n  D --> E[Pays]"
+    },
     {
+      "agreed": false,
+      "place": null,
+      "by": "person",
+      "id": "prototype-a",
+      "kind": "prototype",
       "key": "A",
       "name": "Keep it on the phone",
       "difference": "The basket stays in this phone's browser for 30 days",
       "branch": "proto/X-1-a",
-      "agreed": false,
       "tests": []
     },
     {
+      "agreed": true,
+      "place": null,
+      "by": "person",
+      "id": "prototype-b",
+      "kind": "prototype",
       "key": "B",
       "name": "Bring it back by email",
       "difference": "One tap sends a link that opens the basket on any device",
       "branch": "proto/X-1-b",
-      "agreed": true,
       "tests": ["T-0003"]
+    },
+    {
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "note-1",
+      "kind": "note",
+      "text": "Mia often pays on the laptop at home, not on the phone"
     }
   ],
-  "notes": ["Mia often pays on the laptop at home, not on the phone"]
+  "links": [
+    {
+      "id": "link-1",
+      "from": "problem",
+      "to": "choice-1",
+      "label": ""
+    },
+    {
+      "id": "link-2",
+      "from": "choice-1",
+      "to": "prototype-a",
+      "label": "A"
+    },
+    {
+      "id": "link-3",
+      "from": "choice-1",
+      "to": "prototype-b",
+      "label": "B"
+    },
+    {
+      "id": "link-4",
+      "from": "diagram-1",
+      "to": "prototype-b",
+      "label": "shows"
+    },
+    {
+      "id": "link-5",
+      "from": "note-1",
+      "to": "choice-1",
+      "label": ""
+    }
+  ]
 }

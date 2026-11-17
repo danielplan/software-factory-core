@@ -5,6 +5,7 @@
 import { existsSync } from "node:fs";
 
 import { messageOf } from "../products/product.ts";
+import type { Board } from "./schemas.ts";
 import { KOBBLE_FOLDER, KobbleStore } from "./store.ts";
 
 export function checkKobbleIn(factory: string): {
@@ -29,8 +30,9 @@ export function checkKobbleIn(factory: string): {
   const explorations = read(() => store.all("explorations")) ?? [];
   const tests = read(() => store.all("tests")) ?? [];
   read(() => [store.sync()]);
-  // Each exploration's board fits.
-  for (const one of explorations) read(() => [store.board(one.id)]);
+  for (const one of explorations)
+    for (const board of read(() => [store.board(one.id)]) ?? [])
+      problems.push(...arrowProblems(one.id, board));
   const known = (ids: { id: string }[] | null) => ({
     has: (id: string) => ids === null || ids.some((one) => one.id === id),
   });
@@ -67,4 +69,15 @@ export function checkKobbleIn(factory: string): {
       problems.push(`${KOBBLE_FOLDER}/${where}: there is no ${what}.`);
   }
   return { checked: true, problems };
+}
+
+// A board's arrows that join a thing not on it.
+function arrowProblems(id: string, board: Board): string[] {
+  const on = new Set(["problem", "heard", ...board.things.map((t) => t.id)]);
+  return board.links
+    .filter((link) => !on.has(link.from) || !on.has(link.to))
+    .map(
+      (link) =>
+        `${KOBBLE_FOLDER}/explorations/${id}/board.json: the arrow ${link.id} joins a thing that is not there.`,
+    );
 }

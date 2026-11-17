@@ -31,6 +31,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 
 import { messageOf } from "../products/product.ts";
+import { fromEarlier } from "./board-shape.ts";
 import {
   type Board,
   boardSchema,
@@ -77,12 +78,7 @@ const NAMED: Record<KobbleKind, string> = {
 const SYNC_FILE = "sync.json";
 const BOARD_FILE = "board.json";
 const TALK_FILE = "conversation.md";
-const EMPTY_BOARD: Board = {
-  question: "",
-  options: [],
-  prototypes: [],
-  notes: [],
-};
+const EMPTY_BOARD: Board = { things: [], links: [] };
 
 // The talk with the kobold about an exploration: Claude Code's conversation
 // id, to go on with it, and what was said.
@@ -174,7 +170,9 @@ export class KobbleStore {
     const file = join(this.root, "explorations", id, BOARD_FILE);
     if (!existsSync(file)) return EMPTY_BOARD;
     const name = `explorations/${id}/${BOARD_FILE}`;
-    const parsed = boardSchema.safeParse(readJson(file, name));
+    const data = readJson(file, name);
+    // A board in the first shape is read as it is now (board-shape.ts).
+    const parsed = boardSchema.safeParse(fromEarlier(data) ?? data);
     if (!parsed.success)
       throw new KobbleRefused(
         `${name} does not fit: ${z.prettifyError(parsed.error)}`,
@@ -206,6 +204,22 @@ export class KobbleStore {
   saveConversation(id: string, talk: Conversation): void {
     this.explorationOrRefuse(id);
     writeText(join(this.root, "explorations", id, TALK_FILE), talkText(talk));
+  }
+
+  // A picture a person put on the board, kept in the exploration's
+  // pictures/ folder; its file's name.
+  savePicture(id: string, name: string, bytes: Uint8Array): string {
+    this.explorationOrRefuse(id);
+    const file = join(this.root, "explorations", id, "pictures", name);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, bytes);
+    return name;
+  }
+
+  pictureFile(id: string, name: string): string | null {
+    if (!/^[\w-]+\.(png|jpe?g|gif|webp)$/.test(name)) return null;
+    const file = join(this.root, "explorations", id, "pictures", name);
+    return existsSync(file) ? file : null;
   }
 
   // The hand-off note, written once it is handed off.

@@ -11,7 +11,8 @@ import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { type Read, useRead } from "@/understand/use-records";
 
-import { Canvas } from "./canvas";
+import { Board } from "./board/canvas";
+import { BoardProblem } from "./board/frame";
 import { TalkPanel } from "./talk-panel";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
@@ -19,6 +20,8 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
   ) as Read<Page>;
   const [said, say] = useState<string | null>(null);
+  // The things a person attached to what they type next.
+  const [attached, setAttached] = useState<string[]>([]);
   const waiting = data?.exploration.status === "waiting";
   useEffect(() => {
     if (waiting)
@@ -47,8 +50,29 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         </div>
       )}
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
-        <Canvas page={data} press={press} />
-        <TalkPanel page={data} />
+        <BoardProblem value={say}>
+          <Board
+            page={data}
+            attached={attached}
+            onPick={(thing) => {
+              setAttached((now) =>
+                now.includes(thing)
+                  ? now.filter((one) => one !== thing)
+                  : [...now, thing],
+              );
+            }}
+          />
+        </BoardProblem>
+        <TalkPanel
+          page={data}
+          attached={attached}
+          onSent={() => {
+            setAttached([]);
+          }}
+          onDetach={(thing) => {
+            setAttached((now) => now.filter((one) => one !== thing));
+          }}
+        />
       </div>
     </div>
   );
@@ -60,7 +84,9 @@ function TopBar({
 }: Readonly<{ page: Page; press: (path: string, body: object) => void }>) {
   const { exploration, board } = page;
   const open = ["waiting", "exploring"].includes(exploration.status);
-  const agreed = board.prototypes.find((one) => one.agreed);
+  const agreed = board.things.find(
+    (one) => one.kind === "prototype" && one.agreed,
+  );
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border bg-card px-6 py-4">
       <a
@@ -92,7 +118,7 @@ function TopBar({
               press("hand-off", {});
             }}
           >
-            Hand off {agreed?.key ?? ""}
+            Hand off {agreed?.kind === "prototype" ? agreed.key : ""}
           </Button>
         </>
       ) : (

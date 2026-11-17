@@ -1,17 +1,40 @@
 {
-  "question": "How do businesses pay once a month?",
-  "options": [
+  "things": [
     {
-      "key": "A",
-      "name": "A monthly invoice",
-      "difference": "All orders of the month on one invoice, paid by transfer"
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "problem",
+      "kind": "problem"
     },
     {
-      "key": "B",
-      "name": "Pay later at checkout",
-      "difference": "Choose “pay at the end of the month” when ordering"
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "id": "choice-1",
+      "kind": "choice",
+      "title": "How do businesses pay once a month?",
+      "options": [
+        {
+          "key": "A",
+          "name": "A monthly invoice",
+          "difference": "All orders of the month on one invoice, paid by transfer"
+        },
+        {
+          "key": "B",
+          "name": "Pay later at checkout",
+          "difference": "Choose “pay at the end of the month” when ordering"
+        }
+      ],
+      "chosen": null
     }
   ],
-  "prototypes": [],
-  "notes": []
+  "links": [
+    {
+      "id": "link-1",
+      "from": "problem",
+      "to": "choice-1",
+      "label": ""
+    }
+  ]
 }

@@ -78,32 +78,82 @@ export const explorationSchema = z.strictObject({
 // A prototype's branch: proto/X-<n>-<key>, the key in small letters.
 export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
 
-// The canvas of an exploration (board.json beside it): the question, the
-// ways to answer it (options A, B, C…), a prototype for some of them, and
-// notes. A prototype is a sketch until it is agreed; one at most is agreed.
+// The canvas of an exploration (board.json beside it): things joined by
+// arrows, laid out left to right along them. Kinds of things: the problem
+// (from the exploration itself) and what we heard (its signals), notes, a
+// choice (a question and its options, one of which may be chosen), a
+// prototype of an option, a diagram (Mermaid, in plain words) and a picture
+// a person put on it. Each is a sketch until agreed; a place a person
+// dragged it to is kept, the others are laid out on the page.
 const optionKey = z
   .string()
   .regex(/^[A-Z]$/, "an option is one capital letter");
+const thingId = z
+  .string()
+  .regex(/^[a-z][a-z0-9-]*$/, "small letters, digits and dashes");
+
+const common = {
+  id: thingId,
+  agreed: z.boolean(),
+  place: z.strictObject({ x: z.number(), y: z.number() }).nullable(),
+  // Who put it there: the kobold or a person.
+  by: z.enum(["kobold", "person"]),
+};
+
+const optionSchema = z.strictObject({
+  key: optionKey,
+  name: text,
+  difference: z.string(),
+});
+
+export const thingSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ ...common, kind: z.literal("problem") }),
+  z.strictObject({ ...common, kind: z.literal("heard") }),
+  z.strictObject({ ...common, kind: z.literal("note"), text }),
+  z.strictObject({
+    ...common,
+    kind: z.literal("choice"),
+    title: text,
+    options: z.array(optionSchema),
+    chosen: optionKey.nullable(),
+  }),
+  z.strictObject({
+    ...common,
+    kind: z.literal("prototype"),
+    key: optionKey,
+    name: text,
+    difference: z.string(),
+    branch: z
+      .string()
+      .regex(PROTOTYPE_BRANCH, "a prototype's branch is proto/X-<n>-<key>"),
+    // Its persona tests, the last one last.
+    tests: z.array(fileId),
+  }),
+  z.strictObject({
+    ...common,
+    kind: z.literal("diagram"),
+    title: text,
+    diagram: text,
+  }),
+  z.strictObject({
+    ...common,
+    kind: z.literal("picture"),
+    title: text,
+    // Its file, in the exploration's pictures/ folder.
+    image: z.string().regex(/^[\w-]+\.(png|jpe?g|gif|webp)$/),
+  }),
+]);
+
+export const linkSchema = z.strictObject({
+  id: thingId,
+  from: thingId,
+  to: thingId,
+  label: z.string(),
+});
 
 export const boardSchema = z.strictObject({
-  question: z.string(),
-  options: z.array(
-    z.strictObject({ key: optionKey, name: text, difference: z.string() }),
-  ),
-  prototypes: z.array(
-    z.strictObject({
-      key: optionKey,
-      name: text,
-      difference: z.string(),
-      branch: z
-        .string()
-        .regex(PROTOTYPE_BRANCH, "a prototype's branch is proto/X-<n>-<key>"),
-      agreed: z.boolean(),
-      // Its persona tests, the last one last.
-      tests: z.array(fileId),
-    }),
-  ),
-  notes: z.array(text),
+  things: z.array(thingSchema),
+  links: z.array(linkSchema),
 });
 
 export const PERSONA_ORIGINS = ["developer", "usage"] as const;
@@ -171,3 +221,5 @@ export type Already = z.infer<typeof alreadySchema>;
 export type PersonaTest = z.infer<typeof personaTestSchema>;
 export type TestStep = z.infer<typeof stepSchema>;
 export type Board = z.infer<typeof boardSchema>;
+export type Thing = z.infer<typeof thingSchema>;
+export type BoardLink = z.infer<typeof linkSchema>;

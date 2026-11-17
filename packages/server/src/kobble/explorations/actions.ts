@@ -5,6 +5,7 @@
 // prototype's branch and what was learned.
 
 import {
+  type Board,
   type Exploration,
   type KobbleStore,
   type PersonaTest,
@@ -70,23 +71,6 @@ export function dropExploration(store: KobbleStore, id: string): Exploration {
   return store.put("explorations", { ...open(store, id), status: "dropped" });
 }
 
-// Agree: this prototype is agreed, any other is a sketch again; agreeing
-// to the agreed one takes it back.
-export function agree(store: KobbleStore, id: string, key: string): void {
-  open(store, id);
-  const board = store.board(id);
-  const made = board.prototypes.find((one) => one.key === key);
-  if (!made) throw new Refused(`${id} has no prototype ${key}.`);
-  const now = !made.agreed;
-  store.saveBoard(id, {
-    ...board,
-    prototypes: board.prototypes.map((one) => ({
-      ...one,
-      agreed: one.key === key ? now : false,
-    })),
-  });
-}
-
 // Hand off: the agreed prototype becomes a GitHub issue on the connected
 // board, its first column; handoff.md says the same.
 export async function handOff(
@@ -96,7 +80,9 @@ export async function handOff(
 ): Promise<{ issue: number; url: string }> {
   const exploration = open(store, id);
   const board = store.board(id);
-  const agreed = board.prototypes.find((one) => one.agreed);
+  const agreed = board.things.find(
+    (one): one is Made => one.kind === "prototype" && one.agreed,
+  );
   if (!agreed)
     throw new Refused("Agree to a prototype first: it is what is handed off.");
   const connected = cards();
@@ -117,14 +103,27 @@ export async function handOff(
   return { issue: card.number, url: card.url };
 }
 
+type Made = Extract<Board["things"][number], { kind: "prototype" }>;
+
 function handoffText(
   exploration: Exploration,
-  board: ReturnType<KobbleStore["board"]>,
-  agreed: ReturnType<KobbleStore["board"]>["prototypes"][number],
+  board: Board,
+  agreed: Made,
   tests: PersonaTest[],
 ): string {
+  const question = board.things.find(
+    (one) =>
+      one.kind === "choice" && one.options.some((o) => o.key === agreed.key),
+  );
   const learned = [
-    ...board.notes.map((note) => `- ${note}`),
+    ...board.things.flatMap((one) =>
+      one.kind === "note" ? [`- ${one.text}`] : [],
+    ),
+    ...board.things.flatMap((one) =>
+      one.agreed && (one.kind === "diagram" || one.kind === "picture")
+        ? [`- Agreed ${one.kind}: ${one.title}`]
+        : [],
+    ),
     ...tests.map((test) => {
       const fine = test.steps.filter((step) => step.asExpected).length;
       return `- Persona test ${test.id}: ${String(fine)} of ${String(test.steps.length)} steps as expected.`;
@@ -133,7 +132,7 @@ function handoffText(
   return [
     `**The problem:** ${exploration.problem}`,
     "",
-    `**The question:** ${board.question}`,
+    `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
     "",
     `**Agreed:** ${agreed.key} · ${agreed.name}. ${agreed.difference}`,
     "",

@@ -330,3 +330,54 @@ test("a persona's face is its own, or always the same one from its id", () => {
     /hat/,
   );
 });
+
+test("a board in the first shape is read as things and arrows; arrows must join things", () => {
+  const factory = acmeFactory();
+  const store = new KobbleStore(factory);
+  writeFileSync(
+    join(store.root, "explorations", "X-2", "board.json"),
+    JSON.stringify({
+      question: "How?",
+      options: [{ key: "A", name: "One way", difference: "x" }],
+      prototypes: [
+        {
+          key: "A",
+          name: "One way",
+          difference: "x",
+          branch: "proto/X-2-a",
+          agreed: true,
+          tests: [],
+        },
+      ],
+      notes: ["Keep it short"],
+    }),
+  );
+  const board = store.board("X-2");
+  assert.deepEqual(
+    board.things.map((t) => [t.id, t.kind, t.agreed]),
+    [
+      ["problem", "problem", false],
+      ["choice", "choice", false],
+      ["proto-a", "prototype", true],
+      ["note-1", "note", false],
+    ],
+  );
+  assert.deepEqual(
+    board.links.map((l) => [l.from, l.to, l.label]),
+    [
+      ["problem", "choice", ""],
+      ["choice", "proto-a", "A"],
+    ],
+  );
+  store.saveBoard("X-2", {
+    things: [],
+    links: [{ id: "l", from: "problem", to: "gone", label: "" }],
+  });
+  assert.match(
+    checkRecordsIn(factory).problems.join("\n"),
+    /X-2\/board.json: the arrow l joins a thing that is not there/,
+  );
+  assert.equal(store.pictureFile("X-2", "../x.png"), null);
+  store.savePicture("X-2", "a.png", new Uint8Array([1]));
+  assert.ok(store.pictureFile("X-2", "a.png"));
+});

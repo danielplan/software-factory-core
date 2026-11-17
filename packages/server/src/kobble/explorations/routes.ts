@@ -1,7 +1,9 @@
 // The Explorations pages' routes: the list, one exploration, and its
-// buttons (Start, New exploration, Drop, Make, Open, Test, Agree, Hand off,
-// and what a person says to the kobold). Each change is told to the page;
+// buttons (Start, New exploration, Drop, Make, Open, Test, Hand off, what a
+// person does on the board, and what they say to the kobold). Each change is told to the page;
 // the kobold's tools are answered at /api/kobble/explorations/mcp/<id>.
+
+import { extname } from "node:path";
 
 import type { Claude, KobbleStore, PersonaTest } from "@software-factory/core";
 
@@ -10,15 +12,22 @@ import { asked, field } from "../../asked.ts";
 import type { Cards } from "../../cards/cards.ts";
 import { Refused } from "../../refused.ts";
 import type { PersonaTests } from "../persona-tests.ts";
+import { FileAnswer } from "../../http.ts";
+import { PICTURE_TYPES } from "../../coach/pictures.ts";
+import { addPicture, attachedIn, personActs } from "./person-acts.ts";
 import {
-  agree,
   dropExploration,
   explorationOf,
   handOff,
   newExploration,
   startExploration,
 } from "./actions.ts";
-import { ExplorationPrototypes, prototypeBranch } from "./prototypes.ts";
+import { withThing } from "./board-things.ts";
+import {
+  ExplorationPrototypes,
+  prototypeBranch,
+  prototypeOf,
+} from "./prototypes.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { explorationPage, explorationsView } from "./views.ts";
 
@@ -72,8 +81,8 @@ function testPrototype(
   const key = field(body, "key");
   const board = store.board(exploration.id);
   const persona = exploration.personas[0];
-  if (!board.prototypes.some((one) => one.key === key))
-    throw new Refused(`${exploration.id} has no prototype ${key}.`);
+  const made = prototypeOf(board, key);
+  if (!made) throw new Refused(`${exploration.id} has no prototype ${key}.`);
   if (!persona)
     throw new Refused("Testing needs a persona: this exploration has none.");
   const test = tests.start({
@@ -81,12 +90,10 @@ function testPrototype(
     task: field(body, "task"),
     on: prototypeBranch(exploration.id, key),
   });
-  store.saveBoard(exploration.id, {
-    ...board,
-    prototypes: board.prototypes.map((one) =>
-      one.key === key ? { ...one, tests: [...one.tests, test.id] } : one,
-    ),
-  });
+  store.saveBoard(
+    exploration.id,
+    withThing(board, { ...made, tests: [...made.tests, test.id] }),
+  );
   return test;
 }
 
@@ -96,6 +103,14 @@ function readRoutes(
   prototypes: ExplorationPrototypes,
 ): Record<string, Route> {
   return {
+    "GET /api/kobble/explorations/picture": (_body, url) => {
+      const file = store().pictureFile(
+        explorationOf(store(), asked(url, "id", "exploration")).id,
+        asked(url, "name", "picture"),
+      );
+      if (!file) throw new Refused("There is no such picture.");
+      return new FileAnswer(file, PICTURE_TYPES[extname(file)] ?? "image/png");
+    },
     "GET /api/kobble/explorations": () =>
       explorationsView(store(), (one) => talks.view(one)),
     "GET /api/kobble/exploration": (_body, url) => {
@@ -136,17 +151,24 @@ function buttonRoutes(
       await prototypes.stopAll(dropped.id);
     }),
     "POST /api/kobble/explorations/say": button((body) => {
-      void talks.say(id(body), field(body, "text"));
+      void talks.say(id(body), field(body, "text"), attachedIn(body));
     }),
     "POST /api/kobble/explorations/make": button((body) => ({
-      board: prototypes.make(explorationOf(store(), id(body)), key(body)),
+      board: prototypes.make(
+        explorationOf(store(), id(body)),
+        field(body, "choice"),
+        key(body),
+      ),
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({
       run: await prototypes.open(id(body), key(body)),
     })),
-    "POST /api/kobble/explorations/agree": button((body) => {
-      agree(store(), id(body), key(body));
+    "POST /api/kobble/explorations/board": button((body) => {
+      personActs(store(), talks, id(body), body);
     }),
+    "POST /api/kobble/explorations/picture": button((body) => ({
+      thing: addPicture(store(), talks, id(body), body),
+    })),
     "POST /api/kobble/explorations/hand-off": button((body) =>
       handOff(store(), id(body), on.cards),
     ),

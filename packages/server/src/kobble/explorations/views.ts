@@ -10,10 +10,12 @@ import {
   faceOf,
   type KobbleStore,
   type PersonaTest,
+  type Thing,
 } from "@software-factory/core";
 
 import type { VersionRun } from "../../prototypes/mode.ts";
 import { type SignalRow, signalRows } from "../views.ts";
+import { completed } from "./board-things.ts";
 import type { TalkView } from "./talks.ts";
 
 type PersonaTag = { id: string; name: string; face: Face };
@@ -24,8 +26,10 @@ export type ExplorationRow = Pick<
 > & {
   personas: PersonaTag[];
   signals: number;
-  options: string[];
-  prototypes: { key: string; agreed: boolean }[];
+  // The board in small, for its preview: each thing's kind and whether it
+  // is agreed, and the arrows.
+  things: { id: string; kind: Thing["kind"]; agreed: boolean }[];
+  links: { from: string; to: string }[];
   // What is next, in one line from the kobold; none when it has nothing.
   line: string | null;
 };
@@ -65,8 +69,11 @@ function tagsOf(store: KobbleStore, ids: string[]): PersonaTag[] {
 // The kobold's line: the agreed prototype can be handed off, or the last
 // question it asked.
 function lineOf(board: Board, talk: TalkView): string | null {
-  const agreed = board.prototypes.find((one) => one.agreed);
-  if (agreed) return `${agreed.key} is agreed. You can hand it off.`;
+  const agreed = board.things.find(
+    (one) => one.kind === "prototype" && one.agreed,
+  );
+  if (agreed?.kind === "prototype")
+    return `${agreed.key} is agreed. You can hand it off.`;
   const said = talk.messages.findLast((m) => m.from === "kobold")?.text ?? "";
   const question = said
     .split(/(?<=[.!?])\s+/)
@@ -79,7 +86,7 @@ export function explorationsView(
   talk: (id: string) => TalkView,
 ): ExplorationsView {
   const rows = store.all("explorations").map((exploration) => {
-    const board = store.board(exploration.id);
+    const board = completed(exploration, store.board(exploration.id));
     return {
       id: exploration.id,
       title: exploration.title,
@@ -88,8 +95,12 @@ export function explorationsView(
       work: exploration.work,
       personas: tagsOf(store, exploration.personas),
       signals: exploration.signals.length,
-      options: board.options.map((one) => one.key),
-      prototypes: board.prototypes.map(({ key, agreed }) => ({ key, agreed })),
+      things: board.things.map(({ id, kind, agreed }) => ({
+        id,
+        kind,
+        agreed,
+      })),
+      links: board.links.map(({ from, to }) => ({ from, to })),
       line:
         exploration.status === "exploring"
           ? lineOf(board, talk(exploration.id))
@@ -108,7 +119,7 @@ export function explorationPage(
   exploration: Exploration,
   more: { runs: VersionRun[]; talk: TalkView },
 ): ExplorationPage {
-  const board = store.board(exploration.id);
+  const board = completed(exploration, store.board(exploration.id));
   const tests = store.all("tests");
   const heard = store
     .all("signals")
@@ -120,9 +131,10 @@ export function explorationPage(
     board,
     runs: more.runs,
     tests: Object.fromEntries(
-      board.prototypes.map((made) => {
+      board.things.flatMap((made) => {
+        if (made.kind !== "prototype") return [];
         const last = tests.find((test) => test.id === made.tests.at(-1));
-        return [made.key, last ? resultOf(last) : null];
+        return [[made.key, last ? resultOf(last) : null]];
       }),
     ),
     talk: more.talk,

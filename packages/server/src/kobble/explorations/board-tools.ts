@@ -1,7 +1,10 @@
-// The kobold's tool in an exploration's conversation, served over MCP (the
-// standard way to give Claude new actions): `board`, which changes the
-// board while it talks. Only the conversation's own Claude Code has the
-// token.
+// The kobold's tools in an exploration's conversation, served over MCP (the
+// standard way to give Claude new actions): it looks at the board, adds
+// notes, diagrams and choices, changes and removes things, links and
+// unlinks them with a short label, points at a thing (the person's view
+// moves there), and marks a thing agreed or a sketch. Each answers with
+// what it did and the whole board. Only the conversation's own Claude Code
+// has the token.
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 
@@ -10,67 +13,144 @@ import { z } from "zod";
 
 import { COACH_HEADER } from "../../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../../mcp.ts";
-import type { BoardChange } from "./board-edit.ts";
+import type { Act } from "./board-acts.ts";
+import type { Option } from "./board-things.ts";
 
 export type BoardTools = {
   token: string;
-  change: (change: BoardChange) => string;
+  act: (act: Act) => string;
+  look: () => string;
+  point: (id: string) => string;
+  rename: (change: { title?: string; problem?: string }) => string;
 };
 
-const INPUT = {
-  title: z
+const option = z.object({
+  key: z
     .string()
     .optional()
-    .describe("The exploration's title, a few words."),
-  problem: z
-    .string()
-    .optional()
-    .describe("The problem, in two or three sentences."),
-  question: z
-    .string()
-    .optional()
-    .describe(
-      'What has to be decided ("How do the hours reach the accountant?").',
-    ),
-  options: z
-    .array(
-      z.object({
-        key: z
-          .string()
-          .optional()
-          .describe("An option to change (A, B…); none: a new one."),
-        name: z.string().min(1).describe("A few words."),
-        difference: z
-          .string()
-          .optional()
-          .describe("How it differs, in one line."),
-      }),
-    )
-    .optional(),
-  removeOptions: z
-    .array(z.string())
-    .optional()
-    .describe("Options to take off, by letter."),
-  notes: z
-    .array(z.string())
-    .optional()
-    .describe("Notes to add, one short line each."),
-  removeNotes: z
-    .array(z.number().int())
-    .optional()
-    .describe("Notes to take off, by number."),
-};
+    .describe("An option to change (A, B…); none: a new one."),
+  name: z.string().optional().describe("A few words."),
+  difference: z.string().optional().describe("How it differs, in one line."),
+});
+
+const TOOLS: {
+  name: string;
+  description: string;
+  input: z.ZodRawShape;
+  act: (args: Record<string, unknown>) => Act;
+}[] = [
+  {
+    name: "add_note",
+    description:
+      "A short note: something the team said or decided, a line or two.",
+    input: { text: z.string().min(1) },
+    act: (a) => ({ act: "note", text: String(a.text) }),
+  },
+  {
+    name: "add_diagram",
+    description:
+      "A simple Mermaid flowchart in plain words (the steps of a journey, who talks to whom, the stages something goes through); at most a dozen boxes, no developer words.",
+    input: { title: z.string().min(1), diagram: z.string().min(1) },
+    act: (a) => ({
+      act: "diagram",
+      title: String(a.title),
+      diagram: String(a.diagram),
+    }),
+  },
+  {
+    name: "add_choice",
+    description:
+      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference.",
+    input: { title: z.string().min(1), options: z.array(option) },
+    act: (a) => ({
+      act: "choice",
+      title: String(a.title),
+      options: a.options as Partial<Option>[],
+    }),
+  },
+  {
+    name: "change_thing",
+    description:
+      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter).",
+    input: {
+      id: z.string(),
+      text: z.string().optional(),
+      title: z.string().optional(),
+      diagram: z.string().optional(),
+      options: z.array(option).optional(),
+      removeOptions: z.array(z.string()).optional(),
+    },
+    act: (a) => ({ act: "change", ...(a as { id: string }) }),
+  },
+  {
+    name: "remove_thing",
+    description: "Take a thing off the board, with its arrows.",
+    input: { id: z.string() },
+    act: (a) => ({ act: "remove", id: String(a.id) }),
+  },
+  {
+    name: "link",
+    description:
+      "An arrow from one thing to another, with a short label (a word or two).",
+    input: { from: z.string(), to: z.string(), label: z.string().optional() },
+    act: (a) => ({
+      act: "link",
+      from: String(a.from),
+      to: String(a.to),
+      label: typeof a.label === "string" ? a.label : "",
+    }),
+  },
+  {
+    name: "unlink",
+    description: "Take an arrow off.",
+    input: { from: z.string(), to: z.string() },
+    act: (a) => ({ act: "unlink", from: String(a.from), to: String(a.to) }),
+  },
+  {
+    name: "agree",
+    description:
+      "Mark a thing agreed (talked through and agreed with the team) or a sketch again. One prototype at most is agreed.",
+    input: { id: z.string(), agreed: z.boolean() },
+    act: (a) => ({ act: "agree", id: String(a.id), agreed: a.agreed === true }),
+  },
+];
 
 function serverFor(on: BoardTools): McpServer {
   const server = new McpServer({ name: "board", version: "1.0.0" });
+  for (const tool of TOOLS)
+    server.registerTool(
+      tool.name,
+      { description: tool.description, inputSchema: tool.input },
+      (args) => toolAnswer(() => on.act(tool.act(args))),
+    );
   server.registerTool(
-    "board",
+    "look_at_board",
     {
       description:
-        "Change the exploration's board in one call: its title, the problem, the question, options (new ones get the next letter; change one by its letter; take one off) and notes. Answers with the whole board.",
-      inputSchema: INPUT,
+        "The whole board: its things with their ids, and the arrows.",
     },
-    (args) => toolAnswer(() => on.change(args)),
+    () => toolAnswer(() => on.look()),
+  );
+  server.registerTool(
+    "point_at",
+    {
+      description:
+        "Point at a thing while you talk about it: the person's view moves there.",
+      inputSchema: { id: z.string() },
+    },
+    (args) => toolAnswer(() => on.point(args.id)),
+  );
+  server.registerTool(
+    "name_exploration",
+    {
+      description:
+        "The exploration's title (a few words) or its problem (two or three sentences).",
+      inputSchema: {
+        title: z.string().optional(),
+        problem: z.string().optional(),
+      },
+    },
+    (args) => toolAnswer(() => on.rename(args)),
   );
   return server;
 }

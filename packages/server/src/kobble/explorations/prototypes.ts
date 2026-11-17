@@ -21,9 +21,20 @@ import { skillsFolder } from "@software-factory/skills";
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
+import { linked, withThing } from "./board-things.ts";
 
 const TIME_LIMIT_MS = 60 * 60_000;
 const START_WITHIN_MS = 3 * 60_000;
+
+// The prototype of an option, on the board.
+export function prototypeOf(
+  board: Board,
+  key: string,
+): Extract<Board["things"][number], { kind: "prototype" }> | null {
+  for (const thing of board.things)
+    if (thing.kind === "prototype" && thing.key === key) return thing;
+  return null;
+}
 
 export function prototypeBranch(exploration: string, key: string): string {
   return `proto/${exploration}-${key.toLowerCase()}`;
@@ -51,10 +62,7 @@ export class ExplorationPrototypes {
       },
       onChange: options.onChange,
       copyOf: (exploration, key) => {
-        const made = options
-          .store()
-          .board(exploration)
-          .prototypes.find((one) => one.key === key);
+        const made = prototypeOf(options.store().board(exploration), key);
         if (!made)
           throw new Refused(`${exploration} has no prototype ${key} yet.`);
         return versionCopy(options.project, exploration, key, made.branch);
@@ -66,23 +74,38 @@ export class ExplorationPrototypes {
     return this.mode.view(exploration);
   }
 
-  // Make: the option's prototype goes on the board at once, and the kobold
-  // makes it in the background.
-  make(exploration: Exploration, key: string): Board {
+  // Make: the option's prototype goes on the board at once, joined to its
+  // choice by an arrow with its letter, and the kobold makes it in the
+  // background.
+  make(exploration: Exploration, choice: string, key: string): Board {
     const store = this.options.store();
     const board = store.board(exploration.id);
-    const option = board.options.find((one) => one.key === key);
-    if (!option) throw new Refused(`${exploration.id} has no option ${key}.`);
-    if (board.prototypes.some((one) => one.key === key))
+    const card = board.things.find((one) => one.id === choice);
+    if (card?.kind !== "choice")
+      throw new Refused(`There is no choice “${choice}” on the board.`);
+    const option = card.options.find((one) => one.key === key);
+    if (!option) throw new Refused(`${choice} has no option ${key}.`);
+    if (prototypeOf(board, key))
       throw new Refused(`Option ${key} has a prototype already.`);
-    const branch = prototypeBranch(exploration.id, key);
-    const saved = store.saveBoard(exploration.id, {
-      ...board,
-      prototypes: [
-        ...board.prototypes,
-        { ...option, branch, agreed: false, tests: [] },
-      ].sort((a, b) => a.key.localeCompare(b.key)),
-    });
+    const id = `prototype-${key.toLowerCase()}`;
+    const saved = store.saveBoard(
+      exploration.id,
+      linked(
+        withThing(board, {
+          id,
+          kind: "prototype",
+          agreed: false,
+          place: null,
+          by: "person",
+          ...option,
+          branch: prototypeBranch(exploration.id, key),
+          tests: [],
+        }),
+        choice,
+        id,
+        key,
+      ),
+    );
     this.mode.set(exploration.id, key, {
       state: "making",
       activity: "Starting",
@@ -139,7 +162,7 @@ export class ExplorationPrototypes {
     board: Board,
     key: string,
   ): Promise<void> {
-    const made = board.prototypes.find((one) => one.key === key);
+    const made = prototypeOf(board, key);
     if (!made) return;
     const copy = versionCopy(
       this.options.project,
@@ -153,7 +176,7 @@ export class ExplorationPrototypes {
       prompt: [
         `Make prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${made.branch}).`,
         `The problem: ${exploration.problem}`,
-        `The question: ${board.question}`,
+        `The question it answers: ${questionOf(board, key)}`,
         `This prototype: ${made.name}. ${made.difference}`,
       ].join("\n\n"),
       readOnly: false,
@@ -183,4 +206,12 @@ export class ExplorationPrototypes {
           },
     );
   }
+}
+
+// The question of the choice an option belongs to.
+function questionOf(board: Board, key: string): string {
+  for (const thing of board.things)
+    if (thing.kind === "choice" && thing.options.some((one) => one.key === key))
+      return thing.title;
+  return "not on the board";
 }

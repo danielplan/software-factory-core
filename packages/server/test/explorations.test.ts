@@ -7,7 +7,7 @@ import { KobbleStore } from "@software-factory/core";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
-import { changeBoard } from "../src/kobble/explorations/board-edit.ts";
+import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import type {
   ExplorationPage,
   ExplorationsView,
@@ -68,73 +68,77 @@ async function explorationsFactory(turns: Turn[] = []) {
   };
 }
 
-test("the list: being explored with the kobold's line, waiting, and what is done", async () => {
+const PIXEL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+test("the list: being explored with the board in small and the kobold's line, waiting, done", async () => {
   const factory = await explorationsFactory();
   try {
     const view = await factory.read<ExplorationsView>(
       "/api/kobble/explorations",
     );
+    const [x1, x2] = view.exploring;
     assert.deepEqual(
-      view.exploring.map((row) => [
-        row.id,
-        row.options,
-        row.prototypes,
-        row.line,
-      ]),
+      x1?.things.map((t) => [t.id, t.agreed]),
       [
-        [
-          "X-1",
-          ["A", "B", "C"],
-          [
-            { key: "A", agreed: false },
-            { key: "B", agreed: true },
-          ],
-          "B is agreed. You can hand it off.",
-        ],
-        [
-          "X-2",
-          ["A", "B"],
-          [],
-          "Does his accountant need one invoice, or is one payment enough?",
-        ],
+        ["problem", false],
+        ["choice-1", false],
+        ["diagram-1", false],
+        ["prototype-a", false],
+        ["prototype-b", true],
+        ["note-1", false],
       ],
+    );
+    assert.ok(x1);
+    assert.equal(x1.line, "B is agreed. You can hand it off.");
+    assert.equal(
+      x2?.line,
+      "Does his accountant need one invoice, or is one payment enough?",
     );
     assert.deepEqual(
       view.waiting.map((row) => [row.id, row.personas.map((p) => p.name)]),
       [["X-3", ["Noah"]]],
     );
-    assert.deepEqual(view.done, []);
-    const x1 = await factory.page("X-1");
-    assert.equal(x1.board.question, "How does the basket wait until they pay?");
-    assert.deepEqual(x1.tests.B, {
+    const page = await factory.page("X-1");
+    assert.equal(page.board.things[0]?.kind, "problem");
+    assert.deepEqual(page.tests.B, {
       id: "T-0003",
       status: "done",
       steps: 3,
       asExpected: 3,
       persona: "mia",
     });
-    assert.equal(x1.tests.A, null);
-    assert.equal(x1.talk.messages.length, 3);
-    assert.equal(x1.talk.messages[1]?.from, "you");
+    assert.equal(page.talk.messages.length, 3);
+    assert.equal(page.talk.pointed, null);
   } finally {
     factory.close();
   }
 });
 
-test("starting one, the kobold puts a question and options on the board", async () => {
+test("starting one, the kobold draws on the board with its tools and points at what it means", async () => {
   const factory = await explorationsFactory([
     {
       calls: [
         [
-          "board",
+          "add_choice",
           {
-            question: "How do guests know the order worked?",
+            title: "How do guests know the order worked?",
             options: [
               { name: "A page that says so", difference: "Right after paying" },
               { name: "A text message" },
             ],
-            notes: ["Noah checks his email first"],
           },
+        ],
+        [
+          "add_diagram",
+          { title: "After paying", diagram: "flowchart LR\n A --> B" },
+        ],
+        ["add_note", { text: "Noah checks his email first" }],
+        ["link", { from: "problem", to: "choice-1", label: "asks" }],
+        ["point_at", { id: "choice-1" }],
+        [
+          "name_exploration",
+          { problem: "Guests are not sure the order worked." },
         ],
       ],
       reply: "I put two ways on the board. What matters most to Noah?",
@@ -142,9 +146,14 @@ test("starting one, the kobold puts a question and options on the board", async 
     {
       calls: [
         [
-          "board",
-          { options: [{ key: "B", name: "An SMS" }], removeNotes: [1] },
+          "change_thing",
+          { id: "choice-1", options: [{ key: "B", name: "An SMS" }] },
         ],
+        ["agree", { id: "note-1", agreed: true }],
+        ["unlink", { from: "problem", to: "choice-1" }],
+        ["remove_thing", { id: "diagram-1" }],
+        ["look_at_board", {}],
+        ["remove_thing", { id: "problem" }],
       ],
       reply: "Changed B.",
     },
@@ -153,49 +162,74 @@ test("starting one, the kobold puts a question and options on the board", async 
     assert.equal((await factory.press("/start", { id: "X-3" })).status, 200);
     const started = await factory.settled("X-3");
     assert.equal(started.exploration.status, "exploring");
-    assert.deepEqual(started.board.options, [
-      {
-        key: "A",
-        name: "A page that says so",
-        difference: "Right after paying",
-      },
-      { key: "B", name: "A text message", difference: "" },
-    ]);
-    assert.deepEqual(started.board.notes, ["Noah checks his email first"]);
-    assert.match(
-      factory.answers[0]?.[0] ?? "",
-      /How do guests know the order worked/,
+    assert.equal(
+      started.exploration.problem,
+      "Guests are not sure the order worked.",
     );
-    assert.match(
-      factory.seen[0]?.prompt ?? "",
-      /The problem: First-time buyers/,
-    );
-    // Said again: it goes on with the same conversation.
-    await factory.press("/say", { id: "X-3", text: "Call it an SMS." });
-    const said = await factory.settled("X-3");
-    assert.equal(said.board.options[1]?.name, "An SMS");
-    assert.deepEqual(said.board.notes, []);
     assert.deepEqual(
-      said.talk.messages.map((m) => m.from),
-      ["kobold", "you", "kobold"],
+      started.board.things.map((t) => t.id),
+      ["problem", "choice-1", "diagram-1", "note-1"],
     );
-    assert.equal(factory.seen[1]?.session?.resume, true);
+    assert.deepEqual(
+      started.board.links.map((l) => l.label),
+      ["asks"],
+    );
+    assert.deepEqual(started.talk.pointed, { thing: "choice-1", times: 1 });
+    assert.match(factory.answers[0]?.[0] ?? "", /Added choice-1/);
+    // A person agrees, chooses and attaches; the kobold hears all of it.
+    await factory.press("/board", {
+      id: "X-3",
+      do: { act: "choose", id: "choice-1", option: "A" },
+    });
+    await factory.press("/board", {
+      id: "X-3",
+      do: { act: "move", id: "note-1", x: 10, y: 20 },
+    });
+    await factory.press("/say", {
+      id: "X-3",
+      text: "Call it an SMS.",
+      attached: ["choice-1", "gone"],
+    });
+    const said = await factory.settled("X-3");
+    const choice = said.board.things.find((t) => t.id === "choice-1");
+    assert.ok(choice?.kind === "choice");
+    assert.equal(choice.options[1]?.name, "An SMS");
+    assert.equal(choice.chosen, "A");
+    assert.deepEqual(said.board.links, []);
+    assert.equal(
+      said.board.things.find((t) => t.id === "note-1")?.agreed,
+      true,
+    );
+    assert.deepEqual(said.board.things.find((t) => t.id === "note-1")?.place, {
+      x: 10,
+      y: 20,
+    });
+    const [, second] = factory.seen;
+    assert.ok(second);
+    assert.match(
+      second.prompt,
+      /They attached, from the board: choice choice-1\./,
+    );
+    assert.match(
+      second.prompt,
+      /Since you last spoke, they chose A on choice choice-1/,
+    );
+    assert.equal(second.session?.resume, true);
+    assert.match(
+      factory.answers[1]?.[5] ?? "",
+      /The problem stays on the board/,
+    );
     const kept = readFileSync(
       join(factory.store.root, "explorations", "X-3", "conversation.md"),
       "utf8",
     );
     assert.match(kept, /^<!-- conversation: [\w-]+ -->/);
-    assert.match(kept, /\*\*You:\*\* Call it an SMS\./);
     // Started already: no second first look.
-    assert.equal((await factory.press("/start", { id: "X-3" })).status, 200);
+    await factory.press("/start", { id: "X-3" });
     assert.equal(factory.seen.length, 2);
-    // Only the conversation's own Claude Code may change the board.
     const refused = await fetch(
       `${factory.base}/api/kobble/explorations/mcp/X-3`,
-      {
-        method: "POST",
-        body: "{}",
-      },
+      { method: "POST", body: "{}" },
     );
     assert.equal(refused.status, 403);
   } finally {
@@ -203,34 +237,78 @@ test("starting one, the kobold puts a question and options on the board", async 
   }
 });
 
-test("agree, new, drop, and what is refused", async () => {
+test("people agree, choose, add pictures and remove their own", async () => {
   const factory = await explorationsFactory();
   try {
-    await factory.press("/agree", { id: "X-1", key: "A" });
-    let board = factory.store.board("X-1");
-    assert.deepEqual(
-      board.prototypes.map((p) => [p.key, p.agreed]),
-      [
-        ["A", true],
-        ["B", false],
-      ],
-    );
-    await factory.press("/agree", { id: "X-1", key: "A" });
-    board = factory.store.board("X-1");
-    assert.ok(board.prototypes.every((p) => !p.agreed));
+    const agree = (id: string, agreed: boolean) =>
+      factory.press("/board", { id: "X-1", do: { act: "agree", id, agreed } });
+    await agree("prototype-a", true);
+    const agreedNow = (await factory.page("X-1")).board.things
+      .filter((t) => t.kind === "prototype")
+      .map((t) => [t.id, t.agreed]);
+    assert.deepEqual(agreedNow, [
+      ["prototype-a", true],
+      ["prototype-b", false],
+    ]);
     assert.equal(
-      (await factory.press("/agree", { id: "X-1", key: "C" })).body.error,
-      "X-1 has no prototype C.",
+      (await factory.press("/board", { id: "X-1", do: { act: "fly" } })).body
+        .error,
+      "That is not something the board does.",
+    );
+    assert.equal(
+      (
+        await factory.press("/board", {
+          id: "X-1",
+          do: { act: "remove", id: "note-1" },
+        })
+      ).body.error,
+      "Only what a person put on the board can be removed here.",
+    );
+    const added = await factory.press("/picture", {
+      id: "X-1",
+      title: "Basket screen",
+      data: PIXEL,
+    });
+    const picture = added.body.thing as { id: string; image: string };
+    assert.equal(picture.id, "picture-1");
+    const served = await fetch(
+      `${factory.base}/api/kobble/explorations/picture?id=X-1&name=${picture.image}`,
+    );
+    assert.equal(served.headers.get("content-type"), "image/png");
+    assert.equal(
+      (
+        await fetch(
+          `${factory.base}/api/kobble/explorations/picture?id=X-1&name=nope.png`,
+        )
+      ).status,
+      409,
+    );
+    assert.equal(
+      (
+        await factory.press("/picture", {
+          id: "X-1",
+          data: "data:text/plain;base64,aGk=",
+        })
+      ).body.error,
+      "Only pictures can go on the board.",
+    );
+    await factory.press("/board", {
+      id: "X-1",
+      do: { act: "change", id: "picture-1", title: "Basket" },
+    });
+    await factory.press("/board", {
+      id: "X-1",
+      do: { act: "remove", id: "picture-1" },
+    });
+    assert.ok(
+      !factory.store.board("X-1").things.some((t) => t.id === "picture-1"),
     );
     const made = await factory.press("", {
       title: "Gift notes",
-      problem: "People want to add a personal note.",
+      problem: "People want a note.",
       persona: "mia",
     });
-    assert.equal(
-      (made.body.exploration as { id: string; status: string }).id,
-      "X-4",
-    );
+    assert.equal((made.body.exploration as { id: string }).id, "X-4");
     assert.equal(
       (await factory.press("", { title: " " })).body.error,
       "Say what to explore.",
@@ -240,7 +318,6 @@ test("agree, new, drop, and what is refused", async () => {
       "There is no persona “zoe”.",
     );
     await factory.press("/drop", { id: "X-2" });
-    assert.equal(factory.store.get("explorations", "X-2")?.status, "dropped");
     assert.equal(
       (await factory.press("/drop", { id: "X-2" })).body.error,
       "X-2 is dropped already.",
@@ -252,26 +329,45 @@ test("agree, new, drop, and what is refused", async () => {
       view.done.map((row) => row.id),
       ["X-2"],
     );
-    // Handing off needs an agreed prototype, and a connected board.
+    await agree("prototype-a", false);
     assert.equal(
       (await factory.press("/hand-off", { id: "X-1" })).body.error,
       "Agree to a prototype first: it is what is handed off.",
     );
-    await factory.press("/agree", { id: "X-1", key: "B" });
+    await agree("prototype-b", true);
     assert.match(
       String((await factory.press("/hand-off", { id: "X-1" })).body.error),
       /connect a GitHub board/,
     );
     assert.equal(
-      (await factory.press("/make", { id: "X-1", key: "B" })).body.error,
+      (
+        await factory.press("/make", {
+          id: "X-1",
+          choice: "choice-1",
+          key: "B",
+        })
+      ).body.error,
       "Option B has a prototype already.",
     );
     assert.equal(
-      (await factory.press("/make", { id: "X-1", key: "Z" })).body.error,
-      "X-1 has no option Z.",
+      (
+        await factory.press("/make", {
+          id: "X-1",
+          choice: "choice-1",
+          key: "Z",
+        })
+      ).body.error,
+      "choice-1 has no option Z.",
     );
-    const none = await fetch(`${factory.base}/api/kobble/exploration?id=X-9`);
-    assert.equal(none.status, 409);
+    assert.equal(
+      (await factory.press("/make", { id: "X-1", choice: "note-1", key: "A" }))
+        .body.error,
+      "There is no choice “note-1” on the board.",
+    );
+    assert.equal(
+      (await fetch(`${factory.base}/api/kobble/exploration?id=X-9`)).status,
+      409,
+    );
   } finally {
     factory.close();
   }
@@ -281,11 +377,20 @@ test("Make builds the option on its branch; Open and Test need the project's sta
   const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
   try {
     inGit(factory.project);
-    await factory.press("/make", { id: "X-1", key: "C" });
+    await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
     const made = factory.store
       .board("X-1")
-      .prototypes.find((p) => p.key === "C");
-    assert.equal(made?.branch, "proto/X-1-c");
+      .things.find((t) => t.id === "prototype-c");
+    assert.ok(made?.kind === "prototype");
+    assert.equal(made.branch, "proto/X-1-c");
+    assert.ok(
+      factory.store
+        .board("X-1")
+        .links.some(
+          (l) =>
+            l.from === "choice-1" && l.to === "prototype-c" && l.label === "C",
+        ),
+    );
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     while (run?.state === "making") {
       await new Promise((resolve) => setTimeout(resolve, 20));
@@ -295,23 +400,21 @@ test("Make builds the option on its branch; Open and Test need the project's sta
     const [making] = factory.seen;
     assert.ok(making);
     assert.equal(making.readOnly, false);
-    assert.match(making.prompt, /Make prototype C of the exploration/);
+    assert.match(
+      making.prompt,
+      /The question it answers: How does the basket wait/,
+    );
     assert.ok(
       existsSync(join(factory.project, "..", "project-prototypes", "X-1", "c")),
     );
     const opened = await factory.press("/open", { id: "X-1", key: "C" });
     assert.match(String(opened.body.error), /cannot run versions yet/);
-    // Test: a persona test on the prototype's branch, as Mia.
     const tested = await factory.press("/test", {
       id: "X-1",
       key: "C",
       task: "Remind me tonight",
     });
     const id = (tested.body.test as { id: string }).id;
-    assert.deepEqual(
-      factory.store.board("X-1").prototypes.find((p) => p.key === "C")?.tests,
-      [id],
-    );
     let page = await factory.page("X-1");
     while (page.tests.C?.status !== "failed") page = await factory.page("X-1");
     const kept = factory.store.get("tests", id);
@@ -342,9 +445,9 @@ test("hand off writes handoff.md and the issue, with what was learned", async ()
     assert.deepEqual(answer, { issue: 51, url: "https://example.com/51" });
     const [issue] = made;
     assert.ok(issue);
-    assert.equal(
-      issue.title,
-      "The basket is empty when people come back to pay",
+    assert.match(
+      issue.body,
+      /\*\*The question:\*\* How does the basket wait until they pay\?/,
     );
     assert.match(issue.body, /on the branch `proto\/X-1-b`/);
     assert.match(issue.body, /Persona test T-0003: 3 of 3 steps as expected/);
@@ -365,33 +468,96 @@ test("hand off writes handoff.md and the issue, with what was learned", async ()
   }
 });
 
-test("the board's options: a new one gets the next letter, one with a prototype stays", () => {
+test("the board's acts: options by letter, arrows between two things, what stays", () => {
+  const fresh = { agreed: false, place: null, by: "kobold" as const };
   const board = {
-    question: "",
-    options: [{ key: "A", name: "One", difference: "x" }],
-    prototypes: [
+    things: [
       {
+        ...fresh,
+        id: "choice-1",
+        kind: "choice" as const,
+        title: "Which?",
+        options: [{ key: "A", name: "One", difference: "x" }],
+        chosen: null,
+      },
+      {
+        ...fresh,
+        id: "prototype-a",
+        kind: "prototype" as const,
         key: "A",
         name: "One",
         difference: "x",
         branch: "proto/X-1-a",
-        agreed: false,
         tests: [],
       },
     ],
-    notes: [],
+    links: [],
   };
-  assert.deepEqual(
-    changeBoard(board, {
+  const changed = applyAct(
+    board,
+    {
+      act: "change",
+      id: "choice-1",
       options: [{ key: "a", name: "Uno" }, { name: "Two" }],
-    }).options,
+    },
+    "kobold",
+  ).board;
+  const choice = changed.things[0];
+  assert.ok(choice?.kind === "choice");
+  assert.deepEqual(
+    choice.options.map((o) => [o.key, o.name, o.difference]),
     [
-      { key: "A", name: "Uno", difference: "x" },
-      { key: "B", name: "Two", difference: "" },
+      ["A", "Uno", "x"],
+      ["B", "Two", ""],
     ],
   );
   assert.throws(
-    () => changeBoard(board, { removeOptions: ["A"] }),
-    /has a prototype/,
+    () =>
+      applyAct(
+        board,
+        { act: "change", id: "choice-1", removeOptions: ["A"] },
+        "kobold",
+      ),
+    /prototype stays/,
+  );
+  assert.throws(
+    () => applyAct(board, { act: "remove", id: "prototype-a" }, "kobold"),
+    /stays on the board/,
+  );
+  assert.throws(
+    () =>
+      applyAct(
+        board,
+        { act: "link", from: "choice-1", to: "choice-1" },
+        "kobold",
+      ),
+    /two different things/,
+  );
+  assert.throws(
+    () =>
+      applyAct(
+        board,
+        { act: "unlink", from: "choice-1", to: "prototype-a" },
+        "kobold",
+      ),
+    /no arrow/,
+  );
+  assert.throws(
+    () =>
+      applyAct(
+        board,
+        { act: "choose", id: "prototype-a", option: "A" },
+        "person",
+      ),
+    /not a choice/,
+  );
+  assert.throws(
+    () =>
+      applyAct(board, { act: "choose", id: "choice-1", option: "Q" }, "person"),
+    /no option Q/,
+  );
+  assert.throws(
+    () => applyAct(board, { act: "agree", id: "gone", agreed: true }, "person"),
+    /no thing “gone”/,
   );
 });

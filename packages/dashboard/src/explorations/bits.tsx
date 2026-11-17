@@ -1,9 +1,13 @@
-// Small pieces of the Explorations pages: persona faces in a row, the
-// Sketch or Agreed badge, and the small preview of a canvas.
+// Small pieces of the Explorations pages: persona faces in a row, and the
+// small preview of a board.
+
+import { Fragment } from "react";
 
 import type { ExplorationRow, Face } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
+
+import { columnsOf } from "./view";
 
 export function Faces({
   personas,
@@ -20,65 +24,46 @@ export function Faces({
   );
 }
 
-export function Badge({ agreed }: Readonly<{ agreed: boolean }>) {
-  return agreed ? (
-    <span className="inline-flex h-5 items-center rounded-full bg-[#e3f5ee] px-2.5 text-[11px] font-medium text-[#197653]">
-      ✓ Agreed
-    </span>
-  ) : (
-    <span className="inline-flex h-5 items-center rounded-full px-2.5 text-[11px] font-medium text-faint shadow-[inset_0_0_0_1px_var(--line-soft)]">
-      Sketch
-    </span>
-  );
-}
+const LOOK: Record<string, string> = {
+  problem: "h-[34px] w-[58px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
+  note: "h-[22px] w-[52px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
+  heard: "h-[26px] w-[58px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
+  choice: "h-[52px] w-[56px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
+  diagram: "h-[40px] w-[64px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
+  picture: "h-[34px] w-[48px] bg-[#eef0f4]",
+  prototype: "h-[22px] w-12 bg-card shadow-[0_0_0_1px_var(--line-soft)]",
+};
 
-// The canvas in small: the problem and what we heard, the choice with its
-// options (the agreed one green), and the prototypes (the agreed one
-// outlined in green); a dashed one while there is none.
+// The board in small: its things in columns along their arrows, the
+// agreed ones outlined in green; a dashed box while there is nothing past
+// the problem.
 export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
-  const agreed = row.prototypes.find((one) => one.agreed)?.key;
+  const columns = columnsOf(row.things, row.links);
   return (
-    <div className="relative flex h-28 items-center gap-3.5 rounded-xl bg-[#f7f8fa] bg-[radial-gradient(#dde1ea_1px,transparent_1px)] bg-size-[10px_10px] px-[18px]">
-      <div className="flex flex-col gap-1.5">
-        <div className="h-[34px] w-[58px] rounded-md bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]" />
-        <div className="h-[26px] w-[58px] rounded-md bg-card shadow-[0_0_0_1px_var(--line-soft)]" />
-      </div>
-      <span className="text-[#b6bccb]">→</span>
-      <div
-        className={cn(
-          "flex h-[66px] w-[62px] flex-col gap-1 rounded-md bg-card p-1.5",
-          agreed
-            ? "shadow-[0_0_0_1px_#12a594]"
-            : "shadow-[0_0_0_1px_var(--line-soft)]",
-        )}
-      >
-        {row.options.map((key) => (
-          <div
-            key={key}
-            className={cn(
-              "h-[9px] rounded-[3px]",
-              key === agreed ? "bg-[#cdeee2]" : "bg-[#eef0f4]",
-            )}
-          />
-        ))}
-      </div>
-      <span className="text-[#b6bccb]">→</span>
-      <div className="flex flex-col gap-[5px]">
-        {row.prototypes.length === 0 && (
+    <div className="relative flex h-28 items-center gap-3.5 overflow-hidden rounded-xl bg-[#f7f8fa] bg-[radial-gradient(#dde1ea_1px,transparent_1px)] bg-size-[10px_10px] px-[18px]">
+      {columns.map((column, at) => (
+        <Fragment key={at}>
+          {at > 0 && <span className="text-[#b6bccb]">→</span>}
+          <div className="flex flex-col gap-1.5">
+            {column.map((thing) => (
+              <div
+                key={thing.id}
+                className={cn(
+                  "rounded-[5px]",
+                  LOOK[thing.kind],
+                  thing.agreed && "shadow-[0_0_0_2px_#12a594]",
+                )}
+              />
+            ))}
+          </div>
+        </Fragment>
+      ))}
+      {columns.length < 2 && (
+        <>
+          <span className="text-[#b6bccb]">→</span>
           <div className="h-[22px] w-12 rounded-[5px] border-[1.5px] border-dashed border-[#d3d7e0]" />
-        )}
-        {row.prototypes.map((one) => (
-          <div
-            key={one.key}
-            className={cn(
-              "h-[22px] w-12 rounded-[5px] bg-card",
-              one.agreed
-                ? "shadow-[0_0_0_2px_#12a594]"
-                : "shadow-[0_0_0_1px_var(--line-soft)]",
-            )}
-          />
-        ))}
-      </div>
+        </>
+      )}
     </div>
   );
 }

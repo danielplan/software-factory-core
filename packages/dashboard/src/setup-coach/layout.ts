@@ -9,7 +9,7 @@ import type { ELK, ElkNode } from "elkjs/lib/elk-api";
 
 // ELK is large, so it is loaded with the first canvas.
 let elk: Promise<ELK> | null = null;
-function layoutKernel(): Promise<ELK> {
+export function layoutKernel(): Promise<ELK> {
   elk ??= import("elkjs/lib/elk.bundled.js").then(
     ({ default: Kernel }) => new Kernel(),
   );

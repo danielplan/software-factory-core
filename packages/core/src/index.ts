@@ -175,12 +175,14 @@ export {
 export {
   type Already,
   type Board,
+  type BoardLink,
   type Exploration,
   type KobblePersona,
   type KobbleSignal,
   type PersonaTest,
   type SyncState,
   type TestStep,
+  type Thing,
 } from "./kobble/schemas.ts";
 export {
   type Conversation,
