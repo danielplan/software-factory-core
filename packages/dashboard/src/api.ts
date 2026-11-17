@@ -36,6 +36,13 @@ export type {
 } from "../../server/src/records/signal-views.ts";
 export type { KoboldJob } from "../../server/src/kobold/kobold.ts";
 export type {
+  PersonaPage as KobblePersonaPage,
+  PersonaRow,
+  SignalRow,
+  SignalsView,
+} from "../../server/src/kobble/views.ts";
+export type { SyncView } from "../../server/src/kobble/sync.ts";
+export type {
   ExploreList,
   IdeaPage,
   IdeaRow,
@@ -141,6 +148,9 @@ export function useFactoryState(): { state: State | null; connected: boolean } {
       tellRecords();
     };
     events.addEventListener("records-changed", tellRecords);
+    // Kobble's files changed (signals, explorations, personas): the pages
+    // that read them read again, like the records.
+    events.addEventListener("kobble-changed", tellRecords);
     events.addEventListener("kobold", (event: MessageEvent<string>) => {
       const { jobs } = JSON.parse(event.data) as { jobs: KoboldJob[] };
       for (const listener of koboldHeard) listener(jobs);

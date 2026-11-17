@@ -1,0 +1,61 @@
+{
+  "cursor": "2026-11-17T08:40:00.000Z",
+  "events": [
+    {
+      "id": "ev-1001",
+      "at": "2026-11-16T20:12:00.000Z",
+      "kind": "bug-report",
+      "customer": "c-2841",
+      "text": "The basket was empty again when I came back in the evening to pay."
+    },
+    {
+      "id": "ev-1002",
+      "at": "2026-11-16T09:05:00.000Z",
+      "kind": "suggestion",
+      "customer": "c-5530",
+      "text": "Could we get one invoice at the end of the month for all our orders?"
+    },
+    {
+      "id": "ev-1003",
+      "at": "2026-11-16T09:20:00.000Z",
+      "kind": "limit",
+      "customer": "c-5531",
+      "text": "The assistant could not repeat last Monday's order. It can only show it."
+    },
+    {
+      "id": "ev-1004",
+      "at": "2026-11-16T22:47:00.000Z",
+      "kind": "automation-failed",
+      "customer": null,
+      "text": "The order confirmation email failed to send for three orders."
+    },
+    {
+      "id": "ev-1005",
+      "at": "2026-11-17T06:02:00.000Z",
+      "kind": "error",
+      "customer": null,
+      "text": "Checkout stopped with an error: the payment service took too long to answer."
+    },
+    {
+      "id": "ev-1006",
+      "at": "2026-11-17T07:15:00.000Z",
+      "kind": "other",
+      "customer": "c-7712",
+      "text": "I was not sure my order went through until the email came an hour later."
+    },
+    {
+      "id": "ev-1007",
+      "at": "2026-11-17T07:58:00.000Z",
+      "kind": "bug-report",
+      "customer": "c-9004",
+      "text": "The size guide does not open on my phone. Nothing happens when I tap it."
+    },
+    {
+      "id": "ev-1008",
+      "at": "2026-11-17T08:31:00.000Z",
+      "kind": "suggestion",
+      "customer": "c-2841",
+      "text": "Please keep my basket for later. It is empty every time I come back."
+    }
+  ]
+}

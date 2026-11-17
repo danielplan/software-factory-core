@@ -107,6 +107,7 @@ acme/                    the project, one repository
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
    ├─ runs/              its history
+   ├─ kobble/            signals, explorations and personas, one file each, in git
    ├─ kobble-seed.json   records to start from (the example company has one)
    ├─ kobble.db          the records, a local database, not in git
    └─ settings/, copies/ secrets and working copies, not in git
@@ -293,6 +294,36 @@ came in, where from, and the signal's id in a hidden mark
 `<!-- factory:kobble signal=<id> -->`; the records keep a ticket link (a fix
 or an update) and the signal goes to it (`POST /api/build/fix`). A ticket made or answered reads the board again,
 so the card shows at once.
+
+### Signals and personas as files
+
+Kobble's new pipeline (Signals, then Explorations, then the Factory board)
+keeps its records as files in the product's repository, beside the old
+records while they are replaced: `factory/kobble/signals/S-0001.json`,
+`factory/kobble/explorations/X-1/exploration.json`,
+`factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
+into git, so the team shares them like the code. Each is JSON, checked
+against its schema (`packages/core/src/kobble/schemas.ts`) when it is read
+and written, and written whole (to a file beside it, then renamed).
+
+**Signals** come from the live app: the server reads its export
+([the live export](reference/live-export.md)) when it starts, every 30
+minutes while it runs, and on Sync now (`POST /api/kobble/sync`). Each event
+becomes at most one signal, typed by its kind; its persona is the one whose
+customers include the event's anonymous customer. Then a plain rule looks
+for work that exists already (`packages/core/src/kobble/already.ts`): an
+open exploration that covers at least half of the signal's content words,
+or a fixed signal that says nearly the same. The kobold takes this over
+later.
+
+On the Signals page each signal gets **Fix** (marked fixed; the GitHub
+issue comes with the Factory board), **Explore** (added to the exploration
+found, or a new one that waits) or **Dismiss** (`POST
+/api/kobble/signals/fix`, `/explore`, `/dismiss`). The Personas page lists
+the personas with their signals (`GET /api/kobble/personas`,
+`/api/kobble/persona?id=…`) and adds one (`POST /api/kobble/personas`).
+Each change is told on the page's stream as a `kobble-changed` event.
+`software-factory check` also checks these files and what they name.
 
 ## Extension points
 

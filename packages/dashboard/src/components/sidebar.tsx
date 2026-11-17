@@ -1,12 +1,10 @@
 import {
-  Building2,
   ChevronsUpDown,
-  Lightbulb,
+  FlaskConical,
+  Inbox,
   Menu,
-  Package,
   Settings,
   SquareKanban,
-  Sun,
   Users,
   Wrench,
 } from "lucide-react";
@@ -30,39 +28,31 @@ import { KoboldMark } from "@/understand/bits";
 
 type Item = { page: Page; name: string; icon: ReactNode };
 
-// The pages, in groups: what is waiting first, then the product chosen at
-// the top, the company, and the factory itself. The product's pages each
-// have a colour of their own, on their icon.
+// The pages, in groups: the way from what came in to what is built
+// (Signals, Explorations, the Factory board), then the personas, a little
+// apart, and the factory itself at the bottom. Explorations is still the
+// page "explore" and the Factory board the page "build".
 const GROUPS: { title: string | null; items: Item[] }[] = [
   {
     title: null,
-    items: [{ page: "today", name: "Today", icon: <Sun aria-hidden /> }],
-  },
-  {
-    title: "This product",
     items: [
-      {
-        page: "understand",
-        name: "Understand",
-        icon: <Users aria-hidden className="text-understand" />,
-      },
+      { page: "signals", name: "Signals", icon: <Inbox aria-hidden /> },
       {
         page: "explore",
-        name: "Explore",
-        icon: <Lightbulb aria-hidden className="text-explore" />,
+        name: "Explorations",
+        icon: <FlaskConical aria-hidden />,
       },
       {
         page: "build",
-        name: "Build",
-        icon: <SquareKanban aria-hidden className="text-build" />,
+        name: "Factory",
+        icon: <SquareKanban aria-hidden />,
       },
     ],
   },
   {
-    title: "Company",
+    title: null,
     items: [
-      { page: "customers", name: "Customers", icon: <Building2 aria-hidden /> },
-      { page: "products", name: "Products", icon: <Package aria-hidden /> },
+      { page: "personas", name: "Personas", icon: <Users aria-hidden /> },
     ],
   },
   {
@@ -73,6 +63,9 @@ const GROUPS: { title: string | null; items: Item[] }[] = [
     ],
   },
 ];
+
+// The pages whose count is something waiting for you, shown as a badge.
+const BADGED = new Set<Page>(["signals"]);
 
 export type Product = { id: string; name: string };
 
@@ -234,8 +227,11 @@ function Pages({
 }>) {
   return (
     <nav aria-label="Pages" className="grid gap-0.5">
-      {GROUPS.map((group) => (
-        <div key={group.title ?? "first"} className="grid gap-0.5">
+      {GROUPS.map((group, at) => (
+        <div
+          key={group.title ?? String(at)}
+          className={cn("grid gap-0.5", at > 0 && !group.title && "pt-3.5")}
+        >
           {group.title && (
             <span className="px-2.5 pt-3 pb-1 text-[11px] font-semibold tracking-[0.06em] text-label uppercase">
               {group.title}
@@ -256,7 +252,14 @@ function Pages({
               {item.icon}
               {item.name}
               {counts[item.page] !== undefined && (
-                <span className="ml-auto text-[11px] font-semibold text-muted-foreground">
+                <span
+                  className={cn(
+                    "ml-auto text-[11px] font-semibold",
+                    BADGED.has(item.page)
+                      ? "grid h-5 min-w-5 place-items-center rounded-full bg-blue px-1.5 text-blue-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
                   {counts[item.page]}
                 </span>
               )}

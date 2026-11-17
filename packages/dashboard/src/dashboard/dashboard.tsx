@@ -8,11 +8,12 @@ import { ConnectPage } from "@/connect/connect-page";
 import { ExplorePage } from "@/explore/explore-page";
 import { BoardTab } from "@/ideas/board-tab";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
+import { PersonasPage } from "@/personas/personas-page";
 import { PrototypePage } from "@/prototype/prototype-page";
 import { SetupPage } from "@/setup-coach/setup-page";
+import { SignalsPage } from "@/signals/signals-page";
 import { UnderstandPage } from "@/understand/understand-page";
 
-import { ComingPage, isComing } from "./coming-page";
 import { SettingsTab } from "./settings-tab";
 import { WorkshopPage } from "./workshop-page";
 
@@ -65,15 +66,36 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
           text={state.problems.join(" · ")}
         />
       )}
-      {page === "connect" && (
-        <ConnectPage trackers={trackersOf(state.addOns)} />
-      )}
-      {isComing(page) && <ComingPage page={page} />}
-      {page === "understand" && <UnderstandPage open={open} />}
-      {page === "explore" && <ExplorePage state={state} open={open} />}
-      {page === "build" && <BoardTab state={state} />}
-      {page === "workshop" && <WorkshopPage state={state} open={open} />}
-      {page === "settings" && <SettingsTab state={state} />}
+      <PageBody state={state} page={page} open={open} />
     </Shell>
   );
+}
+
+function PageBody({
+  state,
+  page,
+  open,
+}: Readonly<{
+  state: FactoryState;
+  page: Exclude<Place["page"], "prototype">;
+  open: string | null;
+}>) {
+  switch (page) {
+    case "connect":
+      return <ConnectPage trackers={trackersOf(state.addOns)} />;
+    case "signals":
+      return <SignalsPage />;
+    case "personas":
+      return <PersonasPage open={open} />;
+    case "understand":
+      return <UnderstandPage open={open} />;
+    case "explore":
+      return <ExplorePage state={state} open={open} />;
+    case "build":
+      return <BoardTab state={state} />;
+    case "workshop":
+      return <WorkshopPage state={state} open={open} />;
+    case "settings":
+      return <SettingsTab state={state} />;
+  }
 }

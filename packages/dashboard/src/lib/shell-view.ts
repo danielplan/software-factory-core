@@ -14,11 +14,13 @@ import type {
 } from "../api.ts";
 import type { Page } from "./routes.ts";
 
-// Only real numbers, and only when there is something to count: the ideas
-// being explored, and the board's tickets not yet in the app.
+// Only real numbers, and only when there is something to count: the new
+// signals, the ideas being explored, and the board's tickets not yet in the
+// app.
 export function countsOf(
   ideas: IdeaRow[] | null,
   work: WorkView | null,
+  fresh = 0,
 ): Partial<Record<Page, number>> {
   const exploring = (ideas ?? []).filter(
     (one) => one.state === "exploring",
@@ -27,6 +29,7 @@ export function countsOf(
     (card) => card.stage !== "done",
   ).length;
   return {
+    ...(fresh > 0 ? { signals: fresh } : {}),
     ...(exploring > 0 ? { explore: exploring } : {}),
     ...(open > 0 ? { build: open } : {}),
   };

@@ -1,0 +1,13 @@
+{
+  "id": "S-0001",
+  "type": "bug",
+  "source": "errors",
+  "sourceId": "ev-0950",
+  "customer": null,
+  "persona": null,
+  "at": "2026-11-12T07:30:00.000Z",
+  "text": "The order confirmation email failed to send.",
+  "status": "fixed",
+  "to": "#41",
+  "already": null
+}

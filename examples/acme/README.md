@@ -11,4 +11,8 @@ Its two products are the **Shop** (`shop/`), a web app for customers, and the
 Its Kobble records start from `factory/kobble-seed.json`: the Shop's
 personas, their stories, problems and ideas, made up as well. Running the
 factory here fills its local database from it (`kobble.db`, never in git).
+Its signals, explorations and personas for Kobble's new pages are files in
+`factory/kobble/`, and `live-export.json` is a made-up export of the live
+shop, to try the Signals page without a live app (see
+[the live export](../../docs/reference/live-export.md)).
 The core's tests load this company.

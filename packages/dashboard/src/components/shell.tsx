@@ -9,6 +9,7 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { useExploreList } from "@/explore/use-explore";
 import type { Page } from "@/lib/routes";
 import { countsOf, koboldStatus, overallOf } from "@/lib/shell-view";
+import { useSignals } from "@/signals/use-signals";
 import { useKoboldJobs } from "@/understand/use-records";
 
 import { AskKobold } from "./ask-kobold";
@@ -23,6 +24,7 @@ export function Shell({
   const [picked, choose] = useState<string | null>(null);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const { data: explore } = useExploreList();
+  const { data: signals } = useSignals();
   const jobs = useKoboldJobs();
   const { products } = state;
   // The one picked, while it is still there; the first one otherwise.
@@ -37,7 +39,11 @@ export function Shell({
         products={products}
         chosen={chosen?.id ?? ""}
         onChoose={choose}
-        counts={countsOf(explore?.ideas ?? null, state.work)}
+        counts={countsOf(
+          explore?.ideas ?? null,
+          state.work,
+          signals?.counts.new,
+        )}
         kobold={koboldStatus(jobs, state.work, state.ideas, overall.words)}
         light={overall.lit}
       />

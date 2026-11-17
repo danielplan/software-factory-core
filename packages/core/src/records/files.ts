@@ -9,6 +9,8 @@ import { join } from "node:path";
 
 import { z } from "zod";
 
+import { checkKobbleIn } from "../kobble/check.ts";
+import { KOBBLE_FOLDER } from "../kobble/store.ts";
 import { messageOf } from "../products/product.ts";
 import { checkRecords } from "./check.ts";
 import { type Records, recordsSchema } from "./schemas.ts";
@@ -54,8 +56,8 @@ export function readSeed(file: string): Records {
 }
 
 // What `software-factory check` looks at: the factory's database and its
-// seed, each where there is one (nothing is made). Each problem starts with
-// the file it is in.
+// seed, and Kobble's files, each where there are (nothing is made). Each
+// problem starts with the file it is in.
 export function checkRecordsIn(root: string): {
   checked: string[];
   problems: string[];
@@ -82,6 +84,9 @@ export function checkRecordsIn(root: string): {
     }
   });
   look(SEED_FILE, () => readSeed(join(root, SEED_FILE)));
+  const kobble = checkKobbleIn(root);
+  if (kobble.checked) checked.push(`${KOBBLE_FOLDER}/`);
+  problems.push(...kobble.problems);
   return { checked, problems };
 }
 

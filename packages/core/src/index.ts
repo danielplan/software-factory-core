@@ -157,6 +157,27 @@ export {
   type Writer,
 } from "./records/store.ts";
 
+export { alreadyFor, titleOf } from "./kobble/already.ts";
+export {
+  liveExportSchema,
+  type LiveEvent,
+  type LiveExport,
+} from "./kobble/live.ts";
+export {
+  type Already,
+  type Exploration,
+  type KobblePersona,
+  type KobbleSignal,
+  type SyncState,
+} from "./kobble/schemas.ts";
+export {
+  KOBBLE_FOLDER,
+  type KobbleKind,
+  KobbleRefused,
+  KobbleStore,
+} from "./kobble/store.ts";
+export { takeInEvents } from "./kobble/take-in.ts";
+
 export {
   compareVersions,
   CORE_VERSION,

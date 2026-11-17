@@ -1,14 +1,17 @@
 // Where the dashboard is, from the address after the # (#explore/<id>), so
-// a reload stays there. Addresses from before the pages were renamed
-// (#board, #ideas/<id>, #system, #add-ons) still lead to the same place.
+// a reload stays there. Addresses from before the pages were renamed or
+// taken away (#board, #ideas/<id>, #system, #add-ons, #today, #customers,
+// #products) still lead somewhere that makes sense.
 
+// Explorations is still the page "explore", and the Factory board "build":
+// their addresses stay as they were. Understand is no longer in the sidebar,
+// but its pages still open from the links that lead to them.
 export const PAGES = [
-  "today",
-  "understand",
+  "signals",
   "explore",
   "build",
-  "customers",
-  "products",
+  "personas",
+  "understand",
   "workshop",
   "settings",
 ] as const;
@@ -22,8 +25,8 @@ export type Place = {
   open: string | null;
 };
 
-// The page shown when the address names none: the work on the board.
-const FIRST: Page = "build";
+// The page shown when the address names none: what came in.
+const FIRST: Page = "signals";
 
 // The old pages and where they are now.
 const MOVED = new Map([
@@ -31,6 +34,9 @@ const MOVED = new Map([
   ["ideas", "explore"],
   ["system", "workshop"],
   ["add-ons", "workshop/add-ons"],
+  ["today", "signals"],
+  ["customers", "personas"],
+  ["products", "workshop"],
 ]);
 
 function partsOf(hash: string): { asked: string; rest: string | null } {
@@ -115,4 +121,9 @@ export function prototypeOf(open: string | null): {
 export function prototypeHash(idea: string, version?: string): string {
   const parts = [idea, ...(version ? [version] : [])];
   return ["#prototype", ...parts.map(encodeURIComponent)].join("/");
+}
+
+// A persona's page (#personas/<id>), or the list.
+export function personaHash(id?: string): string {
+  return id ? `#personas/${encodeURIComponent(id)}` : "#personas";
 }

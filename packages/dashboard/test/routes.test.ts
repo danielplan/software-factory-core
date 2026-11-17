@@ -10,9 +10,16 @@ import {
   placeOf,
   prototypeHash,
   prototypeOf,
+  personaHash,
   understandHash,
   understandOf,
 } from "../src/lib/routes.ts";
+
+test("a persona has its own address", () => {
+  assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
+  assert.equal(personaHash(), "#personas");
+  assert.equal(personaHash("gift buyer"), "#personas/gift%20buyer");
+});
 
 test("each page has its own address, with what is open in it", () => {
   for (const page of PAGES)
@@ -28,11 +35,11 @@ test("each page has its own address, with what is open in it", () => {
   assert.deepEqual(placeOf("#explore/"), { page: "explore", open: null });
 });
 
-test("without a page, or with one that does not exist, the board's work comes first", () => {
-  assert.deepEqual(placeOf(""), { page: "build", open: null });
-  assert.deepEqual(placeOf("#"), { page: "build", open: null });
-  assert.deepEqual(placeOf("#nowhere/1"), { page: "build", open: null });
-  assert.deepEqual(placeOf("#constructor"), { page: "build", open: null });
+test("without a page, or with one that does not exist, the signals come first", () => {
+  assert.deepEqual(placeOf(""), { page: "signals", open: null });
+  assert.deepEqual(placeOf("#"), { page: "signals", open: null });
+  assert.deepEqual(placeOf("#nowhere/1"), { page: "signals", open: null });
+  assert.deepEqual(placeOf("#constructor"), { page: "signals", open: null });
 });
 
 test("connecting a board keeps its own address", () => {
@@ -46,6 +53,9 @@ test("the old addresses lead to the new pages", () => {
   assert.equal(movedHash("#system"), "#workshop");
   assert.equal(movedHash("#add-ons"), "#workshop/add-ons");
   assert.equal(movedHash("ideas/idea-1"), "#explore/idea-1");
+  assert.equal(movedHash("#today"), "#signals");
+  assert.equal(movedHash("#customers"), "#personas");
+  assert.equal(movedHash("#products"), "#workshop");
   assert.deepEqual(placeOf("#ideas/idea-1"), {
     page: "explore",
     open: "idea-1",

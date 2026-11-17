@@ -1,0 +1,9 @@
+{
+  "id": "X-1",
+  "title": "The basket is empty when people come back to pay",
+  "status": "exploring",
+  "personas": ["mia"],
+  "signals": [],
+  "problem": "People fill the basket on their phone in the morning, and when they come back in the evening to pay, the basket is empty.",
+  "created": "2026-11-10T09:00:00.000Z"
+}
