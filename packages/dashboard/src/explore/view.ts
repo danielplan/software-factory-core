@@ -51,10 +51,13 @@ export function ideaWhy(page: WhyOf & Pick<IdeaPage, "stage">): string {
 }
 
 // What is next for an idea, on its card in the grid; nothing when its
-// stage already says it all.
+// stage already says it all. An idea with versions made but none shared
+// yet says so, so it does not look untouched.
 export function ideaNext(
-  idea: Pick<IdeaRow, "stage" | "versions">,
+  idea: Pick<IdeaRow, "stage" | "versions" | "unshared">,
 ): string | null {
+  if (idea.stage === "idea" && (idea.unshared ?? 0) > 0)
+    return t("explore:next.unshared", { count: idea.unshared });
   if (idea.stage === "versions")
     return t("explore:next.versions", { count: idea.versions });
   if (idea.stage === "picked") return t("explore:next.picked");

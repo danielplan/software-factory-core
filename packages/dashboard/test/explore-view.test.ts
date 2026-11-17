@@ -262,4 +262,14 @@ test("each idea's card says what is next, only when its stage doesn't", () => {
   assert.equal(next("inApp"), "In the app — did it work?");
   assert.equal(next("worked"), null);
   assert.equal(next("didntWork"), null);
+  // Versions made but none shared yet: the card says so.
+  assert.equal(
+    ideaNext({ stage: "idea", versions: 0, unshared: 1 }),
+    "1 version ready to share",
+  );
+  assert.equal(
+    ideaNext({ stage: "idea", versions: 0, unshared: 2 }),
+    "2 versions ready to share",
+  );
+  assert.equal(ideaNext({ stage: "idea", versions: 0, unshared: 0 }), null);
 });

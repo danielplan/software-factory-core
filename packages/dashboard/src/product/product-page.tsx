@@ -11,7 +11,6 @@ import "@xyflow/react/dist/style.css";
 import {
   Background,
   BackgroundVariant,
-  Controls,
   MarkerType,
   type NodeTypes,
   ReactFlow,
@@ -44,14 +43,11 @@ import { useDownToTheEnd } from "@/lib/use-down-to-the-end";
 
 import { ChooseContext } from "./choose";
 import { Panel } from "./details";
+import { FitMap } from "./fit-map";
 import { type MapNode, mapOf, type Product } from "./map";
 import { ProductNodeView, ProjectNodeView } from "./nodes";
 
 type Press = (path: string) => void;
-
-// The map fits its box, but never so small that the cards can't be read
-// (their words at about 12px at least): a wider map is dragged sideways.
-const FIT = { padding: 0.35, maxZoom: 1, minZoom: 0.85 };
 
 const NODE_TYPES: NodeTypes = {
   project: ProjectNodeView,
@@ -184,19 +180,13 @@ function ProductMap({
             nodesConnectable={false}
             elementsSelectable={false}
             edgesFocusable={false}
-            fitView
-            fitViewOptions={FIT}
             minZoom={0.3}
             maxZoom={1.5}
             aria-label={t("mapLabel")}
             style={COLOURS}
           >
             <Background variant={BackgroundVariant.Dots} gap={18} size={1.5} />
-            <Controls
-              showInteractive={false}
-              position="bottom-left"
-              fitViewOptions={FIT}
-            />
+            <FitMap />
           </ReactFlow>
         </ChooseContext.Provider>
       </div>

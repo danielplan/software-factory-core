@@ -30,6 +30,8 @@ export type IdeaRow = {
   stage: IdeaStage;
   // Its versions shared with the team.
   versions: number;
+  // Its versions made but not shared yet (absent from an older server).
+  unshared?: number;
 };
 
 // A story a new idea can start from: one that holds and breaks at a
@@ -97,6 +99,9 @@ export function exploreList(
       state: derived.ideas[idea.id] ?? "exploring",
       stage: derived.ideaStages[idea.id] ?? "idea",
       versions: shared.filter((v) => v.idea === idea.id).length,
+      unshared: records.versions.filter(
+        (v) => v.idea === idea.id && v.sharedAt === null,
+      ).length,
     })),
     stories: records.stories.flatMap((story) => {
       const problem = records.problems.find((p) => p.id === story.problem);

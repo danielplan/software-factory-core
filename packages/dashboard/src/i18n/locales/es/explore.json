@@ -14,6 +14,8 @@
   "next": {
     "versions_one": "{{count}} versión para probar",
     "versions_other": "{{count}} versiones para probar",
+    "unshared_one": "{{count}} versión lista para compartir",
+    "unshared_other": "{{count}} versiones listas para compartir",
     "picked": "Lista para enviar a la Fábrica",
     "inApp": "En la app — ¿funcionó?"
   },

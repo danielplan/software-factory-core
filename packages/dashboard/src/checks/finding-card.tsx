@@ -1,7 +1,7 @@
 // One thing the check-up found, as a card: how serious it is and what kind
 // (an icon and a word, never colour alone), the problem in plain words,
 // what happens to a person, how to fix it, and where it is, marked New when
-// the last check found it; then Send to Build or Not a problem, what came of
+// the last check found it; then Send to the Factory or Not a problem, what came of
 // it, and Bring back for one set aside.
 
 import {
@@ -114,7 +114,7 @@ function Part({
   );
 }
 
-// Send to Build or Not a problem, while it is open; what came of sending it.
+// Send to the Factory or Not a problem, while it is open; what came of sending it.
 function Actions({ finding }: Readonly<{ finding: Found }>) {
   const { t } = useTranslation("checks");
   const [said, setSaid] = useState<string | null>(null);

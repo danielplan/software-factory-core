@@ -108,15 +108,7 @@ function toNewStory(
   const problem =
     "id" in told.problem
       ? edit.get("problems", told.problem.id, "problem").id
-      : edit.put("problems", {
-          id: newId("problem"),
-          persona,
-          title: told.problem.title,
-          reading: told.problem.reading,
-          by,
-          assumed: false,
-          realProblem: null,
-        }).id;
+      : newProblem(edit, persona, told.problem, by);
   const story = edit.put("stories", {
     id: newId("story"),
     persona,
@@ -185,4 +177,42 @@ function dropIfUnused(edit: Edit, problem: string): void {
     );
   const kobolds = edit.find("problems", problem)?.by === KOBOLD;
   if (!used && kobolds) edit.remove("problems", problem);
+}
+
+// The same words, whatever their capitals and spaces.
+const sameWords = (one: string, other: string) =>
+  one.trim().replace(/\s+/g, " ").toLowerCase() ===
+  other.trim().replace(/\s+/g, " ").toLowerCase();
+
+// A new problem of the persona; refused when the persona has one in the
+// same words, so the signal goes with that one instead of a second copy.
+function newProblem(
+  edit: Edit,
+  persona: string,
+  told: { title: string; reading: string },
+  by: string,
+): string {
+  const same = edit.records.problems.find(
+    (one) => one.persona === persona && sameWords(one.title, told.title),
+  );
+  if (same) {
+    const story = edit.records.stories.find(
+      (one) => one.problem === same.id && one.wrong === null,
+    );
+    const where = story
+      ? `put the signal in its story “${story.title}” (${story.id}) instead`
+      : `start the new story at it ({ "id": "${same.id}" }) instead`;
+    throw new Refused(
+      `${persona} has this problem already: ${same.id} (“${same.title}”). Do not make it twice: ${where}.`,
+    );
+  }
+  return edit.put("problems", {
+    id: newId("problem"),
+    persona,
+    title: told.title,
+    reading: told.reading,
+    by,
+    assumed: false,
+    realProblem: null,
+  }).id;
 }

@@ -4,7 +4,10 @@
 // conversation (session id) keeps its own Claude Code process, which takes the
 // turns over standard input (stream-json) one at a time and closes after a
 // while without turns. A process that stopped is started again on the next
-// turn and continues the same conversation.
+// turn and continues the same conversation. When Claude Code is not there to
+// start (it updates itself, so it is gone for a few seconds), a turn waits and
+// tries again a few times before it says so; one that started is never tried
+// again.
 
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
@@ -22,6 +25,8 @@ import {
 
 export const IDLE_MS = 15 * 60_000;
 const TIME_LIMIT_MS = 15 * 60_000;
+// How long to wait before each new try when Claude Code is not there.
+const MISSING_WAITS_MS = [2000, 5000, 10_000];
 
 // The part of a child process used here, so checks can pretend.
 export type Child = {
@@ -52,21 +57,33 @@ type Open = {
   idle: NodeJS.Timeout | null;
   errors: string;
   closed: boolean;
+  // Claude Code could not start: the program was not there.
+  missing: boolean;
 };
 
 export class WarmClaude {
   private executable: string;
   private start: Start;
   private idleMs: number;
+  private waits: number[];
+  private wait: (ms: number) => Promise<void>;
   private open = new Map<string, Open>();
 
   constructor(
     executable: string,
-    options: { start?: Start; idleMs?: number } = {},
+    options: {
+      start?: Start;
+      idleMs?: number;
+      waits?: number[];
+      wait?: (ms: number) => Promise<void>;
+    } = {},
   ) {
     this.executable = executable;
     this.start = options.start ?? startClaude;
     this.idleMs = options.idleMs ?? IDLE_MS;
+    this.waits = options.waits ?? MISSING_WAITS_MS;
+    this.wait =
+      options.wait ?? ((ms) => new Promise((done) => setTimeout(done, ms)));
   }
 
   async run(options: RunOptions): Promise<ClaudeResult> {
@@ -79,18 +96,29 @@ export class WarmClaude {
       options.readOnly,
       options.mcp,
     ]);
-    let open = this.open.get(id);
-    if (open && (open.closed || open.key !== key || open.turn)) {
-      this.close(id);
-      open = undefined;
+    for (let tried = 0; ; tried++) {
+      const open = this.opened(id, key, options);
+      const result = await this.ask(id, open, options);
+      const waitMs = this.waits[tried];
+      if (!open.missing || waitMs === undefined || options.stop?.aborted)
+        return result;
+      options.onActivity("Claude Code is not there just now, waiting for it");
+      await this.wait(waitMs);
     }
-    open ??= this.begin(id, key, options);
-    return await this.ask(id, open, options);
   }
 
   // Closes every open conversation (the factory is stopping).
   stop(): void {
     for (const id of [...this.open.keys()]) this.close(id);
+  }
+
+  // The conversation's open process, or a new one when it stopped, was
+  // started otherwise, or is busy.
+  private opened(id: string, key: string, options: RunOptions): Open {
+    const open = this.open.get(id);
+    if (open && !open.closed && open.key === key && !open.turn) return open;
+    if (open) this.close(id);
+    return this.begin(id, key, options);
   }
 
   private begin(id: string, key: string, options: RunOptions): Open {
@@ -106,6 +134,7 @@ export class WarmClaude {
       idle: null,
       errors: "",
       closed: false,
+      missing: false,
     };
     this.open.set(id, open);
     createInterface({ input: child.stdout }).on("line", (line) => {
@@ -127,7 +156,8 @@ export class WarmClaude {
     child.on("close", (code) => {
       ended(`Claude stopped (exit code ${code}).`);
     });
-    child.on("error", (error) => {
+    child.on("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") open.missing = true;
       ended(error.message);
     });
     return open;

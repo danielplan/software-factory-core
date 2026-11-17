@@ -262,3 +262,18 @@ test("settings files are never staged, whether the project ignores them or not",
     [".gitignore", "app/.env.example", "app/README.md"],
   );
 });
+
+test("a project with no origin is told so plainly, before any copy is made", async () => {
+  const folder = mkdtempSync(join(tmpdir(), "copies-"));
+  const source = join(folder, "source");
+  await run("git", ["init", "--quiet", "-b", "main", source]);
+  const copy = new Workspace(
+    { source, workspaces: join(folder, "copies"), baseBranch: "main" },
+    "plans",
+  );
+  await assert.rejects(
+    copy.prepareLocalBranch("factory/idea-1/a"),
+    /^Error: This project has no remote called origin: .*git remote add origin <address>/,
+  );
+  assert.equal(existsSync(join(folder, "copies", "plans")), false);
+});

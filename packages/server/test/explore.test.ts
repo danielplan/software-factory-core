@@ -61,6 +61,7 @@ test("Explore lists the ideas, and one idea with its shared versions, picks and 
       state: "exploring",
       stage: "picked",
       versions: 3,
+      unshared: 0,
     });
     const states = Object.fromEntries(list.ideas.map((i) => [i.id, i.state]));
     assert.deepEqual(
@@ -328,6 +329,9 @@ test("prototype mode shows an idea's versions, starts one, makes another and sha
     }
     let remind = await factory.read<IdeaPage>("/api/explore/idea?id=remind");
     assert.deepEqual([remind.versions.length, remind.unshared], [0, 1]);
+    // The list says so too, so the idea does not look untouched.
+    const listed = (await factory.read<ExploreList>("/api/explore")).ideas;
+    assert.equal(listed.find((i) => i.id === "remind")?.unshared, 1);
     const shared = await factory.send("/api/prototypes/share", {
       idea: "remind",
       version: "A",

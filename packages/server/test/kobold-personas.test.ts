@@ -316,3 +316,81 @@ test("a job waiting its turn says so, a person's choice made meanwhile stays, an
     factory.close();
   }
 });
+
+test("the kobold never makes a persona's problem twice: it is told where the one there is", async () => {
+  const sameAgain = {
+    ...newStory,
+    story: {
+      ...newStory.story,
+      title: "Another booking",
+      problem: { title: "  clients FORGET   their booking ", reading: "Same." },
+    },
+  };
+  const pretend = pretendClaude([
+    {
+      calls: [
+        [
+          "sort_signal",
+          {
+            sortedAs: "need",
+            soundsLike: null,
+            why: "Takes bookings for her salon online.",
+            newPersona: sara,
+            place: newStory,
+          },
+        ],
+      ],
+      reply: "Sorted.",
+    },
+    {
+      calls: [
+        [
+          "sort_signal",
+          {
+            sortedAs: "need",
+            soundsLike: "sara",
+            why: "Her salon again.",
+            place: sameAgain,
+          },
+        ],
+        [
+          "sort_signal",
+          {
+            sortedAs: "need",
+            soundsLike: "sara",
+            why: "Her salon again.",
+            place: { to: "unsure" },
+          },
+        ],
+      ],
+      reply: "Sorted.",
+    },
+  ]);
+  const factory = await koboldFactory(pretend.claude);
+  try {
+    await factory.send("/api/signals", {
+      source: "sup",
+      id: "s40",
+      text: "Two clients booked on the website and never came: no reminder.",
+    });
+    await factory.settled();
+    await factory.send("/api/signals", {
+      source: "sup",
+      id: "s41",
+      text: "Another client forgot her booking for Saturday.",
+    });
+    await factory.settled();
+    const records = await factory.records();
+    const problems = records.problems.filter((p) => p.persona === "sara");
+    assert.equal(problems.length, 1);
+    const [problem] = problems;
+    assert.ok(problem);
+    const story = records.stories.find((s) => s.problem === problem.id);
+    assert.equal(
+      pretend.answers[1]?.[0],
+      `sara has this problem already: ${problem.id} (“Clients forget their booking”). Do not make it twice: put the signal in its story “A booking from the website” (${String(story?.id)}) instead.`,
+    );
+  } finally {
+    factory.close();
+  }
+});

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { PartView, ProductPage } from "../src/api.ts";
+import { leftWhenWide } from "../src/product/fit.ts";
 import { chipsOf, mapOf, PROJECT, type Product } from "../src/product/map.ts";
 
 // The Product page's map: the project, then each product after the ones
@@ -89,4 +90,23 @@ test("a product shows the most telling of its stack, and how many more", () => {
     { chips: ["React", "Prisma", "Redis"], more: 3 },
   );
   assert.deepEqual(chipsOf([]), { chips: [], more: 0 });
+});
+
+test("a map that fits stays centred; a wider one starts at its left edge", () => {
+  const centred = { x: 100, y: 40, zoom: 0.85 };
+  // 400 wide at 0.85 is 340: it fits in 800.
+  assert.deepEqual(
+    leftWhenWide(centred, { x: 0, y: 0, width: 400, height: 100 }, 800),
+    centred,
+  );
+  // 1200 wide at 0.85 is 1020: wider than 800, so the first card is at the
+  // left edge, 24px in, and the height stays as React Flow put it.
+  assert.deepEqual(
+    leftWhenWide(
+      { x: -110, y: 40, zoom: 0.85 },
+      { x: 20, y: 0, width: 1200, height: 100 },
+      800,
+    ),
+    { x: 24 - 20 * 0.85, y: 40, zoom: 0.85 },
+  );
 });

@@ -209,10 +209,21 @@ export class Workspace {
   private async download(): Promise<void> {
     await oneAtATime(() =>
       retryWhileLocked(async () => {
+        await this.mustHaveOrigin();
         await this.ensure();
         await this.git("fetch", "--quiet", "origin");
       }),
     );
+  }
+
+  // Copies start from what origin has: a project without it is told so
+  // plainly, not with git's own words about a missing origin/main.
+  private async mustHaveOrigin(): Promise<void> {
+    const remotes = await run("git", ["-C", this.settings.source, "remote"]);
+    if (!remotes.split("\n").includes("origin"))
+      throw new Error(
+        "This project has no remote called origin: the factory's copies start from what origin has. Add the repository's address as origin (git remote add origin <address>), then try again.",
+      );
   }
 
   private async ensure(): Promise<void> {

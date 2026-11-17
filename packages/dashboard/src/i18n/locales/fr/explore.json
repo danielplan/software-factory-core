@@ -14,6 +14,8 @@
   "next": {
     "versions_one": "{{count}} version à essayer",
     "versions_other": "{{count}} versions à essayer",
+    "unshared_one": "{{count}} version prête à partager",
+    "unshared_other": "{{count}} versions prêtes à partager",
     "picked": "Prête à envoyer à la Fabrique",
     "inApp": "Dans l'app — ça a marché ?"
   },

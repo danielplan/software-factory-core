@@ -249,3 +249,87 @@ test("extra tools can be denied, and instructions last the whole conversation", 
   assert.ok(args.includes("Read(**/.env*)"));
   assert.equal(args[args.indexOf("--append-system-prompt") + 1], "Be brief.");
 });
+
+// A Claude Code that is not there: starting it fails as spawn does.
+function missingClaude() {
+  const stdout = new PassThrough();
+  const child = Object.assign(new EventEmitter(), {
+    stdin: new PassThrough(),
+    stdout,
+    stderr: null,
+    kill: () => true,
+  });
+  setImmediate(() => {
+    child.emit(
+      "error",
+      Object.assign(new Error("spawn claude ENOENT"), { code: "ENOENT" }),
+    );
+  });
+  return child;
+}
+
+test("Claude Code gone for a moment (it updates itself): the turn waits and tries again", async () => {
+  const pretend = pretendClaude();
+  let gone = 2;
+  const waited: number[] = [];
+  const activity: string[] = [];
+  const warm = new WarmClaude("claude", {
+    start: (executable, args, cwd) =>
+      gone-- > 0 ? missingClaude() : pretend.start(executable, args, cwd),
+    waits: [5, 10, 20],
+    wait: async (ms) => {
+      waited.push(ms);
+    },
+  });
+  const result = await warm.run({
+    ...base,
+    prompt: "Hello",
+    session: { id: "s-gone", resume: false },
+    onActivity: (line) => activity.push(line),
+  });
+  assert.deepEqual(result, {
+    ok: true,
+    text: "Sure, number 1",
+    session: "s-gone",
+  });
+  warm.stop();
+  assert.deepEqual(waited, [5, 10]);
+  assert.equal(activity.filter((line) => line.includes("waiting")).length, 2);
+});
+
+test("Claude Code still not there after every try: the turn says so; one that started is not tried again", async () => {
+  const waited: number[] = [];
+  const missing = new WarmClaude("claude", {
+    start: () => missingClaude(),
+    waits: [1, 2],
+    wait: async (ms) => {
+      waited.push(ms);
+    },
+  });
+  const gone = await missing.run({
+    ...base,
+    prompt: "Hello",
+    session: { id: "s-never", resume: false },
+  });
+  assert.equal(gone.ok, false);
+  assert.match(gone.error ?? "", /ENOENT/);
+  assert.deepEqual(waited, [1, 2]);
+
+  const pretend = pretendClaude();
+  const tried: number[] = [];
+  const warm = new WarmClaude("claude", {
+    start: pretend.start,
+    wait: async (ms) => {
+      tried.push(ms);
+    },
+  });
+  const stopped = await warm.run({
+    ...base,
+    prompt: "(stop)",
+    session: { id: "s-started", resume: false },
+  });
+  warm.stop();
+  assert.equal(stopped.ok, false);
+  assert.deepEqual(tried, []);
+  assert.equal(pretend.started.length, 1);
+});
