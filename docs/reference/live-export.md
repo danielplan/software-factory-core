@@ -18,7 +18,11 @@ data beyond what its text says.
 
 Both are read from the environment, or else from the project's own `.env`
 file, which stays out of git. Without `KOBBLE_LIVE_URL` the sync is off and
-the Signals page says "Not connected to the live app".
+the Signals page asks for both: **Connect** reads the export once with the
+token, says plainly what is wrong when it does not work, and otherwise
+keeps both in `.env` (adding `.env` to the project's `.gitignore` when it is
+not there) and reads at once. Settings, The live app, shows the address
+(never the token) and **Disconnect** takes both out of `.env` again.
 
 ## The request
 

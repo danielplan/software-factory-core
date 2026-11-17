@@ -12,6 +12,7 @@ import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
 import type { FactoryState } from "./dashboard";
+import { LiveAppCard } from "./live-app-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 
 // The factory's settings, in order: a list of the sections at the side
@@ -24,13 +25,14 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const groups = state.settings.filter((group) => !owned.has(group.id));
   const sections = [
     "Where work is tracked",
+    "The live app",
     ...groups.map((group) => group.name),
   ];
   return (
     <div className="grid gap-5">
       <PageHead
         title="Settings"
-        about="How the factory works here: where work is tracked, and the settings of its parts."
+        about="How the factory works here: where work is tracked, the live app, and the settings of its parts."
       />
       <div
         className={
@@ -42,6 +44,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
         {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
           <TrackerCard state={state} />
+          <LiveAppCard />
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}

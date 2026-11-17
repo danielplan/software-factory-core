@@ -71,8 +71,10 @@ async function fromServer(
       headers: token ? { authorization: `Bearer ${token}` } : {},
       signal: AbortSignal.timeout(30_000),
     });
-  } catch (error) {
-    throw new LiveProblem(`The live app cannot be reached: ${said(error)}`);
+  } catch {
+    throw new LiveProblem(
+      `The live app cannot be reached at ${address.host}: check the address, and that the app is running.`,
+    );
   }
   if (response.status === 401 || response.status === 403)
     throw new LiveProblem(

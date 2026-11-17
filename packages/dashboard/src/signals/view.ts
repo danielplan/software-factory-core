@@ -148,3 +148,11 @@ export function personaPlaceOf(open: string): {
     test: tab === "tests" && test ? test : null,
   };
 }
+
+// When the kobold reads the live app again, in words.
+export function lookAgainWords(next: string | null, now: Date): string {
+  if (!next) return "The kobold looks again soon.";
+  const minutes = Math.ceil((Date.parse(next) - now.getTime()) / MINUTE);
+  if (minutes <= 1) return "The kobold looks again in a minute.";
+  return `The kobold looks again in ${String(minutes)} minutes.`;
+}

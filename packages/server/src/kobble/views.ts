@@ -65,6 +65,14 @@ export function signalsView(
   };
 }
 
+// The signals already handled, the last first: what became of each.
+export function handledView(store: KobbleStore): { signals: SignalRow[] } {
+  const handled = store
+    .all("signals")
+    .filter((signal) => signal.status !== "new");
+  return { signals: signalRows(newestFirst(handled), store.all("personas")) };
+}
+
 export function personasView(store: KobbleStore): { personas: PersonaRow[] } {
   const signals = store.all("signals");
   return {

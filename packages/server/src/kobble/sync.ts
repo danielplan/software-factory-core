@@ -18,8 +18,11 @@ export const SYNC_EVERY = 30 * 60 * 1000;
 export type SyncView = {
   // Whether the live app is set up (KOBBLE_LIVE_URL).
   connected: boolean;
-  // When it was last read, as an ISO time.
+  // Where it reads from (never the token).
+  address: string | null;
+  // When it was last read, and when it reads next, as ISO times.
   last: string | null;
+  next: string | null;
   problem: string | null;
 };
 
@@ -36,6 +39,7 @@ export class LiveSync {
   private running: Promise<KobbleSignal[]> | null = null;
   private problem: string | null = null;
   private timer: NodeJS.Timeout | null = null;
+  private nextAt: number | null = null;
   private readonly options: SyncOptions;
 
   constructor(options: SyncOptions) {
@@ -45,14 +49,24 @@ export class LiveSync {
   // The first sync, then one every 30 minutes; the timer never keeps the
   // server running on its own.
   start(): void {
+    this.close();
     void this.sync();
-    this.timer = setInterval(() => void this.sync(), SYNC_EVERY);
+    this.nextAt = this.now() + SYNC_EVERY;
+    this.timer = setInterval(() => {
+      this.nextAt = this.now() + SYNC_EVERY;
+      void this.sync();
+    }, SYNC_EVERY);
     this.timer.unref();
   }
 
   close(): void {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
+    this.nextAt = null;
+  }
+
+  private now(): number {
+    return (this.options.now ?? (() => new Date()))().getTime();
   }
 
   // The new signals of this sync (none when it is off or failed).
@@ -71,7 +85,16 @@ export class LiveSync {
     } catch {
       // A sync.json that does not fit reads as never synced.
     }
-    return { connected: url !== null, last, problem: this.problem };
+    return {
+      connected: url !== null,
+      address: url,
+      last,
+      next:
+        url !== null && this.nextAt !== null
+          ? new Date(this.nextAt).toISOString()
+          : null,
+      problem: this.problem,
+    };
   }
 
   private async once(): Promise<KobbleSignal[]> {

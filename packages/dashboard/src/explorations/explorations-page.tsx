@@ -51,7 +51,16 @@ export function ExplorationsPage() {
       {problem && (
         <ProblemBox title="The explorations cannot be read" text={problem} />
       )}
-      {data && <Lists view={data} />}
+      {data &&
+        (isEmpty(data) ? (
+          <NothingYet
+            onOwn={() => {
+              setAdding(true);
+            }}
+          />
+        ) : (
+          <Lists view={data} />
+        ))}
       <NewExploration
         open={adding}
         onClose={() => {
@@ -70,6 +79,66 @@ function Sub({ title, n }: Readonly<{ title: string; n: number }>) {
         {n}
       </span>
     </h2>
+  );
+}
+
+function isEmpty(view: ExplorationsView): boolean {
+  return view.exploring.length + view.waiting.length + view.done.length === 0;
+}
+
+// A board in small, for the picture of what an exploration is.
+const EXAMPLE: ExplorationRow = {
+  id: "X-0",
+  title: "",
+  status: "exploring",
+  problem: "",
+  work: null,
+  personas: [],
+  signals: 0,
+  things: [
+    { id: "problem", kind: "problem", agreed: false },
+    { id: "choice", kind: "choice", agreed: false },
+    { id: "a", kind: "prototype", agreed: false },
+    { id: "b", kind: "prototype", agreed: true },
+  ],
+  links: [
+    { from: "problem", to: "choice" },
+    { from: "choice", to: "a" },
+    { from: "choice", to: "b" },
+  ],
+  line: null,
+};
+
+// Before anything is explored: what an exploration is, and two ways to
+// start one.
+function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
+  return (
+    <div
+      className={cn(
+        CARD,
+        "grid items-center gap-8 px-7 py-10 md:grid-cols-[minmax(0,1fr)_360px]",
+      )}
+    >
+      <div className="flex flex-col gap-3">
+        <div className="text-xl font-semibold">Nothing explored yet</div>
+        <p className="max-w-[440px] text-[14.5px] text-foreground-2">
+          An exploration is a board you work on with the kobold: what the
+          problem really is, a few ways to solve it, and a prototype for each.
+          The one you agree on goes to the factory.
+        </p>
+        <div className="mt-1.5 flex flex-wrap gap-2.5">
+          <Button asChild size="pill">
+            <a href="#signals">Explore a signal</a>
+          </Button>
+          <Button variant="ring" size="pill" onClick={onOwn}>
+            Start from your own idea
+          </Button>
+        </div>
+      </div>
+      <div className="opacity-90">
+        <Preview row={EXAMPLE} />
+      </div>
+    </div>
   );
 }
 

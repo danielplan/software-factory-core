@@ -54,6 +54,9 @@ export {
   PERSONA_HATS,
 } from "../../core/src/kobble/face.ts";
 
+// The core's version, and where its releases are (for links to its docs).
+export { CORE_VERSION, RELEASE_SOURCE } from "../../core/src/version.ts";
+
 // The server answers buttons only from its own page, which says so.
 const PAGE_HEADER = "x-software-factory";
 

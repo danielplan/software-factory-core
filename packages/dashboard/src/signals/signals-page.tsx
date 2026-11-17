@@ -9,12 +9,13 @@
 import { ChevronLeft, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
-import { messageOf, post, type SignalRow } from "@/api";
+import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { Already } from "./already";
+import { AllQuiet, ConnectSignals } from "./empty";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
 import { useSignals } from "./use-signals";
 import {
@@ -31,7 +32,10 @@ import {
 const signalHash = (id: string | null) =>
   id ? `#signals/${encodeURIComponent(id)}` : "#signals";
 
-export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
+export function SignalsPage({
+  open,
+  app,
+}: Readonly<{ open: string | null; app: string }>) {
   const { data, problem } = useSignals();
   const [said, say] = useState<string | null>(null);
   const now = new Date();
@@ -40,14 +44,14 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
       <Head
         title="Signals"
         right={
-          <>
-            {data && (
+          data?.sync.connected ? (
+            <>
               <span className="text-[12.5px] text-muted-foreground">
                 {syncLine(data.sync, now)}
               </span>
-            )}
-            <SyncNow onSaid={say} />
-          </>
+              <SyncNow onSaid={say} />
+            </>
+          ) : undefined
         }
       />
       {problem && (
@@ -60,7 +64,7 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
         />
       )}
       {data && (
-        <Board signals={data.signals} open={open} now={now} onSaid={say} />
+        <Shown data={data} app={app} open={open} now={now} onSaid={say} />
       )}
       {said && (
         <Toast
@@ -72,6 +76,29 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
       )}
     </>
   );
+}
+
+// The new signals; with none, how to connect the live app, or that all is
+// quiet.
+function Shown({
+  data,
+  app,
+  open,
+  now,
+  onSaid,
+}: Readonly<{
+  data: SignalsView;
+  app: string;
+  open: string | null;
+  now: Date;
+  onSaid: (said: string) => void;
+}>) {
+  if (data.signals.length > 0)
+    return (
+      <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+    );
+  if (!data.sync.connected) return <ConnectSignals app={app} />;
+  return <AllQuiet app={app} sync={data.sync} now={now} />;
 }
 
 // The new signals, and the one picked beside them (on a phone, instead of

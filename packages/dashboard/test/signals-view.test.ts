@@ -9,6 +9,7 @@ import {
   countWords,
   exploreWords,
   nextAfter,
+  lookAgainWords,
   originWords,
   personaPlaceOf,
   primaryOf,
@@ -101,16 +102,34 @@ test("times are said plainly, and the sync line says where it stands", () => {
   assert.equal(agoOf("2026-11-16T08:00:00.000Z", NOW), "yesterday");
   assert.equal(agoOf("2026-11-13T08:00:00.000Z", NOW), "4 days ago");
   assert.equal(
-    syncLine({ connected: false, last: null, problem: null }, NOW),
+    syncLine(
+      {
+        connected: false,
+        address: null,
+        last: null,
+        next: null,
+        problem: null,
+      },
+      NOW,
+    ),
     "Not connected to the live app",
   );
   assert.equal(
-    syncLine({ connected: true, last: null, problem: null }, NOW),
+    syncLine(
+      { connected: true, address: null, last: null, next: null, problem: null },
+      NOW,
+    ),
     "Not synced with the live app yet · every 30 min",
   );
   assert.equal(
     syncLine(
-      { connected: true, last: "2026-11-17T09:50:00.000Z", problem: null },
+      {
+        connected: true,
+        address: null,
+        last: "2026-11-17T09:50:00.000Z",
+        next: null,
+        problem: null,
+      },
       NOW,
     ),
     "Synced with the live app 10 min ago · every 30 min",
@@ -160,4 +179,16 @@ test("a persona's page opens on their signals, their tests or one test", () => {
     tab: "tests",
     test: "T-0001",
   });
+});
+
+test("when the kobold looks again, in words", () => {
+  assert.equal(lookAgainWords(null, NOW), "The kobold looks again soon.");
+  assert.equal(
+    lookAgainWords("2026-11-17T10:28:00.000Z", NOW),
+    "The kobold looks again in 28 minutes.",
+  );
+  assert.equal(
+    lookAgainWords("2026-11-17T10:00:30.000Z", NOW),
+    "The kobold looks again in a minute.",
+  );
 });

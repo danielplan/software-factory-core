@@ -67,6 +67,9 @@ function Columns({ view }: Readonly<{ view: FactoryView }>) {
           {column.cards.map((card) => (
             <Card key={card.number} card={card} />
           ))}
+          {column.cards.length === 0 && (
+            <p className="px-1.5 py-2 text-[13px] text-faint">Nothing here</p>
+          )}
         </section>
       ))}
     </div>

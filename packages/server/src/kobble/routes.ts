@@ -31,8 +31,10 @@ import { branchParts, servedExplorations } from "./explorations/routes.ts";
 import { liveSettings } from "./live-source.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
+import { connect, disconnect } from "./connect.ts";
 import { factoryView } from "./factory-view.ts";
 import {
+  handledView,
   personaPage,
   personasView,
   signalsView,
@@ -87,6 +89,8 @@ export function servedKobble(options: KobbleOptions) {
       const added = await sync.sync();
       return { added: added.length, sync: sync.view() };
     },
+    ...liveRoutes(options.project, sync, changed),
+    "GET /api/kobble/handled": () => kept(() => handledView(store())),
     ...buttonRoutes(store, changing, () =>
       connectedCards(factory, options.cli),
     ),
@@ -123,6 +127,28 @@ function changingWith(changed: (what: string) => void) {
       changed(what);
       return answer;
     };
+}
+
+// Connecting the live app and disconnecting it; each sync starts again.
+function liveRoutes(
+  project: string,
+  sync: LiveSync,
+  changed: (what: string) => void,
+): Record<string, Route> {
+  return {
+    "POST /api/kobble/connect": async (body) => {
+      const { ignored } = await connect(project, body);
+      sync.start();
+      changed("signals");
+      return { ignored, sync: sync.view() };
+    },
+    "POST /api/kobble/disconnect": () => {
+      disconnect(project);
+      sync.close();
+      changed("signals");
+      return { sync: sync.view() };
+    },
+  };
 }
 
 // The connected board's cards; refused with how to connect one when there

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -71,7 +71,9 @@ test("before the live app is set up, sync is simply off", async () => {
     assert.deepEqual(view.counts, { new: 2 });
     assert.deepEqual(view.sync, {
       connected: false,
+      address: null,
       last: null,
+      next: null,
       problem: null,
     });
     assert.deepEqual((await factory.press("/api/kobble/sync")).body.added, 0);
@@ -469,7 +471,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.deepEqual(factoryView(factory.store, null).connected, false);
     const signals = signalsView(
       factory.store,
-      { connected: true, last: null, problem: null },
+      { connected: true, address: null, last: null, next: null, problem: null },
       work,
     );
     assert.equal(
@@ -480,5 +482,109 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.equal(page.connected, false);
   } finally {
     factory.close();
+  }
+});
+
+test("Connect checks the address with the token once, keeps both in .env, and never shows the token", async () => {
+  const tokens: (string | undefined)[] = [];
+  const live = createServer((request, response) => {
+    tokens.push(request.headers.authorization);
+    const right = request.headers.authorization === "Bearer s3cret-token";
+    response.writeHead(right ? 200 : 401, {
+      "content-type": "application/json",
+    });
+    response.end(right ? readFileSync(EXPORT, "utf8") : "{}");
+  });
+  await new Promise<void>((done) => live.listen(0, "127.0.0.1", done));
+  const address = live.address();
+  assert.ok(address && typeof address === "object");
+  const url = `http://127.0.0.1:${String(address.port)}/api/kobble/export`;
+  const factory = await kobbleFactory();
+  try {
+    const wrong = await factory.press("/api/kobble/connect", {
+      url,
+      token: "nope",
+    });
+    assert.equal(wrong.status, 409);
+    assert.match(String(wrong.body.error), /does not accept the token/);
+    assert.equal(existsSync(join(factory.project, ".env")), false);
+    assert.match(
+      String(
+        (
+          await factory.press("/api/kobble/connect", {
+            url: "http://127.0.0.1:9/export",
+            token: "x",
+          })
+        ).body.error,
+      ),
+      /cannot be reached at 127\.0\.0\.1:9: check the address/,
+    );
+    assert.equal(
+      (await factory.press("/api/kobble/connect", { url: "", token: "x" })).body
+        .error,
+      "Say the address of the export.",
+    );
+    assert.equal(
+      (
+        await factory.press("/api/kobble/connect", {
+          url: "file:///x.json",
+          token: "x",
+        })
+      ).body.error,
+      "Use the web address of your app's export.",
+    );
+    const right = await factory.press("/api/kobble/connect", {
+      url,
+      token: "s3cret-token",
+    });
+    assert.equal(right.status, 200);
+    assert.equal(right.body.ignored, true);
+    assert.doesNotMatch(JSON.stringify(right.body), /s3cret-token/);
+    assert.match(
+      readFileSync(join(factory.project, ".env"), "utf8"),
+      /KOBBLE_LIVE_URL=http:\/\/127\.0\.0\.1:\d+\/api\/kobble\/export\nKOBBLE_LIVE_TOKEN=s3cret-token\n/,
+    );
+    assert.match(
+      readFileSync(join(factory.project, ".gitignore"), "utf8"),
+      /^\.env$/m,
+    );
+    // It reads at once, and says when it reads next.
+    let view = await factory.read<SignalsView>("/api/kobble/signals");
+    while (view.counts.new < 10)
+      view = await factory.read<SignalsView>("/api/kobble/signals");
+    assert.equal(view.sync.address, url);
+    assert.ok(view.sync.next);
+    assert.doesNotMatch(JSON.stringify(view), /s3cret-token/);
+    assert.deepEqual(tokens.slice(0, 2), [
+      "Bearer nope",
+      "Bearer s3cret-token",
+    ]);
+    // Connecting again leaves .gitignore as it is.
+    assert.equal(
+      (
+        await factory.press("/api/kobble/connect", {
+          url,
+          token: "s3cret-token",
+        })
+      ).body.ignored,
+      false,
+    );
+    await factory.press("/api/kobble/signals/dismiss", { id: "S-0011" });
+    const handled = await factory.read<{
+      signals: { id: string; status: string }[];
+    }>("/api/kobble/handled");
+    assert.deepEqual(handled.signals.map((s) => [s.id, s.status]).slice(0, 1), [
+      ["S-0011", "dismissed"],
+    ]);
+    // Disconnect takes both lines out of .env.
+    const off = await factory.press("/api/kobble/disconnect");
+    assert.equal((off.body.sync as { connected: boolean }).connected, false);
+    assert.doesNotMatch(
+      readFileSync(join(factory.project, ".env"), "utf8"),
+      /KOBBLE_LIVE/,
+    );
+  } finally {
+    factory.close();
+    live.close();
   }
 });
