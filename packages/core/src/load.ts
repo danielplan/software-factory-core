@@ -12,6 +12,7 @@ import {
 import type { Part } from "./parts/part.ts";
 import { findProducts } from "./products/find-products.ts";
 import type { Product } from "./products/product.ts";
+import { moveFormerValues } from "./settings/setting-groups.ts";
 
 // A working copy of the project (copies/workspace.ts): its folder, a folder
 // for its own data outside its code (never committed with it), and how far
@@ -41,6 +42,18 @@ export function loadFactory(
     parts,
     problems: [...found.problems, ...factory.problems],
   };
+}
+
+// The factory as the server opens it: first, settings that moved to another
+// file (the team's, to team.env) leave the one they were saved in before.
+export function prepareFactory(
+  root: string,
+  available: Available,
+): Factory | { problem: string } {
+  const loaded = loadFactory(root, available);
+  if ("problem" in loaded) return loaded;
+  const moved = loaded.settings.flatMap((g) => moveFormerValues(g, root));
+  return moved.length > 0 ? loadFactory(root, available) : loaded;
 }
 
 function movedPort(product: Product, available: Available, copy: InCopy) {

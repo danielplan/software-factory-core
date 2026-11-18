@@ -39,7 +39,7 @@ function lines(folder: string) {
     .map((line) => JSON.parse(line) as Record<string, unknown>);
 }
 
-test("the usage log is off by default, on with the setting, next to the project", () => {
+test("the usage log is off by default, on with the team's setting, next to the project", () => {
   const { project, root } = factory();
   assert.equal(usageFolder(root, project), null);
   mkdirSync(join(root, "settings"));
@@ -53,6 +53,14 @@ test("the usage log is off by default, on with the setting, next to the project"
     "FACTORY_USAGE_LOG=on\nFACTORY_USAGE_FOLDER=study\n",
   );
   assert.equal(usageFolder(root, project), join(project, "study"));
+  // Switched on for the team in team.env; the folder stays this computer's.
+  writeFileSync(
+    join(root, "settings", "factory.env"),
+    "FACTORY_USAGE_FOLDER=mine\n",
+  );
+  assert.equal(usageFolder(root, project), null);
+  writeFileSync(join(root, "team.env"), "FACTORY_USAGE_LOG=on\n");
+  assert.equal(usageFolder(root, project), join(project, "mine"));
 });
 
 test("every change to an exploration is one line: made, said, board, status", () => {

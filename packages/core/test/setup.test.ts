@@ -106,7 +106,7 @@ test("a new factory folder: the company file, the knowledge base, the history an
   // What is never shared: secrets and working copies.
   assert.equal(
     readFileSync(join(root, ".gitignore"), "utf8"),
-    "copies/\nsettings/\nkobble/signals/\n",
+    "copies/\nsettings/\nkobble/signals/\n!team.env\n",
   );
   // The knowledge base goes into the project's docs/, never over its own docs.
   assert.equal(

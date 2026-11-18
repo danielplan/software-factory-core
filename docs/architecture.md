@@ -71,10 +71,19 @@ same repository as the code: the company file, the product descriptions,
 the knowledge base and the history change with the code they describe, in
 the same commits and pull requests, and every copy of the code has them.
 The project's own `AGENTS.md` (and `CLAUDE.md`) point to the factory's
-rules, so any agent working in the code finds them. What must not be shared
-stays out of git (`factory/.gitignore`): the settings with their secrets
-(`settings/`) and the agents' working copies (`copies/`). The command finds
-the factory from anywhere inside the project.
+rules, so any agent working in the code finds them. A team uses one
+factory from several computers, one person each, and shares it only through
+the repository; there is no server. The team's settings (the builder's cards
+at once and model, whether the usage log is kept) are in `factory/team.env`,
+which git keeps (the factory's `.gitignore` says `!team.env`, for projects
+that ignore `*.env`). What must not be shared stays out of git
+(`factory/.gitignore`): each person's own settings with their secrets
+(`settings/`: tokens, the AI model, where the usage log is kept, Updates by
+itself) and the agents' working copies (`copies/`). Settings saved in
+`settings/factory.env` before 0.12.0 that are the team's are still read from
+there, and move to `team.env` when the factory opens or the group is saved
+(a setting group's `formerly`). The command finds the factory from anywhere
+inside the project.
 
 **Where work is tracked** is chosen right after the factory opens, and
 changed on Settings: the factory's own board (nothing to connect), a GitHub
@@ -106,6 +115,7 @@ acme/                    the project, one repository
    ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
+   ├─ team.env           the team's settings, in git
    ├─ runs/              its history
    ├─ kobble/            explorations, personas, tests, one file each, in git;
    │                     its signals/ stay on this computer (not in git)

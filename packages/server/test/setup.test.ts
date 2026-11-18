@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { request } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import type { State } from "../src/api.ts";
-import { stage } from "./stage.ts";
+import { sessionOf, stage } from "./stage.ts";
 
 // The factory's folder, as the coach makes it when it names the company
 // (the coach's tests make the rest), and its settings saved from the page.
@@ -69,6 +69,35 @@ test("the factory's folder comes first, once, and its settings save from the pag
     assert.equal(
       jira?.fields.find((f) => f.key === "JIRA_TOKEN")?.value,
       "(set)",
+    );
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("opening a factory moves the team's settings from settings/ to team.env, for git", async () => {
+  const { project, session, server } = await stage();
+  try {
+    const root = session.createCompany({ name: "Acme Garden", about: "" });
+    mkdirSync(join(root, "settings"));
+    writeFileSync(
+      join(root, "settings", "factory.env"),
+      "FACTORY_CLAUDE_MODEL=opus\nFACTORY_PARALLEL_CARDS=3\nFACTORY_USAGE_LOG=on\nFACTORY_USAGE_FOLDER=mine\n",
+    );
+    const again = sessionOf(project);
+    again.close();
+    assert.equal(
+      readFileSync(join(root, "team.env"), "utf8"),
+      "FACTORY_PARALLEL_CARDS=3\nFACTORY_USAGE_LOG=on\n",
+    );
+    assert.equal(
+      readFileSync(join(root, "settings", "factory.env"), "utf8"),
+      "FACTORY_CLAUDE_MODEL=opus\nFACTORY_USAGE_FOLDER=mine\n",
+    );
+    assert.match(
+      readFileSync(join(root, ".gitignore"), "utf8"),
+      /^!team\.env$/m,
     );
   } finally {
     session.close();

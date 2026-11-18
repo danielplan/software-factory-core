@@ -95,25 +95,7 @@ export async function stage(
   for (const [file, text] of Object.entries(code))
     writeFileSync(join(project, file), text);
   const addOns = [githubAddOn(connectors.cli), jiraAddOn(connectors.fetcher)];
-  const session = new Session({
-    project,
-    available: {
-      extensions: [...addOns.map((a) => a.extension), voice],
-      kits: [web],
-    },
-    templates: {
-      knowledgeBase: templateFolder,
-      agents: join(templatesFolder, "AGENTS.md"),
-    },
-    onChange: () => {},
-    coach: {
-      claude,
-      guide: "Help set up.",
-      ideaGuide: "Shape the idea.",
-      trackers,
-    },
-    tools,
-  });
+  const session = sessionOf(project, claude, addOns, trackers);
   const page = join(home, "page");
   mkdirSync(page);
   writeFileSync(join(page, "index.html"), "<p>The factory</p>");
@@ -137,4 +119,32 @@ export async function stage(
       body: JSON.stringify(body),
     });
   return { home, project, session, server, base, post };
+}
+
+// The session of a project, as the factory opens it when it starts.
+export function sessionOf(
+  project: string,
+  claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) },
+  addOns: { extension: ReturnType<typeof defineExtension> }[] = [],
+  trackers: TrackerSetup[] = [],
+): Session {
+  return new Session({
+    project,
+    available: {
+      extensions: [...addOns.map((a) => a.extension), voice],
+      kits: [web],
+    },
+    templates: {
+      knowledgeBase: templateFolder,
+      agents: join(templatesFolder, "AGENTS.md"),
+    },
+    onChange: () => {},
+    coach: {
+      claude,
+      guide: "Help set up.",
+      ideaGuide: "Shape the idea.",
+      trackers,
+    },
+    tools,
+  });
 }

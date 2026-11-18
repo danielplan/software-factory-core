@@ -12,7 +12,7 @@ import {
   type Factory,
   FACTORY_FOLDER,
   hasFactory,
-  loadFactory,
+  prepareFactory,
   saveCompany,
   saveGroup,
   type Templates,
@@ -277,7 +277,7 @@ export class Session {
   }
 
   private open(root: string): void {
-    const loaded = loadFactory(root, this.options.available);
+    const loaded = prepareFactory(root, this.options.available);
     if ("problem" in loaded) throw new Refused(loaded.problem);
     this.close();
     this.root = root;
@@ -363,7 +363,7 @@ export class Session {
   // The factory's files changed: read again; what runs keeps running.
   private reload(): void {
     const root = this.rootOrRefuse();
-    const loaded = loadFactory(root, this.options.available);
+    const loaded = prepareFactory(root, this.options.available);
     if ("problem" in loaded) throw new Refused(loaded.problem);
     this.factory = loaded;
     this.launcher?.setParts(loaded.parts);
