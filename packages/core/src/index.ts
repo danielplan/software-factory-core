@@ -19,6 +19,7 @@ export {
   type Kit,
   type KitFile,
 } from "./extensions/extension.ts";
+export { copyStarter, starterName } from "./extensions/starter.ts";
 export {
   assembleFactory,
   type Available,

@@ -1,11 +1,13 @@
-// Makes the new products of a factory being set up (greenfield): each with
-// its kit's starter commands, one product after the other, in the folder its
-// code goes in. Each is a job the page shows while it works.
+// Makes the new products of a factory being set up (greenfield): each as a
+// copy of its kit's starter, when the kit has one, finished by the kit's
+// commands (or made by them alone, with the framework's own generator), one
+// product after the other, in the folder its code goes in. Each is a job the
+// page shows while it works.
 
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
-import type { Kit } from "@software-factory/core";
+import { copyStarter, type Kit } from "@software-factory/core";
 import type { Launcher } from "@software-factory/launcher";
 
 import type { Job, SetupProduct } from "./api.ts";
@@ -63,5 +65,25 @@ async function createOne(
   }
   const parent = dirname(product.folder);
   mkdirSync(parent, { recursive: true });
+  if (kit?.starter && !copied(kit.starter, kit.name, product, log))
+    return false;
   return (await runSteps(steps, parent, log)) && existsSync(product.folder);
+}
+
+// The kit's starter copied into the product's folder, as the product; a
+// starter that cannot be copied fails the job with what went wrong.
+function copied(
+  starter: string,
+  kitName: string,
+  product: SetupProduct,
+  log: (line: string) => void,
+): boolean {
+  try {
+    const named = copyStarter(starter, product.folder, product.name);
+    log(`Copied the ${kitName} starter as ${named}.`);
+    return true;
+  } catch (error) {
+    log(error instanceof Error ? error.message : String(error));
+    return false;
+  }
 }

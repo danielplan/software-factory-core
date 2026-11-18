@@ -58,6 +58,11 @@ export const kitSchema = z.object({
   // The rules for working on such a product: Markdown files the agents read
   // (conventions and lessons for the kind).
   rules: z.array(z.string().min(1)).default([]),
+  // The folder of the kit's own starter (an absolute path): a whole empty
+  // product of this kind with the kit's standards, checks and prototype
+  // mode. A new product starts as a copy of it, given the product's name
+  // (extensions/starter.ts); `create` then finishes it.
+  starter: z.string().min(1).optional(),
   guides: z.array(guideSchema).default([]),
   // The MCP servers the agents use on such a product, by name: written into
   // the project's .mcp.json when a product of this kind is added.
@@ -85,9 +90,11 @@ export type Detected = {
 type KitCode = {
   partsFor: (product: Product) => Part[];
   detect: (folder: string) => Detected | null;
-  // The commands that make a new product in `folder` (which does not exist
-  // yet) with the framework's own starter, run one after the other in the
-  // folder's parent; null when the kit cannot make one.
+  // The commands that make a new product in `folder`, run one after the
+  // other in the folder's parent: with a starter, they finish the copy of it
+  // already in `folder` (install its packages); without one, `folder` does
+  // not exist yet and they make it with the framework's own generator. Null
+  // when the kit cannot make one.
   create: ((folder: string, name: string) => string[][]) | null;
   // Where a product of this kind usually answers.
   port?: number;
