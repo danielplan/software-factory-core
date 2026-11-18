@@ -11,6 +11,7 @@ import { useState } from "react";
 import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { answerText, type Waiting } from "./answer-text";
 
@@ -46,7 +47,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
     <article className="grid gap-4 rounded-2xl border border-warning/40 bg-warning/[0.07] px-5 py-4">
       <WaitingHead waiting={waiting} />
       <p className="text-lg leading-snug font-semibold">
-        {ask?.question ?? waiting.text}
+        <Markdown text={ask?.question ?? waiting.text} inline />
       </p>
       {ask && ask.answers.length > 0 && (
         <Answers
@@ -99,9 +100,15 @@ function WaitingHead({ waiting }: Readonly<{ waiting: Waiting }>) {
       <p className="text-[12.5px] font-medium text-foreground-2">
         Kobble is waiting for you · Card #{waiting.number} · {waiting.title}
       </p>
-      {ask?.about && <p className="text-sm">{ask.about}</p>}
+      {ask?.about && (
+        <div className="text-sm">
+          <Markdown text={ask.about} />
+        </div>
+      )}
       {ask?.where && (
-        <p className="text-sm text-muted-foreground">{ask.where}</p>
+        <div className="text-sm text-muted-foreground">
+          <Markdown text={ask.where} />
+        </div>
       )}
       <a
         href={waiting.url}
@@ -145,9 +152,13 @@ function Answers({
           >
             <span className="w-4 font-semibold">{one.key}</span>
             <span className="grid flex-1 gap-0.5">
-              <span className="font-medium">{one.answer}</span>
+              <span className="font-medium">
+                <Markdown text={one.answer} inline />
+              </span>
               {one.means && (
-                <span className="text-muted-foreground">{one.means}</span>
+                <span className="text-muted-foreground">
+                  <Markdown text={one.means} inline />
+                </span>
               )}
             </span>
             {ask.suggested === one.key && (

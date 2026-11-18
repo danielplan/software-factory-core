@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { CARD, Chevron, Head, ROW } from "@/signals/bits";
 import { countWords } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
+import { Markdown } from "@/components/markdown";
 
 import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
@@ -211,7 +212,7 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
       {row.line && (
         <span className="flex items-start gap-2 rounded-[10px] bg-wash px-2.5 py-[9px] text-[13px] text-wash-foreground">
           <KoboldHead size={18} />
-          {row.line}
+          <Markdown text={row.line} inline />
         </span>
       )}
     </a>
@@ -228,7 +229,7 @@ function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
       <span className="grid min-w-0 flex-1">
         <span className="font-semibold">{row.title}</span>
         <span className="truncate text-[12.5px] text-muted-foreground">
-          {row.problem}
+          <Markdown text={row.problem} inline />
         </span>
         {problem && (
           <span role="alert" className="text-[12.5px] text-destructive">

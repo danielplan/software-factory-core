@@ -1,7 +1,7 @@
 // One exploration: a bar at the top (back, its title, Drop, Hand off the
 // agreed prototype), the canvas the kobold and the team work on (left), and
 // the conversation with the kobold (right). Opening one that waits starts
-// it.
+// it, and its prototype runs on the board by itself.
 
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import { type Read, useRead } from "@/lib/use-read";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
+import { useLivePrototype } from "./board/live-prototype";
 import { TalkPanel } from "./talk-panel";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
@@ -29,6 +30,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         say(messageOf(error));
       });
   }, [waiting, id]);
+  useLivePrototype(data, say);
   if (!data)
     return problem ? (
       <ProblemBox title="This exploration cannot be read" text={problem} />

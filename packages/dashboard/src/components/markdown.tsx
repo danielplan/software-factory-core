@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Components } from "react-markdown";
 import Shown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -5,20 +6,25 @@ import remarkGfm from "remark-gfm";
 // Text written in Markdown (a card on the board, its plan, what the factory
 // and the owner said): paragraphs, headings, bold, lists, links, code and
 // small tables, styled to sit in a panel. Links open in a new tab; pictures
-// and raw HTML are not shown.
-export function Markdown({ text }: Readonly<{ text: string }>) {
-  return (
-    <div className="grid gap-2">
-      <Shown
-        remarkPlugins={[remarkGfm]}
-        components={PARTS}
-        disallowedElements={["img"]}
-        unwrapDisallowed
-      >
-        {text}
-      </Shown>
-    </div>
+// and raw HTML are not shown. `inline` keeps it in the line it sits in (a
+// row, a chip, a clamped preview): paragraphs, headings and list items
+// become words with a space after them.
+export function Markdown({
+  text,
+  inline = false,
+}: Readonly<{ text: string; inline?: boolean }>) {
+  const shown = (
+    <Shown
+      remarkPlugins={[remarkGfm]}
+      components={inline ? INLINE : PARTS}
+      disallowedElements={["img"]}
+      unwrapDisallowed
+    >
+      {text}
+    </Shown>
   );
+  if (inline) return <span>{shown}</span>;
+  return <div className="grid gap-2">{shown}</div>;
 }
 
 const PARTS: Components = {
@@ -84,4 +90,22 @@ const PARTS: Components = {
   td: ({ children }) => (
     <td className="border-b border-border/60 px-2 py-1">{children}</td>
   ),
+};
+
+// In one line: blocks become words with a space after them.
+const asWords = ({ children }: { children?: ReactNode }) => <>{children} </>;
+
+const INLINE: Components = {
+  strong: PARTS.strong,
+  a: PARTS.a,
+  code: PARTS.code,
+  p: asWords,
+  h1: asWords,
+  h2: asWords,
+  h3: asWords,
+  li: asWords,
+  ul: ({ children }) => <>{children}</>,
+  ol: ({ children }) => <>{children}</>,
+  pre: ({ children }) => <>{children}</>,
+  blockquote: ({ children }) => <>{children}</>,
 };

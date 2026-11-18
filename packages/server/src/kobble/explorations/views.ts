@@ -178,5 +178,38 @@ function labelOf(thing: Thing, problem: string): string {
         return thing.title;
     }
   })();
-  return words.length > 60 ? `${words.slice(0, 57).trimEnd()}…` : words;
+  const plain = plainWords(words);
+  return plain.length > 60 ? `${plain.slice(0, 57).trimEnd()}…` : plain;
+}
+
+// Markdown's marks taken out (bold, code, headings, list bullets, a link's
+// address), so a cut never leaves half a mark; one line.
+export function plainWords(text: string): string {
+  const lines = text.split("\n").map((line) => {
+    const bare = line.trimStart();
+    const start = ["#", "-", "*", "+", ">"].find((mark) =>
+      bare.startsWith(`${mark} `),
+    );
+    return start ? bare.slice(bare.indexOf(" ") + 1) : bare.replace(/^#+ /, "");
+  });
+  return linksAsWords(lines.join(" "))
+    .replaceAll("**", "")
+    .replaceAll("__", "")
+    .replaceAll("`", "")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+// [words](address) → words.
+function linksAsWords(text: string): string {
+  let out = "";
+  let at = 0;
+  for (;;) {
+    const middle = text.indexOf("](", at);
+    const open = middle < 0 ? -1 : text.lastIndexOf("[", middle);
+    const close = middle < 0 ? -1 : text.indexOf(")", middle);
+    if (open < at || close < 0) return out + text.slice(at);
+    out += text.slice(at, open) + text.slice(open + 1, middle);
+    at = close + 1;
+  }
 }

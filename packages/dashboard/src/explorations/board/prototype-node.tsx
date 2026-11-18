@@ -11,6 +11,7 @@ import type { TestResult, VersionRun } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
 import type { ThingNode } from "./nodes";
@@ -82,11 +83,13 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   return (
     <Frame data={data} title={`${thing.key} · ${thing.name}`}>
       <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
-      <div className="text-xs text-muted-foreground">{thing.difference}</div>
+      <div className="text-xs text-muted-foreground">
+        <Markdown text={thing.difference} />
+      </div>
       {thing.said && (
-        <p className="border-l-2 border-border pl-2 text-xs text-foreground-2">
-          {thing.said}
-        </p>
+        <div className="border-l-2 border-border pl-2 text-xs text-foreground-2">
+          <Markdown text={thing.said} />
+        </div>
       )}
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (

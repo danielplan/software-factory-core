@@ -7,6 +7,7 @@ import { useState } from "react";
 import { type Card, type CoachView, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/markdown";
 
 import { cardsIn, type Step } from "./steps";
 
@@ -87,7 +88,7 @@ function Question({
         <b className="font-semibold">
           {/[.?!]$/.test(card.title) ? card.title : `${card.title}.`}
         </b>{" "}
-        {card.text}
+        <Markdown text={card.text ?? ""} inline />
       </p>
       <div className="flex gap-2">
         <input

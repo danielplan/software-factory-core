@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { CARD, Chevron, Head, ROW } from "@/signals/bits";
 import { countWords, originWords, personaPlaceOf } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
+import { Markdown } from "@/components/markdown";
 
 import { NewPersona } from "./new-persona";
 import { SignalLine } from "./signal-line";
@@ -192,9 +193,9 @@ function PersonaBody({
               .join(" · ")}
           </span>
           {persona.about && (
-            <p className="mt-1.5 max-w-[640px] text-foreground-2">
-              {persona.about}
-            </p>
+            <div className="mt-1.5 max-w-[640px] text-foreground-2">
+              <Markdown text={persona.about} />
+            </div>
           )}
         </div>
         <Button variant="ring" size="pill" disabled title="Coming later">

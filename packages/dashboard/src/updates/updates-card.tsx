@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { type Read, useRead } from "@/lib/use-read";
+import { Markdown } from "@/components/markdown";
 
 import type { UpdatesState } from "../../../server/src/updates/project-updates.ts";
 import { updatesSummary } from "./updates-model";
@@ -62,7 +63,9 @@ export function UpdatesCard() {
         </label>
       </div>
       {summary.text && (
-        <p className="text-sm text-muted-foreground">{summary.text}</p>
+        <div className="text-sm text-muted-foreground">
+          <Markdown text={summary.text} />
+        </div>
       )}
       {summary.changes.length > 0 && (
         <ul className="list-disc pl-5 text-sm">

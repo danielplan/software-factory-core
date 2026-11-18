@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { CARD, Chevron, ROW } from "@/signals/bits";
 import { agoOf, countWords } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
+import { Markdown } from "@/components/markdown";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";
@@ -45,7 +46,9 @@ export function TestsTab({ page }: Readonly<{ page: KobblePersonaPage }>) {
           >
             <StatusIcon status={test.status} />
             <span className="grid min-w-0 flex-1">
-              <span className="font-semibold">{test.task}</span>
+              <span className="font-semibold">
+                <Markdown text={test.task} inline />
+              </span>
               <span className="text-[12.5px] text-muted-foreground">
                 The current app · {whenOf(test)}
               </span>
@@ -165,7 +168,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
           </span>
         </div>
         <h1 className="mb-3.5 text-[28px] leading-[1.15] font-bold tracking-[-0.025em]">
-          {test.task}
+          <Markdown text={test.task} inline />
         </h1>
         <div className="flex flex-wrap gap-2">
           <a
@@ -210,10 +213,17 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
             {at + 1}
           </span>
           <span className="grid min-w-0 flex-1">
-            <span className="font-medium">{step.did}</span>
+            <span className="font-medium">
+              <Markdown text={step.did} inline />
+            </span>
             <span className="text-[12.5px] text-muted-foreground">
-              Expected: {step.expected}
-              {step.note ? ` · ${step.note}` : ""}
+              Expected: <Markdown text={step.expected} inline />
+              {step.note && (
+                <>
+                  {" · "}
+                  <Markdown text={step.note} inline />
+                </>
+              )}
             </span>
           </span>
           <span

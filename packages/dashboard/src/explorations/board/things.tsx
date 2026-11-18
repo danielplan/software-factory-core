@@ -8,6 +8,7 @@ import type { NodeProps } from "@xyflow/react";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { useDiagram } from "./diagram";
 import { Frame, useBoardDo } from "./frame";
@@ -17,9 +18,11 @@ export function ProblemNode({ data }: NodeProps<ThingNode>) {
   const { exploration, personas } = data.page;
   return (
     <Frame data={data} tone="note">
-      <p className="text-[13.5px] leading-[1.45]">
-        {exploration.problem || "The kobold writes the problem here."}
-      </p>
+      <div className="text-[13.5px] leading-[1.45]">
+        <Markdown
+          text={exploration.problem || "The kobold writes the problem here."}
+        />
+      </div>
       {personas.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {personas.map((one) => (
@@ -48,7 +51,9 @@ export function HeardNode({ data }: NodeProps<ThingNode>) {
           {signal.personaFace && (
             <PersonaFace face={signal.personaFace} size={18} />
           )}
-          <span className="flex-1">{signal.text}</span>
+          <span className="flex-1">
+            <Markdown text={signal.text} inline />
+          </span>
         </div>
       ))}
     </Frame>
@@ -60,7 +65,7 @@ export function NoteNode({ data }: NodeProps<ThingNode>) {
   if (thing.kind !== "note") return null;
   return (
     <Frame data={data} tone="note">
-      <p className="whitespace-pre-wrap">{thing.text}</p>
+      <Markdown text={thing.text} />
     </Frame>
   );
 }

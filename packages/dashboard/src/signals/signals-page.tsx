@@ -13,6 +13,7 @@ import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
 import { AllQuiet, ConnectSignals } from "./empty";
@@ -226,7 +227,7 @@ function SignalList({
               </span>
             </span>
             <span className="mt-0.5 line-clamp-2 text-foreground-2">
-              {signal.text}
+              <Markdown text={signal.text} inline />
             </span>
           </span>
         </a>
@@ -303,9 +304,9 @@ function SignalDetail({
         </span>
         <TypeChip type={signal.type} />
       </header>
-      <p className="mt-5 mb-[22px] text-xl leading-normal tracking-[-0.01em]">
-        {signal.text}
-      </p>
+      <div className="mt-5 mb-[22px] text-xl leading-normal tracking-[-0.01em]">
+        <Markdown text={signal.text} />
+      </div>
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">
         {button("fix", "Fix", primary === "fix")}

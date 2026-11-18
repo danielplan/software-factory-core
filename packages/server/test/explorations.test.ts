@@ -15,6 +15,7 @@ import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
+import { plainWords } from "../src/kobble/explorations/views.ts";
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import type {
   ExplorationPage,
@@ -599,4 +600,14 @@ test("the board's acts: options by letter, arrows between two things, what stays
     () => applyAct(board, { act: "agree", id: "gone", agreed: true }, "person"),
     /no thing “gone”/,
   );
+});
+
+test("the preview's words keep no Markdown marks", () => {
+  assert.equal(
+    plainWords(
+      "## Sign-in\n- **Own** accounts, see [the page](https://x.test) and `start.ts`",
+    ),
+    "Sign-in Own accounts, see the page and start.ts",
+  );
+  assert.equal(plainWords("[not a link"), "[not a link");
 });

@@ -153,7 +153,7 @@ function Messages({
             key={at}
             className="max-w-[85%] self-end rounded-[14px_4px_14px_14px] bg-blue px-3 py-[9px] text-[13.5px] leading-[1.45] text-blue-foreground"
           >
-            {message.text}
+            <Markdown text={message.text} />
           </div>
         ),
       )}
