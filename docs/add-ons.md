@@ -69,8 +69,16 @@ forward`, no public address needed) and a check every few minutes for
   failure, and opens a draft that says so when the checks still fail.
   Comments on the card or the pull request in Review are answered on the
   same branch. It never merges. Its guide (how to work through the board) is
-  the factory skill's `board.md`. Still to come: starting by itself, GitHub's
-  signals instead of reading every minute, Jira.
+  the factory skill's `board.md`. Each lane works on up to five cards at
+  once (the Builder setting "Cards at once"), each in a copy of its own
+  (`build`, `build-2` …), and the builder can use a model of its own. Before
+  each build or review fix on a branch that exists, the latest main is
+  merged in; a clash goes to the builder to settle, or back to the owner.
+  When Claude's usage limit stops a job, the card says so and waits where it
+  is, and the factory carries on by itself once the limit resets. GitHub's
+  signals come as they happen (`gh webhook forward`, no public address
+  needed), with reading the board every minute as the fallback (every ten
+  minutes while signals come). Still to come: starting by itself, Jira.
 - **Ideas**: Explore and the idea coach's guide; choice cards for real
   choices with the coach's recommendation and the trade-offs, said early; an
   Agreed switch; pictures the owner pastes; parking, dropping and drafts; a

@@ -88,6 +88,11 @@ export {
 export { claudeArgs, type Claude, type RunOptions } from "./agents/claude.ts";
 export { describeEvent, formatDuration } from "./agents/activity.ts";
 export { withChosenModel } from "./agents/model-setting.ts";
+export {
+  builderModel,
+  builderSettings,
+  parallelCards,
+} from "./agents/builder-settings.ts";
 export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,

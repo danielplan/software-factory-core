@@ -56,6 +56,8 @@ export type CardView = {
 export type BuilderView = {
   on: boolean;
   working: { number: number; title: string; what: string } | null;
+  // The other cards it works on at the same time (cards at once).
+  also: { number: number; title: string; what: string }[];
   activity: string | null;
   // Its last steps on that card, oldest first.
   steps: string[];
@@ -66,6 +68,7 @@ export type BuilderView = {
 export type CoachInCardsView = {
   on: boolean;
   working: number | null;
+  also: number[];
   steps: string[];
 };
 
@@ -77,6 +80,8 @@ export type WorkView = {
   read: string | null;
   builder: BuilderView;
   coach: CoachInCardsView;
+  // GitHub's signals as they happen; none before they are set up.
+  signals?: { live: boolean; moves: boolean; problem: string | null };
 };
 
 export type State =

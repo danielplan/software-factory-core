@@ -12,6 +12,7 @@ import {
   NOTES,
   type Note,
   readNote,
+  untilOf,
 } from "./protocol.ts";
 
 export type Message = {
@@ -65,6 +66,7 @@ type Found = Decision & { order: Record<JobKind | "resumed", Job[]> };
 export function decide(
   cards: BoardCard[],
   running: ReadonlySet<number>,
+  now: Date = new Date(),
 ): Decision {
   const found: Found = {
     moves: [],
@@ -73,7 +75,7 @@ export function decide(
     asks: [],
     order: { feedback: [], resumed: [], build: [], plan: [] },
   };
-  for (const card of cards) look(card, running, found);
+  for (const card of cards) look(card, running, found, now);
   const { feedback, resumed, build, plan } = found.order;
   return {
     moves: found.moves,
@@ -96,7 +98,12 @@ export function asksIfItWorked(
   return card.awaitsAnswer && (isFinished(card) || card.stage === "done");
 }
 
-function look(card: BoardCard, running: ReadonlySet<number>, found: Found) {
+function look(
+  card: BoardCard,
+  running: ReadonlySet<number>,
+  found: Found,
+  now: Date,
+) {
   if (asksIfItWorked(card)) found.asks.push(card.number);
   if (isFinished(card)) {
     if (card.stage !== "done")
@@ -107,9 +114,23 @@ function look(card: BoardCard, running: ReadonlySet<number>, found: Found) {
     found.moves.push({ number: card.number, stage: "backlog" });
     return;
   }
-  if (running.has(card.number)) return;
+  if (running.has(card.number) || pausedAt(card, now)) return;
   lookInStage(card, found);
 }
+
+// Paused by Claude's usage limit: the card waits until it resets, unless
+// the owner wrote since.
+function pausedAt(card: BoardCard, now: Date): boolean {
+  const last = card.thread.findLast((m) => readNote(m.body) === "paused");
+  if (!last || ownerSpokeAfter(card.thread, ["paused"])) return false;
+  const until = untilOf(last.body);
+  const later = card.thread.slice(card.thread.indexOf(last) + 1);
+  const resumed = later.some((m) => readNote(m.body) !== null);
+  return !resumed && until !== null && until.getTime() > now.getTime();
+}
+
+// Every note but a pause, which only says the factory waits.
+const REVIEW_NOTES: readonly Note[] = NOTES.filter((n) => n !== "paused");
 
 function lookInStage(card: BoardCard, found: Found): void {
   const { number } = card;
@@ -143,7 +164,10 @@ function lookInStage(card: BoardCard, found: Found): void {
         order.resumed.push({ lane: "build", kind: "build", number });
       break;
     case "review":
-      if (card.pullRequest && ownerSpokeAfter(reviewTimeline(card), NOTES))
+      if (
+        card.pullRequest &&
+        ownerSpokeAfter(reviewTimeline(card), REVIEW_NOTES)
+      )
         order.feedback.push({ lane: "build", kind: "feedback", number });
       break;
     default:

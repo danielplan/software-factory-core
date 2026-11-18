@@ -6,17 +6,15 @@
 // up as a draft pull request that says what is wrong, and the card waits in
 // In progress.
 
-import { randomUUID } from "node:crypto";
-
 import { type Available, type Claude } from "@software-factory/core";
 
 import type { Cards } from "../cards/cards.ts";
-import { branchOf, commitAndPush, headOf } from "./branches.ts";
+import { copyName, headOf } from "./branches.ts";
 import {
   changedFiles,
-  checksFor,
+  checkWithFixes,
   failedChecksSection,
-  runChecks,
+  FIX_ROUNDS,
   type Shell,
 } from "./checks.ts";
 import type { BoardCard, Job } from "./decide.ts";
@@ -24,24 +22,23 @@ import {
   buildPrompt,
   feedbackPrompt,
   fixChecksPrompt,
-  CARRY_ON,
   planPrompt,
 } from "./prompts.ts";
 import {
-  linkRepositoryFiles,
   markComment,
   type Note,
+  pausedComment,
   readNote,
   readStatusLine,
 } from "./protocol.ts";
-import type { PullRequests } from "./pull-requests.ts";
+import { openOrUpdate, type PullRequests } from "./pull-requests.ts";
 import { runSessions } from "./sessions.ts";
+import { type BuildCopy, builderTurn, coachTurn } from "./turn.ts";
+import { Paused, pausedText } from "./usage-limit.ts";
 
 export type ReadCopy = { path: string; prepareReadOnly: () => Promise<void> };
-export type BuildCopy = {
-  path: string;
-  prepareSharedBranch: (branch: string) => Promise<void>;
-};
+export type { BuildCopy } from "./turn.ts";
+export { copyName } from "./branches.ts";
 
 export type JobsOptions = {
   cards: Cards;
@@ -49,17 +46,27 @@ export type JobsOptions = {
   claude: Claude;
   repository: string;
   available: Available;
-  copies: { chat: () => Promise<ReadCopy>; build: () => Promise<BuildCopy> };
+  // The working copies of each lane; place 1 is "chat" and "build", the
+  // others "chat-2", "build-2" … (cards at once, each in a copy of its own).
+  copies: {
+    chat: (place: number) => Promise<ReadCopy>;
+    build: (place: number) => Promise<BuildCopy>;
+  };
   shell?: Shell;
   timeLimitMs?: number;
+  // The builder's model, read for each job; none: the factory's own.
+  model?: () => string | undefined;
+  now?: () => Date;
+};
+
+// Where one job works: its lane's copy, and how many cards there are at once.
+type Place = {
+  chat: () => Promise<ReadCopy>;
+  build: () => Promise<BuildCopy>;
+  name: string;
 };
 
 const BUILD_TIME_MS = 3 * 60 * 60_000;
-const PLAN_TIME_MS = 20 * 60_000;
-// Rounds of fixing while a check is red, before the owner is asked.
-const FIX_ROUNDS = 3;
-// Times a turn that stopped halfway is told to carry on.
-const NUDGES = 2;
 const PLAN_NOTES: readonly Note[] = ["question", "plan-agreed", "blocked"];
 
 export class Jobs {
@@ -69,25 +76,50 @@ export class Jobs {
     this.options = options;
   }
 
-  async run(job: Job, card: BoardCard, onActivity: (line: string) => void) {
-    if (job.kind === "plan") await this.plan(card, onActivity);
-    else if (job.kind === "build") await this.build(card, onActivity);
-    else await this.feedback(card, onActivity);
+  // The job on the card; when Claude's usage limit stops it, the card says
+  // so and the time it may go on is given back.
+  async run(
+    job: Job,
+    card: BoardCard,
+    onActivity: (line: string) => void,
+    place = 1,
+  ): Promise<{ pausedUntil: Date | null }> {
+    const at: Place = {
+      chat: () => this.options.copies.chat(place),
+      build: () => this.options.copies.build(place),
+      name: copyName(job.lane, place),
+    };
+    try {
+      if (job.kind === "plan") await this.plan(card, at, onActivity);
+      else if (job.kind === "build") await this.build(card, at, onActivity);
+      else await this.feedback(card, at, onActivity);
+    } catch (error) {
+      if (!(error instanceof Paused)) throw error;
+      await this.options.cards.comment(
+        card.number,
+        pausedComment(pausedText(error.until), error.until),
+      );
+      return { pausedUntil: error.until };
+    }
+    return { pausedUntil: null };
   }
 
-  private async plan(card: BoardCard, onActivity: (line: string) => void) {
-    const { cards, claude } = this.options;
-    const copy = await this.options.copies.chat();
-    await copy.prepareReadOnly();
-    const result = await claude.run({
-      cwd: copy.path,
+  private now(): Date {
+    return this.options.now?.() ?? new Date();
+  }
+
+  private async plan(
+    card: BoardCard,
+    at: Place,
+    onActivity: (line: string) => void,
+  ) {
+    const { cards } = this.options;
+    const result = await coachTurn({
+      claude: this.options.claude,
+      copy: await at.chat(),
       prompt: planPrompt(card),
-      readOnly: true,
-      tools: ["Read", "Grep", "Glob"],
-      deny: ["Read(**/.env*)"],
-      session: { id: randomUUID(), resume: false },
-      timeLimitMs: PLAN_TIME_MS,
       onActivity,
+      now: this.now(),
     });
     if (!result.ok) {
       await this.say(
@@ -103,7 +135,11 @@ export class Jobs {
     await this.say(card.number, text, note);
   }
 
-  private async build(card: BoardCard, onActivity: (line: string) => void) {
+  private async build(
+    card: BoardCard,
+    at: Place,
+    onActivity: (line: string) => void,
+  ) {
     const { cards } = this.options;
     const continued =
       card.stage === "doing" ||
@@ -118,8 +154,8 @@ export class Jobs {
     }
     const { answer, gaveUp } = await runSessions(continued, {
       session: (earlier) =>
-        this.agent(card, buildPrompt(card, earlier), onActivity),
-      head: async () => headOf((await this.options.copies.build()).path),
+        this.agent(card, at, buildPrompt(card, earlier, at.name), onActivity),
+      head: async () => headOf((await at.build()).path),
       progress: (n, text) =>
         this.say(
           card.number,
@@ -128,7 +164,7 @@ export class Jobs {
         ),
     });
     if (gaveUp !== null) {
-      await this.giveUp(card, gaveUp, "failed", null);
+      await this.giveUp(card, at, gaveUp, "failed", null);
       return;
     }
     if (answer.status === "blocked") {
@@ -137,10 +173,21 @@ export class Jobs {
       return;
     }
     if (answer.status !== "done") {
-      await this.giveUp(card, answer.text, "failed", null);
+      await this.giveUp(card, at, answer.text, "failed", null);
       return;
     }
-    const checked = await this.checkAndPush(card, onActivity);
+    await this.checkedPullRequest(card, at, answer.text, onActivity);
+  }
+
+  // A build the builder calls done: the checks, then the pull request.
+  private async checkedPullRequest(
+    card: BoardCard,
+    at: Place,
+    text: string,
+    onActivity: (line: string) => void,
+  ) {
+    const { cards } = this.options;
+    const checked = await this.checkAndPush(card, at, onActivity);
     if (checked.blocked !== null) {
       await this.say(card.number, checked.blocked, "blocked");
       await cards.move(card.number, "planning");
@@ -149,13 +196,14 @@ export class Jobs {
     if (!checked.passed) {
       await this.giveUp(
         card,
-        `${answer.text}\n\nThe work is built, but the checks still fail after ${String(FIX_ROUNDS)} rounds of fixing.`,
+        at,
+        `${text}\n\nThe work is built, but the checks still fail after ${String(FIX_ROUNDS)} rounds of fixing.`,
         "checks-failed",
         checked.report,
       );
       return;
     }
-    const url = await this.pullRequest(card, answer.text, false);
+    const url = await this.pullRequest(card, text, false);
     await this.say(
       card.number,
       `Built, and every check passes: ${url} is ready for your review.`,
@@ -169,11 +217,12 @@ export class Jobs {
   // waits in In progress for the owner's comment.
   private async giveUp(
     card: BoardCard,
+    at: Place,
     text: string,
     note: Note,
     report: string | null,
   ) {
-    const copy = await this.options.copies.build();
+    const copy = await at.build();
     const base = await this.options.pullRequests.baseBranch();
     const changed = (await changedFiles(copy.path, base)).length > 0;
     const failed = report === null ? "" : `\n\n${failedChecksSection(report)}`;
@@ -190,13 +239,22 @@ export class Jobs {
     );
   }
 
-  private async feedback(card: BoardCard, onActivity: (line: string) => void) {
+  private async feedback(
+    card: BoardCard,
+    at: Place,
+    onActivity: (line: string) => void,
+  ) {
     const pr = card.pullRequest;
     if (!pr) return;
-    const answer = await this.agent(card, feedbackPrompt(card), onActivity);
+    const answer = await this.agent(
+      card,
+      at,
+      feedbackPrompt(card, at.name),
+      onActivity,
+    );
     const note: Note = answer.status === "done" ? "fixed" : "blocked";
     if (note === "fixed") {
-      const checked = await this.checkAndPush(card, onActivity);
+      const checked = await this.checkAndPush(card, at, onActivity);
       if (checked.blocked !== null) {
         await this.sayOnPullRequest(pr.number, checked.blocked, "blocked");
         return;
@@ -224,108 +282,51 @@ export class Jobs {
     await this.sayOnPullRequest(pr.number, answer.text, note);
   }
 
-  // The builder's turn on the card's branch; what it did is committed and
-  // pushed whenever it ran, so a question or a review continues from it.
+  // The builder's turn on the card's branch (turn.ts).
   private async agent(
     card: BoardCard,
+    at: Place,
     prompt: string,
     onActivity: (line: string) => void,
   ) {
-    const copy = await this.options.copies.build();
-    const branch = branchOf(card.number);
-    await copy.prepareSharedBranch(branch);
-    const id = randomUUID();
-    const turn = (text: string, resume: boolean) =>
-      this.options.claude.run({
-        cwd: copy.path,
-        prompt: text,
-        readOnly: false,
-        session: { id, resume },
-        timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,
-        onActivity,
-      });
-    let result = await turn(prompt, false);
-    // A turn that ends without its status line stopped halfway (waiting for
-    // something it left running, say): the same conversation goes on.
-    for (
-      let nudge = 1;
-      result.ok && !readStatusLine(result.text).status && nudge <= NUDGES;
-      nudge++
-    )
-      result = await turn(CARRY_ON, true);
-    await commitAndPush(
-      copy.path,
-      branch,
-      `#${String(card.number)} ${card.title}`,
-    );
-    if (!result.ok)
-      return {
-        status: "failed",
-        text: `The build stopped: ${result.error ?? "Claude Code stopped"}.`,
-      };
-    const read = readStatusLine(result.text);
-    return read.status
-      ? {
-          status: read.status,
-          text: linkRepositoryFiles(read.text, this.options.repository, branch),
-        }
-      : {
-          status: "failed",
-          text: `${read.text}\n\nThe builder stopped ${String(NUDGES + 1)} times without finishing.`,
-        };
+    return await builderTurn({
+      claude: this.options.claude,
+      copy: await at.build(),
+      card,
+      prompt,
+      onActivity,
+      model: this.options.model?.(),
+      timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,
+      repository: this.options.repository,
+      now: this.now(),
+    });
   }
 
-  // The checks, and up to FIX_ROUNDS rounds of fixing while any is red (the
-  // builder fixes every red check, also one that was red before its change);
-  // it stops early when the builder says only the owner can unblock it.
+  // The checks, with rounds of fixing while any is red (checks.ts).
   private async checkAndPush(
     card: BoardCard,
+    at: Place,
     onActivity: (line: string) => void,
-  ): Promise<{ passed: boolean; report: string; blocked: string | null }> {
-    const copy = await this.options.copies.build();
-    const check = async () => {
-      const base = await this.options.pullRequests.baseBranch();
-      const checks = checksFor(
-        copy.path,
-        this.options.available,
-        await changedFiles(copy.path, base),
-      );
-      return await runChecks(copy.path, checks, this.options.shell, (c) => {
-        onActivity(`Checking ${c.name}: ${c.command}`);
-      });
-    };
-    let checked = await check();
-    for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
-      const answer = await this.agent(
-        card,
-        fixChecksPrompt(card, checked.report, round, FIX_ROUNDS),
-        onActivity,
-      );
-      if (answer.status === "blocked")
-        return { ...checked, blocked: answer.text };
-      checked = await check();
-    }
-    return { ...checked, blocked: null };
+  ) {
+    return await checkWithFixes({
+      copy: (await at.build()).path,
+      available: this.options.available,
+      base: await this.options.pullRequests.baseBranch(),
+      ...(this.options.shell ? { shell: this.options.shell } : {}),
+      onActivity,
+      fix: (report, round) =>
+        this.agent(
+          card,
+          at,
+          fixChecksPrompt(card, report, round, FIX_ROUNDS),
+          onActivity,
+        ),
+    });
   }
 
   // Opens the card's pull request, or updates the one there is; its address.
   private async pullRequest(card: BoardCard, text: string, draft: boolean) {
-    const { pullRequests } = this.options;
-    const branch = branchOf(card.number);
-    const body = `${text}\n\nCloses #${String(card.number)}.`;
-    const found = await pullRequests.find(branch);
-    if (found?.state === "OPEN") {
-      await pullRequests.update(found.number, body, draft);
-      return found.url;
-    }
-    const made = await pullRequests.open({
-      branch,
-      base: await pullRequests.baseBranch(),
-      title: card.title,
-      body,
-      draft,
-    });
-    return made.url;
+    return await openOrUpdate(this.options.pullRequests, card, text, draft);
   }
 
   private async say(number: number, text: string, note: Note) {

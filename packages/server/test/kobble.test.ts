@@ -471,11 +471,12 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       builder: {
         on: true,
         working: { number: 51, title: "Basket", what: "" },
+        also: [],
         activity: null,
         steps: [],
         problem: null,
       },
-      coach: { on: false, working: null, steps: [] },
+      coach: { on: false, working: null, also: [], steps: [] },
     } as WorkView;
     const view = factoryView(factory.store, work);
     assert.deepEqual(

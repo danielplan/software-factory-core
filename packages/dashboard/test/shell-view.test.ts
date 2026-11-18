@@ -25,11 +25,12 @@ const work = (more: Partial<WorkView> = {}): WorkView => ({
   builder: {
     on: true,
     working: null,
+    also: [],
     activity: null,
     steps: [],
     problem: null,
   },
-  coach: { on: true, working: null, steps: [] },
+  coach: { on: true, working: null, also: [], steps: [] },
   ...more,
 });
 const part = (light: PartView["light"]) => ({ light }) as PartView;
@@ -73,6 +74,7 @@ test("the kobold's card says what it works on, or that it rests", () => {
         builder: {
           on: true,
           working: { number: 7, title: "Order status", what: "building" },
+          also: [],
           activity: null,
           steps: [],
           problem: null,
@@ -89,7 +91,11 @@ test("the kobold's card says what it works on, or that it rests", () => {
     detail: "Wish list",
   });
   assert.deepEqual(
-    koboldStatus(work({ coach: { on: true, working: 12, steps: [] } }), [], ""),
+    koboldStatus(
+      work({ coach: { on: true, working: 12, also: [], steps: [] } }),
+      [],
+      "",
+    ),
     { busy: true, title: "Kobold is planning", detail: "Card #12" },
   );
 });

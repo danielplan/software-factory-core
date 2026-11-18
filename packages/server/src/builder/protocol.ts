@@ -16,6 +16,8 @@ export const NOTES = [
   "checks-failed",
   // The answer to "did it work?", given in Kobble.
   "did-it-work",
+  // Claude's usage limit: the card waits until it resets (untilOf).
+  "paused",
 ] as const;
 export type Note = (typeof NOTES)[number];
 
@@ -48,13 +50,30 @@ export function readNote(body: string): Note | null {
     : null;
 }
 
+// A pause's end, written in its comment: <!-- software-factory:until <ISO> -->.
+const UNTIL = /<!-- software-factory:until (\S+) -->/;
+
+export function pausedComment(text: string, until: Date): string {
+  return markComment(
+    `${text.trimEnd()}\n\n<!-- software-factory:until ${until.toISOString()} -->`,
+    "paused",
+  );
+}
+
+export function untilOf(body: string): Date | null {
+  const found = UNTIL.exec(body)?.[1];
+  const date = found ? new Date(found) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+}
+
 export function isFactory(body: string): boolean {
   return readNote(body) !== null;
 }
 
 export function stripMarker(body: string): string {
   const match = MARKER.exec(body);
-  return match ? body.slice(0, match.index).trimEnd() : body;
+  const text = match ? body.slice(0, match.index).trimEnd() : body;
+  return text.replace(UNTIL, "").trimEnd();
 }
 
 // The answer and its last line's status ("STATUS: done"); no status when

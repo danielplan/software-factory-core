@@ -103,7 +103,9 @@ export function factoryView(
     builder: {
       on: work?.builder.on ?? false,
       working: work?.builder.working
-        ? `#${String(work.builder.working.number)} · ${work.builder.working.title}`
+        ? [work.builder.working, ...work.builder.also]
+            .map((one) => `#${String(one.number)} · ${one.title}`)
+            .join(", ")
         : null,
     },
   };

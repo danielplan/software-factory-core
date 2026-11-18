@@ -17,6 +17,7 @@ import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
+import { WEBHOOK_PATH } from "./builder/signals.ts";
 import { readBody, send } from "./http.ts";
 import { on, optionalText, record } from "./asked.ts";
 import type { BoardTools } from "./kobble/explorations/board-tools.ts";
@@ -89,6 +90,7 @@ export function startServer(options: {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
+    options.session.work.listenAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
     kobble.serveToolsAt(`http://localhost:${String(port)}/api`);
     kobble.start();
@@ -178,6 +180,8 @@ async function answer(
     stream(response, context);
   } else if (isAgentTools(incoming, url)) {
     await answerAgentTools(incoming, response, url, context);
+  } else if (url.pathname === WEBHOOK_PATH && incoming.method === "POST") {
+    await answerSignal(incoming, response, context.session);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (THEME_ROUTES.has(url.pathname)) {
@@ -187,6 +191,25 @@ async function answer(
   } else {
     await answerApi(incoming, response, context.routes, url);
   }
+}
+
+// A signal GitHub forwarded (gh webhook forward), signed with the
+// factory's secret.
+async function answerSignal(
+  incoming: IncomingMessage,
+  response: ServerResponse,
+  session: Session,
+): Promise<void> {
+  let body = "";
+  for await (const chunk of incoming) body += String(chunk);
+  const header = incoming.headers["x-hub-signature-256"];
+  const event = incoming.headers["x-github-event"];
+  const taken = session.work.signal(
+    typeof event === "string" ? event : "",
+    body,
+    typeof header === "string" ? header : undefined,
+  );
+  send(response, taken ? 200 : 403, taken ? {} : { error: "Not GitHub's." });
 }
 
 async function answerApi(

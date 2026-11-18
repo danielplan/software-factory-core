@@ -141,6 +141,40 @@ export class Workspace {
     this.bringLocalFiles();
   }
 
+  // Brings the latest main into the card's branch before more work on it.
+  // Nothing to do when the branch has main already or has uncommitted work
+  // (it is merged next time). A clash leaves the merge open for the agent:
+  // the files that clash, none when it went in by itself.
+  async bringInMain(): Promise<string[]> {
+    const main = `origin/${this.settings.baseBranch}`;
+    if (await this.succeeds("merge-base", "--is-ancestor", main, "HEAD"))
+      return [];
+    if ((await this.git("status", "--porcelain")).trim() !== "") return [];
+    if (
+      await this.succeedsWithoutHooks(
+        "merge",
+        "--quiet",
+        "--no-edit",
+        "-m",
+        `Bring in the latest ${this.settings.baseBranch}`,
+        main,
+      )
+    )
+      return [];
+    return await this.clashing();
+  }
+
+  // The files a merge left clashing.
+  async clashing(): Promise<string[]> {
+    const out = await this.git("diff", "--name-only", "--diff-filter=U");
+    return out.split("\n").filter((line) => line.trim() !== "");
+  }
+
+  // Gives up a merge the agent could not finish.
+  async abortMerge(): Promise<void> {
+    await this.succeeds("merge", "--abort");
+  }
+
   // Commits everything as it is, even nothing, and returns the commit.
   async commitAll(message: string): Promise<string> {
     await stageAllButSettings(this.path);
@@ -245,6 +279,15 @@ export class Workspace {
     for (const example of settingsFiles.filter((name) => EXAMPLE.test(name))) {
       const own = join(this.path, dirname(example), ".env");
       if (!existsSync(own)) copyFileSync(join(this.path, example), own);
+    }
+  }
+
+  private async succeedsWithoutHooks(...args: string[]): Promise<boolean> {
+    try {
+      await this.gitWithoutHooks(...args);
+      return true;
+    } catch {
+      return false;
     }
   }
 
