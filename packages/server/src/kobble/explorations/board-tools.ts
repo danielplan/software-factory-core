@@ -26,8 +26,9 @@ export type BoardTools = {
   look: () => string;
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
-  // Starts making the prototype of a choice's option.
+  // Starts making the prototype of a choice's option, or changing one.
   make: (choice: string, option: string) => string;
+  change: (prototype: string, change: string) => string;
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -160,6 +161,13 @@ function serverFor(on: BoardTools): McpServer {
     },
     (args) => toolAnswer(() => on.rename(args)),
   );
+  addPrototypeTools(server, on);
+  addWorldTools(server, on.world.worlds, on.world.id);
+  return server;
+}
+
+// Making a choice's option's prototype, and changing one.
+function addPrototypeTools(server: McpServer, on: BoardTools): void {
   server.registerTool(
     "make_prototype",
     {
@@ -172,8 +180,21 @@ function serverFor(on: BoardTools): McpServer {
     },
     (args) => toolAnswer(() => on.make(args.choice, args.option)),
   );
-  addWorldTools(server, on.world.worlds, on.world.id);
-  return server;
+  server.registerTool(
+    "change_prototype",
+    {
+      description:
+        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says): the maker changes it in its copy, a new version on its branch, in a few minutes; the board shows it being made, then running again. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
+      inputSchema: {
+        prototype: z.string().describe("The prototype's letter (A, A2 …)."),
+        change: z
+          .string()
+          .min(1)
+          .describe("What to change, in the team's words, complete."),
+      },
+    },
+    (args) => toolAnswer(() => on.change(args.prototype, args.change)),
+  );
 }
 
 export async function answerBoardTools(

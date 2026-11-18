@@ -118,7 +118,7 @@ function TalkBox({
   );
 }
 
-// The box to type in, roomy: two lines to start, Enter sends and
+// The box to type in, roomy: two lines to start, growing with the words, Enter sends and
 // Shift+Enter starts a new line; Talk and Send below.
 function TypeBox({
   text,
@@ -133,6 +133,14 @@ function TypeBox({
   onSend: () => void;
   onTalk: () => void;
 }>) {
+  // It grows with the words, up to about eight lines, and shrinks when sent.
+  const grow = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const box = grow.current;
+    if (!box) return;
+    box.style.height = "auto";
+    box.style.height = `${String(box.scrollHeight)}px`;
+  }, [text]);
   return (
     <form
       className="mx-4 mb-4 grid gap-2 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgb(20_24_36/0.05)] focus-within:ring-2 focus-within:ring-blue/25"
@@ -155,7 +163,8 @@ function TypeBox({
           event.preventDefault();
           if (!busy && text.trim()) onSend();
         }}
-        className="min-h-12 resize-none bg-transparent px-1 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
+        ref={grow}
+        className="max-h-48 min-h-12 resize-none overflow-y-auto bg-transparent px-1 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
       />
       <div className="flex items-center gap-2">
         <Button

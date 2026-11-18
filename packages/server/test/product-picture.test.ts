@@ -8,7 +8,7 @@ import {
   codeMaps,
   productPicture,
 } from "../src/kobble/explorations/product-picture.ts";
-import { lastWords } from "../src/kobble/explorations/prototypes.ts";
+import { lastWords } from "../src/kobble/explorations/making-words.ts";
 
 function project() {
   const folder = mkdtempSync(join(tmpdir(), "picture-"));

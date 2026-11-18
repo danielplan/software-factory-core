@@ -27,6 +27,7 @@ import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
 import { linked, withThing } from "./board-things.ts";
+import { askFor, commitWords, notShared, stopped } from "./making-words.ts";
 import { codeMaps } from "./product-picture.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
@@ -234,10 +235,40 @@ export class ExplorationPrototypes {
     this.ready = ready;
   }
 
+  // Change: the kobold changes an existing prototype as asked, a new
+  // version on its branch; it is stopped meanwhile and shown being made.
+  async change(
+    exploration: Exploration,
+    key: string,
+    request: string,
+  ): Promise<void> {
+    const board = this.options.store().board(exploration.id);
+    if (!prototypeOf(board, key))
+      throw new Refused(`There is no prototype ${key} on the board.`);
+    if (this.mode.runOf(exploration.id, key).state === "making")
+      throw new Refused(`Prototype ${key} is being made already.`);
+    await this.mode.stop(exploration.id, key);
+    this.mode.set(exploration.id, key, {
+      state: "making",
+      activity: "Starting the change",
+      problem: null,
+    });
+    void this.making(exploration, board, key, request).catch(
+      (error: unknown) => {
+        this.mode.set(exploration.id, key, {
+          state: "failed",
+          activity: null,
+          problem: error instanceof Error ? error.message : String(error),
+        });
+      },
+    );
+  }
+
   private async making(
     exploration: Exploration,
     board: Board,
     key: string,
+    change?: string,
   ): Promise<void> {
     const made = prototypeOf(board, key);
     if (!made) return;
@@ -250,15 +281,10 @@ export class ExplorationPrototypes {
     const workspace = await versionWorkspace(this.options.project, copy);
     const result = await this.options.claude.run({
       cwd: copy.folder,
-      prompt: [
-        `Make prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${made.branch}).`,
-        `The problem: ${exploration.problem}`,
-        `The question it answers: ${questionOf(board, key)}`,
-        `This prototype: ${made.name}. ${made.difference}`,
-        codeMaps(this.options.root),
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
+      prompt: askFor(exploration, board, made, {
+        change,
+        maps: codeMaps(this.options.root),
+      }),
       readOnly: false,
       deny: ["Read(**/.env*)"],
       instructions: readFileSync(
@@ -271,11 +297,8 @@ export class ExplorationPrototypes {
         this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
       },
     });
-    const said = result.ok ? lastWords(result.text) : "";
     await workspace.commitAll(
-      [`Prototype ${key} of ${exploration.id}: ${made.name}`, said]
-        .filter(Boolean)
-        .join("\n\n"),
+      commitWords(exploration.id, made, change, result.ok ? result.text : ""),
     );
     // Pushed, so a teammate can open it too; the board says when it is not.
     const unshared = notShared(await workspace.pushBranch(made.branch));
@@ -290,42 +313,12 @@ export class ExplorationPrototypes {
             problem: stopped(result.error, made.branch, unshared),
           },
     );
-    if (result.ok) this.ready?.(exploration.id, key, made.name, made.id);
+    if (result.ok)
+      this.ready?.(
+        exploration.id,
+        key,
+        change ? `changed: ${change}` : made.name,
+        made.id,
+      );
   }
-}
-
-// Why the kobold stopped making it, and where its work is.
-function stopped(
-  error: string | undefined,
-  branch: string,
-  unshared: string | null,
-): string {
-  return [
-    `The kobold stopped: ${error ?? "Claude Code stopped"}. What it did so far is on ${branch}.`,
-    unshared,
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
-
-// What the board says of a prototype the team cannot open; none when it was
-// pushed.
-function notShared(why: string | null): string | null {
-  return why
-    ? `Only on this computer: it could not be shared with the team (${why}).`
-    : null;
-}
-
-// The kobold's last words: the end of its answer, a few lines at most.
-export function lastWords(text: string): string {
-  const paragraphs = text.trim().split(/\n\s*\n/);
-  return (paragraphs.at(-1) ?? "").trim().slice(0, 600);
-}
-
-// The question of the choice an option belongs to.
-function questionOf(board: Board, key: string): string {
-  for (const thing of board.things)
-    if (thing.kind === "choice" && thing.options.some((one) => one.key === key))
-      return thing.title;
-  return "not on the board";
 }

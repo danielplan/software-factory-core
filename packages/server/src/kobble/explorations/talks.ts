@@ -48,6 +48,11 @@ type TalksOptions = {
   onChange: () => void;
 };
 
+type Makers = {
+  make: (id: string, choice: string, option: string) => void;
+  change: (id: string, prototype: string, change: string) => void;
+};
+
 export class ExplorationTalks {
   private readonly talks = new Map<string, Talk>();
   private readonly pointed = new Map<
@@ -103,13 +108,17 @@ export class ExplorationTalks {
     this.options.onChange();
   }
 
-  // How the kobold starts making a prototype (the exploration's
-  // prototypes, set once both exist).
-  private maker: ((id: string, choice: string, option: string) => void) | null =
-    null;
+  // How the kobold starts making or changing a prototype (the
+  // exploration's prototypes, set once both exist).
+  private maker: Makers | null = null;
 
-  makeWith(maker: (id: string, choice: string, option: string) => void): void {
+  makeWith(maker: Makers): void {
     this.maker = maker;
+  }
+
+  private makers(): Makers {
+    if (!this.maker) throw new Refused("Prototypes cannot be made here.");
+    return this.maker;
   }
 
   personDid(id: string, words: string): void {
@@ -172,9 +181,12 @@ export class ExplorationTalks {
         return `Pointing at ${thing}.`;
       },
       make: (choice, option) => {
-        if (!this.maker) throw new Refused("Prototypes cannot be made here.");
-        this.maker(id, choice, option);
+        this.makers().make(id, choice, option);
         return `Making the prototype of ${option} on ${choice}; it is on the board now.\n\n${this.look(id)}`;
+      },
+      change: (prototype, change) => {
+        this.makers().change(id, prototype, change);
+        return `Changing prototype ${prototype}; the board shows it being made.`;
       },
       rename: ({ title, problem }) => {
         const store = this.options.store();

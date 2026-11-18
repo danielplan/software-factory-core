@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import {
+  askFor,
+  commitWords,
+} from "../src/kobble/explorations/making-words.ts";
 import { freeKey, madeFor } from "../src/kobble/explorations/prototypes.ts";
 import { plainWords } from "../src/kobble/explorations/views.ts";
 
@@ -32,4 +36,40 @@ test("a second choice's option A gets prototype A2, and each choice knows its ow
   assert.equal(freeKey(board, "B"), "B");
   assert.equal(madeFor(board, "choice-1", "A"), true);
   assert.equal(madeFor(board, "choice-2", "A"), false);
+});
+
+test("changing a prototype asks the maker for the change, and its commit says so", () => {
+  const exploration = {
+    id: "X-1",
+    title: "Testers",
+    problem: "Empty page",
+  } as never;
+  const made = {
+    key: "A2",
+    name: "One mission",
+    difference: "Suggested",
+    branch: "proto/X-1-a2",
+  } as never;
+  const board = { things: [], links: [] } as never;
+  const asked = askFor(exploration, board, made, {
+    change: "the empty page sends you to Personas",
+    maps: "",
+  });
+  assert.match(
+    asked,
+    /^Change prototype A2 .*where it is already made\)\. The change: the empty page sends you to Personas\./,
+  );
+  assert.match(
+    askFor(exploration, board, made, { change: undefined, maps: "" }),
+    /^Make prototype A2/,
+  );
+  assert.equal(
+    commitWords(
+      "X-1",
+      made,
+      "the empty page sends you to Personas",
+      "Done.\n\nMoved the button.",
+    ),
+    "Prototype A2 of X-1, changed: the empty page sends you to Personas\n\nMoved the button.",
+  );
 });

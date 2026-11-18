@@ -49,13 +49,21 @@ export function servedExplorations(options: Options) {
   prototypes.whenReady((id, key, name, thing) => {
     talks.tell(
       id,
-      `Prototype ${key} is ready: ${name}. It runs on the board; try it there, or press Bigger to use it full size.`,
+      `Prototype ${key} is ready (${name}). It runs on the board; try it there, or press Bigger to use it full size.`,
       thing,
     );
   });
-  talks.makeWith((id, choice, option) => {
-    prototypes.make(explorationOf(store(), id), choice, option);
-    options.onChange();
+  talks.makeWith({
+    make: (id, choice, option) => {
+      prototypes.make(explorationOf(store(), id), choice, option);
+      options.onChange();
+    },
+    change: (id, prototype, change) => {
+      void prototypes
+        .change(explorationOf(store(), id), prototype, change)
+        .then(options.onChange, options.onChange);
+      options.onChange();
+    },
   });
   // A button: done, then the page is told.
   const button =
