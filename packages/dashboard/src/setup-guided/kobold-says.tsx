@@ -84,7 +84,10 @@ function Question({
       }}
     >
       <p>
-        <b className="font-semibold">{card.title}</b> {card.text}
+        <b className="font-semibold">
+          {/[.?!]$/.test(card.title) ? card.title : `${card.title}.`}
+        </b>{" "}
+        {card.text}
       </p>
       <div className="flex gap-2">
         <input
