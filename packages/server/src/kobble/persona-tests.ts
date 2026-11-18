@@ -36,7 +36,9 @@ export type TestOptions = {
   store: () => KobbleStore;
   // The address of the app under test, started on this computer: the app
   // as it is now (main), or a prototype's branch.
-  app: (on: string) => Promise<string>;
+  // (on a prototype, in the world of the persona's situation, when it
+  // names one)
+  app: (on: string, persona: string) => Promise<string>;
   // A browser the persona agent uses through MCP.
   browser: () => Promise<Browser>;
   onChange: () => void;
@@ -142,7 +144,7 @@ export class PersonaTests {
       const test = this.update(id, { status: "running", started: this.now() });
       const persona = this.options.store().get("personas", test.persona);
       if (!persona) throw new TestProblem("Its persona is gone.");
-      const app = await this.options.app(test.on);
+      const app = await this.options.app(test.on, persona.id);
       browser = await this.options.browser();
       const steps = await this.use(test, persona, app, browser.url);
       this.update(id, { steps });

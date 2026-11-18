@@ -19,6 +19,7 @@ import { Refused } from "../../refused.ts";
 import { type Act, applyAct } from "./board-acts.ts";
 import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
+import type { ExplorationWorlds } from "./worlds.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -42,6 +43,8 @@ type TalksOptions = {
   // The factory's folder: its products, for the kobold's picture of them.
   root?: string;
   store: () => KobbleStore;
+  // The made-up worlds the explorations' prototypes share.
+  worlds: ExplorationWorlds;
   onChange: () => void;
 };
 
@@ -130,6 +133,7 @@ export class ExplorationTalks {
     const talk = this.talk(id);
     return {
       token: talk.token,
+      world: { worlds: this.options.worlds, id },
       act: (act) => this.act(id, act, "kobold").said,
       look: () => this.look(id),
       point: (thing) => {

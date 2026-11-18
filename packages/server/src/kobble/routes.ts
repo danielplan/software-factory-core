@@ -63,14 +63,7 @@ export function servedKobble(options: KobbleOptions) {
       `event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`,
     );
   };
-  // The records once the factory is there; none in setup.
-  const maybe = () => (hasFactory(factory) ? new KobbleStore(factory) : null);
-  const store = () => {
-    const found = maybe();
-    if (!found)
-      throw new Refused("There is no factory yet: its records come with it.");
-    return found;
-  };
+  const { maybe, store } = storesOf(factory);
   const sync = new LiveSync({
     store: maybe,
     settings: () => liveSettings(options.project),
@@ -105,8 +98,11 @@ export function servedKobble(options: KobbleOptions) {
     // Where the server answers the kobold's board tools.
     serveToolsAt: (base: string) => {
       explorations.talks.serveToolsAt(`${base}/kobble/explorations/mcp`);
+      explorations.prototypes.serveWorldAt(`${base}/kobble/world`);
     },
     boardTools: (id: string): BoardTools => explorations.talks.tools(id),
+    // The made-up worlds the prototypes share (world-route.ts).
+    worlds: explorations.worlds,
     start: () => {
       if (maybe()) tests.recover();
       sync.start();
@@ -116,6 +112,19 @@ export function servedKobble(options: KobbleOptions) {
       explorations.close();
     },
   };
+}
+
+// The records once the factory is there; none in setup (maybe), or
+// refused (store).
+function storesOf(factory: string) {
+  const maybe = () => (hasFactory(factory) ? new KobbleStore(factory) : null);
+  const store = () => {
+    const found = maybe();
+    if (!found)
+      throw new Refused("There is no factory yet: its records come with it.");
+    return found;
+  };
+  return { maybe, store };
 }
 
 // A change to the records, told to the page; a record that does not fit is
@@ -183,10 +192,14 @@ function explorationsAndTests(
     onChange: () => {
       changed("tests");
     },
-    prototype: (on) => {
+    prototype: (on, persona) => {
       const parts = branchParts(on);
       if (!parts) throw new Refused(`“${on}” is not a prototype's branch.`);
-      return explorations.prototypes.address(parts.exploration, parts.key);
+      return explorations.prototypes.address(
+        parts.exploration,
+        parts.key,
+        persona,
+      );
     },
   });
   return { explorations, tests };
@@ -196,14 +209,17 @@ function explorationsAndTests(
 function testRoutes(
   options: KobbleOptions,
   store: () => KobbleStore,
-  more: { onChange: () => void; prototype: (on: string) => Promise<string> },
+  more: {
+    onChange: () => void;
+    prototype: (on: string, persona: string) => Promise<string>;
+  },
 ) {
   const tests = new PersonaTests({
     claude: options.claude,
     cwd: options.project,
     store,
-    app: (on) =>
-      on === "main" ? options.testsRunOn.app() : more.prototype(on),
+    app: (on, persona) =>
+      on === "main" ? options.testsRunOn.app() : more.prototype(on, persona),
     browser: options.testsRunOn.browser,
     onChange: more.onChange,
   });

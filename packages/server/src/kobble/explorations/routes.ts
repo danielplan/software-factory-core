@@ -30,6 +30,7 @@ import {
 } from "./prototypes.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { explorationPage, explorationsView } from "./views.ts";
+import { ExplorationWorlds } from "./worlds.ts";
 
 type Options = {
   project: string;
@@ -42,8 +43,9 @@ type Options = {
 
 export function servedExplorations(options: Options) {
   const { store } = options;
-  const talks = new ExplorationTalks({ ...options });
-  const prototypes = new ExplorationPrototypes({ ...options });
+  const worlds = new ExplorationWorlds(options);
+  const talks = new ExplorationTalks({ ...options, worlds });
+  const prototypes = new ExplorationPrototypes({ ...options, worlds });
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>
@@ -60,6 +62,7 @@ export function servedExplorations(options: Options) {
     routes,
     talks,
     prototypes,
+    worlds,
     // Test: a persona test on the prototype's branch, as the exploration's
     // first persona; it shows on the prototype's card.
     testRoute: (tests: PersonaTests): Route =>
@@ -166,7 +169,7 @@ function buttonRoutes(
       ),
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({
-      run: await prototypes.open(id(body), key(body)),
+      run: await prototypes.open(id(body), key(body), persona(body)),
     })),
     "POST /api/kobble/explorations/board": button((body) => {
       personActs(store(), talks, id(body), body);
@@ -188,6 +191,12 @@ export function branchParts(
   return found?.[1] && found[2]
     ? { exploration: found[1], key: found[2].toUpperCase() }
     : null;
+}
+
+// The persona a prototype is opened for, when one is.
+function persona(body: unknown): string | undefined {
+  const value = (body as { persona?: unknown } | null)?.persona;
+  return typeof value === "string" && value ? value : undefined;
 }
 
 // The language the person spoke in, when they talked instead of typing.

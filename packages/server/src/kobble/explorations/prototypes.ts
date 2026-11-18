@@ -4,7 +4,9 @@
 // version of an idea), run with the project's prototype command (Open, one
 // at a time, through prototype mode), and used by a persona (Test). The
 // copies are prototype mode's own (prototypes/copies.ts), next to the
-// project.
+// project. When a product has a made-up world, the start command is told
+// where the exploration's world answers (FACTORY_WORLD_URL, world-route.ts);
+// opened for a persona that names a situation, the world starts from there.
 
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -23,6 +25,7 @@ import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
 import { linked, withThing } from "./board-things.ts";
 import { codeMaps } from "./product-picture.ts";
+import type { ExplorationWorlds } from "./worlds.ts";
 
 const TIME_LIMIT_MS = 60 * 60_000;
 const START_WITHIN_MS = 3 * 60_000;
@@ -46,12 +49,14 @@ type PrototypesOptions = {
   root: string;
   claude: Claude;
   store: () => KobbleStore;
+  worlds: ExplorationWorlds;
   onChange: () => void;
 };
 
 export class ExplorationPrototypes {
   readonly mode: PrototypeMode;
   private readonly options: PrototypesOptions;
+  private worldUrl = "";
 
   constructor(options: PrototypesOptions) {
     this.options = options;
@@ -63,9 +68,29 @@ export class ExplorationPrototypes {
         const made = prototypeOf(options.store().board(exploration), key);
         if (!made)
           throw new Refused(`${exploration} has no prototype ${key} yet.`);
-        return versionCopy(options.project, exploration, key, made.branch);
+        const copy = versionCopy(
+          options.project,
+          exploration,
+          key,
+          made.branch,
+        );
+        return this.worldUrl && options.worlds.offered()
+          ? {
+              ...copy,
+              env: {
+                ...copy.env,
+                FACTORY_WORLD_URL: `${this.worldUrl}/${exploration}`,
+              },
+            }
+          : copy;
       },
     });
+  }
+
+  // Where the server answers the made-up worlds (the exploration's id is
+  // added).
+  serveWorldAt(url: string): void {
+    this.worldUrl = url;
   }
 
   runs(exploration: string): VersionRun[] {
@@ -119,8 +144,14 @@ export class ExplorationPrototypes {
     return saved;
   }
 
-  // Open: this prototype runs, every other one stops (one at a time).
-  async open(exploration: string, key: string): Promise<VersionRun> {
+  // Open: this prototype runs, every other one stops (one at a time); for
+  // a persona, in the world of its situation.
+  async open(
+    exploration: string,
+    key: string,
+    persona?: string,
+  ): Promise<VersionRun> {
+    this.options.worlds.startFor(exploration, persona);
     for (const run of this.mode.view())
       if (
         !(run.idea === exploration && run.version === key) &&
@@ -131,8 +162,12 @@ export class ExplorationPrototypes {
   }
 
   // Where it runs, started and waited for (for a persona test).
-  async address(exploration: string, key: string): Promise<string> {
-    await this.open(exploration, key);
+  async address(
+    exploration: string,
+    key: string,
+    persona?: string,
+  ): Promise<string> {
+    await this.open(exploration, key, persona);
     const until = Date.now() + START_WITHIN_MS;
     for (;;) {
       const run = this.mode.runOf(exploration, key);
