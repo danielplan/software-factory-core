@@ -1,8 +1,9 @@
-// The speech model itself: Whisper, loaded from Hugging Face and kept by
-// the browser. Each sentence is written down in the language the owner
-// chose; without one, the model first guesses which of the voice's
-// languages it is (languages.ts). Used by the worker (whisper-worker.ts) on
-// the graphics card.
+// The speech models themselves: two Whisper models, loaded from Hugging
+// Face and kept by the browser. The accurate one writes down each sentence
+// in the language the owner chose (without one, it first guesses which of
+// the voice's languages it is, languages.ts); the quick one writes the
+// drafts while they speak. Used by the worker (whisper-worker.ts) on the
+// graphics card.
 
 import {
   AutoProcessor,
@@ -20,6 +21,11 @@ import { cleanTranscript, pickLanguage, pieces, tokenOf } from "./transcript";
 // accuracy: smaller ones were found unreliable outside English. A download
 // of about 0.8 GB, once.
 export const MODEL = "onnx-community/whisper-large-v3-turbo";
+
+// A small, quick model (multilingual, so every language of the voice works)
+// for the grey draft words while the owner speaks; the big one still writes
+// the sentence. About 0.2 GB.
+export const DRAFT_MODEL = "onnx-community/whisper-base";
 
 export type Whisper = {
   tokenizer: PreTrainedTokenizer;
@@ -39,9 +45,34 @@ type Config = {
   lang_to_id: Record<string, number>;
 };
 
+// How each part of a model is stored: fewer bits download and run faster,
+// more bits write more accurately.
+export type Precision = {
+  encoder_model: "fp32" | "fp16" | "q4" | "q4f16";
+  decoder_model_merged: "fp32" | "fp16" | "q4" | "q4f16";
+};
+
+// Chosen by measurement. The accurate model: 4-bit, with 16-bit working
+// numbers where the graphics card has them (q4f16): it wrote a sentence in
+// about 1.7 s instead of 2.6 s, the same words, and downloads 0.56 GB
+// instead of 0.76 GB; without them, plain 4-bit. The quick model keeps its
+// encoder at 32 bits: at 16 it wrote nonsense.
+export function precisionOf(name: string, halfNumbers: boolean): Precision {
+  if (name !== MODEL)
+    return { encoder_model: "fp32", decoder_model_merged: "q4" };
+  return halfNumbers
+    ? { encoder_model: "q4f16", decoder_model_merged: "q4f16" }
+    : { encoder_model: "q4", decoder_model_merged: "q4" };
+}
+
 export async function loadWhisper(
   device: "webgpu" | "cpu",
-  progress: (fraction: number | null) => void,
+  progress: (
+    fraction: number | null,
+    bytes?: { loaded: number; total: number },
+  ) => void,
+  name: string = MODEL,
+  precision: Precision = precisionOf(name, false),
 ): Promise<Whisper> {
   const files = new Map<string, { loaded: number; total: number }>();
   const progress_callback = (step: Progress) => {
@@ -53,14 +84,14 @@ export async function loadWhisper(
       loaded += file.loaded;
       total += file.total;
     }
-    progress(total ? loaded / total : null);
+    progress(total ? loaded / total : null, { loaded, total });
   };
   const [tokenizer, processor, model] = await Promise.all([
-    AutoTokenizer.from_pretrained(MODEL, { progress_callback }),
-    AutoProcessor.from_pretrained(MODEL, { progress_callback }),
-    WhisperForConditionalGeneration.from_pretrained(MODEL, {
+    AutoTokenizer.from_pretrained(name, { progress_callback }),
+    AutoProcessor.from_pretrained(name, { progress_callback }),
+    WhisperForConditionalGeneration.from_pretrained(name, {
       device,
-      dtype: { encoder_model: "q4", decoder_model_merged: "q4" },
+      dtype: precision,
       progress_callback,
     }),
   ]);
@@ -72,27 +103,49 @@ export async function loadWhisper(
 }
 
 export async function writeDown(
-  { tokenizer, processor, model }: Whisper,
+  whisper: Whisper,
   audio: Float32Array,
   chosen?: Language,
 ): Promise<{ text: string; language: Language }> {
+  const { processor, model } = whisper;
   const config = model.generation_config as unknown as Config;
   let language: Language | null = chosen ?? null;
   const texts: string[] = [];
   for (const piece of pieces(audio)) {
     const inputs = (await processor(piece)) as Record<string, unknown>;
     language ??= await guessLanguage(model, inputs, config);
-    const ids = (await model.generate({
-      ...inputs,
-      language,
-      task: "transcribe",
-      max_new_tokens: 440,
-    } as Parameters<WhisperForConditionalGeneration["generate"]>[0])) as Tensor;
-    texts.push(
-      tokenizer.batch_decode(ids, { skip_special_tokens: true })[0] ?? "",
-    );
+    texts.push(await transcribe(whisper, inputs, language));
   }
   return { text: cleanTranscript(texts.join(" ")), language: language ?? "en" };
+}
+
+// A draft of the sentence so far, while the owner still speaks, in the
+// language they chose. One pass of the model over at most one piece; longer,
+// no draft (the pause writes it all).
+export async function writeDraft(
+  whisper: Whisper,
+  audio: Float32Array,
+  language: Language,
+): Promise<string> {
+  const [piece, ...more] = pieces(audio);
+  if (!piece || more.length > 0) return "";
+  const inputs = (await whisper.processor(piece)) as Record<string, unknown>;
+  return cleanTranscript(await transcribe(whisper, inputs, language));
+}
+
+// One piece of sound, written down in the language given.
+async function transcribe(
+  { tokenizer, model }: Whisper,
+  inputs: Record<string, unknown>,
+  language: Language,
+): Promise<string> {
+  const ids = (await model.generate({
+    ...inputs,
+    language,
+    task: "transcribe",
+    max_new_tokens: 440,
+  } as Parameters<WhisperForConditionalGeneration["generate"]>[0])) as Tensor;
+  return tokenizer.batch_decode(ids, { skip_special_tokens: true })[0] ?? "";
 }
 
 // One step of the model from "start of transcript": its scores for the next
