@@ -7,6 +7,7 @@ import {
   type CallState,
   type Effect,
   HOLD_AFTER_SEND_MS,
+  type ModelProgress,
   idleCall,
   step,
 } from "../src/voice/call.ts";
@@ -45,9 +46,17 @@ function run(events: CallEvent[], from: CallState = idleCall()) {
   return { state, effects };
 }
 
+const half: ModelProgress = {
+  model: "accurate",
+  fraction: 0.5,
+  loaded: 280_000_000,
+  total: 560_000_000,
+  kept: false,
+};
+
 const ready: CallEvent[] = [
   { type: "start" },
-  { type: "progress", fraction: 0.5 },
+  { type: "progress", progress: half },
   { type: "prepared" },
   { type: "tested", problem: null },
 ];
@@ -60,9 +69,9 @@ test("a call gets ready, listens, sends what was heard and reads the answer out"
   assert.deepEqual(types(started.effects), ["prepare", "test-voice"]);
   assert.equal(run([{ type: "start" }], started.state).effects.length, 0);
   assert.equal(
-    run([{ type: "start" }, { type: "progress", fraction: 0.5 }]).state
-      .progress,
-    0.5,
+    run([{ type: "start" }, { type: "progress", progress: half }]).state
+      .progress.accurate,
+    half,
   );
   // Listening waits for both the model and the voice test.
   assert.equal(
@@ -216,7 +225,7 @@ test("a reply that failed, problems and the language", () => {
   for (const event of [
     { type: "prepared" },
     { type: "tested", problem: null },
-    { type: "progress", fraction: 1 },
+    { type: "progress", progress: half },
     { type: "sentence" },
   ] as CallEvent[])
     assert.equal(run([event]).state.phase, "off");
@@ -306,9 +315,13 @@ test("the line under the voice", () => {
     statusLine(at({ phase: "preparing" }), null).text,
     /don't talk yet/,
   );
-  assert.match(
-    statusLine(at({ phase: "preparing", progress: 0.42 }), null).text,
-    /42%/,
+  assert.deepEqual(
+    statusLine(at({ phase: "preparing", progress: { accurate: half } }), null),
+    {
+      text: "Downloading the accurate speech model, only the first time: 50% (280 of 560 MB)",
+      problem: false,
+      progress: 0.5,
+    },
   );
   assert.match(statusLine(at({ phase: "listening" }), null).text, /Go ahead/);
   assert.match(
