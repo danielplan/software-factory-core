@@ -1,9 +1,10 @@
-// The conversation with the kobold beside the canvas: what was said, its
+// The conversation with the kobold beside the canvas: what was said (the
+// newest in view), its
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
 import { Mic } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
@@ -143,8 +144,20 @@ function Messages({
   refused,
 }: Readonly<{ page: ExplorationPage; refused: string | null }>) {
   const { talk } = page;
+  // The newest words are in view: at the end when it opens, and again when
+  // something is said or the kobold writes.
+  const end = useRef<HTMLDivElement>(null);
+  const said = talk.messages.length;
+  const writing = talk.writing?.length ?? 0;
+  useEffect(() => {
+    const box = end.current;
+    if (box) box.scrollTop = box.scrollHeight;
+  }, [said, writing]);
   return (
-    <div className="flex flex-1 flex-col gap-2.5 overflow-auto px-4 py-3.5">
+    <div
+      ref={end}
+      className="flex flex-1 flex-col gap-2.5 overflow-auto px-4 py-3.5"
+    >
       {talk.messages.map((message, at) =>
         message.from === "kobold" ? (
           <Kobold key={at} text={message.text} />
