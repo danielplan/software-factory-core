@@ -1,7 +1,8 @@
 // The things on the board, drawn in their frame (frame.tsx): the problem
 // (a yellow note with its personas), what we heard (its signals with their
 // persona's face), a note, a choice (the question and its options: click
-// one to choose it, Make for one without a prototype), a diagram (drawn
+// one to pick it, and the kobold goes on, making its prototype when that
+// helps; a picked option with a prototype says so), a diagram (drawn
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
@@ -86,7 +87,6 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
       link.from === thing.id && prototypes.has(link.to) ? [link.label] : [],
     ),
   );
-  const open = ["waiting", "exploring"].includes(page.exploration.status);
   return (
     <Frame data={data} title={thing.title}>
       {thing.options.map((option) => (
@@ -117,16 +117,10 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
             </span>
             <span className="flex-1">{option.name}</span>
           </button>
-          {open && !made.has(option.key) && (
-            <button
-              type="button"
-              className="text-xs font-semibold text-blue"
-              onClick={() => {
-                act("make", { choice: thing.id, key: option.key });
-              }}
-            >
-              Make
-            </button>
+          {made.has(option.key) && (
+            <span className="text-[11px] font-medium text-muted-foreground">
+              Prototype
+            </span>
           )}
         </div>
       ))}

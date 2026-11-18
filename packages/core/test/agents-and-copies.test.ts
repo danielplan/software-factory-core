@@ -108,6 +108,7 @@ test("a copy is made from the base branch, never takes settings files, and links
   mkdirSync(join(source, "app"));
   writeFileSync(join(source, "app", "README.md"), "An app");
   writeFileSync(join(source, "app", ".env.example"), "PORT=3000\n");
+  writeFileSync(join(source, "app", ".env.test.example"), "PORT=3001\n");
   await git("-C", source, "add", ".");
   await git(
     "-C",
@@ -142,6 +143,12 @@ test("a copy is made from the base branch, never takes settings files, and links
     "PORT=3000\n",
   );
   assert.equal(existsSync(join(copy.path, "app", ".env.example")), true);
+  // Every example stays, and gives its own settings file.
+  assert.equal(
+    readFileSync(join(copy.path, "app", ".env.test"), "utf8"),
+    "PORT=3001\n",
+  );
+  assert.equal(existsSync(join(copy.path, "app", ".env.test.example")), true);
   assert.equal(
     lstatSync(join(copy.path, "app", "pictures")).isSymbolicLink(),
     true,

@@ -1,9 +1,8 @@
 // A prototype while the kobold makes it: its page drawing itself piece by
 // piece with a light sweeping over it, the kobold hopping at its work, what
-// it did (ticked) and what it does now, and how long it has been at it.
+// it does now, and how long it has been at it.
 // Motion only when the computer allows it.
 
-import { Check } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
 
 import type { VersionRun } from "@/api";
@@ -98,26 +97,14 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
           </span>
         )}
       </div>
-      <ol className="grid gap-1 text-xs">
-        {run.steps.map((step, at) => (
-          <li
-            key={`${String(at)}-${step}`}
-            className="flex items-start gap-1.5 text-muted-foreground"
-          >
-            <Check
-              aria-hidden
-              className="mt-px size-3.5 flex-none text-success"
-            />
-            {step}
-          </li>
-        ))}
-        {run.activity && (
-          <li className="flex items-start gap-1.5 font-medium text-foreground motion-safe:animate-pop">
-            <span className="mt-[5px] size-1.5 flex-none rounded-full bg-blue motion-safe:animate-breathe" />
-            {run.activity}
-          </li>
-        )}
-      </ol>
+      {run.activity && (
+        <p
+          key={run.activity}
+          className="text-xs text-foreground-2 motion-safe:animate-pop"
+        >
+          {run.activity}
+        </p>
+      )}
     </div>
   );
 }

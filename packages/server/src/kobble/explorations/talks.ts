@@ -92,6 +92,17 @@ export class ExplorationTalks {
   }
 
   // What a person did on the board, for the kobold to hear next time.
+  // The kobold says a line by itself and points at a thing: a prototype it
+  // finished making.
+  tell(id: string, text: string, thing: string): void {
+    const talk = this.talk(id);
+    talk.told(text);
+    this.save(id, talk);
+    const times = (this.pointed.get(id)?.times ?? 0) + 1;
+    this.pointed.set(id, { thing, times });
+    this.options.onChange();
+  }
+
   // How the kobold starts making a prototype (the exploration's
   // prototypes, set once both exist).
   private maker: ((id: string, choice: string, option: string) => void) | null =

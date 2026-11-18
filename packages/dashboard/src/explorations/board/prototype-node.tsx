@@ -1,5 +1,5 @@
 // A prototype on the board: the live screen while it runs (the real app on
-// its branch, in a small frame you can use), otherwise a placeholder; how
+// its branch, at a desktop's size, shrunk; Bigger opens it full size), otherwise a placeholder; how
 // it differs, what is happening to it (the kobold making it, starting),
 // its last persona test, and Open and Test (as the exploration's persona).
 // Agreeing is the badge on its bar.
@@ -15,6 +15,7 @@ import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
 import { Making } from "./prototype-making";
+import { LiveScreen } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 
 const SMALL = "h-7 gap-1.5 px-2.5 text-xs";
@@ -43,17 +44,10 @@ function testWords(test: TestResult): { words: string; dot: string } {
 function Screen({
   run,
   at,
-}: Readonly<{ run: VersionRun | undefined; at: number }>) {
+  title,
+}: Readonly<{ run: VersionRun | undefined; at: number; title: string }>) {
   if (run?.state === "running" && run.url)
-    return (
-      <div className="nodrag nowheel h-[200px] overflow-hidden rounded-[9px] shadow-[0_0_0_1px_var(--line-soft)]">
-        <iframe
-          title="The prototype, running"
-          src={run.url}
-          className="h-[400px] w-[632px] origin-top-left scale-50 border-0"
-        />
-      </div>
-    );
+    return <LiveScreen url={run.url} title={title} />;
   return (
     <div className="grid h-[110px] place-items-center rounded-[9px] bg-[#f3f4f7]">
       <div className="flex h-20 w-[170px] flex-col gap-1.5 rounded-md bg-card p-2 shadow-[0_1px_4px_rgb(0_0_0/0.1)]">
@@ -86,16 +80,15 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
       {run?.state === "making" ? (
         <Making run={run} />
       ) : (
-        <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
+        <Screen
+          run={run}
+          at={thing.key.charCodeAt(0) - 65}
+          title={`${thing.key} · ${thing.name}`}
+        />
       )}
       <div className="text-xs text-muted-foreground">
         <Markdown text={thing.difference} />
       </div>
-      {thing.said && (
-        <div className="border-l-2 border-border pl-2 text-xs text-foreground-2">
-          <Markdown text={thing.said} />
-        </div>
-      )}
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
         <a

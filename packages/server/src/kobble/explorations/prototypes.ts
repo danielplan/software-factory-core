@@ -217,13 +217,21 @@ export class ExplorationPrototypes {
     this.mode.close();
   }
 
-  // The kobold's last words, on the prototype's card.
-  private keepWords(exploration: string, key: string, said: string): void {
-    const store = this.options.store();
-    const board = store.board(exploration);
-    const made = prototypeOf(board, key);
-    if (made) store.saveBoard(exploration, withThing(board, { ...made, said }));
-    this.options.onChange();
+  // Who is told when a prototype is made (the conversation, which says so
+  // and points at it).
+  private ready:
+    | ((exploration: string, key: string, name: string, thing: string) => void)
+    | null = null;
+
+  whenReady(
+    ready: (
+      exploration: string,
+      key: string,
+      name: string,
+      thing: string,
+    ) => void,
+  ): void {
+    this.ready = ready;
   }
 
   private async making(
@@ -271,7 +279,6 @@ export class ExplorationPrototypes {
     );
     // Pushed, so a teammate can open it too; the board says when it is not.
     const unshared = notShared(await workspace.pushBranch(made.branch));
-    if (said) this.keepWords(exploration.id, key, said);
     this.mode.set(
       exploration.id,
       key,
@@ -283,6 +290,7 @@ export class ExplorationPrototypes {
             problem: stopped(result.error, made.branch, unshared),
           },
     );
+    if (result.ok) this.ready?.(exploration.id, key, made.name, made.id);
   }
 }
 

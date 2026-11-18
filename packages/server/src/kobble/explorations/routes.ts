@@ -46,6 +46,13 @@ export function servedExplorations(options: Options) {
   const worlds = new ExplorationWorlds(options);
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
+  prototypes.whenReady((id, key, name, thing) => {
+    talks.tell(
+      id,
+      `Prototype ${key} is ready: ${name}. It runs on the board; try it there, or press Bigger to use it full size.`,
+      thing,
+    );
+  });
   talks.makeWith((id, choice, option) => {
     prototypes.make(explorationOf(store(), id), choice, option);
     options.onChange();

@@ -109,6 +109,12 @@ export class Talk {
     this.changed();
   }
 
+  // A line the coach says without being asked (something it finished).
+  told(text: string): void {
+    this.messages = [...this.messages, { from: "coach", text }];
+    this.changed();
+  }
+
   // The owner's words, shown as said; refused while the coach answers.
   heard(text: string): string {
     if (!text.trim()) throw new Refused("Say something first.");

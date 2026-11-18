@@ -13,16 +13,29 @@ import {
   rmSync,
   symlinkSync,
 } from "node:fs";
-import { dirname, join, sep } from "node:path";
+import { basename, dirname, join, sep } from "node:path";
 
 import { run } from "../processes.ts";
 import { freeBranch } from "./free-branch.ts";
 
 // Settings files an older factory may have copied into a copy; removed when
 // found, so a job never runs with the owner's settings. The examples the
-// project keeps (.env.example) stay: a copy's own settings start from them.
-const LEFT_OUT = /(^|\/)\.env(\.(?!example$)[\w.-]+)?$/;
-const EXAMPLE = /(^|\/)\.env\.example$/;
+// project keeps (.env.example, .env.test.example …) stay: a copy's own
+// settings start from them.
+const EXAMPLE_END = ".example";
+
+function isSettings(file: string): boolean {
+  const name = basename(file);
+  return name === ".env" || name.startsWith(".env.");
+}
+
+function isExample(file: string): boolean {
+  return isSettings(file) && file.endsWith(EXAMPLE_END);
+}
+
+function leftOut(file: string): boolean {
+  return isSettings(file) && !isExample(file);
+}
 
 export type CopySettings = {
   // The owner's checkout, with the local-only files.
@@ -300,12 +313,12 @@ export class Workspace {
       symlinkSync(from, to, "junction");
     }
     const settingsFiles = settingsIn(this.path);
-    for (const file of settingsFiles.filter((name) => LEFT_OUT.test(name)))
+    for (const file of settingsFiles.filter(leftOut))
       rmSync(join(this.path, file), { force: true });
     // A copy's own settings: from the project's examples, never the
     // owner's; a product's copy settings (copyEnv) come on top.
-    for (const example of settingsFiles.filter((name) => EXAMPLE.test(name))) {
-      const own = join(this.path, dirname(example), ".env");
+    for (const example of settingsFiles.filter(isExample)) {
+      const own = join(this.path, example.slice(0, -EXAMPLE_END.length));
       if (!existsSync(own)) copyFileSync(join(this.path, example), own);
     }
   }
@@ -332,8 +345,8 @@ export class Workspace {
   }
 }
 
-// Stages everything in a copy but its own settings files (.env, made from
-// the examples), which are never committed; changes to the examples are.
+// Stages everything in a copy but its own settings files (.env, .env.test
+// …, made from the examples), which are never committed; changes to the examples are.
 // Everything is added the plain way, which keeps to the project's
 // .gitignore, and a settings file the project does not ignore is taken out
 // again. (Leaving them out by name instead makes git refuse when the
@@ -343,7 +356,7 @@ export async function stageAllButSettings(folder: string): Promise<void> {
   await git("add", "--all");
   const staged = (await git("diff", "--cached", "--name-only", "-z"))
     .split("\0")
-    .filter((path) => /(^|\/)\.env$/.test(path));
+    .filter(leftOut);
   if (staged.length > 0)
     await git("rm", "--cached", "--quiet", "--", ...staged);
 }
