@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- New: the kits' own starters. A new React web app, Expo app or NestJS backend is made as a copy of its kit's starter (`packages/kits/starters/<kit>`), not with the framework's generator: the kit's standards and checks in `npm run verify`, `BLUEPRINT.md`, `README.md`, and for the web and phone apps a prototype mode (pretend backend, situations, `npm run prototype`, `prototype:live`) with `npm run check:prototypes`, which fails when prototype code reaches the real app. The prototype uses the factory's shared world when it starts with `FACTORY_WORLD_URL`. The backend's database is a setting (`DATABASE_URL`). A kit names its starter with `starter` (a folder); the core copies it under the product's name (`copyStarter`, `starterName`) before `create` runs, which then only installs its packages. Nothing to do: products made before keep their code.
+
 ## 0.11.1 (2026-11-17)
 
 **To upgrade:** pin `release-0.11.1`, `npm install`, `npx software-factory upgrade`. The empty pages say what goes there, the live app is connected from the Signals page, and signal files stay on this computer. The upgrade adds `kobble/signals/` to `factory/.gitignore`; **to do, when it says so:** signal files already in git are taken out with `git rm -r --cached factory/kobble/signals` (the files stay on your computer). Nothing to do: connecting writes `KOBBLE_LIVE_URL` and `KOBBLE_LIVE_TOKEN` to the project's `.env` for you (and adds `.env` to `.gitignore` when it is not there).

@@ -89,15 +89,26 @@ forward`, no public address needed) and a check every few minutes for
   the idea is about; the coach makes small changes itself; a check that no
   prototype code reaches the real app. It asks each kit for its prototype
   mode and its starter, so a brand-new app starts from the kit's starter.
+  The React web app and Expo app starters have the prototype mode, the
+  shared world's hook and that check already (see the kits).
 - **Voice**: Talk; live words while the owner speaks; a first draft as soon
   as they go quiet; the answer read out as it is written; "stop" interrupts.
 
 ## The kits
 
-| Kit                                                                            | Here | To come                                                                                                                                                             |
-| ------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React web app, SvelteKit web app, NestJS backend, TypeScript package, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
-| Other code                                                                     | yes  | –                                                                                                                                                                   |
+| Kit                                   | Here | Starter                                                                                                                           | To come                                                                       |
+| ------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| React web app                         | yes  | its own (`starters/react-web-app`): the kit's standards and checks, prototype mode with a shared world, `check:prototypes`        | a working copy's environment, the checks to run before a pull request         |
+| Expo app                              | yes  | its own (`starters/expo-app`): the kit's standards and checks, prototype mode with a shared world, `check:prototypes`             | a working copy's environment, the checks to run before a pull request         |
+| NestJS backend                        | yes  | its own (`starters/nestjs-backend`): the kit's standards and checks, settings, migrations, a health route; the database a setting | a working copy's environment, the checks to run before a pull request         |
+| SvelteKit web app, TypeScript package | yes  | the framework's own generator                                                                                                     | a starter with the kit's standards and checks, prototype mode (for a web app) |
+| Other code                            | yes  | –                                                                                                                                 | –                                                                             |
+
+A kit with a starter makes a new product as a copy of it (`starter` in the
+kit, `copyStarter` in the core): the starter's package name, wherever it is
+written, becomes the product's, and `create` then installs its packages.
+Each starter is a whole product with its own checks (`npm run verify` in
+it); the core's own checks leave the `starters/` folder out.
 
 ## What stays with a company
 
