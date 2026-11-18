@@ -1,5 +1,6 @@
-// The conversation with the kobold beside the canvas: what was said (the
-// newest in view), its
+// The conversation with the kobold beside the canvas, roomy as a chat:
+// what was said (the kobold's words as plain text, the person's in a soft
+// bubble, the newest in view), its
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
@@ -33,8 +34,8 @@ export function TalkPanel({
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
   return (
-    <aside className="flex min-h-0 w-[340px] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
-      <div className="flex items-center gap-2.5 border-b border-border-soft px-4 py-3.5">
+    <aside className="flex min-h-0 w-[26rem] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
+      <div className="flex items-center gap-3 border-b border-border-soft px-5 py-4">
         <KoboldHead size={28} />
         <span className="grid">
           <span className="text-sm font-semibold">Your kobold</span>
@@ -78,7 +79,7 @@ function TalkBox({
   const busy = page.talk.writing !== null;
   if (talking)
     return (
-      <div className="border-t border-border-soft p-3">
+      <div className="border-t border-border-soft p-4">
         <VoiceView
           call={call}
           coachProblem={page.talk.problem}
@@ -105,36 +106,76 @@ function TalkBox({
     );
   };
   return (
+    <TypeBox
+      text={text}
+      onText={setText}
+      busy={busy}
+      onSend={send}
+      onTalk={() => {
+        call.start();
+      }}
+    />
+  );
+}
+
+// The box to type in, roomy: two lines to start, Enter sends and
+// Shift+Enter starts a new line; Talk and Send below.
+function TypeBox({
+  text,
+  onText,
+  busy,
+  onSend,
+  onTalk,
+}: Readonly<{
+  text: string;
+  onText: (text: string) => void;
+  busy: boolean;
+  onSend: () => void;
+  onTalk: () => void;
+}>) {
+  return (
     <form
-      className="flex gap-2 border-t border-border-soft p-3"
+      className="mx-4 mb-4 grid gap-2 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgb(20_24_36/0.05)] focus-within:ring-2 focus-within:ring-blue/25"
       onSubmit={(event) => {
         event.preventDefault();
-        send();
+        onSend();
       }}
     >
-      <input
+      <textarea
         aria-label="Talk to the kobold"
         placeholder="Talk to the kobold…"
+        rows={2}
         value={text}
         onChange={(event) => {
-          setText(event.target.value);
+          onText(event.target.value);
         }}
-        className="h-[38px] flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
+        onKeyDown={(event) => {
+          // Enter sends; Shift+Enter starts a new line.
+          if (event.key !== "Enter" || event.shiftKey) return;
+          event.preventDefault();
+          if (!busy && text.trim()) onSend();
+        }}
+        className="min-h-12 resize-none bg-transparent px-1 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
       />
-      <Button
-        type="button"
-        size="pill-sm"
-        variant="ring"
-        aria-label="Talk out loud"
-        onClick={() => {
-          call.start();
-        }}
-      >
-        <Mic aria-hidden className="size-4" />
-      </Button>
-      <Button type="submit" size="pill-sm" disabled={busy || !text.trim()}>
-        Send
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          size="pill-sm"
+          variant="ring"
+          aria-label="Talk out loud"
+          onClick={onTalk}
+        >
+          <Mic aria-hidden className="size-4" />
+        </Button>
+        <Button
+          type="submit"
+          size="pill-sm"
+          className="ml-auto"
+          disabled={busy || !text.trim()}
+        >
+          Send
+        </Button>
+      </div>
     </form>
   );
 }
@@ -156,23 +197,23 @@ function Messages({
   return (
     <div
       ref={end}
-      className="flex flex-1 flex-col gap-2.5 overflow-auto px-4 py-3.5"
+      className="flex flex-1 flex-col gap-5 overflow-auto px-5 py-5 text-sm leading-relaxed"
     >
       {talk.messages.map((message, at) =>
         message.from === "kobold" ? (
-          <Kobold key={at} text={message.text} />
+          <div key={at} className="max-w-[94%] self-start">
+            <Markdown text={message.text} />
+          </div>
         ) : (
           <div
             key={at}
-            className="max-w-[85%] self-end rounded-[14px_4px_14px_14px] bg-blue px-3 py-[9px] text-[13.5px] leading-[1.45] text-blue-foreground"
+            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-wash px-3.5 py-2 text-foreground"
           >
             <Markdown text={message.text} />
           </div>
         ),
       )}
-      {talk.writing !== null && (
-        <Kobold text={talk.writing || talk.activity || "…"} />
-      )}
+      {talk.writing !== null && <Writing talk={talk} />}
       {(talk.problem ?? refused) && (
         <p role="alert" className="text-[12.5px] text-destructive">
           {talk.problem ?? refused}
@@ -182,14 +223,19 @@ function Messages({
   );
 }
 
-function Kobold({ text }: Readonly<{ text: string }>) {
-  return (
-    <div className="flex gap-2">
-      <KoboldHead size={22} />
-      <div className="rounded-[4px_14px_14px_14px] bg-ground px-3 py-[9px] text-[13.5px] leading-[1.45]">
-        <Markdown text={text} />
+// The kobold's answer while it writes, or what it is doing before it does.
+function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
+  if (talk.writing)
+    return (
+      <div className="max-w-[94%] self-start text-muted-foreground">
+        <Markdown text={talk.writing} />
       </div>
-    </div>
+    );
+  return (
+    <p className="flex items-center gap-2 self-start text-[13px] text-muted-foreground">
+      <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
+      {talk.activity ?? "Thinking…"}
+    </p>
   );
 }
 
@@ -204,7 +250,7 @@ function Attached({
   onDetach: (thing: string) => void;
 }>) {
   return (
-    <div className="flex flex-wrap gap-1.5 border-t border-border-soft px-3 pt-2.5">
+    <div className="flex flex-wrap gap-1.5 px-5 pb-2">
       {attached.map((id) => {
         const thing = page.board.things.find((one) => one.id === id);
         return thing ? (
