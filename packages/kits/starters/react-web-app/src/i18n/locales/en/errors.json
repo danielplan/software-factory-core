@@ -1,0 +1,5 @@
+{
+  "network_unreachable": "The service cannot be reached. Try again shortly.",
+  "service_unavailable": "The service is not answering as expected. Try again shortly.",
+  "invalid_response": "The service sent incomplete data. Try again."
+}

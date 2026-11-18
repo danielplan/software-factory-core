@@ -1,0 +1,9 @@
+{
+  "pageTitle": "New web app",
+  "wordmark": "New web app",
+  "loading": "Loading the data…",
+  "loadError": {
+    "title": "The data could not be loaded",
+    "retry": "Try again"
+  }
+}
