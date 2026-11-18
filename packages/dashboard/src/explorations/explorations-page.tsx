@@ -97,10 +97,15 @@ const EXAMPLE: ExplorationRow = {
   personas: [],
   signals: 0,
   things: [
-    { id: "problem", kind: "problem", agreed: false },
-    { id: "choice", kind: "choice", agreed: false },
-    { id: "a", kind: "prototype", agreed: false },
-    { id: "b", kind: "prototype", agreed: true },
+    {
+      id: "problem",
+      kind: "problem",
+      agreed: false,
+      label: "Customers can’t pay by card",
+    },
+    { id: "choice", kind: "choice", agreed: false, label: "How do they pay?" },
+    { id: "a", kind: "prototype", agreed: false, label: "A: Pay in the app" },
+    { id: "b", kind: "prototype", agreed: true, label: "B: A payment link" },
   ],
   links: [
     { from: "problem", to: "choice" },
@@ -148,7 +153,7 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
     <>
       <Sub title="Being explored" n={view.exploring.length} />
       {view.exploring.length > 0 && (
-        <div className={CARD}>
+        <div className="grid gap-4 md:grid-cols-2">
           {view.exploring.map((row) => (
             <Exploring key={row.id} row={row} />
           ))}
@@ -175,45 +180,40 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
   );
 }
 
-// One being explored: where it is, in its colour, and the kobold's next
-// question; a click opens it.
+// One being explored: the board as it really is, in small, where it is
+// in its colour, and the kobold's question; a click opens it.
 function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
   const where = whereItIs(row);
-  const { Icon, tint } = KINDS[where.kind];
+  const { tint } = KINDS[where.kind];
   return (
     <a
       href={explorationHash(row.id)}
-      className={cn(ROW, "items-start transition-colors hover:bg-surface")}
+      className={cn(
+        CARD,
+        "flex flex-col gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgb(20_24_36/0.35)]",
+      )}
     >
-      <span
-        className={cn(
-          "grid size-9 flex-none place-items-center rounded-xl",
-          tint,
-        )}
-      >
-        <Icon aria-hidden className="size-[18px]" />
-      </span>
-      <span className="grid min-w-0 flex-1 gap-1">
-        <span className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold">{row.title}</span>
-          <span
-            className={cn(
-              "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium",
-              tint,
-            )}
-          >
-            {where.text}
-          </span>
+      <Preview row={row} />
+      <span className="flex flex-wrap items-center gap-2 px-1">
+        <span className="text-base font-semibold">{row.title}</span>
+        <span
+          className={cn(
+            "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium",
+            tint,
+          )}
+        >
+          {where.text}
         </span>
-        {row.line && (
-          <span className="flex items-center gap-1.5 text-[13px] text-foreground-2">
-            <KoboldHead size={16} />
-            <span className="truncate">{row.line}</span>
-          </span>
-        )}
+        <span className="ml-auto">
+          <Faces personas={row.personas} size={26} />
+        </span>
       </span>
-      <Faces personas={row.personas} size={26} />
-      <Chevron />
+      {row.line && (
+        <span className="flex items-start gap-2 rounded-[10px] bg-wash px-2.5 py-[9px] text-[13px] text-wash-foreground">
+          <KoboldHead size={18} />
+          {row.line}
+        </span>
+      )}
     </a>
   );
 }

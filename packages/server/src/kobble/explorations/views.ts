@@ -27,9 +27,9 @@ export type ExplorationRow = Pick<
 > & {
   personas: PersonaTag[];
   signals: number;
-  // The board in small, for its preview: each thing's kind and whether it
-  // is agreed, and the arrows.
-  things: { id: string; kind: Thing["kind"]; agreed: boolean }[];
+  // The board in small, for its preview: each thing's kind, a few of its
+  // own words, whether it is agreed, and the arrows.
+  things: { id: string; kind: Thing["kind"]; agreed: boolean; label: string }[];
   links: { from: string; to: string }[];
   // What is next, in one line from the kobold; none when it has nothing.
   line: string | null;
@@ -97,10 +97,11 @@ export function explorationsView(
       work: exploration.work,
       personas: tagsOf(store, exploration.personas),
       signals: exploration.signals.length,
-      things: board.things.map(({ id, kind, agreed }) => ({
-        id,
-        kind,
-        agreed,
+      things: board.things.map((thing) => ({
+        id: thing.id,
+        kind: thing.kind,
+        agreed: thing.agreed,
+        label: labelOf(thing, exploration.problem),
       })),
       links: board.links.map(({ from, to }) => ({ from, to })),
       line:
@@ -156,4 +157,26 @@ function resultOf(test: PersonaTest): TestResult {
     asExpected: test.steps.filter((step) => step.asExpected).length,
     persona: test.persona,
   };
+}
+
+// A thing's own words, short enough for the preview.
+function labelOf(thing: Thing, problem: string): string {
+  const words = (() => {
+    switch (thing.kind) {
+      case "problem":
+        return problem;
+      case "heard":
+        return "What we heard";
+      case "note":
+        return thing.text;
+      case "choice":
+        return thing.title;
+      case "prototype":
+        return `${thing.key}: ${thing.name}`;
+      case "diagram":
+      case "picture":
+        return thing.title;
+    }
+  })();
+  return words.length > 60 ? `${words.slice(0, 57).trimEnd()}…` : words;
 }
