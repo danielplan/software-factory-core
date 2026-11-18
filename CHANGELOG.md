@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Changed: talking is quicker. While the person speaks, their words show under the glow (settled, and the newest in grey), from a small quick speech model (whisper-base) beside the accurate one. The accurate model starts writing as soon as they are quiet for 0.3 s, so their words are sent right after the 1.5 s pause instead of seconds later, and the glow says Thinking at once. A breath or a noise after that is written quietly and joins only when it holds real words; fillers such as "uh" or "thank you" are dropped. Where the graphics card has 16-bit numbers, the accurate model runs lighter (faster, 0.56 GB instead of 0.76 GB); the first Talk after the upgrade downloads about 0.8 GB once, and the old files are removed. Getting ready names the model downloading or loading, with percent, size and a thin bar; no WebGPU, a microphone that is not allowed, a failed download or 30 s with nothing happening are said plainly, with Try again for the last two. Nothing to do.
+
 ## 0.11.1 (2026-11-17)
 
 **To upgrade:** pin `release-0.11.1`, `npm install`, `npx software-factory upgrade`. The empty pages say what goes there, the live app is connected from the Signals page, and signal files stay on this computer. The upgrade adds `kobble/signals/` to `factory/.gitignore`; **to do, when it says so:** signal files already in git are taken out with `git rm -r --cached factory/kobble/signals` (the files stay on your computer). Nothing to do: connecting writes `KOBBLE_LIVE_URL` and `KOBBLE_LIVE_TOKEN` to the project's `.env` for you (and adds `.env` to `.gitignore` when it is not there).

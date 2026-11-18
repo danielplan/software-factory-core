@@ -1,19 +1,23 @@
-import { PhoneOff } from "lucide-react";
+import { PhoneOff, RotateCcw, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import type { CallState } from "./call";
+import { HeardWords } from "./heard-words";
 import { LanguageSwitch } from "./language-switch";
 import { statusLine } from "./status-line";
 import { useSpokenLanguage } from "./use-spoken-language";
 import { useVoiceCall } from "./use-voice-call";
 import type { VoiceCall } from "./voice-call";
+import { VoiceStatus } from "./voice-status";
 import { MOMENT, type OrbMode, VoiceOrb } from "./voice-orb";
 
 // During a call, in place of the box to type: the glow that shows what is
-// happening (voice-orb.tsx), a line saying it in words, the language
-// spoken, and End call (the microphone and the coach's voice turn off;
-// what was said is still answered).
+// happening (voice-orb.tsx), a line saying it in words (with a thin bar
+// while a speech model is on its way), the owner's words while they speak,
+// the language spoken, and End call (the microphone and the coach's voice
+// turn off; what was said is still answered). After a problem that ended
+// the call, it stays to say why, with Try again when a second try may help.
 export function VoiceView({
   call,
   coachProblem,
@@ -27,29 +31,44 @@ export function VoiceView({
   const mode = modeOf(state);
   const [language, chooseLanguage] = useSpokenLanguage(call);
   const status = statusLine(state, coachProblem);
+  const ended = state.phase === "off";
   return (
     <div className="grid justify-items-center gap-4 rounded-[18px] bg-surface px-3 pt-6 pb-3">
-      <VoiceOrb call={call} mode={mode} />
-      <p
-        role="status"
-        className={
-          status.problem
-            ? "text-center text-[13px] text-destructive"
-            : "text-xs font-medium text-muted-foreground"
-        }
-      >
-        {status.text || MOMENT[mode]}
-      </p>
+      {!ended && <VoiceOrb call={call} mode={mode} />}
+      <VoiceStatus status={status} moment={ended ? "" : MOMENT[mode]} />
+      <HeardWords call={call} />
+      {state.quietly && (
+        <p className="text-[11px] text-muted-foreground">
+          A short sound is being written down quietly.
+        </p>
+      )}
       <div className="flex w-full flex-wrap items-center gap-2">
         <LanguageSwitch language={language} onChoose={chooseLanguage} />
+        {status.retry && (
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto h-9 rounded-full px-3.5 text-[13px]"
+            onClick={() => {
+              call.start();
+            }}
+          >
+            <RotateCcw aria-hidden />
+            Try again
+          </Button>
+        )}
         <Button
           type="button"
           variant="outline"
-          className="ml-auto h-9 rounded-full px-3.5 text-[13px]"
+          className={
+            status.retry
+              ? "h-9 rounded-full px-3.5 text-[13px]"
+              : "ml-auto h-9 rounded-full px-3.5 text-[13px]"
+          }
           onClick={onEnd}
         >
-          <PhoneOff aria-hidden />
-          End call
+          {ended ? <X aria-hidden /> : <PhoneOff aria-hidden />}
+          {ended ? "Close" : "End call"}
         </Button>
       </div>
     </div>
