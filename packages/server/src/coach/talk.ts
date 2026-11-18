@@ -10,7 +10,15 @@ import type { Claude, RunOptions } from "@software-factory/core";
 
 import type { ChangeDraft, CoachMessage, Draft } from "../api.ts";
 import { Refused } from "../refused.ts";
-import { draw, type Drawing, EMPTY, mapText, move, removeCard } from "./map.ts";
+import {
+  draw,
+  type Drawing,
+  EMPTY,
+  mapText,
+  move,
+  removeCard,
+  writeCard,
+} from "./map.ts";
 import { COACH_HEADER } from "./setup-tools.ts";
 
 // The coach's own tools, in plain words for the owner.
@@ -96,10 +104,7 @@ export class Talk {
   // The owner moved or took off a card: the coach hears of it with the next
   // message.
   ownerChange(change: ChangeDraft): void {
-    this.map =
-      "move" in change
-        ? move(this.map, change.move)
-        : removeCard(this.map, change.remove);
+    this.map = changedMap(this.map, change);
     this.ownerChanged = true;
     this.changed();
   }
@@ -194,4 +199,17 @@ export function problemOf(error: string, who = "The coach"): string {
   if (/log ?in|auth|credential/i.test(error))
     return "Claude Code is not signed in. Run claude once in a terminal to sign in, then try again.";
   return `${who} stopped: ${error || "no reason given"}. Try again.`;
+}
+
+// The map after the owner's own change.
+function changedMap(map: Draft, change: ChangeDraft): Draft {
+  if ("move" in change) return move(map, change.move);
+  if ("remove" in change) return removeCard(map, change.remove);
+  return writeCard(map, {
+    area: change.add.area,
+    title: change.add.title,
+    ...(change.add.text ? { text: change.add.text } : {}),
+    icon: "person",
+    confirmed: true,
+  }).draft;
 }

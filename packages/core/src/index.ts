@@ -120,6 +120,7 @@ export { alreadyFor, titleOf } from "./kobble/already.ts";
 export {
   type Face,
   faceFor,
+  faceFrom,
   type PersonaColor,
   type PersonaHat,
   faceOf,

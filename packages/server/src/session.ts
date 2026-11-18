@@ -171,7 +171,7 @@ export class Session {
   // not connected yet; the factory's own board needs nothing.
   openFactory(): void {
     if (!this.root) throw new Refused("There is no factory yet.");
-    this.coach.finish();
+    this.coach.finish(this.root);
     const tracker = this.factory?.company.tracker ?? "none";
     this.onboarding = tracker !== "none" && !readBoard(this.root)[tracker];
     this.reload();

@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 
-import { faceFor, KobbleStore } from "@software-factory/core";
+import { faceFrom, KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
 import type { Cards } from "../src/cards/cards.ts";
@@ -378,7 +378,9 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
       about: "Sends gifts early.",
       origin: "developer",
       customers: [],
-      face: faceFor("gift-buyer"),
+      // Its kobold from what it is: a cap (nothing matches), the colour
+      // from its name.
+      face: faceFrom({ name: "Gift Buyer" }),
     });
     const twin = await factory.press("/api/kobble/personas", {
       name: "Gift buyer",

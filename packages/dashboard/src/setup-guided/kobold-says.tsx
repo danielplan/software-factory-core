@@ -1,0 +1,76 @@
+// The kobold at the top of a step: what it said last (or what it is doing
+// and writing now), and the box to answer it, typed or by talking. What the
+// owner says carries the step it was said on and the cards they ask about.
+
+import { useState } from "react";
+
+import { type CoachView, messageOf, post } from "@/api";
+import { KoboldHead } from "@/components/kobold-face";
+import { Answer } from "@/setup-coach/answer-box";
+import { attachedNames } from "@/setup-coach/canvas";
+import { aboutLine } from "@/setup-coach/coach-chat";
+import { Said } from "@/setup-coach/said";
+import type { VoiceCall } from "@/voice/voice-call";
+
+import { onStepLine, type Step } from "./steps";
+
+export function KoboldSays({
+  coach,
+  call,
+  step,
+  asked,
+  onSent,
+}: Readonly<{
+  coach: CoachView;
+  call: VoiceCall;
+  step: Step;
+  asked: string[];
+  onSent: () => void;
+}>) {
+  const [problem, setProblem] = useState<string | null>(null);
+  const said = coach.messages.findLast((m) => m.from === "coach")?.text;
+  const say = (text: string) => {
+    setProblem(null);
+    onSent();
+    post("/api/setup/say", {
+      text:
+        text + aboutLine(attachedNames(coach.draft, asked)) + onStepLine(step),
+    }).catch((error: unknown) => {
+      setProblem(messageOf(error));
+    });
+  };
+  return (
+    <div className="flex items-start gap-3">
+      <KoboldHead size={40} />
+      <div className="grid min-w-0 flex-1 gap-3">
+        <div
+          aria-live="polite"
+          className="rounded-[4px_16px_16px_16px] bg-card px-4 py-3 text-[14.5px] leading-relaxed shadow-card"
+        >
+          <Bubble coach={coach} said={said} />
+        </div>
+        <Answer
+          call={call}
+          coach={coach}
+          onSay={say}
+          placeholder="Answer the kobold, or ask about this step…"
+        />
+        {problem && <p className="text-sm text-destructive">{problem}</p>}
+      </div>
+    </div>
+  );
+}
+
+// What the kobold says now: what it writes, what it does, or its last words.
+function Bubble({
+  coach,
+  said,
+}: Readonly<{ coach: CoachView; said: string | undefined }>) {
+  if (!coach.working) return <Said text={said ?? "Hi, I’m your kobold."} />;
+  if (coach.writing) return <Said text={coach.writing} />;
+  return (
+    <span className="text-muted-foreground">
+      {coach.activity ?? "Thinking…"}
+    </span>
+  );
+}

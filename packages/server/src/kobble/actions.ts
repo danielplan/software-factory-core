@@ -4,7 +4,7 @@
 
 import {
   type Exploration,
-  faceFor,
+  faceFrom,
   heardOf,
   PERSONA_COLORS,
   PERSONA_HATS,
@@ -139,6 +139,6 @@ export function addPersona(store: KobbleStore, body: unknown): KobblePersona {
     about,
     origin: "developer",
     customers: [],
-    face: face ?? faceFor(id),
+    face: face ?? faceFrom({ name, about, place }),
   });
 }

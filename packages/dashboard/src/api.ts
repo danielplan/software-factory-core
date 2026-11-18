@@ -8,13 +8,13 @@ import type { State } from "../../server/src/api.ts";
 export type {
   AddOnView,
   Board,
+  Card,
   CardView,
   CoachView,
   Draft,
   GitHubStatus,
   IdeaView,
   KitView,
-  IconName,
   StageMap,
   State,
   WorkView,
@@ -50,6 +50,7 @@ export type { Light, PartView } from "../../launcher/src/index.ts";
 // A persona's face from its id, and the hats and colours to pick from.
 export {
   faceFor,
+  faceFrom,
   PERSONA_COLORS,
   PERSONA_HATS,
 } from "../../core/src/kobble/face.ts";

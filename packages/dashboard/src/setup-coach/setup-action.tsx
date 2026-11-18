@@ -39,7 +39,7 @@ export function SetupAction({
         disabled={coach.working || busy}
         onClick={() => void press()}
       >
-        {building ? "Open the factory" : "Build the factory"}
+        {building ? "Open Kobble" : "Set up Kobble"}
       </Button>
     </div>
   );

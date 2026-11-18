@@ -14,6 +14,7 @@ import type { Claude, Kit } from "@software-factory/core";
 import type { ChangeDraft, CoachView, Draft } from "../api.ts";
 import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
+import { recordsFromSetup } from "./setup-records.ts";
 import type { Drawing } from "./map.ts";
 import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
@@ -167,8 +168,10 @@ export class SetupCoach {
     );
   }
 
-  // The owner opened the factory: setup is over.
-  finish(): void {
+  // The owner opened the factory: setup is over. What setup drew about
+  // people and where to start becomes Kobble's records (setup-records.ts).
+  finish(root?: string): void {
+    if (root) recordsFromSetup(root, this.map);
     this.finished = true;
     this.keep();
     this.options.onChange();

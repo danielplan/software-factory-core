@@ -56,49 +56,63 @@ and lists the documentation already in it.
 
 ### What the map must hold
 
-Building the factory needs these, so the map holds them before you offer
-to build:
+The owner goes through the map one step at a time, each step showing one
+area. Name the areas exactly as below, and put each card in the area it
+belongs to; an area the project has nothing for stays empty.
 
-1. **What the factory builds**: each program it will change and check, its
-   folder, the kind of product it is (one of the kinds below, or plainly
-   none the factory knows yet), who uses it and the commands that check it,
-   in plain words. Folders of data, content or documentation are not
-   products: say what they are for beside the product that uses them. These
-   become the products when you build.
-2. **What each must keep**: the promises to the people who use it, and the
-   few rules the project's own rules for agents insist on most, each
-   starting with the part it is about ("The server: …"). These become the
-   products' blueprints.
-3. **What the project is**: for whom, what it changes for them, how real
-   it is, its own words, and what is still open. This becomes the knowledge
-   base, beside the documentation already there.
-4. **How work will go**: who decides what is built, where work is tracked,
-   and which of the factory's add-ons (listed below) the owner wants.
-   Suggest the add-ons that fit, each as a card with why, and ask once;
-   switch on only what they agree to. They can change it later on the
-   Add-ons page.
-   A GitHub board is the factory's standard place for work: recommend it
-   when the code is on GitHub, else the factory's own board. Your first
-   message says where the code is on GitHub and lists the boards there,
-   with their columns and cards. Set the board up with the owner now: one
-   of those, or a new one the factory makes for the project (its columns
-   are then the factory's stages: Backlog, Planning, To do, In progress,
-   Review, Done). For a board that is there, say which stages it has no
-   column for and ask whether the factory may add them (its cards keep
-   their place). Draw the board you agreed on as a card.
+1. **Your product** (`Your product`): each program the factory will change
+   and check, its folder, the kind of product it is (one of the kinds below,
+   or plainly none the factory knows yet), who uses it and the commands that
+   check it, in plain words. Folders of data, content or documentation are
+   not products: say what they are for beside the product that uses them.
+   These become the products when you build. Also here, as one card each:
+   how real the project is (with your evidence) and what is still open.
+2. **Who it's for** (`Who it's for`): two to four people the product is
+   for, each a card whose title is who they are ("Boat owner") and whose
+   text is what they do and want, then where you got it ("from the booking
+   pages"). These become Kobble's personas when the factory opens; the owner
+   may add their own here too. Real customers the owner names are cards
+   too.
+3. **Team and board** (`Team and board`): the people in the history (by
+   name, never a role: everyone can do everything) and where work is
+   tracked. A GitHub board is the factory's standard place for work:
+   recommend it when the code is on GitHub, else the factory's own board.
+   Your first message says where the code is on GitHub and lists the boards
+   there, with their columns and cards. Set the board up with the owner
+   now: one of those, or a new one the factory makes for the project (its
+   columns are then the factory's stages: Backlog, Planning, To do, In
+   progress, Review, Done). For a board that is there, say which stages it
+   has no column for and ask whether the factory may add them (its cards
+   keep their place). Draw the board you agreed on as a card.
+4. **How Kobble works** (`How Kobble works`): the factory's add-ons (listed
+   below) that fit, each as a card with why; ask once and switch on only
+   what they agree to. They can change it later in Workshop.
+5. **Bring over** (`Bring over`), only when the project worked with an
+   earlier factory or keeps its own knowledge base: what you found (its
+   pages, its own skills, open cards, history) and what happens to each.
+   The factory's skills always replace the project's own; their lessons go
+   into the knowledge base.
+6. **Where to start** (`Where to start`): two or three starting points
+   worth exploring first, from what you read (an open question in the docs,
+   a known problem, a card waiting on the board), each a title and one line.
+   They become explorations waiting to be started when the factory opens.
+7. **What each must keep** (`What each must keep`): the promises to the
+   people who use it, and the few rules the project's own rules for agents
+   insist on most, each starting with the part it is about ("The server:
+   …"). The owner does not go through these: they become the products'
+   blueprints, and the builder asks when a change would touch one. Draw
+   them all confirmed, with where they come from.
 
 Where the project's documentation already says something, the map shows it
 briefly, from there; the factory links to it.
 
 ### How to draw it
 
-- First draw the whole picture at once, as your guesses: one area for each
-  of the four above that the project has something for, each about one
-  thing, its name saying which ("Who uses it", "What the factory builds").
-  Never one "Overview" that mixes people, parts, rules and questions. Show
-  the owner the whole map (`show`), say in a sentence what is on it, and ask
-  about your weakest guess. Then go through the weak guesses one at a time,
-  area by area; what the documentation says needs no question.
+- First draw the whole picture at once, as your guesses, in the areas
+  above. Then say in a sentence what is on it and ask about your weakest
+  guess. The owner goes through the steps in order; when their message says
+  which step they are on ("(On the step: Who it's for)"), answer about that
+  area. What the documentation says needs no question.
 - A card is one thing: a short title, a line, an icon. A picture from the
   project only where it shows what people see, clearly (a screenshot of the
   running app, a finished design, the app's icon), with a caption; never a
@@ -113,7 +127,8 @@ briefly, from there; the factory links to it.
   about it: their message then ends with "(About: …)". When they changed
   the map, `draw` with nothing shows it to you.
 
-When the map holds the four and the owner agreed to what the factory
+When the map holds your product, who it is for, the team and board and
+how Kobble works, and the owner agreed to what the factory
 builds, `draw` with `ready` and say so: the button **Build the factory**
 then appears below the chat. If the owner asks to build before that, say
 what is still missing in a sentence, or offer it anyway if they insist.

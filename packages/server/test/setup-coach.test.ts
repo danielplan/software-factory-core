@@ -136,6 +136,22 @@ test("the coach plans on the map, builds the factory once the owner says so, and
       move: { id: "area:The project", x: 0, y: 0 },
     });
     await post("/api/setup/draft", { remove: "card-2" });
+    // The owner adds a persona of their own: a card, agreed already.
+    await post("/api/setup/draft", {
+      add: {
+        area: "Who it's for",
+        title: "First boat owner",
+        text: "Books refills",
+      },
+    });
+    const added = session.state();
+    assert.ok(added.mode === "setup");
+    assert.ok(
+      added.coach.draft.cards.some(
+        (c) =>
+          c.title === "First boat owner" && c.confirmed && c.icon === "person",
+      ),
+    );
     assert.equal(
       (await post("/api/setup/draft", { remove: "nothing" })).status,
       409,

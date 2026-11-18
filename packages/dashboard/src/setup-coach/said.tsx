@@ -20,11 +20,6 @@ export function Said({ text }: Readonly<{ text: string }>) {
   );
 }
 
-// What the owner said: their words as typed, lines kept.
-export function SaidByOwner({ text }: Readonly<{ text: string }>) {
-  return <span className="whitespace-pre-line">{text}</span>;
-}
-
 const PARTS: Components = {
   strong: ({ children }) => (
     <strong className="font-semibold">{children}</strong>

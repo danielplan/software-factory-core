@@ -290,10 +290,26 @@ export type CoachView = {
   made: boolean;
 };
 
+// The guided setup's steps, each showing the map's area of the same name
+// (the coach draws into these areas). "What each must keep" is drawn but
+// not shown: it goes into the products' blueprints.
+export const SETUP_AREAS = {
+  product: "Your product",
+  people: "Who it's for",
+  team: "Team and board",
+  how: "How Kobble works",
+  bring: "Bring over",
+  start: "Where to start",
+  keep: "What each must keep",
+} as const;
+
 // The owner's own change to the map: a card taken off, or moved. What a
 // card says is changed by talking to the coach.
 export type ChangeDraft =
-  { remove: string } | { move: { id: string; x: number; y: number } };
+  | { remove: string }
+  | { move: { id: string; x: number; y: number } }
+  // A card the owner adds (a persona in "Who it's for"), agreed already.
+  | { add: { area: string; title: string; text?: string } };
 
 // The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };
