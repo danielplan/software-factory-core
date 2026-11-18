@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CoachView } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { showsVoice } from "@/voice/call";
 import { useVoiceCall } from "@/voice/use-voice-call";
 import type { VoiceCall } from "@/voice/voice-call";
 import { VoiceView } from "@/voice/voice-view";
@@ -27,7 +28,7 @@ export function Answer({
   // The first box on a page: a few lines to write in, the buttons below.
   big?: boolean;
 }>) {
-  const talking = useVoiceCall(call).phase !== "off";
+  const talking = showsVoice(useVoiceCall(call));
   if (talking)
     return (
       <VoiceView

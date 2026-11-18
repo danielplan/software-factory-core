@@ -9,6 +9,7 @@ import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 
+import { showsVoice } from "@/voice/call";
 import { useVoiceCall } from "@/voice/use-voice-call";
 import { VoiceView } from "@/voice/voice-view";
 
@@ -71,7 +72,7 @@ function TalkBox({
 }>) {
   const [text, setText] = useState("");
   const call = useKoboldCall(page, attached, onSent);
-  const talking = useVoiceCall(call).phase !== "off";
+  const talking = showsVoice(useVoiceCall(call));
   const busy = page.talk.writing !== null;
   if (talking)
     return (
