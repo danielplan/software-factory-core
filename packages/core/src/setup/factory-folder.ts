@@ -140,7 +140,8 @@ export function saveCompany(root: string, company: Company): void {
 }
 
 // A product's description next to its code, with its first blueprint (the one
-// given, drafted from the code, or a placeholder), listed in the company file.
+// given, drafted from the code, or a placeholder) unless it has one already,
+// listed in the company file.
 // A folder inside the project is listed from the project's root, so the
 // project can move; one elsewhere keeps its whole path.
 export function addProduct(
@@ -155,6 +156,8 @@ export function addProduct(
   const file = productSchema.parse(rest);
   writeJson(join(home, PRODUCT_FILE), file);
   listProduct(root, home);
+  // A blueprint the project has already is its own: never written over.
+  if (existsSync(join(home, "BLUEPRINT.md"))) return home;
   writeFileSync(
     join(home, "BLUEPRINT.md"),
     blueprint?.trim()
