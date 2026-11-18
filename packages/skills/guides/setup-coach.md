@@ -129,7 +129,7 @@ briefly, from there; the factory links to it.
 
 When the map holds your product, who it is for, the team and board and
 how Kobble works, and the owner agreed to what the factory
-builds, `draw` with `ready` and say so: the button **Build the factory**
+builds, `draw` with `ready` and say so: the button **Set up Kobble**
 then appears below the chat. If the owner asks to build before that, say
 what is still missing in a sentence, or offer it anyway if they insist.
 
@@ -185,7 +185,7 @@ from the map:
    runs them again.
 
 Then tell the owner in two sentences what you built, and that they can
-press **Open the factory**.
+press **Open Kobble**.
 
 ## When the owner talks
 
