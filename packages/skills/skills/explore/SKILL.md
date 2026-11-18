@@ -32,3 +32,16 @@ You are in the version's own copy of the code, on its branch. Change only files 
 5. **A library when it helps.** When a screen needs what the product's kit does not do (a chart, a map, a calendar), you may add one well-known, maintained library that fits its framework, never a little-known one.
 6. Data is made up and says so, never real people's. Try, don't check: no tests, lint or builds while prototyping.
 7. **End with your last words**, two or three plain lines, shown on the prototype's card and kept with the version, so the build checks them: what you changed, where to look when it runs, and every library you added or piece you copied ("added a chart library, recharts"; "copied the list from the shop").
+
+## The made-up world
+
+When a product names a made-up world (its `world` in `product.json`: a folder of situations, `<key>.json` with `name`, `about`, `clock`, `signed_in` and `tables`), the prototypes of an exploration share one live world instead of each keeping its own made-up data. The start command is told where it is, `FACTORY_WORLD_URL`:
+
+- `GET` it for `{situation, version, signed_in, tables}`, and again every few seconds, so a change in another tab or device shows;
+- `POST` `{version, changes: [{table, op: "add" | "change" | "remove", row}]}` with the version you read; rows are found by their `id`. The answer is the new world; 409 means it changed meanwhile: read it again and redo the change;
+- `POST <url>/reset` starts it again from its situation.
+
+The prototype reads its data from the world, signs in as `signed_in` says, and writes back what it changes, so the other prototypes see it. When a screen needs data the world does not have yet:
+
+- data the product keeps already: read it from its table;
+- something new: add it as a column of the table it belongs to (the kobold can put it in the world's rows); do not change the product's situations, which follow its real data: the build makes it real there.

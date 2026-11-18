@@ -1,11 +1,15 @@
 // What `software-factory check` looks at in Kobble's files: that each file
 // fits, and that what a record names is there (the personas, and an
-// exploration's copy of each signal it heard). Each problem starts with where it is.
+// exploration's copy of each signal it heard); and the made-up world's
+// situations (situations.ts), with the situation each persona names. Each
+// problem starts with where it is.
 
 import { existsSync } from "node:fs";
 
-import { messageOf } from "../products/product.ts";
-import type { Board } from "./schemas.ts";
+import { findProducts } from "../products/find-products.ts";
+import { messageOf, type Product } from "../products/product.ts";
+import type { Board, KobblePersona } from "./schemas.ts";
+import { Situations, situationProblems } from "./situations.ts";
 import { KOBBLE_FOLDER, KobbleStore } from "./store.ts";
 
 export function checkKobbleIn(factory: string): {
@@ -13,7 +17,21 @@ export function checkKobbleIn(factory: string): {
   problems: string[];
 } {
   const store = new KobbleStore(factory);
-  if (!existsSync(store.root)) return { checked: false, problems: [] };
+  const { products } = findProducts(factory);
+  const worlds = situationProblems(products);
+  if (!existsSync(store.root))
+    return {
+      checked: products.some((product) => product.world),
+      problems: worlds,
+    };
+  return {
+    checked: true,
+    problems: [...worlds, ...recordProblems(store, products)],
+  };
+}
+
+// What is wrong with Kobble's records.
+function recordProblems(store: KobbleStore, products: Product[]): string[] {
   const problems: string[] = [];
   // What could be read; null when a file did not fit, so what it names is
   // not checked against it.
@@ -30,9 +48,13 @@ export function checkKobbleIn(factory: string): {
   const explorations = read(() => store.all("explorations")) ?? [];
   const tests = read(() => store.all("tests")) ?? [];
   read(() => [store.sync()]);
-  for (const one of explorations)
+  for (const one of explorations) {
     for (const board of read(() => [store.board(one.id)]) ?? [])
       problems.push(...arrowProblems(one.id, board));
+    read(() => [store.world(one.id)]);
+  }
+  const keys = new Situations(() => products).names().map((one) => one.key);
+  problems.push(...situationNamed(personas ?? [], keys));
   const known = (ids: { id: string }[] | null) => ({
     has: (id: string) => ids === null || ids.some((one) => one.id === id),
   });
@@ -67,7 +89,17 @@ export function checkKobbleIn(factory: string): {
     for (const what of gone)
       problems.push(`${KOBBLE_FOLDER}/${where}: there is no ${what}.`);
   }
-  return { checked: true, problems };
+  return problems;
+}
+
+// The personas that name a situation there is not.
+function situationNamed(personas: KobblePersona[], keys: string[]): string[] {
+  return personas
+    .filter((one) => one.situation && !keys.includes(one.situation))
+    .map(
+      (one) =>
+        `${KOBBLE_FOLDER}/personas/${one.id}.json: there is no situation “${one.situation ?? ""}”.`,
+    );
 }
 
 // A board's arrows that join a thing not on it.

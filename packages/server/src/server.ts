@@ -22,6 +22,8 @@ import { readBody, send } from "./http.ts";
 import { on, optionalText, record } from "./asked.ts";
 import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
+import { answerWorld, isWorldRoute } from "./kobble/world-route.ts";
+import type { ExplorationWorlds } from "./kobble/explorations/worlds.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -83,6 +85,7 @@ export function startServer(options: {
       routes,
       watchers,
       boardTools: kobble.boardTools,
+      worlds: kobble.worlds,
       ...options,
     });
   });
@@ -163,6 +166,7 @@ type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
   boardTools: (id: string) => BoardTools;
+  worlds: ExplorationWorlds;
   page: string;
   session: Session;
 };
@@ -178,6 +182,8 @@ async function answer(
     send(response, 403, { error: "Not here." });
   } else if (url.pathname === "/api/events") {
     stream(response, context);
+  } else if (isWorldRoute(url)) {
+    await answerWorld(incoming, response, url, context.worlds);
   } else if (isAgentTools(incoming, url)) {
     await answerAgentTools(incoming, response, url, context);
   } else if (url.pathname === WEBHOOK_PATH && incoming.method === "POST") {

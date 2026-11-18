@@ -7,6 +7,7 @@
 //   explorations/X-1/board.json         its canvas
 //   explorations/X-1/conversation.md    the talk with the kobold
 //   explorations/X-1/handoff.md         written when it is handed off
+//   explorations/X-1/world.json         the made-up world its prototypes share
 //   personas/<id>.json
 //   tests/T-0001.json    persona tests
 //   sync.json            when the live app was last read, and the cursor
@@ -48,6 +49,7 @@ import {
   type SyncState,
   syncStateSchema,
 } from "./schemas.ts";
+import { type World, worldSchema } from "./world.ts";
 
 export const KOBBLE_FOLDER = "kobble";
 
@@ -81,6 +83,7 @@ const NAMED: Record<KobbleKind, string> = {
 const SYNC_FILE = "sync.json";
 const BOARD_FILE = "board.json";
 const TALK_FILE = "conversation.md";
+const WORLD_FILE = "world.json";
 const EMPTY_BOARD: Board = { things: [], links: [] };
 
 // The talk with the kobold about an exploration: Claude Code's conversation
@@ -199,6 +202,27 @@ export class KobbleStore {
       parsed.data,
     );
     return parsed.data;
+  }
+
+  // The made-up world an exploration's prototypes share; none before it
+  // started.
+  world(id: string): World | null {
+    const file = join(this.root, "explorations", id, WORLD_FILE);
+    if (!existsSync(file)) return null;
+    const name = `explorations/${id}/${WORLD_FILE}`;
+    const parsed = worldSchema.safeParse(readJson(file, name));
+    if (!parsed.success)
+      throw new KobbleRefused(
+        `${name} does not fit: ${z.prettifyError(parsed.error)}`,
+      );
+    return parsed.data;
+  }
+
+  saveWorld(id: string, world: World): World {
+    this.explorationOrRefuse(id);
+    const saved = worldSchema.parse(world);
+    writeAtomically(join(this.root, "explorations", id, WORLD_FILE), saved);
+    return saved;
   }
 
   conversation(id: string): Conversation {

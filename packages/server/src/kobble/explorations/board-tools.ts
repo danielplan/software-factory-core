@@ -3,7 +3,8 @@
 // notes, diagrams and choices, changes and removes things, links and
 // unlinks them with a short label, points at a thing (the person's view
 // moves there), and marks a thing agreed or a sketch. Each answers with
-// what it did and the whole board. Only the conversation's own Claude Code
+// what it did and the whole board. Beside them, the made-up world's tools
+// (world-tools.ts). Only the conversation's own Claude Code
 // has the token.
 
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -15,6 +16,8 @@ import { COACH_HEADER } from "../../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../../mcp.ts";
 import type { Act } from "./board-acts.ts";
 import type { Option } from "./board-things.ts";
+import { addWorldTools } from "./world-tools.ts";
+import type { ExplorationWorlds } from "./worlds.ts";
 
 export type BoardTools = {
   token: string;
@@ -22,6 +25,8 @@ export type BoardTools = {
   look: () => string;
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
+  // The made-up world its prototypes share, and the exploration's id.
+  world: { worlds: ExplorationWorlds; id: string };
 };
 
 const option = z.object({
@@ -152,6 +157,7 @@ function serverFor(on: BoardTools): McpServer {
     },
     (args) => toolAnswer(() => on.rename(args)),
   );
+  addWorldTools(server, on.world.worlds, on.world.id);
   return server;
 }
 

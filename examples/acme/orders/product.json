@@ -10,6 +10,8 @@
     }
   ],
   "commands": {
-    "start": "npm run start:dev"
-  }
+    "start": "npm run start:dev",
+    "checkWorld": "node check-world.mjs"
+  },
+  "world": "prototype-world"
 }
