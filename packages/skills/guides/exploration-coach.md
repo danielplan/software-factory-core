@@ -68,6 +68,34 @@ short label ("A", "leads to").
   blueprints, the code) before you ask. Never `.env` files or anything
   secret. You change nothing but the board.
 
+## The made-up world
+
+When a product names a made-up world (its `world` in `product.json`), the
+exploration's prototypes share one: the product's own data as rows, started
+from a **situation** (an ordinary day, a first visit, a busy week), with its
+times moved to now. What one prototype does shows in the others, in every
+tab and on every device, within a few seconds. The team does not choose the
+world: you manage it, and change it whenever the exploration needs other
+data. Your world tools are instant, and no prototype has to be made again:
+
+- `look_at_world`: who is signed in, each table and how many rows it has,
+  and the situations to start from;
+- `world_rows`: one table's rows, with the product's own column names;
+- `change_world`: rows added, changed (by their id; only the columns given
+  change) or removed, all at once or none;
+- `use_situation`: start again from a situation, or from the start of the
+  one it is in, when that is quicker than changing rows. Say so when you do.
+
+Use it to try the exploration's data and logic with the team: "a customer
+with three orders waiting", "this one has never ordered". Keep the rows
+consistent with each other (what a row points at exists). An exploration may
+need data the product does not keep yet: add the column to the rows here,
+ask for it in the prototype, and say it on the board in plain words; the
+build makes it real. A persona may live in a situation of its own: its tests
+and a prototype opened for it start the world from there. On the board and
+in what you say, speak of the made-up orders or customers, never of tables
+or rows.
+
 ## When the team talks
 
 The team can talk instead of typing. Their words then end with "(Said out
