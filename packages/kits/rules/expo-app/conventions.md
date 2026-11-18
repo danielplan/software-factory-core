@@ -62,3 +62,27 @@ The same as a React web app's, plus `expo install --check` and expo-doctor
   use zero cache times, so Jest exits.
 - **Device flows** with Maestro on a simulator, finding elements by test id
   or label, never by position.
+
+## The starter
+
+A new Expo app starts as a copy of the kit's starter (`starters/expo-app` in
+the kits): one home screen, a tiny API client, the checks above in
+`npm run verify`, a `BLUEPRINT.md` and a prototype mode. Keep to its folders
+and keep its checks.
+
+## Prototype mode
+
+The prototype is the real app (in the browser, through Expo's web support)
+against a pretend backend in `prototype/`, with made-up data from the
+situations in `prototype/situations.ts`, or from the factory's shared world
+when the prototype starts with `FACTORY_WORLD_URL` (see the starter's
+README). `npm run prototype` builds it, `npm run prototype:live` runs it.
+
+- **No prototype code in the real app.** The app reaches `prototype/` only
+  through the one prototype switch, which a normal build leaves out.
+  `npm run check:prototypes`, part of `npm run verify`, builds the app as a
+  normal build does and fails when its JavaScript names the prototype or
+  MSW.
+- **One pretend backend** for the tests and the prototype.
+- Something a phone can do and a browser cannot (background location, the
+  camera) is faked in the prototype mode, never in the real app.

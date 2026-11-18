@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "entry": ["test/**/*.{ts,tsx}", "scripts/*.ts"],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "test/**/*.{ts,tsx}",
+    "prototype/**/*.ts",
+    "scripts/*.ts",
+  ],
+  "ignoreExportsUsedInFile": true,
+  // shadcn's generated pieces (npx shadcn add) export every part of a
+  // component; the parts nobody uses yet stay, so the files can be compared
+  // with shadcn's own. Whole unused files are still reported.
+  "ignoreIssues": {
+    "src/components/ui/**": ["exports"],
+  },
+  // Loaded by src/theme.css (@import "tailwindcss"), which knip does not read.
+  "ignoreDependencies": ["tailwindcss"],
+}

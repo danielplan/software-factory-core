@@ -1,0 +1,10 @@
+{
+  "eyebrow": "New app",
+  "title": "New phone app",
+  "intro": "This is the starting point: the first screen of a new app.",
+  "itemsTitle": "Items",
+  "empty": {
+    "title": "No items yet",
+    "subtitle": "Items will show here."
+  }
+}

@@ -1,8 +1,7 @@
 // The React web app kit: a web app made with React and Vite. It recognises
 // one by its packages, runs it with Vite's development server, and makes a
-// new one with Vite's own starter.
-
-import { basename } from "node:path";
+// new one from its own starter (starters/react-web-app): the kit's
+// standards, checks and prototype mode.
 
 import { defineKit, type Product } from "@software-factory/core";
 
@@ -13,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 5173;
 // A phone app also uses React; these packages say it is one.
@@ -75,17 +75,6 @@ export const reactWebApp = defineKit({
       },
     ];
   },
-  create: (folder) => [
-    [
-      "npm",
-      "create",
-      "vite@latest",
-      basename(folder),
-      "--",
-      "--template",
-      "react-ts",
-      "--no-interactive",
-    ],
-    ["npm", "install", "--prefix", basename(folder)],
-  ],
+  starter: starterFolder("react-web-app"),
+  create: installIn,
 });

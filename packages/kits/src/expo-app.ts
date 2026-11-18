@@ -1,8 +1,7 @@
 // The Expo app kit: a phone app made with Expo and React Native. In this
 // first version it runs in the browser, through Expo's web support; the
-// phone emulators come later. It makes a new one with Expo's own starter.
-
-import { basename } from "node:path";
+// phone emulators come later. It makes a new one from its own starter
+// (starters/expo-app): the kit's standards, checks and prototype mode.
 
 import { defineKit, type Product } from "@software-factory/core";
 
@@ -13,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 8081;
 
@@ -57,14 +57,6 @@ export const expoApp = defineKit({
       },
     ];
   },
-  create: (folder) => [
-    [
-      "npx",
-      "create-expo-app@latest",
-      basename(folder),
-      "--template",
-      "blank-typescript",
-      "--yes",
-    ],
-  ],
+  starter: starterFolder("expo-app"),
+  create: installIn,
 });

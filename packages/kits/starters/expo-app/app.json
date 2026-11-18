@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "New phone app",
+    "slug": "new-phone-app",
+    "scheme": "new-phone-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.newphoneapp"
+    },
+    "android": {
+      "package": "com.example.newphoneapp"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-localization"
+    ]
+  }
+}

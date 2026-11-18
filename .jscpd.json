@@ -3,7 +3,11 @@
   "minTokens": 60,
   "reporters": ["console"],
   "format": ["typescript"],
-  "ignore": ["**/node_modules/**", "**/coverage/**"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/coverage/**",
+    "packages/kits/starters/**"
+  ],
   "absolute": false,
   "gitignore": true
 }

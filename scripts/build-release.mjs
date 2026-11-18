@@ -4,7 +4,7 @@
 // The core's packages, compiled to JavaScript in their own layout (npm does
 // not run TypeScript from node_modules) and bundled inside the package, with
 // the dashboard built, the skills, their templates and guides, the
-// knowledge base's template and the kits' rules. Its own `bin` is the
+// knowledge base's template and the kits' rules and starters. Its own `bin` is the
 // software-factory command. The folder is then committed to the release
 // branch and tagged release-<version> (docs/releasing.md).
 
@@ -33,7 +33,7 @@ const PACKAGES = [
 const ASSETS = {
   skills: ["skills", "templates", "guides"],
   "knowledge-base": ["template"],
-  kits: ["rules"],
+  kits: ["rules", "starters"],
 };
 
 const version = /CORE_VERSION = "([^"]+)"/.exec(
@@ -88,7 +88,14 @@ for (const name of PACKAGES) {
   const from = join(here, "packages", name);
   const own = JSON.parse(readFileSync(join(from, "package.json"), "utf8"));
   for (const asset of ASSETS[name] ?? [])
-    cpSync(join(from, asset), join(bundled, name, asset), { recursive: true });
+    cpSync(join(from, asset), join(bundled, name, asset), {
+      recursive: true,
+      // A starter tried out in place keeps its installed packages and builds.
+      filter: (path) =>
+        !["node_modules", "dist", "coverage", ".expo"].some((left) =>
+          path.split(/[\\/]/).includes(left),
+        ),
+    });
   for (const [dependency, range] of Object.entries(own.dependencies ?? {}))
     if (!dependency.startsWith("@software-factory/"))
       external[dependency] = range;
