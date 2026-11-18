@@ -22,6 +22,7 @@ import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
 import { linked, withThing } from "./board-things.ts";
+import { codeMaps } from "./product-picture.ts";
 
 const TIME_LIMIT_MS = 60 * 60_000;
 const START_WITHIN_MS = 3 * 60_000;
@@ -154,6 +155,15 @@ export class ExplorationPrototypes {
     this.mode.close();
   }
 
+  // The kobold's last words, on the prototype's card.
+  private keepWords(exploration: string, key: string, said: string): void {
+    const store = this.options.store();
+    const board = store.board(exploration);
+    const made = prototypeOf(board, key);
+    if (made) store.saveBoard(exploration, withThing(board, { ...made, said }));
+    this.options.onChange();
+  }
+
   private async making(
     exploration: Exploration,
     board: Board,
@@ -175,7 +185,10 @@ export class ExplorationPrototypes {
         `The problem: ${exploration.problem}`,
         `The question it answers: ${questionOf(board, key)}`,
         `This prototype: ${made.name}. ${made.difference}`,
-      ].join("\n\n"),
+        codeMaps(this.options.root),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       readOnly: false,
       deny: ["Read(**/.env*)"],
       instructions: readFileSync(
@@ -188,9 +201,13 @@ export class ExplorationPrototypes {
         this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
       },
     });
+    const said = result.ok ? lastWords(result.text) : "";
     await workspace.commitAll(
-      `Prototype ${key} of ${exploration.id}: ${made.name}`,
+      [`Prototype ${key} of ${exploration.id}: ${made.name}`, said]
+        .filter(Boolean)
+        .join("\n\n"),
     );
+    if (said) this.keepWords(exploration.id, key, said);
     this.mode.set(
       exploration.id,
       key,
@@ -203,6 +220,12 @@ export class ExplorationPrototypes {
           },
     );
   }
+}
+
+// The kobold's last words: the end of its answer, a few lines at most.
+export function lastWords(text: string): string {
+  const paragraphs = text.trim().split(/\n\s*\n/);
+  return (paragraphs.at(-1) ?? "").trim().slice(0, 600);
 }
 
 // The question of the choice an option belongs to.

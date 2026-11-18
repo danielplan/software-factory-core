@@ -82,6 +82,11 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
     <Frame data={data} title={`${thing.key} · ${thing.name}`}>
       <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
       <div className="text-xs text-muted-foreground">{thing.difference}</div>
+      {thing.said && (
+        <p className="border-l-2 border-border pl-2 text-xs text-foreground-2">
+          {thing.said}
+        </p>
+      )}
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
         <a

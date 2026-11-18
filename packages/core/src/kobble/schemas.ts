@@ -141,6 +141,9 @@ export const thingSchema = z.discriminatedUnion("kind", [
       .regex(PROTOTYPE_BRANCH, "a prototype's branch is proto/X-<n>-<key>"),
     // Its persona tests, the last one last.
     tests: z.array(fileId),
+    // The kobold's last words when it made it: what it changed, and every
+    // library it added or piece it copied, so the build checks them.
+    said: z.string().optional(),
   }),
   z.strictObject({
     ...common,

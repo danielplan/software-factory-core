@@ -151,7 +151,12 @@ function buttonRoutes(
       await prototypes.stopAll(dropped.id);
     }),
     "POST /api/kobble/explorations/say": button((body) => {
-      void talks.say(id(body), field(body, "text"), attachedIn(body));
+      void talks.say(
+        id(body),
+        field(body, "text"),
+        attachedIn(body),
+        spokenIn(body),
+      );
     }),
     "POST /api/kobble/explorations/make": button((body) => ({
       board: prototypes.make(
@@ -183,4 +188,10 @@ export function branchParts(
   return found?.[1] && found[2]
     ? { exploration: found[1], key: found[2].toUpperCase() }
     : null;
+}
+
+// The language the person spoke in, when they talked instead of typing.
+function spokenIn(body: unknown): string | undefined {
+  const value = (body as { spokenIn?: unknown } | null)?.spokenIn;
+  return typeof value === "string" && value.trim() ? value : undefined;
 }

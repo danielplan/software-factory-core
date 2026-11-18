@@ -27,5 +27,8 @@ You are in the version's own copy of the code, on its branch. Change only files 
 
 1. Read the idea, its story and what the person asked for this version.
 2. **As simple as possible: one place, your way.** Build only what the person needs to try the idea, in the one place where it matters most, from a similar page and the product's own pieces. No variants side by side, nothing around it they did not ask for.
-3. Data is made up and says so, never real people's. Try, don't check: no tests while prototyping.
-4. End with two lines: what you changed, and where to look when it runs.
+3. **Read little.** Your prompt has a map of the product: its screens and its shared pieces. Open the files the change needs; look further only when the map does not say enough.
+4. **Built from the product's own pieces.** Start from the most similar page and build the same way: the same components, layout, spacing and words. Extend a screen or area that exists rather than adding a page, unless asked. A piece the product lacks: first copy one from another product in this repository and adapt it (never import across products); else add the standard one from the product's own kit.
+5. **A library when it helps.** When a screen needs what the product's kit does not do (a chart, a map, a calendar), you may add one well-known, maintained library that fits its framework, never a little-known one.
+6. Data is made up and says so, never real people's. Try, don't check: no tests, lint or builds while prototyping.
+7. **End with your last words**, two or three plain lines, shown on the prototype's card and kept with the version, so the build checks them: what you changed, where to look when it runs, and every library you added or piece you copied ("added a chart library, recharts"; "copied the list from the shop").

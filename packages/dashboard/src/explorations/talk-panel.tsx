@@ -2,13 +2,18 @@
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
+import { Mic } from "lucide-react";
 import { useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 
+import { useVoiceCall } from "@/voice/use-voice-call";
+import { VoiceView } from "@/voice/voice-view";
+
 import { nameOf } from "./board/nodes";
+import { useKoboldCall } from "./kobold-call";
 
 export function TalkPanel({
   page,
@@ -22,26 +27,8 @@ export function TalkPanel({
   onDetach: (thing: string) => void;
 }>) {
   const { exploration } = page;
-  const [text, setText] = useState("");
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
-  const busy = page.talk.writing !== null;
-  const send = () => {
-    setRefused(null);
-    post("/api/kobble/explorations/say", {
-      id: exploration.id,
-      text,
-      attached,
-    }).then(
-      () => {
-        setText("");
-        onSent();
-      },
-      (error: unknown) => {
-        setRefused(messageOf(error));
-      },
-    );
-  };
   return (
     <aside className="flex min-h-0 w-[340px] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
       <div className="flex items-center gap-2.5 border-b border-border-soft px-4 py-3.5">
@@ -58,28 +45,94 @@ export function TalkPanel({
         <Attached page={page} attached={attached} onDetach={onDetach} />
       )}
       {open && (
-        <form
-          className="flex gap-2 border-t border-border-soft p-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            send();
-          }}
-        >
-          <input
-            aria-label="Talk to the kobold"
-            placeholder="Talk to the kobold…"
-            value={text}
-            onChange={(event) => {
-              setText(event.target.value);
-            }}
-            className="h-[38px] flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
-          />
-          <Button type="submit" size="pill-sm" disabled={busy || !text.trim()}>
-            Send
-          </Button>
-        </form>
+        <TalkBox
+          page={page}
+          attached={attached}
+          onSent={onSent}
+          onRefused={setRefused}
+        />
       )}
     </aside>
+  );
+}
+
+// Where the person talks to the kobold: a box to type in with Send and
+// Talk; during a call, the voice in its place.
+function TalkBox({
+  page,
+  attached,
+  onSent,
+  onRefused,
+}: Readonly<{
+  page: ExplorationPage;
+  attached: string[];
+  onSent: () => void;
+  onRefused: (problem: string | null) => void;
+}>) {
+  const [text, setText] = useState("");
+  const call = useKoboldCall(page, attached, onSent);
+  const talking = useVoiceCall(call).phase !== "off";
+  const busy = page.talk.writing !== null;
+  if (talking)
+    return (
+      <div className="border-t border-border-soft p-3">
+        <VoiceView
+          call={call}
+          coachProblem={page.talk.problem}
+          onEnd={() => {
+            call.end();
+          }}
+        />
+      </div>
+    );
+  const send = () => {
+    onRefused(null);
+    post("/api/kobble/explorations/say", {
+      id: page.exploration.id,
+      text,
+      attached,
+    }).then(
+      () => {
+        setText("");
+        onSent();
+      },
+      (error: unknown) => {
+        onRefused(messageOf(error));
+      },
+    );
+  };
+  return (
+    <form
+      className="flex gap-2 border-t border-border-soft p-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        send();
+      }}
+    >
+      <input
+        aria-label="Talk to the kobold"
+        placeholder="Talk to the kobold…"
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value);
+        }}
+        className="h-[38px] flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
+      />
+      <Button
+        type="button"
+        size="pill-sm"
+        variant="ring"
+        aria-label="Talk out loud"
+        onClick={() => {
+          call.start();
+        }}
+      >
+        <Mic aria-hidden className="size-4" />
+      </Button>
+      <Button type="submit" size="pill-sm" disabled={busy || !text.trim()}>
+        Send
+      </Button>
+    </form>
   );
 }
 

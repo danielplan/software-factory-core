@@ -11,6 +11,8 @@ import { join } from "node:path";
 import type { Claude, KobbleStore } from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
+import { productPicture } from "./product-picture.ts";
+
 import { EMPTY } from "../../coach/map.ts";
 import { Talk } from "../../coach/talk.ts";
 import { Refused } from "../../refused.ts";
@@ -37,6 +39,8 @@ export type TalkView = {
 type TalksOptions = {
   claude: Claude;
   project: string;
+  // The factory's folder: its products, for the kobold's picture of them.
+  root?: string;
   store: () => KobbleStore;
   onChange: () => void;
 };
@@ -91,7 +95,12 @@ export class ExplorationTalks {
 
   // A person's words, with the things they attached from the board; the
   // kobold answers with the board in front of it.
-  async say(id: string, text: string, attached: string[] = []): Promise<void> {
+  async say(
+    id: string,
+    text: string,
+    attached: string[] = [],
+    spokenIn?: string,
+  ): Promise<void> {
     const talk = this.talk(id);
     const said = talk.heard(text);
     const board = this.options.store().board(id);
@@ -103,7 +112,7 @@ export class ExplorationTalks {
       named.length > 0
         ? `\n\n(They attached, from the board: ${named.join(", ")}.)`
         : "";
-    await this.answer(id, talk, `${said}${more}`);
+    await this.answer(id, talk, `${said}${more}`, spokenIn);
   }
 
   // The kobold's first look, when the exploration starts.
@@ -172,7 +181,12 @@ export class ExplorationTalks {
     return boardText(exploration, store.board(id));
   }
 
-  private async answer(id: string, talk: Talk, said: string): Promise<void> {
+  private async answer(
+    id: string,
+    talk: Talk,
+    said: string,
+    spokenIn?: string,
+  ): Promise<void> {
     const store = this.options.store();
     const exploration = store.get("explorations", id);
     if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
@@ -190,12 +204,12 @@ export class ExplorationTalks {
       ...(heard.length > 0 ? ["What we heard:", ...heard] : []),
       ")",
     ].join("\n");
-    await talk.answer(prompt, undefined, {
+    await talk.answer(prompt, spokenIn, {
       ...RIGHTS,
-      instructions: readFileSync(
-        join(guidesFolder, "exploration-coach.md"),
-        "utf8",
-      ),
+      instructions: [
+        readFileSync(join(guidesFolder, "exploration-coach.md"), "utf8"),
+        productPicture(this.options.root ?? "", this.options.project),
+      ].join("\n\n"),
     });
   }
 
