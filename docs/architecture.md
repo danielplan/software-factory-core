@@ -46,8 +46,9 @@ this computer, or Jira Cloud with an API token, each checked before it is
 saved (the GitHub and Jira add-ons, `packages/server/src/add-ons/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
 to build. The owner can talk instead of typing: voice is part of
-the core (`packages/dashboard/src/voice/`). A speech model runs in the
-browser (Whisper) and writes their words down; the coach's answer is read
+the core (`packages/dashboard/src/voice/`). Two speech models run in the
+browser (Whisper): a quick one shows their words while they speak, an
+accurate one writes the sentence as soon as they pause; the coach's answer is read
 out loud as it is written (Piper, also in the browser), and saying "stop"
 interrupts it. Nothing said leaves the computer except the written words
 sent to the coach. There are two kinds of start:
