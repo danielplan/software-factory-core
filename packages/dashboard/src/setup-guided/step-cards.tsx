@@ -9,33 +9,25 @@ import { useState } from "react";
 import { type Card, messageOf, post } from "@/api";
 
 import { initialsOf, isApp, isHowReal, isPerson } from "./card-bits";
-import { BigRow, NewPersona, PersonRow, Row, Tile } from "./card-views";
+import { BoardCard, NewPersona, PersonRow, Row, Tile } from "./card-views";
+import { isLook, TheLook } from "./the-look";
+import { FirstExploration } from "./first-exploration";
 import { HowFar } from "./how-far";
 import { TeamTiles } from "./team-tiles";
 
-export type CardActs = {
-  asked: string[];
-  onAsk: (id: string) => void;
-  onRemove: (id: string) => void;
-};
+export type CardActs = { onRemove: (id: string) => void };
 
 export function StepCards({
   cards,
   stepId,
   area,
-  asked,
-  onAsk,
 }: Readonly<{
   cards: Card[];
   stepId: string;
   area: string;
-  asked: string[];
-  onAsk: (id: string) => void;
 }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const acts: CardActs = {
-    asked,
-    onAsk,
     onRemove: (id) => {
       post("/api/setup/draft", { remove: id }).catch((error: unknown) => {
         setProblem(messageOf(error));
@@ -83,26 +75,23 @@ function Body({
       </Grid>
     );
   if (stepId === "team") return <Team cards={cards} acts={acts} />;
-  if (stepId === "start")
-    return (
-      <div className="grid gap-3">
-        {cards.map((card) => (
-          <BigRow key={card.id} card={card} acts={acts} />
-        ))}
-      </div>
-    );
+  if (stepId === "start") return <FirstExploration cards={cards} />;
   if (stepId === "bring") return <Rows cards={cards} acts={acts} />;
   if (stepId === "how")
     return (
       <>
         <Section title="For everyone" />
         <TeamTiles />
-        {cards.length > 0 && <Section title="Add-ons" />}
+        {cards.some((c) => !isLook(c)) && <Section title="Add-ons" />}
         <Grid>
-          {cards.map((card) => (
-            <Tile key={card.id} card={card} acts={acts} />
-          ))}
+          {cards
+            .filter((c) => !isLook(c))
+            .map((card) => (
+              <Tile key={card.id} card={card} acts={acts} />
+            ))}
         </Grid>
+        <Section title="The look" note="for everyone" />
+        <TheLook cards={cards} area={area} />
       </>
     );
   return (
@@ -153,7 +142,13 @@ function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
         </p>
       </div>
       {rest.length > 0 && <Section title="Your board" />}
-      {rest.length > 0 && <Rows cards={rest} acts={acts} />}
+      {rest.map((card) => (
+        <BoardCard key={card.id} card={card} acts={acts} />
+      ))}
+      <p className="flex gap-2.5 rounded-[14px] bg-wash px-3.5 py-3 text-[13px] text-wash-foreground">
+        Every computer with Kobble can build. A card is built by one at a time:
+        the one that starts it says so on the card, and the others leave it.
+      </p>
     </>
   );
 }

@@ -3,7 +3,7 @@
 // row, a person's row with initials, a big row to pick, and New persona.
 // Clicking a card asks the kobold about it; × takes it off.
 
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 import { type Card, faceFrom, messageOf, post } from "@/api";
@@ -11,7 +11,7 @@ import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { appParts, fromLine, textOf } from "./card-bits";
+import { appParts, fromLine, textOf, withHidden } from "./card-bits";
 import { ICON } from "./icons";
 import type { CardActs } from "./step-cards";
 
@@ -40,19 +40,50 @@ function Remove({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
   );
 }
 
-// Clicking asks about it: the next thing the owner says is about this card.
-function askable(card: Card, acts: CardActs) {
-  return {
-    role: "button",
-    tabIndex: 0,
-    "aria-pressed": acts.asked.includes(card.id),
-    onClick: () => {
-      acts.onAsk(card.id);
-    },
-    onKeyDown: (event: React.KeyboardEvent) => {
-      if (event.key === "Enter") acts.onAsk(card.id);
-    },
-  } as const;
+// A card's words, corrected in place: a click to type, and leaving the
+// field saves it (the card counts as agreed from then on).
+function Editable({
+  card,
+  field,
+  value,
+  className,
+}: Readonly<{
+  card: Card;
+  field: "title" | "text";
+  value: string;
+  className?: string;
+}>) {
+  // The text keeps what the card shows apart: its folder, its source.
+  const whole = (now: string) =>
+    field === "text" ? withHidden(card, now) : now;
+  return (
+    <span
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck={false}
+      role="textbox"
+      aria-label={field === "title" ? "Title" : "What it says"}
+      className={cn(
+        "-mx-1 rounded-md px-1 outline-none hover:bg-ground focus:bg-ground",
+        className,
+      )}
+      onBlur={(event) => {
+        const now = event.currentTarget.textContent.trim();
+        if (now && now !== value)
+          void post("/api/setup/draft", {
+            edit: { id: card.id, [field]: whole(now) },
+          });
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          event.currentTarget.blur();
+        }
+      }}
+    >
+      {value}
+    </span>
+  );
 }
 
 export function Tile({
@@ -66,10 +97,8 @@ export function Tile({
     : { text: textOf(card), from: fromLine(card) };
   return (
     <article
-      {...askable(card, acts)}
       className={cn(
-        "flex min-w-0 cursor-pointer flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card",
-        acts.asked.includes(card.id) && "ring-2 ring-primary",
+        "flex min-w-0 flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card",
       )}
     >
       <div className="flex items-center gap-2.5">
@@ -81,14 +110,17 @@ export function Tile({
         ) : (
           <Icon card={card} />
         )}
-        <span className="min-w-0 flex-1 leading-snug font-semibold">
-          {card.title}
-        </span>
+        <Editable
+          card={card}
+          field="title"
+          value={card.title}
+          className="min-w-0 flex-1 leading-snug font-semibold"
+        />
         <Remove card={card} acts={acts} />
       </div>
       {parts.text && (
         <p className="text-[13px] leading-relaxed text-muted-foreground">
-          {parts.text}
+          <Editable card={card} field="text" value={parts.text} />
         </p>
       )}
       <span className="mt-auto text-xs text-faint">{parts.from}</span>
@@ -99,17 +131,17 @@ export function Tile({
 export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
   return (
     <div
-      {...askable(card, acts)}
       className={cn(
-        "flex cursor-pointer items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
-        acts.asked.includes(card.id) && "bg-wash",
+        "flex items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
       )}
     >
       <Icon card={card} />
       <div className="min-w-0 flex-1">
-        <div className="font-semibold">{card.title}</div>
+        <div className="font-semibold">
+          <Editable card={card} field="title" value={card.title} />
+        </div>
         <div className="text-[12.5px] text-muted-foreground">
-          {textOf(card)}
+          <Editable card={card} field="text" value={textOf(card)} />
         </div>
       </div>
       <span className="text-xs text-faint max-sm:hidden">{fromLine(card)}</span>
@@ -125,19 +157,19 @@ export function PersonRow({
 }: Readonly<{ card: Card; acts: CardActs; initials: string }>) {
   return (
     <div
-      {...askable(card, acts)}
       className={cn(
-        "flex cursor-pointer items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
-        acts.asked.includes(card.id) && "bg-wash",
+        "flex items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
       )}
     >
       <span className="grid size-[38px] flex-none place-items-center rounded-full bg-wash text-[13.5px] font-semibold text-wash-foreground">
         {initials}
       </span>
       <div className="min-w-0 flex-1">
-        <div className="font-semibold">{card.title}</div>
+        <div className="font-semibold">
+          <Editable card={card} field="title" value={card.title} />
+        </div>
         <div className="text-[12.5px] text-muted-foreground">
-          {textOf(card)}
+          <Editable card={card} field="text" value={textOf(card)} />
         </div>
       </div>
       <Remove card={card} acts={acts} />
@@ -145,26 +177,27 @@ export function PersonRow({
   );
 }
 
-export function BigRow({
+// The board, as a card of its own: connected once agreed.
+export function BoardCard({
   card,
   acts,
 }: Readonly<{ card: Card; acts: CardActs }>) {
   return (
-    <div
-      {...askable(card, acts)}
-      className={cn(
-        "flex cursor-pointer items-start gap-3 rounded-2xl bg-card p-4 shadow-card hover:ring-[1.5px] hover:ring-primary",
-        acts.asked.includes(card.id) && "ring-2 ring-primary",
-      )}
-    >
+    <div className="flex items-center gap-3 rounded-[20px] bg-card px-5 py-4 shadow-card">
       <Icon card={card} />
-      <div className="grid min-w-0 flex-1 gap-1">
-        <span className="text-xs text-faint">{fromLine(card)}</span>
-        <span className="text-base font-semibold">{card.title}</span>
-        <span className="text-[13px] text-muted-foreground">
-          {textOf(card)}
-        </span>
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">
+          <Editable card={card} field="title" value={card.title} />
+        </div>
+        <div className="text-[12.5px] text-muted-foreground">
+          <Editable card={card} field="text" value={textOf(card)} />
+        </div>
       </div>
+      {card.confirmed && (
+        <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#e6f6f3] px-2.5 text-xs font-medium text-[#0d7a6d]">
+          <Check className="size-3" aria-hidden /> Connected
+        </span>
+      )}
       <Remove card={card} acts={acts} />
     </div>
   );

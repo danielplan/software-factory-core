@@ -4,7 +4,7 @@
 // personas, and at the end has Kobble set itself up. The same coach and map
 // as before; only the canvas became steps.
 
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
 
 import type { State } from "@/api";
@@ -16,6 +16,7 @@ import { CoachStart } from "@/setup-coach/coach-chat";
 
 import { KoboldSays } from "./kobold-says";
 import { Welcome } from "./welcome";
+import { BarAction } from "./bar-action";
 import { SetupStep } from "./setup-step";
 import { StepCards } from "./step-cards";
 import { cardsIn, type Step, stepsOf } from "./steps";
@@ -32,20 +33,19 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   const { coach } = state;
   const steps = stepsOf(coach.draft);
   const [at, setAt] = useState(fromHash);
-  const [asked, setAsked] = useState<string[]>([]);
-  // The step the owner last said something on: there the reply shows.
-  const [talkedOn, setTalkedOn] = useState<string | null>(null);
-  const call = useCoachCall(coach, asked, () => {
-    setAsked([]);
-  });
+  // Only the first prompt of a project without code is said (or typed).
+  const call = useCoachCall(coach, [], () => undefined);
   const last = steps.length - 1;
-  // Building: the last step, where it shows how far it is.
-  const shown = coach.phase === "build" ? last : Math.min(at, last);
+  const setupAt = steps.findIndex((s) => s.id === "setup");
+  // While Kobble is set up, its step; after that, the first exploration may
+  // be picked; before, not.
+  const building = coach.phase === "build" && !coach.made;
+  const reach = coach.made ? last : setupAt;
+  const shown = building ? setupAt : Math.min(at, reach);
   const step = steps[shown] ?? steps[0];
   if (!step) return null;
   const go = (n: number) => {
-    setAsked([]);
-    const to = Math.max(0, Math.min(last, n));
+    const to = Math.max(0, Math.min(reach, n));
     setAt(to);
     history.replaceState(null, "", `#step-${String(to)}`);
   };
@@ -56,7 +56,7 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
         working={coach.working}
         steps={steps}
         at={shown}
-        started={coach.started}
+        reach={coach.started ? reach : -1}
         onGo={go}
       />
       <main className="flex min-w-0 flex-1 flex-col">
@@ -68,21 +68,12 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
               n={shown}
               of={last}
               call={call}
-              asked={asked}
-              onAsk={(id) => {
-                setAsked((now) =>
-                  now.includes(id) ? now.filter((a) => a !== id) : [...now, id],
-                );
-              }}
-              talking={talkedOn === step.id}
-              onSent={() => {
-                setAsked([]);
-                setTalkedOn(step.id);
-              }}
             />
           </div>
         </div>
-        {coach.started && step.id !== "setup" && <Bar at={shown} onGo={go} />}
+        {coach.started && (
+          <Bar state={state} step={step} at={shown} onGo={go} />
+        )}
       </main>
     </div>
   );
@@ -94,20 +85,12 @@ function Content({
   n,
   of,
   call,
-  asked,
-  onAsk,
-  talking,
-  onSent,
 }: Readonly<{
   state: SetupState;
   step: Step;
   n: number;
   of: number;
   call: ReturnType<typeof useCoachCall>;
-  asked: string[];
-  onAsk: (id: string) => void;
-  talking: boolean;
-  onSent: () => void;
 }>) {
   const { coach } = state;
   if (!coach.started)
@@ -123,29 +106,21 @@ function Content({
         <CoachStart coach={coach} call={call} />
       </div>
     );
-  const says = (
-    <KoboldSays
-      coach={coach}
-      call={call}
-      step={step}
-      asked={asked}
-      talking={talking}
-      onSent={onSent}
-    />
+  if (step.id === "hello") return <Welcome coach={coach} />;
+  const says = <KoboldSays coach={coach} step={step} />;
+  const eyebrow = (
+    <span className="text-[12.5px] text-muted-foreground">
+      Step {n} of {of}
+    </span>
   );
   if (step.id === "setup")
-    return <SetupStep state={state} says={says} call={call} />;
-  if (step.id === "hello") return <Welcome coach={coach} />;
+    return <SetupStep state={state} says={says} eyebrow={eyebrow} />;
   return (
     <>
       <header className="grid gap-1.5">
-        {n > 0 && (
-          <span className="text-[12.5px] text-muted-foreground">
-            Step {n} of {of}
-          </span>
-        )}
+        {eyebrow}
         <h1 className="text-[30px] leading-tight font-bold tracking-tight">
-          {n === 0 ? "Hi, I’m your kobold." : step.name}
+          {step.id === "start" ? "Where shall we start?" : step.name}
         </h1>
         <p className="text-muted-foreground">{LEADS[step.id] ?? ""}</p>
       </header>
@@ -155,8 +130,6 @@ function Content({
           cards={cardsIn(coach.draft, step.area)}
           stepId={step.id}
           area={step.area}
-          asked={asked}
-          onAsk={onAsk}
         />
       )}
     </>
@@ -173,7 +146,7 @@ const LEADS: Record<string, string> = {
   how: "The parts of Kobble that fit how you work. You can change them later in Workshop.",
   bring: "What you have already, and what happens to it.",
   start:
-    "Where to start exploring once Kobble is set up. Take off what doesn’t matter.",
+    "Pick one and Kobble opens it with the canvas already started. Or look around first.",
 };
 
 function Rail({
@@ -181,14 +154,15 @@ function Rail({
   working,
   steps,
   at,
-  started,
+  reach,
   onGo,
 }: Readonly<{
   project: string;
   working: boolean;
   steps: Step[];
   at: number;
-  started: boolean;
+  // The last step that can be opened (none before the kobold read).
+  reach: number;
   onGo: (n: number) => void;
 }>) {
   return (
@@ -211,7 +185,7 @@ function Rail({
           <li key={step.id}>
             <button
               type="button"
-              disabled={!started}
+              disabled={n > reach}
               aria-current={n === at ? "step" : undefined}
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left font-medium text-muted-foreground hover:bg-muted disabled:cursor-default",
@@ -248,13 +222,22 @@ function Rail({
 }
 
 function Bar({
+  state,
+  step,
   at,
   onGo,
-}: Readonly<{ at: number; onGo: (n: number) => void }>) {
+}: Readonly<{
+  state: SetupState;
+  step: Step;
+  at: number;
+  onGo: (n: number) => void;
+}>) {
+  const { coach } = state;
+  const building = coach.phase === "build" && !coach.made;
   return (
     <div className="border-t border-border bg-card px-7 py-3.5">
       <div className="mx-auto flex max-w-[880px] items-center gap-3">
-        {at > 0 && (
+        {at > 0 && step.id !== "start" && !building && !coach.made && (
           <Button
             variant="ring"
             size="pill"
@@ -266,20 +249,22 @@ function Bar({
           </Button>
         )}
         <span className="flex-1 text-[12.5px] text-faint">
-          {at === 0 ? "" : "You can change this later."}
+          {hintOf(step, coach)}
         </span>
-        <Button
-          size="pill"
-          onClick={() => {
-            onGo(at + 1);
-          }}
-        >
-          {at === 0 ? "Let’s go" : "Continue"}
-          <ArrowRight className="size-4" aria-hidden />
-        </Button>
+        <BarAction state={state} step={step} at={at} onGo={onGo} />
       </div>
     </div>
   );
+}
+
+function hintOf(step: Step, coach: SetupState["coach"]): string {
+  if (step.id === "hello") return "";
+  if (step.id === "setup")
+    return coach.phase === "build"
+      ? ""
+      : "Next, Kobble writes all of this into your repository.";
+  if (step.id === "start") return "";
+  return "You can change this later.";
 }
 
 // The rail's foot: how long it takes, and the kobold, at work or not.

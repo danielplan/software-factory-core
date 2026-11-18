@@ -44,13 +44,13 @@ const ALL: Step[] = [
     hint: "What you have already",
     area: SETUP_AREAS.bring,
   },
+  { id: "setup", name: "Set up", hint: "Kobble writes it all", area: null },
   {
     id: "start",
-    name: "Where to start",
-    hint: "Your first explorations",
+    name: "First exploration",
+    hint: "Start with real work",
     area: SETUP_AREAS.start,
   },
-  { id: "setup", name: "Set up", hint: "Kobble writes it all", area: null },
 ];
 
 export function stepsOf(draft: Draft): Step[] {
@@ -63,9 +63,4 @@ export function stepsOf(draft: Draft): Step[] {
 
 export function cardsIn(draft: Draft, area: string | null) {
   return area ? draft.cards.filter((card) => card.area === area) : [];
-}
-
-// Added to what the owner says, so the kobold answers about this step.
-export function onStepLine(step: Step): string {
-  return step.area ? `\n\n(On the step: ${step.area})` : "";
 }

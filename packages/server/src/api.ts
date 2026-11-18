@@ -309,7 +309,9 @@ export type ChangeDraft =
   | { remove: string }
   | { move: { id: string; x: number; y: number } }
   // A card the owner adds (a persona in "Who it's for"), agreed already.
-  | { add: { area: string; title: string; text?: string } };
+  | { add: { area: string; title: string; text?: string } }
+  // A card the owner corrects in place: agreed from then on.
+  | { edit: { id: string; title?: string; text?: string } };
 
 // The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };

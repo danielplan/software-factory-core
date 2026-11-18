@@ -1,109 +1,106 @@
-// The kobold at the top of a step: what it said last (or what it is doing
-// and writing now), and the box to answer it, typed or by talking. What the
-// owner says carries the step it was said on and the cards they ask about.
+// The kobold at the top of a step, as in the design: one sentence about the
+// step, or its open questions about it, each with a small field to answer
+// it. There is no chat: the owner corrects cards in place.
 
 import { useState } from "react";
 
-import { type CoachView, messageOf, post } from "@/api";
+import { type Card, type CoachView, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
-import { Answer } from "@/setup-coach/answer-box";
-import { attachedNames } from "@/setup-coach/canvas";
-import { aboutLine } from "@/setup-coach/coach-chat";
-import { Said } from "@/setup-coach/said";
-import type { VoiceCall } from "@/voice/voice-call";
+import { Button } from "@/components/ui/button";
 
-import { cardsIn, onStepLine, type Step } from "./steps";
+import { cardsIn, type Step } from "./steps";
 
-// What the kobold says on a step: while the owner talks with it on this
-// step, its reply; otherwise its open questions about this step, or a line
-// about the step.
+const LINES: Record<string, string> = {
+  product:
+    "Here is your product as I read it. Click a card to correct it, or take it off.",
+  people:
+    "These are the people I think you build for. Add the real ones you know.",
+  team: "I found who works on it in the history, and where the work is tracked.",
+  how: "These fit how you’ve worked so far. Change anything you like.",
+  bring: "This is what you have already, and what happens to it.",
+  setup: "When you press Set up Kobble, I write it all into your repository.",
+  start: "From what I read, these are worth starting with.",
+};
+
 export function KoboldSays({
   coach,
-  call,
   step,
-  asked,
-  talking,
-  onSent,
-}: Readonly<{
-  coach: CoachView;
-  call: VoiceCall;
-  step: Step;
-  asked: string[];
-  // The owner said something on this step: the kobold's reply shows.
-  talking: boolean;
-  onSent: () => void;
-}>) {
-  const [problem, setProblem] = useState<string | null>(null);
-  const said = talking
-    ? coach.messages.findLast((m) => m.from === "coach")?.text
-    : stepLine(coach, step);
-  const say = (text: string) => {
-    setProblem(null);
-    onSent();
-    post("/api/setup/say", {
-      text:
-        text + aboutLine(attachedNames(coach.draft, asked)) + onStepLine(step),
-    }).catch((error: unknown) => {
-      setProblem(messageOf(error));
-    });
-  };
+}: Readonly<{ coach: CoachView; step: Step }>) {
+  const open = cardsIn(coach.draft, step.area).filter(
+    (card) => card.tone === "question" && !card.confirmed,
+  );
   return (
     <div className="flex items-start gap-3">
       <KoboldHead size={40} />
-      <div className="grid max-w-[640px] min-w-0 flex-1 gap-2 rounded-[4px_16px_16px_16px] bg-card px-4 py-3 shadow-card">
-        <div aria-live="polite" className="text-[14.5px] leading-relaxed">
-          <Bubble
-            coach={talking ? coach : { ...coach, working: false }}
-            said={said}
-          />
-        </div>
-        <Answer
-          call={call}
-          coach={coach}
-          onSay={say}
-          placeholder="Tell the kobold…"
-          className="rounded-xl bg-ground py-1 pr-1 pl-3 [&_textarea]:min-h-9 [&_textarea]:py-1.5 [&_textarea]:text-[13.5px]"
-        />
-        {problem && <p className="text-sm text-destructive">{problem}</p>}
+      <div className="grid max-w-[640px] min-w-0 gap-3 rounded-[4px_16px_16px_16px] bg-card px-4 py-3 text-[14.5px] leading-relaxed shadow-card">
+        {open.length === 0 ? (
+          <p>
+            {coach.working
+              ? "One moment, I’m changing the cards…"
+              : (LINES[step.id] ?? "")}
+          </p>
+        ) : (
+          open.map((card) => (
+            <Question
+              key={card.id}
+              card={card}
+              step={step}
+              busy={coach.working}
+            />
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-// What the kobold says now: what it writes, what it does, or its last words.
-function Bubble({
-  coach,
-  said,
-}: Readonly<{ coach: CoachView; said: string | undefined }>) {
-  if (!coach.working) return <Said text={said ?? "Hi, I’m your kobold."} />;
-  if (coach.writing) return <Said text={coach.writing} />;
+// One of the kobold's questions, answered in place.
+function Question({
+  card,
+  step,
+  busy,
+}: Readonly<{ card: Card; step: Step; busy: boolean }>) {
+  const [answer, setAnswer] = useState("");
+  const [problem, setProblem] = useState<string | null>(null);
+  const send = () => {
+    setProblem(null);
+    post("/api/setup/say", {
+      text: `${answer.trim()}\n\n(About: ${card.title} [${card.id}])\n\n(On the step: ${step.area ?? step.name})`,
+    }).then(
+      () => {
+        setAnswer("");
+      },
+      (error: unknown) => {
+        setProblem(messageOf(error));
+      },
+    );
+  };
   return (
-    <span className="text-muted-foreground">
-      {coach.activity ?? "Thinking…"}
-    </span>
+    <form
+      className="grid gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        send();
+      }}
+    >
+      <p>
+        <b className="font-semibold">{card.title}</b> {card.text}
+      </p>
+      <div className="flex gap-2">
+        <input
+          aria-label={`Answer: ${card.title}`}
+          className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
+          placeholder="Your answer"
+          value={answer}
+          onChange={(event) => {
+            setAnswer(event.target.value);
+          }}
+        />
+        <Button type="submit" size="pill-sm" disabled={busy || !answer.trim()}>
+          {busy ? "…" : "Answer"}
+        </Button>
+      </div>
+      {problem && <p className="text-sm text-destructive">{problem}</p>}
+    </form>
   );
-}
-
-const LINES: Record<string, string> = {
-  product:
-    "Here is your product as I read it. Correct a card by telling me, or take it off.",
-  people:
-    "These are the people I think you build for. Add the real ones you know.",
-  team: "This is who works on it and where the work is tracked.",
-  how: "These parts of Kobble fit how you work. Take off what you don’t want.",
-  bring: "This is what you have already, and what happens to it.",
-  start: "Once Kobble is set up, these are worth exploring first.",
-  setup: "When you press Set up Kobble, I write it all into your repository.",
-};
-
-// The step's open questions (question cards not yet answered), or its line.
-function stepLine(coach: CoachView, step: Step): string {
-  const open = cardsIn(coach.draft, step.area).filter(
-    (card) => card.tone === "question" && !card.confirmed,
-  );
-  if (open.length > 0)
-    return open
-      .map((card) => `**${card.title}.** ${card.text ?? ""}`)
-      .join("\n\n");
-  return LINES[step.id] ?? "";
 }

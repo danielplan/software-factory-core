@@ -205,6 +205,16 @@ export function problemOf(error: string, who = "The coach"): string {
 function changedMap(map: Draft, change: ChangeDraft): Draft {
   if ("move" in change) return move(map, change.move);
   if ("remove" in change) return removeCard(map, change.remove);
+  if ("edit" in change) {
+    const card = map.cards.find((c) => c.id === change.edit.id);
+    if (!card) throw new Refused("There is no such card.");
+    return writeCard(map, {
+      ...card,
+      title: change.edit.title ?? card.title,
+      text: change.edit.text ?? card.text,
+      confirmed: true,
+    }).draft;
+  }
   return writeCard(map, {
     area: change.add.area,
     title: change.add.title,

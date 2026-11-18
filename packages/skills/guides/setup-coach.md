@@ -86,7 +86,11 @@ belongs to; an area the project has nothing for stays empty.
    keep their place). Draw the board you agreed on as a card.
 4. **How Kobble works** (`How Kobble works`): the factory's add-ons (listed
    below) that fit, each as a card with why; ask once and switch on only
-   what they agree to. They can change it later in Workshop.
+   what they agree to. They can change it later in Workshop. The owner may
+   add a card "The look" here: "Your app's look" means you write the theme
+   from the app's own colours, fonts and corners; "Kobble's own" means no
+   theme. Without that card, write it from the app. Cards at once and the
+   usage log the owner sets themselves on this step (`factory/team.env`).
 5. **Bring over** (`Bring over`), only when the project worked with an
    earlier factory or keeps its own knowledge base: what you found (its
    pages, its own skills, open cards, history) and what happens to each.
@@ -131,6 +135,10 @@ briefly, from there; the factory links to it.
   to"). Arrows join cards in the same area that act on each other; between
   areas, a card's text names the other side instead. A rule or a question
   gets none.
+- The owner corrects a card's words in place (it is then agreed), adds
+  people, and takes cards off; you see it with `draw` with nothing. There
+  is no chat: they answer your question cards in place, so their message
+  says which card it answers ("(About: …)").
 - The owner moves and removes cards themselves, and clicks one to ask
   about it: their message then ends with "(About: …)". When they changed
   the map, `draw` with nothing shows it to you.

@@ -112,3 +112,14 @@ function withoutCheck(text: string): string {
   while (end > 0 && ". ".includes(cut.charAt(end - 1))) end--;
   return cut.slice(0, end).trim();
 }
+
+// New words for a card's text, with its folder in front and its source at
+// the end kept as they were.
+export function withHidden(card: Card, words: string): string {
+  const text = textOf(card);
+  const dot = text.indexOf(" · ");
+  const folder = isApp(card) && dot !== -1 ? `${text.slice(0, dot)} · ` : "";
+  const source = sourceOf(card);
+  const end = source ? ` (${source})` : "";
+  return `${folder}${words}${end}`;
+}

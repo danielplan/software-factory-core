@@ -4,11 +4,8 @@
 // Open Kobble.
 
 import { Check } from "lucide-react";
-import { useState } from "react";
 
-import { messageOf, post, type State } from "@/api";
-import { Button } from "@/components/ui/button";
-import type { VoiceCall } from "@/voice/voice-call";
+import type { State } from "@/api";
 
 import { isApp, isPerson } from "./card-bits";
 import { cardsIn } from "./steps";
@@ -19,13 +16,18 @@ type Coach = SetupState["coach"];
 export function SetupStep({
   state,
   says,
-  call,
-}: Readonly<{ state: SetupState; says: React.ReactNode; call: VoiceCall }>) {
+  eyebrow,
+}: Readonly<{
+  state: SetupState;
+  says: React.ReactNode;
+  eyebrow: React.ReactNode;
+}>) {
   const { coach } = state;
   const words = wordsOf(coach);
   return (
     <>
       <header className="grid gap-1.5">
+        {eyebrow}
         <h1 className="text-[30px] leading-tight font-bold tracking-tight">
           {words.title}
         </h1>
@@ -50,7 +52,6 @@ export function SetupStep({
           Now: {coach.activity}
         </p>
       )}
-      <Action coach={coach} call={call} />
     </>
   );
 }
@@ -96,41 +97,11 @@ function plan(coach: Coach): string[] {
   ];
 }
 
-function Action({ coach, call }: Readonly<{ coach: Coach; call: VoiceCall }>) {
-  const [busy, setBusy] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const building = coach.phase === "build";
-  if (building && !coach.made) return null;
-  const press = async () => {
-    call.end();
-    setBusy(true);
-    setProblem(null);
-    try {
-      await post(building ? "/api/setup/open" : "/api/setup/build");
-    } catch (error) {
-      setProblem(messageOf(error));
-    }
-    setBusy(false);
-  };
-  return (
-    <div className="grid justify-items-start gap-2">
-      <Button
-        size="pill"
-        disabled={coach.working || busy}
-        onClick={() => void press()}
-      >
-        {building ? "Open Kobble" : "Set up Kobble"}
-      </Button>
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
-    </div>
-  );
-}
-
 function wordsOf(coach: Coach): { title: string; lead: string } {
   if (coach.made)
     return {
       title: "Kobble is set up",
-      lead: "Everything is in place, in your repository. Open Kobble to start.",
+      lead: "Everything is in place. One last step: pick where to start.",
     };
   if (coach.phase === "build")
     return {
