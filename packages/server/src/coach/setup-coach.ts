@@ -171,6 +171,8 @@ export class SetupCoach {
   // The owner opened the factory: setup is over. What setup drew about
   // people and where to start becomes Kobble's records (setup-records.ts).
   finish(root?: string): void {
+    if (this.talk.working)
+      throw new Refused("Kobble is still being set up: wait until it is done.");
     if (root) recordsFromSetup(root, this.map);
     this.finished = true;
     this.keep();

@@ -142,3 +142,10 @@ test("the answer sent from a waiting card: the owner's words, else the picked an
   assert.equal(answerText(waiting, "A", " Mine "), "Mine");
   assert.equal(answerText(waiting, null, ""), "");
 });
+
+test("setting up is done only once the kobold has finished, not when the folder exists", async () => {
+  const { setUpDone } = await import("../src/setup-guided/steps.ts");
+  assert.equal(setUpDone({ made: true, working: true }), false);
+  assert.equal(setUpDone({ made: false, working: false }), false);
+  assert.equal(setUpDone({ made: true, working: false }), true);
+});

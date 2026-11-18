@@ -487,3 +487,48 @@ test("the setup conversation is kept in the project and goes on after the factor
     server.close();
   }
 });
+
+test("Kobble cannot be opened while the kobold is still setting it up", async () => {
+  const pretend = pretendClaude([
+    { calls: [], reply: "Shall I set it up?" },
+    {
+      calls: [["configure", { project: { name: "Acme" } }]],
+      reply: "It is set up.",
+    },
+  ]);
+  // The setting up turn waits until the test lets it finish.
+  let finish: () => void = () => undefined;
+  const held = new Promise<void>((done) => {
+    finish = done;
+  });
+  const claude = {
+    run: async (options: Parameters<typeof pretend.claude.run>[0]) => {
+      const result = await pretend.claude.run(options);
+      if (options.prompt.includes("Build the factory now")) await held;
+      return result;
+    },
+  };
+  const { session, server, post } = await stage(claude);
+  try {
+    await post("/api/setup/say", { text: "A garden shop." });
+    const building = post("/api/setup/build", {});
+    const made = () => {
+      const now = session.state();
+      return now.mode === "setup" && now.coach.made;
+    };
+    for (let i = 0; i < 200 && !made(); i++)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    const midway = session.state();
+    assert.ok(midway.mode === "setup");
+    // The folder is there, but the kobold is still at work.
+    assert.equal(midway.coach.made, true);
+    assert.equal(midway.coach.working, true);
+    assert.equal((await post("/api/setup/open", {})).status, 409);
+    finish();
+    await building;
+    assert.equal((await post("/api/setup/open", {})).status, 200);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
