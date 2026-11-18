@@ -122,3 +122,23 @@ test("light only: every rule for a computer set to dark is switched off", () => 
     ["not all", "not all", "(min-width: 768px)"],
   );
 });
+
+test("the answer sent from a waiting card: the owner's words, else the picked answer", async () => {
+  const { answerText } = await import("../src/factory/answer-text.ts");
+  const waiting = {
+    number: 1,
+    title: "T",
+    url: "",
+    text: "?",
+    ask: {
+      about: "",
+      where: "",
+      question: "?",
+      answers: [{ key: "A", answer: "Yes", means: "" }],
+      suggested: null,
+    },
+  };
+  assert.equal(answerText(waiting, "A", ""), "**A**: Yes");
+  assert.equal(answerText(waiting, "A", " Mine "), "Mine");
+  assert.equal(answerText(waiting, null, ""), "");
+});

@@ -5,7 +5,7 @@
 
 import type { KobbleStore } from "@software-factory/core";
 
-import type { CardView, Stage, WorkView } from "../api.ts";
+import type { Asking, CardView, Stage, WorkView } from "../api.ts";
 
 export const FACTORY_COLUMNS = [
   { id: "todo", title: "To do" },
@@ -30,6 +30,8 @@ export type FactoryView = {
   problem: string | null;
   read: string | null;
   columns: { id: Column; title: string; cards: FactoryCard[] }[];
+  // The cards where the factory waits for the owner, oldest first.
+  waiting: Asking[];
   builder: { on: boolean; working: string | null };
 };
 
@@ -94,19 +96,26 @@ export function factoryView(
     connected: work !== null,
     problem: work?.problem ?? null,
     read: work?.read ?? null,
+    waiting: [...(work?.asking ?? [])].sort((a, b) => a.number - b.number),
     columns: FACTORY_COLUMNS.map((column) => ({
       ...column,
       cards: cards
         .filter((one) => one.column === column.id)
         .map((one) => one.card),
     })),
-    builder: {
-      on: work?.builder.on ?? false,
-      working: work?.builder.working
-        ? [work.builder.working, ...work.builder.also]
-            .map((one) => `#${String(one.number)} · ${one.title}`)
-            .join(", ")
+    builder: builderOf(work),
+  };
+}
+
+// The builder's switch and what it builds now, every card it is on.
+function builderOf(work: WorkView | null): FactoryView["builder"] {
+  const builder = work?.builder;
+  const cards = builder?.working ? [builder.working, ...builder.also] : [];
+  return {
+    on: builder?.on ?? false,
+    working:
+      cards.length > 0
+        ? cards.map((one) => `#${String(one.number)} · ${one.title}`).join(", ")
         : null,
-    },
   };
 }

@@ -31,6 +31,31 @@ same: the [factory](SKILL.md) skill and the skills it routes to.
   the values your prompt lists. The factory reads it to move the card, so
   nothing may follow it.
 
+## Asking the owner
+
+The owner may answer on GitHub or on the factory's Factory page. Whenever
+you end with `STATUS: question` or `STATUS: blocked`, put the question in
+this shape too, as the last thing before the status line, so the page can
+show it with buttons:
+
+```
+<!-- software-factory:ask
+{"about": "What the card is about, in one line",
+ "where": "Where the work is now, in one line",
+ "question": "The question, in plain everyday words",
+ "answers": [
+   {"key": "A", "answer": "The first answer", "means": "What it changes in practice, in one line"},
+   {"key": "B", "answer": "The second answer", "means": "…"}
+ ],
+ "suggested": "A"}
+-->
+```
+
+Two to four answers; `suggested` is the one you recommend (or leave it
+out). The visible comment above it still says everything in words: the
+block is only for the page. An open question with no sensible answers to
+pick from leaves `answers` empty.
+
 ## Planning (the coach, card in Planning)
 
 Coach the owner through the `plan` skill, in the card's comments:

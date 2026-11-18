@@ -309,5 +309,12 @@ function workRoutes(session: Session) {
       session.work.orRefuse().switch("chat", on(body));
     },
     "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
+    "POST /api/work/answer": (body: unknown) => {
+      const number = Number((body as { number?: unknown } | null)?.number);
+      if (!Number.isInteger(number)) throw new Refused("Say which card.");
+      const said = text(body, "text").trim();
+      if (said === "") throw new Refused("Write or pick an answer first.");
+      return session.work.orRefuse().answer(number, said);
+    },
   };
 }

@@ -9,9 +9,12 @@ import type { Stage } from "../api.ts";
 import {
   AGREEMENT_NOTES,
   CONVERSATION_NOTES,
+  type Ask,
   NOTES,
   type Note,
+  readAsk,
   readNote,
+  stripMarker,
   untilOf,
 } from "./protocol.ts";
 
@@ -226,4 +229,18 @@ function waitingAfterFailedChecks(thread: Message[]): boolean {
     thread.some((m) => gaveUp.includes(readNote(m.body) ?? "started")) &&
     !ownerSpokeAfter(thread, gaveUp)
   );
+}
+
+// The factory waits for the owner on this card: its last word is a
+// question (planning) or a stop that only the owner can unblock, and the
+// owner has not answered yet. The question as the Factory page shows it.
+export function waitsForOwner(
+  card: Pick<BoardCard, "thread" | "closed">,
+): { text: string; ask: Ask | null } | null {
+  if (card.closed) return null;
+  const asking: readonly Note[] = ["question", "blocked"];
+  const last = card.thread.findLast((m) => readNote(m.body) !== null);
+  if (!last || !asking.includes(readNote(last.body) ?? "started")) return null;
+  if (ownerSpokeAfter(card.thread, NOTES)) return null;
+  return { text: stripMarker(last.body), ask: readAsk(last.body) };
 }

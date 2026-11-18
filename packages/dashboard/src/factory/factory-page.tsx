@@ -19,6 +19,7 @@ import { type Read, useRead } from "@/lib/use-read";
 import { CARD } from "@/signals/bits";
 
 import { ColumnIcon } from "./column-icon";
+import { WaitingCards } from "./waiting-card";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   const { data, problem } = useRead("/api/kobble/factory") as Read<FactoryView>;
@@ -42,7 +43,17 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
         }
       />
       {shown && <ProblemBox title="That did not work" text={shown} />}
-      {data && <Columns view={data} />}
+      {data && <Board view={data} />}
+    </>
+  );
+}
+
+// What waits for the owner, then the columns.
+function Board({ view }: Readonly<{ view: FactoryView }>) {
+  return (
+    <>
+      {view.connected && <WaitingCards waiting={view.waiting} />}
+      <Columns view={view} />
     </>
   );
 }

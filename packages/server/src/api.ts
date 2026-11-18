@@ -72,6 +72,22 @@ export type CoachInCardsView = {
   steps: string[];
 };
 
+// A card the factory waits on: its question, in the shape the Factory page
+// can answer when the agent wrote one (ask), else as text.
+export type Asking = {
+  number: number;
+  title: string;
+  url: string;
+  text: string;
+  ask: {
+    about: string;
+    where: string;
+    question: string;
+    answers: { key: string; answer: string; means: string }[];
+    suggested: string | null;
+  } | null;
+};
+
 export type WorkView = {
   cards: CardView[];
   // Why the cards could not be read last time.
@@ -80,6 +96,8 @@ export type WorkView = {
   read: string | null;
   builder: BuilderView;
   coach: CoachInCardsView;
+  // The cards where the factory waits for the owner's answer.
+  asking?: Asking[];
   // GitHub's signals as they happen; none before they are set up.
   signals?: { live: boolean; moves: boolean; problem: string | null };
 };

@@ -7,7 +7,7 @@
 // Kobble waits for "did it work?" about is shown asking it, in Done, until
 // a person answers.
 
-import type { BuilderView, CardView, Stage, WorkView } from "../api.ts";
+import type { Asking, BuilderView, CardView, Stage, WorkView } from "../api.ts";
 import type { Card, Cards } from "../cards/cards.ts";
 import {
   asksIfItWorked,
@@ -15,6 +15,7 @@ import {
   decide,
   type Job,
   type Lane,
+  waitsForOwner,
 } from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
 import { markComment } from "./protocol.ts";
@@ -56,6 +57,7 @@ export class BoardWork {
   // request may leave its card open).
   private asked = new Set<number>();
   private decided = new Set<number>();
+  private asking: Asking[] = [];
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -93,6 +95,7 @@ export class BoardWork {
       })),
       problem: this.problem,
       read: this.read,
+      asking: this.asking,
       builder,
       coach: {
         on: this.on.chat,
@@ -133,6 +136,15 @@ export class BoardWork {
     for (let place = 1; place <= places; place++)
       if (!taken.has(place)) return place;
     return null;
+  }
+
+  // The owner's answer to a card the factory waits on, from the Factory
+  // page: a comment on the card, as if written on GitHub.
+  async answer(number: number, text: string): Promise<void> {
+    await this.options.cards.comment(number, text);
+    this.asking = this.asking.filter((one) => one.number !== number);
+    this.options.onChange();
+    void this.refresh();
   }
 
   // The coach (chat) or the builder (build) on or off; off finishes the job
@@ -232,6 +244,12 @@ export class BoardWork {
     const { cards, pullRequests } = this.options;
     const board = await snapshotOf(listed, cards, pullRequests, this.waiting());
     this.notePullRequests(board);
+    this.asking = board.flatMap((card) => {
+      const waits = waitsForOwner(card);
+      return waits
+        ? [{ number: card.number, title: card.title, url: card.url, ...waits }]
+        : [];
+    });
     const busy = new Set(this.running.keys());
     const decision = decide(board, busy, this.now());
     this.decided = new Set(decision.asks);
