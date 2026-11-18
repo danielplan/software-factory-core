@@ -52,23 +52,27 @@ export const KINDS: Record<
   },
 };
 
-// The stages an exploration goes through, in order.
-export const STAGES = [
-  "The problem",
-  "Ways",
-  "Prototypes",
-  "Agreed",
-  "Handed off",
-] as const;
-
-// How far it is: the index in STAGES.
-export function stageOf(row: {
+// Where an exploration is, in words, from what its board holds: its icon
+// and colour are those of the thing it is at.
+export function whereItIs(row: {
   status: string;
   things: { kind: Thing["kind"]; agreed: boolean }[];
-}): number {
-  if (row.status === "handed-off") return 4;
-  if (row.things.some((t) => t.kind === "prototype" && t.agreed)) return 3;
-  if (row.things.some((t) => t.kind === "prototype")) return 2;
-  if (row.things.some((t) => t.kind === "choice")) return 1;
-  return 0;
+}): { text: string; kind: Thing["kind"] } {
+  const count = (kind: Thing["kind"]) =>
+    row.things.filter((thing) => thing.kind === kind).length;
+  const plural = (n: number, one: string, many: string) =>
+    `${String(n)} ${n === 1 ? one : many}`;
+  if (row.status === "handed-off")
+    return { text: "Handed off to the Factory", kind: "prototype" };
+  if (row.things.some((t) => t.kind === "prototype" && t.agreed))
+    return { text: "Agreed: ready to hand off", kind: "prototype" };
+  const prototypes = count("prototype");
+  if (prototypes > 0)
+    return {
+      text: `${plural(prototypes, "prototype", "prototypes")} to try`,
+      kind: "prototype",
+    };
+  const choices = count("choice");
+  if (choices > 0) return { text: "Choosing a way", kind: "choice" };
+  return { text: "Understanding the problem", kind: "problem" };
 }

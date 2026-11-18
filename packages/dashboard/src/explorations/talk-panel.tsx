@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
+import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 
 import { showsVoice } from "@/voice/call";
@@ -172,8 +173,8 @@ function Kobold({ text }: Readonly<{ text: string }>) {
   return (
     <div className="flex gap-2">
       <KoboldHead size={22} />
-      <div className="rounded-[4px_14px_14px_14px] bg-ground px-3 py-[9px] text-[13.5px] leading-[1.45] whitespace-pre-wrap">
-        <Strong text={text} />
+      <div className="rounded-[4px_14px_14px_14px] bg-ground px-3 py-[9px] text-[13.5px] leading-[1.45]">
+        <Markdown text={text} />
       </div>
     </div>
   );
@@ -208,19 +209,5 @@ function Attached({
         ) : null;
       })}
     </div>
-  );
-}
-
-// The kobold writes **bold** for the ways it names: shown bold, without
-// the stars.
-function Strong({ text }: Readonly<{ text: string }>) {
-  return text.split("**").map((part, at) =>
-    at % 2 === 1 ? (
-      <b key={at} className="font-semibold">
-        {part}
-      </b>
-    ) : (
-      part
-    ),
   );
 }

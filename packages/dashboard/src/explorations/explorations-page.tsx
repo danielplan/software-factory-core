@@ -21,8 +21,7 @@ import { countWords } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
 
 import { Faces, Preview } from "./bits";
-import { stageOf } from "./kinds";
-import { StageLine } from "./stage-line";
+import { KINDS, whereItIs } from "./kinds";
 import { NewExploration } from "./new-exploration";
 
 export const explorationHash = (id: string) =>
@@ -148,33 +147,13 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
   return (
     <>
       <Sub title="Being explored" n={view.exploring.length} />
-      <div className="grid gap-4 md:grid-cols-2">
-        {view.exploring.map((row) => (
-          <a
-            key={row.id}
-            href={explorationHash(row.id)}
-            className={cn(
-              CARD,
-              "flex flex-col gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgb(20_24_36/0.35)]",
-            )}
-          >
-            <Preview row={row} />
-            <StageLine at={stageOf(row)} />
-            <span className="flex items-center gap-2.5 px-1">
-              <span className="flex-1 text-base font-semibold">
-                {row.title}
-              </span>
-              <Faces personas={row.personas} size={26} />
-            </span>
-            {row.line && (
-              <span className="flex items-center gap-2 rounded-[10px] bg-wash px-2.5 py-[9px] text-[13px] text-[#1e2a55]">
-                <KoboldHead size={18} />
-                {row.line}
-              </span>
-            )}
-          </a>
-        ))}
-      </div>
+      {view.exploring.length > 0 && (
+        <div className={CARD}>
+          {view.exploring.map((row) => (
+            <Exploring key={row.id} row={row} />
+          ))}
+        </div>
+      )}
       {view.exploring.length === 0 && (
         <p className="text-sm text-muted-foreground">
           Nothing is being explored. Start one that waits.
@@ -193,6 +172,49 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
       </div>
       <Done rows={view.done} />
     </>
+  );
+}
+
+// One being explored: where it is, in its colour, and the kobold's next
+// question; a click opens it.
+function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
+  const where = whereItIs(row);
+  const { Icon, tint } = KINDS[where.kind];
+  return (
+    <a
+      href={explorationHash(row.id)}
+      className={cn(ROW, "items-start transition-colors hover:bg-surface")}
+    >
+      <span
+        className={cn(
+          "grid size-9 flex-none place-items-center rounded-xl",
+          tint,
+        )}
+      >
+        <Icon aria-hidden className="size-[18px]" />
+      </span>
+      <span className="grid min-w-0 flex-1 gap-1">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold">{row.title}</span>
+          <span
+            className={cn(
+              "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium",
+              tint,
+            )}
+          >
+            {where.text}
+          </span>
+        </span>
+        {row.line && (
+          <span className="flex items-center gap-1.5 text-[13px] text-foreground-2">
+            <KoboldHead size={16} />
+            <span className="truncate">{row.line}</span>
+          </span>
+        )}
+      </span>
+      <Faces personas={row.personas} size={26} />
+      <Chevron />
+    </a>
   );
 }
 

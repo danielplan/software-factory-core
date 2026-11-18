@@ -11,7 +11,7 @@ import { type ReactNode, useState } from "react";
 
 import type { Light } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
-import { StatusLight } from "@/components/status-light";
+import { LABEL, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -108,7 +108,7 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
       </span>
       <Pages current={current} counts={counts} onGo={onGo} />
       <KoboldCard kobold={kobold} />
-      <nav aria-label="The factory" className="mt-1.5 flex items-center">
+      <nav aria-label="The factory" className="mt-2 grid gap-0.5">
         {QUIET.map((item) => (
           <a
             key={item.page}
@@ -116,17 +116,26 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
             onClick={onGo}
             aria-current={current === item.page ? "page" : undefined}
             className={cn(
-              "flex h-10 items-center gap-2 rounded-xl px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground [&_svg]:size-4",
-              current === item.page && "text-wash-foreground",
+              "flex h-[38px] items-center gap-3 rounded-xl px-3 text-[13.5px] font-medium text-muted-foreground hover:bg-ground hover:text-foreground [&_svg]:size-[17px] [&_svg]:flex-none",
+              current === item.page &&
+                "bg-wash text-wash-foreground hover:bg-wash",
             )}
           >
             {item.icon}
             {item.name}
+            {item.page === "workshop" &&
+              light !== "running" &&
+              light !== "none" && (
+                <span
+                  title={kobold.detail}
+                  className="ml-auto flex items-center gap-2 text-xs font-normal"
+                >
+                  {LABEL[light]}
+                  <StatusLight light={light} />
+                </span>
+              )}
           </a>
         ))}
-        <span title={kobold.detail} className="ml-auto flex px-3">
-          <StatusLight light={light} />
-        </span>
       </nav>
     </>
   );

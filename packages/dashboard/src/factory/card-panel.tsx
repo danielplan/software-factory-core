@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 import { get, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
+import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
 import type { CardPanel as Panel } from "../../../server/src/kobble/factory-card.ts";
@@ -153,7 +154,9 @@ function Section({ title, text }: Readonly<{ title: string; text: string }>) {
       <h3 className="text-[13px] font-semibold text-muted-foreground">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
+      <div className="text-sm leading-relaxed">
+        <Markdown text={text} />
+      </div>
     </section>
   );
 }
@@ -180,7 +183,7 @@ function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
               · {new Date(one.at).toLocaleString()}
             </span>
           </span>
-          <p className="whitespace-pre-wrap">{one.text}</p>
+          <Markdown text={one.text} />
         </div>
       ))}
     </section>
