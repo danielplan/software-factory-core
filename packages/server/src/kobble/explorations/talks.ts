@@ -92,6 +92,15 @@ export class ExplorationTalks {
   }
 
   // What a person did on the board, for the kobold to hear next time.
+  // How the kobold starts making a prototype (the exploration's
+  // prototypes, set once both exist).
+  private maker: ((id: string, choice: string, option: string) => void) | null =
+    null;
+
+  makeWith(maker: (id: string, choice: string, option: string) => void): void {
+    this.maker = maker;
+  }
+
   personDid(id: string, words: string): void {
     this.done.set(id, [...(this.done.get(id) ?? []), words]);
   }
@@ -150,6 +159,11 @@ export class ExplorationTalks {
         this.pointed.set(id, { thing, times });
         this.options.onChange();
         return `Pointing at ${thing}.`;
+      },
+      make: (choice, option) => {
+        if (!this.maker) throw new Refused("Prototypes cannot be made here.");
+        this.maker(id, choice, option);
+        return `Making the prototype of ${option} on ${choice}; it is on the board now.\n\n${this.look(id)}`;
       },
       rename: ({ title, problem }) => {
         const store = this.options.store();

@@ -2,7 +2,8 @@
 // standard way to give Claude new actions): it looks at the board, adds
 // notes, diagrams and choices, changes and removes things, links and
 // unlinks them with a short label, points at a thing (the person's view
-// moves there), and marks a thing agreed or a sketch. Each answers with
+// moves there), marks a thing agreed or a sketch, and starts making an
+// option's prototype. Each answers with
 // what it did and the whole board. Beside them, the made-up world's tools
 // (world-tools.ts). Only the conversation's own Claude Code
 // has the token.
@@ -25,6 +26,8 @@ export type BoardTools = {
   look: () => string;
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
+  // Starts making the prototype of a choice's option.
+  make: (choice: string, option: string) => string;
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -156,6 +159,18 @@ function serverFor(on: BoardTools): McpServer {
       },
     },
     (args) => toolAnswer(() => on.rename(args)),
+  );
+  server.registerTool(
+    "make_prototype",
+    {
+      description:
+        "Start making the prototype of one option of a choice: it appears on the board at once and is made in the background (a few minutes), in its own copy of the code. Make one when trying it will teach more than talking (the team picked the option, or asked for it, or it settles the question); say in one line what you started.",
+      inputSchema: {
+        choice: z.string().describe("The choice's id (choice-1)."),
+        option: z.string().describe("The option's letter (A, B …)."),
+      },
+    },
+    (args) => toolAnswer(() => on.make(args.choice, args.option)),
   );
   addWorldTools(server, on.world.worlds, on.world.id);
   return server;

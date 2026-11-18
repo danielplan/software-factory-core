@@ -43,6 +43,28 @@ export function prototypeOf(
   return null;
 }
 
+// Whether a choice's option has its prototype: the arrow from the choice,
+// labelled with the option, to a prototype.
+export function madeFor(board: Board, choice: string, key: string): boolean {
+  return board.links.some(
+    (link) =>
+      link.from === choice &&
+      link.label === key &&
+      board.things.some(
+        (thing) => thing.id === link.to && thing.kind === "prototype",
+      ),
+  );
+}
+
+// The option's letter, or with the first free number when another choice's
+// option of that letter has a prototype (A2, A3 …).
+export function freeKey(board: Board, key: string): string {
+  for (let number = 1; ; number += 1) {
+    const name = number === 1 ? key : `${key}${String(number)}`;
+    if (!prototypeOf(board, name)) return name;
+  }
+}
+
 export function prototypeBranch(exploration: string, key: string): string {
   return `proto/${exploration}-${key.toLowerCase()}`;
 }
@@ -111,9 +133,10 @@ export class ExplorationPrototypes {
       throw new Refused(`There is no choice “${choice}” on the board.`);
     const option = card.options.find((one) => one.key === key);
     if (!option) throw new Refused(`${choice} has no option ${key}.`);
-    if (prototypeOf(board, key))
+    if (madeFor(board, choice, key))
       throw new Refused(`Option ${key} has a prototype already.`);
-    const id = `prototype-${key.toLowerCase()}`;
+    const name = freeKey(board, key);
+    const id = `prototype-${name.toLowerCase()}`;
     const saved = store.saveBoard(
       exploration.id,
       linked(
@@ -124,7 +147,8 @@ export class ExplorationPrototypes {
           place: null,
           by: "person",
           ...option,
-          branch: prototypeBranch(exploration.id, key),
+          key: name,
+          branch: prototypeBranch(exploration.id, name),
           tests: [],
         }),
         choice,
@@ -132,13 +156,13 @@ export class ExplorationPrototypes {
         key,
       ),
     );
-    this.mode.set(exploration.id, key, {
+    this.mode.set(exploration.id, name, {
       state: "making",
       activity: "Starting",
       problem: null,
     });
-    void this.making(exploration, saved, key).catch((error: unknown) => {
-      this.mode.set(exploration.id, key, {
+    void this.making(exploration, saved, name).catch((error: unknown) => {
+      this.mode.set(exploration.id, name, {
         state: "failed",
         activity: null,
         problem: error instanceof Error ? error.message : String(error),

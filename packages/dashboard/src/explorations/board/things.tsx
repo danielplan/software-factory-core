@@ -74,9 +74,16 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "choice") return null;
-  const made = new Set(
+  // This choice's options that have a prototype: the arrows from it,
+  // labelled with the option, to a prototype.
+  const prototypes = new Set(
     page.board.things.flatMap((one) =>
-      one.kind === "prototype" ? [one.key] : [],
+      one.kind === "prototype" ? [one.id] : [],
+    ),
+  );
+  const made = new Set(
+    page.board.links.flatMap((link) =>
+      link.from === thing.id && prototypes.has(link.to) ? [link.label] : [],
     ),
   );
   const open = ["waiting", "exploring"].includes(page.exploration.status);

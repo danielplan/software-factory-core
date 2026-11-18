@@ -89,7 +89,7 @@ export const explorationSchema = z.strictObject({
 });
 
 // A prototype's branch: proto/X-<n>-<key>, the key in small letters.
-export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
+export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+\d*$/;
 
 // The canvas of an exploration (board.json beside it): things joined by
 // arrows, laid out left to right along them. Kinds of things: the problem
@@ -101,6 +101,11 @@ export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
 const optionKey = z
   .string()
   .regex(/^[A-Z]$/, "an option is one capital letter");
+// A prototype is named after its option; a second choice's option of the
+// same letter gets a number (A2).
+const prototypeKey = z
+  .string()
+  .regex(/^[A-Z]\d*$/, "a prototype is its option's letter, maybe a number");
 const thingId = z
   .string()
   .regex(/^[a-z][a-z0-9-]*$/, "small letters, digits and dashes");
@@ -133,7 +138,7 @@ export const thingSchema = z.discriminatedUnion("kind", [
   z.strictObject({
     ...common,
     kind: z.literal("prototype"),
-    key: optionKey,
+    key: prototypeKey,
     name: text,
     difference: z.string(),
     branch: z

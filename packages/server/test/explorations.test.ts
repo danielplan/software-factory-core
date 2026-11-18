@@ -15,6 +15,7 @@ import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
+import { freeKey, madeFor } from "../src/kobble/explorations/prototypes.ts";
 import { plainWords } from "../src/kobble/explorations/views.ts";
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import type {
@@ -185,11 +186,7 @@ test("starting one, the kobold draws on the board with its tools and points at w
     );
     assert.deepEqual(started.talk.pointed, { thing: "choice-1", times: 1 });
     assert.match(factory.answers[0]?.[0] ?? "", /Added choice-1/);
-    // A person agrees, chooses and attaches; the kobold hears all of it.
-    await factory.press("/board", {
-      id: "X-3",
-      do: { act: "choose", id: "choice-1", option: "A" },
-    });
+    // A person moves a thing and attaches; the kobold hears it.
     await factory.press("/board", {
       id: "X-3",
       do: { act: "move", id: "note-1", x: 10, y: 20 },
@@ -203,7 +200,6 @@ test("starting one, the kobold draws on the board with its tools and points at w
     const choice = said.board.things.find((t) => t.id === "choice-1");
     assert.ok(choice?.kind === "choice");
     assert.equal(choice.options[1]?.name, "An SMS");
-    assert.equal(choice.chosen, "A");
     assert.deepEqual(said.board.links, []);
     assert.equal(
       said.board.things.find((t) => t.id === "note-1")?.agreed,
@@ -219,10 +215,6 @@ test("starting one, the kobold draws on the board with its tools and points at w
       second.prompt,
       /They attached, from the board: choice choice-1\./,
     );
-    assert.match(
-      second.prompt,
-      /Since you last spoke, they chose A on choice choice-1/,
-    );
     assert.equal(second.session?.resume, true);
     assert.match(
       factory.answers[1]?.[5] ?? "",
@@ -233,9 +225,22 @@ test("starting one, the kobold draws on the board with its tools and points at w
       "utf8",
     );
     assert.match(kept, /^<!-- conversation: [\w-]+ -->/);
+    // Picking an option is said in the conversation, and the kobold goes on.
+    await factory.press("/board", {
+      id: "X-3",
+      do: { act: "choose", id: "choice-1", option: "A" },
+    });
+    const picked = await factory.settled("X-3");
+    const chosen = picked.board.things.find((t) => t.id === "choice-1");
+    assert.ok(chosen?.kind === "choice");
+    assert.equal(chosen.chosen, "A");
+    assert.match(
+      factory.seen[2]?.prompt ?? "",
+      /^I pick A: A page that says so\./,
+    );
     // Started already: no second first look.
     await factory.press("/start", { id: "X-3" });
-    assert.equal(factory.seen.length, 2);
+    assert.equal(factory.seen.length, 3);
     const refused = await fetch(
       `${factory.base}/api/kobble/explorations/mcp/X-3`,
       { method: "POST", body: "{}" },
@@ -610,4 +615,21 @@ test("the preview's words keep no Markdown marks", () => {
     "Sign-in Own accounts, see the page and start.ts",
   );
   assert.equal(plainWords("[not a link"), "[not a link");
+});
+
+test("a second choice's option A gets prototype A2, and each choice knows its own", () => {
+  const prototype = (id: string, key: string) =>
+    ({ id, kind: "prototype", key }) as never;
+  const board = {
+    things: [
+      { id: "choice-1", kind: "choice" } as never,
+      { id: "choice-2", kind: "choice" } as never,
+      prototype("prototype-a", "A"),
+    ],
+    links: [{ id: "link-1", from: "choice-1", to: "prototype-a", label: "A" }],
+  } as never;
+  assert.equal(freeKey(board, "A"), "A2");
+  assert.equal(freeKey(board, "B"), "B");
+  assert.equal(madeFor(board, "choice-1", "A"), true);
+  assert.equal(madeFor(board, "choice-2", "A"), false);
 });

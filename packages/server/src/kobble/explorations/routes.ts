@@ -46,6 +46,10 @@ export function servedExplorations(options: Options) {
   const worlds = new ExplorationWorlds(options);
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
+  talks.makeWith((id, choice, option) => {
+    prototypes.make(explorationOf(store(), id), choice, option);
+    options.onChange();
+  });
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>

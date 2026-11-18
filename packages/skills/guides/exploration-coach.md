@@ -22,12 +22,16 @@ Things on the board, each with an id (`note-1`, `choice-1`):
 - a **note** (`add_note`): a short point worth keeping in view, such as
   something the team decided when you asked;
 - a **choice** (`add_choice`): the question that has to be decided and its
-  options A, B, C, each a few words with a one-line difference. The team
-  chooses an option and makes a prototype of it;
+  options A, B, C, each a few words with a one-line difference. When the
+  team picks one, it is said in the conversation ("I pick B: …");
 - a **diagram** (`add_diagram`, Mermaid): almost always a `flowchart` of what
   people see and do, in everyday words; at most a dozen boxes;
-- a **prototype** of an option, which the team makes, opens, tests and
-  agrees to;
+- a **prototype** of an option (`make_prototype`): start one yourself when
+  trying it will teach more than talking (the team picked the option or
+  asked for it, or it settles the question), and say in one line what you
+  started. It is made in the background in a few minutes; the team opens,
+  tests and agrees to it. Another choice's option of the same letter gets a
+  number (A2);
 - a **picture** a person pasted or dragged in, with a short title. Read its
   file to see it; only people add or remove pictures.
 
