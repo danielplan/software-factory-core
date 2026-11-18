@@ -10,7 +10,10 @@
 //   explorations/X-1/world.json         the made-up world its prototypes share
 //   personas/<id>.json
 //   tests/T-0001.json    persona tests
-//   sync.json            when the live app was last read, and the cursor
+//
+// The signals stay on this computer, out of git (ignored.ts), and with them
+// signals/.sync.json, where this computer last read the live app
+// (read-position.ts).
 //
 // The files are JSON, not Markdown with front matter: the platform reads and
 // writes JSON on its own, while front matter would need a YAML library. Each
@@ -23,7 +26,6 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -31,9 +33,15 @@ import { dirname, join } from "node:path";
 
 import { z } from "zod";
 
-import { messageOf } from "../products/product.ts";
 import { fromEarlier } from "./board-shape.ts";
+import {
+  KobbleRefused,
+  readJson,
+  writeAtomically,
+  writeText,
+} from "./files.ts";
 import { ignoreSignals } from "./ignored.ts";
+import { readPosition, savePosition } from "./read-position.ts";
 import {
   type Board,
   boardSchema,
@@ -47,14 +55,12 @@ import {
   type PersonaTest,
   personaTestSchema,
   type SyncState,
-  syncStateSchema,
 } from "./schemas.ts";
 import { type World, worldSchema } from "./world.ts";
 
 export const KOBBLE_FOLDER = "kobble";
 
-// A record that does not fit, or a file that cannot be read, with why.
-export class KobbleRefused extends Error {}
+export { KobbleRefused };
 
 type Kinds = {
   signals: KobbleSignal;
@@ -80,7 +86,6 @@ const NAMED: Record<KobbleKind, string> = {
   tests: "test",
 };
 
-const SYNC_FILE = "sync.json";
 const BOARD_FILE = "board.json";
 const TALK_FILE = "conversation.md";
 const WORLD_FILE = "world.json";
@@ -92,7 +97,6 @@ export type Conversation = {
   session: string | null;
   messages: { from: "kobold" | "you"; text: string }[];
 };
-const NEVER: SyncState = { last: null, cursor: null };
 
 export class KobbleStore {
   readonly root: string;
@@ -160,19 +164,14 @@ export class KobbleStore {
     return `${kind === "signals" ? "S" : "T"}-${String(next).padStart(4, "0")}`;
   }
 
+  // Where this computer last read the live app (read-position.ts).
   sync(): SyncState {
-    const file = join(this.root, SYNC_FILE);
-    if (!existsSync(file)) return NEVER;
-    const parsed = syncStateSchema.safeParse(readJson(file, SYNC_FILE));
-    if (!parsed.success)
-      throw new KobbleRefused(
-        `${SYNC_FILE} does not fit: ${z.prettifyError(parsed.error)}`,
-      );
-    return parsed.data;
+    return readPosition(this.root);
   }
 
   saveSync(state: SyncState): void {
-    writeAtomically(join(this.root, SYNC_FILE), syncStateSchema.parse(state));
+    ignoreSignals(this.factory);
+    savePosition(this.root, state);
   }
 
   // An exploration's canvas; an empty one before anything is on it.
@@ -288,7 +287,12 @@ export class KobbleStore {
             .map((entry) => entry.name)
             .filter((id) => existsSync(this.fileOf(kind, id)))
         : entries
-            .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+            .filter(
+              (entry) =>
+                entry.isFile() &&
+                entry.name.endsWith(".json") &&
+                !entry.name.startsWith("."),
+            )
             .map((entry) => entry.name.slice(0, -".json".length));
     return ids.sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
   }
@@ -323,25 +327,6 @@ export class KobbleStore {
 export function heardOf(signal: KobbleSignal): Heard {
   const { id, type, source, persona, at, text } = signal;
   return { id, type, source, persona, at, text };
-}
-
-function readJson(file: string, name: string): unknown {
-  try {
-    return JSON.parse(readFileSync(file, "utf8"));
-  } catch (error) {
-    throw new KobbleRefused(`${name} cannot be read: ${messageOf(error)}`);
-  }
-}
-
-function writeAtomically(file: string, data: unknown): void {
-  writeText(file, `${JSON.stringify(data, null, 2)}\n`);
-}
-
-function writeText(file: string, text: string): void {
-  mkdirSync(dirname(file), { recursive: true });
-  const temporary = `${file}.${String(process.pid)}.tmp`;
-  writeFileSync(temporary, text);
-  renameSync(temporary, file);
 }
 
 // conversation.md: the conversation's id in a comment, then each message

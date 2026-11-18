@@ -140,10 +140,15 @@ Kobble (the dashboard's name) works through one pipeline: Signals, then
 Explorations, then the Factory board. It keeps its records as files in the
 product's repository: `factory/kobble/signals/S-0001.json`,
 `factory/kobble/explorations/X-1/exploration.json`,
-`factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
+`factory/kobble/personas/<id>.json`. They go
 into git, so the team shares them like the code, except the signals: what
 people said stays on the computer that read the live app (the factory's
-`.gitignore` names `kobble/signals/`), since git would keep it for ever. An
+`.gitignore` names `kobble/signals/`), since git would keep it for ever.
+Each computer reads the live app for itself, and keeps where it got to beside
+its signals, in `kobble/signals/.sync.json`, so a teammate's computer reads
+from the beginning and has the signals too (before 0.12.0 it was
+`kobble/sync.json`, in git; it is read when this computer has no place of
+its own yet, and removed at the next sync). An
 exploration keeps its own copy of what it heard (`heard` in
 `exploration.json`: each signal's id, type, source, persona, time and
 words), so it reads the same on a teammate's computer; a persona's page

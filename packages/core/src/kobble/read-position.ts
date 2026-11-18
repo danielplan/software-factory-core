@@ -1,0 +1,39 @@
+// Where this computer last read the live app, and the cursor the export
+// gave: in signals/.sync.json, beside the signals and like them out of git
+// (ignored.ts). Each computer reads the live app for itself, so a teammate's
+// own reading starts from the beginning and gets the signals too. Before
+// 0.12.0 the place was kobble/sync.json, in git, where a teammate got the
+// cursor without the signals: it is read when this computer has no place of
+// its own yet, and removed when the new one is written (the removal goes into
+// git with the next commit).
+
+import { existsSync, rmSync } from "node:fs";
+import { join } from "node:path";
+
+import { z } from "zod";
+
+import { type SyncState, syncStateSchema } from "./schemas.ts";
+import { KobbleRefused, readJson, writeAtomically } from "./files.ts";
+
+const SYNC_FILE = join("signals", ".sync.json");
+const FORMER_SYNC_FILE = "sync.json";
+const NEVER: SyncState = { last: null, cursor: null };
+
+// root: the factory's kobble/ folder.
+export function readPosition(root: string): SyncState {
+  const name = [SYNC_FILE, FORMER_SYNC_FILE].find((one) =>
+    existsSync(join(root, one)),
+  );
+  if (!name) return NEVER;
+  const parsed = syncStateSchema.safeParse(readJson(join(root, name), name));
+  if (!parsed.success)
+    throw new KobbleRefused(
+      `${name} does not fit: ${z.prettifyError(parsed.error)}`,
+    );
+  return parsed.data;
+}
+
+export function savePosition(root: string, state: SyncState): void {
+  writeAtomically(join(root, SYNC_FILE), syncStateSchema.parse(state));
+  rmSync(join(root, FORMER_SYNC_FILE), { force: true });
+}
