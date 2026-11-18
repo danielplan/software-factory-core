@@ -40,9 +40,9 @@ the first company's factory; they come here written for any company (see
 | **Prototypes**     | The coach has a clickable prototype of an idea made in the real app, version by version, before anything is built                                                                                   | Ideas, a kit with prototype mode      | no       | to come                   |
 | **Made-up worlds** | Shared made-up data the prototypes run on, kept in step with the real data's shape; the coach can look at it and change it                                                                          | Prototypes                            | no       | to come                   |
 | **Voice**          | The owner talks instead of typing; speech stays on the computer (a one-time download of about 0.8 GB)                                                                                               | –                                     | no       | yes (in the kernel today) |
-| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; on that computer only                                                             | Ideas                                 | no       | to come                   |
-| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | to come                   |
-| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | to come                   |
+| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; on that computer only                                                             | Ideas                                 | no       | yes (Settings, Workshop)  |
+| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | yes (Settings, Workshop)  |
+| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | yes (Settings, Workshop)  |
 
 ### What each brings
 
@@ -89,6 +89,15 @@ forward`, no public address needed) and a check every few minutes for
   the idea is about; the coach makes small changes itself; a check that no
   prototype code reaches the real app. It asks each kit for its prototype
   mode and its starter, so a brand-new app starts from the kit's starter.
+- **Usage log** (off by default, the Usage log setting): every change to
+  an exploration as a line of JSON in a folder next to the project
+  (`<project>-usage`), each prototype's change as a patch and, when it is
+  opened, a picture at a computer's and a phone's width.
+- **Updates** (Workshop, the Updates setting): the owner's folder takes the
+  newest main from GitHub without git, only when nothing can be lost, by
+  itself every few minutes when switched on; running products start again.
+- **Desktop start** (Workshop): a file on the desktop that opens the
+  factory with a double-click (`.cmd` on Windows, `.command` on macOS).
 - **Voice**: Talk; live words while the owner speaks; a first draft as soon
   as they go quiet; the answer read out as it is written; "stop" interrupts.
 

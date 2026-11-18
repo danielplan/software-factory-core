@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { columnsOf } from "@/lib/columns";
+import { DesktopStartCard, UpdatesCard } from "@/updates/updates-card";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
@@ -38,6 +39,8 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
         <StatusLight light={top.light} />
         <span className="min-w-0 flex-1 text-[15px]">{top.text}</span>
       </Card>
+      <UpdatesCard />
+      <DesktopStartCard />
       {problem && <ProblemBox title="That did not work" text={problem} />}
       <div className="grid gap-4">
         <Area

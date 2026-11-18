@@ -1,0 +1,59 @@
+// The usage log's pictures: when a prototype is opened, a picture of it as
+// it runs, at a computer's and a phone's width, kept with the exploration
+// in the log's folder. Taken with Playwright's own command; when it cannot
+// (no browser installed, the prototype did not start), nothing is kept and
+// nobody is stopped.
+
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+
+import { run } from "@software-factory/core";
+
+import type { UsageLog } from "./usage-log.ts";
+
+const SIZES = [
+  { name: "computer", size: "1440,900" },
+  { name: "phone", size: "390,844" },
+];
+const NPX = process.platform === "win32" ? "npx.cmd" : "npx";
+
+export type Photograph = (
+  url: string,
+  file: string,
+  size: string,
+) => Promise<void>;
+
+export const playwrightPhotograph: Photograph = async (url, file, size) => {
+  await run(NPX, [
+    "--yes",
+    "playwright",
+    "screenshot",
+    `--viewport-size=${size}`,
+    "--wait-for-timeout=3000",
+    url,
+    file,
+  ]);
+};
+
+export async function pictureOfPrototype(options: {
+  usage: UsageLog;
+  exploration: string;
+  key: string;
+  address: () => Promise<string>;
+  photograph?: Photograph;
+  now?: Date;
+}): Promise<void> {
+  const { usage, exploration, key } = options;
+  const take = options.photograph ?? playwrightPhotograph;
+  try {
+    const url = await options.address();
+    const folder = join(usage.folder, "prototypes", exploration);
+    mkdirSync(folder, { recursive: true });
+    const at = (options.now ?? new Date()).toISOString().replace(/[:.]/g, "-");
+    for (const { name, size } of SIZES)
+      await take(url, join(folder, `${key}-${at}-${name}.png`), size);
+    usage.write(exploration, [{ event: "prototype-opened", key, url }]);
+  } catch {
+    // The log must never stop anyone's work.
+  }
+}

@@ -93,6 +93,13 @@ export {
   builderSettings,
   parallelCards,
 } from "./agents/builder-settings.ts";
+export {
+  chooseUpdatesByItself,
+  updatesByItself,
+  updateSettings,
+  usageFolder,
+  usageSettings,
+} from "./agents/usage-settings.ts";
 export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,
@@ -143,6 +150,7 @@ export {
   heardOf,
   KOBBLE_FOLDER,
   type KobbleKind,
+  type KobbleKinds,
   KobbleRefused,
   KobbleStore,
 } from "./kobble/store.ts";

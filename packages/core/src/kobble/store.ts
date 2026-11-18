@@ -60,6 +60,7 @@ type Kinds = {
   personas: KobblePersona;
   tests: PersonaTest;
 };
+export type { Kinds as KobbleKinds };
 export type KobbleKind = keyof Kinds;
 
 const SCHEMAS: { [K in KobbleKind]: z.ZodType<Kinds[K]> } = {
