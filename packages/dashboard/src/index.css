@@ -252,6 +252,62 @@
       transform: scale(1.12);
     }
   }
+  /* A prototype being made (explorations/board/prototype-making.tsx): its
+     page draws itself piece by piece, a light sweeps over it, the kobold
+     hops at its work and the card glows. */
+  --animate-assemble: assemble 5.2s cubic-bezier(0.2, 0.9, 0.3, 1) infinite;
+  @keyframes assemble {
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.92);
+    }
+    12%,
+    82% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  --animate-sweep: sweep 2.6s ease-in-out infinite;
+  @keyframes sweep {
+    from {
+      transform: translateX(-120%);
+    }
+    to {
+      transform: translateX(320%);
+    }
+  }
+  --animate-hop: hop 0.9s ease-in-out infinite;
+  @keyframes hop {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-6deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(6deg);
+    }
+  }
+  --animate-spark: spark 0.9s ease-out infinite;
+  @keyframes spark {
+    from {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(var(--spark-x), var(--spark-y)) scale(0.3);
+    }
+  }
+  --animate-making-glow: making-glow 2.4s ease-in-out infinite;
+  @keyframes making-glow {
+    50% {
+      box-shadow:
+        0 0 0 4px rgb(49 86 216 / 0.14),
+        0 14px 34px -14px rgb(49 86 216 / 0.5);
+    }
+  }
   /* The coach's orb turns slowly while it thinks. */
   --animate-swirl: swirl 3s linear infinite;
   @keyframes swirl {

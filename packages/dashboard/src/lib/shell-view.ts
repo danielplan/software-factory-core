@@ -47,16 +47,25 @@ export function overallOf(parts: PartView[]): {
 export type KoboldStatus = { busy: boolean; title: string; detail: string };
 
 // What the kobold is working on, from what the factory knows: the card it
-// builds, an idea it thinks about, a card it plans;
+// builds, an exploration it thinks about or makes a prototype for, an idea
+// it thinks about, a card it plans;
 // resting otherwise, with the factory's light in words.
 export function koboldStatus(
   work: WorkView | null,
   ideas: IdeaView[],
   quiet: string,
+  explorations: { title: string; busy: string | null }[] = [],
 ): KoboldStatus {
   const building = work?.builder.working;
   if (building)
     return { busy: true, title: "Kobold is building", detail: building.title };
+  const exploring = explorations.find((one) => one.busy);
+  if (exploring?.busy)
+    return {
+      busy: true,
+      title: `Kobold is ${exploring.busy.charAt(0).toLowerCase()}${exploring.busy.slice(1)}`,
+      detail: exploring.title,
+    };
   const thinking = ideas.find((one) => one.working);
   if (thinking)
     return {

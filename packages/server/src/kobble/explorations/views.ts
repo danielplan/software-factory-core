@@ -33,6 +33,9 @@ export type ExplorationRow = Pick<
   links: { from: string; to: string }[];
   // What is next, in one line from the kobold; none when it has nothing.
   line: string | null;
+  // What the kobold is busy with here right now (making a prototype,
+  // thinking), or null.
+  busy: string | null;
 };
 
 export type ExplorationsView = {
@@ -86,6 +89,7 @@ function lineOf(board: Board, talk: TalkView): string | null {
 export function explorationsView(
   store: KobbleStore,
   talk: (id: string) => TalkView,
+  runs: (id: string) => VersionRun[] = () => [],
 ): ExplorationsView {
   const rows = store.all("explorations").map((exploration) => {
     const board = completed(exploration, store.board(exploration.id));
@@ -108,6 +112,7 @@ export function explorationsView(
         exploration.status === "exploring"
           ? lineOf(board, talk(exploration.id))
           : null,
+      busy: busyWith(talk(exploration.id), runs(exploration.id)),
     };
   });
   return {
@@ -212,4 +217,12 @@ function linksAsWords(text: string): string {
     out += text.slice(at, open) + text.slice(open + 1, middle);
     at = close + 1;
   }
+}
+
+// What the kobold is busy with in one exploration.
+function busyWith(talk: TalkView, runs: VersionRun[]): string | null {
+  const making = runs.find((run) => run.state === "making");
+  if (making) return `Making prototype ${making.version}`;
+  if (talk.writing !== null || talk.activity !== null) return "Thinking";
+  return null;
 }

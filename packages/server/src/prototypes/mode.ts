@@ -30,8 +30,11 @@ export type VersionRun = {
   state: RunState;
   // Where it runs, once the start command said so.
   url: string | null;
-  // What the kobold is doing while it makes it, in a few words.
+  // What the kobold is doing while it makes it, in a few words; what it
+  // did before that (the last few, oldest first) and since when it makes it.
   activity: string | null;
+  steps: string[];
+  since: string | null;
   // Why it stopped or could not start, or what is odd about it.
   problem: string | null;
 };
@@ -47,6 +50,9 @@ export type ModeOptions = {
 
 // The last lines a failed command printed, to say why.
 const KEPT_LINES = 6;
+
+// The steps of making a prototype the board shows.
+const KEPT_STEPS = 4;
 
 export class PrototypeMode {
   readonly options: ModeOptions;
@@ -71,6 +77,8 @@ export class PrototypeMode {
         state: "stopped",
         url: null,
         activity: null,
+        steps: [],
+        since: null,
         problem: null,
       }
     );
@@ -78,7 +86,18 @@ export class PrototypeMode {
 
   // Changes what is known of a version, and says so.
   set(idea: string, version: string, change: Partial<VersionRun>): void {
-    const run = { ...this.runOf(idea, version), ...change };
+    const now = this.runOf(idea, version);
+    const run = { ...now, ...change };
+    if (run.state === "making" && now.state !== "making") {
+      run.since = new Date().toISOString();
+      run.steps = [];
+    } else if (
+      run.state === "making" &&
+      now.activity &&
+      change.activity !== undefined &&
+      change.activity !== now.activity
+    )
+      run.steps = [...now.steps, now.activity].slice(-KEPT_STEPS);
     this.runs.set(keyOf(idea, version), run);
     this.options.onChange();
   }

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
+import { Making } from "./prototype-making";
 import type { ThingNode } from "./nodes";
 
 const SMALL = "h-7 gap-1.5 px-2.5 text-xs";
@@ -21,10 +22,6 @@ const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
 function stateWords(run: VersionRun | undefined): string | null {
   if (!run) return null;
-  if (run.state === "making") {
-    const doing = run.activity ? `: ${run.activity}` : "…";
-    return `The kobold is making it${doing}`;
-  }
   if (run.state === "starting") return "Starting…";
   if (run.state === "failed") return run.problem ?? "It stopped.";
   // Running or stopped: what is odd about it (not shared with the team).
@@ -81,8 +78,16 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const words = stateWords(run);
   const result = test ? testWords(test) : null;
   return (
-    <Frame data={data} title={`${thing.key} · ${thing.name}`}>
-      <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
+    <Frame
+      data={data}
+      title={`${thing.key} · ${thing.name}`}
+      glow={run?.state === "making"}
+    >
+      {run?.state === "making" ? (
+        <Making run={run} />
+      ) : (
+        <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
+      )}
       <div className="text-xs text-muted-foreground">
         <Markdown text={thing.difference} />
       </div>

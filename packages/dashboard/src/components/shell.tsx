@@ -35,7 +35,10 @@ export function Shell({
           state.work,
           signals?.counts.new,
         )}
-        kobold={koboldStatus(state.work, state.ideas, overall.words)}
+        kobold={koboldStatus(state.work, state.ideas, overall.words, [
+          ...(explorations?.exploring ?? []),
+          ...(explorations?.waiting ?? []),
+        ])}
         light={overall.lit}
       />
       <main className="min-w-0 flex-1">

@@ -115,7 +115,11 @@ function readRoutes(
       return new FileAnswer(file, PICTURE_TYPES[extname(file)] ?? "image/png");
     },
     "GET /api/kobble/explorations": () =>
-      explorationsView(store(), (one) => talks.view(one)),
+      explorationsView(
+        store(),
+        (one) => talks.view(one),
+        (one) => prototypes.runs(one),
+      ),
     "GET /api/kobble/exploration": (_body, url) => {
       const exploration = explorationOf(
         store(),

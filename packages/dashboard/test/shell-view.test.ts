@@ -149,3 +149,17 @@ test("setting up is done only once the kobold has finished, not when the folder 
   assert.equal(setUpDone({ made: false, working: false }), false);
   assert.equal(setUpDone({ made: true, working: false }), true);
 });
+
+test("the kobold's card says when it makes a prototype or thinks in an exploration", () => {
+  assert.deepEqual(
+    koboldStatus(null, [], "All running", [
+      { title: "Quiet one", busy: null },
+      { title: "Signals from AI testers", busy: "Making prototype A" },
+    ]),
+    {
+      busy: true,
+      title: "Kobold is making prototype A",
+      detail: "Signals from AI testers",
+    },
+  );
+});

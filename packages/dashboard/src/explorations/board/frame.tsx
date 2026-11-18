@@ -98,11 +98,14 @@ export function Frame({
   data,
   title,
   tone = "card",
+  glow = false,
   children,
 }: Readonly<{
   data: ThingData;
   title?: string;
   tone?: "card" | "note";
+  // Glows while the kobold works on it (a prototype being made).
+  glow?: boolean;
   children: ReactNode;
 }>) {
   const { thing, pointed, attached, placed } = data;
@@ -117,6 +120,7 @@ export function Frame({
         pointed && "ring-4 ring-blue/40",
         attached && "ring-2 ring-blue ring-offset-2",
         !placed && "opacity-0",
+        glow && "border-blue/50 motion-safe:animate-making-glow",
       )}
     >
       <Handle type="target" position={Position.Left} className="opacity-0" />

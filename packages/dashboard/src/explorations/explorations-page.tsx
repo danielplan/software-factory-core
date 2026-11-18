@@ -114,6 +114,7 @@ const EXAMPLE: ExplorationRow = {
     { from: "choice", to: "b" },
   ],
   line: null,
+  busy: null,
 };
 
 // Before anything is explored: what an exploration is, and two ways to
