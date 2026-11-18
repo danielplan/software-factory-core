@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
 
 import { teamRoutes } from "../coach/setup-team.ts";
+import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
 import { servedKobble } from "./routes.ts";
@@ -52,6 +53,10 @@ export function kobbleOf(
       ...kobble.routes,
       ...updates.routes,
       ...teamRoutes(session.options.project),
+      ...factoryCardRoutes(
+        join(session.options.project, FACTORY_FOLDER),
+        more.cli,
+      ),
       "POST /api/desktop-start": () => ({
         file: putStartOnDesktop({
           project: session.options.project,

@@ -49,6 +49,8 @@ export type CardView = {
   closed: boolean;
   // It waits in Done for a person to say whether it worked (Kobble).
   asks: boolean;
+  // What kind of work it is (its "type: …" label), when it has one.
+  type?: "bug" | "feature" | "improvement" | null;
 };
 
 // What the builder is doing: on or off, the card it works on, its last

@@ -37,7 +37,9 @@ export const AGREEMENT_NOTES: readonly Note[] = CONVERSATION_NOTES.filter(
   (note) => note !== "failed",
 );
 
-const MARKER = /<!-- software-factory:([a-z-]+) -->\s*$/;
+// An earlier factory's notes, marked with its own name before "factory:"
+// ("<!-- acme-factory:started -->"), are read too, so its cards carry on.
+const MARKER = /<!-- [a-z-]{0,40}factory:([a-z-]+) -->\s*$/;
 
 export function markComment(text: string, note: Note): string {
   return `${text.trimEnd()}\n\n<!-- software-factory:${note} -->`;

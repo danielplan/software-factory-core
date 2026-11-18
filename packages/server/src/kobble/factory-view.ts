@@ -23,6 +23,7 @@ export type FactoryCard = {
   from: { exploration: string; key: string | null } | null;
   // A fix of a signal.
   fix: boolean;
+  type: CardView["type"];
 };
 
 export type FactoryView = {
@@ -89,6 +90,7 @@ export function factoryView(
             }
           : null,
         fix: fixes.has(`#${String(card.number)}`),
+        type: card.type ?? null,
       },
     };
   });

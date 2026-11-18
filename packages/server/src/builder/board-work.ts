@@ -8,7 +8,7 @@
 // a person answers.
 
 import type { Asking, BuilderView, CardView, Stage, WorkView } from "../api.ts";
-import type { Card, Cards } from "../cards/cards.ts";
+import { type Card, type Cards, typeOf } from "../cards/cards.ts";
 import {
   asksIfItWorked,
   type BoardCard,
@@ -224,7 +224,7 @@ export class BoardWork {
         .map((card) => card.number),
     );
     this.cards = listed.map(
-      ({ number, title, stage, column, url, closed }) => ({
+      ({ number, title, stage, column, url, closed, labels }) => ({
         number,
         title,
         stage,
@@ -233,6 +233,7 @@ export class BoardWork {
         pullRequest: this.pullRequests.get(number) ?? null,
         closed,
         asks: false,
+        type: typeOf(labels),
       }),
     );
     this.problem = null;

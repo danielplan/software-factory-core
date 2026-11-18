@@ -7,9 +7,9 @@ import { STAGES } from "../api.ts";
 import { answer, ownerOf, statusOf } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
-import type { Card, CardDetail, Cards } from "./cards.ts";
+import type { Card, CardDetail, Cards, CardType } from "./cards.ts";
 import { blockedBy, relationsOf } from "./github-relations.ts";
-import { planOf, withPlan } from "./cards.ts";
+import { labelArgs, planOf, typeEdit, withPlan } from "./cards.ts";
 
 // The board as board.json keeps it.
 export type GitHubBoard = {
@@ -142,6 +142,16 @@ class GitHubCards {
       "--body",
       withPlan(body, plan),
     ]);
+  }
+
+  // The card's type as a label (made when GitHub has none of that name);
+  // its other type labels come off.
+  async setType(number: number, type: CardType | null): Promise<void> {
+    const { card } = await this.find(number);
+    if (type) await this.gh(labelArgs(type, this.repo));
+    const edit = typeEdit(card.labels, type);
+    if (edit.length > 0)
+      await this.gh(["issue", "edit", String(number), ...this.repo, ...edit]);
   }
 
   // GitHub's "blocked by": the card waits for the other one.
