@@ -1,0 +1,265 @@
+// The pieces a step's cards are drawn with, as in the design: a tile (an
+// icon or the persona's kobold, the title, a line, where it came from), a
+// row, a person's row with initials, a big row to pick, and New persona.
+// Clicking a card asks the kobold about it; × takes it off.
+
+import { Plus, X } from "lucide-react";
+import { useState } from "react";
+
+import { type Card, faceFrom, messageOf, post } from "@/api";
+import { PersonaFace } from "@/components/kobold-face";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import { appParts, fromLine, textOf } from "./card-bits";
+import { ICON } from "./icons";
+import type { CardActs } from "./step-cards";
+
+function Icon({ card }: Readonly<{ card: Card }>) {
+  const Shown = card.icon ? ICON[card.icon] : null;
+  return (
+    <span className="grid size-8 flex-none place-items-center rounded-[10px] bg-wash text-wash-foreground">
+      {Shown && <Shown className="size-[17px]" aria-hidden />}
+    </span>
+  );
+}
+
+function Remove({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
+  return (
+    <button
+      type="button"
+      aria-label={`Take off ${card.title}`}
+      className="grid size-7 flex-none place-items-center rounded-lg text-faint hover:bg-ground hover:text-foreground-2"
+      onClick={(event) => {
+        event.stopPropagation();
+        acts.onRemove(card.id);
+      }}
+    >
+      <X className="size-[15px]" aria-hidden />
+    </button>
+  );
+}
+
+// Clicking asks about it: the next thing the owner says is about this card.
+function askable(card: Card, acts: CardActs) {
+  return {
+    role: "button",
+    tabIndex: 0,
+    "aria-pressed": acts.asked.includes(card.id),
+    onClick: () => {
+      acts.onAsk(card.id);
+    },
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.key === "Enter") acts.onAsk(card.id);
+    },
+  } as const;
+}
+
+export function Tile({
+  card,
+  acts,
+  person = false,
+  app = false,
+}: Readonly<{ card: Card; acts: CardActs; person?: boolean; app?: boolean }>) {
+  const parts = app
+    ? appParts(card)
+    : { text: textOf(card), from: fromLine(card) };
+  return (
+    <article
+      {...askable(card, acts)}
+      className={cn(
+        "flex min-w-0 cursor-pointer flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card",
+        acts.asked.includes(card.id) && "ring-2 ring-primary",
+      )}
+    >
+      <div className="flex items-center gap-2.5">
+        {person ? (
+          <PersonaFace
+            face={faceFrom({ name: card.title, about: card.text ?? "" })}
+            size={44}
+          />
+        ) : (
+          <Icon card={card} />
+        )}
+        <span className="min-w-0 flex-1 leading-snug font-semibold">
+          {card.title}
+        </span>
+        <Remove card={card} acts={acts} />
+      </div>
+      {parts.text && (
+        <p className="text-[13px] leading-relaxed text-muted-foreground">
+          {parts.text}
+        </p>
+      )}
+      <span className="mt-auto text-xs text-faint">{parts.from}</span>
+    </article>
+  );
+}
+
+export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
+  return (
+    <div
+      {...askable(card, acts)}
+      className={cn(
+        "flex cursor-pointer items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
+        acts.asked.includes(card.id) && "bg-wash",
+      )}
+    >
+      <Icon card={card} />
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">{card.title}</div>
+        <div className="text-[12.5px] text-muted-foreground">
+          {textOf(card)}
+        </div>
+      </div>
+      <span className="text-xs text-faint max-sm:hidden">{fromLine(card)}</span>
+      <Remove card={card} acts={acts} />
+    </div>
+  );
+}
+
+export function PersonRow({
+  card,
+  acts,
+  initials,
+}: Readonly<{ card: Card; acts: CardActs; initials: string }>) {
+  return (
+    <div
+      {...askable(card, acts)}
+      className={cn(
+        "flex cursor-pointer items-center gap-3.5 border-t border-border-soft px-[18px] py-3.5 first:border-t-0",
+        acts.asked.includes(card.id) && "bg-wash",
+      )}
+    >
+      <span className="grid size-[38px] flex-none place-items-center rounded-full bg-wash text-[13.5px] font-semibold text-wash-foreground">
+        {initials}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">{card.title}</div>
+        <div className="text-[12.5px] text-muted-foreground">
+          {textOf(card)}
+        </div>
+      </div>
+      <Remove card={card} acts={acts} />
+    </div>
+  );
+}
+
+export function BigRow({
+  card,
+  acts,
+}: Readonly<{ card: Card; acts: CardActs }>) {
+  return (
+    <div
+      {...askable(card, acts)}
+      className={cn(
+        "flex cursor-pointer items-start gap-3 rounded-2xl bg-card p-4 shadow-card hover:ring-[1.5px] hover:ring-primary",
+        acts.asked.includes(card.id) && "ring-2 ring-primary",
+      )}
+    >
+      <Icon card={card} />
+      <div className="grid min-w-0 flex-1 gap-1">
+        <span className="text-xs text-faint">{fromLine(card)}</span>
+        <span className="text-base font-semibold">{card.title}</span>
+        <span className="text-[13px] text-muted-foreground">
+          {textOf(card)}
+        </span>
+      </div>
+      <Remove card={card} acts={acts} />
+    </div>
+  );
+}
+
+// A persona of the owner's own: who they are and what they do and want.
+export function NewPersona({
+  area,
+  onProblem,
+}: Readonly<{ area: string; onProblem: (problem: string | null) => void }>) {
+  const [open, setOpen] = useState(false);
+  if (!open)
+    return (
+      <button
+        type="button"
+        className="grid min-h-[150px] place-items-center rounded-2xl text-muted-foreground shadow-[inset_0_0_0_1.5px_var(--border)] hover:text-foreground"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <span className="grid justify-items-center gap-1.5">
+          <Plus className="size-[18px]" aria-hidden />
+          Add a real customer
+        </span>
+      </button>
+    );
+  return (
+    <PersonaForm
+      area={area}
+      onProblem={onProblem}
+      onDone={() => {
+        setOpen(false);
+      }}
+    />
+  );
+}
+
+function PersonaForm({
+  area,
+  onProblem,
+  onDone,
+}: Readonly<{
+  area: string;
+  onProblem: (problem: string | null) => void;
+  onDone: () => void;
+}>) {
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
+  const add = () => {
+    onProblem(null);
+    post("/api/setup/draft", { add: { area, title, text } }).then(
+      onDone,
+      (error: unknown) => {
+        onProblem(messageOf(error));
+      },
+    );
+  };
+  return (
+    <form
+      className="grid gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card"
+      onSubmit={(event) => {
+        event.preventDefault();
+        add();
+      }}
+    >
+      <label className="grid gap-1 text-xs text-muted-foreground">
+        Who they are
+        <input
+          className="h-9 rounded-lg bg-ground px-3 text-sm text-foreground outline-none"
+          value={title}
+          placeholder="A first boat owner"
+          onChange={(event) => {
+            setTitle(event.target.value);
+          }}
+        />
+      </label>
+      <label className="grid gap-1 text-xs text-muted-foreground">
+        What they do and want
+        <textarea
+          rows={2}
+          className="rounded-lg bg-ground px-3 py-2 text-sm text-foreground outline-none"
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value);
+          }}
+        />
+      </label>
+      <div className="flex gap-2">
+        <Button type="submit" size="pill-sm" disabled={!title.trim()}>
+          Add
+        </Button>
+        <Button type="button" size="pill-sm" variant="ring" onClick={onDone}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}

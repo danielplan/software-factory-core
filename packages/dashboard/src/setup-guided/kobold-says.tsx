@@ -50,11 +50,8 @@ export function KoboldSays({
   return (
     <div className="flex items-start gap-3">
       <KoboldHead size={40} />
-      <div className="grid min-w-0 flex-1 gap-3">
-        <div
-          aria-live="polite"
-          className="rounded-[4px_16px_16px_16px] bg-card px-4 py-3 text-[14.5px] leading-relaxed shadow-card"
-        >
+      <div className="grid max-w-[640px] min-w-0 flex-1 gap-2 rounded-[4px_16px_16px_16px] bg-card px-4 py-3 shadow-card">
+        <div aria-live="polite" className="text-[14.5px] leading-relaxed">
           <Bubble
             coach={talking ? coach : { ...coach, working: false }}
             said={said}
@@ -64,7 +61,8 @@ export function KoboldSays({
           call={call}
           coach={coach}
           onSay={say}
-          placeholder="Answer the kobold, or ask about this step…"
+          placeholder="Tell the kobold…"
+          className="rounded-xl bg-ground py-1 pr-1 pl-3 [&_textarea]:min-h-9 [&_textarea]:py-1.5 [&_textarea]:text-[13.5px]"
         />
         {problem && <p className="text-sm text-destructive">{problem}</p>}
       </div>
@@ -95,6 +93,7 @@ const LINES: Record<string, string> = {
   how: "These parts of Kobble fit how you work. Take off what you don’t want.",
   bring: "This is what you have already, and what happens to it.",
   start: "Once Kobble is set up, these are worth exploring first.",
+  setup: "When you press Set up Kobble, I write it all into your repository.",
 };
 
 // The step's open questions (question cards not yet answered), or its line.

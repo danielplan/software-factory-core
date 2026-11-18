@@ -69,5 +69,3 @@ export function cardsIn(draft: Draft, area: string | null) {
 export function onStepLine(step: Step): string {
   return step.area ? `\n\n(On the step: ${step.area})` : "";
 }
-
-export const PEOPLE_AREA = SETUP_AREAS.people;

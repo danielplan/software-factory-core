@@ -13,6 +13,7 @@ export type {
   CoachView,
   Draft,
   GitHubStatus,
+  IconName,
   IdeaView,
   KitView,
   StageMap,

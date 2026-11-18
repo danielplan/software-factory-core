@@ -22,10 +22,16 @@ import { cardsIn, type Step, stepsOf } from "./steps";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
+// The step in the address (#step-3), so a reload stays there.
+function fromHash(): number {
+  const found = /^#step-(\d+)$/.exec(location.hash);
+  return found ? Number(found[1]) : 0;
+}
+
 export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   const { coach } = state;
   const steps = stepsOf(coach.draft);
-  const [at, setAt] = useState(0);
+  const [at, setAt] = useState(fromHash);
   const [asked, setAsked] = useState<string[]>([]);
   // The step the owner last said something on: there the reply shows.
   const [talkedOn, setTalkedOn] = useState<string | null>(null);
@@ -39,11 +45,20 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   if (!step) return null;
   const go = (n: number) => {
     setAsked([]);
-    setAt(Math.max(0, Math.min(last, n)));
+    const to = Math.max(0, Math.min(last, n));
+    setAt(to);
+    history.replaceState(null, "", `#step-${String(to)}`);
   };
   return (
     <div className="flex h-dvh min-h-0 bg-ground max-md:flex-col">
-      <Rail steps={steps} at={shown} started={coach.started} onGo={go} />
+      <Rail
+        project={state.project}
+        working={coach.working}
+        steps={steps}
+        at={shown}
+        started={coach.started}
+        onGo={go}
+      />
       <main className="flex min-w-0 flex-1 flex-col">
         <div className="flex-1 overflow-auto">
           <div className="mx-auto grid max-w-[880px] gap-6 px-7 py-9">
@@ -138,6 +153,7 @@ function Content({
       {step.area && (
         <StepCards
           cards={cardsIn(coach.draft, step.area)}
+          stepId={step.id}
           area={step.area}
           asked={asked}
           onAsk={onAsk}
@@ -161,11 +177,15 @@ const LEADS: Record<string, string> = {
 };
 
 function Rail({
+  project,
+  working,
   steps,
   at,
   started,
   onGo,
 }: Readonly<{
+  project: string;
+  working: boolean;
   steps: Step[];
   at: number;
   started: boolean;
@@ -180,6 +200,12 @@ function Rail({
         <KoboldHead size={32} />
         kobble
       </div>
+      <p className="px-1.5 pb-4 text-[12.5px] text-muted-foreground max-md:hidden">
+        Setting up{" "}
+        <b className="font-semibold text-foreground">
+          {project.split(/[\\/]/).filter(Boolean).at(-1)}
+        </b>
+      </p>
       <ol className="grid gap-0.5 max-md:flex">
         {steps.map((step, n) => (
           <li key={step.id}>
@@ -216,9 +242,7 @@ function Rail({
           </li>
         ))}
       </ol>
-      <p className="mt-auto px-1.5 pt-4 text-xs text-muted-foreground max-md:hidden">
-        You can change all of it later in Settings, Workshop and Personas.
-      </p>
+      <RailEnd working={working} />
     </nav>
   );
 }
@@ -241,7 +265,9 @@ function Bar({
             <ArrowLeft className="size-4" aria-hidden /> Back
           </Button>
         )}
-        <span className="flex-1" />
+        <span className="flex-1 text-[12.5px] text-faint">
+          {at === 0 ? "" : "You can change this later."}
+        </span>
         <Button
           size="pill"
           onClick={() => {
@@ -251,6 +277,29 @@ function Bar({
           {at === 0 ? "Let’s go" : "Continue"}
           <ArrowRight className="size-4" aria-hidden />
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// The rail's foot: how long it takes, and the kobold, at work or not.
+function RailEnd({ working }: Readonly<{ working: boolean }>) {
+  return (
+    <div className="mt-auto grid gap-2.5 pt-4 max-md:hidden">
+      <p className="px-1.5 text-xs text-muted-foreground">
+        About 7 minutes. You can change all of it later in Settings, Workshop
+        and Personas.
+      </p>
+      <div className="rounded-2xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
+        <div className="flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-[0_0_0_1px_var(--border-soft)]">
+          <KoboldHead size={36} />
+          <span className="grid">
+            <b className="text-[13.5px]">Your kobold</b>
+            <small className="text-xs text-muted-foreground">
+              {working ? "Working…" : "Here to help"}
+            </small>
+          </span>
+        </div>
       </div>
     </div>
   );
