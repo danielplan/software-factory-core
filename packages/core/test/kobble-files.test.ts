@@ -36,11 +36,12 @@ function emptyFactory(): KobbleStore {
   return new KobbleStore(mkdtempSync(join(tmpdir(), "kobble-")));
 }
 
-// The example company's factory folder, copied, so writes stay in the copy.
+// The example company, copied, so writes stay in the copy: its factory
+// folder (its products, with their made-up world, beside it).
 function acmeFactory(): string {
-  const folder = join(mkdtempSync(join(tmpdir(), "kobble-acme-")), "factory");
-  cpSync(ACME, folder, { recursive: true });
-  return folder;
+  const project = join(mkdtempSync(join(tmpdir(), "kobble-acme-")), "acme");
+  cpSync(join(ACME, ".."), project, { recursive: true });
+  return join(project, "factory");
 }
 
 const signal = (

@@ -5,6 +5,7 @@
   "about": "Orders flour and supplies every Monday from the office laptop and pays suppliers once a month.",
   "origin": "developer",
   "customers": ["c-5530", "c-5531"],
+  "situation": "monthly-buyers",
   "face": {
     "hat": "toque",
     "color": "amber"

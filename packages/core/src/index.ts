@@ -137,6 +137,20 @@ export {
   type Thing,
 } from "./kobble/schemas.ts";
 export { checkKobbleIn } from "./kobble/check.ts";
+export {
+  type SituationName,
+  Situations,
+  worldFolder,
+} from "./kobble/situations.ts";
+export {
+  changeWorld,
+  startWorld,
+  type World,
+  type WorldChange,
+  worldChangeSchema,
+  WorldRefused,
+  worldText,
+} from "./kobble/world.ts";
 export { IGNORED_SIGNALS, ignoreSignals } from "./kobble/ignored.ts";
 export {
   type Conversation,

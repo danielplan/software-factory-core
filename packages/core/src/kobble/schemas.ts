@@ -184,6 +184,9 @@ export const kobblePersonaSchema = z.strictObject({
   origin: z.enum(PERSONA_ORIGINS),
   // The anonymous customer ids it stands for.
   customers: z.array(text),
+  // The made-up world's situation it lives in (kobble/situations.ts): its
+  // tests and its prototypes start the world from there.
+  situation: fileId.optional(),
   // Its kobold's hat and colour; worked out from the id when not given
   // (face.ts).
   face: z
