@@ -7,6 +7,9 @@
 // project. When a product has a made-up world, the start command is told
 // where the exploration's world answers (FACTORY_WORLD_URL, world-route.ts);
 // opened for a persona that names a situation, the world starts from there.
+// Each prototype is pushed to origin once made, so a teammate opens it from
+// origin's branch (Workspace.prepareLocalBranch); when it cannot be, the
+// board says so.
 
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -242,19 +245,43 @@ export class ExplorationPrototypes {
         .filter(Boolean)
         .join("\n\n"),
     );
+    // Pushed, so a teammate can open it too; the board says when it is not.
+    const unshared = notShared(await workspace.pushBranch(made.branch));
     if (said) this.keepWords(exploration.id, key, said);
     this.mode.set(
       exploration.id,
       key,
       result.ok
-        ? { state: "stopped", activity: null, problem: null }
+        ? { state: "stopped", activity: null, problem: unshared }
         : {
             state: "failed",
             activity: null,
-            problem: `The kobold stopped: ${result.error ?? "Claude Code stopped"}. What it did so far is on ${made.branch}.`,
+            problem: stopped(result.error, made.branch, unshared),
           },
     );
   }
+}
+
+// Why the kobold stopped making it, and where its work is.
+function stopped(
+  error: string | undefined,
+  branch: string,
+  unshared: string | null,
+): string {
+  return [
+    `The kobold stopped: ${error ?? "Claude Code stopped"}. What it did so far is on ${branch}.`,
+    unshared,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+// What the board says of a prototype the team cannot open; none when it was
+// pushed.
+function notShared(why: string | null): string | null {
+  return why
+    ? `Only on this computer: it could not be shared with the team (${why}).`
+    : null;
 }
 
 // The kobold's last words: the end of its answer, a few lines at most.

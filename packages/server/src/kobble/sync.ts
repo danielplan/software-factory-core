@@ -3,6 +3,9 @@
 // and whenever someone presses Sync now. One sync at a time: pressing it
 // during one waits for that one. When a sync fails the signals stay as they
 // were and the problem is shown in plain words until the next one works.
+// Each computer reads for itself: where it got to is kept beside its signals,
+// out of git (the store's sync()), so a teammate's server reads the export
+// from the beginning and has the signals too.
 
 import {
   KobbleRefused,
@@ -83,7 +86,7 @@ export class LiveSync {
     try {
       last = this.options.store()?.sync().last ?? null;
     } catch {
-      // A sync.json that does not fit reads as never synced.
+      // A read position that does not fit reads as never synced.
     }
     return {
       connected: url !== null,

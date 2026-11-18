@@ -4,7 +4,11 @@
 
 import { builderSettings } from "../agents/builder-settings.ts";
 import { modelSettings } from "../agents/model-setting.ts";
-import { updateSettings, usageSettings } from "../agents/usage-settings.ts";
+import {
+  updateSettings,
+  usageFolderSettings,
+  usageSettings,
+} from "../agents/usage-settings.ts";
 import type { Company } from "../company/company.ts";
 import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
@@ -62,6 +66,7 @@ export function assembleFactory(
     modelSettings,
     builderSettings,
     usageSettings,
+    usageFolderSettings,
     updateSettings,
     ...extensions.flatMap((extension) => extension.settings),
   ];

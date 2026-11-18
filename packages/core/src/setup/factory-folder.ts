@@ -19,6 +19,7 @@ import {
   companySchema,
 } from "../company/company.ts";
 import { IGNORED_SIGNALS } from "../kobble/ignored.ts";
+import { KEEP_TEAM_FILE } from "../settings/team-file.ts";
 import { PRODUCT_FILE } from "../products/find-products.ts";
 import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
@@ -100,7 +101,7 @@ export function createFactoryFolder(
   );
   writeFileSync(
     join(root, ".gitignore"),
-    `copies/\nsettings/\n${IGNORED_SIGNALS}\n`,
+    `copies/\nsettings/\n${IGNORED_SIGNALS}\n${KEEP_TEAM_FILE}\n`,
   );
   return file;
 }

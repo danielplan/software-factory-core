@@ -71,10 +71,19 @@ same repository as the code: the company file, the product descriptions,
 the knowledge base and the history change with the code they describe, in
 the same commits and pull requests, and every copy of the code has them.
 The project's own `AGENTS.md` (and `CLAUDE.md`) point to the factory's
-rules, so any agent working in the code finds them. What must not be shared
-stays out of git (`factory/.gitignore`): the settings with their secrets
-(`settings/`) and the agents' working copies (`copies/`). The command finds
-the factory from anywhere inside the project.
+rules, so any agent working in the code finds them. A team uses one
+factory from several computers, one person each, and shares it only through
+the repository; there is no server. The team's settings (the builder's cards
+at once and model, whether the usage log is kept) are in `factory/team.env`,
+which git keeps (the factory's `.gitignore` says `!team.env`, for projects
+that ignore `*.env`). What must not be shared stays out of git
+(`factory/.gitignore`): each person's own settings with their secrets
+(`settings/`: tokens, the AI model, where the usage log is kept, Updates by
+itself) and the agents' working copies (`copies/`). Settings saved in
+`settings/factory.env` before 0.12.0 that are the team's are still read from
+there, and move to `team.env` when the factory opens or the group is saved
+(a setting group's `formerly`). The command finds the factory from anywhere
+inside the project.
 
 **Where work is tracked** is chosen right after the factory opens, and
 changed on Settings: the factory's own board (nothing to connect), a GitHub
@@ -106,6 +115,7 @@ acme/                    the project, one repository
    ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
+   ├─ team.env           the team's settings, in git
    ├─ runs/              its history
    ├─ kobble/            explorations, personas, tests, one file each, in git;
    │                     its signals/ stay on this computer (not in git)
@@ -130,10 +140,15 @@ Kobble (the dashboard's name) works through one pipeline: Signals, then
 Explorations, then the Factory board. It keeps its records as files in the
 product's repository: `factory/kobble/signals/S-0001.json`,
 `factory/kobble/explorations/X-1/exploration.json`,
-`factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
+`factory/kobble/personas/<id>.json`. They go
 into git, so the team shares them like the code, except the signals: what
 people said stays on the computer that read the live app (the factory's
-`.gitignore` names `kobble/signals/`), since git would keep it for ever. An
+`.gitignore` names `kobble/signals/`), since git would keep it for ever.
+Each computer reads the live app for itself, and keeps where it got to beside
+its signals, in `kobble/signals/.sync.json`, so a teammate's computer reads
+from the beginning and has the signals too (before 0.12.0 it was
+`kobble/sync.json`, in git; it is read when this computer has no place of
+its own yet, and removed at the next sync). An
 exploration keeps its own copy of what it heard (`heard` in
 `exploration.json`: each signal's id, type, source, persona, time and
 words), so it reads the same on a teammate's computer; a persona's page
@@ -197,7 +212,10 @@ sketch and agreed, choose an option, add pictures and click things to
 attach them to what they type next; the kobold hears what they did with
 their next words. **Make** builds an option's prototype on its branch
 `proto/X-<n>-<key>`, in a copy of the code next to the project, like a
-version in prototype mode; **Open** runs it with the project's
+version in prototype mode, and pushes the branch to origin once it is
+committed, so a teammate's computer opens it from origin's branch (when it
+cannot be pushed, or there is no origin, the board says it is only on this
+computer); **Open** runs it with the project's
 `prototype.start` command, one at a time, and the board shows it live;
 **Test** starts a persona test on that branch, as the exploration's first
 persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the

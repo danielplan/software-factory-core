@@ -205,6 +205,71 @@ test("a copy is made from the base branch, never takes settings files, and links
   );
 });
 
+test("a prototype's branch is pushed, and a teammate's computer starts from it", async () => {
+  const folder = mkdtempSync(join(tmpdir(), "shared-"));
+  const git = (...args: string[]) => run("git", args);
+  const origin = join(folder, "origin.git");
+  await git("init", "--quiet", "--bare", "-b", "main", origin);
+  const [mine, theirs] = [join(folder, "mine"), join(folder, "theirs")];
+  await git("clone", "--quiet", origin, mine);
+  writeFileSync(join(mine, "README.md"), "An app");
+  await git("-C", mine, "add", ".");
+  await git(
+    "-C",
+    mine,
+    "-c",
+    "user.name=t",
+    "-c",
+    "user.email=t@t",
+    "commit",
+    "-qm",
+    "x",
+  );
+  await git("-C", mine, "push", "--quiet", "origin", "HEAD:main");
+  await git("clone", "--quiet", origin, theirs);
+  const copyOf = (source: string) =>
+    new Workspace(
+      {
+        source,
+        workspaces: `${source}-copies`,
+        baseBranch: "main",
+      },
+      "proto",
+    );
+
+  const made = copyOf(mine);
+  await made.prepareLocalBranch("proto/X-1-a");
+  writeFileSync(join(made.path, "PROTOTYPE.md"), "Option A");
+  await made.commitAll("Prototype A");
+  assert.equal(await made.pushBranch("proto/X-1-a"), null);
+
+  // On the teammate's computer the branch is not there: origin's is taken.
+  const opened = copyOf(theirs);
+  await opened.prepareLocalBranch("proto/X-1-a");
+  assert.equal(
+    readFileSync(join(opened.path, "PROTOTYPE.md"), "utf8"),
+    "Option A",
+  );
+  // A branch nobody pushed starts from main.
+  await opened.prepareLocalBranch("proto/X-1-b");
+  assert.equal(existsSync(join(opened.path, "PROTOTYPE.md")), false);
+
+  // A push never goes over a teammate's work; it says why instead.
+  await made.commitAll("Mine again");
+  await made.pushBranch("proto/X-1-a");
+  await opened.prepareLocalBranch("proto/X-1-a");
+  await opened.commitAll("Theirs");
+  assert.match((await opened.pushBranch("proto/X-1-a")) ?? "", /rejected/);
+
+  // Without an origin there is nothing to share it through.
+  const alone = new Workspace(
+    { source: mine, workspaces: join(folder, "alone"), baseBranch: "main" },
+    "proto",
+  );
+  await git("init", "--quiet", alone.path);
+  assert.match((await alone.pushBranch("x")) ?? "", /no origin/);
+});
+
 test("a git lock is waited for, a few times; anything else is not", async () => {
   const waits: number[] = [];
   let tries = 0;

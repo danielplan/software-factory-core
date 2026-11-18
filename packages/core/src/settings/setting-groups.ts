@@ -3,7 +3,9 @@
 // add their groups; the Settings tab shows them and saves a change. Node reads
 // .env files (util.parseEnv) but has nothing that changes one and keeps its
 // comments, so the file is changed line by line here: every other line stays
-// as it was.
+// as it was. A group that moved to another file (`formerly`) is still read
+// from the old one for what the new one does not set, and its values move
+// over the next time it is saved (or when the upgrade runs).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -11,6 +13,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 
 import { readSettings } from "../parts/addresses.ts";
+import { keepTeamFile, TEAM_FILE } from "./team-file.ts";
 
 export const settingFieldSchema = z.object({
   key: z.string().regex(/^[A-Z][A-Z0-9_]*$/, "capitals, digits and _"),
@@ -38,6 +41,8 @@ export const settingGroupSchema = z.object({
   about: z.string().min(1),
   // The .env file it is saved in, from the company's root.
   file: z.string().min(1),
+  // The file it was saved in before, read for what `file` does not set.
+  formerly: z.string().min(1).optional(),
   // The parts that read it when they start (one file can serve several).
   usedBy: z.array(z.string()),
   fields: z.array(settingFieldSchema).min(1),
@@ -56,8 +61,17 @@ export type GroupView = Omit<SettingGroup, "fields"> & {
 // null for a value means: take it out of the file, so the default counts.
 export type Changes = Record<string, string | null>;
 
+// The group's values: its file's, and for the settings that file does not
+// set, what the file it was saved in before says.
+export function readGroup(
+  group: SettingGroup,
+  root: string,
+): Record<string, string> {
+  return { ...formerValues(group, root), ...readSettings(root, group.file) };
+}
+
 export function groupView(group: SettingGroup, root: string): GroupView {
-  const values = readSettings(root, group.file);
+  const values = readGroup(group, root);
   return {
     ...group,
     fields: group.fields.map((field) => ({
@@ -115,7 +129,43 @@ export function saveGroup(
   root: string,
   changes: Changes,
 ): void {
-  const path = join(root, group.file);
+  const moved = formerValues(group, root);
+  const now = readSettings(root, group.file);
+  const kept = Object.fromEntries(
+    Object.entries(moved).filter(([key]) => !(key in now)),
+  );
+  if (group.file === TEAM_FILE) keepTeamFile(root);
+  changeFile(join(root, group.file), { ...kept, ...changes });
+  if (group.formerly && Object.keys(moved).length > 0)
+    changeFile(
+      join(root, group.formerly),
+      Object.fromEntries(Object.keys(moved).map((key) => [key, null])),
+    );
+}
+
+// Moves what the file it was saved in before still has to the group's own
+// file; the settings moved.
+export function moveFormerValues(group: SettingGroup, root: string): string[] {
+  const moved = Object.keys(formerValues(group, root));
+  if (moved.length > 0) saveGroup(group, root, {});
+  return moved;
+}
+
+// The group's settings that the file it was saved in before has.
+function formerValues(
+  group: SettingGroup,
+  root: string,
+): Record<string, string> {
+  if (!group.formerly) return {};
+  const values = readSettings(root, group.formerly);
+  return Object.fromEntries(
+    group.fields
+      .filter((field) => field.key in values)
+      .map((field) => [field.key, values[field.key] ?? ""]),
+  );
+}
+
+function changeFile(path: string, changes: Changes): void {
   const before = existsSync(path) ? readFileSync(path, "utf8") : "";
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, changeEnvText(before, changes));

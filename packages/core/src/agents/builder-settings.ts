@@ -1,10 +1,11 @@
 // The builder's own settings, in the factory's Settings tab: how many cards
 // each lane works on at once, and the model the builder uses (empty: the
 // factory's Claude model). Read again for each job, so a change counts from
-// the next one.
+// the next one. The same for the whole team, so they are kept in the
+// factory's team.env, which git shares (team-file.ts).
 
-import { readSettings } from "../parts/addresses.ts";
-import type { SettingGroup } from "../settings/setting-groups.ts";
+import { readGroup, type SettingGroup } from "../settings/setting-groups.ts";
+import { PERSONAL_FILE, TEAM_FILE } from "../settings/team-file.ts";
 
 export const PARALLEL_KEY = "FACTORY_PARALLEL_CARDS";
 export const BUILDER_MODEL_KEY = "FACTORY_BUILDER_MODEL";
@@ -14,7 +15,8 @@ export const builderSettings: SettingGroup = {
   id: "builder",
   name: "Builder",
   about: "How the factory works through the board's cards.",
-  file: "settings/factory.env",
+  file: TEAM_FILE,
+  formerly: PERSONAL_FILE,
   usedBy: [],
   fields: [
     {
@@ -39,7 +41,7 @@ export const builderSettings: SettingGroup = {
 // Cards at once, from 1 to 5; 1 when the file says nothing usable.
 export function parallelCards(root: string | null): number {
   if (!root) return 1;
-  const value = Number(readSettings(root, builderSettings.file)[PARALLEL_KEY]);
+  const value = Number(readGroup(builderSettings, root)[PARALLEL_KEY]);
   return Number.isInteger(value) && value >= 1
     ? Math.min(value, MOST_CARDS)
     : 1;
@@ -48,6 +50,6 @@ export function parallelCards(root: string | null): number {
 // The builder's model; none means the factory's own choice.
 export function builderModel(root: string | null): string | undefined {
   if (!root) return undefined;
-  const value = readSettings(root, builderSettings.file)[BUILDER_MODEL_KEY];
+  const value = readGroup(builderSettings, root)[BUILDER_MODEL_KEY];
   return value?.trim() || undefined;
 }

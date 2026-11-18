@@ -176,6 +176,10 @@ test("records are removed, and the sync's place is kept", () => {
     last: "2026-11-17T08:00:00.000Z",
     cursor: "abc",
   });
+  // The place is this computer's: beside the signals, out of git, and never
+  // read as a signal.
+  assert.ok(existsSync(join(store.root, "signals", ".sync.json")));
+  assert.deepEqual(store.all("signals"), []);
   store.put("signals", signal("S-0001"));
   store.remove("signals", "S-0001");
   assert.deepEqual(store.all("signals"), []);
@@ -426,5 +430,21 @@ test("an exploration keeps its own copy of what it heard; signal files stay out 
   assert.match(
     checkKobbleIn(factory).problems.join("\n"),
     /X-1\/exploration.json: there is no copy of the signal “S-0404” it heard/,
+  );
+});
+
+test("the old shared sync.json is read once, then replaced by this computer's own", () => {
+  const store = emptyFactory();
+  const old = join(store.root, "sync.json");
+  mkdirSync(store.root, { recursive: true });
+  writeFileSync(old, '{"last": "2026-11-17T08:00:00.000Z", "cursor": "c1"}');
+  assert.equal(store.sync().cursor, "c1");
+  store.saveSync({ last: "2026-11-18T08:00:00.000Z", cursor: "c2" });
+  assert.equal(existsSync(old), false);
+  assert.equal(store.sync().cursor, "c2");
+  writeFileSync(join(store.root, "signals", ".sync.json"), '{"last": 3}');
+  assert.match(
+    refusal(() => store.sync()),
+    /\.sync\.json does not fit/,
   );
 });

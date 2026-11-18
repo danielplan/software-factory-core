@@ -26,7 +26,7 @@ export {
   type Factory,
   type KnownProduct,
 } from "./extensions/registry.ts";
-export { type InCopy, loadFactory } from "./load.ts";
+export { type InCopy, loadFactory, prepareFactory } from "./load.ts";
 export {
   addressOf,
   envOf,
@@ -77,6 +77,8 @@ export {
   checkChanges,
   checkGroups,
   groupView,
+  moveFormerValues,
+  readGroup,
   saveGroup,
   SECRET_SET,
   settingGroupSchema,
@@ -99,8 +101,15 @@ export {
   updatesByItself,
   updateSettings,
   usageFolder,
+  usageFolderSettings,
   usageSettings,
 } from "./agents/usage-settings.ts";
+export {
+  KEEP_TEAM_FILE,
+  keepTeamFile,
+  PERSONAL_FILE,
+  TEAM_FILE,
+} from "./settings/team-file.ts";
 export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,
