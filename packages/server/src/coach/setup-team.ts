@@ -2,6 +2,7 @@
 // once and the usage log. Saved in the factory folder's team file, which
 // git keeps, even before the factory itself is written.
 
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -28,6 +29,7 @@ export function teamRoutes(project: string): Record<string, Route> {
     "GET /api/setup/team": () => read(),
     "POST /api/setup/team": (body) => {
       const asked = (body ?? {}) as Partial<TeamChoices>;
+      mkdirSync(root, { recursive: true });
       if (asked.cards !== undefined) {
         if (
           !Number.isInteger(asked.cards) ||

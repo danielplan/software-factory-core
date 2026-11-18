@@ -31,7 +31,7 @@ export function fromLine(card: Card): string {
 }
 
 // A program the factory builds: its card starts with its folder
-// ("app-nano/ · …"); anything else is about the product (how real it is,
+// ("app-shop/ · …"); anything else is about the product (how real it is,
 // what is open, folders that are not products).
 const FOLDER = /^[\w.-]+(\/[\w.-]+)*\/ ·/;
 
@@ -85,7 +85,7 @@ export function isHowReal(card: Card): boolean {
   return /how (real|far)/i.test(card.title);
 }
 
-// An app's card: its folder in front ("app-nano/ · …") and its check at the
+// An app's card: its folder in front ("app-shop/ · …") and its check at the
 // end ("npm run verify") go into the line beneath; the rest is what it is.
 export function appParts(card: Card): { text: string; from: string } {
   const text = textOf(card);
