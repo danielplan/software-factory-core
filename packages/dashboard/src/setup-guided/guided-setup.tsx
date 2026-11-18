@@ -19,7 +19,7 @@ import { Welcome } from "./welcome";
 import { BarAction } from "./bar-action";
 import { SetupStep } from "./setup-step";
 import { StepCards } from "./step-cards";
-import { cardsIn, type Step, stepsOf } from "./steps";
+import { cardsIn, setUpDone, type Step, stepsOf } from "./steps";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -39,8 +39,9 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   const setupAt = steps.findIndex((s) => s.id === "setup");
   // While Kobble is set up, its step; after that, the first exploration may
   // be picked; before, not.
-  const building = coach.phase === "build" && !coach.made;
-  const reach = coach.made ? last : setupAt;
+  const done = setUpDone(coach);
+  const building = coach.phase === "build" && !done;
+  const reach = done ? last : setupAt;
   const shown = building ? setupAt : Math.min(at, reach);
   const step = steps[shown] ?? steps[0];
   if (!step) return null;
@@ -233,11 +234,11 @@ function Bar({
   onGo: (n: number) => void;
 }>) {
   const { coach } = state;
-  const building = coach.phase === "build" && !coach.made;
+  const building = coach.phase === "build" && !setUpDone(coach);
   return (
     <div className="border-t border-border bg-card px-7 py-3.5">
       <div className="mx-auto flex max-w-[880px] items-center gap-3">
-        {at > 0 && step.id !== "start" && !building && !coach.made && (
+        {at > 0 && step.id !== "start" && !building && !setUpDone(coach) && (
           <Button
             variant="ring"
             size="pill"

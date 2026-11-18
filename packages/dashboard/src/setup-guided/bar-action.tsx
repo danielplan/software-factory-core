@@ -9,7 +9,7 @@ import { get, messageOf, post, type State } from "@/api";
 import { Button } from "@/components/ui/button";
 
 import { pickedStart } from "./first-exploration";
-import type { Step } from "./steps";
+import { setUpDone, type Step } from "./steps";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -47,9 +47,10 @@ export function BarAction({
   let act = next;
   if (step.id === "hello") label = "Let’s go";
   if (step.id === "setup") {
-    if (coach.phase === "build" && !coach.made) return null;
-    label = coach.made ? "Pick where to start" : "Set up Kobble";
-    if (!coach.made)
+    const done = setUpDone(coach);
+    if (coach.phase === "build" && !done) return null;
+    label = done ? "Pick where to start" : "Set up Kobble";
+    if (!done)
       act = () => {
         run(() => post("/api/setup/build"));
       };

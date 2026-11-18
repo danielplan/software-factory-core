@@ -64,3 +64,9 @@ export function stepsOf(draft: Draft): Step[] {
 export function cardsIn(draft: Draft, area: string | null) {
   return area ? draft.cards.filter((card) => card.area === area) : [];
 }
+
+// Kobble is set up: the factory is written and the kobold has finished
+// (the folder exists from the first moment of setting up).
+export function setUpDone(coach: { made: boolean; working: boolean }): boolean {
+  return coach.made && !coach.working;
+}

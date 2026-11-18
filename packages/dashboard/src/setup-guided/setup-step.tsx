@@ -8,7 +8,7 @@ import { Check } from "lucide-react";
 import type { State } from "@/api";
 
 import { isApp, isPerson } from "./card-bits";
-import { cardsIn } from "./steps";
+import { cardsIn, setUpDone } from "./steps";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 type Coach = SetupState["coach"];
@@ -41,13 +41,13 @@ export function SetupStep({
             className="flex items-center gap-3 border-t border-border-soft px-[18px] py-3 first:border-t-0"
           >
             <Mark coach={coach} />
-            <span className={coach.made ? "" : "text-foreground-2"}>
+            <span className={setUpDone(coach) ? "" : "text-foreground-2"}>
               {line}
             </span>
           </li>
         ))}
       </ul>
-      {coach.phase === "build" && !coach.made && coach.activity && (
+      {coach.phase === "build" && !setUpDone(coach) && coach.activity && (
         <p className="text-[13px] text-muted-foreground">
           Now: {coach.activity}
         </p>
@@ -57,7 +57,7 @@ export function SetupStep({
 }
 
 function Mark({ coach }: Readonly<{ coach: Coach }>) {
-  if (coach.made)
+  if (setUpDone(coach))
     return (
       <Check
         className="size-[18px] flex-none rounded-full bg-[#12a594] p-0.5 text-white"
@@ -98,7 +98,7 @@ function plan(coach: Coach): string[] {
 }
 
 function wordsOf(coach: Coach): { title: string; lead: string } {
-  if (coach.made)
+  if (setUpDone(coach))
     return {
       title: "Kobble is set up",
       lead: "Everything is in place. One last step: pick where to start.",
