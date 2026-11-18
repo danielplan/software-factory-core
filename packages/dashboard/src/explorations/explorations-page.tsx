@@ -3,7 +3,7 @@
 // next), what waits (Start), and one quiet line for what was handed off or
 // dropped, which opens. New exploration starts one for a team idea.
 
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, CircleAlert, Plus } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -21,6 +21,8 @@ import { countWords } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
 
 import { Faces, Preview } from "./bits";
+import { stageOf } from "./kinds";
+import { StageLine } from "./stage-line";
 import { NewExploration } from "./new-exploration";
 
 export const explorationHash = (id: string) =>
@@ -151,9 +153,13 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
           <a
             key={row.id}
             href={explorationHash(row.id)}
-            className={cn(CARD, "flex flex-col gap-3 p-3.5")}
+            className={cn(
+              CARD,
+              "flex flex-col gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgb(20_24_36/0.35)]",
+            )}
           >
             <Preview row={row} />
+            <StageLine at={stageOf(row)} />
             <span className="flex items-center gap-2.5 px-1">
               <span className="flex-1 text-base font-semibold">
                 {row.title}
@@ -193,12 +199,14 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
 function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
   const [problem, setProblem] = useState<string | null>(null);
   return (
-    <div className={ROW}>
-      <Faces personas={row.personas} size={28} />
+    <div className={cn(ROW, "transition-colors hover:bg-surface")}>
+      <span className="grid size-9 flex-none place-items-center rounded-xl bg-[#fdf1d8] text-[#8a5a12]">
+        <CircleAlert aria-hidden className="size-[18px]" />
+      </span>
       <span className="grid min-w-0 flex-1">
         <span className="font-semibold">{row.title}</span>
         <span className="truncate text-[12.5px] text-muted-foreground">
-          {countWords(row.signals, "signal", "signals")} · {row.problem}
+          {row.problem}
         </span>
         {problem && (
           <span role="alert" className="text-[12.5px] text-destructive">
@@ -206,6 +214,12 @@ function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
           </span>
         )}
       </span>
+      <Faces personas={row.personas} size={26} />
+      {row.signals > 0 && (
+        <span className="inline-flex h-6 items-center rounded-full bg-[#e8f0fe] px-2 text-xs font-medium text-[#2948bc]">
+          {countWords(row.signals, "signal", "signals")}
+        </span>
+      )}
       <Button
         variant="ring"
         size="pill-sm"

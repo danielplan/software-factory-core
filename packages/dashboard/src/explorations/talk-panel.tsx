@@ -173,7 +173,7 @@ function Kobold({ text }: Readonly<{ text: string }>) {
     <div className="flex gap-2">
       <KoboldHead size={22} />
       <div className="rounded-[4px_14px_14px_14px] bg-ground px-3 py-[9px] text-[13.5px] leading-[1.45] whitespace-pre-wrap">
-        {text}
+        <Strong text={text} />
       </div>
     </div>
   );
@@ -208,5 +208,19 @@ function Attached({
         ) : null;
       })}
     </div>
+  );
+}
+
+// The kobold writes **bold** for the ways it names: shown bold, without
+// the stars.
+function Strong({ text }: Readonly<{ text: string }>) {
+  return text.split("**").map((part, at) =>
+    at % 2 === 1 ? (
+      <b key={at} className="font-semibold">
+        {part}
+      </b>
+    ) : (
+      part
+    ),
   );
 }

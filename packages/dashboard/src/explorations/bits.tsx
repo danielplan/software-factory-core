@@ -26,12 +26,12 @@ export function Faces({
 
 const LOOK: Record<string, string> = {
   problem: "h-[34px] w-[58px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
-  note: "h-[22px] w-[52px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
-  heard: "h-[26px] w-[58px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  choice: "h-[52px] w-[56px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  diagram: "h-[40px] w-[64px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  picture: "h-[34px] w-[48px] bg-[#eef0f4]",
-  prototype: "h-[22px] w-12 bg-card shadow-[0_0_0_1px_var(--line-soft)]",
+  note: "h-[22px] w-[52px] bg-[#f1f2f5] shadow-[0_0_0_1px_#e1e3e9]",
+  heard: "h-[26px] w-[58px] bg-[#e8f0fe] shadow-[0_0_0_1px_#c9d8fb]",
+  choice: "h-[52px] w-[56px] bg-[#efe9fd] shadow-[0_0_0_1px_#d9cdf8]",
+  diagram: "h-[40px] w-[64px] bg-[#e3f4f8] shadow-[0_0_0_1px_#c3e6ee]",
+  picture: "h-[34px] w-[48px] bg-[#fdeef3] shadow-[0_0_0_1px_#f6d3df]",
+  prototype: "h-[22px] w-12 bg-[#e6f6f3] shadow-[0_0_0_1px_#bfe7df]",
 };
 
 // The board in small: its things in columns along their arrows, the
