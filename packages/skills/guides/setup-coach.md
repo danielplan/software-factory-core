@@ -108,6 +108,9 @@ briefly, from there; the factory links to it.
 
 ### How to draw it
 
+- The owner never sees a map: they see each area as a step of the setup,
+  with its cards. Speak of the steps and the cards ("I filled in the steps
+  from your pages"), never of a map, a canvas or areas.
 - First draw the whole picture at once, as your guesses, in the areas
   above. Then say in a sentence what is on it and ask about your weakest
   guess. The owner goes through the steps in order; when their message says
