@@ -1,7 +1,7 @@
-// Plain rules around the speech model (whisper-worker.ts): which of the
+// Plain rules around the speech models (whisper-worker.ts): which of the
 // voice's languages a sentence was said in, which "words" are only the model
-// imagining speech in noise, and how a long turn is cut into pieces the model
-// can take.
+// imagining speech in noise, words to compare drafts with, and how a long
+// turn is cut into pieces the model can take.
 
 import { type Language, LANGUAGE_CODES } from "./languages.ts";
 import { SAMPLE_RATE } from "./voice-detector.ts";
@@ -47,13 +47,20 @@ const IMAGINED = [
 
 export function cleanTranscript(text: string): string {
   const said = text.replace(/\s+/g, " ").trim();
-  const plain = said
+  const plain = plainWords(said);
+  return !plain || IMAGINED.includes(plain) ? "" : said;
+}
+
+// Words without capitals, accents or punctuation, to compare what the model
+// wrote: "Okay," once and "okay" the next time are the same words.
+export function plainWords(text: string): string {
+  return text
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\p{L}\p{N} ]/gu, "")
+    .replace(/\s+/g, " ")
     .trim();
-  return !plain || IMAGINED.includes(plain) ? "" : said;
 }
 
 // The model takes at most 30 seconds at a time.

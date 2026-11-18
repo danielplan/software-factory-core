@@ -3,8 +3,8 @@
 // frames of 32 ms at 16 kHz, the rate the speech model listens at (the
 // resampler converts it). Nothing is recorded or sent anywhere.
 
-import { Resampler } from "./resampler";
-import { FRAME_SIZE, SAMPLE_RATE } from "./voice-detector";
+import { Resampler } from "./resampler.ts";
+import { FRAME_SIZE, SAMPLE_RATE } from "./voice-detector.ts";
 
 // What can stop the microphone from opening, each with its own message.
 export type MicrophoneProblem =
