@@ -16,6 +16,13 @@ const DESKTOP = { width: 1280, height: 800 };
 const SHOWN = 492;
 const SCALE = SHOWN / DESKTOP.width;
 
+// The screen's size on the card: the same whether the prototype runs, is
+// being made or waits, so the card does not jump.
+export const SCREEN = {
+  width: SHOWN,
+  height: Math.round(DESKTOP.height * SCALE),
+};
+
 export function LiveScreen({
   url,
   title,
@@ -24,7 +31,7 @@ export function LiveScreen({
     <Dialog>
       <div
         className="nodrag nowheel group relative overflow-hidden rounded-[9px] shadow-[0_0_0_1px_var(--line-soft)]"
-        style={{ width: SHOWN, height: Math.round(DESKTOP.height * SCALE) }}
+        style={SCREEN}
       >
         <iframe
           title={`${title}, running`}

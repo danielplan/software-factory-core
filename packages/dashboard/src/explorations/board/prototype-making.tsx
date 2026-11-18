@@ -9,14 +9,16 @@ import type { VersionRun } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
+import { SCREEN } from "./prototype-screen";
+
 // The pieces of the page, in the order they appear.
 const PIECES = [
-  "col-span-12 h-3 w-1/3 bg-blue/60",
+  "col-span-12 h-4 w-1/3 bg-blue/60",
   "col-span-3 row-span-3 h-full bg-surface-2",
-  "col-span-9 h-9 bg-[#e8edff]",
-  "col-span-4 h-12 bg-[#ffe9ef]",
-  "col-span-5 h-12 bg-[#e3f5ee]",
-  "col-span-9 h-3 w-3/4 bg-surface-2",
+  "col-span-9 h-full bg-[#e8edff]",
+  "col-span-4 h-full bg-[#ffe9ef]",
+  "col-span-5 h-full bg-[#e3f5ee]",
+  "col-span-9 h-4 w-3/4 bg-surface-2",
 ];
 
 const SPARKS = [
@@ -47,7 +49,10 @@ function useNow(): number {
 
 function Page() {
   return (
-    <div className="relative h-[150px] overflow-hidden rounded-[9px] bg-[#f3f4f7] p-2.5">
+    <div
+      className="relative overflow-hidden rounded-[9px] bg-[#f3f4f7] p-3"
+      style={SCREEN}
+    >
       <div className="grid h-full grid-cols-12 grid-rows-[auto_1fr_1fr_auto] gap-1.5 rounded-md bg-card p-2 shadow-[0_1px_4px_rgb(0_0_0/0.08)]">
         {PIECES.map((piece, at) => (
           <div
