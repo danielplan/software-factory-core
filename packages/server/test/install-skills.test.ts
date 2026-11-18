@@ -25,10 +25,10 @@ function skills(): string {
 
 const read = (...path: string[]) => readFileSync(join(...path), "utf8");
 
-test("the skills go where Claude Code and Codex look, and are kept up to date", () => {
+test("the skills go where Claude Code and Codex look, and the factory's always win", () => {
   const from = skills();
   const project = mkdtempSync(join(tmpdir(), "project-"));
-  // The project's own skill called plan, for Codex, is left alone.
+  // The project's own skill called plan, for Codex, is moved aside.
   mkdirSync(join(project, ".agents", "skills", "plan"), { recursive: true });
   writeFileSync(
     join(project, ".agents", "skills", "plan", "SKILL.md"),
@@ -39,6 +39,7 @@ test("the skills go where Claude Code and Codex look, and are kept up to date", 
     join(".claude", "skills", "build"),
     join(".claude", "skills", "plan"),
     join(".agents", "skills", "build"),
+    join(".agents", "skills", "plan"),
   ]);
   assert.equal(
     read(project, ".claude", "skills", "plan", "SKILL.md"),
@@ -46,6 +47,10 @@ test("the skills go where Claude Code and Codex look, and are kept up to date", 
   );
   assert.equal(
     read(project, ".agents", "skills", "plan", "SKILL.md"),
+    "# plan v1\n",
+  );
+  assert.equal(
+    read(project, "factory", "replaced-skills", "agents", "plan", "SKILL.md"),
     "mine\n",
   );
   assert.ok(
@@ -54,15 +59,21 @@ test("the skills go where Claude Code and Codex look, and are kept up to date", 
     ),
   );
 
-  // The factory's own copies are replaced by newer ones; the project's stays.
+  // An upgrade replaces the factory's copies as a whole: an edit made in
+  // the project and a file the new version dropped are both gone.
   writeFileSync(join(from, "build", "SKILL.md"), "# build v2\n");
+  writeFileSync(join(project, ".claude", "skills", "build", "extra.md"), "x");
+  writeFileSync(join(project, ".claude", "skills", "plan", "SKILL.md"), "edit");
   installSkills(project, from);
   assert.equal(
     read(project, ".claude", "skills", "build", "SKILL.md"),
     "# build v2\n",
   );
+  assert.ok(
+    !existsSync(join(project, ".claude", "skills", "build", "extra.md")),
+  );
   assert.equal(
-    read(project, ".agents", "skills", "plan", "SKILL.md"),
-    "mine\n",
+    read(project, ".claude", "skills", "plan", "SKILL.md"),
+    "# plan v1\n",
   );
 });

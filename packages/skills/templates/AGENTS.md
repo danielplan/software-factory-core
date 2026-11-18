@@ -17,7 +17,8 @@ When you are asked to build or change something, use the factory skills to plan,
 - What is known lives in the repository: the knowledge base, a product's blueprint, a decision record. Never only in an agent's own memory (such as Claude Code's memory) or a chat, where no other agent or person finds it. When you find a note kept only there, write it into the knowledge base.
 - Write down what is not done: unfinished items go into the product's blueprint (under Open) or the run's Later section before a run is called done.
 - Never loosen a check or add a lint-disabling comment without asking.
-- Changes to this file, the skills or the folder structure get a row in `CHANGES.md`, with the reason, before you make them.
+- Changes to this file or the folder structure get a row in `CHANGES.md`, with the reason, before you make them.
+- The factory's skills (`.claude/skills/`, `.agents/skills/`) belong to the factory and are replaced at every upgrade: never edit them here. A convention or lesson of this company goes in the knowledge base (`docs/reference/conventions/`, `docs/reference/lessons/`); one that would hold for any company is suggested to the factory core.
 
 <!-- company: rules only this company has. -->
 
