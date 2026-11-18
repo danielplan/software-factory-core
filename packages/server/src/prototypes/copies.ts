@@ -89,7 +89,8 @@ function envOf(project: string, branch: string, folder: string) {
 }
 
 // A version's copy as a working copy (core's Workspace): made when it is not
-// there yet, on the version's branch, or a new branch from the latest main.
+// there yet, on the version's branch (this computer's, else the one a
+// teammate pushed to origin), or a new branch from the latest main.
 export async function versionWorkspace(
   project: string,
   copy: PrototypeCopy,

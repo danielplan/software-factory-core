@@ -90,21 +90,29 @@ export class Workspace {
     this.bringLocalFiles();
   }
 
-  // A branch kept only on this computer (an idea's prototype): continued when
-  // it exists, otherwise started from the latest main.
+  // A prototype's branch: continued when this computer has it, otherwise
+  // started from origin's when a teammate pushed it (pushBranch), otherwise
+  // from the latest main.
   async prepareLocalBranch(branch: string): Promise<void> {
     await this.download();
     const exists = await this.git("branch", "--list", branch);
-    if (exists.trim() === "")
+    if (exists.trim() === "") {
+      const pushed = await this.git(
+        "branch",
+        "--remotes",
+        "--list",
+        `origin/${branch}`,
+      );
+      const from = pushed.trim() === "" ? this.settings.baseBranch : branch;
       await this.git(
         "checkout",
         "--quiet",
         "--force",
         "-b",
         branch,
-        `origin/${this.settings.baseBranch}`,
+        `origin/${from}`,
       );
-    else await this.git("checkout", "--quiet", "--force", branch);
+    } else await this.git("checkout", "--quiet", "--force", branch);
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
   }
@@ -197,6 +205,26 @@ export class Workspace {
       "origin",
       `${commit}:refs/heads/${branch}`,
     );
+  }
+
+  // Shares the copy's branch with the team: pushed to origin as it is, never
+  // over a teammate's work (no force). Plain words for why it could not be,
+  // or null when it was.
+  async pushBranch(branch: string): Promise<string | null> {
+    if (!(await this.succeeds("remote", "get-url", "origin")))
+      return "the project has no origin to share it through";
+    try {
+      await this.gitWithoutHooks(
+        "push",
+        "--quiet",
+        "origin",
+        `HEAD:refs/heads/${branch}`,
+      );
+      return null;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return message.replace(/^git .*? failed: /, "");
+    }
   }
 
   // Whether the copy carries on with its own branch of a card: it holds

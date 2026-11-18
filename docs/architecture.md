@@ -212,7 +212,10 @@ sketch and agreed, choose an option, add pictures and click things to
 attach them to what they type next; the kobold hears what they did with
 their next words. **Make** builds an option's prototype on its branch
 `proto/X-<n>-<key>`, in a copy of the code next to the project, like a
-version in prototype mode; **Open** runs it with the project's
+version in prototype mode, and pushes the branch to origin once it is
+committed, so a teammate's computer opens it from origin's branch (when it
+cannot be pushed, or there is no origin, the board says it is only on this
+computer); **Open** runs it with the project's
 `prototype.start` command, one at a time, and the board shows it live;
 **Test** starts a persona test on that branch, as the exploration's first
 persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the

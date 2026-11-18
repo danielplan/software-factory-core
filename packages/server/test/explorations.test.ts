@@ -1,9 +1,17 @@
 import assert from "node:assert/strict";
-import { cpSync, existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
+import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
@@ -376,7 +384,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
 test("Make builds the option on its branch; Open and Test need the project's start command", async () => {
   const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
   try {
-    inGit(factory.project);
+    const origin = inGit(factory.project);
     await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
     const made = factory.store
       .board("X-1")
@@ -397,6 +405,14 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }
     assert.equal(run?.state, "stopped");
+    // Pushed, so a teammate can open it.
+    assert.equal(run.problem, null);
+    assert.match(
+      execFileSync(GIT, ["-C", origin, "branch", "--list", "proto/X-1-c"], {
+        encoding: "utf8",
+      }),
+      /proto\/X-1-c/,
+    );
     const [making] = factory.seen;
     assert.ok(making);
     assert.equal(making.readOnly, false);
@@ -425,6 +441,29 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       (await factory.press("/test", { id: "X-3", key: "A", task: "x" })).body
         .error,
       "X-3 has no prototype A.",
+    );
+  } finally {
+    factory.close();
+  }
+});
+
+test("a prototype that cannot be pushed stays on this computer, and the board says so", async () => {
+  const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
+  try {
+    const origin = inGit(factory.project);
+    const hook = join(origin, "hooks", "pre-receive");
+    writeFileSync(hook, "#!/bin/sh\necho 'not today' >&2\nexit 1\n");
+    chmodSync(hook, 0o755);
+    await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
+    let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
+    while (run?.state === "making") {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
+    }
+    assert.equal(run?.state, "stopped");
+    assert.match(
+      run.problem ?? "",
+      /^Only on this computer: it could not be shared with the team \(.*not today/s,
     );
   } finally {
     factory.close();

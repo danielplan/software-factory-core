@@ -26,7 +26,8 @@ function stateWords(run: VersionRun | undefined): string | null {
   }
   if (run.state === "starting") return "Starting…";
   if (run.state === "failed") return run.problem ?? "It stopped.";
-  return run.state === "running" ? run.problem : null;
+  // Running or stopped: what is odd about it (not shared with the team).
+  return run.problem;
 }
 
 function testWords(test: TestResult): { words: string; dot: string } {
