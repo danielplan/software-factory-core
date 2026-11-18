@@ -12,23 +12,31 @@ import { aboutLine } from "@/setup-coach/coach-chat";
 import { Said } from "@/setup-coach/said";
 import type { VoiceCall } from "@/voice/voice-call";
 
-import { onStepLine, type Step } from "./steps";
+import { cardsIn, onStepLine, type Step } from "./steps";
 
+// What the kobold says on a step: while the owner talks with it on this
+// step, its reply; otherwise its open questions about this step, or a line
+// about the step.
 export function KoboldSays({
   coach,
   call,
   step,
   asked,
+  talking,
   onSent,
 }: Readonly<{
   coach: CoachView;
   call: VoiceCall;
   step: Step;
   asked: string[];
+  // The owner said something on this step: the kobold's reply shows.
+  talking: boolean;
   onSent: () => void;
 }>) {
   const [problem, setProblem] = useState<string | null>(null);
-  const said = coach.messages.findLast((m) => m.from === "coach")?.text;
+  const said = talking
+    ? coach.messages.findLast((m) => m.from === "coach")?.text
+    : stepLine(coach, step);
   const say = (text: string) => {
     setProblem(null);
     onSent();
@@ -47,7 +55,10 @@ export function KoboldSays({
           aria-live="polite"
           className="rounded-[4px_16px_16px_16px] bg-card px-4 py-3 text-[14.5px] leading-relaxed shadow-card"
         >
-          <Bubble coach={coach} said={said} />
+          <Bubble
+            coach={talking ? coach : { ...coach, working: false }}
+            said={said}
+          />
         </div>
         <Answer
           call={call}
@@ -73,4 +84,27 @@ function Bubble({
       {coach.activity ?? "Thinking…"}
     </span>
   );
+}
+
+const LINES: Record<string, string> = {
+  product:
+    "Here is your product as I read it. Correct a card by telling me, or take it off.",
+  people:
+    "These are the people I think you build for. Add the real ones you know.",
+  team: "This is who works on it and where the work is tracked.",
+  how: "These parts of Kobble fit how you work. Take off what you don’t want.",
+  bring: "This is what you have already, and what happens to it.",
+  start: "Once Kobble is set up, these are worth exploring first.",
+};
+
+// The step's open questions (question cards not yet answered), or its line.
+function stepLine(coach: CoachView, step: Step): string {
+  const open = cardsIn(coach.draft, step.area).filter(
+    (card) => card.tone === "question" && !card.confirmed,
+  );
+  if (open.length > 0)
+    return open
+      .map((card) => `**${card.title}.** ${card.text ?? ""}`)
+      .join("\n\n");
+  return LINES[step.id] ?? "";
 }

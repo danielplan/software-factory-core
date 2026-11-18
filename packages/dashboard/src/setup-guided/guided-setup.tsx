@@ -15,6 +15,7 @@ import { useCoachCall } from "@/setup-coach/coach-call";
 import { CoachStart } from "@/setup-coach/coach-chat";
 
 import { KoboldSays } from "./kobold-says";
+import { Welcome } from "./welcome";
 import { SetupStep } from "./setup-step";
 import { StepCards } from "./step-cards";
 import { cardsIn, type Step, stepsOf } from "./steps";
@@ -26,6 +27,8 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   const steps = stepsOf(coach.draft);
   const [at, setAt] = useState(0);
   const [asked, setAsked] = useState<string[]>([]);
+  // The step the owner last said something on: there the reply shows.
+  const [talkedOn, setTalkedOn] = useState<string | null>(null);
   const call = useCoachCall(coach, asked, () => {
     setAsked([]);
   });
@@ -56,8 +59,10 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
                   now.includes(id) ? now.filter((a) => a !== id) : [...now, id],
                 );
               }}
+              talking={talkedOn === step.id}
               onSent={() => {
                 setAsked([]);
+                setTalkedOn(step.id);
               }}
             />
           </div>
@@ -76,6 +81,7 @@ function Content({
   call,
   asked,
   onAsk,
+  talking,
   onSent,
 }: Readonly<{
   state: SetupState;
@@ -85,6 +91,7 @@ function Content({
   call: ReturnType<typeof useCoachCall>;
   asked: string[];
   onAsk: (id: string) => void;
+  talking: boolean;
   onSent: () => void;
 }>) {
   const { coach } = state;
@@ -107,11 +114,13 @@ function Content({
       call={call}
       step={step}
       asked={asked}
+      talking={talking}
       onSent={onSent}
     />
   );
   if (step.id === "setup")
     return <SetupStep state={state} says={says} call={call} />;
+  if (step.id === "hello") return <Welcome coach={coach} />;
   return (
     <>
       <header className="grid gap-1.5">
