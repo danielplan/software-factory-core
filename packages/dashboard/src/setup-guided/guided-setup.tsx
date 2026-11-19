@@ -145,7 +145,7 @@ const LEADS: Record<string, string> = {
   people:
     "The people you build for. Kobble tests ideas against them, so they should be real. Add your own.",
   team: "Who works on it, and where the work is tracked. Everyone can do everything.",
-  how: "The parts of Kobble that fit how you work. You can change them later in Workshop.",
+  how: "The parts of Kobble that fit how you work. You can change them later in Settings.",
   bring: "What you have already, and what happens to it.",
   start:
     "Pick one and Kobble opens it with the canvas already started. Or look around first.",
@@ -275,8 +275,8 @@ function RailEnd({ working }: Readonly<{ working: boolean }>) {
   return (
     <div className="mt-auto grid gap-2.5 pt-4 max-md:hidden">
       <p className="px-1.5 text-xs text-muted-foreground">
-        About 7 minutes. You can change all of it later in Settings, Workshop
-        and Personas.
+        About 7 minutes. You can change all of it later in Settings and
+        Personas.
       </p>
       <div className="rounded-xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
         <div className="flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-[0_0_0_1px_var(--border-soft)]">

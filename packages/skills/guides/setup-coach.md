@@ -88,7 +88,7 @@ belongs to; an area the project has nothing for stays empty.
    keep their place). Draw the board you agreed on as a card.
 4. **How Kobble works** (`How Kobble works`): the factory's add-ons (listed
    below) that fit, each as a card with why; ask once and switch on only
-   what they agree to. They can change it later in Workshop. The owner may
+   what they agree to. They can change it later in Settings. The owner may
    add a card "The look" here: "Your app's look" means you write the theme
    from the app's own colours, fonts and corners; "Kobble's own" means no
    theme. Without that card, write it from the app. Cards at once and the

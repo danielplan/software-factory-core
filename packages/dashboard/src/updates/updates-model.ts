@@ -1,6 +1,8 @@
-import type { UpdatesState } from "../../../server/src/updates/project-updates.ts";
+import type { UpdatesView } from "../../../server/src/updates/served.ts";
 
-// What Workshop says about new versions on GitHub, in plain words.
+type UpdatesState = UpdatesView;
+
+// What Settings › Updates says about new versions on GitHub, in plain words.
 export type UpdatesSummary = {
   tone: "quiet" | "new" | "blocked";
   title: string;
@@ -31,7 +33,9 @@ function whatToSay(
   if (updates.updating)
     return {
       tone: "new",
-      title: "Taking the new version from GitHub…",
+      title: updates.step
+        ? `${updates.step}…`
+        : "Taking the new version from GitHub…",
       text: "The products that run start again with it.",
       canUpdate: false,
     };
@@ -75,4 +79,61 @@ function clock(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+// The row in the sidebar, only when something needs the owner or just
+// happened: an update running, changes ready, changes that cannot be taken
+// yet, a newer Kobble, or an update in the last ten minutes.
+export type UpdateRow = {
+  tone: "busy" | "new" | "blocked" | "release" | "done";
+  title: string;
+  text: string;
+};
+
+const JUST = 10 * 60_000;
+
+export function updateRow(
+  updates: UpdatesState,
+  now = Date.now(),
+): UpdateRow | null {
+  return changesRow(updates) ?? releaseRow(updates) ?? doneRow(updates, now);
+}
+
+function changesRow(updates: UpdatesState): UpdateRow | null {
+  const { waiting, blocked } = updates;
+  if (updates.updating)
+    return {
+      tone: "busy",
+      title: "Updating…",
+      text: updates.step ?? "Taking the changes from GitHub",
+    };
+  if (waiting.count === 0) return null;
+  if (blocked)
+    return { tone: "blocked", title: "Can't update yet", text: blocked.reason };
+  return {
+    tone: "new",
+    title: `${String(waiting.count)} ${waiting.count === 1 ? "change" : "changes"} ready`,
+    text: waiting.titles[0] ?? "",
+  };
+}
+
+function releaseRow({ release }: UpdatesState): UpdateRow | null {
+  if (!release.newest) return null;
+  return {
+    tone: "release",
+    title: `Kobble ${release.newest} is out`,
+    text: release.card
+      ? `Being prepared in #${String(release.card.number)}`
+      : "Prepare the upgrade for the team",
+  };
+}
+
+function doneRow(updates: UpdatesState, now: number): UpdateRow | null {
+  const last = updates.lastUpdate;
+  if (!last || now - new Date(last.at).getTime() >= JUST) return null;
+  return {
+    tone: "done",
+    title: "Updated",
+    text: `${String(last.count)} ${last.count === 1 ? "change" : "changes"}, everything started again`,
+  };
 }

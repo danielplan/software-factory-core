@@ -33,6 +33,8 @@ export function pretendGitHub() {
   // Which card waits for which (GitHub's "blocked by"), and which are closed.
   const blockedBy = new Map<number, number[]>();
   const closed = new Set<number>();
+  // Items taken off the board (their issues stay).
+  const removed = new Set<number>();
   const says = (out: unknown) =>
     Promise.resolve({
       code: 0,
@@ -40,24 +42,26 @@ export function pretendGitHub() {
       err: "",
     });
   const items = () => [
-    ...[...issues].map(([number, issue]) => ({
-      id: `item-${String(number)}`,
-      fieldValueByName: { name: issue.column },
-      content: {
-        number,
-        title: issue.title,
-        url: `https://github.com/acme/shop/issues/${String(number)}`,
-        repository: { nameWithOwner: "acme/shop" },
-        labels: { nodes: [] },
-        state: closed.has(number) ? "CLOSED" : "OPEN",
-        blockedBy: {
-          nodes: (blockedBy.get(number) ?? []).map((n) => ({
-            number: n,
-            state: closed.has(n) ? "CLOSED" : "OPEN",
-          })),
+    ...[...issues]
+      .filter(([number]) => !removed.has(number))
+      .map(([number, issue]) => ({
+        id: `item-${String(number)}`,
+        fieldValueByName: { name: issue.column },
+        content: {
+          number,
+          title: issue.title,
+          url: `https://github.com/acme/shop/issues/${String(number)}`,
+          repository: { nameWithOwner: "acme/shop" },
+          labels: { nodes: [] },
+          state: closed.has(number) ? "CLOSED" : "OPEN",
+          blockedBy: {
+            nodes: (blockedBy.get(number) ?? []).map((n) => ({
+              number: n,
+              state: closed.has(n) ? "CLOSED" : "OPEN",
+            })),
+          },
         },
-      },
-    })),
+      })),
     // Another repository's issue and a draft are not the factory's cards.
     {
       id: "item-x",
@@ -148,6 +152,10 @@ export function pretendGitHub() {
       return says("{}");
     }
     if (first === "issue") return issue(args);
+    if (first === "project" && second === "item-delete") {
+      removed.add(Number(/item-(\d+)/.exec(args.join(" "))?.[1]));
+      return says("{}");
+    }
     if (first === "project" && second === "item-add")
       return says(JSON.stringify({ id: "item-9" }));
     return Promise.resolve({
@@ -160,5 +168,5 @@ export function pretendGitHub() {
     run,
     start: () => ({ answer: () => {}, done: Promise.resolve(1) }),
   };
-  return { cli, issues, said, closed };
+  return { cli, issues, said, closed, removed };
 }

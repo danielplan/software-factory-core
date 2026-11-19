@@ -1,7 +1,8 @@
 // A card opened beside the board: its type (changed with a click), where
 // the work is, what it asks for, the agreed plan, the pull request, and the
 // conversation with the factory; GitHub is a link away. Esc or the
-// backdrop closes it.
+// backdrop closes it. A card not wanted any more is deleted at its foot,
+// after a second click: closed as not planned and taken off the board.
 
 import { ArrowUpRight, GitPullRequest, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,11 +14,17 @@ import { cn } from "@/lib/utils";
 
 import type { CardPanel as Panel } from "../../../server/src/kobble/factory-card.ts";
 import { type CardType, TypePicker } from "./card-type";
+import { DeleteCard } from "./delete-card";
 
 export function CardPanel({
   number,
   onClose,
-}: Readonly<{ number: number; onClose: () => void }>) {
+  onDelete,
+}: Readonly<{
+  number: number;
+  onClose: () => void;
+  onDelete: () => void;
+}>) {
   const [panel, setPanel] = useState<Panel | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   useEffect(() => {
@@ -60,34 +67,51 @@ export function CardPanel({
         aria-label={`Card #${String(number)}`}
         className="relative flex h-full w-[460px] max-w-full animate-slide-in flex-col overflow-y-auto bg-card shadow-[-12px_0_40px_-16px_rgb(20_24_36/0.25)]"
       >
-        <header className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5">
-          <span className="text-[13px] text-muted-foreground">#{number}</span>
-          <span className="flex-1" />
-          {panel && (
-            <a
-              href={panel.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary"
-            >
-              Open on GitHub <ArrowUpRight className="size-3.5" aria-hidden />
-            </a>
-          )}
-          <button
-            type="button"
-            aria-label="Close"
-            className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-ground"
-            onClick={onClose}
-          >
-            <X className="size-4" aria-hidden />
-          </button>
-        </header>
+        <PanelHead number={number} url={panel?.url ?? null} onClose={onClose} />
         {problem && (
           <p className="px-5 pt-4 text-[13px] text-destructive">{problem}</p>
         )}
         {panel ? <Body panel={panel} onPick={pick} /> : !problem && <Loading />}
+        {panel && (
+          <DeleteCard
+            number={number}
+            building={panel.building}
+            onDelete={onDelete}
+          />
+        )}
       </aside>
     </div>
+  );
+}
+
+function PanelHead({
+  number,
+  url,
+  onClose,
+}: Readonly<{ number: number; url: string | null; onClose: () => void }>) {
+  return (
+    <header className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5">
+      <span className="text-[13px] text-muted-foreground">#{number}</span>
+      <span className="flex-1" />
+      {url && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary"
+        >
+          Open on GitHub <ArrowUpRight className="size-3.5" aria-hidden />
+        </a>
+      )}
+      <button
+        type="button"
+        aria-label="Close"
+        className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-ground"
+        onClick={onClose}
+      >
+        <X className="size-4" aria-hidden />
+      </button>
+    </header>
   );
 }
 

@@ -9,6 +9,12 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
 import type { Card, CardDetail, Cards, CardType } from "./cards.ts";
 import { blockedBy, relationsOf } from "./github-relations.ts";
+import {
+  type Item,
+  itemOf,
+  ITEMS,
+  type ProjectAnswer,
+} from "./github-items.ts";
 import { labelArgs, planOf, typeEdit, withPlan } from "./cards.ts";
 
 // The board as board.json keeps it.
@@ -19,16 +25,6 @@ export type GitHubBoard = {
   stages: StageMap;
 };
 
-type Issue = {
-  number: number;
-  title: string;
-  url: string;
-  repository: string;
-  labels: string[];
-  closed: boolean;
-  waitsFor: number[];
-};
-type Item = { id: string; status: string; issue: Issue | null };
 type Project = { id: string; items: Item[] };
 
 export function githubCards(cli: Cli, board: GitHubBoard): Cards {
@@ -42,6 +38,8 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     writePlan: (number, plan) => cards.writePlan(number, plan),
     dependOn: (number, on) => cards.dependOn(number, on),
     replace: (number, by) => cards.replace(number, by),
+    setType: (number, type) => cards.setType(number, type),
+    remove: (number) => cards.remove(number),
   };
 }
 
@@ -203,6 +201,33 @@ class GitHubCards {
     ]);
   }
 
+  // Closed as not planned and taken off the board; the issue stays on GitHub.
+  async remove(number: number): Promise<void> {
+    const { card, item } = await this.find(number);
+    if (card.stage === "doing")
+      throw new Refused(
+        `The builder is on #${String(number)}: stop it before deleting the card.`,
+      );
+    if (!card.closed)
+      await this.gh([
+        "issue",
+        "close",
+        String(number),
+        ...this.repo,
+        "--reason",
+        "not planned",
+      ]);
+    await this.gh([
+      "project",
+      "item-delete",
+      String(this.board.board),
+      "--owner",
+      this.owner,
+      "--id",
+      item.id,
+    ]);
+  }
+
   // The card with that number, its item and the board.
   private async find(number: number) {
     const project = await this.project();
@@ -284,52 +309,4 @@ class GitHubCards {
   private async gh(args: string[]): Promise<string> {
     return answer(await this.cli.run(args));
   }
-}
-
-const ITEMS = `id items(first: 100) { nodes { id
-  fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
-  content { ... on Issue { number title url state repository { nameWithOwner } labels(first: 20) { nodes { name } } blockedBy(first: 20) { nodes { number state } } } } } }`;
-
-type Node = {
-  id: string;
-  fieldValueByName: { name?: string } | null;
-  content: {
-    number?: number;
-    title?: string;
-    url?: string;
-    state?: string;
-    repository?: { nameWithOwner: string };
-    labels?: { nodes: { name: string }[] };
-    blockedBy?: { nodes: { number: number; state: string }[] };
-  } | null;
-};
-type ProjectAnswer = {
-  data?: {
-    repositoryOwner?: {
-      projectV2?: { id: string; items: { nodes: Node[] } } | null;
-    };
-  };
-};
-
-function itemOf(node: Node): Item {
-  return {
-    id: node.id,
-    status: node.fieldValueByName?.name ?? "",
-    issue: issueOf(node.content),
-  };
-}
-
-function issueOf(content: Node["content"]): Issue | null {
-  if (content?.number === undefined) return null;
-  return {
-    number: content.number,
-    title: content.title ?? "",
-    url: content.url ?? "",
-    repository: content.repository?.nameWithOwner ?? "",
-    labels: content.labels?.nodes.map((l) => l.name) ?? [],
-    closed: content.state === "CLOSED",
-    waitsFor: (content.blockedBy?.nodes ?? [])
-      .filter((b) => b.state !== "CLOSED")
-      .map((b) => b.number),
-  };
 }

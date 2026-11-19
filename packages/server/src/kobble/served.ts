@@ -12,7 +12,7 @@ import { teamRoutes } from "../coach/setup-team.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
-import { servedKobble } from "./routes.ts";
+import { connectedCards, servedKobble } from "./routes.ts";
 import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
@@ -37,17 +37,27 @@ function kobbleAlone(
   });
 }
 
-// Kobble, with Updates beside it on Workshop: the owner's folder following
+// Kobble, with Updates beside it (the sidebar, Settings › Updates): the owner's folder following
 // GitHub's main (updates/), told to the page like Kobble's changes.
 export function kobbleOf(
   session: Session,
   tell: (event: string) => void,
-  more: { cli: Cli; testsRunOn?: TestsRunOn },
+  more: {
+    cli: Cli;
+    testsRunOn?: TestsRunOn;
+    restartFactory?: (resume: string[]) => Promise<void>;
+  },
 ) {
   const kobble = kobbleAlone(session, tell, more);
-  const updates = updatesOf(session, () => {
-    tell(`event: kobble-changed\ndata: {"what":"updates"}\n\n`);
-  });
+  const updates = updatesOf(
+    session,
+    () => {
+      tell(`event: kobble-changed\ndata: {"what":"updates"}\n\n`);
+    },
+    () =>
+      connectedCards(join(session.options.project, FACTORY_FOLDER), more.cli),
+    more.restartFactory,
+  );
   return {
     ...kobble,
     routes: {

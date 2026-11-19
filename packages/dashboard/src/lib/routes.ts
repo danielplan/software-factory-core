@@ -1,40 +1,41 @@
 // Where the dashboard is, from the address after the # (#explore/<id>), so
 // a reload stays there. Addresses from before the pages were renamed or
-// taken away (#board, #ideas/<id>, #system, #add-ons, #today, #customers,
+// taken away (#board, #ideas/<id>, #workshop, #add-ons, #today, #customers,
 // #products, #understand, #prototype) still lead somewhere that makes sense.
 
 // Explorations is still the page "explore", and the Factory board "build":
 // their addresses stay as they were.
 export const PAGES = [
+  "home",
+  "system",
   "signals",
   "explore",
   "build",
   "personas",
-  "workshop",
   "settings",
 ] as const;
 export type Page = (typeof PAGES)[number];
 
-// The page, and what is open in it: an exploration, a persona, the
-// add-ons on Workshop. Connecting a board (#connect) is a page of its own,
+// The page, and what is open in it: an exploration, a persona. Connecting a board (#connect) is a page of its own,
 // outside the sidebar.
 export type Place = {
   page: Page | "connect";
   open: string | null;
 };
 
-// The page shown when the address names none: what came in.
-const FIRST: Page = "signals";
+// The page shown when the address names none: what waits for you.
+const FIRST: Page = "home";
 
 // The old pages and where they are now.
 const MOVED = new Map([
   ["board", "build"],
   ["ideas", "explore"],
-  ["system", "workshop"],
-  ["add-ons", "workshop/add-ons"],
+  ["workshop/add-ons", "settings"],
+  ["workshop", "system"],
+  ["add-ons", "settings"],
   ["today", "signals"],
   ["customers", "personas"],
-  ["products", "workshop"],
+  ["products", "system"],
   ["understand", "personas"],
   ["prototype", "explore/"],
 ]);
@@ -50,6 +51,8 @@ function partsOf(hash: string): { asked: string; rest: string | null } {
 // when it has not moved.
 export function movedHash(hash: string): string | null {
   const { asked, rest } = partsOf(hash);
+  const whole = rest === null ? undefined : MOVED.get(`${asked}/${rest}`);
+  if (whole !== undefined) return `#${whole}`;
   const now = MOVED.get(asked);
   if (now === undefined) return null;
   return rest === null || now.includes("/") ? `#${now}` : `#${now}/${rest}`;

@@ -1,51 +1,40 @@
 // Explorations: what is being explored (a card each, with a small preview
 // of its canvas, its personas and one line from the kobold about what is
 // next), what waits (Start), and one quiet line for what was handed off or
-// dropped, which opens. New exploration starts one for a team idea.
+// dropped, which opens. New exploration asks the support kobold, who adds a team idea with them.
 
-import { ChevronDown, ChevronUp, CircleAlert, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { useState } from "react";
 
-import {
-  type ExplorationRow,
-  type ExplorationsView,
-  messageOf,
-  post,
-} from "@/api";
+import { type ExplorationRow, type ExplorationsView } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CARD, Chevron, Head, ROW } from "@/signals/bits";
-import { countWords } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
 import { Markdown } from "@/components/markdown";
 
 import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
-import { NewExploration } from "./new-exploration";
-
-export const explorationHash = (id: string) =>
-  `#explore/${encodeURIComponent(id)}`;
+import { askSupport } from "@/support/ask-support";
+import { explorationHash, Waiting } from "./waiting-row";
 
 export const useExplorations = () =>
   useRead("/api/kobble/explorations") as Read<ExplorationsView>;
 
 export function ExplorationsPage() {
   const { data, problem } = useExplorations();
-  const [adding, setAdding] = useState(false);
+  const adding = () => {
+    askSupport("I have an idea or a feature request to explore.");
+  };
   return (
     <>
       <Head
         title="Explorations"
         right={
-          <Button
-            size="pill"
-            onClick={() => {
-              setAdding(true);
-            }}
-          >
+          <Button size="pill" onClick={adding}>
             <Plus aria-hidden strokeWidth={2.2} />
             New exploration
           </Button>
@@ -55,21 +44,7 @@ export function ExplorationsPage() {
         <ProblemBox title="The explorations cannot be read" text={problem} />
       )}
       {data &&
-        (isEmpty(data) ? (
-          <NothingYet
-            onOwn={() => {
-              setAdding(true);
-            }}
-          />
-        ) : (
-          <Lists view={data} />
-        ))}
-      <NewExploration
-        open={adding}
-        onClose={() => {
-          setAdding(false);
-        }}
-      />
+        (isEmpty(data) ? <NothingYet onOwn={adding} /> : <Lists view={data} />)}
     </>
   );
 }
@@ -227,50 +202,6 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
         </span>
       )}
     </a>
-  );
-}
-
-function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
-  const [problem, setProblem] = useState<string | null>(null);
-  return (
-    <div className={cn(ROW, "transition-colors hover:bg-surface")}>
-      <span className="grid size-9 flex-none place-items-center rounded-xl bg-[#fdf1d8] text-[#8a5a12]">
-        <CircleAlert aria-hidden className="size-[18px]" />
-      </span>
-      <span className="grid min-w-0 flex-1">
-        <span className="font-semibold">{row.title}</span>
-        <span className="truncate text-[12.5px] text-muted-foreground">
-          <Markdown text={row.problem} inline />
-        </span>
-        {problem && (
-          <span role="alert" className="text-[12.5px] text-destructive">
-            {problem}
-          </span>
-        )}
-      </span>
-      <Faces personas={row.personas} size={26} />
-      {row.signals > 0 && (
-        <span className="inline-flex h-6 items-center rounded-full bg-[#e8f0fe] px-2 text-xs font-medium text-[#2948bc]">
-          {countWords(row.signals, "signal", "signals")}
-        </span>
-      )}
-      <Button
-        variant="ring"
-        size="pill-sm"
-        onClick={() => {
-          post("/api/kobble/explorations/start", { id: row.id }).then(
-            () => {
-              window.location.hash = explorationHash(row.id);
-            },
-            (error: unknown) => {
-              setProblem(messageOf(error));
-            },
-          );
-        }}
-      >
-        Start
-      </Button>
-    </div>
   );
 }
 

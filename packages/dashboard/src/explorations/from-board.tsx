@@ -9,14 +9,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ROW } from "@/signals/bits";
 
+import { RemoveRow } from "./remove-row";
+
 // An idea in the board's Backlog: not agreed work, so it waits here.
 // Starting it makes an exploration of it; handing that off fills in this
-// same issue and moves it to To do.
+// same issue and moves it to To do. Not wanted: deleted like a card
+// (closed as not planned, off the board).
 export function FromBoard({
   idea,
 }: Readonly<{ idea: ExplorationsView["fromBoard"][number] }>) {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const [gone, setGone] = useState(false);
   const start = async () => {
     setBusy(true);
     setProblem(null);
@@ -32,6 +36,7 @@ export function FromBoard({
       setProblem(messageOf(error));
     }
   };
+  if (gone) return null;
   return (
     <div className={cn(ROW, "transition-colors hover:bg-surface")}>
       <span className="grid size-9 flex-none place-items-center rounded-xl bg-[#eef0f4] text-[#4b5563]">
@@ -64,6 +69,13 @@ export function FromBoard({
       >
         {busy ? "Starting…" : "Start"}
       </Button>
+      <RemoveRow
+        path="/api/kobble/factory/delete"
+        body={{ number: idea.number }}
+        what="Close it on GitHub?"
+        onGone={setGone}
+        onProblem={setProblem}
+      />
     </div>
   );
 }

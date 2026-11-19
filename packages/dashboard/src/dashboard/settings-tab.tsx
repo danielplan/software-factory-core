@@ -11,28 +11,41 @@ import { PageHead } from "@/components/page-head";
 import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
+import { DesktopStart, UpdatesCard } from "@/updates/updates-card";
+
+import { AddOnsTab } from "./add-ons-tab";
 import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
+import { FactoryPrograms } from "./system-page";
 
 // The factory's settings, in order: a list of the sections at the side
 // (when there is more than one), the cards using the full width: where
-// work is tracked, then each settings group that no add-on has (an
-// add-on's are in its card on Add-ons). Each card shows what is set now
+// work is tracked, the live app, updates, the add-ons and kits, the
+// factory's own programs, this computer, then each settings group that no
+// add-on has (an add-on's are in its card on Add-ons). Each card shows what is set now
 // and saves on its own; the parts that read it can be restarted from there.
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const owned = new Set(state.addOns.flatMap((addOn) => addOn.settings));
-  const groups = state.settings.filter((group) => !owned.has(group.id));
+  // Updates has its own section, with its switch.
+  const groups = state.settings.filter(
+    (group) => !owned.has(group.id) && group.id !== "updates",
+  );
+  const programs = state.parts.some((part) => part.area === "factory");
   const sections = [
     "Where work is tracked",
     "The live app",
+    "Updates",
+    "Add-ons",
+    ...(programs ? ["The factory's programs"] : []),
+    "This computer",
     ...groups.map((group) => group.name),
   ];
   return (
     <div className="grid gap-5">
       <PageHead
         title="Settings"
-        about="How the factory works here: where work is tracked, the live app, and the settings of its parts."
+        about="How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts."
       />
       <div
         className={
@@ -45,12 +58,49 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
         <div className="grid gap-5">
           <TrackerCard state={state} />
           <LiveAppCard />
+          <Topic
+            title="Updates"
+            about="Merged work comes to this computer from GitHub; new versions of Kobble come as a card for the builder."
+          >
+            <UpdatesCard />
+          </Topic>
+          <Section name="Add-ons">
+            <AddOnsTab state={state} />
+          </Section>
+          {programs && (
+            <Section name="The factory's programs">
+              <FactoryPrograms state={state} />
+            </Section>
+          )}
+          <Topic
+            title="This computer"
+            about="For owners who do not use a terminal."
+          >
+            <DesktopStart />
+          </Topic>
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}
         </div>
       </div>
     </div>
+  );
+}
+
+// A section that brings its own cards, to go to from the list.
+function Section({
+  name,
+  children,
+}: Readonly<{ name: string; children: React.ReactNode }>) {
+  return (
+    <section
+      id={sectionId(name)}
+      aria-label={name}
+      className="grid scroll-mt-6 gap-3"
+    >
+      <h2 className="px-1 text-[15px] font-semibold">{name}</h2>
+      {children}
+    </section>
   );
 }
 

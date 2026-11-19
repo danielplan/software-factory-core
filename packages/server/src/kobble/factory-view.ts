@@ -20,7 +20,8 @@ export type FactoryCard = {
   title: string;
   url: string;
   // The exploration it was handed off from, with the agreed prototype.
-  from: { exploration: string; key: string | null } | null;
+  // Its title is what people see; the id (X-1) and key (B) are for links.
+  from: { exploration: string; title: string; key: string | null } | null;
   // A fix of a signal.
   fix: boolean;
   type: CardView["type"];
@@ -33,8 +34,14 @@ export type FactoryView = {
   columns: { id: Column; title: string; cards: FactoryCard[] }[];
   // The cards where the factory waits for the owner, oldest first.
   waiting: Asking[];
-  // The cards it builds now, by number, and the same in words.
-  builder: { on: boolean; working: string | null; cards: number[] };
+  // The cards it builds now, by number, and the same in words; on each,
+  // what it is doing right now (its latest step), by card number.
+  builder: {
+    on: boolean;
+    working: string | null;
+    cards: number[];
+    now: Record<number, string>;
+  };
 };
 
 // The Factory page shows agreed work only: an idea in the board's Backlog
@@ -98,6 +105,7 @@ export function factoryView(
         from: from
           ? {
               exploration: from.id,
+              title: from.title,
               key: agreed?.kind === "prototype" ? agreed.key : null,
             }
           : null,
@@ -128,6 +136,12 @@ function builderOf(work: WorkView | null): FactoryView["builder"] {
   return {
     on: builder?.on ?? false,
     cards: cards.map((one) => one.number),
+    now: Object.fromEntries(
+      cards.map((one) => [
+        one.number,
+        one.activity ?? `Started ${one.what} it`,
+      ]),
+    ),
     working:
       cards.length > 0
         ? cards.map((one) => `#${String(one.number)} · ${one.title}`).join(", ")

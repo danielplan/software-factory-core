@@ -13,8 +13,9 @@ import { PersonasPage } from "@/personas/personas-page";
 import { GuidedSetup } from "@/setup-guided/guided-setup";
 import { SignalsPage } from "@/signals/signals-page";
 
+import { HomePage } from "./home-page";
 import { SettingsTab } from "./settings-tab";
-import { WorkshopPage } from "./workshop-page";
+import { SystemPage } from "./system-page";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
@@ -93,8 +94,10 @@ function PageBody({
       return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
     case "build":
       return <FactoryPage state={state} />;
-    case "workshop":
-      return <WorkshopPage state={state} open={open} />;
+    case "home":
+      return <HomePage state={state} />;
+    case "system":
+      return <SystemPage state={state} />;
     case "settings":
       return <SettingsTab state={state} />;
   }

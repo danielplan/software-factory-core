@@ -471,7 +471,12 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       read: null,
       builder: {
         on: true,
-        working: { number: 51, title: "Basket", what: "" },
+        working: {
+          number: 51,
+          title: "Basket",
+          what: "building",
+          activity: "Running the checks",
+        },
         also: [],
         activity: null,
         steps: [],
@@ -500,11 +505,13 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     );
     assert.deepEqual(view.columns[1]?.cards[0]?.from, {
       exploration: "X-1",
+      title: x1.title,
       key: "B",
     });
     assert.equal(view.columns[0]?.cards[0]?.fix, true);
     assert.equal(view.builder.working, "#51 · Basket");
     assert.deepEqual(view.builder.cards, [51]);
+    assert.deepEqual(view.builder.now, { 51: "Running the checks" });
     assert.equal(columnOf("#41", work), "Done");
     assert.equal(columnOf("#5", work), null);
     assert.deepEqual(factoryView(factory.store, null).connected, false);

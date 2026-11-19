@@ -5,15 +5,10 @@
 // and its switch in the header; "Read it again" reads the board now.
 // Without a board, the page says so and leads to connecting one.
 
-import {
-  ArrowUpRight,
-  FlaskConical,
-  LoaderCircle,
-  RefreshCw,
-} from "lucide-react";
-import { createContext, use, useState } from "react";
+import { ArrowUpRight, LoaderCircle, RefreshCw } from "lucide-react";
+import { useState } from "react";
 
-import { type FactoryCard, type FactoryView, messageOf, post } from "@/api";
+import { type FactoryView, messageOf, post } from "@/api";
 import { boardOf } from "@/connect/connected-board";
 import { PageHead } from "@/components/page-head";
 import { ProblemBox } from "@/components/problem-box";
@@ -24,8 +19,8 @@ import { type Read, useRead } from "@/lib/use-read";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/signals/bits";
 
+import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
-import { TypeChip } from "./card-type";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { WaitingCards } from "./waiting-card";
 
@@ -33,6 +28,22 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   const { data, problem } = useFactoryView(state);
   const [said, say] = useState<string | null>(null);
   const [open, setOpen] = useState<number | null>(null);
+  // Deleted cards leave the board at once; one GitHub refuses comes back.
+  const [gone, setGone] = useState<number[]>([]);
+  const remove = (number: number) => {
+    setOpen(null);
+    say(null);
+    setGone((was) => [...was, number]);
+    post("/api/kobble/factory/delete", { number }).then(
+      () => {
+        press("/api/work/refresh");
+      },
+      (error: unknown) => {
+        setGone((was) => was.filter((one) => one !== number));
+        say(messageOf(error));
+      },
+    );
+  };
   const press = (path: string, body: object = {}) => {
     say(null);
     post(path, body).catch((error: unknown) => {
@@ -52,17 +63,34 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
         }
       />
       {shown && <ProblemBox title="That did not work" text={shown} />}
-      <OpenCard value={setOpen}>{data && <Board view={data} />}</OpenCard>
+      <OpenCard value={setOpen}>
+        {data && <Board view={without(data, gone)} />}
+      </OpenCard>
       {open !== null && (
         <CardPanel
           number={open}
           onClose={() => {
             setOpen(null);
           }}
+          onDelete={() => {
+            remove(open);
+          }}
         />
       )}
     </>
   );
+}
+
+// The board less the cards just deleted.
+function without(view: FactoryView, gone: number[]): FactoryView {
+  if (gone.length === 0) return view;
+  return {
+    ...view,
+    columns: view.columns.map((column) => ({
+      ...column,
+      cards: column.cards.filter((card) => !gone.includes(card.number)),
+    })),
+  };
 }
 
 // What waits for the owner, then the columns.
@@ -91,7 +119,7 @@ function Columns({ view }: Readonly<{ view: FactoryView }>) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:h-[calc(100dvh-150px)] xl:min-h-[360px] xl:grid-cols-4">
       {view.columns.map((column) => (
-        <Column key={column.id} column={column} building={view.builder.cards} />
+        <Column key={column.id} column={column} now={view.builder.now} />
       ))}
     </div>
   );
@@ -109,8 +137,11 @@ const MEANS: Record<FactoryView["columns"][number]["id"], string> = {
 
 function Column({
   column,
-  building,
-}: Readonly<{ column: FactoryView["columns"][number]; building: number[] }>) {
+  now,
+}: Readonly<{
+  column: FactoryView["columns"][number];
+  now: FactoryView["builder"]["now"];
+}>) {
   const [all, setAll] = useState(false);
   const colour = COLUMN_COLOURS[column.id];
   const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
@@ -148,7 +179,7 @@ function Column({
             key={card.number}
             card={card}
             at={at}
-            building={building.includes(card.number)}
+            now={now[card.number] ?? null}
           />
         ))}
         {column.cards.length === 0 && (
@@ -235,75 +266,6 @@ function builderWords(builder: FactoryView["builder"]): string {
   return builder.on
     ? "The builder takes cards from To do"
     : "The builder is off";
-}
-
-// A card on the board: it rises in after the ones above it, lifts under the
-// pointer, and a click opens it beside the board (card-panel.tsx). While it
-// is being built, a light runs along its top and it says Building.
-function Card({
-  card,
-  at,
-  building,
-}: Readonly<{ card: FactoryCard; at: number; building: boolean }>) {
-  const open = use(OpenCard);
-  return (
-    <button
-      type="button"
-      className="relative flex flex-none flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
-      style={{ animationDelay: `${String(Math.min(at, 8) * 45)}ms` }}
-      onClick={() => {
-        open(card.number);
-      }}
-    >
-      {building && (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-[3px] overflow-hidden bg-blue/15"
-        >
-          <span className="block h-full w-2/5 bg-blue motion-safe:animate-run-light" />
-        </span>
-      )}
-      <span className="flex w-full items-center gap-2 text-xs text-muted-foreground">
-        #{card.number}
-        {building && (
-          <span className="ml-auto inline-flex items-center gap-1 font-medium text-blue">
-            <LoaderCircle aria-hidden className="size-3 animate-spin" />
-            Building
-          </span>
-        )}
-      </span>
-      <span className="text-[13px] leading-[1.35] font-medium">
-        {card.title}
-      </span>
-      {(card.type ?? card.from ?? card.fix) && (
-        <span className="flex flex-wrap gap-1.5">
-          <TypeChip type={card.type ?? null} />
-          <Origin card={card} />
-        </span>
-      )}
-    </button>
-  );
-}
-
-// Opens a card beside the board.
-const OpenCard = createContext<(number: number) => void>(() => undefined);
-
-// Where a card came from: an exploration's prototype, or a fix.
-function Origin({ card }: Readonly<{ card: FactoryCard }>) {
-  if (card.from)
-    return (
-      <span className="inline-flex h-[22px] items-center gap-1.5 rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">
-        <FlaskConical aria-hidden strokeWidth={2} className="size-3" />
-        {card.from.exploration}
-        {card.from.key ? ` · prototype ${card.from.key}` : ""}
-      </span>
-    );
-  if (!card.fix) return null;
-  return (
-    <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-      Fix
-    </span>
-  );
 }
 
 function NotConnected() {

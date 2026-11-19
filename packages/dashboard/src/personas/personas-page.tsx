@@ -1,13 +1,13 @@
-// Personas: the made-up people who stand for the app's customers, as cards
-// with their face, name and description; a card opens the persona's page.
-// Send everyone sends each on the mission the kobold suggests; New persona
-// adds one. A persona's page (#personas/<id>) shows who they are, Send on a
-// mission and their missions (missions.tsx), and, once there are any, the
-// signals from real customers like them. A mission's own page is
-// #personas/<id>/tests/<mission>.
+// Personas: the made-up people who stand for the app's customers, each
+// with their kobold, where they are, whether someone on the team added them
+// or they were found in how the app is used, and how many signals came from
+// them. Send everyone sends each on the mission the kobold suggests; New
+// persona asks the support kobold, who adds one with the team. A persona's
+// page (#personas/<id>) shows who they are, Send on a mission and their
+// missions (missions.tsx), and every signal from them, whatever became of
+// it. A mission's own page is #personas/<id>/tests/<mission>.
 
 import { ChevronLeft, Pencil, Plus } from "lucide-react";
-import { useState } from "react";
 
 import type { Face, KobblePersonaPage, PersonaRow } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
@@ -19,10 +19,10 @@ import { CARD, Head } from "@/signals/bits";
 import { originWords, personaPlaceOf } from "@/signals/view";
 import { type Read, useRead } from "@/lib/use-read";
 import { Markdown } from "@/components/markdown";
+import { askSupport } from "@/support/ask-support";
 
 import { PersonaMissions } from "./missions";
 import { SendEveryone } from "./send-everyone";
-import { NewPersona } from "./new-persona";
 import { SignalLine } from "./signal-line";
 import { TestRun } from "./tests";
 
@@ -37,7 +37,9 @@ function PersonaList() {
   const { data, problem } = useRead("/api/kobble/personas") as Read<{
     personas: PersonaRow[];
   }>;
-  const [adding, setAdding] = useState(false);
+  const adding = () => {
+    askSupport("I'd like to add a new persona.");
+  };
   return (
     <>
       <Head
@@ -50,9 +52,7 @@ function PersonaList() {
             <Button
               variant={data?.personas.length === 0 ? "default" : "ring"}
               size="pill"
-              onClick={() => {
-                setAdding(true);
-              }}
+              onClick={adding}
             >
               <Plus aria-hidden strokeWidth={2.2} />
               New persona
@@ -63,13 +63,7 @@ function PersonaList() {
       {problem && (
         <ProblemBox title="The personas cannot be read" text={problem} />
       )}
-      {data && data.personas.length === 0 && (
-        <NoPersonas
-          onNew={() => {
-            setAdding(true);
-          }}
-        />
-      )}
+      {data && data.personas.length === 0 && <NoPersonas onNew={adding} />}
       {data && data.personas.length > 0 && (
         <nav
           aria-label="Personas"
@@ -80,12 +74,6 @@ function PersonaList() {
           ))}
         </nav>
       )}
-      <NewPersona
-        open={adding}
-        onClose={() => {
-          setAdding(false);
-        }}
-      />
     </>
   );
 }
@@ -116,8 +104,9 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
       </div>
       <div className="text-base font-semibold">Who are you building for?</div>
       <p className="max-w-[460px] text-[14.5px] text-foreground-2">
-        Add the people who use your app, in a few words each. Once Kobble reads
-        your live app, the kobold also suggests personas from how people use it.
+        Tell the kobold about the people who use your app, in a few words each.
+        Once Kobble reads your live app, the kobold also suggests personas from
+        how people use it.
       </p>
       <Button size="pill" className="mt-2" onClick={onNew}>
         <Plus aria-hidden strokeWidth={2.2} />
