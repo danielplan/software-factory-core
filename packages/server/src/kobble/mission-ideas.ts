@@ -11,6 +11,7 @@ import { z } from "zod";
 
 import { Refused } from "../refused.ts";
 import { answerOf, personaTestSkill, who } from "./persona-tests.ts";
+import { inLanguage } from "../language.ts";
 
 // An app a persona can be sent into: a product the factory starts with a
 // web address.
@@ -84,7 +85,7 @@ export class MissionIdeas {
       ].join("\n\n"),
       readOnly: true,
       tools: [],
-      instructions: personaTestSkill(),
+      instructions: inLanguage(personaTestSkill()),
       session: { id: randomUUID(), resume: false },
       timeLimitMs: TIME_LIMIT_MS,
       onActivity: () => {},

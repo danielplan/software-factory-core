@@ -12,13 +12,18 @@ import { type Read, useRead } from "@/lib/use-read";
 import { Markdown } from "@/components/markdown";
 
 import type { UpdatesView } from "../../../server/src/updates/served.ts";
+import { useLanguage } from "@/i18n/use-t";
+import { messagesIn } from "@/i18n/messages";
+
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
   const { data } = useRead("/api/updates") as Read<UpdatesView>;
   const [problem, setProblem] = useState<string | null>(null);
+  const { locale } = useLanguage();
+  const m = messagesIn(locale).updates;
   if (!data) return null;
-  const summary = updatesSummary(data);
+  const summary = updatesSummary(data, { m, locale });
   const press = (path: string, body: object = {}) => {
     setProblem(null);
     post(path, body).catch((error: unknown) => {
@@ -38,7 +43,7 @@ export function UpdatesCard() {
               press("/api/updates/update");
             }}
           >
-            Update
+            {m.update}
           </Button>
         )}
         <Button
@@ -49,7 +54,7 @@ export function UpdatesCard() {
             press("/api/updates/look");
           }}
         >
-          <RefreshCw aria-hidden className="size-4" /> Look again
+          <RefreshCw aria-hidden className="size-4" /> {m.lookAgain}
         </Button>
         <label className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
           <Switch
@@ -58,7 +63,7 @@ export function UpdatesCard() {
               press("/api/updates/by-itself", { on });
             }}
           />
-          Update by itself
+          {m.byItself}
         </label>
       </div>
       {summary.text && (
@@ -91,18 +96,17 @@ export function UpdatesCard() {
 // double-click, for owners who do not use a terminal.
 export function DesktopStart() {
   const [said, say] = useState<string | null>(null);
+  const m = messagesIn(useLanguage().locale).updates.desktop;
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <span className="min-w-0 flex-1 text-[15px]">
-        {said ?? "Open the factory with a double-click from the desktop."}
-      </span>
+      <span className="min-w-0 flex-1 text-[15px]">{said ?? m.say}</span>
       <Button
         size="pill"
         variant="ring"
         onClick={() => {
           post<{ file: string }>("/api/desktop-start").then(
             ({ file }) => {
-              say(`Put on the desktop: ${file}`);
+              say(m.put(file));
             },
             (error: unknown) => {
               say(messageOf(error));
@@ -110,7 +114,7 @@ export function DesktopStart() {
           );
         }}
       >
-        Put a start on the desktop
+        {m.button}
       </Button>
     </div>
   );

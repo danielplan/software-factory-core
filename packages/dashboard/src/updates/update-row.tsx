@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/dialog";
 import { type Read, useRead } from "@/lib/use-read";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/i18n/use-t";
+import { messagesIn } from "@/i18n/messages";
 
 import type { UpdatesView } from "../../../server/src/updates/served.ts";
 import {
@@ -53,7 +55,10 @@ const FRAME: Record<Row["tone"], string> = {
 export function UpdateRow() {
   const { data } = useRead("/api/updates") as Read<UpdatesView>;
   const [open, setOpen] = useState(false);
-  const row = data ? updateRow(data) : null;
+  const { locale } = useLanguage();
+  const row = data
+    ? updateRow(data, undefined, messagesIn(locale).updates)
+    : null;
   if (!data || !row) return null;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -85,7 +90,9 @@ export function UpdateRow() {
 
 function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
   const [problem, setProblem] = useState<string | null>(null);
-  const summary = updatesSummary(data);
+  const { locale } = useLanguage();
+  const m = messagesIn(locale).updates;
+  const summary = updatesSummary(data, { m, locale });
   const { release } = data;
   const press = (path: string) => {
     setProblem(null);
@@ -142,7 +149,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
             press("/api/updates/look");
           }}
         >
-          Look again
+          {m.lookAgain}
         </Button>
         {summary.canUpdate && (
           <Button
@@ -151,7 +158,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
               press("/api/updates/update");
             }}
           >
-            Update now
+            {m.updateNow}
           </Button>
         )}
       </div>
@@ -165,13 +172,12 @@ function ReleaseBox({
   release,
   onPrepare,
 }: Readonly<{ release: UpdatesView["release"]; onPrepare: () => void }>) {
+  const m = messagesIn(useLanguage().locale).updates.release;
   return (
     <div className="grid gap-2 rounded-[10px] bg-surface px-3 py-2.5 text-[13px]">
-      <span className="font-medium">Kobble {release.newest} is out</span>
+      <span className="font-medium">{m.out(release.newest ?? "")}</span>
       <span className="text-foreground-2">
-        {release.card
-          ? "The builder prepares the upgrade on the board. Once its pull request is merged, every computer takes it with its next update."
-          : "The builder can prepare the upgrade as a card: the new version, its migrations and the checks, as a pull request for the team to merge."}
+        {release.card ? m.beingPrepared : m.canPrepare}
       </span>
       {release.card ? (
         <a
@@ -180,7 +186,7 @@ function ReleaseBox({
           rel="noreferrer"
           className="inline-flex items-center gap-1 justify-self-start text-blue hover:underline"
         >
-          Open #{release.card.number}
+          {m.openCard(release.card.number)}
           <ExternalLink aria-hidden className="size-3" />
         </a>
       ) : (
@@ -189,7 +195,7 @@ function ReleaseBox({
           className="h-8 justify-self-start px-3 text-[13px]"
           onClick={onPrepare}
         >
-          Prepare the upgrade
+          {m.prepare}
         </Button>
       )}
     </div>

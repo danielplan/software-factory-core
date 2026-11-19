@@ -13,6 +13,7 @@ import {
 
 import type { FactoryState } from "./dashboard";
 import { SettingInput } from "./setting-input";
+import { useT } from "@/i18n/use-t";
 
 // A settings group in its own card: what is set now, Save, and the parts
 // that read it, to restart once saved.
@@ -109,12 +110,13 @@ function Saving({
   usedBy: string[];
   state: FactoryState;
 }>) {
+  const t = useT().settings.form;
   const running = state.parts.filter(
     (part) => usedBy.includes(part.id) && part.canStop,
   );
   return (
     <>
-      {form.problem && <ProblemBox title="Not saved" text={form.problem} />}
+      {form.problem && <ProblemBox title={t.notSaved} text={form.problem} />}
       <div className="flex flex-wrap items-center gap-3">
         <Button
           size="sm"
@@ -122,11 +124,12 @@ function Saving({
           onClick={() => void form.save()}
           disabled={!changed}
         >
-          Save
+          {t.save}
         </Button>
         {form.saved && (
           <span className="text-[13px] text-success">
-            Saved.{running.length > 0 && " It counts once restarted:"}
+            {t.saved}
+            {running.length > 0 && t.restartToCount}
           </span>
         )}
         {form.saved &&
@@ -139,7 +142,7 @@ function Saving({
                 void post(`/api/parts/${encodeURIComponent(part.id)}/restart`)
               }
             >
-              Restart {part.name}
+              {t.restart(part.name)}
             </Button>
           ))}
       </div>

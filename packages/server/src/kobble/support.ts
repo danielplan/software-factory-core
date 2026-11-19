@@ -17,6 +17,7 @@ import type { Route } from "../add-ons/add-on.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
 import type { SupportTools } from "./support-tools.ts";
+import { inLanguage } from "../language.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -73,9 +74,8 @@ export class SupportTalk {
     const where = page ? `\n\n(They are on the ${page} page.)` : "";
     void this.talk.answer(`${said}${where}`, undefined, {
       ...RIGHTS,
-      instructions: readFileSync(
-        join(guidesFolder, "support-kobold.md"),
-        "utf8",
+      instructions: inLanguage(
+        readFileSync(join(guidesFolder, "support-kobold.md"), "utf8"),
       ),
     });
   }

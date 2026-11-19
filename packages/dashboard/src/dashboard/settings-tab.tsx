@@ -13,7 +13,10 @@ import { ConnectedBoard } from "@/connect/connected-board";
 
 import { DesktopStart, UpdatesCard } from "@/updates/updates-card";
 
+import { useT } from "@/i18n/use-t";
+
 import { AddOnsTab } from "./add-ons-tab";
+import { LanguageCard } from "./language-card";
 import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
@@ -26,6 +29,8 @@ import { FactoryPrograms } from "./system-page";
 // add-on has (an add-on's are in its card on Add-ons). Each card shows what is set now
 // and saves on its own; the parts that read it can be restarted from there.
 export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
+  const t = useT();
+  const n = t.settings.sections;
   const owned = new Set(state.addOns.flatMap((addOn) => addOn.settings));
   // Updates has its own section, with its switch.
   const groups = state.settings.filter(
@@ -33,20 +38,18 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   );
   const programs = state.parts.some((part) => part.area === "factory");
   const sections = [
-    "Where work is tracked",
-    "The live app",
-    "Updates",
-    "Add-ons",
-    ...(programs ? ["The factory's programs"] : []),
-    "This computer",
+    n.language,
+    n.tracker,
+    n.liveApp,
+    n.updates,
+    n.addOns,
+    ...(programs ? [n.programs] : []),
+    n.computer,
     ...groups.map((group) => group.name),
   ];
   return (
     <div className="grid gap-5">
-      <PageHead
-        title="Settings"
-        about="How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts."
-      />
+      <PageHead title={t.shell.pages.settings} about={t.settings.about} />
       <div
         className={
           sections.length > 1
@@ -56,26 +59,21 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
       >
         {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
+          <LanguageCard />
           <TrackerCard state={state} />
           <LiveAppCard />
-          <Topic
-            title="Updates"
-            about="Merged work comes to this computer from GitHub; new versions of Kobble come as a card for the builder."
-          >
+          <Topic title={n.updates} about={t.settings.updatesAbout}>
             <UpdatesCard />
           </Topic>
-          <Section name="Add-ons">
+          <Section name={n.addOns}>
             <AddOnsTab state={state} />
           </Section>
           {programs && (
-            <Section name="The factory's programs">
+            <Section name={n.programs}>
               <FactoryPrograms state={state} />
             </Section>
           )}
-          <Topic
-            title="This computer"
-            about="For owners who do not use a terminal."
-          >
+          <Topic title={n.computer} about={t.settings.computerAbout}>
             <DesktopStart />
           </Topic>
           {groups.map((group) => (
@@ -108,7 +106,7 @@ function Section({
 function Sections({ names }: Readonly<{ names: string[] }>) {
   return (
     <nav
-      aria-label="Sections"
+      aria-label={useT().settings.sectionsLabel}
       className="sticky top-6 grid gap-0.5 max-lg:hidden"
     >
       {names.map((name) => (
@@ -133,14 +131,12 @@ function Sections({ names }: Readonly<{ names: string[] }>) {
 // on the page; what was connected, once done.
 function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
   const [done, setDone] = useState<string | null>(null);
+  const t = useT().settings;
   const now =
     state.addOns.find((addOn) => addOn.id === state.company.tracker)?.name ??
-    "No board connected yet";
+    t.tracker.none;
   return (
-    <Topic
-      title="Where work is tracked"
-      about={`Now: ${now}. Where the ideas you agree to become work to build.`}
-    >
+    <Topic title={t.sections.tracker} about={t.tracker.about(now)}>
       <ConnectedBoard state={state} />
       {state.company.tracker === "none" ? (
         <TrackerChoice
@@ -151,7 +147,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
       ) : (
         <Collapsible className="grid gap-4">
           <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-[13px] font-medium">
-            Change where work is tracked
+            {t.tracker.change}
             <ChevronDown
               className="size-4 transition group-data-[state=open]:rotate-180"
               aria-hidden

@@ -25,6 +25,7 @@ import type { Page } from "@/lib/routes";
 import { useFactoryName, useLogo } from "@/lib/brand";
 import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/use-t";
 import { UpdateRow } from "@/updates/update-row";
 
 import { type Item, PageLink, ProductState } from "./sidebar-links";
@@ -38,48 +39,42 @@ import { type Item, PageLink, ProductState } from "./sidebar-links";
 const TOP: Item[] = [
   {
     page: "home",
-    name: "Home",
     icon: <House aria-hidden />,
     color: "var(--foreground)",
   },
   {
     page: "system",
-    name: "System",
     icon: <Boxes aria-hidden />,
     color: "var(--source-usage)",
   },
 ];
 
-const GROUPS: { label: string; items: Item[] }[] = [
+const GROUPS: { label: "work" | "customers"; items: Item[] }[] = [
   {
-    label: "Work",
+    label: "work",
     items: [
       {
         page: "signals",
-        name: "Signals",
         icon: <Inbox aria-hidden />,
         color: "var(--understand)",
       },
       {
         page: "explore",
-        name: "Explorations",
         icon: <FlaskConical aria-hidden />,
         color: "var(--explore)",
       },
       {
         page: "build",
-        name: "Factory",
         icon: <Columns3 aria-hidden />,
         color: "var(--build)",
       },
     ],
   },
   {
-    label: "Customers",
+    label: "customers",
     items: [
       {
         page: "personas",
-        name: "Personas",
         icon: <Users aria-hidden />,
         color: "var(--source-app)",
       },
@@ -98,7 +93,6 @@ function GroupLabel({ children }: Readonly<{ children: ReactNode }>) {
 const QUIET: Item[] = [
   {
     page: "settings",
-    name: "Settings",
     icon: <Settings aria-hidden />,
     color: "#667085",
   },
@@ -128,6 +122,7 @@ type SidebarProps = Readonly<{
 export function Sidebar(props: SidebarProps) {
   const [open, setOpen] = useState(false);
   const { kobold, light } = props;
+  const t = useT().shell;
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col gap-0.5 overflow-y-auto border-r border-sidebar-border bg-sidebar text-sidebar-strong px-3 pt-4 pb-3 md:flex">
@@ -136,12 +131,12 @@ export function Sidebar(props: SidebarProps) {
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-2 border-b border-sidebar-border bg-sidebar text-sidebar-strong px-2 md:hidden">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Open the menu">
+            <Button variant="ghost" size="icon" aria-label={t.openMenu}>
               <Menu aria-hidden />
             </Button>
           </DialogTrigger>
           <DialogContent className="top-0 left-0 flex h-full w-[264px] max-w-[85vw] translate-x-0 translate-y-0 flex-col gap-0.5 rounded-none border-0 bg-sidebar text-sidebar-strong px-4 pt-[22px] pb-4 data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 sm:max-w-[85vw]">
-            <DialogTitle className="sr-only">Pages</DialogTitle>
+            <DialogTitle className="sr-only">{t.menu}</DialogTitle>
             <Content
               {...props}
               onGo={() => {
@@ -257,11 +252,12 @@ function Pages({
   doing: Doing;
   onGo?: () => void;
 }>) {
+  const t = useT().shell;
   return (
     <nav aria-label="Pages" className="grid gap-px">
       {GROUPS.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
-          <GroupLabel>{group.label}</GroupLabel>
+          <GroupLabel>{t.groups[group.label]}</GroupLabel>
           {group.items.map((item) => (
             <PageLink key={item.page} item={item} current={current} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">

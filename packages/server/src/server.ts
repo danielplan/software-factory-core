@@ -27,6 +27,7 @@ import { answerWorld, isWorldRoute } from "./kobble/world-route.ts";
 import type { ExplorationWorlds } from "./kobble/explorations/worlds.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
+import { languageRoutes } from "./language.ts";
 
 export const PAGE_HEADER = "x-software-factory";
 // A picture from the project that a setup card shows.
@@ -71,6 +72,7 @@ export function startServer(options: {
   const kobble = kobbleOf(session, tell, { ...options, cli });
   const routes = {
     ...routesFor(session),
+    ...languageRoutes(session.options.project),
     ...kobble.routes,
     ...addOnRoutes(
       options.addOns,

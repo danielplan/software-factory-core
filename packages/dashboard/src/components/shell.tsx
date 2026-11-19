@@ -13,6 +13,7 @@ import {
   koboldStatus,
   overallOf,
 } from "@/lib/shell-view";
+import { useT } from "@/i18n/use-t";
 import { SupportBar } from "@/support/support-bar";
 import { useSupport } from "@/support/use-support";
 import { useSignals } from "@/signals/use-signals";
@@ -58,10 +59,11 @@ export function Shell({
 // What the sidebar shows besides the pages: the counts, the kobold's status
 // and light, and what each kobold does now.
 function useSidebarParts(state: FactoryState) {
+  const t = useT().shell;
   const { data: explorations } = useExplorations();
   const { data: signals } = useSignals();
   const support = useSupport();
-  const overall = overallOf(state.parts);
+  const overall = overallOf(state.parts, t);
   const products = state.parts.filter((part) => part.area === "products");
   const all = [
     ...(explorations?.exploring ?? []),
@@ -73,12 +75,12 @@ function useSidebarParts(state: FactoryState) {
       state.work,
       signals?.counts.new,
     ),
-    kobold: koboldStatus(state.work, state.ideas, overall.words, all),
+    kobold: koboldStatus(state.work, state.ideas, overall.words, all, t),
     light: overall.lit,
     product: {
-      light: overallOf(products).lit,
+      light: overallOf(products, t).lit,
       link: products.find((part) => part.link)?.link ?? null,
     },
-    doing: koboldsDoing(state.work, all, support?.writing != null),
+    doing: koboldsDoing(state.work, all, support?.writing != null, t),
   };
 }

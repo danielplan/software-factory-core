@@ -5,12 +5,13 @@ import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { Light } from "@/api";
-import { LABEL, StatusLight } from "@/components/status-light";
+import { StatusLight } from "@/components/status-light";
+import { useT } from "@/i18n/use-t";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 // Each page with its own colour: its icon on a tint of it.
-export type Item = { page: Page; name: string; icon: ReactNode; color: string };
+export type Item = { page: Page; icon: ReactNode; color: string };
 
 // One page in the sidebar: its tile and name, and what it shows beside.
 export function PageLink({
@@ -26,6 +27,7 @@ export function PageLink({
   quiet?: boolean;
   children?: ReactNode;
 }>) {
+  const t = useT().shell;
   return (
     <a
       href={`#${item.page}`}
@@ -41,7 +43,7 @@ export function PageLink({
       )}
     >
       <Tile color={item.color}>{item.icon}</Tile>
-      {item.name}
+      {t.pages[item.page]}
       {children}
     </a>
   );
@@ -51,6 +53,7 @@ export function PageLink({
 export function ProductState({
   product,
 }: Readonly<{ product: { light: Light; link: string | null } }>) {
+  const t = useT().shell;
   if (product.light === "running" && product.link)
     return (
       <span
@@ -67,13 +70,13 @@ export function ProductState({
           window.open(product.link ?? "", "_blank", "noreferrer");
         }}
       >
-        Open <ExternalLink aria-hidden />
+        {t.open} <ExternalLink aria-hidden />
       </span>
     );
   if (product.light === "none" || product.light === "running") return null;
   return (
     <span className="ml-auto flex items-center gap-2 text-xs text-sidebar-muted">
-      {LABEL[product.light]}
+      {t.lights[product.light]}
       <StatusLight light={product.light} />
     </span>
   );

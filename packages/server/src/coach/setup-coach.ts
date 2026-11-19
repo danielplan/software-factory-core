@@ -20,6 +20,7 @@ import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
 import { readSetup, saveSetup, type SetupRecord } from "./setup-record.ts";
 import { Talk } from "./talk.ts";
+import { inLanguage } from "../language.ts";
 
 const HELLO =
   "Hi! Tell me what you want to build: what is the idea, who is it for, and what should it change for them?";
@@ -203,7 +204,7 @@ export class SetupCoach {
     const rights = this.phase === "build" ? BUILD : PLAN;
     const ok = await this.talk.answer(said, spokenIn, {
       ...rights,
-      instructions: this.instructions(),
+      instructions: inLanguage(this.instructions()),
     });
     if (ok) this.opening = null;
   }

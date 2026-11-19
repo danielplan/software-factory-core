@@ -23,6 +23,7 @@ import { type Drawing, EMPTY } from "./map.ts";
 import { pictureIn } from "./pictures.ts";
 import type { ToolsFor } from "./setup-tools.ts";
 import { Talk } from "./talk.ts";
+import { inLanguage } from "../language.ts";
 
 export const IDEAS_FOLDER = "ideas";
 
@@ -160,7 +161,7 @@ export class Ideas {
     const said = idea.talk.heard(text);
     await idea.talk.answer(said, spokenIn?.trim().slice(0, 40), {
       ...RIGHTS,
-      instructions: this.options.guide,
+      instructions: inLanguage(this.options.guide),
     });
   }
 

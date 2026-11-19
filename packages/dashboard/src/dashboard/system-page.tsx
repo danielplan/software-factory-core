@@ -3,7 +3,7 @@ import { Fragment, useState } from "react";
 import { messageOf, type PartView, post } from "@/api";
 import { Arrow } from "@/components/arrow";
 import { ProblemBox } from "@/components/problem-box";
-import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
+import { LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageHead } from "@/components/page-head";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
@@ -25,13 +27,15 @@ import { PartCard } from "./part-card";
 export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const press = usePress(setProblem);
+  const t = useT();
+  const s = t.system;
   const products = state.parts.filter((part) => part.area === "products");
-  const top = headline(products);
+  const top = headline(products, s.headline);
   return (
     <>
       <PageHead
-        title="System"
-        about="What your product is made of and how its parts connect. Start, stop and open them here."
+        title={t.shell.pages.system}
+        about={s.about}
         actions={
           products.length > 0 && (
             <>
@@ -42,7 +46,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                   press("/api/start-all");
                 }}
               >
-                Start all
+                {s.startAll}
               </Button>
               <Button
                 variant="outline"
@@ -51,7 +55,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                   press("/api/stop-all");
                 }}
               >
-                Stop all
+                {s.stopAll}
               </Button>
             </>
           )
@@ -61,17 +65,17 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
         <StatusLight light={top.light} />
         <span className="min-w-0 flex-1">{top.text}</span>
       </div>
-      {problem && <ProblemBox title="That did not work" text={problem} />}
-      <Area title="Your product" parts={products} onPress={press}>
+      {problem && <ProblemBox title={s.didNotWork} text={problem} />}
+      <Area title={s.yourProduct} parts={products} onPress={press}>
         <p className="py-6 text-center text-[13px] text-muted-foreground">
-          No parts to run yet: they come with your first idea, on the{" "}
+          {s.noPartsBefore}{" "}
           <a
             href="#explore"
             className="text-foreground underline underline-offset-2"
           >
-            Explorations
-          </a>{" "}
-          page.
+            {t.shell.pages.explore}
+          </a>
+          {s.noPartsAfter}
         </p>
       </Area>
       <Legend />
@@ -84,16 +88,13 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
 export function FactoryPrograms({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const press = usePress(setProblem);
+  const s = useT().system;
   const factory = state.parts.filter((part) => part.area === "factory");
   if (factory.length === 0) return null;
   return (
     <>
-      {problem && <ProblemBox title="That did not work" text={problem} />}
-      <Area
-        title="The factory's own programs"
-        parts={factory}
-        onPress={press}
-      />
+      {problem && <ProblemBox title={s.didNotWork} text={problem} />}
+      <Area title={s.programs} parts={factory} onPress={press} />
     </>
   );
 }
@@ -109,12 +110,13 @@ function usePress(setProblem: (problem: string | null) => void) {
 
 // What the lights mean.
 function Legend() {
+  const t = useT();
   return (
     <>
       <div className="flex flex-wrap gap-4 px-1 text-xs text-muted-foreground">
         {LIGHTS.map((light) => (
           <span key={light} className="inline-flex items-center gap-1.5">
-            <StatusLight light={light} /> {LABEL[light]}
+            <StatusLight light={light} /> {t.shell.lights[light]}
           </span>
         ))}
       </div>
@@ -189,7 +191,10 @@ function AreaCard({
 
 // How the factory is doing, in a sentence that says what to do: a problem
 // first, then starting, then all running, else not running yet.
-function headline(parts: PartView[]): {
+function headline(
+  parts: PartView[],
+  says: Messages["system"]["headline"],
+): {
   light: PartView["light"];
   text: string;
 } {
@@ -201,27 +206,27 @@ function headline(parts: PartView[]): {
   if (lit.length === 0)
     return {
       light: "none",
-      text: "No parts to run yet: they come with your first idea.",
+      text: says.none,
     };
   if (problems > 0)
     return {
       light: "problem",
-      text: `${problems === 1 ? "One part" : String(problems) + " parts"} could not start: the card says why and what to do.`,
+      text: says.problem(problems),
     };
   if (lit.some((part) => part.light === "starting"))
-    return { light: "starting", text: "Starting your product…" };
+    return { light: "starting", text: says.starting };
   if (lit.every((part) => part.light === "running"))
     return {
       light: "running",
-      text: "Everything is running: open it to try it.",
+      text: says.running,
     };
   if (lit.some((part) => part.light === "running"))
     return {
       light: "stopped",
-      text: "Some parts are running: start the others to try everything.",
+      text: says.some,
     };
   return {
     light: "stopped",
-    text: "Your product is not running. Start it to try it on this computer.",
+    text: says.stopped,
   };
 }

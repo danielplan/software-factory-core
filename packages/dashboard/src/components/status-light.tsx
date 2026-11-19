@@ -1,13 +1,6 @@
 import type { Light } from "@/api";
+import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
-
-export const LABEL: Record<Light, string> = {
-  running: "Running",
-  stopped: "Stopped",
-  starting: "Starting",
-  problem: "Problem",
-  none: "",
-};
 
 // Each light's colour, with a soft ring of the same colour around the dot.
 const LOOK: Record<Light, string> = {
@@ -22,16 +15,22 @@ const LOOK: Record<Light, string> = {
   none: "hidden",
 };
 
-export const LIGHTS: Light[] = ["running", "starting", "stopped", "problem"];
+export const LIGHTS: Exclude<Light, "none">[] = [
+  "running",
+  "starting",
+  "stopped",
+  "problem",
+];
 
 export function StatusLight({
   light,
   className,
 }: Readonly<{ light: Light; className?: string }>) {
+  const t = useT().shell;
   return (
     <i
       role="img"
-      aria-label={LABEL[light] || undefined}
+      aria-label={light === "none" ? undefined : t.lights[light]}
       className={cn(
         "inline-block size-2 flex-none rounded-full",
         LOOK[light],

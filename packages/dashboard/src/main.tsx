@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "@/app";
+import { LanguageProvider } from "@/i18n/use-t";
 import { followLogo, THEME_LOADED } from "@/lib/brand";
 import { lightOnly } from "@/lib/light-only";
 import "./index.css";
@@ -31,6 +32,8 @@ if (!root) throw new Error("index.html has no element with the id root.");
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </StrictMode>,
 );
