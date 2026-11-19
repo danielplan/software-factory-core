@@ -13,7 +13,7 @@ import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
 import { servedKobble } from "./routes.ts";
-import { appAddress, playwrightBrowser } from "./test-setup.ts";
+import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
 
@@ -30,7 +30,8 @@ function kobbleAlone(
     cli: more.cli,
     work: () => session.work.view(),
     testsRunOn: testsRunOn ?? {
-      app: () => appAddress(() => session.launcherOrRefuse()),
+      apps: () => appsOf(() => session.launcherOrRefuse()),
+      app: (product) => appAddress(() => session.launcherOrRefuse(), product),
       browser: playwrightBrowser,
     },
   });

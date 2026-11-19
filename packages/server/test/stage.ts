@@ -85,6 +85,7 @@ export async function stage(
   trackers: TrackerSetup[] = [],
   // What persona tests run on; by default no app, said plainly.
   testsRunOn: Parameters<typeof startServer>[0]["testsRunOn"] = {
+    apps: () => [],
     app: () => Promise.reject(new Error("There is no app in the tests.")),
     browser: () => Promise.reject(new Error("There is no browser.")),
   },

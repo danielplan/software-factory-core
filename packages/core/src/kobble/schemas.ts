@@ -17,7 +17,16 @@ const fileId = z
 const text = z.string().trim().min(1);
 const time = z.iso.datetime({ offset: true });
 
-export const SIGNAL_TYPES = ["bug", "request", "feedback"] as const;
+// From the live app: bug, request or feedback. From a mission (a persona
+// sent to try the app before launch): bug, idea or question (an open
+// question).
+export const SIGNAL_TYPES = [
+  "bug",
+  "request",
+  "feedback",
+  "idea",
+  "question",
+] as const;
 // Where a signal came from: the app's own "Report a bug" and "Suggest
 // something" (app), how people use it, such as the assistant hitting
 // something it cannot do (usage), machine errors and failed automations
@@ -38,6 +47,12 @@ const alreadySchema = z.strictObject({
   title: text,
 });
 
+const stepOfSchema = z.strictObject({
+  test: fileId,
+  number: z.number().int().positive(),
+  did: text,
+});
+
 export const kobbleSignalSchema = z.strictObject({
   id: fileId.regex(/^S-\d{4,}$/, "a signal's id is S- and four digits"),
   type: z.enum(SIGNAL_TYPES),
@@ -51,6 +66,9 @@ export const kobbleSignalSchema = z.strictObject({
   at: time,
   text,
   status: z.enum(SIGNAL_STATUSES),
+  // Where it happened, for a signal from a persona test: the test, the
+  // step's number (from 1) and what the persona did there.
+  step: stepOfSchema.optional(),
   // The exploration or factory item it went to.
   to: text.nullable(),
   already: alreadySchema.nullable(),
@@ -225,10 +243,16 @@ export const personaTestSchema = z.strictObject({
   task: text,
   // What it ran on: the app as it is now (main), or a prototype's branch.
   on: z.union([z.literal("main"), z.string().regex(PROTOTYPE_BRANCH)]),
+  // The product (app) it tried, when the factory has more than one; none
+  // for the first product with a web address.
+  product: fileId.nullable().optional(),
   status: z.enum(TEST_STATUSES),
   started: time.nullable(),
   ended: time.nullable(),
   steps: z.array(stepSchema),
+  // While it runs: the step the persona is on, in its words ("Step 3:
+  // choosing a delivery slot").
+  doing: z.string().nullable().optional(),
   signals: z.array(fileId),
   // Why it failed, in plain words.
   problem: z.string().nullable(),
@@ -248,6 +272,7 @@ export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;
 export type PersonaTest = z.infer<typeof personaTestSchema>;
 export type TestStep = z.infer<typeof stepSchema>;
+export type SignalStep = z.infer<typeof stepOfSchema>;
 export type Board = z.infer<typeof boardSchema>;
 export type Thing = z.infer<typeof thingSchema>;
 export type BoardLink = z.infer<typeof linkSchema>;

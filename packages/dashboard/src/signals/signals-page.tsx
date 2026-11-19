@@ -16,11 +16,15 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
-import { AllQuiet, ConnectSignals } from "./empty";
+import { AllQuiet } from "./empty";
+import { BeforeLaunch } from "./before-launch";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
+import { StepOf } from "./step";
 import { useSignals } from "./use-signals";
 import {
+  type Act,
   agoOf,
+  doneWords,
   exploreWords,
   nextAfter,
   primaryOf,
@@ -79,7 +83,8 @@ export function SignalsPage({
   );
 }
 
-// The new signals; with none, how to connect the live app, or that all is
+// The new signals; before launch, the personas on a mission and, with no
+// signal yet, where the first come from; after it, with none, that all is
 // quiet.
 function Shown({
   data,
@@ -94,12 +99,21 @@ function Shown({
   now: Date;
   onSaid: (said: string) => void;
 }>) {
+  const before = !data.sync.connected && (
+    <BeforeLaunch
+      app={app}
+      missions={data.missions}
+      empty={data.signals.length === 0}
+    />
+  );
   if (data.signals.length > 0)
     return (
-      <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+      <div className="grid gap-4">
+        <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+        {before}
+      </div>
     );
-  if (!data.sync.connected) return <ConnectSignals app={app} />;
-  return <AllQuiet app={app} sync={data.sync} now={now} />;
+  return before || <AllQuiet app={app} sync={data.sync} now={now} />;
 }
 
 // The new signals, and the one picked beside them (on a phone, instead of
@@ -229,26 +243,12 @@ function SignalList({
             <span className="mt-0.5 line-clamp-2 text-foreground-2">
               <Markdown text={signal.text} inline />
             </span>
+            <StepOf signal={signal} />
           </span>
         </a>
       ))}
     </nav>
   );
-}
-
-type Act = "fix" | "explore" | "dismiss";
-
-// What a button did, in words.
-function doneWords(act: Act, signal: SignalRow, answer: unknown): string {
-  if (act === "fix") {
-    const fixed = (answer as { signal: { to: string | null } }).signal.to;
-    return `${fixed ?? signal.id} is in the factory's To do`;
-  }
-  if (act === "dismiss") return "Dismissed";
-  const { exploration } = answer as { exploration: { id: string } };
-  return signal.already?.kind === "exploration"
-    ? `Added to ${exploration.id}`
-    : `${exploration.id} is waiting in Explorations`;
 }
 
 function SignalDetail({
@@ -307,6 +307,7 @@ function SignalDetail({
       </header>
       <div className="mt-5 mb-[22px] text-base leading-normal tracking-[-0.01em]">
         <Markdown text={signal.text} />
+        <StepOf signal={signal} link />
       </div>
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">

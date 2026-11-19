@@ -150,6 +150,7 @@ export {
   type KobblePersona,
   type KobbleSignal,
   type PersonaTest,
+  type SignalStep,
   type SyncState,
   type TestStep,
   type Thing,

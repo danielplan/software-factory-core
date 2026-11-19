@@ -1,5 +1,4 @@
-// A persona test's status as a small round icon, as a chip, and the tabs
-// on a persona's page.
+// A mission's status as a small round icon, and as a chip.
 
 import type { ReactNode } from "react";
 
@@ -76,34 +75,5 @@ export function StatusChip({ status }: Readonly<{ status: Status }>) {
       <StatusIcon status={status} size={12} />
       {TEST_WORDS[status]}
     </span>
-  );
-}
-
-// Segmented tabs: a grey track, the current one white.
-export function Tabs({
-  tabs,
-}: Readonly<{
-  tabs: { name: string; count: number; href: string; on: boolean }[];
-}>) {
-  return (
-    <nav
-      aria-label="Tabs"
-      className="mb-4 inline-flex gap-0.5 rounded-[14px] bg-[#eceef2] p-1"
-    >
-      {tabs.map((tab) => (
-        <a
-          key={tab.name}
-          href={tab.href}
-          aria-current={tab.on ? "page" : undefined}
-          className={cn(
-            "inline-flex h-9 items-center gap-2 rounded-[10px] px-3.5 font-medium text-muted-foreground",
-            tab.on &&
-              "bg-card text-foreground shadow-[0_1px_3px_rgb(20_24_36/0.1)]",
-          )}
-        >
-          {tab.name} <span className="text-xs text-faint">{tab.count}</span>
-        </a>
-      ))}
-    </nav>
   );
 }

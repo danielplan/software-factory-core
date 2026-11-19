@@ -59,3 +59,22 @@ export function pretendClaude(
   };
   return { claude, seen, answers, paths };
 }
+
+// Each answer in turn; a line "Step N: …" before the diary is written as
+// the reply goes, as Claude Code does.
+export function standIn(answers: (string | null)[]) {
+  const seen: RunOptions[] = [];
+  const claude: Claude = {
+    run: (options) => {
+      seen.push(options);
+      const text = answers[seen.length - 1];
+      if (text) for (const line of text.split("\n")) options.onText?.(line);
+      return Promise.resolve(
+        text === null || text === undefined
+          ? { ok: false, text: "", error: "spawn claude ENOENT" }
+          : { ok: true, text },
+      );
+    },
+  };
+  return { claude, seen };
+}

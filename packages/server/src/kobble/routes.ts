@@ -29,6 +29,7 @@ import type { BoardTools } from "./explorations/board-tools.ts";
 import { branchParts, servedExplorations } from "./explorations/routes.ts";
 import { explorationRoutes, storeOf, usageOf } from "./usage-routes.ts";
 import { liveSettings } from "./live-source.ts";
+import { type App, MissionIdeas } from "./mission-ideas.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
 import { connect, disconnect } from "./connect.ts";
@@ -52,9 +53,14 @@ type KobbleOptions = {
   // The connected board's cards as the builder last read them; none
   // without a board.
   work: () => WorkView | null;
-  // What a persona test runs on: the app's address (as it is now), and a
+  // What a persona test runs on: the apps it can be sent into, an app's
+  // address as it is now (the first app's without a product), and a
   // browser.
-  testsRunOn: { app: () => Promise<string>; browser: () => Promise<Browser> };
+  testsRunOn: {
+    apps: () => App[];
+    app: (product: string | null) => Promise<string>;
+    browser: () => Promise<Browser>;
+  };
 };
 
 export function servedKobble(options: KobbleOptions) {
@@ -213,7 +219,8 @@ function explorationsAndTests(
   return { explorations, tests };
 }
 
-// Persona tests: start one, a persona's tests, one test.
+// Persona tests (missions): the one the kobold suggests, start one, a
+// persona's tests, one test.
 function testRoutes(
   options: KobbleOptions,
   store: () => KobbleStore,
@@ -226,12 +233,24 @@ function testRoutes(
     claude: options.claude,
     cwd: options.project,
     store,
-    app: (on, persona) =>
-      on === "main" ? options.testsRunOn.app() : more.prototype(on, persona),
+    app: (test) =>
+      test.on === "main"
+        ? options.testsRunOn.app(test.product ?? null)
+        : more.prototype(test.on, test.persona),
     browser: options.testsRunOn.browser,
     onChange: more.onChange,
   });
+  const ideas = new MissionIdeas({
+    claude: options.claude,
+    cwd: options.project,
+    store,
+    apps: options.testsRunOn.apps,
+  });
   const routes: Record<string, Route> = {
+    "GET /api/kobble/mission": (_body, url) =>
+      kept(async () => ({
+        mission: await ideas.suggest(asked(url, "persona", "persona")),
+      })),
     "GET /api/kobble/tests": (_body, url) =>
       kept(() => ({
         tests: testsOf(store(), asked(url, "persona", "persona")),
@@ -239,7 +258,11 @@ function testRoutes(
     "GET /api/kobble/test": (_body, url) =>
       kept(() => testPage(store(), asked(url, "id", "test"))),
     "POST /api/kobble/tests": (body) =>
-      kept(() => ({ test: tests.start(body) })),
+      kept(() => {
+        const test = tests.start(body);
+        ideas.forget(test.persona);
+        return { test };
+      }),
   };
   return {
     routes,

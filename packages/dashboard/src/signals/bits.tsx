@@ -68,6 +68,10 @@ const TYPES: Record<SignalRow["type"], string> = {
   bug: "bg-type-bug/10 text-type-bug",
   request: "bg-type-request/10 text-type-request",
   feedback: "bg-type-feedback/10 text-type-feedback",
+  // From a mission: an idea in the colour of a request, an open question
+  // in the colour of feedback.
+  idea: "bg-type-request/10 text-type-request",
+  question: "bg-type-feedback/10 text-type-feedback",
 };
 
 export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {

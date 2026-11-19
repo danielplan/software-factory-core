@@ -25,6 +25,7 @@ import {
   PERSONA_COLORS,
   PERSONA_HATS,
   takeInEvents,
+  takeInFindings,
 } from "../src/index.ts";
 import { signalFromEvent } from "../src/kobble/live.ts";
 import { ACME } from "./stand-ins.ts";
@@ -447,4 +448,30 @@ test("the old shared sync.json is read once, then replaced by this computer's ow
     refusal(() => store.sync()),
     /\.sync\.json does not fit/,
   );
+});
+
+test("a mission's findings are signals of their kind, each at its step", () => {
+  const store = emptyFactory();
+  const added = takeInFindings(store, {
+    persona: "mia",
+    at: "2026-11-19T08:00:00.000Z",
+    findings: [
+      {
+        type: "question",
+        text: "Is the evening delivery free?",
+        step: { test: "T-0001", number: 2, did: "Looked at the delivery" },
+      },
+      { type: "idea", text: "Keep my basket for later.", step: null },
+    ],
+  });
+  assert.deepEqual(
+    added.map((one) => [one.id, one.type, one.source, one.step?.number]),
+    [
+      ["S-0001", "question", "test", 2],
+      ["S-0002", "idea", "test", undefined],
+    ],
+  );
+  const back = store.get("signals", "S-0001");
+  assert.equal(back?.step?.did, "Looked at the delivery");
+  assert.equal(store.get("signals", "S-0002")?.step, undefined);
 });

@@ -27,6 +27,7 @@ export type {
   PersonaHat,
 } from "../../core/src/index.ts";
 export type {
+  MissionNow,
   PersonaPage as KobblePersonaPage,
   PersonaRow,
   SignalRow,
@@ -35,6 +36,7 @@ export type {
 } from "../../server/src/kobble/views.ts";
 export type { PersonaTest } from "../../core/src/index.ts";
 export type { SyncView } from "../../server/src/kobble/sync.ts";
+export type { MissionIdea } from "../../server/src/kobble/mission-ideas.ts";
 export type {
   FactoryCard,
   FactoryView,

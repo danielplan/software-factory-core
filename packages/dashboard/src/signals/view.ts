@@ -4,7 +4,7 @@
 // live app was last read. Kept apart from the components so it is checked
 // on its own.
 
-import type { SignalRow, SyncView } from "../api.ts";
+import type { MissionNow, SignalRow, SyncView } from "../api.ts";
 
 type Signal = Pick<
   SignalRow,
@@ -15,13 +15,15 @@ export const TYPE_WORDS: Record<Signal["type"], string> = {
   bug: "Bug",
   request: "Feature request",
   feedback: "Feedback",
+  idea: "Idea",
+  question: "Open question",
 };
 
 export const SOURCE_WORDS: Record<Signal["source"], string> = {
   app: "In the app",
   usage: "Usage",
   errors: "Errors",
-  test: "Persona test",
+  test: "Mission",
 };
 
 export function whoOf(signal: Pick<Signal, "personaName">): string {
@@ -122,12 +124,27 @@ export function statusWords(signal: Pick<SignalRow, "status" | "to">): string {
   return signal.status === "new" ? "New" : "Dismissed";
 }
 
+// A mission running or waiting, in a few words: the step it is on.
+export function missionWords(
+  mission: Pick<MissionNow, "status" | "doing">,
+): string {
+  if (mission.status === "queued") return "Waits for its turn";
+  return mission.doing ?? "Opening the app…";
+}
+
+// Where a signal from a mission happened: "At step 2: Opened the basket".
+export function stepWords(signal: Pick<SignalRow, "step">): string | null {
+  return signal.step
+    ? `At step ${String(signal.step.number)}: ${signal.step.did}`
+    : null;
+}
+
 export const TEST_WORDS: Record<
   "queued" | "running" | "done" | "failed",
   string
 > = {
   queued: "Waiting",
-  running: "Testing…",
+  running: "On a mission",
   done: "Done",
   failed: "Failed",
 };
@@ -155,4 +172,23 @@ export function lookAgainWords(next: string | null, now: Date): string {
   const minutes = Math.ceil((Date.parse(next) - now.getTime()) / MINUTE);
   if (minutes <= 1) return "The kobold looks again in a minute.";
   return `The kobold looks again in ${String(minutes)} minutes.`;
+}
+
+export type Act = "fix" | "explore" | "dismiss";
+
+// What a button did, in words.
+export function doneWords(
+  act: Act,
+  signal: SignalRow,
+  answer: unknown,
+): string {
+  if (act === "fix") {
+    const fixed = (answer as { signal: { to: string | null } }).signal.to;
+    return `${fixed ?? signal.id} is in the factory's To do`;
+  }
+  if (act === "dismiss") return "Dismissed";
+  const { exploration } = answer as { exploration: { id: string } };
+  return signal.already?.kind === "exploration"
+    ? `Added to ${exploration.id}`
+    : `${exploration.id} is waiting in Explorations`;
 }

@@ -4,13 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import {
-  type Claude,
-  KobbleStore,
-  type RunOptions,
-} from "@software-factory/core";
+import { KobbleStore } from "@software-factory/core";
 
 import { PersonaTests } from "../src/kobble/persona-tests.ts";
+import { standIn } from "./pretend-claude.ts";
 import type { TestPage } from "../src/kobble/views.ts";
 import { stage } from "./stage.ts";
 
@@ -32,29 +29,22 @@ const DIARY = {
   ],
 };
 
-function standIn(answers: (string | null)[]) {
-  const seen: RunOptions[] = [];
-  const claude: Claude = {
-    run: (options) => {
-      seen.push(options);
-      const text = answers[seen.length - 1];
-      return Promise.resolve(
-        text === null || text === undefined
-          ? { ok: false, text: "", error: "spawn claude ENOENT" }
-          : { ok: true, text },
-      );
-    },
-  };
-  return { claude, seen };
-}
-
 async function testFactory(
   answers: (string | null)[],
-  app: () => Promise<string> = () => Promise.resolve("http://localhost:5173"),
+  app: (product: string | null) => Promise<string> = () =>
+    Promise.resolve("http://localhost:5173"),
 ) {
   const { claude, seen } = standIn(answers);
   let closed = 0;
   const staged = await stage(claude, {}, undefined, [], {
+    apps: () => [
+      { id: "shop", name: "Shop", does: "Where customers order" },
+      {
+        id: "office",
+        name: "Back office",
+        does: "Where the team keeps the shop",
+      },
+    ],
     app,
     browser: () =>
       Promise.resolve({
@@ -100,19 +90,32 @@ async function testFactory(
   };
 }
 
-test("a persona test uses the app as the persona and files what surprised them", async () => {
-  const factory = await testFactory([
-    `Here is my diary: ${JSON.stringify(DIARY)}`,
-    JSON.stringify({
-      signals: [
-        { type: "bug", text: "The size guide does not open on my phone." },
-      ],
-    }),
-  ]);
+test("a mission uses the app as the persona and files what surprised them, each at its step", async () => {
+  const asked: (string | null)[] = [];
+  const factory = await testFactory(
+    [
+      `Step 1: Opening the size guide\nHere is my diary: ${JSON.stringify(DIARY)}`,
+      JSON.stringify({
+        signals: [
+          {
+            type: "bug",
+            text: "The size guide does not open on my phone.",
+            step: 1,
+          },
+          { type: "question", text: "Do these run small?", step: 9 },
+        ],
+      }),
+    ],
+    (product) => {
+      asked.push(product);
+      return Promise.resolve("http://localhost:5173");
+    },
+  );
   try {
     const started = await factory.start({
       persona: "noah",
       task: "Find the right size for trail shoes",
+      product: "shop",
     });
     assert.equal(started.status, 200);
     assert.equal(started.body.test.id, "T-0004");
@@ -120,11 +123,24 @@ test("a persona test uses the app as the persona and files what surprised them",
     assert.equal(page.test.status, "done");
     assert.equal(page.test.problem, null);
     assert.deepEqual(page.test.steps, DIARY.steps);
-    assert.deepEqual(page.test.signals, ["S-0004"]);
+    assert.deepEqual(page.test.signals, ["S-0004", "S-0005"]);
+    assert.equal(page.test.doing, null);
+    assert.equal(page.test.product, "shop");
+    assert.deepEqual(asked, ["shop"]);
     assert.equal(page.persona.name, "Noah");
     assert.deepEqual(
-      page.signals.map((s) => [s.type, s.source, s.persona, s.text]),
-      [["bug", "test", "noah", "The size guide does not open on my phone."]],
+      page.signals.map((s) => [s.type, s.source, s.persona, s.text, s.step]),
+      [
+        [
+          "bug",
+          "test",
+          "noah",
+          "The size guide does not open on my phone.",
+          { test: "T-0004", number: 1, did: "Opened the size guide" },
+        ],
+        // A step the diary does not have is left out.
+        ["question", "test", "noah", "Do these run small?", undefined],
+      ],
     );
     // The persona agent has the browser and no tool of its own; the
     // analyst has nothing at all.
@@ -150,20 +166,30 @@ test("a persona test uses the app as the persona and files what surprised them",
   }
 });
 
-test("a test that cannot run says why, and waits its turn", async () => {
-  const factory = await testFactory(["no diary here", null], () =>
-    Promise.resolve("http://localhost:5173"),
-  );
+test("a mission that cannot run says why; a persona goes on one mission at a time", async () => {
+  // The app starts only when the second try was refused.
+  let open = () => {};
+  const opened = new Promise<void>((resolve) => {
+    open = resolve;
+  });
+  const factory = await testFactory(["no diary here", null], async () => {
+    await opened;
+    return "http://localhost:5173";
+  });
   try {
     const first = await factory.start({ persona: "mia", task: "Pay" });
-    const second = await factory.start({ persona: "mia", task: "Pay again" });
+    const again = await factory.start({ persona: "mia", task: "Pay again" });
+    assert.equal(again.status, 409);
+    assert.equal(again.body.error, "Mia is on a mission already.");
+    open();
     assert.equal(
       (await factory.finished(first.body.test.id)).test.problem,
       "The kobold's diary could not be read.",
     );
+    const second = await factory.start({ persona: "mia", task: "Pay again" });
     assert.match(
       (await factory.finished(second.body.test.id)).test.problem ?? "",
-      /^Claude Code could not run the test: spawn claude ENOENT/,
+      /^Claude Code could not run the mission: spawn claude ENOENT/,
     );
     assert.equal(factory.closed(), 2);
   } finally {
@@ -173,13 +199,13 @@ test("a test that cannot run says why, and waits its turn", async () => {
 
 test("without an app to test, the test fails plainly", async () => {
   const factory = await testFactory([], () =>
-    Promise.reject(new Error("Persona tests need a product.")),
+    Promise.reject(new Error("Missions need an app.")),
   );
   try {
     const started = await factory.start({ persona: "mia", task: "Pay" });
     const page = await factory.finished(started.body.test.id);
     assert.equal(page.test.status, "failed");
-    assert.equal(page.test.problem, "Persona tests need a product.");
+    assert.equal(page.test.problem, "Missions need an app.");
     assert.ok(page.test.ended);
     assert.equal(factory.closed(), 0);
   } finally {
@@ -228,6 +254,9 @@ test("a test left running when the factory stopped says it did not finish", () =
   assert.ok(left);
   assert.equal(left.status, "failed");
   assert.equal(left.ended, "2026-11-17T10:00:00.000Z");
-  assert.equal(left.problem, "The factory stopped before the test finished.");
+  assert.equal(
+    left.problem,
+    "The factory stopped before the mission finished.",
+  );
   assert.equal(store.get("tests", "T-0001")?.status, "done");
 });
