@@ -1,0 +1,143 @@
+@import "tailwindcss";
+:root {
+  /* Neutral tokens (shadcn's neutral palette): the product's own colours
+     replace them. */
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #fff;
+  --card-foreground: #171717;
+  --popover: #fff;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted: #f5f5f5;
+  --muted-foreground: #525252;
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
+  --destructive: #b91c1c;
+  --border: #e5e5e5;
+  --input: #d4d4d4;
+  --ring: #737373;
+  --radius: 0.65rem;
+  /* The top bar: dark, with light text. */
+  --sidebar: #171717;
+  --sidebar-foreground: #d4d4d4;
+  --sidebar-primary: #fafafa;
+  --sidebar-primary-foreground: #171717;
+  --sidebar-accent: #262626;
+  --sidebar-accent-foreground: #fff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #a3a3a3;
+}
+@theme inline {
+  --font-sans: system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Type sizes, smallest to largest (font size only). */
+  --text-fine: 10px;
+  --text-caption: 11px;
+  --text-note: 12px;
+  --text-body: 13px;
+  --text-subtitle: 17px;
+  --text-figure: 20px;
+  --text-title-phone: 26px;
+  --text-title: 32px;
+  --text-metric: 40px;
+  --tracking-metric: -1.5px;
+  --tracking-title: -1px;
+  --tracking-subtitle: -0.3px;
+  --tracking-label: 0.12em;
+  --tracking-label-wide: 0.18em;
+  --leading-airy: 1.8;
+  /* Below these widths the layout narrows: max-narrow:, max-wide:. */
+  --breakpoint-narrow: 720px;
+  --breakpoint-wide: 1100px;
+  --container-prose: 680px;
+  --container-page: 1600px;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+/* Element styles sit in the base layer so Tailwind classes can override them. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    color: var(--foreground);
+    background: var(--background);
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: default;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+  a {
+    color: inherit;
+  }
+  h1 {
+    font-size: var(--text-title);
+    letter-spacing: var(--tracking-title);
+    font-weight: 600;
+    margin: 0 0 9px;
+  }
+  h2 {
+    font-size: var(--text-subtitle);
+    font-weight: 600;
+    letter-spacing: var(--tracking-subtitle);
+  }
+  p {
+    color: var(--muted-foreground);
+    font-size: var(--text-body);
+    line-height: 1.7;
+  }
+  @media (width < 720px) {
+    h1 {
+      font-size: var(--text-title-phone);
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    "prototype/**/*.ts",
+    "scripts/**/*.ts"
+  ]
+}

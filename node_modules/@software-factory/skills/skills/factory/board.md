@@ -21,31 +21,52 @@ same: the [factory](SKILL.md) skill and the skills it routes to.
 - Your turn is the whole job: when it ends, the factory reads your last line,
   and nothing you started keeps running. Run long checks in the foreground
   and wait for them; never end with "I'll do it when this finishes".
+- Helpers (subagents) run in the foreground only. To split a large job,
+  start several helpers in one message (they still work at the same time)
+  and write your answer only after every one has reported back.
+- Other cards may be worked on at the same time in other working copies,
+  each with its own settings, test database and ports. Use only your own
+  copy's; never stop, reset or change another copy's servers or data.
 - End your answer with exactly one last line, `STATUS: <value>`, with one of
   the values your prompt lists. The factory reads it to move the card, so
   nothing may follow it.
 
-## Planning (the coach, card in Planning)
+## Asking the owner
 
-Coach the owner through the `plan` skill, in the card's comments:
+The owner may answer on GitHub or on the factory's Factory page. Whenever
+you end with `STATUS: question` or `STATUS: blocked`, put the question in
+this shape too, as the last thing before the status line, so the page can
+show it with buttons:
 
-- One step per comment, each ending with one question.
-- Read the relevant knowledge and code first. Your copy is the latest main
-  branch and read-only: write nothing. The run file and the blueprint are
-  written when building.
-- While a question is open: `STATUS: question`.
-- Before the plan is agreed, read the board's other cards and name the ones
-  this plan depends on, replaces or changes, so the owner can link them.
-- When everything the card touches is agreed, write the agreed plan instead:
-  the request, which product(s), the plan, the checks, what stays open. End
-  by asking the owner to move the card to **Ready** to build it.
-  `STATUS: plan-agreed`.
-- When the card cannot go on without something you cannot get here (another
-  decision, an access): say what is needed. `STATUS: blocked`.
+```
+<!-- software-factory:ask
+{"about": "What the card is about, in one line",
+ "where": "Where the work is now, in one line",
+ "question": "The question, in plain everyday words",
+ "answers": [
+   {"key": "A", "answer": "The first answer", "means": "What it changes in practice, in one line"},
+   {"key": "B", "answer": "The second answer", "means": "…"}
+ ],
+ "suggested": "A"}
+-->
+```
 
-## Building (the builder, card moved to Ready)
+Two to four answers; `suggested` is the one you recommend (or leave it
+out). The visible comment above it still says everything in words: the
+block is only for the page. An open question with no sensible answers to
+pick from leaves `answers` empty.
 
-The owner approved the plan. You are on the card's branch in the factory's
+## No planning here
+
+The factory does not plan. Work is thought through before it reaches the
+board: in an exploration (the card then carries the agreed plan and its
+prototype) or as a signal that is fixed (the card carries what was
+reported). A card in To do is the go-ahead to build it.
+
+## Building (the builder, card in To do)
+
+The card's text is the plan: an agreed plan from an exploration, or a
+signal to fix. You are on the card's branch in the factory's
 own working copy; it has its own settings files, made from the examples.
 
 - Follow the factory's workflow: open the run file with the agreed plan
@@ -73,10 +94,28 @@ own working copy; it has its own settings files, made from the examples.
   open a pull request for part of the scope, and do not ask the owner whether
   to go on. Each session must add at least one commit, or the factory stops.
 - When the agreed scope is built and checked, write the pull request's
-  description: what was built, how to try it, what was checked, what was not
-  checked and why. `STATUS: done`.
+  description: what was built, how to try it, what was checked and measured
+  (with the numbers), what was not checked and why. `STATUS: done`.
+- Say plainly what is not done. When you report progress or stop early,
+  list the plan's stages as done, partly done or not started; never call
+  part of the scope finished.
 - When you are stuck or need a decision that is the owner's: say what is done
   so far and ask one clear question. `STATUS: blocked`.
+
+## Bringing main in
+
+Before each build session or review fix on a branch that exists, the
+factory merges the latest main into it. When that clashes, your prompt
+names the files: settle them first.
+
+- Keep both sides' intent: main's change and the card's change both stay.
+- Numbered things (runs, decisions, migrations) that both sides added keep
+  main's number; the card's side moves to the next free number, and every
+  link to it is updated.
+- Lists both sides added to (a change log, an index) keep every row.
+- Then `git commit` to finish the merge, and carry on with the task.
+- When the two sides cannot both stay, say how they clash and ask.
+  `STATUS: blocked`.
 
 ## Review comments (the builder, card in Review)
 

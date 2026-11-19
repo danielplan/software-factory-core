@@ -76,3 +76,12 @@ with the owner's agreement.
 - Tests against a real database use unique identifiers and remove their own
   records; one journey makes its last step fail, to prove the transaction
   rolls back.
+
+## The starter
+
+A new NestJS backend starts as a copy of the kit's starter
+(`starters/nestjs-backend` in the kits): settings checked at start, a
+database connection with migrations, a health route, the checks above in
+`npm run verify` and a `BLUEPRINT.md`, without features or sign-in. Which
+database server it uses is a setting (`DATABASE_URL` in `.env`), the
+product's or the company's decision, not the kit's.
