@@ -159,7 +159,6 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
         columns: ["Todo", "In Progress", "Done"],
         suggested: {
           backlog: "",
-          planning: "",
           todo: "Todo",
           doing: "In Progress",
           review: "",
@@ -194,7 +193,6 @@ test("connecting a GitHub board: the CLI is here, signing in shows a code, the b
       label: "*",
       stages: {
         backlog: "Todo",
-        planning: "",
         todo: "",
         doing: "In Progress",
         review: "",
@@ -287,7 +285,6 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       columns: ["Backlog", "Selected for Development", "In Review", "Done"],
       suggested: {
         backlog: "Backlog",
-        planning: "",
         todo: "Selected for Development",
         doing: "",
         review: "In Review",
@@ -313,11 +310,11 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       .find((g) => g.id === "jira")
       ?.fields.find((f) => f.key === "JIRA_TOKEN");
     assert.equal(token?.value, "(set)");
-    assert.equal((await post("/api/connect/own-board", {})).status, 200);
-    assert.equal(factory(session).company.tracker, "none");
+    // There is no board of the factory's own to choose any more.
+    assert.equal((await post("/api/connect/own-board", {})).status, 404);
 
-    // On the factory's own board no tracker is on; one that is off
-    // answers nothing.
+    // With no board chosen no tracker is on; one that is off answers
+    // nothing.
     saveCompany(join(project, "factory"), {
       ...factory(session).company,
       without: ["github"],
@@ -340,7 +337,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
     const turn = (id: string, on: boolean) => post("/api/add-ons", { id, on });
     assert.equal((await turn("github", true)).status, 200);
     assert.equal((await turn("voice", true)).status, 200);
-    // Jira stays off: on the factory's own board no tracker was on.
+    // Jira stays off: with no board chosen no tracker was on.
     assert.deepEqual(factory(session).company.without, ["jira"]);
     assert.deepEqual(factory(session).company.extensions, ["voice"]);
     await turn("voice", false);
@@ -376,7 +373,6 @@ test("the board's columns are matched to the factory's stages by their names", (
     suggestStages(["Icebox", "Up next", "Doing", "QA", "Shipped"]),
     {
       backlog: "Icebox",
-      planning: "",
       todo: "Up next",
       doing: "Doing",
       review: "QA",
@@ -385,7 +381,6 @@ test("the board's columns are matched to the factory's stages by their names", (
   );
   assert.deepEqual(suggestStages(["Whatever"]), {
     backlog: "",
-    planning: "",
     todo: "",
     doing: "",
     review: "",
@@ -393,39 +388,23 @@ test("the board's columns are matched to the factory's stages by their names", (
   });
 });
 
-test("a board's Planning column is matched to the Planning stage", () => {
-  assert.deepEqual(
-    suggestStages([
-      "Backlog",
-      "Planning",
-      "Todo",
-      "In Progress",
-      "In Review",
-      "Done",
-    ]),
-    {
-      backlog: "Backlog",
-      planning: "Planning",
-      todo: "Todo",
-      doing: "In Progress",
-      review: "In Review",
-      done: "Done",
-    },
-  );
-  assert.equal(suggestStages(["Refinement", "Ready"]).planning, "Refinement");
-});
-
-test("a board file written before Planning existed still loads", () => {
+test("a board file with a Planning column still loads, without it", () => {
   const root = mkdtempSync(join(tmpdir(), "board-"));
   writeFileSync(
     join(root, "board.json"),
     JSON.stringify({
       github: {
         label: "factory",
-        stages: { backlog: "", todo: "Todo", doing: "", review: "", done: "" },
+        stages: {
+          backlog: "",
+          todo: "Todo",
+          doing: "",
+          review: "",
+          done: "",
+        },
       },
     }),
   );
-  assert.equal(readBoard(root).github?.stages.planning, "");
+  assert.equal("planning" in (readBoard(root).github?.stages ?? {}), false);
   assert.equal(readBoard(root).github?.stages.todo, "Todo");
 });

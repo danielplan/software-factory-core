@@ -76,13 +76,17 @@ test("a coding agent plans a card with the owner and puts it in ready, with its 
     list.said,
     "#3  Backlog  Invoices in euros  https://github.com/acme/shop/issues/3",
   );
-  assert.equal(
+  assert.match(
     (await card(folder, github.cli, "move", "3", "planning")).said,
-    "Moved #3 to Planning.",
+    /“planning” is not a stage/,
   );
-  assert.equal(github.issues.get(3)?.column, "Planning");
+  assert.equal(
+    (await card(folder, github.cli, "move", "3", "doing")).said,
+    "Moved #3 to In progress.",
+  );
+  assert.equal(github.issues.get(3)?.column, "In progress");
   const shown = await card(folder, github.cli, "show", "#3");
-  assert.match(shown.said, /Planning {2}Invoices in euros/);
+  assert.match(shown.said, /In progress {2}Invoices in euros/);
   assert.match(
     shown.said,
     /No agreed plan yet\.\n\nAs written\.\n\n— ana:\nEuros only\?/,
@@ -151,7 +155,7 @@ test("a new card lands in the backlog; mistakes are said plainly", async () => {
   assert.match(await said("agree", "3"), /--plan-file/);
   assert.match(
     (await card(project("none"), github.cli, "list")).said,
-    /factory's own board: connect a GitHub board/,
+    /No board is connected yet/,
   );
   assert.match(
     (await card(mkdtempSync(join(tmpdir(), "none-")), github.cli, "list")).said,

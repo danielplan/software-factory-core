@@ -41,6 +41,8 @@ const newSchema = z.object({
   title: z.string().trim().min(1, "Say what to explore."),
   problem: z.string().trim().default(""),
   persona: z.string().optional(),
+  // A Backlog issue of the board it starts from.
+  issue: z.number().int().positive().optional(),
 });
 
 // New exploration: a team idea, no signal needed; it waits to be started.
@@ -52,18 +54,25 @@ export function newExploration(
   const parsed = newSchema.safeParse(body);
   if (!parsed.success)
     throw new Refused(parsed.error.issues.map((i) => i.message).join(" "));
-  const { title, problem, persona } = parsed.data;
+  const { title, problem, persona, issue } = parsed.data;
   if (persona && !store.get("personas", persona))
     throw new Refused(`There is no persona “${persona}”.`);
+  const taken = issue
+    ? store.all("explorations").find((one) => one.issue === issue)
+    : undefined;
+  if (taken)
+    throw new Refused(`#${String(issue)} is explored already, in ${taken.id}.`);
   return store.put("explorations", {
     id: store.nextId("explorations"),
     title: titleOf(title),
     status: "waiting",
     personas: persona ? [persona] : [],
     signals: [],
+    heard: [],
     problem: problem || title,
     created: now.toISOString(),
     work: null,
+    ...(issue ? { issue } : {}),
   });
 }
 
@@ -90,7 +99,9 @@ export async function handOff(
     .all("tests")
     .filter((test) => agreed.tests.includes(test.id));
   const text = handoffText(exploration, board, agreed, tests);
-  const card = await connected.create(exploration.title, text);
+  // Handed off agreed: straight to To do, the go-ahead to build it. An
+  // exploration of a Backlog issue fills in that issue instead.
+  const card = await handedOffCard(connected, exploration, text);
   store.saveHandoff(
     id,
     `# ${exploration.title}\n\n${text}\n\nHanded off as #${String(card.number)}.\n`,
@@ -104,6 +115,18 @@ export async function handOff(
 }
 
 type Made = Extract<Board["things"][number], { kind: "prototype" }>;
+
+async function handedOffCard(
+  cards: Cards,
+  exploration: Exploration,
+  text: string,
+): Promise<{ number: number; url: string }> {
+  if (!exploration.issue) return cards.create(exploration.title, text, "todo");
+  await cards.writePlan(exploration.issue, text);
+  await cards.move(exploration.issue, "todo");
+  const { url } = await cards.show(exploration.issue);
+  return { number: exploration.issue, url };
+}
 
 function handoffText(
   exploration: Exploration,

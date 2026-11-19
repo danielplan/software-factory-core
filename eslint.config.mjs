@@ -30,6 +30,9 @@ export default tseslint.config(
       "**/node_modules/**",
       "coverage/**",
       "packages/dashboard/dist/**",
+      // The kits' starters are whole products with their own checks
+      // (each starter's npm run verify).
+      "packages/kits/starters/**",
     ],
   },
   {

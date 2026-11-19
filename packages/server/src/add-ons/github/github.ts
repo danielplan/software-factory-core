@@ -18,7 +18,12 @@ export type Cli = {
   start: (
     args: string[],
     onLine: (line: string) => void,
-  ) => { answer: (text: string) => void; done: Promise<number> };
+  ) => {
+    answer: (text: string) => void;
+    done: Promise<number>;
+    // Ends a program that keeps running (gh webhook forward).
+    stop?: () => void;
+  };
 };
 
 export type GitHubStatus = {
@@ -213,6 +218,7 @@ export function realCli(within = ANSWER_WITHIN): Cli {
       child.stderr.on("data", read);
       return {
         answer: (text) => child.stdin.write(text),
+        stop: () => child.kill("SIGINT"),
         done: new Promise((resolve) => {
           child.on("error", () => {
             resolve(1);

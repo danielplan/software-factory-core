@@ -49,6 +49,8 @@ export type CardView = {
   closed: boolean;
   // It waits in Done for a person to say whether it worked (Kobble).
   asks: boolean;
+  // What kind of work it is (its "type: …" label), when it has one.
+  type?: "bug" | "feature" | "improvement" | null;
 };
 
 // What the builder is doing: on or off, the card it works on, its last
@@ -56,6 +58,8 @@ export type CardView = {
 export type BuilderView = {
   on: boolean;
   working: { number: number; title: string; what: string } | null;
+  // The other cards it works on at the same time (cards at once).
+  also: { number: number; title: string; what: string }[];
   activity: string | null;
   // Its last steps on that card, oldest first.
   steps: string[];
@@ -66,7 +70,24 @@ export type BuilderView = {
 export type CoachInCardsView = {
   on: boolean;
   working: number | null;
+  also: number[];
   steps: string[];
+};
+
+// A card the factory waits on: its question, in the shape the Factory page
+// can answer when the agent wrote one (ask), else as text.
+export type Asking = {
+  number: number;
+  title: string;
+  url: string;
+  text: string;
+  ask: {
+    about: string;
+    where: string;
+    question: string;
+    answers: { key: string; answer: string; means: string }[];
+    suggested: string | null;
+  } | null;
 };
 
 export type WorkView = {
@@ -77,6 +98,10 @@ export type WorkView = {
   read: string | null;
   builder: BuilderView;
   coach: CoachInCardsView;
+  // The cards where the factory waits for the owner's answer.
+  asking?: Asking[];
+  // GitHub's signals as they happen; none before they are set up.
+  signals?: { live: boolean; moves: boolean; problem: string | null };
 };
 
 export type State =
@@ -223,19 +248,11 @@ export type Card = {
 
 export type CoachMessage = { from: "coach" | "owner"; text: string };
 
-// The stages agreed work goes through, on the factory's board (and the
-// connected board's columns, matched to them). An idea is a draft before.
-// Planning: the plan of a piece of work is talked through with the owner in
-// its conversation (for work that did not come through Ideas) until it is
-// agreed; To do is the owner's go-ahead to build it.
-export const STAGES = [
-  "backlog",
-  "planning",
-  "todo",
-  "doing",
-  "review",
-  "done",
-] as const;
+// The stages agreed work goes through, on the connected board (its
+// columns matched to them). There is no planning stage: work is thought
+// through outside the factory (an exploration, a signal), so a card in To
+// do is the go-ahead to build it, its text the plan.
+export const STAGES = ["backlog", "todo", "doing", "review", "done"] as const;
 export type Stage = (typeof STAGES)[number];
 export type StageMap = Record<Stage, string>;
 
@@ -267,10 +284,28 @@ export type CoachView = {
   made: boolean;
 };
 
+// The guided setup's steps, each showing the map's area of the same name
+// (the coach draws into these areas). "What each must keep" is drawn but
+// not shown: it goes into the products' blueprints.
+export const SETUP_AREAS = {
+  product: "Your product",
+  people: "Who it's for",
+  team: "Team and board",
+  how: "How Kobble works",
+  bring: "Bring over",
+  start: "Where to start",
+  keep: "What each must keep",
+} as const;
+
 // The owner's own change to the map: a card taken off, or moved. What a
 // card says is changed by talking to the coach.
 export type ChangeDraft =
-  { remove: string } | { move: { id: string; x: number; y: number } };
+  | { remove: string }
+  | { move: { id: string; x: number; y: number } }
+  // A card the owner adds (a persona in "Who it's for"), agreed already.
+  | { add: { area: string; title: string; text?: string } }
+  // A card the owner corrects in place: agreed from then on.
+  | { edit: { id: string; title?: string; text?: string } };
 
 // The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };

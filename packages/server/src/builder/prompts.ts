@@ -14,19 +14,16 @@ const GUIDE =
 const SHARED = `You are the software factory, started on the owner's computer while nobody watches.
 Read ${GUIDE} first and follow it: it has the rules for working through the board and for this task.`;
 
-export function planPrompt(card: BoardCard): string {
-  return `${SHARED}
-
-## Your task: planning card #${String(card.number)}
-
-The card is in **Planning**. Follow the guide's "Planning" section.
-
-${cardText(card)}
-
-${answer("question", "plan-agreed", "blocked")}`;
+// Other cards may be worked on at the same time, each in a copy of its own.
+function copyLine(copy: string): string {
+  return `Your working copy is \`${copy}\`. Other cards may be worked on at the same time in other copies, each with its own settings, test database and ports: never touch theirs.`;
 }
 
-export function buildPrompt(card: BoardCard, continued: boolean): string {
+export function buildPrompt(
+  card: BoardCard,
+  continued: boolean,
+  copy = "build",
+): string {
   const earlier = continued
     ? "; earlier work on this branch exists: continue from it (read the run file first)"
     : "";
@@ -36,18 +33,20 @@ export function buildPrompt(card: BoardCard, continued: boolean): string {
 
 The owner approved the plan by moving the card to **Ready**. Follow the guide's "Building" section.
 You are on branch \`${branchOf(card.number)}\` in the factory's own working copy${earlier}.
+${copyLine(copy)}
 
 ${cardText(card)}
 
 ${answer("done", "blocked", "continue")}`;
 }
 
-export function feedbackPrompt(card: BoardCard): string {
+export function feedbackPrompt(card: BoardCard, copy = "build"): string {
   return `${SHARED}
 
 ## Your task: review comments on card #${String(card.number)}
 
 The work is in pull request #${String(card.pullRequest?.number ?? "")} on branch \`${branchOf(card.number)}\`, and the card is in **Review**. Follow the guide's "Review comments" section.
+${copyLine(copy)}
 
 ${cardText(card, reviewTimeline(card))}
 
@@ -71,6 +70,18 @@ ${report}
 ${cardText(card, reviewTimeline(card))}
 
 ${answer("done", "blocked")}`;
+}
+
+// The latest main was merged into the branch and clashed: settled first.
+export function clashPrompt(files: string[]): string {
+  const list = files.map((file) => `- \`${file}\``).join("\n");
+  return `## First: bringing main in
+
+The factory merged the latest main into this branch and these files clash:
+
+${list}
+
+Follow the guide's "Bringing main in" section: settle them before anything else, then \`git commit\` to finish the merge.`;
 }
 
 // For a turn that ended without its status line: the job is not done.

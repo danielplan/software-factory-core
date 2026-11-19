@@ -6,9 +6,16 @@
 // effects.
 
 import type { Language } from "./languages.ts";
-import type { MicrophoneProblem } from "./microphone.ts";
-import type { VoiceProblem } from "./speaker.ts";
 import { sayable } from "./answer-text.ts";
+import {
+  type CallEvent,
+  type CallState,
+  type Effect,
+  idleCall,
+  NO_ANSWER,
+  type Problem,
+} from "./call-state.ts";
+import { isFiller } from "./fillers.ts";
 import { asksToStop } from "./stop-words.ts";
 
 // How long the owner may stay silent before their turn is sent.
@@ -19,65 +26,13 @@ export const QUICK_PAUSE_MS = 500;
 // A sent turn: the ears rest this long and a short sound says it was taken.
 export const HOLD_AFTER_SEND_MS = 1000;
 
-export type Phase = "off" | "preparing" | "listening" | "thinking" | "speaking";
-
-// What can go wrong, each with its own plain message (status-line.ts).
-export type Problem =
-  MicrophoneProblem | VoiceProblem | "unsupported" | "download" | "not-sent";
-
-export type CallState = {
-  phase: Phase;
-  // How much of the speech model is downloaded (0 to 1), while getting ready.
-  progress: number | null;
-  // The voice test runs when Talk is pressed (a short sentence out loud);
-  // the ears start only once it is over and the speech model is ready, so
-  // they do not hear it.
-  testing: boolean;
-  modelReady: boolean;
-  // The language the owner chose to speak (the switch beside Talk): the
-  // ears write their words down in it and the coach answers in it.
-  language: Language;
-  // A sentence is being turned into text.
-  writing: boolean;
-  // The coach's answer to the last turn, as far as it was handed to the
-  // voice; whether the answer is complete; whether the voice still talks;
-  // whether the owner stopped it (the rest of that answer is not read).
-  speech: string;
-  complete: boolean;
-  talking: boolean;
-  stopped: boolean;
-  problem: Problem | null;
-};
-
-export type CallEvent =
-  | { type: "start" }
-  // The owner chose the language they speak.
-  | { type: "language"; language: Language }
-  | { type: "progress"; fraction: number | null }
-  | { type: "prepared" }
-  // The voice test is over: null when the voice works.
-  | { type: "tested"; problem: VoiceProblem | null }
-  | { type: "end" }
-  | { type: "sentence" }
-  | { type: "heard"; text: string; language: Language }
-  // The coach's spoken answer so far; final once the reply is complete.
-  | { type: "speech"; text: string; final: boolean }
-  // The voice said everything it was given.
-  | { type: "drained" }
-  | { type: "failed" }
-  | { type: "problem"; problem: Problem };
-
-export type Effect =
-  | { type: "prepare" }
-  | { type: "test-voice"; language: Language }
-  | { type: "listen" }
-  | { type: "stop-listening" }
-  | { type: "quick"; on: boolean }
-  | { type: "hold"; ms: number }
-  | { type: "cue" }
-  | { type: "send"; text: string; language: Language }
-  | { type: "say"; text: string; language: Language }
-  | { type: "stop-voice" };
+export type {
+  CallEvent,
+  CallState,
+  Effect,
+  ModelProgress,
+} from "./call-state.ts";
+export { idleCall, showsVoice } from "./call-state.ts";
 
 type Step = { state: CallState; effects: Effect[] };
 
@@ -89,27 +44,8 @@ const ENDS_CALL: Problem[] = [
   "microphone-busy",
   "microphone-failed",
   "download",
+  "stalled",
 ];
-
-const NO_ANSWER = {
-  speech: "",
-  complete: false,
-  talking: false,
-  stopped: false,
-};
-
-export function idleCall(language: Language = "en"): CallState {
-  return {
-    phase: "off",
-    progress: null,
-    testing: false,
-    modelReady: false,
-    language,
-    writing: false,
-    ...NO_ANSWER,
-    problem: null,
-  };
-}
 
 // What one event changes, and what the browser parts must do next.
 export function step(state: CallState, event: CallEvent): Step {
@@ -141,13 +77,19 @@ const RULES: {
     state: { ...state, language: event.language },
     effects: [],
   }),
-  progress: (state, event) =>
+  progress: (state, { progress }) =>
     state.phase === "preparing"
-      ? { state: { ...state, progress: event.fraction }, effects: [] }
+      ? {
+          state: {
+            ...state,
+            progress: { ...state.progress, [progress.model]: progress },
+          },
+          effects: [],
+        }
       : unchanged(state),
   prepared: (state) => {
     if (state.phase !== "preparing") return unchanged(state);
-    return listenWhenReady({ ...state, progress: null, modelReady: true });
+    return listenWhenReady({ ...state, progress: {}, modelReady: true });
   },
   tested: (state, event) => {
     if (state.phase !== "preparing") return unchanged(state);
@@ -158,18 +100,31 @@ const RULES: {
     });
   },
   end: (state) => {
-    if (!isOn(state)) return unchanged(state);
+    // A problem that ended the call is put away.
+    if (!isOn(state))
+      return state.problem
+        ? { state: idleCall(state.language), effects: [] }
+        : unchanged(state);
     return {
       state: idleCall(state.language),
       effects: [{ type: "stop-voice" }, { type: "stop-listening" }],
     };
   },
-  sentence: (state) =>
-    state.phase === "listening" || state.phase === "thinking"
-      ? { state: { ...state, writing: true }, effects: [] }
-      : unchanged(state),
+  // "Writing" only while the owner's own sentence is written before it is
+  // sent. A sound after that, while the coach works, is written quietly.
+  sentence: (state) => {
+    if (state.phase === "listening")
+      return { state: { ...state, writing: true }, effects: [] };
+    if (state.phase === "thinking")
+      return { state: { ...state, quietly: true }, effects: [] };
+    return unchanged(state);
+  },
   heard: (state, event) =>
-    heard({ ...state, writing: false }, event.text.trim(), event.language),
+    heard(
+      { ...state, writing: false, quietly: false },
+      event.text.trim(),
+      event.language,
+    ),
   speech: (state, event) => speech(state, event.text, event.final),
   drained: (state) => drained(state),
   failed: (state) =>
@@ -209,7 +164,8 @@ function problem(state: CallState, problem: Problem): Step {
 
 // A sentence was turned into text (empty when it was only noise).
 function heard(state: CallState, text: string, language: Language): Step {
-  if (!text) return { state, effects: [] };
+  // Only noise, or a filler the model made up from a breath.
+  if (!text || isFiller(text)) return { state, effects: [] };
   switch (state.phase) {
     case "listening":
       return send(state, text, language);

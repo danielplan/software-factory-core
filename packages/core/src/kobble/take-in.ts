@@ -4,7 +4,7 @@
 
 import { alreadyFor } from "./already.ts";
 import { type LiveEvent, signalFromEvent } from "./live.ts";
-import type { KobbleSignal } from "./schemas.ts";
+import type { KobbleSignal, SignalStep } from "./schemas.ts";
 import type { KobbleStore } from "./store.ts";
 
 // Writes the new signals and answers with them.
@@ -28,7 +28,7 @@ export function takeInEvents(
 }
 
 // What a persona test found, as new signals from that persona (source
-// test), each through the same "already" check.
+// test), each at its step, through the same "already" check.
 export function takeInFindings(
   store: KobbleStore,
   found: { persona: string; at: string; findings: Finding[] },
@@ -46,6 +46,7 @@ export function takeInFindings(
       at: found.at,
       text: finding.text,
       status: "new",
+      ...(finding.step ? { step: finding.step } : {}),
       to: null,
       already: alreadyFor(finding.text, explorations, signals),
     });
@@ -54,4 +55,10 @@ export function takeInFindings(
   });
 }
 
-export type Finding = { type: "bug" | "feedback"; text: string };
+// A mission's finding: a bug, an idea or an open question, and the step
+// where it happened, when the analyst could tell.
+export type Finding = {
+  type: "bug" | "idea" | "question";
+  text: string;
+  step?: SignalStep | null;
+};

@@ -136,6 +136,22 @@ test("the coach plans on the map, builds the factory once the owner says so, and
       move: { id: "area:The project", x: 0, y: 0 },
     });
     await post("/api/setup/draft", { remove: "card-2" });
+    // The owner adds a persona of their own: a card, agreed already.
+    await post("/api/setup/draft", {
+      add: {
+        area: "Who it's for",
+        title: "First boat owner",
+        text: "Books refills",
+      },
+    });
+    const added = session.state();
+    assert.ok(added.mode === "setup");
+    assert.ok(
+      added.coach.draft.cards.some(
+        (c) =>
+          c.title === "First boat owner" && c.confirmed && c.icon === "person",
+      ),
+    );
     assert.equal(
       (await post("/api/setup/draft", { remove: "nothing" })).status,
       409,
@@ -317,7 +333,7 @@ async function answered(session: Session) {
   }
 }
 
-test("a factory on its own board opens without a step to connect a board", async () => {
+test("a factory with no board chosen opens on the step to connect one", async () => {
   const pretend = pretendClaude([
     { calls: [], reply: "Shall I build it?" },
     {
@@ -333,7 +349,7 @@ test("a factory on its own board opens without a step to connect a board", async
     const made = session.state();
     assert.ok(made.mode === "factory");
     assert.equal(made.company.tracker, "none");
-    assert.equal(made.onboarding, false);
+    assert.equal(made.onboarding, true);
   } finally {
     session.close();
     server.close();
@@ -372,7 +388,6 @@ test("the coach connects the board the owner agreed to while it builds; opening 
           label: "factory",
           stages: {
             backlog: "",
-            planning: "",
             todo: "",
             doing: "",
             review: "",
@@ -466,6 +481,51 @@ test("the setup conversation is kept in the project and goes on after the factor
     // A record that does not fit starts afresh.
     writeFileSync(join(project, "factory", "setup.json"), "{ nope");
     assert.equal(readSetup(project), null);
+  } finally {
+    session.close();
+    server.close();
+  }
+});
+
+test("Kobble cannot be opened while the kobold is still setting it up", async () => {
+  const pretend = pretendClaude([
+    { calls: [], reply: "Shall I set it up?" },
+    {
+      calls: [["configure", { project: { name: "Acme" } }]],
+      reply: "It is set up.",
+    },
+  ]);
+  // The setting up turn waits until the test lets it finish.
+  let finish: () => void = () => undefined;
+  const held = new Promise<void>((done) => {
+    finish = done;
+  });
+  const claude = {
+    run: async (options: Parameters<typeof pretend.claude.run>[0]) => {
+      const result = await pretend.claude.run(options);
+      if (options.prompt.includes("Build the factory now")) await held;
+      return result;
+    },
+  };
+  const { session, server, post } = await stage(claude);
+  try {
+    await post("/api/setup/say", { text: "A garden shop." });
+    const building = post("/api/setup/build", {});
+    const made = () => {
+      const now = session.state();
+      return now.mode === "setup" && now.coach.made;
+    };
+    for (let i = 0; i < 200 && !made(); i++)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    const midway = session.state();
+    assert.ok(midway.mode === "setup");
+    // The folder is there, but the kobold is still at work.
+    assert.equal(midway.coach.made, true);
+    assert.equal(midway.coach.working, true);
+    assert.equal((await post("/api/setup/open", {})).status, 409);
+    finish();
+    await building;
+    assert.equal((await post("/api/setup/open", {})).status, 200);
   } finally {
     session.close();
     server.close();

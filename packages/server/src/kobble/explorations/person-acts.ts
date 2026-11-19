@@ -1,7 +1,8 @@
 // What a person does on an exploration's board: move a thing, mark it agreed
 // or a sketch, choose an option, change a picture's title, remove what they
 // put there, and add a picture (pasted or dragged in). The kobold hears of
-// it with their next words. The things they attach to what they say.
+// it with their next words, except a picked option, which is said in the
+// conversation at once. The things they attach to what they say.
 
 import { randomUUID } from "node:crypto";
 
@@ -50,7 +51,25 @@ export function personActs(
       "Only what a person put on the board can be removed here.",
     );
   talks.act(id, act, "person");
-  if (act.act !== "move") talks.personDid(id, personWords(act, board));
+  if (act.act === "move") return;
+  const words = personWords(act, board);
+  const picked = pickedWords(act, board);
+  // Picking an option is said in the conversation, so the kobold goes on
+  // at once; while it is still answering, it hears it with the next words.
+  if (picked)
+    void talks.say(id, picked).catch(() => {
+      talks.personDid(id, words);
+    });
+  else talks.personDid(id, words);
+}
+
+// "I pick B: Send everyone at once." for an option picked on a choice.
+function pickedWords(act: Act, board: ReturnType<KobbleStore["board"]>) {
+  if (act.act !== "choose" || !act.option) return null;
+  const choice = board.things.find((one) => one.id === act.id);
+  if (choice?.kind !== "choice") return null;
+  const option = choice.options.find((one) => one.key === act.option);
+  return option ? `I pick ${option.key}: ${option.name}.` : null;
 }
 
 export function attachedIn(body: unknown): string[] {

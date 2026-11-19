@@ -7,9 +7,13 @@
 //   explorations/X-1/board.json         its canvas
 //   explorations/X-1/conversation.md    the talk with the kobold
 //   explorations/X-1/handoff.md         written when it is handed off
+//   explorations/X-1/world.json         the made-up world its prototypes share
 //   personas/<id>.json
 //   tests/T-0001.json    persona tests
-//   sync.json            when the live app was last read, and the cursor
+//
+// The signals stay on this computer, out of git (ignored.ts), and with them
+// signals/.sync.json, where this computer last read the live app
+// (read-position.ts).
 //
 // The files are JSON, not Markdown with front matter: the platform reads and
 // writes JSON on its own, while front matter would need a YAML library. Each
@@ -22,7 +26,6 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -30,8 +33,15 @@ import { dirname, join } from "node:path";
 
 import { z } from "zod";
 
-import { messageOf } from "../products/product.ts";
 import { fromEarlier } from "./board-shape.ts";
+import {
+  KobbleRefused,
+  readJson,
+  writeAtomically,
+  writeText,
+} from "./files.ts";
+import { ignoreSignals } from "./ignored.ts";
+import { readPosition, savePosition } from "./read-position.ts";
 import {
   type Board,
   boardSchema,
@@ -39,18 +49,18 @@ import {
   explorationSchema,
   type KobblePersona,
   kobblePersonaSchema,
+  type Heard,
   type KobbleSignal,
   kobbleSignalSchema,
   type PersonaTest,
   personaTestSchema,
   type SyncState,
-  syncStateSchema,
 } from "./schemas.ts";
+import { type World, worldSchema } from "./world.ts";
 
 export const KOBBLE_FOLDER = "kobble";
 
-// A record that does not fit, or a file that cannot be read, with why.
-export class KobbleRefused extends Error {}
+export { KobbleRefused };
 
 type Kinds = {
   signals: KobbleSignal;
@@ -58,6 +68,7 @@ type Kinds = {
   personas: KobblePersona;
   tests: PersonaTest;
 };
+export type { Kinds as KobbleKinds };
 export type KobbleKind = keyof Kinds;
 
 const SCHEMAS: { [K in KobbleKind]: z.ZodType<Kinds[K]> } = {
@@ -75,9 +86,9 @@ const NAMED: Record<KobbleKind, string> = {
   tests: "test",
 };
 
-const SYNC_FILE = "sync.json";
 const BOARD_FILE = "board.json";
 const TALK_FILE = "conversation.md";
+const WORLD_FILE = "world.json";
 const EMPTY_BOARD: Board = { things: [], links: [] };
 
 // The talk with the kobold about an exploration: Claude Code's conversation
@@ -86,13 +97,14 @@ export type Conversation = {
   session: string | null;
   messages: { from: "kobold" | "you"; text: string }[];
 };
-const NEVER: SyncState = { last: null, cursor: null };
 
 export class KobbleStore {
   readonly root: string;
+  private readonly factory: string;
 
   // root: the factory's folder in the product's repository.
   constructor(factory: string) {
+    this.factory = factory;
     this.root = join(factory, KOBBLE_FOLDER);
   }
 
@@ -126,6 +138,8 @@ export class KobbleStore {
         `This ${NAMED[kind]} does not fit: ${z.prettifyError(parsed.error)}`,
       );
     const id = (parsed.data as { id: string }).id;
+    // Signal files stay on this computer (ignored.ts).
+    if (kind === "signals") ignoreSignals(this.factory);
     writeAtomically(this.fileOf(kind, id), parsed.data);
     return parsed.data;
   }
@@ -150,19 +164,14 @@ export class KobbleStore {
     return `${kind === "signals" ? "S" : "T"}-${String(next).padStart(4, "0")}`;
   }
 
+  // Where this computer last read the live app (read-position.ts).
   sync(): SyncState {
-    const file = join(this.root, SYNC_FILE);
-    if (!existsSync(file)) return NEVER;
-    const parsed = syncStateSchema.safeParse(readJson(file, SYNC_FILE));
-    if (!parsed.success)
-      throw new KobbleRefused(
-        `${SYNC_FILE} does not fit: ${z.prettifyError(parsed.error)}`,
-      );
-    return parsed.data;
+    return readPosition(this.root);
   }
 
   saveSync(state: SyncState): void {
-    writeAtomically(join(this.root, SYNC_FILE), syncStateSchema.parse(state));
+    ignoreSignals(this.factory);
+    savePosition(this.root, state);
   }
 
   // An exploration's canvas; an empty one before anything is on it.
@@ -192,6 +201,27 @@ export class KobbleStore {
       parsed.data,
     );
     return parsed.data;
+  }
+
+  // The made-up world an exploration's prototypes share; none before it
+  // started.
+  world(id: string): World | null {
+    const file = join(this.root, "explorations", id, WORLD_FILE);
+    if (!existsSync(file)) return null;
+    const name = `explorations/${id}/${WORLD_FILE}`;
+    const parsed = worldSchema.safeParse(readJson(file, name));
+    if (!parsed.success)
+      throw new KobbleRefused(
+        `${name} does not fit: ${z.prettifyError(parsed.error)}`,
+      );
+    return parsed.data;
+  }
+
+  saveWorld(id: string, world: World): World {
+    this.explorationOrRefuse(id);
+    const saved = worldSchema.parse(world);
+    writeAtomically(join(this.root, "explorations", id, WORLD_FILE), saved);
+    return saved;
   }
 
   conversation(id: string): Conversation {
@@ -228,6 +258,19 @@ export class KobbleStore {
     writeText(join(this.root, "explorations", id, "handoff.md"), text);
   }
 
+  // An exploration written before it kept what it heard: its copy, from
+  // the signal files on this computer.
+  private withHeard(data: unknown): unknown {
+    if (typeof data !== "object" || data === null || "heard" in data)
+      return data;
+    const ids = (data as { signals?: unknown }).signals;
+    const heard = (Array.isArray(ids) ? ids : []).flatMap((id) => {
+      const signal = typeof id === "string" ? this.get("signals", id) : null;
+      return signal ? [heardOf(signal)] : [];
+    });
+    return { ...data, heard };
+  }
+
   private explorationOrRefuse(id: string): void {
     if (!this.get("explorations", id))
       throw new KobbleRefused(`There is no exploration “${id}”.`);
@@ -244,7 +287,12 @@ export class KobbleStore {
             .map((entry) => entry.name)
             .filter((id) => existsSync(this.fileOf(kind, id)))
         : entries
-            .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+            .filter(
+              (entry) =>
+                entry.isFile() &&
+                entry.name.endsWith(".json") &&
+                !entry.name.startsWith("."),
+            )
             .map((entry) => entry.name.slice(0, -".json".length));
     return ids.sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
   }
@@ -261,7 +309,10 @@ export class KobbleStore {
     file: string,
   ): Kinds[K] {
     const name = file.slice(this.root.length + 1);
-    const parsed = SCHEMAS[kind].safeParse(readJson(file, name));
+    const data = readJson(file, name);
+    const parsed = SCHEMAS[kind].safeParse(
+      kind === "explorations" ? this.withHeard(data) : data,
+    );
     if (!parsed.success)
       throw new KobbleRefused(
         `${name} does not fit: ${z.prettifyError(parsed.error)}`,
@@ -272,23 +323,10 @@ export class KobbleStore {
   }
 }
 
-function readJson(file: string, name: string): unknown {
-  try {
-    return JSON.parse(readFileSync(file, "utf8"));
-  } catch (error) {
-    throw new KobbleRefused(`${name} cannot be read: ${messageOf(error)}`);
-  }
-}
-
-function writeAtomically(file: string, data: unknown): void {
-  writeText(file, `${JSON.stringify(data, null, 2)}\n`);
-}
-
-function writeText(file: string, text: string): void {
-  mkdirSync(dirname(file), { recursive: true });
-  const temporary = `${file}.${String(process.pid)}.tmp`;
-  writeFileSync(temporary, text);
-  renameSync(temporary, file);
+// A signal as an exploration keeps it.
+export function heardOf(signal: KobbleSignal): Heard {
+  const { id, type, source, persona, at, text } = signal;
+  return { id, type, source, persona, at, text };
 }
 
 // conversation.md: the conversation's id in a comment, then each message

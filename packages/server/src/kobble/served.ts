@@ -4,12 +4,20 @@
 
 import type { Cli } from "../add-ons/github/github.ts";
 import type { Session } from "../session.ts";
+import { join } from "node:path";
+
+import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
+
+import { teamRoutes } from "../coach/setup-team.ts";
+import { factoryCardRoutes } from "./factory-card.ts";
+import { putStartOnDesktop } from "../desktop-start.ts";
+import { updatesOf } from "../updates/session-updates.ts";
 import { servedKobble } from "./routes.ts";
-import { appAddress, playwrightBrowser } from "./test-setup.ts";
+import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
 
-export function kobbleOf(
+function kobbleAlone(
   session: Session,
   tell: (event: string) => void,
   more: { cli: Cli; testsRunOn?: TestsRunOn },
@@ -22,8 +30,54 @@ export function kobbleOf(
     cli: more.cli,
     work: () => session.work.view(),
     testsRunOn: testsRunOn ?? {
-      app: () => appAddress(() => session.launcherOrRefuse()),
+      apps: () => appsOf(() => session.launcherOrRefuse()),
+      app: (product) => appAddress(() => session.launcherOrRefuse(), product),
       browser: playwrightBrowser,
     },
   });
+}
+
+// Kobble, with Updates beside it on Workshop: the owner's folder following
+// GitHub's main (updates/), told to the page like Kobble's changes.
+export function kobbleOf(
+  session: Session,
+  tell: (event: string) => void,
+  more: { cli: Cli; testsRunOn?: TestsRunOn },
+) {
+  const kobble = kobbleAlone(session, tell, more);
+  const updates = updatesOf(session, () => {
+    tell(`event: kobble-changed\ndata: {"what":"updates"}\n\n`);
+  });
+  return {
+    ...kobble,
+    routes: {
+      ...kobble.routes,
+      ...updates.routes,
+      ...teamRoutes(session.options.project),
+      ...factoryCardRoutes(
+        join(session.options.project, FACTORY_FOLDER),
+        more.cli,
+      ),
+      "POST /api/desktop-start": () => ({
+        file: putStartOnDesktop({
+          project: session.options.project,
+          name: companyName(session.options.project),
+        }),
+      }),
+    },
+    start: () => {
+      kobble.start();
+      updates.start();
+    },
+    close: () => {
+      kobble.close();
+      updates.close();
+    },
+  };
+}
+
+// The company's name, for the start file; the project's folder without one.
+function companyName(project: string): string {
+  const read = readCompany(join(project, FACTORY_FOLDER, "factory.json"));
+  return "company" in read ? read.company.name : "";
 }

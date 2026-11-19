@@ -1,6 +1,7 @@
 import type { GroupView } from "@/api";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
 
 // A secret the server says is set; its value is never sent to the page.
 const SECRET_SET = "(set)";
@@ -25,20 +26,13 @@ export function SettingInput({
   return (
     <Field id={id} label={label} help={help} {...(problem ? { problem } : {})}>
       {field.kind === "choice" ? (
-        <select
+        <Combobox
           id={id}
-          className="h-10 rounded-[10px] border border-input bg-card px-2 text-sm"
-          value={shown}
-          onChange={(event) => {
-            onType(event.target.value);
-          }}
-        >
-          {field.choices?.map((choice) => (
-            <option key={choice.value} value={choice.value}>
-              {choice.label}
-            </option>
-          ))}
-        </select>
+          // Nothing set yet: the setting's default, else its first choice.
+          value={shown || field.default || field.choices?.[0]?.value || ""}
+          options={field.choices ?? []}
+          onChange={onType}
+        />
       ) : (
         <Input
           id={id}

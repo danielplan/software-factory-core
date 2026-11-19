@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { SOURCE_WORDS, TYPE_WORDS } from "./view";
 
 // A white card: radius 20px, a hairline ring.
-export const CARD = "overflow-hidden rounded-[20px] bg-card shadow-card";
+export const CARD = "overflow-hidden rounded-xl bg-card shadow-card";
 // A row in a card, with a line above all but the first.
 export const ROW =
   "flex w-full items-center gap-3.5 border-t border-border-soft px-5 py-3.5 text-left first:border-t-0";
@@ -30,7 +30,7 @@ export function Head({
 }: Readonly<{ title: string; right?: ReactNode }>) {
   return (
     <header className="mb-1.5 flex flex-wrap items-end justify-between gap-4">
-      <h1 className="text-[32px] leading-[1.15] font-bold tracking-[-0.025em]">
+      <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
         {title}
       </h1>
       {right && (
@@ -68,6 +68,10 @@ const TYPES: Record<SignalRow["type"], string> = {
   bug: "bg-type-bug/10 text-type-bug",
   request: "bg-type-request/10 text-type-request",
   feedback: "bg-type-feedback/10 text-type-feedback",
+  // From a mission: an idea in the colour of a request, an open question
+  // in the colour of feedback.
+  idea: "bg-type-request/10 text-type-request",
+  question: "bg-type-feedback/10 text-type-feedback",
 };
 
 export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {

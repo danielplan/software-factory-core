@@ -22,17 +22,30 @@ export type SignalRow = KobbleSignal & {
   workColumn?: string | null;
 };
 
+// A persona on a mission now (or waiting for its turn), and the step it is
+// on.
+export type MissionNow = {
+  id: string;
+  persona: string;
+  name: string;
+  face: Face;
+  status: PersonaTest["status"];
+  doing: string | null;
+};
+
 export type SignalsView = {
   // The new signals, newest first.
   signals: SignalRow[];
   counts: { new: number };
   sync: SyncView;
+  // The missions running or waiting.
+  missions: MissionNow[];
 };
 
 // A persona always has a face here: its own, or the one from its id.
 type WithFace = KobblePersona & { face: Face };
 
-export type PersonaRow = WithFace & { signals: number };
+export type PersonaRow = WithFace & { signals: number; onMission: boolean };
 
 export type PersonaPage = {
   persona: WithFace;
@@ -62,16 +75,51 @@ export function signalsView(
     })),
     counts: { new: fresh.length },
     sync,
+    missions: missionsNow(store),
   };
+}
+
+const going = (test: PersonaTest) =>
+  test.status === "queued" || test.status === "running";
+
+export function missionsNow(store: KobbleStore): MissionNow[] {
+  const personas = new Map(store.all("personas").map((one) => [one.id, one]));
+  return store
+    .all("tests")
+    .filter(going)
+    .flatMap((test) => {
+      const persona = personas.get(test.persona);
+      if (!persona) return [];
+      return [
+        {
+          id: test.id,
+          persona: persona.id,
+          name: persona.name,
+          face: faceOf(persona),
+          status: test.status,
+          doing: test.doing ?? null,
+        },
+      ];
+    });
+}
+
+// The signals already handled, the last first: what became of each.
+export function handledView(store: KobbleStore): { signals: SignalRow[] } {
+  const handled = store
+    .all("signals")
+    .filter((signal) => signal.status !== "new");
+  return { signals: signalRows(newestFirst(handled), store.all("personas")) };
 }
 
 export function personasView(store: KobbleStore): { personas: PersonaRow[] } {
   const signals = store.all("signals");
+  const busy = new Set(missionsNow(store).map((one) => one.persona));
   return {
     personas: store.all("personas").map((persona) => ({
       ...persona,
       face: faceOf(persona),
       signals: signals.filter((signal) => signal.persona === persona.id).length,
+      onMission: busy.has(persona.id),
     })),
   };
 }

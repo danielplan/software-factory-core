@@ -5,7 +5,8 @@
 
 import { answer } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
-import type { Message } from "./decide.ts";
+import { branchOf } from "./branches.ts";
+import type { BoardCard, Message } from "./decide.ts";
 
 export type PullRequest = {
   number: number;
@@ -157,4 +158,28 @@ async function saidOn(
       message(c.user, c.path ? `(${c.path}) ${c.body}` : c.body, c.created_at),
     ),
   ].sort((a, b) => a.at.localeCompare(b.at));
+}
+
+// Opens the card's pull request, or updates the one there is; its address.
+export async function openOrUpdate(
+  pullRequests: PullRequests,
+  card: Pick<BoardCard, "number" | "title">,
+  text: string,
+  draft: boolean,
+): Promise<string> {
+  const branch = branchOf(card.number);
+  const body = `${text}\n\nCloses #${String(card.number)}.`;
+  const found = await pullRequests.find(branch);
+  if (found?.state === "OPEN") {
+    await pullRequests.update(found.number, body, draft);
+    return found.url;
+  }
+  const made = await pullRequests.open({
+    branch,
+    base: await pullRequests.baseBranch(),
+    title: card.title,
+    body,
+    draft,
+  });
+  return made.url;
 }

@@ -53,7 +53,7 @@ function pretendGitHub(): Cli & { asked: string[] } {
               projectV2Field: {
                 options: [
                   ...START,
-                  ...["Backlog", "Planning", "Review"].map((name, n) => ({
+                  ...["Backlog", "Review"].map((name, n) => ({
                     id: `n${String(n)}`,
                     name,
                     color: "GRAY",
@@ -82,7 +82,7 @@ test("the coach hears where the code is on GitHub and the boards there", async (
   assert.equal(
     facts,
     "On GitHub: the code is at acme/shop. The boards of acme:\n" +
-      "- “Roadmap” (board 1): 3 cards; columns Todo, In Progress, Done; the factory's stages: To do = Todo, In progress = In Progress, Done = Done; no column for Backlog, Planning, Review",
+      "- “Roadmap” (board 1): 3 cards; columns Todo, In Progress, Done; the factory's stages: To do = Todo, In progress = In Progress, Done = Done; no column for Backlog, Review",
   );
   assert.equal(
     await githubSetup(cli).facts(project("https://gitlab.com/acme/shop")),
@@ -103,14 +103,13 @@ test("a board that is there is connected as it is, saying which stages have no c
     label: "*",
     stages: {
       backlog: "",
-      planning: "",
       todo: "Todo",
       doing: "In Progress",
       review: "",
       done: "Done",
     },
   });
-  assert.match(said, /No column for Backlog, Planning, Review/);
+  assert.match(said, /No column for Backlog, Review/);
   assert.ok(!cli.asked.some((line) => line.includes("updateProjectV2Field")));
 });
 
@@ -124,7 +123,6 @@ test("a new board is made, linked to the code, and gets the stages' columns besi
   assert.equal(entry.label, "*");
   assert.deepEqual(entry.stages, {
     backlog: "Backlog",
-    planning: "Planning",
     todo: "Todo",
     doing: "In Progress",
     review: "Review",
@@ -143,18 +141,8 @@ test("a new board is made, linked to the code, and gets the stages' columns besi
   const names = [...(update ?? "").matchAll(/name: "([^"]+)"/g)].map(
     (match) => match[1],
   );
-  assert.deepEqual(names, [
-    "Backlog",
-    "Planning",
-    "Todo",
-    "In Progress",
-    "Review",
-    "Done",
-  ]);
-  assert.match(
-    update ?? "",
-    /name: "Planning", color: PURPLE, description: "Its plan is talked through\."/,
-  );
+  assert.deepEqual(names, ["Backlog", "Todo", "In Progress", "Review", "Done"]);
+  assert.doesNotMatch(update ?? "", /Planning/);
 });
 
 test("connecting refuses what cannot be done, in plain words", async () => {

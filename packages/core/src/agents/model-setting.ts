@@ -1,8 +1,11 @@
 // The model Claude Code uses, chosen in the factory's Settings tab instead of
 // in Claude Code's own settings files. Left empty, Claude Code picks its own.
+// Each person's own (settings/, not shared): which models one can use
+// depends on one's Claude account.
 
 import { readSettings } from "../parts/addresses.ts";
 import type { SettingGroup } from "../settings/setting-groups.ts";
+import { PERSONAL_FILE } from "../settings/team-file.ts";
 import type { Claude, RunOptions } from "./claude.ts";
 
 export const MODEL_KEY = "FACTORY_CLAUDE_MODEL";
@@ -11,7 +14,7 @@ export const modelSettings: SettingGroup = {
   id: "ai-model",
   name: "AI model",
   about: "Which model the factory's own Claude Code runs use.",
-  file: "settings/factory.env",
+  file: PERSONAL_FILE,
   usedBy: [],
   fields: [
     {

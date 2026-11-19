@@ -7,9 +7,9 @@ import { STAGES } from "../api.ts";
 import { answer, ownerOf, statusOf } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
-import type { Card, CardDetail, Cards } from "./cards.ts";
+import type { Card, CardDetail, Cards, CardType } from "./cards.ts";
 import { blockedBy, relationsOf } from "./github-relations.ts";
-import { planOf, withPlan } from "./cards.ts";
+import { labelArgs, planOf, typeEdit, withPlan } from "./cards.ts";
 
 // The board as board.json keeps it.
 export type GitHubBoard = {
@@ -38,7 +38,7 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     show: (number) => cards.show(number),
     move: (number, stage) => cards.move(number, stage),
     comment: (number, text) => cards.comment(number, text),
-    create: (title, body) => cards.create(title, body),
+    create: (title, body, stage) => cards.create(title, body, stage),
     writePlan: (number, plan) => cards.writePlan(number, plan),
     dependOn: (number, on) => cards.dependOn(number, on),
     replace: (number, by) => cards.replace(number, by),
@@ -104,7 +104,14 @@ class GitHubCards {
     ]);
   }
 
-  async create(title: string, body: string): Promise<Card> {
+  // A new card in the stage asked for (the backlog unless said): the issue,
+  // added to the board, put in its column by the item GitHub answers with,
+  // since a board read right after adding may not list the new item yet.
+  async create(
+    title: string,
+    body: string,
+    stage: Stage = "backlog",
+  ): Promise<Card> {
     const label = this.board.label === "*" ? [] : ["--label", this.board.label];
     const url = (
       await this.gh([
@@ -118,18 +125,33 @@ class GitHubCards {
         ...label,
       ])
     ).trim();
-    await this.gh([
-      "project",
-      "item-add",
-      String(this.board.board),
-      "--owner",
-      this.owner,
-      "--url",
-      url,
-    ]);
+    const added = JSON.parse(
+      (await this.gh([
+        "project",
+        "item-add",
+        String(this.board.board),
+        "--owner",
+        this.owner,
+        "--url",
+        url,
+        "--format",
+        "json",
+      ])) || "{}",
+    ) as { id?: string };
     const number = Number(/\/issues\/(\d+)/.exec(url)?.[1]);
-    await this.move(number, "backlog");
-    return (await this.find(number)).card;
+    const project = await this.project();
+    const item = added.id ?? (await this.find(number)).item.id;
+    await this.setColumn(project.id, item, stage);
+    return {
+      number,
+      title,
+      stage,
+      column: this.board.stages[stage],
+      url,
+      labels: label.slice(1),
+      closed: false,
+      waitsFor: [],
+    };
   }
 
   async writePlan(number: number, plan: string): Promise<void> {
@@ -142,6 +164,16 @@ class GitHubCards {
       "--body",
       withPlan(body, plan),
     ]);
+  }
+
+  // The card's type as a label (made when GitHub has none of that name);
+  // its other type labels come off.
+  async setType(number: number, type: CardType | null): Promise<void> {
+    const { card } = await this.find(number);
+    if (type) await this.gh(labelArgs(type, this.repo));
+    const edit = typeEdit(card.labels, type);
+    if (edit.length > 0)
+      await this.gh(["issue", "edit", String(number), ...this.repo, ...edit]);
   }
 
   // GitHub's "blocked by": the card waits for the other one.

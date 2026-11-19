@@ -19,13 +19,14 @@ export {
   type Kit,
   type KitFile,
 } from "./extensions/extension.ts";
+export { copyStarter, starterName } from "./extensions/starter.ts";
 export {
   assembleFactory,
   type Available,
   type Factory,
   type KnownProduct,
 } from "./extensions/registry.ts";
-export { type InCopy, loadFactory } from "./load.ts";
+export { type InCopy, loadFactory, prepareFactory } from "./load.ts";
 export {
   addressOf,
   envOf,
@@ -76,6 +77,8 @@ export {
   checkChanges,
   checkGroups,
   groupView,
+  moveFormerValues,
+  readGroup,
   saveGroup,
   SECRET_SET,
   settingGroupSchema,
@@ -88,6 +91,25 @@ export {
 export { claudeArgs, type Claude, type RunOptions } from "./agents/claude.ts";
 export { describeEvent, formatDuration } from "./agents/activity.ts";
 export { withChosenModel } from "./agents/model-setting.ts";
+export {
+  builderModel,
+  builderSettings,
+  parallelCards,
+} from "./agents/builder-settings.ts";
+export {
+  chooseUpdatesByItself,
+  updatesByItself,
+  updateSettings,
+  usageFolder,
+  usageFolderSettings,
+  usageSettings,
+} from "./agents/usage-settings.ts";
+export {
+  KEEP_TEAM_FILE,
+  keepTeamFile,
+  PERSONAL_FILE,
+  TEAM_FILE,
+} from "./settings/team-file.ts";
 export { WarmClaude, type Child, type Start } from "./agents/warm.ts";
 export {
   addsText,
@@ -107,6 +129,7 @@ export { alreadyFor, titleOf } from "./kobble/already.ts";
 export {
   type Face,
   faceFor,
+  faceFrom,
   type PersonaColor,
   type PersonaHat,
   faceOf,
@@ -123,18 +146,37 @@ export {
   type Board,
   type BoardLink,
   type Exploration,
+  type Heard,
   type KobblePersona,
   type KobbleSignal,
   type PersonaTest,
+  type SignalStep,
   type SyncState,
   type TestStep,
   type Thing,
 } from "./kobble/schemas.ts";
 export { checkKobbleIn } from "./kobble/check.ts";
 export {
+  type SituationName,
+  Situations,
+  worldFolder,
+} from "./kobble/situations.ts";
+export {
+  changeWorld,
+  startWorld,
+  type World,
+  type WorldChange,
+  worldChangeSchema,
+  WorldRefused,
+  worldText,
+} from "./kobble/world.ts";
+export { IGNORED_SIGNALS, ignoreSignals } from "./kobble/ignored.ts";
+export {
   type Conversation,
+  heardOf,
   KOBBLE_FOLDER,
   type KobbleKind,
+  type KobbleKinds,
   KobbleRefused,
   KobbleStore,
 } from "./kobble/store.ts";

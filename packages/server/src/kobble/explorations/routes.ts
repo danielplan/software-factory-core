@@ -29,7 +29,8 @@ import {
   prototypeOf,
 } from "./prototypes.ts";
 import { ExplorationTalks } from "./talks.ts";
-import { explorationPage, explorationsView } from "./views.ts";
+import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
+import { ExplorationWorlds } from "./worlds.ts";
 
 type Options = {
   project: string;
@@ -37,13 +38,33 @@ type Options = {
   claude: Claude;
   store: () => KobbleStore;
   cards: () => Cards;
+  // The board's ideas (its Backlog), as the builder last read them.
+  ideas?: () => BoardIdea[];
   onChange: () => void;
 };
 
 export function servedExplorations(options: Options) {
   const { store } = options;
-  const talks = new ExplorationTalks({ ...options });
-  const prototypes = new ExplorationPrototypes({ ...options });
+  const worlds = new ExplorationWorlds(options);
+  const talks = new ExplorationTalks({ ...options, worlds });
+  const prototypes = new ExplorationPrototypes({ ...options, worlds });
+  // A prototype made: the kobold who talks with the team reviews it.
+  prototypes.whenReady((id, key, made) => {
+    talks.review(id, key, made);
+  });
+  talks.makeWith({
+    making: (id) => prototypes.beingMade(id),
+    make: (id, choice, option) => {
+      prototypes.make(explorationOf(store(), id), choice, option);
+      options.onChange();
+    },
+    change: (id, prototype, change) => {
+      void prototypes
+        .change(explorationOf(store(), id), prototype, change)
+        .then(options.onChange, options.onChange);
+      options.onChange();
+    },
+  });
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>
@@ -53,13 +74,14 @@ export function servedExplorations(options: Options) {
       return answer ?? {};
     };
   const routes = {
-    ...readRoutes(store, talks, prototypes),
+    ...readRoutes(store, talks, prototypes, options.ideas),
     ...buttonRoutes(store, button, { talks, prototypes, cards: options.cards }),
   };
   return {
     routes,
     talks,
     prototypes,
+    worlds,
     // Test: a persona test on the prototype's branch, as the exploration's
     // first persona; it shows on the prototype's card.
     testRoute: (tests: PersonaTests): Route =>
@@ -101,6 +123,7 @@ function readRoutes(
   store: () => KobbleStore,
   talks: ExplorationTalks,
   prototypes: ExplorationPrototypes,
+  ideas: (() => BoardIdea[]) | undefined,
 ): Record<string, Route> {
   return {
     "GET /api/kobble/explorations/picture": (_body, url) => {
@@ -112,7 +135,12 @@ function readRoutes(
       return new FileAnswer(file, PICTURE_TYPES[extname(file)] ?? "image/png");
     },
     "GET /api/kobble/explorations": () =>
-      explorationsView(store(), (one) => talks.view(one)),
+      explorationsView(
+        store(),
+        (one) => talks.view(one),
+        (one) => prototypes.runs(one),
+        ideas?.() ?? [],
+      ),
     "GET /api/kobble/exploration": (_body, url) => {
       const exploration = explorationOf(
         store(),
@@ -151,7 +179,12 @@ function buttonRoutes(
       await prototypes.stopAll(dropped.id);
     }),
     "POST /api/kobble/explorations/say": button((body) => {
-      void talks.say(id(body), field(body, "text"), attachedIn(body));
+      void talks.say(
+        id(body),
+        field(body, "text"),
+        attachedIn(body),
+        spokenIn(body),
+      );
     }),
     "POST /api/kobble/explorations/make": button((body) => ({
       board: prototypes.make(
@@ -161,7 +194,7 @@ function buttonRoutes(
       ),
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({
-      run: await prototypes.open(id(body), key(body)),
+      run: await prototypes.open(id(body), key(body), persona(body)),
     })),
     "POST /api/kobble/explorations/board": button((body) => {
       personActs(store(), talks, id(body), body);
@@ -183,4 +216,16 @@ export function branchParts(
   return found?.[1] && found[2]
     ? { exploration: found[1], key: found[2].toUpperCase() }
     : null;
+}
+
+// The persona a prototype is opened for, when one is.
+function persona(body: unknown): string | undefined {
+  const value = (body as { persona?: unknown } | null)?.persona;
+  return typeof value === "string" && value ? value : undefined;
+}
+
+// The language the person spoke in, when they talked instead of typing.
+function spokenIn(body: unknown): string | undefined {
+  const value = (body as { spokenIn?: unknown } | null)?.spokenIn;
+  return typeof value === "string" && value.trim() ? value : undefined;
 }

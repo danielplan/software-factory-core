@@ -5,6 +5,7 @@
 // components so it is checked on its own.
 
 import type { IdeaView, Light, PartView, WorkView } from "../api.ts";
+import type { KoboldId } from "./kobolds.ts";
 import type { Page } from "./routes.ts";
 
 // Only real numbers, and only when there is something to count: the new
@@ -15,8 +16,14 @@ export function countsOf(
   work: WorkView | null,
   fresh = 0,
 ): Partial<Record<Page, number>> {
+  // Agreed work not done yet (To do, In progress, Review); ideas in the
+  // Backlog count as waiting explorations, not as the factory's work.
   const open = (work?.cards ?? []).filter(
-    (card) => card.stage !== "done",
+    (card) =>
+      !card.closed &&
+      (card.stage === "todo" ||
+        card.stage === "doing" ||
+        card.stage === "review"),
   ).length;
   return {
     ...(fresh > 0 ? { signals: fresh } : {}),
@@ -47,29 +54,31 @@ export function overallOf(parts: PartView[]): {
 export type KoboldStatus = { busy: boolean; title: string; detail: string };
 
 // What the kobold is working on, from what the factory knows: the card it
-// builds, an idea it thinks about, a card it plans;
+// builds, an exploration it thinks about or makes a prototype for, an idea
+// it thinks about;
 // resting otherwise, with the factory's light in words.
 export function koboldStatus(
   work: WorkView | null,
   ideas: IdeaView[],
   quiet: string,
+  explorations: { title: string; busy: string | null }[] = [],
 ): KoboldStatus {
   const building = work?.builder.working;
   if (building)
     return { busy: true, title: "Kobold is building", detail: building.title };
+  const exploring = explorations.find((one) => one.busy);
+  if (exploring?.busy)
+    return {
+      busy: true,
+      title: `Kobold is ${exploring.busy.charAt(0).toLowerCase()}${exploring.busy.slice(1)}`,
+      detail: exploring.title,
+    };
   const thinking = ideas.find((one) => one.working);
   if (thinking)
     return {
       busy: true,
       title: "Kobold is thinking",
       detail: thinking.title,
-    };
-  const planning = work?.coach.working;
-  if (planning !== undefined && planning !== null)
-    return {
-      busy: true,
-      title: "Kobold is planning",
-      detail: `Card #${String(planning)}`,
     };
   return {
     busy: false,
@@ -78,9 +87,26 @@ export function koboldStatus(
   };
 }
 
-// The short line under "Your kobold": what it is doing, or Idle.
+// The short line under the kobold's name: what it is doing, or Idle.
 export function koboldLine(kobold: KoboldStatus): string {
   if (!kobold.busy) return "Idle";
   const doing = kobold.title.replace(/^Kobold is /, "");
   return doing.charAt(0).toUpperCase() + doing.slice(1);
+}
+
+// What each kobold (lib/kobolds.ts) is doing now, in a few words; the idle
+// ones are left out.
+export function koboldsDoing(
+  work: WorkView | null,
+  explorations: { title: string; busy: string | null }[],
+  answering: boolean,
+): Partial<Record<KoboldId, string>> {
+  const doing: Partial<Record<KoboldId, string>> = {};
+  if (answering) doing.support = "Answering a question";
+  const exploring = explorations.find((one) => one.busy);
+  if (exploring?.busy) doing.explorer = `${exploring.busy}: ${exploring.title}`;
+  const building = work?.builder.working;
+  if (building)
+    doing.builder = `Building #${String(building.number)} · ${building.title}`;
+  return doing;
 }

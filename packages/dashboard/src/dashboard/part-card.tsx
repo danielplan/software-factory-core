@@ -42,7 +42,7 @@ export function PartCard({
     >
       <div className="flex items-center gap-2">
         <StatusLight light={part.light} />
-        <span className="truncate text-sm font-medium">{part.name}</span>
+        <span className="truncate text-[13px] font-medium">{part.name}</span>
         {part.link && (
           <a
             href={part.link}

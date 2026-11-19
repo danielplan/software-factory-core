@@ -7,6 +7,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
@@ -17,7 +18,11 @@ import {
   readCompany,
 } from "@software-factory/core";
 import { allKits } from "@software-factory/kits";
-import { checkDocs, templateFolder } from "@software-factory/knowledge-base";
+import {
+  checkDocs,
+  GIT,
+  templateFolder,
+} from "@software-factory/knowledge-base";
 
 import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { jiraAddOn } from "../src/add-ons/jira/index.ts";
@@ -321,4 +326,32 @@ test("0.6.0 moves the knowledge base into the project's docs and the products ne
     extensions,
   });
   assert.deepEqual(again.done, ["Refreshed the skills (22 folders)."]);
+});
+
+test("0.11.1 keeps signal files out of git, and says when some are tracked already", async () => {
+  const { project, root } = oldFactory();
+  const git = (...args: string[]) =>
+    execFileSync(GIT, args, { cwd: project, encoding: "utf8" });
+  git("init", "--quiet", "--initial-branch=main");
+  git("config", "user.email", "test@example.com");
+  git("config", "user.name", "Test");
+  write(join(root, "kobble", "signals", "S-0001.json"), "{}");
+  git("add", ".");
+  git("commit", "--quiet", "-m", "Start");
+  const result = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.match(
+    readFileSync(join(root, ".gitignore"), "utf8"),
+    /^kobble\/signals\/$/m,
+  );
+  assert.ok(
+    result.done.includes("Added kobble/signals/ to the factory's .gitignore."),
+  );
+  assert.deepEqual(result.left, [
+    "Signal files are tracked in git; remove them from git with `git rm -r --cached factory/kobble/signals` (the files stay on this computer).",
+  ]);
 });

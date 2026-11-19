@@ -106,7 +106,7 @@ test("a new factory folder: the company file, the knowledge base, the history an
   // What is never shared: secrets and working copies.
   assert.equal(
     readFileSync(join(root, ".gitignore"), "utf8"),
-    "copies/\nsettings/\n",
+    "copies/\nsettings/\nkobble/signals/\n!team.env\n",
   );
   // The knowledge base goes into the project's docs/, never over its own docs.
   assert.equal(
@@ -150,7 +150,17 @@ test("a new factory folder: the company file, the knowledge base, the history an
     /# Shop blueprint/,
   );
   const far = mkdtempSync(join(tmpdir(), "far-"));
-  addProduct(root, { ...product, id: "far", name: "Far", folder: far });
+  // A product with its own blueprint keeps it, word for word.
+  writeFileSync(join(far, "BLUEPRINT.md"), "# Far, as we wrote it\n");
+  addProduct(
+    root,
+    { ...product, id: "far", name: "Far", folder: far },
+    "# A draft from the code",
+  );
+  assert.equal(
+    readFileSync(join(far, "BLUEPRINT.md"), "utf8"),
+    "# Far, as we wrote it\n",
+  );
   const listed = readCompany(join(root, "factory.json"));
   assert.ok("company" in listed);
   assert.deepEqual(listed.company.products, ["apps/shop", far]);

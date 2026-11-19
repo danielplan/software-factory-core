@@ -173,7 +173,7 @@ function toolsFor(on: ToolsFor): McpServer {
       "configure",
       {
         description:
-          "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked (none: the factory's own board, or the id of an add-on that tracks work), its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
+          "Only once the owner said to build the factory. Sets the factory's own settings, checked as they are saved: the project (its name and what it is; the first call makes the factory's folder), its products, where its work is tracked (the id of an add-on that tracks work, such as github; there is no board of the factory's own), its add-ons, a settings group's values, and tools to install on this computer. Answers with what it did and what the factory's checks still find.",
         inputSchema: CONFIGURE_INPUT,
       },
       async (args) => toolAnswer(() => configure(args)),

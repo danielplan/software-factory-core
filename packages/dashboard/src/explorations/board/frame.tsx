@@ -11,17 +11,8 @@ import { createContext, type ReactNode, use } from "react";
 import { messageOf, post } from "@/api";
 import { cn } from "@/lib/utils";
 
-import type { Thing, ThingData } from "./nodes";
-
-const KIND: Record<Thing["kind"], string> = {
-  problem: "The problem",
-  heard: "What we heard",
-  note: "Note",
-  choice: "Choice",
-  prototype: "Prototype",
-  diagram: "Diagram",
-  picture: "Picture",
-};
+import { KINDS } from "../kinds";
+import type { ThingData } from "./nodes";
 
 // Where a button on the board says why it did not work (the page shows it).
 export const BoardProblem = createContext<(problem: string | null) => void>(
@@ -107,29 +98,35 @@ export function Frame({
   data,
   title,
   tone = "card",
+  glow = false,
   children,
 }: Readonly<{
   data: ThingData;
   title?: string;
   tone?: "card" | "note";
+  // Glows while the kobold works on it (a prototype being made).
+  glow?: boolean;
   children: ReactNode;
 }>) {
   const { thing, pointed, attached, placed } = data;
   return (
     <article
-      aria-label={title ? `${KIND[thing.kind]}: ${title}` : KIND[thing.kind]}
+      aria-label={
+        title ? `${KINDS[thing.kind].name}: ${title}` : KINDS[thing.kind].name
+      }
       className={cn(
-        "grid gap-2 rounded-[14px] border-[1.5px] p-3 text-left text-[13px] transition-[opacity,box-shadow] duration-300",
+        "grid gap-2 rounded-[14px] border-[1.5px] p-3 text-left text-[13px] shadow-[0_1px_2px_rgb(20_24_36/0.04)] transition-[opacity,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_-14px_rgb(20_24_36/0.35)]",
         outlineOf(thing.agreed, tone),
         pointed && "ring-4 ring-blue/40",
         attached && "ring-2 ring-blue ring-offset-2",
         !placed && "opacity-0",
+        glow && "border-blue/50 motion-safe:animate-making-glow",
       )}
     >
       <Handle type="target" position={Position.Left} className="opacity-0" />
       <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
         <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
-        <span className="flex-none">{KIND[thing.kind]}</span>
+        <KindBadge kind={thing.kind} />
         <span className="ml-auto flex items-center gap-1">
           <AgreeTick data={data} />
           <RemoveButton data={data} />
@@ -141,5 +138,20 @@ export function Frame({
       {children}
       <Handle type="source" position={Position.Right} className="opacity-0" />
     </article>
+  );
+}
+
+function KindBadge({ kind }: Readonly<{ kind: ThingData["thing"]["kind"] }>) {
+  const { name, Icon, tint } = KINDS[kind];
+  return (
+    <span
+      className={cn(
+        "inline-flex h-5 flex-none items-center gap-1 rounded-full px-1.5 text-[11px] font-medium",
+        tint,
+      )}
+    >
+      <Icon aria-hidden className="size-3" />
+      {name}
+    </span>
   );
 }

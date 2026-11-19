@@ -1,0 +1,23 @@
+// The team's settings: the choices that are the same for everyone who works
+// on the project (how many cards the builder takes at once, whether the
+// usage log is kept), in `team.env` in the factory folder, which git keeps,
+// so a teammate's computer has them after a pull. What belongs to one
+// person or one computer (tokens, the AI model of their account, where the
+// usage log is kept on it) stays in `settings/`, which git never sees.
+// Some projects ignore every *.env file; the factory's own .gitignore says
+// `!team.env`, so git keeps this one anyway.
+
+import { addToGitignore } from "../kobble/ignored.ts";
+
+export const TEAM_FILE = "team.env";
+
+// Where every setting was saved before 0.12.0, team-wide ones included.
+export const PERSONAL_FILE = "settings/factory.env";
+
+export const KEEP_TEAM_FILE = `!${TEAM_FILE}`;
+
+// Adds `!team.env` to the factory's .gitignore when it is missing; true
+// when it had to.
+export function keepTeamFile(factory: string): boolean {
+  return addToGitignore(factory, KEEP_TEAM_FILE);
+}

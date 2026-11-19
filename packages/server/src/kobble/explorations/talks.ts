@@ -11,12 +11,16 @@ import { join } from "node:path";
 import type { Claude, KobbleStore } from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
+import { productPicture } from "./product-picture.ts";
+
 import { EMPTY } from "../../coach/map.ts";
 import { Talk } from "../../coach/talk.ts";
 import { Refused } from "../../refused.ts";
 import { type Act, applyAct } from "./board-acts.ts";
 import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
+import type { MadeReport } from "./prototypes.ts";
+import type { ExplorationWorlds } from "./worlds.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -37,8 +41,19 @@ export type TalkView = {
 type TalksOptions = {
   claude: Claude;
   project: string;
+  // The factory's folder: its products, for the kobold's picture of them.
+  root?: string;
   store: () => KobbleStore;
+  // The made-up worlds the explorations' prototypes share.
+  worlds: ExplorationWorlds;
   onChange: () => void;
+};
+
+type Makers = {
+  // What the exploration's prototypes being made do now.
+  making: (id: string) => string[];
+  make: (id: string, choice: string, option: string) => void;
+  change: (id: string, prototype: string, change: string) => void;
 };
 
 export class ExplorationTalks {
@@ -84,14 +99,76 @@ export class ExplorationTalks {
     };
   }
 
-  // What a person did on the board, for the kobold to hear next time.
+  // The kobold says a line by itself and points at a thing: a prototype
+  // made while it was answering.
+  private tell(id: string, text: string, thing: string): void {
+    const talk = this.talk(id);
+    talk.told(text);
+    this.save(id, talk);
+    const times = (this.pointed.get(id)?.times ?? 0) + 1;
+    this.pointed.set(id, { thing, times });
+    this.options.onChange();
+  }
+
+  // How the kobold starts making or changing a prototype (the
+  // exploration's prototypes, set once both exist).
+  private maker: Makers | null = null;
+
+  makeWith(maker: Makers): void {
+    this.maker = maker;
+  }
+
+  private makers(): Makers {
+    if (!this.maker) throw new Refused("Prototypes cannot be made here.");
+    return this.maker;
+  }
+
+  // A prototype the maker finished: the kobold looks at what it made (the
+  // maker's own words and the files it changed), reviews it against the
+  // plan, says so, and points at it. Busy answering, it hears of it with
+  // the next message instead.
+  review(id: string, key: string, made: MadeReport): void {
+    const talk = this.talk(id);
+    const report = [
+      `Prototype ${key} (${made.name}) is ready.`,
+      made.said ? `The maker who built it says:\n${made.said}` : "",
+      made.files ? `The files it changed:\n${made.files}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    if (talk.working) {
+      this.done.set(id, [
+        ...(this.done.get(id) ?? []),
+        `got prototype ${key} made (the maker says: ${made.said.slice(0, 600)})`,
+      ]);
+      this.tell(
+        id,
+        `Prototype ${key} is ready (${made.name}). Try it on the board.`,
+        made.thing,
+      );
+      return;
+    }
+    const times = (this.pointed.get(id)?.times ?? 0) + 1;
+    this.pointed.set(id, { thing: made.thing, times });
+    void this.answer(
+      id,
+      talk,
+      `(Not from the team: ${report}\n\nReview it for the team: is it what the plan and the problem asked for, what is missing or off, and one thing to try or change. Then ask them to try it on the board.)`,
+    );
+  }
+
   personDid(id: string, words: string): void {
     this.done.set(id, [...(this.done.get(id) ?? []), words]);
   }
 
   // A person's words, with the things they attached from the board; the
   // kobold answers with the board in front of it.
-  async say(id: string, text: string, attached: string[] = []): Promise<void> {
+  async say(
+    id: string,
+    text: string,
+    attached: string[] = [],
+    spokenIn?: string,
+  ): Promise<void> {
     const talk = this.talk(id);
     const said = talk.heard(text);
     const board = this.options.store().board(id);
@@ -103,7 +180,7 @@ export class ExplorationTalks {
       named.length > 0
         ? `\n\n(They attached, from the board: ${named.join(", ")}.)`
         : "";
-    await this.answer(id, talk, `${said}${more}`);
+    await this.answer(id, talk, `${said}${more}`, spokenIn);
   }
 
   // The kobold's first look, when the exploration starts.
@@ -121,6 +198,7 @@ export class ExplorationTalks {
     const talk = this.talk(id);
     return {
       token: talk.token,
+      world: { worlds: this.options.worlds, id },
       act: (act) => this.act(id, act, "kobold").said,
       look: () => this.look(id),
       point: (thing) => {
@@ -137,6 +215,14 @@ export class ExplorationTalks {
         this.pointed.set(id, { thing, times });
         this.options.onChange();
         return `Pointing at ${thing}.`;
+      },
+      make: (choice, option) => {
+        this.makers().make(id, choice, option);
+        return `Making the prototype of ${option} on ${choice}; it is on the board now.\n\n${this.look(id)}`;
+      },
+      change: (prototype, change) => {
+        this.makers().change(id, prototype, change);
+        return `Changing prototype ${prototype}; the board shows it being made.`;
       },
       rename: ({ title, problem }) => {
         const store = this.options.store();
@@ -172,33 +258,44 @@ export class ExplorationTalks {
     return boardText(exploration, store.board(id));
   }
 
-  private async answer(id: string, talk: Talk, said: string): Promise<void> {
+  private async answer(
+    id: string,
+    talk: Talk,
+    said: string,
+    spokenIn?: string,
+  ): Promise<void> {
     const store = this.options.store();
     const exploration = store.get("explorations", id);
     if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
-    const heard = store
-      .all("signals")
-      .filter((signal) => exploration.signals.includes(signal.id))
-      .map((signal) => `- ${signal.text}`);
+    const heard = exploration.heard.map((one) => `- ${one.text}`);
     const did = this.done.get(id) ?? [];
+    const making = this.maker?.making(id) ?? [];
     this.done.delete(id);
     const prompt = [
       said,
       ...(did.length > 0
         ? ["", `(Since you last spoke, they ${did.join("; ")}.)`]
         : []),
+      ...(making.length > 0
+        ? [
+            "",
+            `(Prototypes being made now, by the maker: ${making.join("; ")}.)`,
+          ]
+        : []),
       "",
       "(The board now:",
       boardText(exploration, store.board(id)),
       ...(heard.length > 0 ? ["What we heard:", ...heard] : []),
       ")",
+      "",
+      "(Answer in at most 60 words: what changed, then one question.)",
     ].join("\n");
-    await talk.answer(prompt, undefined, {
+    await talk.answer(prompt, spokenIn, {
       ...RIGHTS,
-      instructions: readFileSync(
-        join(guidesFolder, "exploration-coach.md"),
-        "utf8",
-      ),
+      instructions: [
+        readFileSync(join(guidesFolder, "exploration-coach.md"), "utf8"),
+        productPicture(this.options.root ?? "", this.options.project),
+      ].join("\n\n"),
     });
   }
 

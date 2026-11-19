@@ -74,14 +74,13 @@ export function alreadyFor(
   signals: KobbleSignal[],
 ): Already | null {
   const words = contentWords(text);
-  const textOf = new Map(signals.map((signal) => [signal.id, signal.text]));
   let best: { score: number; exploration: Exploration } | null = null;
   for (const exploration of explorations) {
     if (!["waiting", "exploring"].includes(exploration.status)) continue;
     const told = [
       exploration.title,
       exploration.problem,
-      ...exploration.signals.map((id) => textOf.get(id) ?? ""),
+      ...exploration.heard.map((heard) => heard.text),
     ].join(" ");
     const { score, shared } = covered(words, contentWords(told));
     if (shared >= AT_LEAST && score >= ABOUT && score > (best?.score ?? 0))

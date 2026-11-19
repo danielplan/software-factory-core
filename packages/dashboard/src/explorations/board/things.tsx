@@ -1,13 +1,15 @@
 // The things on the board, drawn in their frame (frame.tsx): the problem
 // (a yellow note with its personas), what we heard (its signals with their
 // persona's face), a note, a choice (the question and its options: click
-// one to choose it, Make for one without a prototype), a diagram (drawn
+// one to pick it, and the kobold goes on, making its prototype when that
+// helps; a picked option with a prototype says so), a diagram (drawn
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { useDiagram } from "./diagram";
 import { Frame, useBoardDo } from "./frame";
@@ -17,9 +19,11 @@ export function ProblemNode({ data }: NodeProps<ThingNode>) {
   const { exploration, personas } = data.page;
   return (
     <Frame data={data} tone="note">
-      <p className="text-[13.5px] leading-[1.45]">
-        {exploration.problem || "The kobold writes the problem here."}
-      </p>
+      <div className="text-[13.5px] leading-[1.45]">
+        <Markdown
+          text={exploration.problem || "The kobold writes the problem here."}
+        />
+      </div>
       {personas.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {personas.map((one) => (
@@ -48,7 +52,9 @@ export function HeardNode({ data }: NodeProps<ThingNode>) {
           {signal.personaFace && (
             <PersonaFace face={signal.personaFace} size={18} />
           )}
-          <span className="flex-1">{signal.text}</span>
+          <span className="flex-1">
+            <Markdown text={signal.text} inline />
+          </span>
         </div>
       ))}
     </Frame>
@@ -60,7 +66,7 @@ export function NoteNode({ data }: NodeProps<ThingNode>) {
   if (thing.kind !== "note") return null;
   return (
     <Frame data={data} tone="note">
-      <p className="whitespace-pre-wrap">{thing.text}</p>
+      <Markdown text={thing.text} />
     </Frame>
   );
 }
@@ -69,12 +75,18 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "choice") return null;
-  const made = new Set(
+  // This choice's options that have a prototype: the arrows from it,
+  // labelled with the option, to a prototype.
+  const prototypes = new Set(
     page.board.things.flatMap((one) =>
-      one.kind === "prototype" ? [one.key] : [],
+      one.kind === "prototype" ? [one.id] : [],
     ),
   );
-  const open = ["waiting", "exploring"].includes(page.exploration.status);
+  const made = new Set(
+    page.board.links.flatMap((link) =>
+      link.from === thing.id && prototypes.has(link.to) ? [link.label] : [],
+    ),
+  );
   return (
     <Frame data={data} title={thing.title}>
       {thing.options.map((option) => (
@@ -105,16 +117,10 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
             </span>
             <span className="flex-1">{option.name}</span>
           </button>
-          {open && !made.has(option.key) && (
-            <button
-              type="button"
-              className="text-xs font-semibold text-blue"
-              onClick={() => {
-                act("make", { choice: thing.id, key: option.key });
-              }}
-            >
-              Make
-            </button>
+          {made.has(option.key) && (
+            <span className="text-[11px] font-medium text-muted-foreground">
+              Prototype
+            </span>
           )}
         </div>
       ))}

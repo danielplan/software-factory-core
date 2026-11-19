@@ -21,7 +21,7 @@ export function GitHubSteps({
   const { status, problem, act } = useGitHub();
   if (!status) return null;
   return (
-    <section className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft">
+    <section className="grid gap-5 rounded-xl bg-card p-6 shadow-soft">
       <ol className="grid gap-5">
         <Step n={1} title="The GitHub CLI on this computer" done={status.cli}>
           {!status.cli && (
@@ -111,8 +111,8 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
         </Button>
       )}
       {signing?.code && (
-        <div className="grid gap-1 rounded-2xl bg-surface-2 p-4">
-          <span className="text-sm text-muted-foreground">
+        <div className="grid gap-1 rounded-xl bg-surface-2 p-4">
+          <span className="text-[13px] text-muted-foreground">
             Type this code in the browser window that opened:
           </span>
           <span className="text-2xl font-semibold tracking-[0.12em] tabular-nums">

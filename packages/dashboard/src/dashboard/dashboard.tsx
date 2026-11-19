@@ -10,7 +10,7 @@ import { ExplorationsPage } from "@/explorations/explorations-page";
 import { FactoryPage } from "@/factory/factory-page";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { PersonasPage } from "@/personas/personas-page";
-import { SetupPage } from "@/setup-coach/setup-page";
+import { GuidedSetup } from "@/setup-guided/guided-setup";
 import { SignalsPage } from "@/signals/signals-page";
 
 import { SettingsTab } from "./settings-tab";
@@ -45,7 +45,7 @@ function usePlace(): Place {
 export function Dashboard({ state }: Readonly<{ state: State }>) {
   // Setting up fills the window, with nothing but the coach and the
   // canvas: the pages come once there is a factory.
-  if (state.mode === "setup") return <SetupPage state={state} />;
+  if (state.mode === "setup") return <GuidedSetup state={state} />;
   return <FactoryDashboard state={state} />;
 }
 
@@ -86,7 +86,7 @@ function PageBody({
     case "connect":
       return <ConnectPage trackers={trackersOf(state.addOns)} />;
     case "signals":
-      return <SignalsPage open={open} />;
+      return <SignalsPage open={open} app={state.company.name} />;
     case "personas":
       return <PersonasPage open={open} />;
     case "explore":

@@ -13,6 +13,9 @@ import { githubCards, type GitHubBoard } from "./github-cards.ts";
 
 export type Connected = { cards: Cards; repository: string };
 
+// Why there are no cards while no board is chosen.
+export const NO_BOARD = "No board is connected yet.";
+
 // The factory's folder's cards, or why there are none.
 export function cardsFor(
   root: string,
@@ -29,7 +32,7 @@ export function cardsFor(
   return {
     problem:
       tracker === "none"
-        ? "Work stays on the factory's own board: connect a GitHub board to plan cards here."
+        ? NO_BOARD
         : `Cards from ${tracker} come later; for now, cards come from a connected GitHub board.`,
   };
 }

@@ -20,7 +20,7 @@ export function PageHead({
     <header className="mb-1.5 grid gap-1.5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <h1 className="text-[32px] leading-[1.15] font-bold tracking-[-0.025em]">
+          <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
             {title}
           </h1>
           {children}
@@ -29,7 +29,7 @@ export function PageHead({
           <div className="flex flex-wrap items-center gap-2.5">{actions}</div>
         )}
       </div>
-      {about && <p className="text-sm text-muted-foreground">{about}</p>}
+      {about && <p className="text-[13px] text-muted-foreground">{about}</p>}
     </header>
   );
 }

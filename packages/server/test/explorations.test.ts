@@ -1,9 +1,17 @@
 import assert from "node:assert/strict";
-import { cpSync, existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
+import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
@@ -176,11 +184,7 @@ test("starting one, the kobold draws on the board with its tools and points at w
     );
     assert.deepEqual(started.talk.pointed, { thing: "choice-1", times: 1 });
     assert.match(factory.answers[0]?.[0] ?? "", /Added choice-1/);
-    // A person agrees, chooses and attaches; the kobold hears all of it.
-    await factory.press("/board", {
-      id: "X-3",
-      do: { act: "choose", id: "choice-1", option: "A" },
-    });
+    // A person moves a thing and attaches; the kobold hears it.
     await factory.press("/board", {
       id: "X-3",
       do: { act: "move", id: "note-1", x: 10, y: 20 },
@@ -194,7 +198,6 @@ test("starting one, the kobold draws on the board with its tools and points at w
     const choice = said.board.things.find((t) => t.id === "choice-1");
     assert.ok(choice?.kind === "choice");
     assert.equal(choice.options[1]?.name, "An SMS");
-    assert.equal(choice.chosen, "A");
     assert.deepEqual(said.board.links, []);
     assert.equal(
       said.board.things.find((t) => t.id === "note-1")?.agreed,
@@ -210,10 +213,6 @@ test("starting one, the kobold draws on the board with its tools and points at w
       second.prompt,
       /They attached, from the board: choice choice-1\./,
     );
-    assert.match(
-      second.prompt,
-      /Since you last spoke, they chose A on choice choice-1/,
-    );
     assert.equal(second.session?.resume, true);
     assert.match(
       factory.answers[1]?.[5] ?? "",
@@ -224,9 +223,22 @@ test("starting one, the kobold draws on the board with its tools and points at w
       "utf8",
     );
     assert.match(kept, /^<!-- conversation: [\w-]+ -->/);
+    // Picking an option is said in the conversation, and the kobold goes on.
+    await factory.press("/board", {
+      id: "X-3",
+      do: { act: "choose", id: "choice-1", option: "A" },
+    });
+    const picked = await factory.settled("X-3");
+    const chosen = picked.board.things.find((t) => t.id === "choice-1");
+    assert.ok(chosen?.kind === "choice");
+    assert.equal(chosen.chosen, "A");
+    assert.match(
+      factory.seen[2]?.prompt ?? "",
+      /^I pick A: A page that says so\./,
+    );
     // Started already: no second first look.
     await factory.press("/start", { id: "X-3" });
-    assert.equal(factory.seen.length, 2);
+    assert.equal(factory.seen.length, 3);
     const refused = await fetch(
       `${factory.base}/api/kobble/explorations/mcp/X-3`,
       { method: "POST", body: "{}" },
@@ -337,7 +349,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
     await agree("prototype-b", true);
     assert.match(
       String((await factory.press("/hand-off", { id: "X-1" })).body.error),
-      /connect a GitHub board/,
+      /No GitHub board is connected yet/,
     );
     assert.equal(
       (
@@ -376,7 +388,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
 test("Make builds the option on its branch; Open and Test need the project's start command", async () => {
   const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
   try {
-    inGit(factory.project);
+    const origin = inGit(factory.project);
     await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
     const made = factory.store
       .board("X-1")
@@ -397,6 +409,14 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }
     assert.equal(run?.state, "stopped");
+    // Pushed, so a teammate can open it.
+    assert.equal(run.problem, null);
+    assert.match(
+      execFileSync(GIT, ["-C", origin, "branch", "--list", "proto/X-1-c"], {
+        encoding: "utf8",
+      }),
+      /proto\/X-1-c/,
+    );
     const [making] = factory.seen;
     assert.ok(making);
     assert.equal(making.readOnly, false);
@@ -425,6 +445,29 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       (await factory.press("/test", { id: "X-3", key: "A", task: "x" })).body
         .error,
       "X-3 has no prototype A.",
+    );
+  } finally {
+    factory.close();
+  }
+});
+
+test("a prototype that cannot be pushed stays on this computer, and the board says so", async () => {
+  const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
+  try {
+    const origin = inGit(factory.project);
+    const hook = join(origin, "hooks", "pre-receive");
+    writeFileSync(hook, "#!/bin/sh\necho 'not today' >&2\nexit 1\n");
+    chmodSync(hook, 0o755);
+    await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
+    let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
+    while (run?.state === "making") {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
+    }
+    assert.equal(run?.state, "stopped");
+    assert.match(
+      run.problem ?? "",
+      /^Only on this computer: it could not be shared with the team \(.*not today/s,
     );
   } finally {
     factory.close();

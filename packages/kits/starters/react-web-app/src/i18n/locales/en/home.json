@@ -1,0 +1,12 @@
+{
+  "title": "New web app",
+  "subtitle": "This is the starting point of a new app: its screens will grow from here.",
+  "itemsLabel": "Items",
+  "count_one": "{{count}} item",
+  "count_other": "{{count}} items",
+  "updated": "Updated on {{day}}",
+  "empty": {
+    "title": "No items yet",
+    "text": "When there is data, it will show here."
+  }
+}

@@ -35,6 +35,7 @@ test("the example company: its products, their kits, the parts and settings they
   assert.deepEqual(orders?.commands, {
     verify: "npm run verify",
     start: "npm run start:dev",
+    checkWorld: "node check-world.mjs",
   });
   assert.equal(orders.folder, join(ACME, "..", "orders"));
   // A part per product (from its kit), each after what it needs, then the
@@ -49,7 +50,14 @@ test("the example company: its products, their kits, the parts and settings they
   );
   assert.deepEqual(
     factory.settings.map((g) => g.id),
-    ["ai-model", "github"],
+    [
+      "ai-model",
+      "builder",
+      "usage-log",
+      "usage-log-folder",
+      "updates",
+      "github",
+    ],
   );
   assert.deepEqual(
     factory.guides.map((g) => g.file),

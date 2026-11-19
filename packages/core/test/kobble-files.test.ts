@@ -14,6 +14,8 @@ import { test } from "node:test";
 
 import {
   checkKobbleIn,
+  heardOf,
+  ignoreSignals,
   faceFor,
   faceOf,
   type KobbleSignal,
@@ -23,6 +25,7 @@ import {
   PERSONA_COLORS,
   PERSONA_HATS,
   takeInEvents,
+  takeInFindings,
 } from "../src/index.ts";
 import { signalFromEvent } from "../src/kobble/live.ts";
 import { ACME } from "./stand-ins.ts";
@@ -34,11 +37,12 @@ function emptyFactory(): KobbleStore {
   return new KobbleStore(mkdtempSync(join(tmpdir(), "kobble-")));
 }
 
-// The example company's factory folder, copied, so writes stay in the copy.
+// The example company, copied, so writes stay in the copy: its factory
+// folder (its products, with their made-up world, beside it).
 function acmeFactory(): string {
-  const folder = join(mkdtempSync(join(tmpdir(), "kobble-acme-")), "factory");
-  cpSync(ACME, folder, { recursive: true });
-  return folder;
+  const project = join(mkdtempSync(join(tmpdir(), "kobble-acme-")), "acme");
+  cpSync(join(ACME, ".."), project, { recursive: true });
+  return join(project, "factory");
 }
 
 const signal = (
@@ -80,6 +84,7 @@ test("each record is one pretty JSON file, read back the same", () => {
     status: "waiting",
     personas: [],
     signals: ["S-0002"],
+    heard: [],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
     work: null,
@@ -172,6 +177,10 @@ test("records are removed, and the sync's place is kept", () => {
     last: "2026-11-17T08:00:00.000Z",
     cursor: "abc",
   });
+  // The place is this computer's: beside the signals, out of git, and never
+  // read as a signal.
+  assert.ok(existsSync(join(store.root, "signals", ".sync.json")));
+  assert.deepEqual(store.all("signals"), []);
   store.put("signals", signal("S-0001"));
   store.remove("signals", "S-0001");
   assert.deepEqual(store.all("signals"), []);
@@ -181,6 +190,7 @@ test("records are removed, and the sync's place is kept", () => {
     status: "dropped",
     personas: [],
     signals: [],
+    heard: [],
     problem: "",
     created: "2026-11-17T08:00:00.000Z",
     work: null,
@@ -279,7 +289,7 @@ test("the check reads Kobble's files and finds what is not there", () => {
   );
   assert.match(
     problems[1] ?? "",
-    /X-1\/exploration.json: there is no signal “S-0404”/,
+    /X-1\/exploration.json: there is no copy of the signal “S-0404” it heard/,
   );
   // A persona's file that does not fit: said once, and what names
   // personas is not checked against the rest.
@@ -380,4 +390,88 @@ test("a board in the first shape is read as things and arrows; arrows must join 
   assert.equal(store.pictureFile("X-2", "../x.png"), null);
   store.savePicture("X-2", "a.png", new Uint8Array([1]));
   assert.ok(store.pictureFile("X-2", "a.png"));
+});
+
+test("an exploration keeps its own copy of what it heard; signal files stay out of git", () => {
+  const factory = acmeFactory();
+  const store = new KobbleStore(factory);
+  store.put("signals", signal("S-0002", { text: "The basket was empty." }));
+  assert.match(
+    readFileSync(join(factory, ".gitignore"), "utf8"),
+    /^kobble\/signals\/$/m,
+  );
+  assert.equal(ignoreSignals(factory), false);
+  // An exploration from before it kept a copy: read with one, from the
+  // signal files on this computer.
+  const x1 = JSON.parse(
+    readFileSync(
+      join(store.root, "explorations", "X-1", "exploration.json"),
+      "utf8",
+    ),
+  ) as Record<string, unknown>;
+  delete x1.heard;
+  writeFileSync(
+    join(store.root, "explorations", "X-1", "exploration.json"),
+    JSON.stringify({ ...x1, signals: ["S-0002", "S-0404"] }),
+  );
+  const read = store.get("explorations", "X-1");
+  assert.deepEqual(
+    read?.heard.map((one) => [one.id, one.text]),
+    [["S-0002", "The basket was empty."]],
+  );
+  assert.deepEqual(heardOf(signal("S-0009")), {
+    id: "S-0009",
+    type: "bug",
+    source: "app",
+    persona: null,
+    at: "2026-11-17T08:00:00.000Z",
+    text: "Something broke.",
+  });
+  // The check asks for the copy, not the signal file.
+  assert.match(
+    checkKobbleIn(factory).problems.join("\n"),
+    /X-1\/exploration.json: there is no copy of the signal “S-0404” it heard/,
+  );
+});
+
+test("the old shared sync.json is read once, then replaced by this computer's own", () => {
+  const store = emptyFactory();
+  const old = join(store.root, "sync.json");
+  mkdirSync(store.root, { recursive: true });
+  writeFileSync(old, '{"last": "2026-11-17T08:00:00.000Z", "cursor": "c1"}');
+  assert.equal(store.sync().cursor, "c1");
+  store.saveSync({ last: "2026-11-18T08:00:00.000Z", cursor: "c2" });
+  assert.equal(existsSync(old), false);
+  assert.equal(store.sync().cursor, "c2");
+  writeFileSync(join(store.root, "signals", ".sync.json"), '{"last": 3}');
+  assert.match(
+    refusal(() => store.sync()),
+    /\.sync\.json does not fit/,
+  );
+});
+
+test("a mission's findings are signals of their kind, each at its step", () => {
+  const store = emptyFactory();
+  const added = takeInFindings(store, {
+    persona: "mia",
+    at: "2026-11-19T08:00:00.000Z",
+    findings: [
+      {
+        type: "question",
+        text: "Is the evening delivery free?",
+        step: { test: "T-0001", number: 2, did: "Looked at the delivery" },
+      },
+      { type: "idea", text: "Keep my basket for later.", step: null },
+    ],
+  });
+  assert.deepEqual(
+    added.map((one) => [one.id, one.type, one.source, one.step?.number]),
+    [
+      ["S-0001", "question", "test", 2],
+      ["S-0002", "idea", "test", undefined],
+    ],
+  );
+  const back = store.get("signals", "S-0001");
+  assert.equal(back?.step?.did, "Looked at the delivery");
+  assert.equal(store.get("signals", "S-0002")?.step, undefined);
 });

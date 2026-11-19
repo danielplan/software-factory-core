@@ -1,32 +1,30 @@
-// A prototype on the board: the live screen while it runs (the real app on
-// its branch, in a small frame you can use), otherwise a placeholder; how
-// it differs, what is happening to it (the kobold making it, starting),
-// its last persona test, and Open and Test (as the exploration's persona).
-// Agreeing is the badge on its bar.
+// A prototype on the board, its screen always the same size: the live app
+// while it runs (on its branch, at a desktop's size, shrunk; Bigger opens
+// it full size), being made, or a sketch with Start in its middle; how it
+// differs, what odd thing happened, and its last persona test. Agreeing is
+// the badge on its bar.
 
 import type { NodeProps } from "@xyflow/react";
-import { ExternalLink } from "lucide-react";
+import { Play } from "lucide-react";
 
 import type { TestResult, VersionRun } from "@/api";
-import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
+import { Making } from "./prototype-making";
+import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 
-const SMALL = "h-7 gap-1.5 px-2.5 text-xs";
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
 function stateWords(run: VersionRun | undefined): string | null {
   if (!run) return null;
-  if (run.state === "making") {
-    const doing = run.activity ? `: ${run.activity}` : "…";
-    return `The kobold is making it${doing}`;
-  }
   if (run.state === "starting") return "Starting…";
   if (run.state === "failed") return run.problem ?? "It stopped.";
-  return run.state === "running" ? run.problem : null;
+  // Running or stopped: what is odd about it (not shared with the team).
+  return run.problem;
 }
 
 function testWords(test: TestResult): { words: string; dot: string } {
@@ -40,24 +38,44 @@ function testWords(test: TestResult): { words: string; dot: string } {
   return { words: "Testing…", dot: "bg-blue" };
 }
 
-// The screen: the running app, or a sketch of one.
+// The screen: the running app, or a sketch of one with Start in its middle
+// (Starting… while it starts).
 function Screen({
   run,
   at,
-}: Readonly<{ run: VersionRun | undefined; at: number }>) {
+  title,
+  start,
+}: Readonly<{
+  run: VersionRun | undefined;
+  at: number;
+  title: string;
+  start: (() => void) | null;
+}>) {
   if (run?.state === "running" && run.url)
-    return (
-      <div className="nodrag nowheel h-[200px] overflow-hidden rounded-[9px] shadow-[0_0_0_1px_var(--line-soft)]">
-        <iframe
-          title="The prototype, running"
-          src={run.url}
-          className="h-[400px] w-[632px] origin-top-left scale-50 border-0"
-        />
-      </div>
-    );
+    return <LiveScreen url={run.url} title={title} />;
+  const starting = run?.state === "starting";
   return (
-    <div className="grid h-[110px] place-items-center rounded-[9px] bg-[#f3f4f7]">
-      <div className="flex h-20 w-[170px] flex-col gap-1.5 rounded-md bg-card p-2 shadow-[0_1px_4px_rgb(0_0_0/0.1)]">
+    <div
+      className="relative grid place-items-center rounded-[9px] bg-[#f3f4f7]"
+      style={SCREEN}
+    >
+      {(start ?? starting) && (
+        <Button
+          size="pill"
+          className="nodrag absolute z-10 gap-2 shadow-[0_8px_24px_-10px_rgb(20_24_36/0.45)]"
+          disabled={starting}
+          onClick={start ?? undefined}
+        >
+          {starting ? (
+            "Starting…"
+          ) : (
+            <>
+              <Play aria-hidden className="size-4 fill-current" /> Start
+            </>
+          )}
+        </Button>
+      )}
+      <div className="flex h-36 w-[300px] flex-col gap-2.5 rounded-lg bg-card p-3.5 opacity-60 shadow-[0_1px_4px_rgb(0_0_0/0.1)]">
         <div
           className="h-[6px] w-1/2 rounded-[3px]"
           style={{ background: TINTS[at % TINTS.length] }}
@@ -72,6 +90,7 @@ function Screen({
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
+  const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "prototype") return null;
   const run = page.runs.find((one) => one.version === thing.key);
   const test = page.tests[thing.key];
@@ -79,9 +98,30 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const words = stateWords(run);
   const result = test ? testWords(test) : null;
   return (
-    <Frame data={data} title={`${thing.key} · ${thing.name}`}>
-      <Screen run={run} at={thing.key.charCodeAt(0) - 65} />
-      <div className="text-xs text-muted-foreground">{thing.difference}</div>
+    <Frame
+      data={data}
+      title={`${thing.key} · ${thing.name}`}
+      glow={run?.state === "making"}
+    >
+      {run?.state === "making" ? (
+        <Making run={run} />
+      ) : (
+        <Screen
+          run={run}
+          at={thing.key.charCodeAt(0) - 65}
+          title={`${thing.key} · ${thing.name}`}
+          start={
+            open
+              ? () => {
+                  act("open", { key: thing.key });
+                }
+              : null
+          }
+        />
+      )}
+      <div className="text-xs text-muted-foreground">
+        <Markdown text={thing.difference} />
+      </div>
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
         <a
@@ -94,61 +134,6 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
           {result.words}
         </a>
       )}
-      {open && <Actions data={data} run={run} />}
     </Frame>
-  );
-}
-
-// Open (the running one opens in a new tab) and Test, as the exploration's
-// persona.
-function Actions({
-  data,
-  run,
-}: Readonly<{ data: ThingNode["data"]; run: VersionRun | undefined }>) {
-  const { thing, page } = data;
-  const act = useBoardDo(page.exploration.id);
-  if (thing.kind !== "prototype") return null;
-  const persona = page.personas[0];
-  const making = run?.state === "making";
-  return (
-    <div className="nodrag flex items-center gap-1.5">
-      {run?.state === "running" && run.url ? (
-        <Button asChild variant="ring" size="pill-sm" className={SMALL}>
-          <a href={run.url} target="_blank" rel="noreferrer">
-            Open <ExternalLink aria-hidden className="size-3" />
-          </a>
-        </Button>
-      ) : (
-        <Button
-          variant="ring"
-          size="pill-sm"
-          className={SMALL}
-          disabled={making}
-          onClick={() => {
-            act("open", { key: thing.key });
-          }}
-        >
-          Open
-        </Button>
-      )}
-      <Button
-        variant="ring"
-        size="pill-sm"
-        className={SMALL}
-        disabled={!persona || making}
-        title={
-          persona ? `Test it as ${persona.name}` : "Testing needs a persona"
-        }
-        onClick={() => {
-          act("test", {
-            key: thing.key,
-            task: `Try “${thing.name}”: ${thing.difference}`,
-          });
-        }}
-      >
-        {persona && <PersonaFace face={persona.face} size={14} />}
-        Test
-      </Button>
-    </div>
   );
 }

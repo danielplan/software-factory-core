@@ -1,0 +1,28 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Browser files (name.web.ts) are picked by the bundler, not imported.
+  "entry": [
+    "test/**/*.{ts,tsx}",
+    "scripts/*.ts",
+    "src/**/*.web.{ts,tsx}",
+    "prototype/**/*.web.ts",
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "test/**/*.{ts,tsx}",
+    "scripts/*.ts",
+    "prototype/**/*.ts",
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [
+    // Expo's own runtime for fonts and images; `expo install --check` and
+    // expo-doctor expect it next to expo.
+    "expo-asset",
+    // knip's Expo plugin asks for it with any app.json; the app ships no
+    // over-the-air updates.
+    "expo-updates",
+    // jest-expo's preset brings both.
+    "@expo/vector-icons",
+    "babel-jest",
+  ],
+}

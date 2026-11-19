@@ -23,6 +23,43 @@ export type Shell = (
 ) => Promise<{ ok: boolean; output: string }>;
 export type CheckOutcome = { passed: boolean; report: string };
 
+// Rounds of fixing while a check is red, before the owner is asked.
+export const FIX_ROUNDS = 3;
+
+// The checks, and up to FIX_ROUNDS rounds of fixing while any is red (the
+// builder fixes every red check, also one that was red before its change);
+// it stops early when the builder says only the owner can unblock it.
+export async function checkWithFixes(options: {
+  copy: string;
+  available: Available;
+  base: string;
+  shell?: Shell;
+  onActivity: (line: string) => void;
+  fix: (
+    report: string,
+    round: number,
+  ) => Promise<{ status: string; text: string }>;
+}): Promise<CheckOutcome & { blocked: string | null }> {
+  const { copy, available, base, onActivity } = options;
+  const check = async () =>
+    await runChecks(
+      copy,
+      checksFor(copy, available, await changedFiles(copy, base)),
+      options.shell,
+      (c) => {
+        onActivity(`Checking ${c.name}: ${c.command}`);
+      },
+    );
+  let checked = await check();
+  for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
+    const answer = await options.fix(checked.report, round);
+    if (answer.status === "blocked")
+      return { ...checked, blocked: answer.text };
+    checked = await check();
+  }
+  return { ...checked, blocked: null };
+}
+
 const HOUR = 60 * 60_000;
 const TAIL = 30;
 const FAILED_LINES = 40;

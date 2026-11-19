@@ -1,8 +1,7 @@
 // The NestJS backend kit: a server made with NestJS. It recognises one by
 // its packages, runs it with its own start script on the port it is given,
-// and makes a new one with the Nest command line's own starter.
-
-import { basename } from "node:path";
+// and makes a new one from its own starter (starters/nestjs-backend): the
+// kit's standards and checks, with its database as a setting.
 
 import { defineKit, type Product } from "@software-factory/core";
 
@@ -13,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 3000;
 
@@ -59,17 +59,8 @@ export const nestjsBackend = defineKit({
       },
     ];
   },
-  create: (folder) => [
-    [
-      "npx",
-      "@nestjs/cli@latest",
-      "new",
-      basename(folder),
-      "--package-manager",
-      "npm",
-      "--skip-git",
-    ],
-  ],
+  starter: starterFolder("nestjs-backend"),
+  create: installIn,
 });
 
 // The product's start command as a program to run: "npm run start:dev" or

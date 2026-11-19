@@ -34,3 +34,8 @@ export async function commitAndPush(
     `HEAD:refs/heads/${branch}`,
   );
 }
+
+// The working copy of a lane's place: "build", then "build-2", "build-3" ….
+export function copyName(lane: "chat" | "build", place: number): string {
+  return place === 1 ? lane : `${lane}-${String(place)}`;
+}

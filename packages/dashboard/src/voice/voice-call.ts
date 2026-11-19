@@ -11,6 +11,7 @@ import {
 } from "./call";
 import { type Ears, makeEars } from "./ears";
 import type { Language } from "./languages";
+import type { Shown } from "./live-words";
 import { playCue } from "./cue";
 import { Speaker } from "./speaker";
 
@@ -58,6 +59,27 @@ export class VoiceCall {
     if (level === this.level) return;
     this.level = level;
     for (const listener of this.levelListeners) listener();
+  }
+
+  // The owner's words while they speak (drafts, ears.ts), kept apart like
+  // the voice bar: shown while the call listens or the coach thinks, until
+  // the sentence is written down.
+  private words: Shown | null = null;
+  private wordsListeners = new Set<() => void>();
+
+  readonly subscribeWords = (listener: () => void): (() => void) => {
+    this.wordsListeners.add(listener);
+    return () => this.wordsListeners.delete(listener);
+  };
+
+  readonly currentWords = (): Shown | null => this.words;
+
+  private setWords(words: Shown | null): void {
+    const hearing = ["listening", "thinking"].includes(this.state.phase);
+    const next = hearing ? words : null;
+    if (next === this.words) return;
+    this.words = next;
+    for (const listener of this.wordsListeners) listener();
   }
 
   // The screen tells the call where to send turns.
@@ -115,6 +137,7 @@ export class VoiceCall {
         return;
       case "stop-listening":
         this.setLevel(0);
+        this.setWords(null);
         this.ears.stop();
         return;
       case "quick":
@@ -143,8 +166,8 @@ export class VoiceCall {
 
   private prepare(): void {
     void this.ears
-      .prepare((fraction) => {
-        this.dispatch({ type: "progress", fraction });
+      .prepare((progress) => {
+        this.dispatch({ type: "progress", progress });
       })
       .then((problem) => {
         this.dispatch(
@@ -156,10 +179,14 @@ export class VoiceCall {
   private listen(): void {
     void this.ears.start({
       voice: () => {},
+      draft: (words) => {
+        this.setWords(words);
+      },
       sentence: () => {
         this.dispatch({ type: "sentence" });
       },
       heard: (text, language) => {
+        this.setWords(null);
         this.dispatch({ type: "heard", text, language });
       },
       level: (level) => {

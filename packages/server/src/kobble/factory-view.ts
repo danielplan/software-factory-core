@@ -5,7 +5,7 @@
 
 import type { KobbleStore } from "@software-factory/core";
 
-import type { CardView, Stage, WorkView } from "../api.ts";
+import type { Asking, CardView, Stage, WorkView } from "../api.ts";
 
 export const FACTORY_COLUMNS = [
   { id: "todo", title: "To do" },
@@ -23,6 +23,7 @@ export type FactoryCard = {
   from: { exploration: string; key: string | null } | null;
   // A fix of a signal.
   fix: boolean;
+  type: CardView["type"];
 };
 
 export type FactoryView = {
@@ -30,21 +31,35 @@ export type FactoryView = {
   problem: string | null;
   read: string | null;
   columns: { id: Column; title: string; cards: FactoryCard[] }[];
-  builder: { on: boolean; working: string | null };
+  // The cards where the factory waits for the owner, oldest first.
+  waiting: Asking[];
+  // The cards it builds now, by number, and the same in words.
+  builder: { on: boolean; working: string | null; cards: number[] };
 };
 
-const OF_STAGE: Record<Stage, Column> = {
-  backlog: "todo",
-  planning: "todo",
+// The Factory page shows agreed work only: an idea in the board's Backlog
+// (or in no column) waits in Explorations instead (boardIdeas).
+const OF_STAGE: Record<Stage, Column | null> = {
+  backlog: null,
   todo: "todo",
   doing: "building",
   review: "review",
   done: "done",
 };
 
-function columnOfCard(card: CardView): Column {
+function columnOfCard(card: CardView): Column | null {
   if (card.closed) return "done";
-  return card.stage ? OF_STAGE[card.stage] : "todo";
+  return card.stage ? OF_STAGE[card.stage] : null;
+}
+
+// The board's ideas: open cards in its Backlog or in no column, not agreed
+// work yet. They wait in Explorations until someone explores one.
+export function boardIdeas(
+  work: WorkView | null,
+): { number: number; title: string; url: string }[] {
+  return (work?.cards ?? [])
+    .filter((card) => !card.closed && columnOfCard(card) === null)
+    .map(({ number, title, url }) => ({ number, title, url }));
 }
 
 // The column of an issue ("#41") on the board, in words; none when the
@@ -87,6 +102,7 @@ export function factoryView(
             }
           : null,
         fix: fixes.has(`#${String(card.number)}`),
+        type: card.type ?? null,
       },
     };
   });
@@ -94,17 +110,27 @@ export function factoryView(
     connected: work !== null,
     problem: work?.problem ?? null,
     read: work?.read ?? null,
+    waiting: [...(work?.asking ?? [])].sort((a, b) => a.number - b.number),
     columns: FACTORY_COLUMNS.map((column) => ({
       ...column,
       cards: cards
         .filter((one) => one.column === column.id)
         .map((one) => one.card),
     })),
-    builder: {
-      on: work?.builder.on ?? false,
-      working: work?.builder.working
-        ? `#${String(work.builder.working.number)} · ${work.builder.working.title}`
+    builder: builderOf(work),
+  };
+}
+
+// The builder's switch and what it builds now, every card it is on.
+function builderOf(work: WorkView | null): FactoryView["builder"] {
+  const builder = work?.builder;
+  const cards = builder?.working ? [builder.working, ...builder.also] : [];
+  return {
+    on: builder?.on ?? false,
+    cards: cards.map((one) => one.number),
+    working:
+      cards.length > 0
+        ? cards.map((one) => `#${String(one.number)} · ${one.title}`).join(", ")
         : null,
-    },
   };
 }

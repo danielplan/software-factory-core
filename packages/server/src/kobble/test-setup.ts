@@ -9,6 +9,7 @@ import { type AddressInfo, createServer } from "node:net";
 
 import type { Launcher } from "@software-factory/launcher";
 
+import type { App } from "./mission-ideas.ts";
 import { type Browser, TestProblem } from "./persona-tests.ts";
 import { NPX } from "./programs.ts";
 
@@ -16,14 +17,38 @@ import { NPX } from "./programs.ts";
 const PLAYWRIGHT_MCP = "@playwright/mcp@0.0.85";
 const READY_MS = 60_000;
 
-// The address of the product with a web address, started when it is not
-// running yet.
-export async function appAddress(launcher: () => Launcher): Promise<string> {
-  const parts = launcher().state();
-  const app = parts.find((part) => part.area === "products" && part.link);
+// The products the factory starts with a web address: the apps a persona
+// can be sent into. None while the launcher cannot be read.
+export function appsOf(launcher: () => Launcher): App[] {
+  try {
+    return webApps(launcher).map((part) => ({
+      id: part.id,
+      name: part.name,
+      does: part.does,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const webApps = (launcher: () => Launcher) =>
+  launcher()
+    .state()
+    .filter((part) => part.area === "products" && part.link);
+
+// The address of the product (or the first with a web address), started
+// when it is not running yet.
+export async function appAddress(
+  launcher: () => Launcher,
+  product: string | null = null,
+): Promise<string> {
+  const apps = webApps(launcher);
+  const app = product ? apps.find((part) => part.id === product) : apps[0];
   if (!app?.link)
     throw new TestProblem(
-      "Persona tests need a product the factory starts with a web address; there is none.",
+      product
+        ? `Missions need the app “${product}”, and the factory has no app by that name.`
+        : "Missions need an app the factory starts with a web address; there is none.",
     );
   if (app.light !== "running") {
     await launcher().start(app.id);
@@ -33,7 +58,7 @@ export async function appAddress(launcher: () => Launcher): Promise<string> {
     if (now?.light !== "running") {
       const why = now?.problem ? `: ${now.problem.title}` : ".";
       throw new TestProblem(
-        `Persona tests need ${app.name} running on this computer, and it did not start${why}`,
+        `Missions need ${app.name} running on this computer, and it did not start${why}`,
       );
     }
   }
@@ -71,7 +96,7 @@ export async function playwrightBrowser(): Promise<Browser> {
   } catch (error) {
     close();
     throw new TestProblem(
-      `Persona tests need a browser (Playwright's MCP server, via npx ${PLAYWRIGHT_MCP}) and it did not start: ${error instanceof Error ? error.message : String(error)}.`,
+      `Missions need a browser (Playwright's MCP server, via npx ${PLAYWRIGHT_MCP}) and it did not start: ${error instanceof Error ? error.message : String(error)}.`,
     );
   }
   return { url, close };

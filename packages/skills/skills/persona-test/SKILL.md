@@ -1,9 +1,29 @@
 ---
 name: persona-test
-description: How the kobold tests the app as one persona - it uses the app only through a browser, on this computer and never the live app, acts as that person would, and keeps a think-aloud diary of what it did, what it expected and whether that happened; then, as the analyst, it turns the diary into a few signals in the person's own words.
+description: How the kobold sends one persona on a mission in the app - it suggests the mission, uses the app only through a browser, on this computer and never the live app, acts as that person would, and keeps a think-aloud diary of what it did, what it expected and whether that happened; then, as the analyst, it turns the diary into a few signals (bug, idea, open question) in the person's own words, each at its step.
 ---
 
-A persona test has two parts. Each run is told which one it is.
+A persona test (a mission, on the page) has up to three parts. Each run is
+told which one it is.
+
+## Part 0: suggesting a mission
+
+You are given who the persona is, the apps there are and the missions they
+were sent on before. Suggest one mission: what this person would come to
+do, in one plain sentence in their words, in the app they would use (an
+someone on the team the back office, a customer the shop). Something they really do
+and that is worth trying now: a different one from those before. No
+technical words.
+
+End with the mission and nothing else, as JSON, `app` being the app's id
+from the list (or null when there is no list):
+
+```json
+{
+  "app": "shop",
+  "mission": "Fill the basket on the way home and pay in the evening."
+}
+```
 
 ## Part 1: using the app as the persona
 
@@ -17,9 +37,10 @@ built.
 - **Do the task as they would.** Start where they would start. Read what is
   on the screen the way they would read it. When you are unsure, do what
   they would try, not what a developer would.
-- **Think aloud.** Before each step, say what you expect to happen. After
-  it, say what happened and whether it was what you expected. Short and
-  plain, in the person's voice.
+- **Think aloud.** Before each step, write one line starting with `Step N:`
+  and what you do now, in a few words (the team follows it while you go),
+  and say what you expect to happen. After it, say what happened and whether it was
+  what you expected. Short and plain, in the person's voice.
 - **Stop** when the task is done, when you are stuck as the person would be,
   or after about 15 steps.
 
@@ -41,11 +62,13 @@ End with the diary and nothing else, as JSON:
 ## Part 2: the analyst
 
 You read the diary of a persona test. Turn what surprised the persona into
-signals, one thing each:
+signals, one thing each, at the step where it happened (its number in the
+diary, from 1):
 
 - `bug` when the app did something wrong (an error, something lost, a
-  button that does nothing); `feedback` when it worked but the person
-  stumbled, was unsure or wanted something else.
+  button that does nothing); `idea` when it worked but something would
+  have made it easier or better for them; `question` when they were left
+  unsure, with a question the team should answer.
 - The text is what the person would say, in their words, in one or two
   sentences. No technical words, no fixes, no "users".
 - Only what the diary shows. A step that went as expected gives no signal.
@@ -54,5 +77,9 @@ signals, one thing each:
 End with the signals and nothing else, as JSON:
 
 ```json
-{ "signals": [{ "type": "bug", "text": "My basket was empty again." }] }
+{
+  "signals": [
+    { "type": "bug", "text": "My basket was empty again.", "step": 3 }
+  ]
+}
 ```

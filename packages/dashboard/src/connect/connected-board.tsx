@@ -18,7 +18,7 @@ export function ConnectedBoard({
   const { name, href, entry } = board;
   return (
     <div className="grid gap-3">
-      <p className="text-sm">
+      <p className="text-[13px]">
         {brief ? "Your work is tracked on " : "Connected to "}
         <a
           href={href}

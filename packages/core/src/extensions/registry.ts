@@ -2,7 +2,13 @@
 // it uses, and what they add (parts, settings, the agents' guides), with
 // everything that does not fit said in plain words before anything starts.
 
+import { builderSettings } from "../agents/builder-settings.ts";
 import { modelSettings } from "../agents/model-setting.ts";
+import {
+  updateSettings,
+  usageFolderSettings,
+  usageSettings,
+} from "../agents/usage-settings.ts";
 import type { Company } from "../company/company.ts";
 import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
@@ -58,6 +64,10 @@ export function assembleFactory(
   ]);
   const settings = [
     modelSettings,
+    builderSettings,
+    usageSettings,
+    usageFolderSettings,
+    updateSettings,
     ...extensions.flatMap((extension) => extension.settings),
   ];
   problems.push(

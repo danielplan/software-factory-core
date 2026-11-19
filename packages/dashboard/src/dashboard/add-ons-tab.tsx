@@ -73,8 +73,8 @@ function Shelf({
   return (
     <section aria-label={title} className="grid gap-4">
       <div className="grid gap-0.5 px-1">
-        <h2 className="text-[17px] font-semibold">{title}</h2>
-        <p className="text-sm text-muted-foreground">{about}</p>
+        <h2 className="text-[15px] font-semibold">{title}</h2>
+        <p className="text-[13px] text-muted-foreground">{about}</p>
       </div>
       <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {children}
@@ -105,7 +105,7 @@ function Tile({
     <article
       aria-label={name}
       className={cn(
-        "grid gap-4 rounded-2xl p-5 transition-[background-color,opacity]",
+        "grid gap-4 rounded-xl p-5 transition-[background-color,opacity]",
         idle
           ? "bg-card/50 opacity-75 hover:opacity-100"
           : "bg-card shadow-soft",
@@ -118,7 +118,7 @@ function Tile({
           <span className="text-xs text-muted-foreground">{from}</span>
         </div>
       </div>
-      <p className="min-h-10 text-sm text-foreground/75">{about}</p>
+      <p className="min-h-10 text-[13px] text-foreground/75">{about}</p>
       {children}
     </article>
   );
@@ -209,7 +209,7 @@ function Settings({
 }: Readonly<{ groups: FactoryState["settings"]; state: FactoryState }>) {
   return (
     <Collapsible className="grid gap-4 border-t border-border-soft pt-3">
-      <CollapsibleTrigger className="group flex items-center gap-1.5 text-sm font-medium">
+      <CollapsibleTrigger className="group flex items-center gap-1.5 text-[13px] font-medium">
         Settings
         <ChevronDown
           className="size-4 transition group-data-[state=open]:rotate-180"

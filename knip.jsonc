@@ -31,6 +31,8 @@
       "project": ["src/**/*.{ts,tsx}", "test/**/*.ts"],
     },
   },
+  // The kits' starters are whole products with their own knip settings.
+  "ignore": ["packages/kits/starters/**"],
   "ignoreExportsUsedInFile": true,
   // shadcn's generated pieces are kept as generated, with all their parts.
   "ignoreIssues": {

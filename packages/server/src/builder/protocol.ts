@@ -16,6 +16,8 @@ export const NOTES = [
   "checks-failed",
   // The answer to "did it work?", given in Kobble.
   "did-it-work",
+  // Claude's usage limit: the card waits until it resets (untilOf).
+  "paused",
 ] as const;
 export type Note = (typeof NOTES)[number];
 
@@ -35,7 +37,9 @@ export const AGREEMENT_NOTES: readonly Note[] = CONVERSATION_NOTES.filter(
   (note) => note !== "failed",
 );
 
-const MARKER = /<!-- software-factory:([a-z-]+) -->\s*$/;
+// An earlier factory's notes, marked with its own name before "factory:"
+// ("<!-- acme-factory:started -->"), are read too, so its cards carry on.
+const MARKER = /<!-- [a-z-]{0,40}factory:([a-z-]+) -->\s*$/;
 
 export function markComment(text: string, note: Note): string {
   return `${text.trimEnd()}\n\n<!-- software-factory:${note} -->`;
@@ -48,13 +52,94 @@ export function readNote(body: string): Note | null {
     : null;
 }
 
+// A pause's end, written in its comment: <!-- software-factory:until <ISO> -->.
+const UNTIL = /<!-- software-factory:until (\S+) -->/;
+
+export function pausedComment(text: string, until: Date): string {
+  return markComment(
+    `${text.trimEnd()}\n\n<!-- software-factory:until ${until.toISOString()} -->`,
+    "paused",
+  );
+}
+
+export function untilOf(body: string): Date | null {
+  const found = UNTIL.exec(body)?.[1];
+  const date = found ? new Date(found) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+}
+
+// A question in a shape the Factory page can answer: what the card is
+// about, where the factory is, the question in plain words, two to four
+// answers each with what it means in practice, and the factory's
+// suggestion. Written by the agent as a hidden block in its comment.
+export type Ask = {
+  about: string;
+  where: string;
+  question: string;
+  answers: { key: string; answer: string; means: string }[];
+  suggested: string | null;
+};
+
+const ASK_START = "<!-- software-factory:ask";
+const ASK_END = "-->";
+
+// Where the ask block is in a comment, with its JSON; none without one.
+function askBlock(
+  body: string,
+): { from: number; to: number; json: string } | null {
+  const from = body.indexOf(ASK_START);
+  if (from === -1) return null;
+  const end = body.indexOf(ASK_END, from + ASK_START.length);
+  if (end === -1) return null;
+  return {
+    from,
+    to: end + ASK_END.length,
+    json: body.slice(from + ASK_START.length, end),
+  };
+}
+
+function withoutAsk(text: string): string {
+  const block = askBlock(text);
+  return block ? text.slice(0, block.from) + text.slice(block.to) : text;
+}
+
+export function readAsk(body: string): Ask | null {
+  const found = askBlock(body)?.json;
+  if (!found) return null;
+  try {
+    const read = JSON.parse(found) as Partial<Ask>;
+    const answers = (read.answers ?? []).filter(
+      (one) => typeof one.answer === "string" && one.answer.trim() !== "",
+    );
+    if (typeof read.question !== "string" || read.question.trim() === "")
+      return null;
+    return {
+      about: typeof read.about === "string" ? read.about : "",
+      where: typeof read.where === "string" ? read.where : "",
+      question: read.question,
+      answers: answers.slice(0, 4).map((one, at) => ({
+        key:
+          typeof one.key === "string" && one.key
+            ? one.key
+            : String.fromCharCode(65 + at),
+        answer: one.answer,
+        means: typeof one.means === "string" ? one.means : "",
+      })),
+      suggested: typeof read.suggested === "string" ? read.suggested : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function isFactory(body: string): boolean {
   return readNote(body) !== null;
 }
 
 export function stripMarker(body: string): string {
   const match = MARKER.exec(body);
-  return match ? body.slice(0, match.index).trimEnd() : body;
+  const text = match ? body.slice(0, match.index).trimEnd() : body;
+  return withoutAsk(text.replace(UNTIL, "")).trimEnd();
 }
 
 // The answer and its last line's status ("STATUS: done"); no status when

@@ -1,0 +1,8 @@
+{
+  "network_unreachable": "The service cannot be reached. Check the connection and try again.",
+  "action_unconfirmed": "No answer received: the change may not be saved. Try again.",
+  "service_unavailable": "Something went wrong. Try again soon.",
+  "invalid_response": "Incomplete data received. Try again.",
+  "too_many_requests": "Too many tries. Try again in a minute.",
+  "unexpected": "Something went wrong. Try again."
+}

@@ -25,7 +25,7 @@ export type ThingNode = Node<ThingData, Thing["kind"]>;
 export function widthOf(thing: Thing): number {
   switch (thing.kind) {
     case "prototype":
-      return 340;
+      return 520;
     case "diagram":
       return 380;
     case "picture":

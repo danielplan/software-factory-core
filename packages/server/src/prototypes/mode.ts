@@ -30,8 +30,10 @@ export type VersionRun = {
   state: RunState;
   // Where it runs, once the start command said so.
   url: string | null;
-  // What the kobold is doing while it makes it, in a few words.
+  // What the kobold is doing while it makes it, in a few words, and since
+  // when it makes it.
   activity: string | null;
+  since: string | null;
   // Why it stopped or could not start, or what is odd about it.
   problem: string | null;
 };
@@ -71,6 +73,7 @@ export class PrototypeMode {
         state: "stopped",
         url: null,
         activity: null,
+        since: null,
         problem: null,
       }
     );
@@ -78,7 +81,10 @@ export class PrototypeMode {
 
   // Changes what is known of a version, and says so.
   set(idea: string, version: string, change: Partial<VersionRun>): void {
-    const run = { ...this.runOf(idea, version), ...change };
+    const now = this.runOf(idea, version);
+    const run = { ...now, ...change };
+    if (run.state === "making" && now.state !== "making")
+      run.since = new Date().toISOString();
     this.runs.set(keyOf(idea, version), run);
     this.options.onChange();
   }

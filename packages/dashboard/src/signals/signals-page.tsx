@@ -9,16 +9,22 @@
 import { ChevronLeft, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
-import { messageOf, post, type SignalRow } from "@/api";
+import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
+import { AllQuiet } from "./empty";
+import { BeforeLaunch } from "./before-launch";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
+import { StepOf } from "./step";
 import { useSignals } from "./use-signals";
 import {
+  type Act,
   agoOf,
+  doneWords,
   exploreWords,
   nextAfter,
   primaryOf,
@@ -31,7 +37,10 @@ import {
 const signalHash = (id: string | null) =>
   id ? `#signals/${encodeURIComponent(id)}` : "#signals";
 
-export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
+export function SignalsPage({
+  open,
+  app,
+}: Readonly<{ open: string | null; app: string }>) {
   const { data, problem } = useSignals();
   const [said, say] = useState<string | null>(null);
   const now = new Date();
@@ -40,14 +49,14 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
       <Head
         title="Signals"
         right={
-          <>
-            {data && (
+          data?.sync.connected ? (
+            <>
               <span className="text-[12.5px] text-muted-foreground">
                 {syncLine(data.sync, now)}
               </span>
-            )}
-            <SyncNow onSaid={say} />
-          </>
+              <SyncNow onSaid={say} />
+            </>
+          ) : undefined
         }
       />
       {problem && (
@@ -60,7 +69,7 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
         />
       )}
       {data && (
-        <Board signals={data.signals} open={open} now={now} onSaid={say} />
+        <Shown data={data} app={app} open={open} now={now} onSaid={say} />
       )}
       {said && (
         <Toast
@@ -72,6 +81,39 @@ export function SignalsPage({ open }: Readonly<{ open: string | null }>) {
       )}
     </>
   );
+}
+
+// The new signals; before launch, the personas on a mission and, with no
+// signal yet, where the first come from; after it, with none, that all is
+// quiet.
+function Shown({
+  data,
+  app,
+  open,
+  now,
+  onSaid,
+}: Readonly<{
+  data: SignalsView;
+  app: string;
+  open: string | null;
+  now: Date;
+  onSaid: (said: string) => void;
+}>) {
+  const before = !data.sync.connected && (
+    <BeforeLaunch
+      app={app}
+      missions={data.missions}
+      empty={data.signals.length === 0}
+    />
+  );
+  if (data.signals.length > 0)
+    return (
+      <div className="grid gap-4">
+        <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+        {before}
+      </div>
+    );
+  return before || <AllQuiet app={app} sync={data.sync} now={now} />;
 }
 
 // The new signals, and the one picked beside them (on a phone, instead of
@@ -117,7 +159,7 @@ function Board({
           <p
             className={cn(
               CARD,
-              "p-[50px] text-center text-sm text-muted-foreground",
+              "p-[50px] text-center text-[13px] text-muted-foreground",
             )}
           >
             No new signals.
@@ -172,7 +214,7 @@ function SignalList({
   return (
     <nav aria-label="New signals" className={cn(CARD, "grid")}>
       {signals.length === 0 && (
-        <p className="p-[50px] text-center text-sm text-muted-foreground">
+        <p className="p-[50px] text-center text-[13px] text-muted-foreground">
           No new signals.
         </p>
       )}
@@ -199,28 +241,14 @@ function SignalList({
               </span>
             </span>
             <span className="mt-0.5 line-clamp-2 text-foreground-2">
-              {signal.text}
+              <Markdown text={signal.text} inline />
             </span>
+            <StepOf signal={signal} />
           </span>
         </a>
       ))}
     </nav>
   );
-}
-
-type Act = "fix" | "explore" | "dismiss";
-
-// What a button did, in words.
-function doneWords(act: Act, signal: SignalRow, answer: unknown): string {
-  if (act === "fix") {
-    const fixed = (answer as { signal: { to: string | null } }).signal.to;
-    return `${fixed ?? signal.id} is in the factory's To do`;
-  }
-  if (act === "dismiss") return "Dismissed";
-  const { exploration } = answer as { exploration: { id: string } };
-  return signal.already?.kind === "exploration"
-    ? `Added to ${exploration.id}`
-    : `${exploration.id} is waiting in Explorations`;
 }
 
 function SignalDetail({
@@ -234,15 +262,15 @@ function SignalDetail({
   onDone: (said: string) => void;
   onFailed: (said: string) => void;
 }>) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<Act | null>(null);
   const act = (what: Act) => {
-    setBusy(true);
+    setBusy(what);
     post(`/api/kobble/signals/${what}`, { id: signal.id }).then(
       (answer) => {
         onDone(doneWords(what, signal, answer));
       },
       (error: unknown) => {
-        setBusy(false);
+        setBusy(null);
         onFailed(messageOf(error));
       },
     );
@@ -252,7 +280,8 @@ function SignalDetail({
     <Button
       variant={dark ? "default" : "ring"}
       size="pill"
-      disabled={busy}
+      busy={busy === what}
+      disabled={busy !== null}
       className={cn(what === "dismiss" && "ml-auto")}
       onClick={() => {
         act(what);
@@ -276,9 +305,10 @@ function SignalDetail({
         </span>
         <TypeChip type={signal.type} />
       </header>
-      <p className="mt-5 mb-[22px] text-xl leading-normal tracking-[-0.01em]">
-        {signal.text}
-      </p>
+      <div className="mt-5 mb-[22px] text-base leading-normal tracking-[-0.01em]">
+        <Markdown text={signal.text} />
+        <StepOf signal={signal} link />
+      </div>
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">
         {button("fix", "Fix", primary === "fix")}

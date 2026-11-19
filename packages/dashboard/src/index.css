@@ -12,10 +12,10 @@
 :root {
   --font-body: "Inter Variable", Inter, system-ui, sans-serif;
   /* Kobble's name beside the kobold. */
-  --font-name: "Bricolage Grotesque Variable", "Inter Variable", sans-serif;
+  --font-name: "Inter Variable", Inter, system-ui, sans-serif;
   /* The ground the sidebar sits on, and the panel the page sits in. */
-  --ground: #f5f6f8;
-  --background: #f5f6f8;
+  --ground: #f7f7f8;
+  --background: #f7f7f8;
   --panel: #ffffff;
   --page: #fafbfd;
   /* Text, from the strongest to the faintest. */
@@ -60,13 +60,13 @@
   --accent-foreground: #171a26;
   --destructive: #d9534f;
   /* Lines: around the panel, buttons and fields; around cards; between. */
-  --border: #e7e9ef;
-  --line-soft: #e7e9ef;
+  --border: #e6e6ea;
+  --line-soft: #ececef;
   --border-soft: #f0f2f5;
   --input: #e7e9ef;
   --ring: #3156d8;
   --link: #171a26;
-  --hover: #e9ebf3;
+  --hover: #efeff2;
   --success: #12a594;
   --warning: #e9a23b;
   --stopped: #a3aabb;
@@ -74,6 +74,18 @@
   --dot: #dde1e8;
   --surface: #f6f7fb;
   --surface-2: #eef0f5;
+  /* The sidebar, which a company's theme can colour on its own (a dark
+     sidebar like its app's): its ground, text, quiet text, the open page
+     and the row under the pointer. */
+  --sidebar: #fbfbfc;
+  --sidebar-foreground: var(--foreground-2);
+  --sidebar-strong: var(--foreground);
+  --sidebar-muted: var(--muted-foreground);
+  --sidebar-hover: #f1f1f3;
+  --sidebar-active: #ececef;
+  --sidebar-active-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-accent: var(--blue);
   /* Each page's own colour, on its icon in the sidebar. */
   --understand: #e64f86;
   --explore: #e9a23b;
@@ -101,11 +113,11 @@
   /* A card's hairline ring, a card lifted under the mouse, the current
      page in the sidebar, the panel. */
   --shadow-soft: 0 0 0 1px var(--line-soft);
-  --shadow-lift: 0 0 0 1px #d6d9e4, 0 6px 16px -12px rgb(23 26 38 / 0.35);
-  --shadow-current: 0 1px 2px rgb(23 26 38 / 0.08);
+  --shadow-lift: 0 0 0 1px #d4d4da;
+  --shadow-current: 0 0 0 1px var(--border);
   --shadow-panel: 0 0 0 1px var(--border);
-  /* A card: white, radius 20px, a hairline ring and a breath of shadow. */
-  --shadow-card: 0 0 0 1px var(--line-soft), 0 1px 2px rgb(20 24 36 / 0.03);
+  /* A card: white, radius 12px, a hairline border, no shadow. */
+  --shadow-card: 0 0 0 1px var(--border);
   --shadow-big: 0 30px 60px -30px rgb(23 26 38 / 0.45);
   --radius: 0.625rem;
   /* The factory's own gradient, from the coach's orb: the start prompt's
@@ -140,6 +152,16 @@
   --color-usage: var(--usage);
   --color-usage-foreground: var(--usage-foreground);
   --font-display: var(--font-name);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-strong: var(--sidebar-strong);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --font-wordmark: var(--wordmark, var(--font-name));
   --color-tint: var(--tint);
   --color-tint-line: var(--tint-line);
   --color-tint-foreground: var(--tint-foreground);
@@ -213,7 +235,34 @@
       transform: translateY(8px) scale(0.96);
     }
   }
+  /* A page, a card or a row coming in: up a little and into view. Only
+     backwards: once in, it holds no transform, so a panel inside a page
+     (fixed to the window) is not held to the page. */
+  --animate-rise: rise 0.38s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  /* A card being built: a light running along its top edge. */
+  --animate-run-light: run-light 1.6s ease-in-out infinite;
+  @keyframes run-light {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
+  }
   /* The coach's conversation slides in at the side after the first answer. */
+  --animate-slide-in: slide-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  @keyframes slide-in {
+    from {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+  }
   --animate-dock: dock 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
   @keyframes dock {
     from {
@@ -243,6 +292,62 @@
   @keyframes orb-talk {
     50% {
       transform: scale(1.12);
+    }
+  }
+  /* A prototype being made (explorations/board/prototype-making.tsx): its
+     page draws itself piece by piece, a light sweeps over it, the kobold
+     hops at its work and the card glows. */
+  --animate-assemble: assemble 5.2s cubic-bezier(0.2, 0.9, 0.3, 1) infinite;
+  @keyframes assemble {
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.92);
+    }
+    12%,
+    82% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  --animate-sweep: sweep 2.6s ease-in-out infinite;
+  @keyframes sweep {
+    from {
+      transform: translateX(-120%);
+    }
+    to {
+      transform: translateX(320%);
+    }
+  }
+  --animate-hop: hop 0.9s ease-in-out infinite;
+  @keyframes hop {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-6deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(6deg);
+    }
+  }
+  --animate-spark: spark 0.9s ease-out infinite;
+  @keyframes spark {
+    from {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(var(--spark-x), var(--spark-y)) scale(0.3);
+    }
+  }
+  --animate-making-glow: making-glow 2.4s ease-in-out infinite;
+  @keyframes making-glow {
+    50% {
+      box-shadow:
+        0 0 0 4px rgb(49 86 216 / 0.14),
+        0 14px 34px -14px rgb(49 86 216 / 0.5);
     }
   }
   /* The coach's orb turns slowly while it thinks. */
@@ -307,7 +412,7 @@
   body {
     margin: 0;
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.5;
     color: var(--foreground);
     background: var(--ground);

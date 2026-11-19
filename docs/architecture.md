@@ -46,8 +46,9 @@ this computer, or Jira Cloud with an API token, each checked before it is
 saved (the GitHub and Jira add-ons, `packages/server/src/add-ons/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
 to build. The owner can talk instead of typing: voice is part of
-the core (`packages/dashboard/src/voice/`). A speech model runs in the
-browser (Whisper) and writes their words down; the coach's answer is read
+the core (`packages/dashboard/src/voice/`). Two speech models run in the
+browser (Whisper): a quick one shows their words while they speak, an
+accurate one writes the sentence as soon as they pause; the coach's answer is read
 out loud as it is written (Piper, also in the browser), and saying "stop"
 interrupts it. Nothing said leaves the computer except the written words
 sent to the coach. There are two kinds of start:
@@ -70,15 +71,25 @@ same repository as the code: the company file, the product descriptions,
 the knowledge base and the history change with the code they describe, in
 the same commits and pull requests, and every copy of the code has them.
 The project's own `AGENTS.md` (and `CLAUDE.md`) point to the factory's
-rules, so any agent working in the code finds them. What must not be shared
-stays out of git (`factory/.gitignore`): the settings with their secrets
-(`settings/`) and the agents' working copies (`copies/`). The command finds
-the factory from anywhere inside the project.
+rules, so any agent working in the code finds them. A team uses one
+factory from several computers, one person each, and shares it only through
+the repository; there is no server. The team's settings (the builder's cards
+at once and model, whether the usage log is kept) are in `factory/team.env`,
+which git keeps (the factory's `.gitignore` says `!team.env`, for projects
+that ignore `*.env`). What must not be shared stays out of git
+(`factory/.gitignore`): each person's own settings with their secrets
+(`settings/`: tokens, the AI model, where the usage log is kept, Updates by
+itself) and the agents' working copies (`copies/`). Settings saved in
+`settings/factory.env` before 0.12.0 that are the team's are still read from
+there, and move to `team.env` when the factory opens or the group is saved
+(a setting group's `formerly`). The command finds the factory from anywhere
+inside the project.
 
 **Where work is tracked** is chosen right after the factory opens, and
-changed on Settings: the factory's own board (nothing to connect), a GitHub
-board, or **Jira Cloud**. Work goes through one set of stages everywhere:
-a draft idea, then Backlog, Planning, To do, In progress, Review and Done (`STAGES`
+changed on Settings: a GitHub board, or **Jira Cloud**; there is no board
+of the factory's own. Work goes through one set of stages everywhere:
+Backlog, To do, In progress, Review and Done, with no Planning (work is
+thought through outside the factory, in explorations) (`STAGES`
 in `packages/server/src/api.ts`). Connecting a board picks the label of
 the work the factory takes in and matches its columns to these stages; the
 factory's `board.json` keeps all of it, and only Jira's API token is kept
@@ -105,8 +116,10 @@ acme/                    the project, one repository
    ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
+   ├─ team.env           the team's settings, in git
    ├─ runs/              its history
-   ├─ kobble/            signals, explorations and personas, one file each, in git
+   ├─ kobble/            explorations, personas, tests, one file each, in git;
+   │                     its signals/ stay on this computer (not in git)
    └─ settings/, copies/ secrets and working copies, not in git
 ```
 
@@ -128,8 +141,19 @@ Kobble (the dashboard's name) works through one pipeline: Signals, then
 Explorations, then the Factory board. It keeps its records as files in the
 product's repository: `factory/kobble/signals/S-0001.json`,
 `factory/kobble/explorations/X-1/exploration.json`,
-`factory/kobble/personas/<id>.json` and `factory/kobble/sync.json`. They go
-into git, so the team shares them like the code. Each is JSON, checked
+`factory/kobble/personas/<id>.json`. They go
+into git, so the team shares them like the code, except the signals: what
+people said stays on the computer that read the live app (the factory's
+`.gitignore` names `kobble/signals/`), since git would keep it for ever.
+Each computer reads the live app for itself, and keeps where it got to beside
+its signals, in `kobble/signals/.sync.json`, so a teammate's computer reads
+from the beginning and has the signals too (before 0.12.0 it was
+`kobble/sync.json`, in git; it is read when this computer has no place of
+its own yet, and removed at the next sync). An
+exploration keeps its own copy of what it heard (`heard` in
+`exploration.json`: each signal's id, type, source, persona, time and
+words), so it reads the same on a teammate's computer; a persona's page
+shows the signals on this computer. Each is JSON, checked
 against its schema (`packages/core/src/kobble/schemas.ts`) when it is read
 and written, and written whole (to a file beside it, then renamed).
 
@@ -153,20 +177,33 @@ the personas with their signals (`GET /api/kobble/personas`,
 file may give its kobold's face (`face`: a hat and a colour); otherwise it
 comes from the persona's id (`packages/core/src/kobble/face.ts`).
 
-**Persona tests** (`factory/kobble/tests/T-0001.json`) let the kobold use the
-app as one persona would, on this computer only and never the live app
+**Persona tests**, called missions on the page
+(`factory/kobble/tests/T-0001.json`), let the kobold use the app as one
+persona would, on this computer only and never the live app
 (`packages/server/src/kobble/persona-tests.ts`, with the `persona-test`
-skill). The product starts as the factory starts it (the launcher, with its
-kit's command and port); the persona agent sees it only through a browser,
-Playwright's MCP server (`npx @playwright/mcp`, headless, no saved profile),
-and keeps a diary of each step: what it did, what it expected, and whether
-that happened. Then the analyst turns the diary into signals (`bug` or
-`feedback`, source `test`, the persona set, in the person's words), which go
-through the same "already" check. One test runs at a time; the others wait.
-A test that cannot run says why in its `problem` (no product with a web
-address, the product does not start, no browser, Claude Code missing). The
-routes: `POST /api/kobble/tests` (`persona`, `task`), `GET
-/api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`.
+skill). Before launch they are where the first signals come from: the empty
+Signals page sends the team to Personas. For each persona the kobold first
+suggests one mission (`mission-ideas.ts`, Part 0 of the skill): a sentence
+and the app (product) they would try it in, from who they are, the products
+with a web address and their missions before; it is kept in memory until the
+persona is sent, then the next is asked for. The product starts as the
+factory starts it (the launcher, with its kit's command and port; two
+missions needing it at once start it once); the persona agent sees it only
+through a browser, Playwright's MCP server (`npx @playwright/mcp`, headless,
+no saved profile), writes a `Step N: …` line before each step (kept in the
+test's `doing` while it runs, so the page follows it) and keeps a diary of
+each step: what it did, what it expected, and whether that happened. Then
+the analyst turns the diary into signals (`bug`, `idea` or `question`,
+source `test`, the persona set, in the person's words), each with the
+`step` where it happened (the test, the step's number and what the persona
+did), through the same "already" check. Up to 3 run at once and the others
+wait; one at a time for each persona. A test that cannot run says why in its
+`problem` (no product with a web address, the product does not start, no
+browser, Claude Code missing). The routes: `GET /api/kobble/mission?persona=…`,
+`POST /api/kobble/tests` (`persona`, `task`, `product`), `GET
+/api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`; the personas on a
+mission now come with the signals (`missions` in `GET /api/kobble/signals`)
+and each persona says whether it is on one (`onMission`).
 
 **Explorations** (`#explore`) are where the team works out what to build
 for a problem, with the kobold
@@ -189,7 +226,10 @@ sketch and agreed, choose an option, add pictures and click things to
 attach them to what they type next; the kobold hears what they did with
 their next words. **Make** builds an option's prototype on its branch
 `proto/X-<n>-<key>`, in a copy of the code next to the project, like a
-version in prototype mode; **Open** runs it with the project's
+version in prototype mode, and pushes the branch to origin once it is
+committed, so a teammate's computer opens it from origin's branch (when it
+cannot be pushed, or there is no origin, the board says it is only on this
+computer); **Open** runs it with the project's
 `prototype.start` command, one at a time, and the board shows it live;
 **Test** starts a persona test on that branch, as the exploration's first
 persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the
@@ -204,7 +244,7 @@ Each change is told on the page's stream as a `kobble-changed` event.
 **The Factory board** (`#build`, `GET /api/kobble/factory`,
 `packages/server/src/kobble/factory-view.ts`) shows the connected GitHub
 board's cards, as the builder last read them, in four columns: To do (with
-the board's Backlog and Planning), Building, Review and Done. A card says
+the board's Backlog), Building, Review and Done. A card says
 where it came from: an exploration whose `work` is its number, with the
 agreed prototype, or a fixed signal. The builder and its switch work as
 before.

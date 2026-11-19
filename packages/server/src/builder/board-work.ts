@@ -7,19 +7,21 @@
 // Kobble waits for "did it work?" about is shown asking it, in Done, until
 // a person answers.
 
-import type { BuilderView, CardView, Stage, WorkView } from "../api.ts";
-import type { Card, Cards } from "../cards/cards.ts";
+import type { Asking, BuilderView, CardView, Stage, WorkView } from "../api.ts";
+import { type Card, type Cards, typeOf } from "../cards/cards.ts";
 import {
   asksIfItWorked,
   type BoardCard,
   decide,
   type Job,
   type Lane,
+  waitsForOwner,
 } from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
 import { markComment } from "./protocol.ts";
 import type { PullRequests } from "./pull-requests.ts";
 import { snapshotOf } from "./snapshot.ts";
+import { clockOf } from "./usage-limit.ts";
 
 export const EVERY_MS = 60_000;
 
@@ -32,12 +34,14 @@ export type BoardWorkOptions = {
   now?: () => Date;
   // The issues Kobble waits for "did it work?" about; none without records.
   waiting?: () => ReadonlySet<number>;
+  // Cards each lane works on at once (the Builder setting); 1 when not given.
+  places?: () => number;
 };
 
-type Running = { job: Job; title: string; steps: string[] };
+// A job on a card, at its lane's place (its working copy).
+type Running = { job: Job; title: string; steps: string[]; place: number };
 const STEPS = 40;
 const WHAT: Record<Job["kind"], string> = {
-  plan: "planning",
   build: "building",
   feedback: "answering the review of",
 };
@@ -52,6 +56,7 @@ export class BoardWork {
   // request may leave its card open).
   private asked = new Set<number>();
   private decided = new Set<number>();
+  private asking: Asking[] = [];
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -59,26 +64,25 @@ export class BoardWork {
   private reading: Promise<void> | null = null;
   private again = false;
   private readonly on: Record<Lane, boolean> = { chat: false, build: false };
-  private readonly running = new Map<Lane, Running>();
+  // The jobs under way, by card.
+  private readonly running = new Map<number, Running>();
+  // Claude's usage limit: no new job starts before then.
+  private pausedUntil: Date | null = null;
 
   constructor(options: BoardWorkOptions) {
     this.options = options;
   }
 
   view(): WorkView {
-    const building = this.running.get("build");
+    const [building, ...alsoBuilding] = this.inLane("build");
+    const planning = this.inLane("chat");
     const builder: BuilderView = {
       on: this.on.build,
-      working: building
-        ? {
-            number: building.job.number,
-            title: building.title,
-            what: WHAT[building.job.kind],
-          }
-        : null,
+      working: building ? workingOf(building) : null,
+      also: alsoBuilding.map(workingOf),
       activity: building?.steps.at(-1) ?? null,
       steps: building?.steps ?? [],
-      problem: this.laneProblem,
+      problem: this.laneProblem ?? this.pauseWords(),
     };
     const waiting = this.waiting();
     return {
@@ -90,13 +94,56 @@ export class BoardWork {
       })),
       problem: this.problem,
       read: this.read,
+      asking: this.asking,
       builder,
       coach: {
         on: this.on.chat,
-        working: this.running.get("chat")?.job.number ?? null,
-        steps: this.running.get("chat")?.steps ?? [],
+        working: planning[0]?.job.number ?? null,
+        also: planning.slice(1).map((one) => one.job.number),
+        steps: planning[0]?.steps ?? [],
       },
     };
+  }
+
+  private now(): Date {
+    return this.options.now?.() ?? new Date();
+  }
+
+  private paused(): boolean {
+    return (
+      this.pausedUntil !== null &&
+      this.pausedUntil.getTime() > this.now().getTime()
+    );
+  }
+
+  private pauseWords(): string | null {
+    if (!this.paused() || !this.pausedUntil) return null;
+    return `Paused until ${clockOf(this.pausedUntil)}: Claude's usage limit is reached.`;
+  }
+
+  // A lane's jobs, by place.
+  private inLane(lane: Lane): Running[] {
+    return [...this.running.values()]
+      .filter((one) => one.job.lane === lane)
+      .sort((a, b) => a.place - b.place);
+  }
+
+  // The lane's first free place, none when all its places are taken.
+  private freePlace(lane: Lane): number | null {
+    const places = Math.max(1, this.options.places?.() ?? 1);
+    const taken = new Set(this.inLane(lane).map((one) => one.place));
+    for (let place = 1; place <= places; place++)
+      if (!taken.has(place)) return place;
+    return null;
+  }
+
+  // The owner's answer to a card the factory waits on, from the Factory
+  // page: a comment on the card, as if written on GitHub.
+  async answer(number: number, text: string): Promise<void> {
+    await this.options.cards.comment(number, text);
+    this.asking = this.asking.filter((one) => one.number !== number);
+    this.options.onChange();
+    void this.refresh();
   }
 
   // The coach (chat) or the builder (build) on or off; off finishes the job
@@ -108,13 +155,20 @@ export class BoardWork {
     if (on) void this.refresh();
   }
 
-  // Reads the board now, then every minute.
+  // Reads the board now, then every minute (or as often as asked).
   start(): void {
     this.stop();
     void this.refresh();
+    this.every(this.options.everyMs ?? EVERY_MS);
+  }
+
+  // How often the board is read from now on: less often while GitHub's
+  // signals come as they happen.
+  every(ms: number): void {
+    if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
       void this.refresh();
-    }, this.options.everyMs ?? EVERY_MS);
+    }, ms);
     this.timer.unref();
   }
 
@@ -169,7 +223,7 @@ export class BoardWork {
         .map((card) => card.number),
     );
     this.cards = listed.map(
-      ({ number, title, stage, column, url, closed }) => ({
+      ({ number, title, stage, column, url, closed, labels }) => ({
         number,
         title,
         stage,
@@ -178,6 +232,7 @@ export class BoardWork {
         pullRequest: this.pullRequests.get(number) ?? null,
         closed,
         asks: false,
+        type: typeOf(labels),
       }),
     );
     this.problem = null;
@@ -189,19 +244,25 @@ export class BoardWork {
     const { cards, pullRequests } = this.options;
     const board = await snapshotOf(listed, cards, pullRequests, this.waiting());
     this.notePullRequests(board);
-    const busy = new Set([...this.running.values()].map((r) => r.job.number));
-    const decision = decide(board, busy);
+    this.asking = board.flatMap((card) => {
+      const waits = waitsForOwner(card);
+      return waits
+        ? [{ number: card.number, title: card.title, url: card.url, ...waits }]
+        : [];
+    });
+    const busy = new Set(this.running.keys());
+    const decision = decide(board, busy, this.now());
     this.decided = new Set(decision.asks);
     for (const move of decision.moves)
       if (move.stage === "done" || this.on.build) await this.move(move);
     if (this.on.build)
       for (const c of decision.comments)
         await cards.comment(c.number, markComment(c.body, c.note));
-    for (const lane of ["chat", "build"] as const) {
-      const next = decision.jobs.find((j) => j.lane === lane);
-      const card = board.find((c) => c.number === next?.number);
-      if (next && card && this.on[lane] && !this.running.has(lane))
-        this.begin(next, card);
+    for (const next of this.paused() ? [] : decision.jobs) {
+      const card = board.find((c) => c.number === next.number);
+      const place = this.on[next.lane] ? this.freePlace(next.lane) : null;
+      if (card && place !== null && !this.running.has(next.number))
+        this.begin(next, card, place);
     }
   }
 
@@ -220,24 +281,36 @@ export class BoardWork {
     await this.options.cards.move(move.number, move.stage);
   }
 
-  private begin(job: Job, card: BoardCard): void {
-    const running: Running = { job, title: card.title, steps: [] };
-    this.running.set(job.lane, running);
+  private begin(job: Job, card: BoardCard, place: number): void {
+    const running: Running = { job, title: card.title, steps: [], place };
+    this.running.set(job.number, running);
     this.options.onChange();
     void this.options.jobs
-      .run(job, card, (line) => {
-        running.steps = [...running.steps, line].slice(-STEPS);
-        this.options.onChange();
+      .run(
+        job,
+        card,
+        (line) => {
+          running.steps = [...running.steps, line].slice(-STEPS);
+          this.options.onChange();
+        },
+        place,
+      )
+      .then(({ pausedUntil }) => {
+        if (pausedUntil) this.pausedUntil = pausedUntil;
       })
       .catch((error: unknown) => {
         this.laneProblem = `#${String(job.number)}: ${messageOf(error)}`;
       })
       .finally(() => {
-        this.running.delete(job.lane);
+        this.running.delete(job.number);
         this.options.onChange();
         void this.refresh();
       });
   }
+}
+
+function workingOf(one: Running) {
+  return { number: one.job.number, title: one.title, what: WHAT[one.job.kind] };
 }
 
 function messageOf(error: unknown): string {

@@ -18,6 +18,8 @@ import {
   type Company,
   companySchema,
 } from "../company/company.ts";
+import { IGNORED_SIGNALS } from "../kobble/ignored.ts";
+import { KEEP_TEAM_FILE } from "../settings/team-file.ts";
 import { PRODUCT_FILE } from "../products/find-products.ts";
 import { type ProductInput, productSchema } from "../products/product.ts";
 import { CORE_VERSION } from "../version.ts";
@@ -97,7 +99,10 @@ export function createFactoryFolder(
     join(root, "AGENTS.md"),
     readFileSync(templates.agents, "utf8").replaceAll("<company>", file.name),
   );
-  writeFileSync(join(root, ".gitignore"), "copies/\nsettings/\n");
+  writeFileSync(
+    join(root, ".gitignore"),
+    `copies/\nsettings/\n${IGNORED_SIGNALS}\n${KEEP_TEAM_FILE}\n`,
+  );
   return file;
 }
 
@@ -135,7 +140,8 @@ export function saveCompany(root: string, company: Company): void {
 }
 
 // A product's description next to its code, with its first blueprint (the one
-// given, drafted from the code, or a placeholder), listed in the company file.
+// given, drafted from the code, or a placeholder) unless it has one already,
+// listed in the company file.
 // A folder inside the project is listed from the project's root, so the
 // project can move; one elsewhere keeps its whole path.
 export function addProduct(
@@ -150,6 +156,8 @@ export function addProduct(
   const file = productSchema.parse(rest);
   writeJson(join(home, PRODUCT_FILE), file);
   listProduct(root, home);
+  // A blueprint the project has already is its own: never written over.
+  if (existsSync(join(home, "BLUEPRINT.md"))) return home;
   writeFileSync(
     join(home, "BLUEPRINT.md"),
     blueprint?.trim()

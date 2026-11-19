@@ -30,7 +30,6 @@ export type Status = { id: string; options: Option[] };
 // GitHub's colours for each stage's column.
 const COLOURS: Record<(typeof STAGES)[number], string> = {
   backlog: "GRAY",
-  planning: "PURPLE",
   todo: "BLUE",
   doing: "YELLOW",
   review: "PINK",

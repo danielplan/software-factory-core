@@ -1,16 +1,23 @@
 import assert from "node:assert/strict";
-import { cpSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 
-import { faceFor, KobbleStore } from "@software-factory/core";
+import { faceFrom, KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
 import type { Cards } from "../src/cards/cards.ts";
 import { fixSignal } from "../src/kobble/actions.ts";
 import {
+  boardIdeas,
   columnOf,
   factoryView,
   type FactoryView,
@@ -71,7 +78,9 @@ test("before the live app is set up, sync is simply off", async () => {
     assert.deepEqual(view.counts, { new: 2 });
     assert.deepEqual(view.sync, {
       connected: false,
+      address: null,
       last: null,
+      next: null,
       problem: null,
     });
     assert.deepEqual((await factory.press("/api/kobble/sync")).body.added, 0);
@@ -231,6 +240,20 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
     const x1 = factory.store.get("explorations", "X-1");
     assert.deepEqual(x1?.signals, ["S-0004"]);
     assert.deepEqual(factory.store.get("signals", "S-0004")?.to, "X-1");
+    assert.deepEqual(
+      factory.store.get("explorations", "X-1")?.heard.map((one) => one.id),
+      ["S-0004"],
+    );
+    // The exploration still says what it heard where the signal file is not
+    // (it stays on the computer that read the live app).
+    rmSync(join(factory.store.root, "signals", "S-0004.json"));
+    const page = await factory.read<{
+      heard: { id: string; personaName: string | null }[];
+    }>("/api/kobble/exploration?id=X-1");
+    assert.deepEqual(
+      page.heard.map((one) => [one.id, one.personaName]),
+      [["S-0004", "Mia"]],
+    );
 
     // Nothing found: a new exploration, waiting.
     const made = await factory.press("/api/kobble/signals/explore", {
@@ -244,6 +267,16 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
         status: "waiting",
         personas: ["bruno"],
         signals: ["S-0006"],
+        heard: [
+          {
+            id: "S-0006",
+            type: "request",
+            source: "usage",
+            persona: "bruno",
+            at: "2026-11-16T09:20:00.000Z",
+            text: "The assistant could not repeat last Monday's order. It can only show it.",
+          },
+        ],
         problem:
           "The assistant could not repeat last Monday's order. It can only show it.",
         created: "",
@@ -346,7 +379,9 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
       about: "Sends gifts early.",
       origin: "developer",
       customers: [],
-      face: faceFor("gift-buyer"),
+      // Its kobold from what it is: a cap (nothing matches), the colour
+      // from its name.
+      face: faceFrom({ name: "Gift Buyer" }),
     });
     const twin = await factory.press("/api/kobble/personas", {
       name: "Gift buyer",
@@ -391,15 +426,13 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
   try {
     await factory.press("/api/kobble/sync");
     const made: string[] = [];
-    const moved: [number, string][] = [];
+    const stages: (string | undefined)[] = [];
     const cards = {
-      create: (title: string) => {
+      // Made straight in To do: no read of the board right after adding.
+      create: (title: string, _body: string, stage?: string) => {
         made.push(title);
+        stages.push(stage);
         return Promise.resolve({ number: 77, url: "https://example.com/77" });
-      },
-      move: (number: number, stage: string) => {
-        moved.push([number, stage]);
-        return Promise.resolve();
       },
     } as unknown as Cards;
     const signal = await fixSignal(factory.store, "S-0008", () => cards);
@@ -408,7 +441,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.deepEqual(made, [
       "Checkout stopped with an error: the payment service took too long to answer",
     ]);
-    assert.deepEqual(moved, [[77, "todo"]]);
+    assert.deepEqual(stages, ["todo"]);
     const x1 = factory.store.get("explorations", "X-1");
     assert.ok(x1);
     factory.store.put("explorations", { ...x1, work: 51 });
@@ -439,11 +472,12 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       builder: {
         on: true,
         working: { number: 51, title: "Basket", what: "" },
+        also: [],
         activity: null,
         steps: [],
         problem: null,
       },
-      coach: { on: false, working: null, steps: [] },
+      coach: { on: false, working: null, also: [], steps: [] },
     } as WorkView;
     const view = factoryView(factory.store, work);
     assert.deepEqual(
@@ -452,11 +486,17 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
         column.cards.map((c) => c.number),
       ]),
       [
-        ["todo", [77, 9]],
+        ["todo", [77]],
         ["building", [51]],
         ["review", [12]],
         ["done", [41]],
       ],
+    );
+    // A card in no column (or the Backlog) is an idea: it waits in
+    // Explorations, not on the Factory page.
+    assert.deepEqual(
+      boardIdeas(work).map((idea) => idea.number),
+      [9],
     );
     assert.deepEqual(view.columns[1]?.cards[0]?.from, {
       exploration: "X-1",
@@ -464,12 +504,13 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     });
     assert.equal(view.columns[0]?.cards[0]?.fix, true);
     assert.equal(view.builder.working, "#51 · Basket");
+    assert.deepEqual(view.builder.cards, [51]);
     assert.equal(columnOf("#41", work), "Done");
     assert.equal(columnOf("#5", work), null);
     assert.deepEqual(factoryView(factory.store, null).connected, false);
     const signals = signalsView(
       factory.store,
-      { connected: true, last: null, problem: null },
+      { connected: true, address: null, last: null, next: null, problem: null },
       work,
     );
     assert.equal(
@@ -480,5 +521,109 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.equal(page.connected, false);
   } finally {
     factory.close();
+  }
+});
+
+test("Connect checks the address with the token once, keeps both in .env, and never shows the token", async () => {
+  const tokens: (string | undefined)[] = [];
+  const live = createServer((request, response) => {
+    tokens.push(request.headers.authorization);
+    const right = request.headers.authorization === "Bearer s3cret-token";
+    response.writeHead(right ? 200 : 401, {
+      "content-type": "application/json",
+    });
+    response.end(right ? readFileSync(EXPORT, "utf8") : "{}");
+  });
+  await new Promise<void>((done) => live.listen(0, "127.0.0.1", done));
+  const address = live.address();
+  assert.ok(address && typeof address === "object");
+  const url = `http://127.0.0.1:${String(address.port)}/api/kobble/export`;
+  const factory = await kobbleFactory();
+  try {
+    const wrong = await factory.press("/api/kobble/connect", {
+      url,
+      token: "nope",
+    });
+    assert.equal(wrong.status, 409);
+    assert.match(String(wrong.body.error), /does not accept the token/);
+    assert.equal(existsSync(join(factory.project, ".env")), false);
+    assert.match(
+      String(
+        (
+          await factory.press("/api/kobble/connect", {
+            url: "http://127.0.0.1:9/export",
+            token: "x",
+          })
+        ).body.error,
+      ),
+      /cannot be reached at 127\.0\.0\.1:9: check the address/,
+    );
+    assert.equal(
+      (await factory.press("/api/kobble/connect", { url: "", token: "x" })).body
+        .error,
+      "Say the address of the export.",
+    );
+    assert.equal(
+      (
+        await factory.press("/api/kobble/connect", {
+          url: "file:///x.json",
+          token: "x",
+        })
+      ).body.error,
+      "Use the web address of your app's export.",
+    );
+    const right = await factory.press("/api/kobble/connect", {
+      url,
+      token: "s3cret-token",
+    });
+    assert.equal(right.status, 200);
+    assert.equal(right.body.ignored, true);
+    assert.doesNotMatch(JSON.stringify(right.body), /s3cret-token/);
+    assert.match(
+      readFileSync(join(factory.project, ".env"), "utf8"),
+      /KOBBLE_LIVE_URL=http:\/\/127\.0\.0\.1:\d+\/api\/kobble\/export\nKOBBLE_LIVE_TOKEN=s3cret-token\n/,
+    );
+    assert.match(
+      readFileSync(join(factory.project, ".gitignore"), "utf8"),
+      /^\.env$/m,
+    );
+    // It reads at once, and says when it reads next.
+    let view = await factory.read<SignalsView>("/api/kobble/signals");
+    while (view.counts.new < 10)
+      view = await factory.read<SignalsView>("/api/kobble/signals");
+    assert.equal(view.sync.address, url);
+    assert.ok(view.sync.next);
+    assert.doesNotMatch(JSON.stringify(view), /s3cret-token/);
+    assert.deepEqual(tokens.slice(0, 2), [
+      "Bearer nope",
+      "Bearer s3cret-token",
+    ]);
+    // Connecting again leaves .gitignore as it is.
+    assert.equal(
+      (
+        await factory.press("/api/kobble/connect", {
+          url,
+          token: "s3cret-token",
+        })
+      ).body.ignored,
+      false,
+    );
+    await factory.press("/api/kobble/signals/dismiss", { id: "S-0011" });
+    const handled = await factory.read<{
+      signals: { id: string; status: string }[];
+    }>("/api/kobble/handled");
+    assert.deepEqual(handled.signals.map((s) => [s.id, s.status]).slice(0, 1), [
+      ["S-0011", "dismissed"],
+    ]);
+    // Disconnect takes both lines out of .env.
+    const off = await factory.press("/api/kobble/disconnect");
+    assert.equal((off.body.sync as { connected: boolean }).connected, false);
+    assert.doesNotMatch(
+      readFileSync(join(factory.project, ".env"), "utf8"),
+      /KOBBLE_LIVE/,
+    );
+  } finally {
+    factory.close();
+    live.close();
   }
 });

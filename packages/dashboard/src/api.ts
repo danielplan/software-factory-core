@@ -8,13 +8,14 @@ import type { State } from "../../server/src/api.ts";
 export type {
   AddOnView,
   Board,
+  Card,
   CardView,
   CoachView,
   Draft,
   GitHubStatus,
+  IconName,
   IdeaView,
   KitView,
-  IconName,
   StageMap,
   State,
   WorkView,
@@ -26,6 +27,7 @@ export type {
   PersonaHat,
 } from "../../core/src/index.ts";
 export type {
+  MissionNow,
   PersonaPage as KobblePersonaPage,
   PersonaRow,
   SignalRow,
@@ -34,6 +36,7 @@ export type {
 } from "../../server/src/kobble/views.ts";
 export type { PersonaTest } from "../../core/src/index.ts";
 export type { SyncView } from "../../server/src/kobble/sync.ts";
+export type { MissionIdea } from "../../server/src/kobble/mission-ideas.ts";
 export type {
   FactoryCard,
   FactoryView,
@@ -50,9 +53,13 @@ export type { Light, PartView } from "../../launcher/src/index.ts";
 // A persona's face from its id, and the hats and colours to pick from.
 export {
   faceFor,
+  faceFrom,
   PERSONA_COLORS,
   PERSONA_HATS,
 } from "../../core/src/kobble/face.ts";
+
+// The core's version, and where its releases are (for links to its docs).
+export { CORE_VERSION, RELEASE_SOURCE } from "../../core/src/version.ts";
 
 // The server answers buttons only from its own page, which says so.
 const PAGE_HEADER = "x-software-factory";

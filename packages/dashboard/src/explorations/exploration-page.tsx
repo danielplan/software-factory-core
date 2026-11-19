@@ -1,7 +1,7 @@
 // One exploration: a bar at the top (back, its title, Drop, Hand off the
 // agreed prototype), the canvas the kobold and the team work on (left), and
 // the conversation with the kobold (right). Opening one that waits starts
-// it.
+// it, and its prototype runs on the board by itself.
 
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import { type Read, useRead } from "@/lib/use-read";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
+import { useLivePrototype } from "./board/live-prototype";
 import { TalkPanel } from "./talk-panel";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
@@ -22,6 +23,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const [said, say] = useState<string | null>(null);
   // The things a person attached to what they type next.
   const [attached, setAttached] = useState<string[]>([]);
+  const [pending, setPending] = useState<string | null>(null);
   const waiting = data?.exploration.status === "waiting";
   useEffect(() => {
     if (waiting)
@@ -29,21 +31,25 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         say(messageOf(error));
       });
   }, [waiting, id]);
+  useLivePrototype(data, say);
   if (!data)
     return problem ? (
       <ProblemBox title="This exploration cannot be read" text={problem} />
     ) : null;
   const press = (path: string, body: object) => {
     say(null);
-    post(`/api/kobble/explorations/${path}`, { id, ...body }).catch(
-      (error: unknown) => {
+    setPending(path);
+    post(`/api/kobble/explorations/${path}`, { id, ...body })
+      .catch((error: unknown) => {
         say(messageOf(error));
-      },
-    );
+      })
+      .finally(() => {
+        setPending(null);
+      });
   };
   return (
     <div className="flex h-dvh flex-col max-md:h-[calc(100dvh-56px)]">
-      <TopBar page={data} press={press} />
+      <TopBar page={data} press={press} pending={pending} />
       {said && (
         <div className="px-6 pt-3">
           <ProblemBox title="That did not work" text={said} />
@@ -81,12 +87,19 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
 function TopBar({
   page,
   press,
-}: Readonly<{ page: Page; press: (path: string, body: object) => void }>) {
+  pending,
+}: Readonly<{
+  page: Page;
+  press: (path: string, body: object) => void;
+  // The button whose work runs now.
+  pending: string | null;
+}>) {
   const { exploration, board } = page;
   const open = ["waiting", "exploring"].includes(exploration.status);
   const agreed = board.things.find(
     (one) => one.kind === "prototype" && one.agreed,
   );
+  const key = agreed?.kind === "prototype" ? agreed.key : "";
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border bg-card px-6 py-4">
       <a
@@ -97,7 +110,7 @@ function TopBar({
         Explorations
       </a>
       <span className="text-[12.5px] text-muted-foreground">/</span>
-      <span className="min-w-0 flex-1 text-[17px] font-semibold">
+      <span className="min-w-0 flex-1 text-[15px] font-semibold">
         {exploration.title}
       </span>
       {open ? (
@@ -105,24 +118,27 @@ function TopBar({
           <Button
             variant="ring"
             size="pill-sm"
+            busy={pending === "drop"}
+            disabled={pending !== null}
             onClick={() => {
               press("drop", {});
             }}
           >
-            Drop
+            {pending === "drop" ? "Dropping…" : "Drop"}
           </Button>
           <Button
             size="pill-sm"
-            disabled={!agreed}
+            busy={pending === "hand-off"}
+            disabled={!agreed || pending !== null}
             onClick={() => {
               press("hand-off", {});
             }}
           >
-            Hand off {agreed?.kind === "prototype" ? agreed.key : ""}
+            {pending === "hand-off" ? "Handing off…" : `Hand off ${key}`}
           </Button>
         </>
       ) : (
-        <span className="inline-flex h-[26px] items-center rounded-full bg-wash px-2.5 text-xs font-medium text-wash-foreground">
+        <span className="inline-flex h-[22px] items-center rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">
           {exploration.work
             ? `Handed off as #${String(exploration.work)}`
             : "Dropped"}

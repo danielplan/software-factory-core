@@ -7,6 +7,7 @@ import type { ExplorationRow, Face } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
+import { KINDS } from "./kinds";
 import { columnsOf } from "./view";
 
 export function Faces({
@@ -24,46 +25,60 @@ export function Faces({
   );
 }
 
-const LOOK: Record<string, string> = {
-  problem: "h-[34px] w-[58px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
-  note: "h-[22px] w-[52px] bg-[#fff6cf] shadow-[0_0_0_1px_#f1e3a6]",
-  heard: "h-[26px] w-[58px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  choice: "h-[52px] w-[56px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  diagram: "h-[40px] w-[64px] bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-  picture: "h-[34px] w-[48px] bg-[#eef0f4]",
-  prototype: "h-[22px] w-12 bg-card shadow-[0_0_0_1px_var(--line-soft)]",
-};
-
-// The board in small: its things in columns along their arrows, the
-// agreed ones outlined in green; a dashed box while there is nothing past
-// the problem.
+// The board in small, as it really is: its things in columns along their
+// arrows, each in its kind's colour with its icon and its own first words,
+// the agreed ones outlined in green; a dashed box while there is nothing
+// past the problem.
 export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
   const columns = columnsOf(row.things, row.links);
   return (
-    <div className="relative flex h-28 items-center gap-3.5 overflow-hidden rounded-xl bg-[#f7f8fa] bg-[radial-gradient(#dde1ea_1px,transparent_1px)] bg-size-[10px_10px] px-[18px]">
+    <div className="relative flex h-[132px] items-center gap-2.5 overflow-hidden rounded-xl bg-[#f7f8fa] bg-[radial-gradient(#dde1ea_1px,transparent_1px)] bg-size-[10px_10px] px-4">
       {columns.map((column, at) => (
         <Fragment key={at}>
-          {at > 0 && <span className="text-[#b6bccb]">→</span>}
-          <div className="flex flex-col gap-1.5">
-            {column.map((thing) => (
-              <div
-                key={thing.id}
-                className={cn(
-                  "rounded-[5px]",
-                  LOOK[thing.kind],
-                  thing.agreed && "shadow-[0_0_0_2px_#12a594]",
-                )}
-              />
+          {at > 0 && <span className="flex-none text-[#b6bccb]">→</span>}
+          <div className="flex w-[132px] flex-none flex-col gap-1.5">
+            {column.slice(0, 3).map((thing) => (
+              <Mini key={thing.id} thing={thing} />
             ))}
+            {column.length > 3 && (
+              <span className="text-[10.5px] text-muted-foreground">
+                +{column.length - 3} more
+              </span>
+            )}
           </div>
         </Fragment>
       ))}
       {columns.length < 2 && (
         <>
           <span className="text-[#b6bccb]">→</span>
-          <div className="h-[22px] w-12 rounded-[5px] border-[1.5px] border-dashed border-[#d3d7e0]" />
+          <div className="grid h-[38px] w-[110px] flex-none place-items-center rounded-lg border-[1.5px] border-dashed border-[#d3d7e0] text-[10.5px] text-faint">
+            ways come here
+          </div>
         </>
       )}
+    </div>
+  );
+}
+
+function Mini({
+  thing,
+}: Readonly<{ thing: ExplorationRow["things"][number] }>) {
+  const { Icon, tint } = KINDS[thing.kind];
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 items-start gap-1 rounded-lg bg-card px-1.5 py-1 text-[10.5px] leading-tight shadow-[0_0_0_1px_var(--line-soft)]",
+        thing.agreed && "shadow-[0_0_0_2px_#12a594]",
+      )}
+    >
+      <span
+        className={cn("grid size-4 flex-none place-items-center rounded", tint)}
+      >
+        <Icon aria-hidden className="size-2.5" />
+      </span>
+      <span className="line-clamp-2 min-w-0 text-foreground-2">
+        {thing.label}
+      </span>
     </div>
   );
 }

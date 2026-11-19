@@ -2,8 +2,10 @@
 // standard way to give Claude new actions): it looks at the board, adds
 // notes, diagrams and choices, changes and removes things, links and
 // unlinks them with a short label, points at a thing (the person's view
-// moves there), and marks a thing agreed or a sketch. Each answers with
-// what it did and the whole board. Only the conversation's own Claude Code
+// moves there), marks a thing agreed or a sketch, and starts making an
+// option's prototype. Each answers with
+// what it did and the whole board. Beside them, the made-up world's tools
+// (world-tools.ts). Only the conversation's own Claude Code
 // has the token.
 
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -15,6 +17,8 @@ import { COACH_HEADER } from "../../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../../mcp.ts";
 import type { Act } from "./board-acts.ts";
 import type { Option } from "./board-things.ts";
+import { addWorldTools } from "./world-tools.ts";
+import type { ExplorationWorlds } from "./worlds.ts";
 
 export type BoardTools = {
   token: string;
@@ -22,6 +26,11 @@ export type BoardTools = {
   look: () => string;
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
+  // Starts making the prototype of a choice's option, or changing one.
+  make: (choice: string, option: string) => string;
+  change: (prototype: string, change: string) => string;
+  // The made-up world its prototypes share, and the exploration's id.
+  world: { worlds: ExplorationWorlds; id: string };
 };
 
 const option = z.object({
@@ -152,7 +161,40 @@ function serverFor(on: BoardTools): McpServer {
     },
     (args) => toolAnswer(() => on.rename(args)),
   );
+  addPrototypeTools(server, on);
+  addWorldTools(server, on.world.worlds, on.world.id);
   return server;
+}
+
+// Making a choice's option's prototype, and changing one.
+function addPrototypeTools(server: McpServer, on: BoardTools): void {
+  server.registerTool(
+    "make_prototype",
+    {
+      description:
+        "Start making the prototype of one option of a choice: it appears on the board at once and is made in the background (a few minutes), in its own copy of the code. Make one when trying it will teach more than talking (the team picked the option, or asked for it, or it settles the question); say in one line what you started.",
+      inputSchema: {
+        choice: z.string().describe("The choice's id (choice-1)."),
+        option: z.string().describe("The option's letter (A, B …)."),
+      },
+    },
+    (args) => toolAnswer(() => on.make(args.choice, args.option)),
+  );
+  server.registerTool(
+    "change_prototype",
+    {
+      description:
+        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says): the maker changes it in its copy, a new version on its branch, in a few minutes; the board shows it being made, then running again. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
+      inputSchema: {
+        prototype: z.string().describe("The prototype's letter (A, A2 …)."),
+        change: z
+          .string()
+          .min(1)
+          .describe("What to change, in the team's words, complete."),
+      },
+    },
+    (args) => toolAnswer(() => on.change(args.prototype, args.change)),
+  );
 }
 
 export async function answerBoardTools(

@@ -221,42 +221,14 @@ test("each kit runs a product as one valid part, on the product's port or its ow
   assert.equal(phoneApp.startSeconds, 240);
 });
 
-test("each kit makes a new product with the framework's own starter", () => {
+test("the kits with a starter finish its copy by installing its packages", () => {
   const folder = join("/somewhere", "new-shop");
-  assert.deepEqual(reactWebApp.create?.(folder, "New shop"), [
-    [
-      "npm",
-      "create",
-      "vite@latest",
-      "new-shop",
-      "--",
-      "--template",
-      "react-ts",
-      "--no-interactive",
-    ],
-    ["npm", "install", "--prefix", "new-shop"],
-  ]);
-  assert.deepEqual(nestjsBackend.create?.(folder, "New shop"), [
-    [
-      "npx",
-      "@nestjs/cli@latest",
-      "new",
-      "new-shop",
-      "--package-manager",
-      "npm",
-      "--skip-git",
-    ],
-  ]);
-  assert.deepEqual(expoApp.create?.(folder, "New shop"), [
-    [
-      "npx",
-      "create-expo-app@latest",
-      "new-shop",
-      "--template",
-      "blank-typescript",
-      "--yes",
-    ],
-  ]);
+  for (const kit of [reactWebApp, nestjsBackend, expoApp]) {
+    assert.ok(kit.starter, kit.id);
+    assert.deepEqual(kit.create?.(folder, "New shop"), [
+      ["npm", "install", "--prefix", "new-shop"],
+    ]);
+  }
 });
 
 test("the example company's factory, with the core's kits", () => {

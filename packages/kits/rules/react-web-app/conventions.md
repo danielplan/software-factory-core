@@ -81,3 +81,28 @@ with the owner's agreement. Inline lint-disabling comments are refused.
 - **Vitest** with **Testing Library** for components, with the server
   pretended by **MSW**.
 - **Playwright** click-throughs against a pretend server for whole journeys.
+
+## The starter
+
+A new React web app starts as a copy of the kit's starter
+(`starters/react-web-app` in the kits): one home page, a tiny API client, the
+checks above in `npm run verify`, a `BLUEPRINT.md` and a prototype mode. Keep
+to its folders and keep its checks.
+
+## Prototype mode
+
+The prototype is the real app in the browser against a pretend backend
+(`prototype/`, served by MSW's service worker), with made-up data from the
+situations in `prototype/situations.ts`, or from the factory's shared world
+when the prototype starts with `FACTORY_WORLD_URL` (see the starter's
+README). `npm run prototype` builds it, `npm run prototype:live` runs it.
+
+- **No prototype code in the real app.** `src/` reaches `prototype/` only
+  through the one dynamic `import()` in `src/main.tsx`, behind the
+  `prototype` mode, so the real build drops it; MSW's worker lives outside
+  `public/`. `npm run check:prototypes`, part of `npm run verify` after the
+  build, fails when the real build names the prototype or holds the worker.
+- **One pretend backend** for the tests and the prototype: a new request of
+  the app gets its answer there, refusals included.
+- Something a browser cannot do is faked in the prototype mode, never in the
+  real app.

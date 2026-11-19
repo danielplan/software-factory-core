@@ -6,15 +6,30 @@
 
 import { basename, dirname, join } from "node:path";
 
-import { type Available, type Claude, Workspace } from "@software-factory/core";
+import {
+  type Available,
+  builderModel,
+  type Claude,
+  parallelCards,
+  Workspace,
+} from "@software-factory/core";
 
 import { type Cli, realCli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
 import { cardsFor } from "../cards/cards-for.ts";
 import { readBoard } from "../connect/board-file.ts";
-import { BoardWork } from "./board-work.ts";
-import { Jobs } from "./jobs.ts";
+import { BoardWork, EVERY_MS } from "./board-work.ts";
+import { copyName, Jobs } from "./jobs.ts";
 import { githubPullRequests } from "./pull-requests.ts";
+import {
+  isRelevant,
+  Signals,
+  verifySignature,
+  WEBHOOK_PATH,
+} from "./signals.ts";
+
+// Reading the board while GitHub's signals come as they happen.
+const WITH_SIGNALS_MS = 10 * 60_000;
 
 export type WorkSettings = {
   // The factory's folder and the project around it.
@@ -27,7 +42,9 @@ export type WorkSettings = {
   waiting?: () => ReadonlySet<number>;
 };
 
-export function workFor(settings: WorkSettings): BoardWork | null {
+export function workFor(
+  settings: WorkSettings,
+): { work: BoardWork; repository: string } | null {
   const { root, project, cli, claude, available, onChange, waiting } = settings;
   const found = cardsFor(root, cli);
   if ("problem" in found) return null;
@@ -48,15 +65,21 @@ export function workFor(settings: WorkSettings): BoardWork | null {
     claude,
     repository: found.repository,
     available,
-    copies: { chat: () => copyOf("chat"), build: () => copyOf("build") },
+    copies: {
+      chat: (place) => copyOf(copyName("chat", place)),
+      build: (place) => copyOf(copyName("build", place)),
+    },
+    model: () => builderModel(root),
   });
-  return new BoardWork({
+  const work = new BoardWork({
     cards: found.cards,
     pullRequests,
     jobs,
     onChange,
+    places: () => parallelCards(root),
     ...(waiting ? { waiting } : {}),
   });
+  return { work, repository: found.repository };
 }
 
 // The session's board work: connected once a factory with a board opens,
@@ -64,6 +87,10 @@ export function workFor(settings: WorkSettings): BoardWork | null {
 export class ConnectedWork {
   private readonly settings: Omit<WorkSettings, "root">;
   private work: BoardWork | null = null;
+  private repository = "";
+  private signals: Signals | null = null;
+  // The factory's own address, once it listens: where gh sends signals.
+  private base: string | null = null;
   // The board it was connected to, to see when it changes.
   private board = "";
   // The issues Kobble waits for "did it work?" about, once the records are
@@ -90,7 +117,46 @@ export class ConnectedWork {
   }
 
   view() {
-    return this.work?.view() ?? null;
+    const view = this.work?.view() ?? null;
+    return view && this.signals
+      ? { ...view, signals: this.signals.view() }
+      : view;
+  }
+
+  // The factory listens at this address: GitHub's signals can come.
+  listenAt(base: string): void {
+    this.base = base;
+    this.startSignals();
+  }
+
+  // A signal from gh webhook forward: checked, and the board read at once
+  // when it is about this board. False when it is not GitHub's.
+  signal(event: string, body: string, signature: string | undefined): boolean {
+    if (!this.signals || !verifySignature(this.signals.secret, body, signature))
+      return false;
+    if (isRelevant(event, jsonOf(body), this.repository)) this.refresh();
+    return true;
+  }
+
+  private startSignals(): void {
+    if (!this.work || !this.base || this.signals) return;
+    const work = this.work;
+    this.signals = new Signals({
+      cli: this.settings.cli,
+      repository: this.repository,
+      url: `${this.base}${WEBHOOK_PATH.replace(/^\/api/, "")}`,
+      onLive: (moves) => {
+        if (moves) work.every(WITH_SIGNALS_MS);
+        void work.refresh();
+        this.settings.onChange();
+      },
+      onLost: () => {
+        work.every(EVERY_MS);
+        void work.refresh();
+        this.settings.onChange();
+      },
+    });
+    void this.signals.start();
   }
 
   // Reads the board again now (a ticket was made or answered).
@@ -111,11 +177,16 @@ export class ConnectedWork {
     if (board === this.board) return;
     this.stop();
     this.board = board;
-    this.work = workFor({ ...this.settings, root });
+    const made = workFor({ ...this.settings, root });
+    this.work = made?.work ?? null;
+    this.repository = made?.repository ?? "";
     this.work?.start();
+    this.startSignals();
   }
 
   stop(): void {
+    this.signals?.stop();
+    this.signals = null;
     this.work?.stop();
     this.work = null;
     this.board = "";
@@ -126,5 +197,13 @@ export class ConnectedWork {
     if (!this.work)
       throw new Refused("Connect a board first: the builder works its cards.");
     return this.work;
+  }
+}
+
+function jsonOf(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
   }
 }

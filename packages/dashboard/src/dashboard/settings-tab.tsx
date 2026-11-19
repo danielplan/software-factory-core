@@ -12,6 +12,7 @@ import { TrackerChoice } from "@/connect/connect-page";
 import { ConnectedBoard } from "@/connect/connected-board";
 
 import type { FactoryState } from "./dashboard";
+import { LiveAppCard } from "./live-app-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 
 // The factory's settings, in order: a list of the sections at the side
@@ -24,13 +25,14 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
   const groups = state.settings.filter((group) => !owned.has(group.id));
   const sections = [
     "Where work is tracked",
+    "The live app",
     ...groups.map((group) => group.name),
   ];
   return (
     <div className="grid gap-5">
       <PageHead
         title="Settings"
-        about="How the factory works here: where work is tracked, and the settings of its parts."
+        about="How the factory works here: where work is tracked, the live app, and the settings of its parts."
       />
       <div
         className={
@@ -42,6 +44,7 @@ export function SettingsTab({ state }: Readonly<{ state: FactoryState }>) {
         {sections.length > 1 && <Sections names={sections} />}
         <div className="grid gap-5">
           <TrackerCard state={state} />
+          <LiveAppCard />
           {groups.map((group) => (
             <GroupCard key={group.id} group={group} state={state} />
           ))}
@@ -62,7 +65,7 @@ function Sections({ names }: Readonly<{ names: string[] }>) {
         <button
           key={name}
           type="button"
-          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-hover hover:text-foreground"
+          className="rounded-lg px-3 py-2 text-left text-[13px] text-muted-foreground hover:bg-hover hover:text-foreground"
           onClick={() => {
             document
               .getElementById(sectionId(name))
@@ -82,7 +85,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
   const [done, setDone] = useState<string | null>(null);
   const now =
     state.addOns.find((addOn) => addOn.id === state.company.tracker)?.name ??
-    "The factory's board";
+    "No board connected yet";
   return (
     <Topic
       title="Where work is tracked"
@@ -97,7 +100,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
         />
       ) : (
         <Collapsible className="grid gap-4">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-sm font-medium">
+          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-[13px] font-medium">
             Change where work is tracked
             <ChevronDown
               className="size-4 transition group-data-[state=open]:rotate-180"
@@ -114,7 +117,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
           </CollapsibleContent>
         </Collapsible>
       )}
-      {done && <p className="text-sm font-medium text-success">{done}</p>}
+      {done && <p className="text-[13px] font-medium text-success">{done}</p>}
     </Topic>
   );
 }

@@ -17,7 +17,16 @@ const fileId = z
 const text = z.string().trim().min(1);
 const time = z.iso.datetime({ offset: true });
 
-export const SIGNAL_TYPES = ["bug", "request", "feedback"] as const;
+// From the live app: bug, request or feedback. From a mission (a persona
+// sent to try the app before launch): bug, idea or question (an open
+// question).
+export const SIGNAL_TYPES = [
+  "bug",
+  "request",
+  "feedback",
+  "idea",
+  "question",
+] as const;
 // Where a signal came from: the app's own "Report a bug" and "Suggest
 // something" (app), how people use it, such as the assistant hitting
 // something it cannot do (usage), machine errors and failed automations
@@ -38,6 +47,12 @@ const alreadySchema = z.strictObject({
   title: text,
 });
 
+const stepOfSchema = z.strictObject({
+  test: fileId,
+  number: z.number().int().positive(),
+  did: text,
+});
+
 export const kobbleSignalSchema = z.strictObject({
   id: fileId.regex(/^S-\d{4,}$/, "a signal's id is S- and four digits"),
   type: z.enum(SIGNAL_TYPES),
@@ -51,6 +66,9 @@ export const kobbleSignalSchema = z.strictObject({
   at: time,
   text,
   status: z.enum(SIGNAL_STATUSES),
+  // Where it happened, for a signal from a persona test: the test, the
+  // step's number (from 1) and what the persona did there.
+  step: stepOfSchema.optional(),
   // The exploration or factory item it went to.
   to: text.nullable(),
   already: alreadySchema.nullable(),
@@ -63,20 +81,36 @@ export const EXPLORATION_STATUSES = [
   "dropped",
 ] as const;
 
+// What an exploration heard: its own copy of each signal's words, so the
+// exploration reads the same on a teammate's computer, where the signal
+// files are not (they stay on the computer that read the live app).
+const heardSchema = z.strictObject({
+  id: fileId,
+  type: z.enum(SIGNAL_TYPES),
+  source: z.enum(SIGNAL_SOURCES),
+  persona: fileId.nullable(),
+  at: time,
+  text,
+});
+
 export const explorationSchema = z.strictObject({
   id: fileId.regex(/^X-\d+$/, "an exploration's id is X- and a number"),
   title: text,
   status: z.enum(EXPLORATION_STATUSES),
   personas: z.array(fileId),
   signals: z.array(fileId),
+  heard: z.array(heardSchema),
   problem: z.string(),
   created: time,
   // The GitHub issue it was handed off as.
   work: z.number().int().positive().nullable(),
+  // The board's issue it started from (an idea in the board's Backlog);
+  // handing off fills in that issue instead of making a new one.
+  issue: z.number().int().positive().nullable().optional(),
 });
 
 // A prototype's branch: proto/X-<n>-<key>, the key in small letters.
-export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
+export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+\d*$/;
 
 // The canvas of an exploration (board.json beside it): things joined by
 // arrows, laid out left to right along them. Kinds of things: the problem
@@ -88,6 +122,11 @@ export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+$/;
 const optionKey = z
   .string()
   .regex(/^[A-Z]$/, "an option is one capital letter");
+// A prototype is named after its option; a second choice's option of the
+// same letter gets a number (A2).
+const prototypeKey = z
+  .string()
+  .regex(/^[A-Z]\d*$/, "a prototype is its option's letter, maybe a number");
 const thingId = z
   .string()
   .regex(/^[a-z][a-z0-9-]*$/, "small letters, digits and dashes");
@@ -120,7 +159,7 @@ export const thingSchema = z.discriminatedUnion("kind", [
   z.strictObject({
     ...common,
     kind: z.literal("prototype"),
-    key: optionKey,
+    key: prototypeKey,
     name: text,
     difference: z.string(),
     branch: z
@@ -128,6 +167,9 @@ export const thingSchema = z.discriminatedUnion("kind", [
       .regex(PROTOTYPE_BRANCH, "a prototype's branch is proto/X-<n>-<key>"),
     // Its persona tests, the last one last.
     tests: z.array(fileId),
+    // The kobold's last words when it made it: what it changed, and every
+    // library it added or piece it copied, so the build checks them.
+    said: z.string().optional(),
   }),
   z.strictObject({
     ...common,
@@ -168,6 +210,9 @@ export const kobblePersonaSchema = z.strictObject({
   origin: z.enum(PERSONA_ORIGINS),
   // The anonymous customer ids it stands for.
   customers: z.array(text),
+  // The made-up world's situation it lives in (kobble/situations.ts): its
+  // tests and its prototypes start the world from there.
+  situation: fileId.optional(),
   // Its kobold's hat and colour; worked out from the id when not given
   // (face.ts).
   face: z
@@ -198,10 +243,16 @@ export const personaTestSchema = z.strictObject({
   task: text,
   // What it ran on: the app as it is now (main), or a prototype's branch.
   on: z.union([z.literal("main"), z.string().regex(PROTOTYPE_BRANCH)]),
+  // The product (app) it tried, when the factory has more than one; none
+  // for the first product with a web address.
+  product: fileId.nullable().optional(),
   status: z.enum(TEST_STATUSES),
   started: time.nullable(),
   ended: time.nullable(),
   steps: z.array(stepSchema),
+  // While it runs: the step the persona is on, in its words ("Step 3:
+  // choosing a delivery slot").
+  doing: z.string().nullable().optional(),
   signals: z.array(fileId),
   // Why it failed, in plain words.
   problem: z.string().nullable(),
@@ -215,11 +266,13 @@ export const syncStateSchema = z.strictObject({
 
 export type KobbleSignal = z.infer<typeof kobbleSignalSchema>;
 export type Exploration = z.infer<typeof explorationSchema>;
+export type Heard = z.infer<typeof heardSchema>;
 export type KobblePersona = z.infer<typeof kobblePersonaSchema>;
 export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;
 export type PersonaTest = z.infer<typeof personaTestSchema>;
 export type TestStep = z.infer<typeof stepSchema>;
+export type SignalStep = z.infer<typeof stepOfSchema>;
 export type Board = z.infer<typeof boardSchema>;
 export type Thing = z.infer<typeof thingSchema>;
 export type BoardLink = z.infer<typeof linkSchema>;

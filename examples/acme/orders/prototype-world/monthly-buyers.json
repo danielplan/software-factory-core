@@ -1,0 +1,65 @@
+{
+  "name": "Monday for a bakery",
+  "about": "Bruno's bakery orders flour every Monday; three orders this month are waiting to be paid at the end of it.",
+  "clock": "2026-11-16T07:30:00.000Z",
+  "signed_in": { "shop": "c-5530" },
+  "tables": {
+    "products": [
+      {
+        "id": "p-10",
+        "name": "Bread flour, 25 kg",
+        "price_cents": 2490,
+        "in_stock": 80
+      },
+      {
+        "id": "p-11",
+        "name": "Fresh yeast, 1 kg",
+        "price_cents": 690,
+        "in_stock": 30
+      }
+    ],
+    "customers": [
+      {
+        "id": "c-5530",
+        "name": "Bruno's Bakery",
+        "email": "orders@bakery.example.test",
+        "pays": "card",
+        "created_at": "2025-09-01T09:00:00.000Z"
+      },
+      {
+        "id": "c-5531",
+        "name": "Bruno's Bakery, second shop",
+        "email": "shop2@bakery.example.test",
+        "pays": "card",
+        "created_at": "2026-02-10T09:00:00.000Z"
+      }
+    ],
+    "basket_lines": [],
+    "orders": [
+      {
+        "id": "o-201",
+        "customer_id": "c-5530",
+        "status": "unpaid",
+        "total_cents": 7470,
+        "placed_at": "2026-11-02T07:10:00.000Z",
+        "delivery_day": "2026-11-03"
+      },
+      {
+        "id": "o-202",
+        "customer_id": "c-5530",
+        "status": "unpaid",
+        "total_cents": 5670,
+        "placed_at": "2026-11-09T07:05:00.000Z",
+        "delivery_day": "2026-11-10"
+      },
+      {
+        "id": "o-203",
+        "customer_id": "c-5531",
+        "status": "unpaid",
+        "total_cents": 2490,
+        "placed_at": "2026-11-09T07:20:00.000Z",
+        "delivery_day": "2026-11-10"
+      }
+    ]
+  }
+}

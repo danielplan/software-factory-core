@@ -90,6 +90,29 @@ function Hat({
           <circle cx={21} cy={13.4} r={1.7} fill={color} />
         </>
       );
+    case "captain":
+      return (
+        <>
+          <path
+            d="M11 21 Q11.5 13.5 22 13 Q32.5 13.5 33 21 Z"
+            fill="#fff"
+            stroke={color}
+            strokeWidth={1.4}
+          />
+          <rect x={11} y={19.5} width={22} height={3.4} rx={1.2} fill={color} />
+          <path d="M14 23 Q22 27.5 30 23" fill={color} />
+          <circle cx={22} cy={17} r={1.6} fill="#e9a23b" />
+        </>
+      );
+    case "trucker":
+      return (
+        <>
+          <path d="M11.5 22 Q11.5 12 22 12 Q32.5 12 32.5 22 Z" fill="#fff" />
+          <path d="M11.5 22 Q11.5 12 18 12.3 L18 22 Z" fill={color} />
+          <path d="M26 12.3 Q32.5 13 32.5 22 L26 22 Z" fill={color} />
+          <path d="M10 22 L36 22 L40 24.5 L10 24.5 Z" fill={color} />
+        </>
+      );
     case "flop":
       return (
         <path
@@ -136,11 +159,19 @@ export function NoFace({ size = 36 }: Readonly<{ size?: number }>) {
   );
 }
 
-// Kobble's own kobold, with its floppy cap.
+// Kobble's own kobold, with its floppy cap; the other kobolds (lib/kobolds.ts)
+// with the hat of their job.
 export function KoboldHead({
   size = 28,
   className,
-}: Readonly<{ size?: number; className?: string }>) {
+  hat = "flop",
+  color = "#3156d8",
+}: Readonly<{
+  size?: number;
+  className?: string;
+  hat?: PersonaHat | "flop";
+  color?: string;
+}>) {
   return (
     <svg
       width={size}
@@ -150,7 +181,7 @@ export function KoboldHead({
       className={cn("flex-none overflow-visible", className)}
     >
       <Head skin="#c6d3ff" />
-      <Hat hat="flop" color="#3156d8" />
+      <Hat hat={hat} color={color} />
     </svg>
   );
 }

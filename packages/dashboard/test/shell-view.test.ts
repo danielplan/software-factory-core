@@ -25,11 +25,12 @@ const work = (more: Partial<WorkView> = {}): WorkView => ({
   builder: {
     on: true,
     working: null,
+    also: [],
     activity: null,
     steps: [],
     problem: null,
   },
-  coach: { on: true, working: null, steps: [] },
+  coach: { on: true, working: null, also: [], steps: [] },
   ...more,
 });
 const part = (light: PartView["light"]) => ({ light }) as PartView;
@@ -39,8 +40,17 @@ test("the sidebar counts only what there is: explorations, tickets not in the ap
   assert.deepEqual(
     countsOf(
       2,
-      work({ cards: [card(1, "todo"), card(2, "done"), card(3, null)] }),
+      work({
+        cards: [
+          card(1, "todo"),
+          card(2, "done"),
+          card(3, null),
+          card(4, "backlog"),
+          card(5, "review"),
+        ],
+      }),
     ),
+    // Ideas (Backlog, no column) are not the factory's work.
     { explore: 2, build: 2 },
   );
   assert.deepEqual(countsOf(0, work({ cards: [card(2, "done")] })), {});
@@ -73,6 +83,7 @@ test("the kobold's card says what it works on, or that it rests", () => {
         builder: {
           on: true,
           working: { number: 7, title: "Order status", what: "building" },
+          also: [],
           activity: null,
           steps: [],
           problem: null,
@@ -88,10 +99,6 @@ test("the kobold's card says what it works on, or that it rests", () => {
     title: "Kobold is thinking",
     detail: "Wish list",
   });
-  assert.deepEqual(
-    koboldStatus(work({ coach: { on: true, working: 12, steps: [] } }), [], ""),
-    { busy: true, title: "Kobold is planning", detail: "Card #12" },
-  );
 });
 
 test("light only: every rule for a computer set to dark is switched off", () => {
@@ -114,5 +121,46 @@ test("light only: every rule for a computer set to dark is switched off", () => 
   assert.deepEqual(
     [dark, nested, wide].map((rule) => rule.media?.mediaText),
     ["not all", "not all", "(min-width: 768px)"],
+  );
+});
+
+test("the answer sent from a waiting card: the owner's words, else the picked answer", async () => {
+  const { answerText } = await import("../src/factory/answer-text.ts");
+  const waiting = {
+    number: 1,
+    title: "T",
+    url: "",
+    text: "?",
+    ask: {
+      about: "",
+      where: "",
+      question: "?",
+      answers: [{ key: "A", answer: "Yes", means: "" }],
+      suggested: null,
+    },
+  };
+  assert.equal(answerText(waiting, "A", ""), "**A**: Yes");
+  assert.equal(answerText(waiting, "A", " Mine "), "Mine");
+  assert.equal(answerText(waiting, null, ""), "");
+});
+
+test("setting up is done only once the kobold has finished, not when the folder exists", async () => {
+  const { setUpDone } = await import("../src/setup-guided/steps.ts");
+  assert.equal(setUpDone({ made: true, working: true }), false);
+  assert.equal(setUpDone({ made: false, working: false }), false);
+  assert.equal(setUpDone({ made: true, working: false }), true);
+});
+
+test("the kobold's card says when it makes a prototype or thinks in an exploration", () => {
+  assert.deepEqual(
+    koboldStatus(null, [], "All running", [
+      { title: "Quiet one", busy: null },
+      { title: "Signals from AI testers", busy: "Making prototype A" },
+    ]),
+    {
+      busy: true,
+      title: "Kobold is making prototype A",
+      detail: "Signals from AI testers",
+    },
   );
 });

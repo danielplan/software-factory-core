@@ -12,6 +12,7 @@ import {
   PERSONA_HATS,
   post,
 } from "@/api";
+import { FIELD_AREA } from "@/lib/field-style";
 import { PersonaFace } from "@/components/kobold-face";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
@@ -161,7 +162,7 @@ function Fields({
           id="persona-about"
           value={values.about}
           rows={3}
-          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className={FIELD_AREA}
           onChange={(event) => {
             onChange({ about: event.target.value });
           }}

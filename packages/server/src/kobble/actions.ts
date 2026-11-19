@@ -4,7 +4,8 @@
 
 import {
   type Exploration,
-  faceFor,
+  faceFrom,
+  heardOf,
   PERSONA_COLORS,
   PERSONA_HATS,
   type KobblePersona,
@@ -44,8 +45,8 @@ export async function fixSignal(
       "",
       `<!-- factory:kobble signal=${signal.id} -->`,
     ].join("\n"),
+    "todo",
   );
-  await board.move(card.number, "todo");
   return store.put("signals", {
     ...fresh(store, id),
     status: "fixed",
@@ -58,7 +59,8 @@ export function dismissSignal(store: KobbleStore, id: string): KobbleSignal {
 }
 
 // Explore: added to the open exploration the check found for it, or a new
-// exploration that waits to be started.
+// exploration that waits to be started. The exploration keeps its own copy
+// of what the signal says, since the signal file stays on this computer.
 export function exploreSignal(
   store: KobbleStore,
   id: string,
@@ -78,6 +80,7 @@ export function exploreSignal(
       ? {
           ...open,
           signals: [...open.signals, signal.id],
+          heard: [...open.heard, heardOf(signal)],
           personas: [...new Set([...open.personas, ...personas])],
         }
       : {
@@ -86,6 +89,7 @@ export function exploreSignal(
           status: "waiting",
           personas,
           signals: [signal.id],
+          heard: [heardOf(signal)],
           problem: signal.text,
           created: now.toISOString(),
           work: null,
@@ -135,6 +139,6 @@ export function addPersona(store: KobbleStore, body: unknown): KobblePersona {
     about,
     origin: "developer",
     customers: [],
-    face: face ?? faceFor(id),
+    face: face ?? faceFrom({ name, about, place }),
   });
 }

@@ -1,0 +1,69 @@
+// An idea in the board's Backlog, in Explorations › Waiting (the Factory
+// page shows agreed work only).
+
+import { Lightbulb } from "lucide-react";
+import { useState } from "react";
+
+import { type ExplorationsView, messageOf, post } from "@/api";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ROW } from "@/signals/bits";
+
+// An idea in the board's Backlog: not agreed work, so it waits here.
+// Starting it makes an exploration of it; handing that off fills in this
+// same issue and moves it to To do.
+export function FromBoard({
+  idea,
+}: Readonly<{ idea: ExplorationsView["fromBoard"][number] }>) {
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const start = async () => {
+    setBusy(true);
+    setProblem(null);
+    try {
+      const { exploration } = await post<{ exploration: { id: string } }>(
+        "/api/kobble/explorations",
+        { title: idea.title, issue: idea.number },
+      );
+      await post("/api/kobble/explorations/start", { id: exploration.id });
+      window.location.hash = `explore/${exploration.id}`;
+    } catch (error: unknown) {
+      setBusy(false);
+      setProblem(messageOf(error));
+    }
+  };
+  return (
+    <div className={cn(ROW, "transition-colors hover:bg-surface")}>
+      <span className="grid size-9 flex-none place-items-center rounded-xl bg-[#eef0f4] text-[#4b5563]">
+        <Lightbulb aria-hidden className="size-[17px]" />
+      </span>
+      <span className="grid min-w-0 flex-1">
+        <span className="font-semibold">{idea.title}</span>
+        <span className="truncate text-[12.5px] text-muted-foreground">
+          <a
+            href={idea.url}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
+          >
+            #{idea.number}
+          </a>{" "}
+          · an idea from the board's Backlog
+        </span>
+        {problem && (
+          <span role="alert" className="text-[12.5px] text-destructive">
+            {problem}
+          </span>
+        )}
+      </span>
+      <Button
+        variant="ring"
+        size="pill-sm"
+        busy={busy}
+        onClick={() => void start()}
+      >
+        {busy ? "Starting…" : "Start"}
+      </Button>
+    </div>
+  );
+}

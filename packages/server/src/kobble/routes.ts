@@ -8,7 +8,6 @@ import { join } from "node:path";
 import {
   type Claude,
   FACTORY_FOLDER,
-  hasFactory,
   KobbleRefused,
   KobbleStore,
 } from "@software-factory/core";
@@ -18,7 +17,7 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { asked, field } from "../asked.ts";
 import type { WorkView } from "../api.ts";
 import type { Cards } from "../cards/cards.ts";
-import { cardsFor } from "../cards/cards-for.ts";
+import { cardsFor, NO_BOARD } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";
 import {
   addPersona,
@@ -28,11 +27,16 @@ import {
 } from "./actions.ts";
 import type { BoardTools } from "./explorations/board-tools.ts";
 import { branchParts, servedExplorations } from "./explorations/routes.ts";
+import { explorationRoutes, storeOf, usageOf } from "./usage-routes.ts";
 import { liveSettings } from "./live-source.ts";
+import { type App, MissionIdeas } from "./mission-ideas.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
-import { factoryView } from "./factory-view.ts";
+import { connect, disconnect } from "./connect.ts";
+import { boardIdeas, factoryView } from "./factory-view.ts";
+import { supportOf, supportRoutes } from "./support.ts";
 import {
+  handledView,
   personaPage,
   personasView,
   signalsView,
@@ -49,9 +53,14 @@ type KobbleOptions = {
   // The connected board's cards as the builder last read them; none
   // without a board.
   work: () => WorkView | null;
-  // What a persona test runs on: the app's address (as it is now), and a
+  // What a persona test runs on: the apps it can be sent into, an app's
+  // address as it is now (the first app's without a product), and a
   // browser.
-  testsRunOn: { app: () => Promise<string>; browser: () => Promise<Browser> };
+  testsRunOn: {
+    apps: () => App[];
+    app: (product: string | null) => Promise<string>;
+    browser: () => Promise<Browser>;
+  };
 };
 
 export function servedKobble(options: KobbleOptions) {
@@ -61,14 +70,7 @@ export function servedKobble(options: KobbleOptions) {
       `event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`,
     );
   };
-  // The records once the factory is there; none in setup.
-  const maybe = () => (hasFactory(factory) ? new KobbleStore(factory) : null);
-  const store = () => {
-    const found = maybe();
-    if (!found)
-      throw new Refused("There is no factory yet: its records come with it.");
-    return found;
-  };
+  const { maybe, store } = storesOf(factory, options.project);
   const sync = new LiveSync({
     store: maybe,
     settings: () => liveSettings(options.project),
@@ -87,22 +89,29 @@ export function servedKobble(options: KobbleOptions) {
       const added = await sync.sync();
       return { added: added.length, sync: sync.view() };
     },
+    ...liveRoutes(options.project, sync, changed),
+    "GET /api/kobble/handled": () => kept(() => handledView(store())),
     ...buttonRoutes(store, changing, () =>
       connectedCards(factory, options.cli),
     ),
     ...tests.routes,
-    ...keptAll({
-      ...explorations.routes,
-      "POST /api/kobble/explorations/test": explorations.testRoute(tests.tests),
-    }),
+    ...supportRoutes(supportOf(options, changed)),
+    ...keptAll(
+      explorationRoutes(explorations, tests.tests, () =>
+        usageOf(factory, options.project),
+      ),
+    ),
   };
   return {
     routes,
     // Where the server answers the kobold's board tools.
     serveToolsAt: (base: string) => {
       explorations.talks.serveToolsAt(`${base}/kobble/explorations/mcp`);
+      explorations.prototypes.serveWorldAt(`${base}/kobble/world`);
     },
     boardTools: (id: string): BoardTools => explorations.talks.tools(id),
+    // The made-up worlds the prototypes share (world-route.ts).
+    worlds: explorations.worlds,
     start: () => {
       if (maybe()) tests.recover();
       sync.start();
@@ -112,6 +121,19 @@ export function servedKobble(options: KobbleOptions) {
       explorations.close();
     },
   };
+}
+
+// The records once the factory is there; none in setup (maybe), or
+// refused (store).
+function storesOf(factory: string, project: string) {
+  const maybe = () => storeOf(factory, project);
+  const store = () => {
+    const found = maybe();
+    if (!found)
+      throw new Refused("There is no factory yet: its records come with it.");
+    return found;
+  };
+  return { maybe, store };
 }
 
 // A change to the records, told to the page; a record that does not fit is
@@ -125,13 +147,39 @@ function changingWith(changed: (what: string) => void) {
     };
 }
 
+// Connecting the live app and disconnecting it; each sync starts again.
+function liveRoutes(
+  project: string,
+  sync: LiveSync,
+  changed: (what: string) => void,
+): Record<string, Route> {
+  return {
+    "POST /api/kobble/connect": async (body) => {
+      const { ignored } = await connect(project, body);
+      sync.start();
+      changed("signals");
+      return { ignored, sync: sync.view() };
+    },
+    "POST /api/kobble/disconnect": () => {
+      disconnect(project);
+      sync.close();
+      changed("signals");
+      return { sync: sync.view() };
+    },
+  };
+}
+
 // The connected board's cards; refused with how to connect one when there
 // is none.
 function connectedCards(factory: string, cli: Cli): Cards {
   const found = cardsFor(factory, cli);
   if ("problem" in found)
     throw new Refused(
-      `No GitHub board is connected, so there is nowhere to put it. ${found.problem} Connect one in Settings, under Where work is tracked.`,
+      [
+        "No GitHub board is connected yet, so there is nowhere to put it.",
+        ...(found.problem === NO_BOARD ? [] : [found.problem]),
+        "Connect one in [Settings](#settings), under Where work is tracked.",
+      ].join(" "),
     );
   return found.cards;
 }
@@ -149,6 +197,7 @@ function explorationsAndTests(
     claude: options.claude,
     store,
     cards: () => connectedCards(factory, options.cli),
+    ideas: () => boardIdeas(options.work()),
     onChange: () => {
       changed("explorations");
     },
@@ -157,31 +206,54 @@ function explorationsAndTests(
     onChange: () => {
       changed("tests");
     },
-    prototype: (on) => {
+    prototype: (on, persona) => {
       const parts = branchParts(on);
       if (!parts) throw new Refused(`“${on}” is not a prototype's branch.`);
-      return explorations.prototypes.address(parts.exploration, parts.key);
+      return explorations.prototypes.address(
+        parts.exploration,
+        parts.key,
+        persona,
+      );
     },
   });
   return { explorations, tests };
 }
 
-// Persona tests: start one, a persona's tests, one test.
+// Persona tests (missions): the one the kobold suggests, start one, a
+// persona's tests, one test.
 function testRoutes(
   options: KobbleOptions,
   store: () => KobbleStore,
-  more: { onChange: () => void; prototype: (on: string) => Promise<string> },
+  more: {
+    onChange: () => void;
+    prototype: (on: string, persona: string) => Promise<string>;
+  },
 ) {
   const tests = new PersonaTests({
     claude: options.claude,
     cwd: options.project,
     store,
-    app: (on) =>
-      on === "main" ? options.testsRunOn.app() : more.prototype(on),
+    app: (test) =>
+      test.on === "main"
+        ? options.testsRunOn.app(test.product ?? null)
+        : more.prototype(test.on, test.persona),
     browser: options.testsRunOn.browser,
     onChange: more.onChange,
   });
+  const ideas = new MissionIdeas({
+    claude: options.claude,
+    cwd: options.project,
+    store,
+    apps: options.testsRunOn.apps,
+  });
   const routes: Record<string, Route> = {
+    "GET /api/kobble/mission": (_body, url) =>
+      kept(async () => ({
+        mission: await ideas.suggest(
+          asked(url, "persona", "persona"),
+          url.searchParams.get("again") === "yes",
+        ),
+      })),
     "GET /api/kobble/tests": (_body, url) =>
       kept(() => ({
         tests: testsOf(store(), asked(url, "persona", "persona")),
@@ -189,7 +261,11 @@ function testRoutes(
     "GET /api/kobble/test": (_body, url) =>
       kept(() => testPage(store(), asked(url, "id", "test"))),
     "POST /api/kobble/tests": (body) =>
-      kept(() => ({ test: tests.start(body) })),
+      kept(() => {
+        const test = tests.start(body);
+        ideas.forget(test.persona);
+        return { test };
+      }),
   };
   return {
     routes,

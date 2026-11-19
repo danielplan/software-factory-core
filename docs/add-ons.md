@@ -30,47 +30,70 @@ the first company's factory; they come here written for any company (see
 
 ## The add-ons
 
-| Add-on             | What it does                                                                                                                                                                                        | Needs                                 | Built in | Here                      |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------- | ------------------------- |
-| **Board**          | The work in its stages (draft, Backlog, Planning, To do, In progress, Review, Done); the factory's own board when no tracker is connected                                                           | –                                     | yes      | partly                    |
-| **GitHub**         | Where work is tracked: a GitHub board, connected through the GitHub CLI                                                                                                                             | Board                                 | yes      | yes                       |
-| **Jira**           | Where work is tracked: Jira Cloud with an API token                                                                                                                                                 | Board                                 | yes      | yes                       |
-| **Builder**        | Works the cards: the coach talks a card's plan through in its comments; the builder builds it test-first in a working copy of its own, runs the checks, opens a pull request, fixes review comments | Board, a tracker, GitHub as code host | yes      | yes, for GitHub boards    |
-| **Ideas**          | The owner starts an idea with a sentence and works it out with the idea coach on a map; Ready puts the agreed plan on the Backlog                                                                   | Board                                 | yes      | partly                    |
-| **Prototypes**     | The coach has a clickable prototype of an idea made in the real app, version by version, before anything is built                                                                                   | Ideas, a kit with prototype mode      | no       | to come                   |
-| **Made-up worlds** | Shared made-up data the prototypes run on, kept in step with the real data's shape; the coach can look at it and change it                                                                          | Prototypes                            | no       | to come                   |
-| **Voice**          | The owner talks instead of typing; speech stays on the computer (a one-time download of about 0.8 GB)                                                                                               | –                                     | no       | yes (in the kernel today) |
-| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; on that computer only                                                             | Ideas                                 | no       | to come                   |
-| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | to come                   |
-| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | to come                   |
+| Add-on             | What it does                                                                                                                                                                                        | Needs                                 | Built in | Here                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------- | ----------------------------- |
+| **Board**          | The work in its stages (Backlog, To do, In progress, Review, Done), on the connected board                                                                                                          | –                                     | yes      | partly                        |
+| **GitHub**         | Where work is tracked: a GitHub board, connected through the GitHub CLI                                                                                                                             | Board                                 | yes      | yes                           |
+| **Jira**           | Where work is tracked: Jira Cloud with an API token                                                                                                                                                 | Board                                 | yes      | yes                           |
+| **Builder**        | Works the cards: the coach talks a card's plan through in its comments; the builder builds it test-first in a working copy of its own, runs the checks, opens a pull request, fixes review comments | Board, a tracker, GitHub as code host | yes      | yes, for GitHub boards        |
+| **Ideas**          | The owner starts an idea with a sentence and works it out with the idea coach on a map; Ready puts the agreed plan on the Backlog                                                                   | Board                                 | yes      | partly                        |
+| **Prototypes**     | The coach has a clickable prototype of an idea made in the real app, version by version, before anything is built                                                                                   | Ideas, a kit with prototype mode      | no       | to come                       |
+| **Made-up worlds** | Shared made-up data the prototypes run on, kept in step with the real data's shape; the coach can look at it and change it                                                                          | Prototypes                            | no       | yes, in Kobble's explorations |
+| **Voice**          | The owner talks instead of typing; speech stays on the computer (a one-time download of about 0.8 GB)                                                                                               | –                                     | no       | yes (in the kernel today)     |
+| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; switched on for the team, kept on each computer                                   | Ideas                                 | no       | yes (Settings, Workshop)      |
+| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | yes (Settings, Workshop)      |
+| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | yes (Settings, Workshop)      |
 
 ### What each brings
 
-- **Board**: Build, the board's page; Planning, where a card that did not come through
-  Ideas has its plan talked through in its conversation until it is agreed;
-  moving cards by dragging them (Backlog, Planning, To do) or
-  with a menu; a card in Review opens its pull request.
+- **Board**: Build, the board's page; a card in Review opens its pull
+  request. There is no Planning stage: work is thought through outside the
+  factory, in explorations.
+- **Made-up worlds** (`core/src/kobble/world.ts`, `situations.ts`;
+  `server/src/kobble/world-route.ts`, `explorations/worlds.ts`,
+  `world-tools.ts`): a product names a folder of situations as its `world`
+  in `product.json` (`<key>.json`: `name`, `about`, `clock`, `signed_in`,
+  `tables`), and may give a `checkWorld` command that checks them against
+  its own schema (`software-factory check` runs it). Each exploration's
+  prototypes share one world, kept as `world.json` beside the exploration:
+  started from the first situation, or from a persona's (`situation` in its
+  file) when its test or a prototype opened for it starts it, with every
+  time moved to now; versioned, so a change made on an older version is
+  refused; started again on request. The prototypes' start command gets
+  `FACTORY_WORLD_URL=http://localhost:<port>/api/kobble/world/<exploration>`:
+  `GET` the world (`{situation, version, signed_in, tables}`), `POST`
+  `{version, changes: [{table, op, row}]}` (409 when stale), `POST …/reset`.
+  It answers pages on any port of this computer (CORS for localhost only)
+  and is asked again every few seconds, so tabs and devices share it live.
+  The kobold changes it with `look_at_world`, `world_rows`, `change_world`
+  and `use_situation`. Acme's Orders service has three situations.
 - **GitHub**: connecting; signals from GitHub as they happen (`gh webhook
 forward`, no public address needed) and a check every few minutes for
   anything missed; a hidden mark on the factory's own comments, because the
   owner and the factory may post with the same account.
 - **Builder** (`server/src/builder/`): Build shows the connected
-  board's cards, read every minute. Two lanes, each switched on there: the
-  coach answers a card's conversation in Planning in a read-only copy of
-  main, and writes the agreed plan into the card; the builder builds one card
+  board's cards, read every minute. The builder builds one card
   at a time on its branch (`factory/issue-<number>`, continuing a prototype
   pushed there) in a copy of its own. The rules are pure (`decide.ts`): a
-  card in Ready without an agreed plan, or with a comment after it, goes back
-  to Planning with a reason; a question goes back to Planning; a build that
-  failed for a technical reason keeps its plan and is tried again when the
-  card goes back to Ready; an interrupted build resumes; merged or closed
+  card in To do is built as it is, its text the plan; it waits while a
+  question on it is open, staying in To do (the Factory page shows it
+  waiting for the owner); a build that failed for a technical reason is
+  tried again; an interrupted build resumes; merged or closed
   cards go to Done. Before a pull request the factory runs each changed
   product's verify command itself, gives the builder one round to fix a
   failure, and opens a draft that says so when the checks still fail.
   Comments on the card or the pull request in Review are answered on the
   same branch. It never merges. Its guide (how to work through the board) is
-  the factory skill's `board.md`. Still to come: starting by itself, GitHub's
-  signals instead of reading every minute, Jira.
+  the factory skill's `board.md`. Each lane works on up to five cards at
+  once (the Builder setting "Cards at once"), each in a copy of its own
+  (`build`, `build-2` …), and the builder can use a model of its own. Before
+  each build or review fix on a branch that exists, the latest main is
+  merged in; a clash goes to the builder to settle, or back to the owner.
+  When Claude's usage limit stops a job, the card says so and waits where it
+  is, and the factory carries on by itself once the limit resets. GitHub's
+  signals come as they happen (`gh webhook forward`, no public address
+  needed), with reading the board every minute as the fallback (every ten
+  minutes while signals come). Still to come: starting by itself, Jira.
 - **Ideas**: Explore and the idea coach's guide; choice cards for real
   choices with the coach's recommendation and the trade-offs, said early; an
   Agreed switch; pictures the owner pastes; parking, dropping and drafts; a
@@ -81,15 +104,35 @@ forward`, no public address needed) and a check every few minutes for
   the idea is about; the coach makes small changes itself; a check that no
   prototype code reaches the real app. It asks each kit for its prototype
   mode and its starter, so a brand-new app starts from the kit's starter.
+  The React web app and Expo app starters have the prototype mode, the
+  shared world's hook and that check already (see the kits).
+- **Usage log** (off by default, the Usage log setting): every change to
+  an exploration as a line of JSON in a folder next to the project
+  (`<project>-usage`), each prototype's change as a patch and, when it is
+  opened, a picture at a computer's and a phone's width.
+- **Updates** (Workshop, the Updates setting): the owner's folder takes the
+  newest main from GitHub without git, only when nothing can be lost, by
+  itself every few minutes when switched on; running products start again.
+- **Desktop start** (Workshop): a file on the desktop that opens the
+  factory with a double-click (`.cmd` on Windows, `.command` on macOS).
 - **Voice**: Talk; live words while the owner speaks; a first draft as soon
   as they go quiet; the answer read out as it is written; "stop" interrupts.
 
 ## The kits
 
-| Kit                                                                            | Here | To come                                                                                                                                                             |
-| ------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React web app, SvelteKit web app, NestJS backend, TypeScript package, Expo app | yes  | a starter with the kit's standards and checks (not only the framework's own), prototype mode, a working copy's environment, the checks to run before a pull request |
-| Other code                                                                     | yes  | –                                                                                                                                                                   |
+| Kit                                   | Here | Starter                                                                                                                           | To come                                                                       |
+| ------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| React web app                         | yes  | its own (`starters/react-web-app`): the kit's standards and checks, prototype mode with a shared world, `check:prototypes`        | a working copy's environment, the checks to run before a pull request         |
+| Expo app                              | yes  | its own (`starters/expo-app`): the kit's standards and checks, prototype mode with a shared world, `check:prototypes`             | a working copy's environment, the checks to run before a pull request         |
+| NestJS backend                        | yes  | its own (`starters/nestjs-backend`): the kit's standards and checks, settings, migrations, a health route; the database a setting | a working copy's environment, the checks to run before a pull request         |
+| SvelteKit web app, TypeScript package | yes  | the framework's own generator                                                                                                     | a starter with the kit's standards and checks, prototype mode (for a web app) |
+| Other code                            | yes  | –                                                                                                                                 | –                                                                             |
+
+A kit with a starter makes a new product as a copy of it (`starter` in the
+kit, `copyStarter` in the core): the starter's package name, wherever it is
+written, becomes the product's, and `create` then installs its packages.
+Each starter is a whole product with its own checks (`npm run verify` in
+it); the core's own checks leave the `starters/` folder out.
 
 ## What stays with a company
 

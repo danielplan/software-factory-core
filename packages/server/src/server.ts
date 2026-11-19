@@ -17,10 +17,13 @@ import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
+import { WEBHOOK_PATH } from "./builder/signals.ts";
 import { readBody, send } from "./http.ts";
 import { on, optionalText, record } from "./asked.ts";
 import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
+import { answerWorld, isWorldRoute } from "./kobble/world-route.ts";
+import type { ExplorationWorlds } from "./kobble/explorations/worlds.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -82,6 +85,7 @@ export function startServer(options: {
       routes,
       watchers,
       boardTools: kobble.boardTools,
+      worlds: kobble.worlds,
       ...options,
     });
   });
@@ -89,6 +93,7 @@ export function startServer(options: {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
     options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
+    options.session.work.listenAt(`http://localhost:${String(port)}/api`);
     options.session.begin();
     kobble.serveToolsAt(`http://localhost:${String(port)}/api`);
     kobble.start();
@@ -143,9 +148,6 @@ function routesFor(session: Session): Record<string, Route> {
     "POST /api/add-ons": (body) => {
       session.switchAddOn(text(body, "id"), on(body));
     },
-    "POST /api/connect/own-board": () => {
-      session.chooseBoard("none");
-    },
     ...workRoutes(session),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
@@ -161,6 +163,7 @@ type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
   boardTools: (id: string) => BoardTools;
+  worlds: ExplorationWorlds;
   page: string;
   session: Session;
 };
@@ -176,8 +179,12 @@ async function answer(
     send(response, 403, { error: "Not here." });
   } else if (url.pathname === "/api/events") {
     stream(response, context);
+  } else if (isWorldRoute(url)) {
+    await answerWorld(incoming, response, url, context.worlds);
   } else if (isAgentTools(incoming, url)) {
     await answerAgentTools(incoming, response, url, context);
+  } else if (url.pathname === WEBHOOK_PATH && incoming.method === "POST") {
+    await answerSignal(incoming, response, context.session);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (THEME_ROUTES.has(url.pathname)) {
@@ -187,6 +194,25 @@ async function answer(
   } else {
     await answerApi(incoming, response, context.routes, url);
   }
+}
+
+// A signal GitHub forwarded (gh webhook forward), signed with the
+// factory's secret.
+async function answerSignal(
+  incoming: IncomingMessage,
+  response: ServerResponse,
+  session: Session,
+): Promise<void> {
+  let body = "";
+  for await (const chunk of incoming) body += String(chunk);
+  const header = incoming.headers["x-hub-signature-256"];
+  const event = incoming.headers["x-github-event"];
+  const taken = session.work.signal(
+    typeof event === "string" ? event : "",
+    body,
+    typeof header === "string" ? header : undefined,
+  );
+  send(response, taken ? 200 : 403, taken ? {} : { error: "Not GitHub's." });
 }
 
 async function answerApi(
@@ -286,5 +312,12 @@ function workRoutes(session: Session) {
       session.work.orRefuse().switch("chat", on(body));
     },
     "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
+    "POST /api/work/answer": (body: unknown) => {
+      const number = Number((body as { number?: unknown } | null)?.number);
+      if (!Number.isInteger(number)) throw new Refused("Say which card.");
+      const said = text(body, "text").trim();
+      if (said === "") throw new Refused("Write or pick an answer first.");
+      return session.work.orRefuse().answer(number, said);
+    },
   };
 }

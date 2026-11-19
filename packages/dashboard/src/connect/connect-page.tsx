@@ -1,4 +1,3 @@
-import { LayoutGrid } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type AddOnView, type Board } from "@/api";
@@ -8,14 +7,6 @@ import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
 
-// The factory's own board: "none", as the company file says.
-const OWN = {
-  id: "none",
-  icon: <LayoutGrid aria-hidden />,
-  title: "The factory's own board",
-  text: "Work stays here, on the board in this app. Nothing to connect.",
-};
-
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
 export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
@@ -23,16 +14,16 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em]">
+        <h1 className="text-[22px] font-semibold tracking-[-0.015em]">
           Where should the factory keep its work?
         </h1>
         <p className="text-muted-foreground">
-          The ideas you agree to become work on a board, and the factory builds
-          from there. Keep it here, or use the board your team already has.
+          The ideas you agree to become cards on your team's board, and the
+          factory builds from there. Connect the board it works from.
         </p>
       </header>
       {done ? (
-        <section className="grid gap-4 rounded-3xl bg-card p-6 shadow-soft">
+        <section className="grid gap-4 rounded-xl bg-card p-6 shadow-soft">
           <p className="text-[15px] font-medium text-success">{done}</p>
           <Button
             className="h-10 justify-self-start px-4"
@@ -44,15 +35,16 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
           </Button>
         </section>
       ) : (
-        <TrackerChoice trackers={trackers} current="none" onDone={setDone} />
+        <TrackerChoice trackers={trackers} current="github" onDone={setDone} />
       )}
     </div>
   );
 }
 
-// The factory's own board, or a board of one of the tracker add-ons (those
-// the page has steps for): the choices, and under the chosen one its
-// steps, each checked. Used right after setup and on Settings.
+// A board of one of the tracker add-ons (those the page has steps for):
+// the choices, and under the chosen one its steps, each checked. Used right
+// after setup and on Settings. There is no board of the factory's own:
+// Kobble's Factory works from a connected board.
 export function TrackerChoice({
   trackers,
   current,
@@ -65,9 +57,8 @@ export function TrackerChoice({
   connected?: Board;
   onDone: (message: string) => void;
 }>) {
-  const [choice, setChoice] = useState(current);
+  const [choice, setChoice] = useState(current === "none" ? "github" : current);
   const choices = [
-    OWN,
     ...trackers
       .filter((tracker) => TRACKER_STEPS[tracker.id])
       .map((tracker) => ({
@@ -95,20 +86,10 @@ export function TrackerChoice({
         setProblem(messageOf(error));
       });
   };
-  const ownBoard = () => {
-    setProblem(null);
-    post("/api/connect/own-board")
-      .then(() => {
-        onDone("Work stays on the factory's own board.");
-      })
-      .catch((error: unknown) => {
-        setProblem(messageOf(error));
-      });
-  };
   return (
     <div className="grid gap-5">
       <div
-        className="grid gap-3 sm:grid-cols-3"
+        className="grid gap-3 sm:grid-cols-2"
         role="radiogroup"
         aria-label="Tracker"
       >
@@ -125,11 +106,6 @@ export function TrackerChoice({
           />
         ))}
       </div>
-      {choice === "none" && (
-        <Button className="h-10 justify-self-start px-4" onClick={ownBoard}>
-          Use the factory's board
-        </Button>
-      )}
       {Steps && <Steps onDone={onDone} connected={connected?.[choice]} />}
       {problem && <ProblemBox title="That did not work" text={problem} />}
     </div>

@@ -7,14 +7,19 @@ import {
   agoOf,
   alreadyLine,
   countWords,
+  doneWords,
   exploreWords,
+  missionWords,
   nextAfter,
+  lookAgainWords,
   originWords,
   personaPlaceOf,
   primaryOf,
   shownOf,
   statusWords,
+  stepWords,
   syncLine,
+  TYPE_WORDS,
   tintIndexOf,
   whoOf,
 } from "../src/signals/view.ts";
@@ -101,16 +106,34 @@ test("times are said plainly, and the sync line says where it stands", () => {
   assert.equal(agoOf("2026-11-16T08:00:00.000Z", NOW), "yesterday");
   assert.equal(agoOf("2026-11-13T08:00:00.000Z", NOW), "4 days ago");
   assert.equal(
-    syncLine({ connected: false, last: null, problem: null }, NOW),
+    syncLine(
+      {
+        connected: false,
+        address: null,
+        last: null,
+        next: null,
+        problem: null,
+      },
+      NOW,
+    ),
     "Not connected to the live app",
   );
   assert.equal(
-    syncLine({ connected: true, last: null, problem: null }, NOW),
+    syncLine(
+      { connected: true, address: null, last: null, next: null, problem: null },
+      NOW,
+    ),
     "Not synced with the live app yet · every 30 min",
   );
   assert.equal(
     syncLine(
-      { connected: true, last: "2026-11-17T09:50:00.000Z", problem: null },
+      {
+        connected: true,
+        address: null,
+        last: "2026-11-17T09:50:00.000Z",
+        next: null,
+        problem: null,
+      },
       NOW,
     ),
     "Synced with the live app 10 min ago · every 30 min",
@@ -160,4 +183,54 @@ test("a persona's page opens on their signals, their tests or one test", () => {
     tab: "tests",
     test: "T-0001",
   });
+});
+
+test("when the kobold looks again, in words", () => {
+  assert.equal(lookAgainWords(null, NOW), "The kobold looks again soon.");
+  assert.equal(
+    lookAgainWords("2026-11-17T10:28:00.000Z", NOW),
+    "The kobold looks again in 28 minutes.",
+  );
+  assert.equal(
+    lookAgainWords("2026-11-17T10:00:30.000Z", NOW),
+    "The kobold looks again in a minute.",
+  );
+});
+
+test("a mission says the step it is on; its signals, where they happened", () => {
+  assert.equal(
+    missionWords({ status: "queued", doing: null }),
+    "Waits for its turn",
+  );
+  assert.equal(
+    missionWords({ status: "running", doing: null }),
+    "Opening the app…",
+  );
+  assert.equal(
+    missionWords({ status: "running", doing: "Step 2: Paying" }),
+    "Step 2: Paying",
+  );
+  assert.equal(
+    stepWords(row({ step: { test: "T-0001", number: 2, did: "Paid" } })),
+    "At step 2: Paid",
+  );
+  assert.equal(stepWords(row()), null);
+  assert.equal(TYPE_WORDS.question, "Open question");
+  assert.equal(TYPE_WORDS.idea, "Idea");
+});
+
+test("what a button did, in words", () => {
+  assert.equal(
+    doneWords("fix", row(), { signal: { to: "#12" } }),
+    "#12 is in the factory's To do",
+  );
+  assert.equal(
+    doneWords("fix", row(), { signal: { to: null } }),
+    "S-0001 is in the factory's To do",
+  );
+  assert.equal(doneWords("dismiss", row(), {}), "Dismissed");
+  assert.equal(
+    doneWords("explore", row(), { exploration: { id: "X-2" } }),
+    "X-2 is waiting in Explorations",
+  );
 });

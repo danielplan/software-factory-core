@@ -8,10 +8,13 @@
 import type { Stage } from "../api.ts";
 import {
   AGREEMENT_NOTES,
-  CONVERSATION_NOTES,
+  type Ask,
   NOTES,
   type Note,
+  readAsk,
   readNote,
+  stripMarker,
+  untilOf,
 } from "./protocol.ts";
 
 export type Message = {
@@ -47,7 +50,7 @@ export type BoardCard = {
 
 // The coach answers in the cards (chat); the builder builds (build).
 export type Lane = "chat" | "build";
-export type JobKind = "plan" | "build" | "feedback";
+export type JobKind = "build" | "feedback";
 export type Job = { lane: Lane; kind: JobKind; number: number };
 
 export type Decision = {
@@ -65,20 +68,21 @@ type Found = Decision & { order: Record<JobKind | "resumed", Job[]> };
 export function decide(
   cards: BoardCard[],
   running: ReadonlySet<number>,
+  now: Date = new Date(),
 ): Decision {
   const found: Found = {
     moves: [],
     comments: [],
     jobs: [],
     asks: [],
-    order: { feedback: [], resumed: [], build: [], plan: [] },
+    order: { feedback: [], resumed: [], build: [] },
   };
-  for (const card of cards) look(card, running, found);
-  const { feedback, resumed, build, plan } = found.order;
+  for (const card of cards) look(card, running, found, now);
+  const { feedback, resumed, build } = found.order;
   return {
     moves: found.moves,
     comments: found.comments,
-    jobs: [...feedback, ...resumed, ...build, ...plan],
+    jobs: [...feedback, ...resumed, ...build],
     asks: found.asks,
   };
 }
@@ -96,7 +100,12 @@ export function asksIfItWorked(
   return card.awaitsAnswer && (isFinished(card) || card.stage === "done");
 }
 
-function look(card: BoardCard, running: ReadonlySet<number>, found: Found) {
+function look(
+  card: BoardCard,
+  running: ReadonlySet<number>,
+  found: Found,
+  now: Date,
+) {
   if (asksIfItWorked(card)) found.asks.push(card.number);
   if (isFinished(card)) {
     if (card.stage !== "done")
@@ -107,43 +116,44 @@ function look(card: BoardCard, running: ReadonlySet<number>, found: Found) {
     found.moves.push({ number: card.number, stage: "backlog" });
     return;
   }
-  if (running.has(card.number)) return;
+  if (running.has(card.number) || pausedAt(card, now)) return;
   lookInStage(card, found);
 }
+
+// Paused by Claude's usage limit: the card waits until it resets, unless
+// the owner wrote since.
+function pausedAt(card: BoardCard, now: Date): boolean {
+  const last = card.thread.findLast((m) => readNote(m.body) === "paused");
+  if (!last || ownerSpokeAfter(card.thread, ["paused"])) return false;
+  const until = untilOf(last.body);
+  const later = card.thread.slice(card.thread.indexOf(last) + 1);
+  const resumed = later.some((m) => readNote(m.body) !== null);
+  return !resumed && until !== null && until.getTime() > now.getTime();
+}
+
+// Every note but a pause, which only says the factory waits.
+const REVIEW_NOTES: readonly Note[] = NOTES.filter((n) => n !== "paused");
 
 function lookInStage(card: BoardCard, found: Found): void {
   const { number } = card;
   const { order } = found;
   switch (card.stage) {
-    case "planning":
-      if (
-        !lastNote(card.thread, CONVERSATION_NOTES) ||
-        ownerSpokeAfter(card.thread, CONVERSATION_NOTES)
-      )
-        order.plan.push({ lane: "chat", kind: "plan", number });
+    case "todo":
+      // It waits in To do until the cards it depends on are done, and
+      // while a question on it is open; there is no planning stage to send
+      // it back to (work is thought through outside the factory).
+      if (card.waitsFor.length > 0 || waitsForAnswer(card)) break;
+      order.build.push({ lane: "build", kind: "build", number });
       break;
-    case "todo": {
-      // It waits in Ready until the cards it depends on are done.
-      if (card.waitsFor.length > 0) break;
-      const why = notReady(card);
-      if (why === null)
-        order.build.push({ lane: "build", kind: "build", number });
-      else {
-        found.moves.push({ number, stage: "planning" });
-        found.comments.push({
-          number,
-          note: "moved-back",
-          body: `The builder moved this card back to **Planning** because ${why}. Once the plan is agreed, move it to **Ready** again.`,
-        });
-      }
-      break;
-    }
     case "doing":
       if (!waitingAfterFailedChecks(card.thread))
         order.resumed.push({ lane: "build", kind: "build", number });
       break;
     case "review":
-      if (card.pullRequest && ownerSpokeAfter(reviewTimeline(card), NOTES))
+      if (
+        card.pullRequest &&
+        ownerSpokeAfter(reviewTimeline(card), REVIEW_NOTES)
+      )
         order.feedback.push({ lane: "build", kind: "feedback", number });
       break;
     default:
@@ -158,22 +168,15 @@ export function reviewTimeline(card: BoardCard): Message[] {
   );
 }
 
-// Why a card in Ready cannot be built yet; none when it can. A plan is
-// agreed in the card's text or in the factory's note; a comment after the
-// agreed plan, or an open question, sends it back. A question the builder
-// asked is answered by the owner's comment.
-function notReady(card: BoardCard): string | null {
-  const { thread } = card;
-  const hasPlan =
-    card.agreedInText || thread.some((m) => readNote(m.body) === "plan-agreed");
-  if (!hasPlan) return "the plan is not agreed yet";
-  const last = lastNote(thread, AGREEMENT_NOTES);
-  if (last === "question") return "a question about the plan is still open";
-  if (last === "plan-agreed" && ownerSpokeAfter(thread, AGREEMENT_NOTES))
-    return "there is a new comment after the agreed plan";
-  if (last === "blocked" && !ownerSpokeAfter(thread, ["blocked"]))
-    return "the builder's question is not answered yet";
-  return null;
+// A card in To do waits while the factory's last question on it (the
+// builder's, or one from before) has no answer from the owner yet. Its text
+// is the plan: it came agreed from an exploration, or from a signal.
+function waitsForAnswer(card: BoardCard): boolean {
+  const last = lastNote(card.thread, AGREEMENT_NOTES);
+  return (
+    (last === "question" || last === "blocked") &&
+    !ownerSpokeAfter(card.thread, AGREEMENT_NOTES)
+  );
 }
 
 // The owner wrote after the factory's last note of these kinds (or wrote
@@ -202,4 +205,18 @@ function waitingAfterFailedChecks(thread: Message[]): boolean {
     thread.some((m) => gaveUp.includes(readNote(m.body) ?? "started")) &&
     !ownerSpokeAfter(thread, gaveUp)
   );
+}
+
+// The factory waits for the owner on this card: its last word is a
+// question (planning) or a stop that only the owner can unblock, and the
+// owner has not answered yet. The question as the Factory page shows it.
+export function waitsForOwner(
+  card: Pick<BoardCard, "thread" | "closed">,
+): { text: string; ask: Ask | null } | null {
+  if (card.closed) return null;
+  const asking: readonly Note[] = ["question", "blocked"];
+  const last = card.thread.findLast((m) => readNote(m.body) !== null);
+  if (!last || !asking.includes(readNote(last.body) ?? "started")) return null;
+  if (ownerSpokeAfter(card.thread, NOTES)) return null;
+  return { text: stripMarker(last.body), ask: readAsk(last.body) };
 }

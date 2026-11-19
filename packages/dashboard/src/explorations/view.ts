@@ -4,10 +4,10 @@
 
 type Small = { id: string; kind: string; agreed: boolean };
 
-export function columnsOf(
-  things: Small[],
+export function columnsOf<T extends Small>(
+  things: T[],
   links: { from: string; to: string }[],
-): Small[][] {
+): T[][] {
   const depth = new Map(things.map((thing) => [thing.id, 0]));
   // As many rounds as there are things: enough for the longest way, and
   // a loop cannot go on for ever.
@@ -18,7 +18,7 @@ export function columnsOf(
       if (from !== undefined && to !== undefined && to < from + 1)
         depth.set(link.to, Math.min(from + 1, things.length));
     }
-  const columns: Small[][] = [];
+  const columns: T[][] = [];
   for (const thing of things) {
     const at = depth.get(thing.id) ?? 0;
     columns[at] = [...(columns[at] ?? []), thing];

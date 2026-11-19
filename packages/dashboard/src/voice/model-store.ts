@@ -3,18 +3,22 @@
 // browser's usual download cache can refuse files as big as the model's
 // (about 430 MB), so the model would be downloaded again on every Talk. A
 // file is written under a temporary name and renamed once complete, so an
-// interrupted download is never taken for a finished one.
+// interrupted download is never taken for a finished one. Once the models
+// are ready, files they no longer use (an earlier version) are removed.
 
 export type Folder = Pick<
   FileSystemDirectoryHandle,
-  "getFileHandle" | "removeEntry"
+  "getFileHandle" | "removeEntry" | "keys"
 >;
 
 export class ModelStore {
   private folder: Promise<Folder> | null;
-  // A model file (not a small settings file, some of which do not exist and
-  // are asked for every time) was not kept: it comes from the internet now.
-  downloading = false;
+  // The model files (not the small settings files, some of which do not
+  // exist and are asked for every time) that were not kept: they come from
+  // the internet now.
+  private missing: string[] = [];
+  // The files asked for: the ones the models use.
+  private used = new Set<string>();
 
   constructor(folder?: Promise<Folder>) {
     this.folder = folder ?? null;
@@ -31,6 +35,7 @@ export class ModelStore {
   }
 
   async match(key: string): Promise<Response | undefined> {
+    this.used.add(name(key));
     try {
       const file = await (
         await (await this.open()).getFileHandle(name(key))
@@ -39,9 +44,15 @@ export class ModelStore {
         headers: { "content-length": String(file.size) },
       });
     } catch {
-      if (key.includes("/onnx/")) this.downloading = true;
+      if (key.includes("/onnx/")) this.missing.push(key);
       return undefined;
     }
+  }
+
+  // Whether a file of this model (its name on Hugging Face) is being
+  // downloaded.
+  downloads(model: string): boolean {
+    return this.missing.some((key) => key.includes(`/${model}/`));
   }
 
   async put(key: string, response: Response): Promise<void> {
@@ -62,6 +73,15 @@ export class ModelStore {
       // works, and is downloaded again next time.
       await folder.removeEntry(part).catch(() => {});
     }
+  }
+
+  // Removes the kept files the models did not ask for.
+  async keepOnlyUsed(): Promise<void> {
+    const folder = await this.open();
+    const unused: string[] = [];
+    for await (const kept of folder.keys())
+      if (!this.used.has(kept)) unused.push(kept);
+    for (const kept of unused) await folder.removeEntry(kept).catch(() => {});
   }
 }
 

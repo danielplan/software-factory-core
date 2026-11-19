@@ -36,7 +36,7 @@ export function WorkshopPage({
                 href={part.href}
                 aria-current={here ? "page" : undefined}
                 className={cn(
-                  "rounded-[10px] px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground",
+                  "rounded-[10px] px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground",
                   here && "bg-card text-foreground shadow-current",
                 )}
               >
