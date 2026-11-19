@@ -129,7 +129,7 @@ the skills' words: a path into `docs/` may also point into any knowledge base
 there is (a `docs/` or `context/` folder with an index.md, as the template).
 A path in none of them is still reported, with a test for both.
 
-Checked again in eight later sessions on 2026-11-19 (the branch up to date
+Checked again in nine later sessions on 2026-11-19 (the branch up to date
 with main each time), the last one just before the pull request: `npm run
 verify` passes in full, 311 of 311 tests, 97% of lines covered. The scope is
 finished; nothing more to build.
