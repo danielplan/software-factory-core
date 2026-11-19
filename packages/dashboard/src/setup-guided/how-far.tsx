@@ -8,8 +8,10 @@ import { type Card, messageOf, post } from "@/api";
 import { cn } from "@/lib/utils";
 
 import { STAGES, stageOf, textOf } from "./card-bits";
+import { useT } from "@/i18n/use-t";
 
 export function HowFar({ card }: Readonly<{ card: Card }>) {
+  const t = useT();
   const guess = stageOf(card);
   const [chosen, choose] = useState<string>(guess);
   const [problem, setProblem] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function HowFar({ card }: Readonly<{ card: Card }>) {
   };
   return (
     <div className="grid gap-2.5 rounded-xl bg-card px-5 py-[18px] shadow-card">
-      <span className="font-semibold">How far is it?</span>
+      <span className="font-semibold">{t.setup.howFar}</span>
       <div
         role="radiogroup"
         className="flex w-fit flex-wrap gap-0.5 rounded-[14px] bg-[#eceef2] p-1"
@@ -44,11 +46,13 @@ export function HowFar({ card }: Readonly<{ card: Card }>) {
               pick(stage);
             }}
           >
-            {stage}
+            {t.setup.stages[stage] ?? stage}
           </button>
         ))}
       </div>
-      <span className="text-xs text-faint">My guess: {textOf(card)}</span>
+      <span className="text-xs text-faint">
+        {t.setup.myGuess(textOf(card))}
+      </span>
       {problem && (
         <span className="text-[13px] text-destructive">{problem}</span>
       )}

@@ -14,6 +14,7 @@ import { isLook, TheLook } from "./the-look";
 import { FirstExploration } from "./first-exploration";
 import { HowFar } from "./how-far";
 import { TeamTiles } from "./team-tiles";
+import { useT } from "@/i18n/use-t";
 
 export type CardActs = { onRemove: (id: string) => void };
 
@@ -64,6 +65,7 @@ function Body({
   acts: CardActs;
   onProblem: (problem: string | null) => void;
 }>) {
+  const t = useT();
   if (stepId === "product") return <Product cards={cards} acts={acts} />;
   if (stepId === "people")
     return (
@@ -80,9 +82,11 @@ function Body({
   if (stepId === "how")
     return (
       <>
-        <Section title="For everyone" />
+        <Section title={t.setup.cards.forEveryone} />
         <TeamTiles />
-        {cards.some((c) => !isLook(c)) && <Section title="Add-ons" />}
+        {cards.some((c) => !isLook(c)) && (
+          <Section title={t.setup.cards.addOns} />
+        )}
         <Grid>
           {cards
             .filter((c) => !isLook(c))
@@ -90,7 +94,7 @@ function Body({
               <Tile key={card.id} card={card} acts={acts} />
             ))}
         </Grid>
-        <Section title="The look" note="for everyone" />
+        <Section title={t.setup.cards.look} note={t.setup.cards.lookNote} />
         <TheLook cards={cards} area={area} />
       </>
     );
@@ -104,25 +108,30 @@ function Body({
 }
 
 function Product({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
+  const t = useT();
   const howReal = cards.find(isHowReal);
   const apps = cards.filter(isApp);
   const rest = cards.filter((card) => card !== howReal && !isApp(card));
   return (
     <>
       {howReal && <HowFar card={howReal} />}
-      <Section title="Apps I found" note={`${String(apps.length)} apps`} />
+      <Section
+        title={t.setup.cards.apps}
+        note={t.setup.cards.appsNote(apps.length)}
+      />
       <Grid>
         {apps.map((card) => (
           <Tile key={card.id} card={card} acts={acts} app />
         ))}
       </Grid>
-      {rest.length > 0 && <Section title="Also in your project" />}
+      {rest.length > 0 && <Section title={t.setup.cards.alsoHere} />}
       {rest.length > 0 && <Rows cards={rest} acts={acts} />}
     </>
   );
 }
 
 function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
+  const t = useT();
   const people = cards.filter(isPerson);
   const rest = cards.filter((card) => !isPerson(card));
   return (
@@ -137,17 +146,15 @@ function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
           />
         ))}
         <p className="border-t border-border-soft px-[18px] py-3 text-right text-[12.5px] text-muted-foreground">
-          Everyone can do everything. Kobble only uses this list to recognise
-          who is at a computer.
+          {t.setup.cards.everyone}
         </p>
       </div>
-      {rest.length > 0 && <Section title="Your board" />}
+      {rest.length > 0 && <Section title={t.setup.cards.board} />}
       {rest.map((card) => (
         <BoardCard key={card.id} card={card} acts={acts} />
       ))}
       <p className="flex gap-2.5 rounded-[14px] bg-wash px-3.5 py-3 text-[13px] text-wash-foreground">
-        Every computer with Kobble can build. A card is built by one at a time:
-        the one that starts it says so on the card, and the others leave it.
+        {t.setup.cards.building}
       </p>
     </>
   );

@@ -17,8 +17,6 @@ type Signal = Pick<
 
 export const TYPE_WORDS: Record<Signal["type"], string> = W.types;
 
-export const SOURCE_WORDS: Record<Signal["source"], string> = W.sources;
-
 export function whoOf(
   signal: Pick<Signal, "personaName">,
   m: Words = W,
@@ -143,8 +141,6 @@ export function stepWords(
 ): string | null {
   return signal.step ? m.step(signal.step.number, signal.step.did) : null;
 }
-
-export const TEST_WORDS = W.tests;
 
 // On a persona's page, what is open: their signals (#personas/<id>), their
 // tests (#personas/<id>/tests) or one test (#personas/<id>/tests/<test>).

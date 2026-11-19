@@ -52,6 +52,7 @@ const en = {
   closed:
     "The factory's window seems closed. Start it again with software-factory.",
   opening: "Opening the factory…",
+  misfit: "Something in the factory's files does not fit",
 };
 
 export const shell = area(
@@ -105,6 +106,7 @@ export const shell = area(
     closed:
       "La finestra della fabbrica sembra chiusa. Riavviala con software-factory.",
     opening: "Apro la fabbrica…",
+    misfit: "Qualcosa nei file della fabbrica non torna",
   },
   {
     pages: {
@@ -154,5 +156,6 @@ export const shell = area(
     closed:
       "Das Fenster der Fabrik scheint geschlossen. Starte sie neu mit software-factory.",
     opening: "Die Fabrik öffnet sich…",
+    misfit: "Etwas in den Dateien der Fabrik passt nicht",
   },
 );

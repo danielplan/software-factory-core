@@ -8,6 +8,7 @@ import { showsVoice } from "@/voice/call";
 import { useVoiceCall } from "@/voice/use-voice-call";
 import type { VoiceCall } from "@/voice/voice-call";
 import { VoiceView } from "@/voice/voice-view";
+import { useT } from "@/i18n/use-t";
 
 // Where the owner answers: the box to type in, with Talk beside it (or, as
 // a big box, below it with Send); during a call, the voice in its place.
@@ -15,7 +16,7 @@ export function Answer({
   call,
   coach,
   onSay,
-  placeholder = "Answer the coach…",
+  placeholder,
   className,
   big = false,
 }: Readonly<{
@@ -28,6 +29,7 @@ export function Answer({
   // The first box on a page: a few lines to write in, the buttons below.
   big?: boolean;
 }>) {
+  const t = useT();
   const talking = showsVoice(useVoiceCall(call));
   if (talking)
     return (
@@ -42,7 +44,7 @@ export function Answer({
   return (
     <Reply
       working={coach.working}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t.setup.coach.answer}
       className={className}
       big={big}
       onSay={onSay}
@@ -68,6 +70,7 @@ function Reply({
   onSay: (text: string) => void;
   onTalk: () => void;
 }>) {
+  const t = useT();
   const [text, setText] = useState("");
   const send = () => {
     if (!text.trim() || working) return;
@@ -88,7 +91,7 @@ function Reply({
       }}
     >
       <label htmlFor="coach-reply" className="sr-only">
-        Answer the coach
+        {t.setup.coach.answerLabel}
       </label>
       <textarea
         id="coach-reply"
@@ -124,15 +127,20 @@ function Buttons({
   canSend,
   onTalk,
 }: Readonly<{ big: boolean; canSend: boolean; onTalk: () => void }>) {
+  const t = useT();
   return (
     <span className={cn("flex items-center gap-2", big && "justify-end")}>
-      <IconAction label="Talk" title="Talk instead of typing" onClick={onTalk}>
+      <IconAction
+        label={t.setup.coach.talk}
+        title={t.setup.coach.talkTitle}
+        onClick={onTalk}
+      >
         <Mic aria-hidden />
       </IconAction>
       <Button
         type="submit"
         size="icon"
-        aria-label="Send"
+        aria-label={t.setup.coach.send}
         className="size-10 rounded-full"
         disabled={!canSend}
       >

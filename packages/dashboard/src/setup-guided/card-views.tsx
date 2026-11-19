@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { appParts, fromLine, textOf, withHidden } from "./card-bits";
 import { ICON } from "./icons";
 import type { CardActs } from "./step-cards";
+import { useT } from "@/i18n/use-t";
 
 function Icon({ card }: Readonly<{ card: Card }>) {
   const Shown = card.icon ? ICON[card.icon] : null;
@@ -25,10 +26,11 @@ function Icon({ card }: Readonly<{ card: Card }>) {
 }
 
 function Remove({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
+  const t = useT();
   return (
     <button
       type="button"
-      aria-label={`Take off ${card.title}`}
+      aria-label={t.setup.cards.takeOff(card.title)}
       className="grid size-7 flex-none place-items-center rounded-lg text-faint hover:bg-ground hover:text-foreground-2"
       onClick={(event) => {
         event.stopPropagation();
@@ -53,6 +55,7 @@ function Editable({
   value: string;
   className?: string;
 }>) {
+  const t = useT();
   // The text keeps what the card shows apart: its folder, its source.
   const whole = (now: string) =>
     field === "text" ? withHidden(card, now) : now;
@@ -62,7 +65,9 @@ function Editable({
       suppressContentEditableWarning
       spellCheck={false}
       role="textbox"
-      aria-label={field === "title" ? "Title" : "What it says"}
+      aria-label={
+        field === "title" ? t.setup.cards.title : t.setup.cards.whatItSays
+      }
       className={cn(
         "-mx-1 rounded-md px-1 outline-none hover:bg-ground focus:bg-ground",
         className,
@@ -92,9 +97,10 @@ export function Tile({
   person = false,
   app = false,
 }: Readonly<{ card: Card; acts: CardActs; person?: boolean; app?: boolean }>) {
+  const t = useT();
   const parts = app
     ? appParts(card)
-    : { text: textOf(card), from: fromLine(card) };
+    : { text: textOf(card), from: fromLine(card, t.setup.guess) };
   return (
     <article
       className={cn(
@@ -129,6 +135,7 @@ export function Tile({
 }
 
 export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -144,7 +151,9 @@ export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
           <Editable card={card} field="text" value={textOf(card)} />
         </div>
       </div>
-      <span className="text-xs text-faint max-sm:hidden">{fromLine(card)}</span>
+      <span className="text-xs text-faint max-sm:hidden">
+        {fromLine(card, t.setup.guess)}
+      </span>
       <Remove card={card} acts={acts} />
     </div>
   );
@@ -208,6 +217,7 @@ export function NewPersona({
   area,
   onProblem,
 }: Readonly<{ area: string; onProblem: (problem: string | null) => void }>) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   if (!open)
     return (
@@ -220,7 +230,7 @@ export function NewPersona({
       >
         <span className="grid justify-items-center gap-1.5">
           <Plus className="size-[18px]" aria-hidden />
-          Add a real customer
+          {t.setup.cards.addCustomer}
         </span>
       </button>
     );
@@ -244,6 +254,7 @@ function PersonaForm({
   onProblem: (problem: string | null) => void;
   onDone: () => void;
 }>) {
+  const t = useT();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const add = () => {
@@ -264,18 +275,18 @@ function PersonaForm({
       }}
     >
       <label className="grid gap-1 text-xs text-muted-foreground">
-        Who they are
+        {t.setup.cards.who}
         <input
           className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none"
           value={title}
-          placeholder="A first boat owner"
+          placeholder={t.setup.cards.whoExample}
           onChange={(event) => {
             setTitle(event.target.value);
           }}
         />
       </label>
       <label className="grid gap-1 text-xs text-muted-foreground">
-        What they do and want
+        {t.setup.cards.what}
         <textarea
           rows={2}
           className="rounded-lg bg-ground px-3 py-2 text-[13px] text-foreground outline-none"
@@ -287,10 +298,10 @@ function PersonaForm({
       </label>
       <div className="flex gap-2">
         <Button type="submit" size="pill-sm" disabled={!title.trim()}>
-          Add
+          {t.setup.cards.add}
         </Button>
         <Button type="button" size="pill-sm" variant="ring" onClick={onDone}>
-          Cancel
+          {t.setup.cards.cancel}
         </Button>
       </div>
     </form>

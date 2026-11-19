@@ -1,4 +1,4 @@
-// Times, dates and numbers as people in the language shown write them.
+// Times and dates as people in the language shown write them.
 
 import type { Locale } from "./locale.ts";
 
@@ -10,14 +10,6 @@ export function clockIn(locale: Locale, iso: string): string {
   });
 }
 
-// A day ("19 Nov", "19. Nov.").
-export function dayIn(locale: Locale, iso: string): string {
-  return new Date(iso).toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-  });
-}
-
 // A day and a time.
 export function momentIn(locale: Locale, iso: string): string {
   return new Date(iso).toLocaleString(locale, {
@@ -26,8 +18,4 @@ export function momentIn(locale: Locale, iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-export function numberIn(locale: Locale, value: number): string {
-  return value.toLocaleString(locale);
 }

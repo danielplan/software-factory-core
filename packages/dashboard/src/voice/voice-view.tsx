@@ -10,7 +10,8 @@ import { useSpokenLanguage } from "./use-spoken-language";
 import { useVoiceCall } from "./use-voice-call";
 import type { VoiceCall } from "./voice-call";
 import { VoiceStatus } from "./voice-status";
-import { MOMENT, type OrbMode, VoiceOrb } from "./voice-orb";
+import { type OrbMode, VoiceOrb } from "./voice-orb";
+import { useT } from "@/i18n/use-t";
 
 // During a call, in place of the box to type: the glow that shows what is
 // happening (voice-orb.tsx), a line saying it in words (with a thin bar
@@ -27,15 +28,16 @@ export function VoiceView({
   coachProblem: string | null;
   onEnd: () => void;
 }>) {
+  const t = useT();
   const state = useVoiceCall(call);
   const mode = modeOf(state);
   const [language, chooseLanguage] = useSpokenLanguage(call);
-  const status = statusLine(state, coachProblem);
+  const status = statusLine(state, coachProblem, t.voice);
   const ended = state.phase === "off";
   return (
     <div className="grid justify-items-center gap-4 rounded-xl bg-surface px-3 pt-6 pb-3">
       {!ended && <VoiceOrb call={call} mode={mode} />}
-      <VoiceStatus status={status} moment={ended ? "" : MOMENT[mode]} />
+      <VoiceStatus status={status} moment={ended ? "" : t.voice.orb[mode]} />
       <HeardWords call={call} />
       {state.quietly && (
         <p className="text-[11px] text-muted-foreground">
@@ -54,7 +56,7 @@ export function VoiceView({
             }}
           >
             <RotateCcw aria-hidden />
-            Try again
+            {t.voice.tryAgain}
           </Button>
         )}
         <Button
@@ -68,7 +70,7 @@ export function VoiceView({
           onClick={onEnd}
         >
           {ended ? <X aria-hidden /> : <PhoneOff aria-hidden />}
-          {ended ? "Close" : "End call"}
+          {ended ? t.voice.close : t.voice.endCall}
         </Button>
       </div>
     </div>

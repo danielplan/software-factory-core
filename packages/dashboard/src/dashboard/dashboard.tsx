@@ -16,6 +16,7 @@ import { SignalsPage } from "@/signals/signals-page";
 import { HomePage } from "./home-page";
 import { SettingsTab } from "./settings-tab";
 import { SystemPage } from "./system-page";
+import { useT } from "@/i18n/use-t";
 
 export type FactoryState = Extract<State, { mode: "factory" }>;
 
@@ -51,6 +52,7 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
+  const t = useT();
   const place = usePlace();
   // Just set up, connecting where work is tracked comes first.
   const { page, open } = state.onboarding
@@ -64,10 +66,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
       fill={page === "explore" && open !== null}
     >
       {state.problems.length > 0 && (
-        <ProblemBox
-          title="Something in the factory's files does not fit"
-          text={state.problems.join(" · ")}
-        />
+        <ProblemBox title={t.shell.misfit} text={state.problems.join(" · ")} />
       )}
       <PageBody state={state} page={page} open={open} />
     </Shell>
