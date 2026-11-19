@@ -21,7 +21,7 @@ export function LiveAppCard() {
     >
       {sync?.connected ? (
         <div className="grid gap-3">
-          <p className="text-sm">
+          <p className="text-[13px]">
             Reads from{" "}
             <span className="font-medium break-all">{sync.address}</span>
           </p>
@@ -40,7 +40,7 @@ export function LiveAppCard() {
           </Button>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground">
           Not connected. Connect it on{" "}
           <a href="#signals" className="font-semibold text-blue">
             Signals

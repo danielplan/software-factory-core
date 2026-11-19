@@ -28,7 +28,7 @@ software-factory card show <number>          a card: its text, comments, agreed 
 software-factory card new <title> [--body-file <file>] [--found-while <number>]
                                              a new card in the backlog (something noticed
                                              while working on another card links back to it)
-software-factory card move <number> <stage>  backlog, planning, ready, doing, review, done
+software-factory card move <number> <stage>  backlog, ready, doing, review, done
 software-factory card comment <number> --body <text> | --body-file <file>
 software-factory card depends <number> --on <number>
                                              the card is built only after the other one
@@ -274,7 +274,7 @@ function stageOrRefuse(name: string) {
   const stage = stageNamed(name);
   if (!stage)
     throw new Refused(
-      `“${name}” is not a stage: backlog, planning, ready, doing, review or done.`,
+      `“${name}” is not a stage: backlog, ready, doing, review or done.`,
     );
   return stage;
 }

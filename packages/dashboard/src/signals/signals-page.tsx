@@ -145,7 +145,7 @@ function Board({
           <p
             className={cn(
               CARD,
-              "p-[50px] text-center text-sm text-muted-foreground",
+              "p-[50px] text-center text-[13px] text-muted-foreground",
             )}
           >
             No new signals.
@@ -200,7 +200,7 @@ function SignalList({
   return (
     <nav aria-label="New signals" className={cn(CARD, "grid")}>
       {signals.length === 0 && (
-        <p className="p-[50px] text-center text-sm text-muted-foreground">
+        <p className="p-[50px] text-center text-[13px] text-muted-foreground">
           No new signals.
         </p>
       )}
@@ -262,15 +262,15 @@ function SignalDetail({
   onDone: (said: string) => void;
   onFailed: (said: string) => void;
 }>) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<Act | null>(null);
   const act = (what: Act) => {
-    setBusy(true);
+    setBusy(what);
     post(`/api/kobble/signals/${what}`, { id: signal.id }).then(
       (answer) => {
         onDone(doneWords(what, signal, answer));
       },
       (error: unknown) => {
-        setBusy(false);
+        setBusy(null);
         onFailed(messageOf(error));
       },
     );
@@ -280,7 +280,8 @@ function SignalDetail({
     <Button
       variant={dark ? "default" : "ring"}
       size="pill"
-      disabled={busy}
+      busy={busy === what}
+      disabled={busy !== null}
       className={cn(what === "dismiss" && "ml-auto")}
       onClick={() => {
         act(what);
@@ -304,7 +305,7 @@ function SignalDetail({
         </span>
         <TypeChip type={signal.type} />
       </header>
-      <div className="mt-5 mb-[22px] text-xl leading-normal tracking-[-0.01em]">
+      <div className="mt-5 mb-[22px] text-base leading-normal tracking-[-0.01em]">
         <Markdown text={signal.text} />
       </div>
       <Already signal={signal} />

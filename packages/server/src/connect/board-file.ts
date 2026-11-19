@@ -14,7 +14,8 @@ import { STAGES } from "../api.ts";
 
 export const BOARD_FILE = "board.json";
 
-// A stage added later (Planning) is "" in a board file written before it.
+// A stage missing from an older board file is ""; a stage no longer there
+// (Planning) is left out.
 const stages = z.object(
   Object.fromEntries(
     STAGES.map((stage) => [stage, z.string().default("")]),

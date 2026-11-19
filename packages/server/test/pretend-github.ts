@@ -5,7 +5,6 @@ import type { Cli } from "../src/add-ons/github/github.ts";
 
 const STAGES = {
   backlog: "Backlog",
-  planning: "Planning",
   todo: "Ready",
   doing: "In progress",
   review: "In review",
@@ -149,7 +148,8 @@ export function pretendGitHub() {
       return says("{}");
     }
     if (first === "issue") return issue(args);
-    if (first === "project" && second === "item-add") return says("{}");
+    if (first === "project" && second === "item-add")
+      return says(JSON.stringify({ id: "item-9" }));
     return Promise.resolve({
       code: 1,
       out: "",

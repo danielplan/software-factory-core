@@ -167,13 +167,13 @@ export class Session {
   }
 
   // The owner opens the factory the coach made: setup is over. Connecting
-  // where work is tracked comes first only for a board agreed in setup and
-  // not connected yet; the factory's own board needs nothing.
+  // the board work is tracked on comes first while none is connected:
+  // Kobble's Factory works only from a connected board.
   openFactory(): void {
     if (!this.root) throw new Refused("There is no factory yet.");
     this.coach.finish(this.root);
     const tracker = this.factory?.company.tracker ?? "none";
-    this.onboarding = tracker !== "none" && !readBoard(this.root)[tracker];
+    this.onboarding = tracker === "none" || !readBoard(this.root)[tracker];
     this.reload();
   }
 
@@ -228,7 +228,7 @@ export class Session {
   }
 
   // Where work is tracked, which ends the onboarding: a board connected and
-  // checked (board.json, its secrets in settings), or the factory's own.
+  // checked (board.json, its secrets in settings).
   chooseBoard(
     tracker: Company["tracker"],
     entry?: Board[string],

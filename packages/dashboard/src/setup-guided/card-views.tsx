@@ -98,7 +98,7 @@ export function Tile({
   return (
     <article
       className={cn(
-        "flex min-w-0 flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card",
+        "flex min-w-0 flex-col gap-2 rounded-xl bg-card px-4 py-3.5 shadow-card",
       )}
     >
       <div className="flex items-center gap-2.5">
@@ -183,7 +183,7 @@ export function BoardCard({
   acts,
 }: Readonly<{ card: Card; acts: CardActs }>) {
   return (
-    <div className="flex items-center gap-3 rounded-[20px] bg-card px-5 py-4 shadow-card">
+    <div className="flex items-center gap-3 rounded-xl bg-card px-5 py-4 shadow-card">
       <Icon card={card} />
       <div className="min-w-0 flex-1">
         <div className="font-semibold">
@@ -213,7 +213,7 @@ export function NewPersona({
     return (
       <button
         type="button"
-        className="grid min-h-[150px] place-items-center rounded-2xl text-muted-foreground shadow-[inset_0_0_0_1.5px_var(--border)] hover:text-foreground"
+        className="grid min-h-[150px] place-items-center rounded-xl text-muted-foreground shadow-[inset_0_0_0_1.5px_var(--border)] hover:text-foreground"
         onClick={() => {
           setOpen(true);
         }}
@@ -257,7 +257,7 @@ function PersonaForm({
   };
   return (
     <form
-      className="grid gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card"
+      className="grid gap-2 rounded-xl bg-card px-4 py-3.5 shadow-card"
       onSubmit={(event) => {
         event.preventDefault();
         add();
@@ -266,7 +266,7 @@ function PersonaForm({
       <label className="grid gap-1 text-xs text-muted-foreground">
         Who they are
         <input
-          className="h-9 rounded-lg bg-ground px-3 text-sm text-foreground outline-none"
+          className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none"
           value={title}
           placeholder="A first boat owner"
           onChange={(event) => {
@@ -278,7 +278,7 @@ function PersonaForm({
         What they do and want
         <textarea
           rows={2}
-          className="rounded-lg bg-ground px-3 py-2 text-sm text-foreground outline-none"
+          className="rounded-lg bg-ground px-3 py-2 text-[13px] text-foreground outline-none"
           value={text}
           onChange={(event) => {
             setText(event.target.value);

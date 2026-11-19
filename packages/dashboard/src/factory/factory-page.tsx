@@ -5,7 +5,12 @@
 // and its switch in the header; "Read it again" reads the board now.
 // Without a board, the page says so and leads to connecting one.
 
-import { ArrowUpRight, FlaskConical, RefreshCw } from "lucide-react";
+import {
+  ArrowUpRight,
+  FlaskConical,
+  LoaderCircle,
+  RefreshCw,
+} from "lucide-react";
 import { createContext, use, useState } from "react";
 
 import { type FactoryCard, type FactoryView, messageOf, post } from "@/api";
@@ -16,15 +21,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import type { FactoryState } from "@/dashboard/dashboard";
 import { type Read, useRead } from "@/lib/use-read";
+import { cn } from "@/lib/utils";
 import { CARD } from "@/signals/bits";
 
 import { CardPanel } from "./card-panel";
 import { TypeChip } from "./card-type";
-import { ColumnIcon } from "./column-icon";
+import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { WaitingCards } from "./waiting-card";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
-  const { data, problem } = useRead("/api/kobble/factory") as Read<FactoryView>;
+  const { data, problem } = useFactoryView(state);
   const [said, say] = useState<string | null>(null);
   const [open, setOpen] = useState<number | null>(null);
   const press = (path: string, body: object = {}) => {
@@ -61,6 +67,14 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
 
 // What waits for the owner, then the columns.
 function Board({ view }: Readonly<{ view: FactoryView }>) {
+  // Connected, but not read yet (just started): no empty columns meanwhile.
+  if (view.connected && view.read === null)
+    return (
+      <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
+        <LoaderCircle aria-hidden className="size-4 animate-spin" />
+        Reading the board on GitHub…
+      </p>
+    );
   return (
     <>
       {view.connected && <WaitingCards waiting={view.waiting} />}
@@ -69,32 +83,92 @@ function Board({ view }: Readonly<{ view: FactoryView }>) {
   );
 }
 
+// The board's columns, side by side and the same height (the window's,
+// less the page's head); each scrolls on its own. Done shows its latest
+// cards, the rest under Show all.
 function Columns({ view }: Readonly<{ view: FactoryView }>) {
   if (!view.connected) return <NotConnected />;
   return (
-    <div className="grid items-start gap-3.5 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 md:grid-cols-2 xl:h-[calc(100dvh-150px)] xl:min-h-[360px] xl:grid-cols-4">
       {view.columns.map((column) => (
-        <section
-          key={column.id}
-          aria-label={column.title}
-          className="flex min-h-[480px] flex-col gap-2.5 rounded-[20px] bg-[#eceef2] p-3"
-        >
-          <h2 className="flex items-center gap-2 px-1.5 py-1 font-semibold">
-            <ColumnIcon column={column.id} />
-            {column.title}
-            <span className="text-[12.5px] font-normal text-muted-foreground">
-              {column.cards.length}
-            </span>
-          </h2>
-          {column.cards.map((card) => (
-            <Card key={card.number} card={card} />
-          ))}
-          {column.cards.length === 0 && (
-            <p className="px-1.5 py-2 text-[13px] text-faint">Nothing here</p>
-          )}
-        </section>
+        <Column key={column.id} column={column} building={view.builder.cards} />
       ))}
     </div>
+  );
+}
+
+const DONE_SHOWN = 6;
+
+// What each column means, under its title.
+const MEANS: Record<FactoryView["columns"][number]["id"], string> = {
+  todo: "Waiting to be built",
+  building: "The builder is on it",
+  review: "Waiting for your review",
+  done: "Merged or closed",
+};
+
+function Column({
+  column,
+  building,
+}: Readonly<{ column: FactoryView["columns"][number]; building: number[] }>) {
+  const [all, setAll] = useState(false);
+  const colour = COLUMN_COLOURS[column.id];
+  const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
+  const cards = cut ? column.cards.slice(0, DONE_SHOWN) : column.cards;
+  return (
+    <section
+      aria-label={column.title}
+      className="flex min-h-0 flex-col rounded-xl border"
+      style={{
+        backgroundColor: `color-mix(in srgb, ${colour} 6%, #fafafa)`,
+        borderColor: `color-mix(in srgb, ${colour} 16%, #e6e6ea)`,
+      }}
+    >
+      <header className="grid gap-0.5 px-3.5 pt-3 pb-2.5">
+        <h2 className="flex items-center gap-2 text-[13px] font-semibold">
+          <ColumnIcon column={column.id} />
+          <span style={{ color: colour }}>{column.title}</span>
+          <span
+            className="ml-auto grid h-5 min-w-5 place-items-center rounded-md px-1.5 text-[11px] font-semibold"
+            style={{
+              color: colour,
+              backgroundColor: `color-mix(in srgb, ${colour} 14%, transparent)`,
+            }}
+          >
+            {column.cards.length}
+          </span>
+        </h2>
+        <p className="pl-[23px] text-xs text-muted-foreground">
+          {MEANS[column.id]}
+        </p>
+      </header>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
+        {cards.map((card, at) => (
+          <Card
+            key={card.number}
+            card={card}
+            at={at}
+            building={building.includes(card.number)}
+          />
+        ))}
+        {column.cards.length === 0 && (
+          <p className="rounded-lg border border-dashed border-current/15 px-3 py-4 text-center text-xs text-faint">
+            Nothing here
+          </p>
+        )}
+        {cut && (
+          <button
+            type="button"
+            onClick={() => {
+              setAll(true);
+            }}
+            className="rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-card hover:text-foreground"
+          >
+            Show all {column.cards.length}
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -109,6 +183,7 @@ function Builder({
   press: (path: string, body?: object) => void;
   href: string | null;
 }>) {
+  const [reading, setReading] = useState(false);
   return (
     <>
       <label className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
@@ -118,16 +193,30 @@ function Builder({
             press("/api/builder", { on });
           }}
         />
+        {view.builder.working && (
+          <LoaderCircle
+            aria-hidden
+            className="size-3.5 flex-none animate-spin text-blue"
+          />
+        )}
         {builderWords(view.builder)}
       </label>
       <Button
         variant="ring"
         size="pill"
         onClick={() => {
+          setReading(true);
+          setTimeout(() => {
+            setReading(false);
+          }, 900);
           press("/api/work/refresh");
         }}
       >
-        <RefreshCw aria-hidden strokeWidth={2} className="size-[15px]" />
+        <RefreshCw
+          aria-hidden
+          strokeWidth={2}
+          className={cn("size-[15px]", reading && "animate-spin")}
+        />
         Read it again
       </Button>
       {href && (
@@ -148,22 +237,44 @@ function builderWords(builder: FactoryView["builder"]): string {
     : "The builder is off";
 }
 
-// A card on the board: it lifts under the pointer, and a click opens it
-// beside the board (card-panel.tsx).
-function Card({ card }: Readonly<{ card: FactoryCard }>) {
+// A card on the board: it rises in after the ones above it, lifts under the
+// pointer, and a click opens it beside the board (card-panel.tsx). While it
+// is being built, a light runs along its top and it says Building.
+function Card({
+  card,
+  at,
+  building,
+}: Readonly<{ card: FactoryCard; at: number; building: boolean }>) {
   const open = use(OpenCard);
   return (
     <button
       type="button"
-      className="flex flex-col items-start gap-2 rounded-2xl bg-card px-4 py-3.5 text-left shadow-card transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_28px_-14px_rgb(20_24_36/0.35)] active:translate-y-0 active:scale-[0.99]"
+      className="relative flex flex-none flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
+      style={{ animationDelay: `${String(Math.min(at, 8) * 45)}ms` }}
       onClick={() => {
         open(card.number);
       }}
     >
-      <span className="text-[12.5px] text-muted-foreground">
+      {building && (
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[3px] overflow-hidden bg-blue/15"
+        >
+          <span className="block h-full w-2/5 bg-blue motion-safe:animate-run-light" />
+        </span>
+      )}
+      <span className="flex w-full items-center gap-2 text-xs text-muted-foreground">
         #{card.number}
+        {building && (
+          <span className="ml-auto inline-flex items-center gap-1 font-medium text-blue">
+            <LoaderCircle aria-hidden className="size-3 animate-spin" />
+            Building
+          </span>
+        )}
       </span>
-      <span className="leading-[1.35] font-semibold">{card.title}</span>
+      <span className="text-[13px] leading-[1.35] font-medium">
+        {card.title}
+      </span>
       {(card.type ?? card.from ?? card.fix) && (
         <span className="flex flex-wrap gap-1.5">
           <TypeChip type={card.type ?? null} />
@@ -181,7 +292,7 @@ const OpenCard = createContext<(number: number) => void>(() => undefined);
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
   if (card.from)
     return (
-      <span className="inline-flex h-[26px] items-center gap-1.5 rounded-full bg-wash px-2.5 text-xs font-medium text-wash-foreground">
+      <span className="inline-flex h-[22px] items-center gap-1.5 rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">
         <FlaskConical aria-hidden strokeWidth={2} className="size-3" />
         {card.from.exploration}
         {card.from.key ? ` · prototype ${card.from.key}` : ""}
@@ -189,7 +300,7 @@ function Origin({ card }: Readonly<{ card: FactoryCard }>) {
     );
   if (!card.fix) return null;
   return (
-    <span className="inline-flex h-[26px] items-center rounded-full bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
+    <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
       Fix
     </span>
   );
@@ -198,15 +309,25 @@ function Origin({ card }: Readonly<{ card: FactoryCard }>) {
 function NotConnected() {
   return (
     <div className={`${CARD} grid justify-items-start gap-3 px-6 py-6`}>
-      <p className="font-semibold">No GitHub board is connected yet.</p>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[15px] font-semibold">
+        No GitHub board is connected yet.
+      </p>
+      <p className="max-w-prose text-[13px] text-muted-foreground">
         The factory's work lives on a GitHub board: fixes and handed-off
         prototypes go to its To do column, and the builder takes them from
         there.
       </p>
-      <Button asChild size="pill">
+      <Button asChild size="pill" className="mt-1">
         <a href="#connect">Connect a board</a>
       </Button>
     </div>
   );
+}
+
+// The board as the page shows it, read again each time the factory read
+// its board on GitHub (the state's stream says when), not only when
+// Kobble's files change.
+function useFactoryView(state: FactoryState): Read<FactoryView> {
+  const read = state.work?.read ?? "";
+  return useRead(`/api/kobble/factory?read=${read}`) as Read<FactoryView>;
 }

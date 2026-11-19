@@ -56,27 +56,17 @@ out). The visible comment above it still says everything in words: the
 block is only for the page. An open question with no sensible answers to
 pick from leaves `answers` empty.
 
-## Planning (the coach, card in Planning)
+## No planning here
 
-Coach the owner through the `plan` skill, in the card's comments:
+The factory does not plan. Work is thought through before it reaches the
+board: in an exploration (the card then carries the agreed plan and its
+prototype) or as a signal that is fixed (the card carries what was
+reported). A card in To do is the go-ahead to build it.
 
-- One step per comment, each ending with one question.
-- Read the relevant knowledge and code first. Your copy is the latest main
-  branch and read-only: write nothing. The run file and the blueprint are
-  written when building.
-- While a question is open: `STATUS: question`.
-- Before the plan is agreed, read the board's other cards and name the ones
-  this plan depends on, replaces or changes, so the owner can link them.
-- When everything the card touches is agreed, write the agreed plan instead:
-  the request, which product(s), the plan, the checks, what stays open. End
-  by asking the owner to move the card to **Ready** to build it.
-  `STATUS: plan-agreed`.
-- When the card cannot go on without something you cannot get here (another
-  decision, an access): say what is needed. `STATUS: blocked`.
+## Building (the builder, card in To do)
 
-## Building (the builder, card moved to Ready)
-
-The owner approved the plan. You are on the card's branch in the factory's
+The card's text is the plan: an agreed plan from an exploration, or a
+signal to fix. You are on the card's branch in the factory's
 own working copy; it has its own settings files, made from the examples.
 
 - Follow the factory's workflow: open the run file with the agreed plan

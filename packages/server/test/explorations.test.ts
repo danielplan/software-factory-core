@@ -349,7 +349,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
     await agree("prototype-b", true);
     assert.match(
       String((await factory.press("/hand-off", { id: "X-1" })).body.error),
-      /connect a GitHub board/,
+      /No GitHub board is connected yet/,
     );
     assert.equal(
       (

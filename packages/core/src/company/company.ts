@@ -17,9 +17,9 @@ export const companySchema = z.object({
   name: z.string().min(1),
   // What the company does, in a sentence or two.
   about: z.string().default(""),
-  // Where its work is tracked: the factory's own board ("none"), or the id
-  // of an add-on that tracks work (a GitHub board, Jira Cloud). Which board
-  // is in the factory's board.json.
+  // Where its work is tracked: the id of an add-on that tracks work (a
+  // GitHub board, Jira Cloud), or "none" while no board is chosen yet (the
+  // factory then asks for one). Which board is in the factory's board.json.
   tracker: id.default("none"),
   // The add-ons the factory uses, by id; the core extensions are on anyway.
   extensions: z.array(id).default([]),
@@ -43,6 +43,16 @@ export const companySchema = z.object({
       start: z.string().min(1),
       stop: z.string().min(1).optional(),
       remove: z.string().min(1).optional(),
+    })
+    .optional(),
+  // The factory under the company's own names (white label): what the
+  // factory is called in the tab and the sidebar ("Acme Factory"; none:
+  // "<name> · Kobble"), and the kobold's name (none: Kobble's own). Its
+  // look (colours, fonts, logo) is in factory/theme.css.
+  brand: z
+    .object({
+      factory: z.string().min(1).optional(),
+      kobold: z.string().min(1).optional(),
     })
     .optional(),
 });

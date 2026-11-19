@@ -333,7 +333,7 @@ async function answered(session: Session) {
   }
 }
 
-test("a factory on its own board opens without a step to connect a board", async () => {
+test("a factory with no board chosen opens on the step to connect one", async () => {
   const pretend = pretendClaude([
     { calls: [], reply: "Shall I build it?" },
     {
@@ -349,7 +349,7 @@ test("a factory on its own board opens without a step to connect a board", async
     const made = session.state();
     assert.ok(made.mode === "factory");
     assert.equal(made.company.tracker, "none");
-    assert.equal(made.onboarding, false);
+    assert.equal(made.onboarding, true);
   } finally {
     session.close();
     server.close();
@@ -388,7 +388,6 @@ test("the coach connects the board the owner agreed to while it builds; opening 
           label: "factory",
           stages: {
             backlog: "",
-            planning: "",
             todo: "",
             doing: "",
             review: "",

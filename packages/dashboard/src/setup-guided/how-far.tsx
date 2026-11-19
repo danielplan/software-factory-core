@@ -24,7 +24,7 @@ export function HowFar({ card }: Readonly<{ card: Card }>) {
     });
   };
   return (
-    <div className="grid gap-2.5 rounded-[20px] bg-card px-5 py-[18px] shadow-card">
+    <div className="grid gap-2.5 rounded-xl bg-card px-5 py-[18px] shadow-card">
       <span className="font-semibold">How far is it?</span>
       <div
         role="radiogroup"
@@ -49,7 +49,9 @@ export function HowFar({ card }: Readonly<{ card: Card }>) {
         ))}
       </div>
       <span className="text-xs text-faint">My guess: {textOf(card)}</span>
-      {problem && <span className="text-sm text-destructive">{problem}</span>}
+      {problem && (
+        <span className="text-[13px] text-destructive">{problem}</span>
+      )}
     </div>
   );
 }

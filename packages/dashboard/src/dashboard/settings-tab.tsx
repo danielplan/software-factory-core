@@ -65,7 +65,7 @@ function Sections({ names }: Readonly<{ names: string[] }>) {
         <button
           key={name}
           type="button"
-          className="rounded-lg px-3 py-2 text-left text-sm text-muted-foreground hover:bg-hover hover:text-foreground"
+          className="rounded-lg px-3 py-2 text-left text-[13px] text-muted-foreground hover:bg-hover hover:text-foreground"
           onClick={() => {
             document
               .getElementById(sectionId(name))
@@ -85,7 +85,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
   const [done, setDone] = useState<string | null>(null);
   const now =
     state.addOns.find((addOn) => addOn.id === state.company.tracker)?.name ??
-    "The factory's board";
+    "No board connected yet";
   return (
     <Topic
       title="Where work is tracked"
@@ -100,7 +100,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
         />
       ) : (
         <Collapsible className="grid gap-4">
-          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-sm font-medium">
+          <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-[13px] font-medium">
             Change where work is tracked
             <ChevronDown
               className="size-4 transition group-data-[state=open]:rotate-180"
@@ -117,7 +117,7 @@ function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
           </CollapsibleContent>
         </Collapsible>
       )}
-      {done && <p className="text-sm font-medium text-success">{done}</p>}
+      {done && <p className="text-[13px] font-medium text-success">{done}</p>}
     </Topic>
   );
 }

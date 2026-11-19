@@ -17,6 +17,7 @@ import type { CardView, WorkView } from "../src/api.ts";
 import type { Cards } from "../src/cards/cards.ts";
 import { fixSignal } from "../src/kobble/actions.ts";
 import {
+  boardIdeas,
   columnOf,
   factoryView,
   type FactoryView,
@@ -425,15 +426,13 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
   try {
     await factory.press("/api/kobble/sync");
     const made: string[] = [];
-    const moved: [number, string][] = [];
+    const stages: (string | undefined)[] = [];
     const cards = {
-      create: (title: string) => {
+      // Made straight in To do: no read of the board right after adding.
+      create: (title: string, _body: string, stage?: string) => {
         made.push(title);
+        stages.push(stage);
         return Promise.resolve({ number: 77, url: "https://example.com/77" });
-      },
-      move: (number: number, stage: string) => {
-        moved.push([number, stage]);
-        return Promise.resolve();
       },
     } as unknown as Cards;
     const signal = await fixSignal(factory.store, "S-0008", () => cards);
@@ -442,7 +441,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.deepEqual(made, [
       "Checkout stopped with an error: the payment service took too long to answer",
     ]);
-    assert.deepEqual(moved, [[77, "todo"]]);
+    assert.deepEqual(stages, ["todo"]);
     const x1 = factory.store.get("explorations", "X-1");
     assert.ok(x1);
     factory.store.put("explorations", { ...x1, work: 51 });
@@ -487,11 +486,17 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
         column.cards.map((c) => c.number),
       ]),
       [
-        ["todo", [77, 9]],
+        ["todo", [77]],
         ["building", [51]],
         ["review", [12]],
         ["done", [41]],
       ],
+    );
+    // A card in no column (or the Backlog) is an idea: it waits in
+    // Explorations, not on the Factory page.
+    assert.deepEqual(
+      boardIdeas(work).map((idea) => idea.number),
+      [9],
     );
     assert.deepEqual(view.columns[1]?.cards[0]?.from, {
       exploration: "X-1",
@@ -499,6 +504,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     });
     assert.equal(view.columns[0]?.cards[0]?.fix, true);
     assert.equal(view.builder.working, "#51 · Basket");
+    assert.deepEqual(view.builder.cards, [51]);
     assert.equal(columnOf("#41", work), "Done");
     assert.equal(columnOf("#5", work), null);
     assert.deepEqual(factoryView(factory.store, null).connected, false);

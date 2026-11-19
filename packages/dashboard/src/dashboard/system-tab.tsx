@@ -73,7 +73,7 @@ export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
           parts={products}
           onPress={press}
         >
-          <p className="py-6 text-center text-sm text-muted-foreground">
+          <p className="py-6 text-center text-[13px] text-muted-foreground">
             No products yet: describe what you want to build on the{" "}
             <a
               href="#explore"

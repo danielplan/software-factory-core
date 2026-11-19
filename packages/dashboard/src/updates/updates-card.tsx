@@ -63,12 +63,12 @@ export function UpdatesCard() {
         </label>
       </div>
       {summary.text && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-[13px] text-muted-foreground">
           <Markdown text={summary.text} />
         </div>
       )}
       {summary.changes.length > 0 && (
-        <ul className="list-disc pl-5 text-sm">
+        <ul className="list-disc pl-5 text-[13px]">
           {summary.changes.map((change) => (
             <li key={change}>{change}</li>
           ))}
@@ -83,7 +83,7 @@ export function UpdatesCard() {
           ))}
         </ul>
       )}
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </Card>
   );
 }

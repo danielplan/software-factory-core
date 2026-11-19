@@ -1,10 +1,4 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 
 // A choice from a list, with "Choose the …" until one is chosen.
 export function Pick({
@@ -19,22 +13,14 @@ export function Pick({
   onPick: (value: string) => void;
 }>) {
   return (
-    <Select
+    <Combobox
+      label={label}
       value={value}
-      onValueChange={onPick}
+      options={options}
+      onChange={onPick}
       disabled={options.length === 0}
-    >
-      <SelectTrigger aria-label={label} className="h-10 w-full bg-card">
-        <SelectValue placeholder={`Choose the ${label.toLowerCase()}…`} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((one) => (
-          <SelectItem key={one.value} value={one.value}>
-            {one.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      placeholder={`Choose the ${label.toLowerCase()}…`}
+    />
   );
 }
 

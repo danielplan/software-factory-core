@@ -172,11 +172,16 @@ export class Talk {
       prompt,
       ...rights,
       session: { id: this.conversation, resume: this.started },
-      mcp: {
-        name: "setup",
-        url: this.toolsUrl,
-        headers: { [COACH_HEADER]: this.token },
-      },
+      // A talk without tools of its own (the support kobold) has no server.
+      ...(this.toolsUrl
+        ? {
+            mcp: {
+              name: "setup",
+              url: this.toolsUrl,
+              headers: { [COACH_HEADER]: this.token },
+            },
+          }
+        : {}),
       onText: (reply: string) => {
         this.writing = reply;
         this.changed();

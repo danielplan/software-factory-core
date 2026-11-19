@@ -48,7 +48,10 @@ export function ChoiceCard({
           {title}
         </span>
         <span
-          className={cn("text-muted-foreground", big ? "text-sm" : "text-xs")}
+          className={cn(
+            "text-muted-foreground",
+            big ? "text-[13px]" : "text-xs",
+          )}
         >
           {text}
         </span>

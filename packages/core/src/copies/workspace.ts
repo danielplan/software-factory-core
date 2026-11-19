@@ -209,6 +209,18 @@ export class Workspace {
     return (await this.git("rev-parse", "HEAD")).trim();
   }
 
+  // What the branch changed against the base branch, file by file with how
+  // much ("src/a.ts | 12 +++--"); empty when it cannot be told.
+  async changes(): Promise<string> {
+    try {
+      return (
+        await this.git("diff", "--stat", `${this.settings.baseBranch}...HEAD`)
+      ).trim();
+    } catch {
+      return "";
+    }
+  }
+
   // Puts one commit on GitHub as a branch, replacing what the branch had.
   async pushCommit(commit: string, branch: string): Promise<void> {
     await this.gitWithoutHooks(

@@ -8,6 +8,7 @@
 import { ArrowUpRight, Check, MessagesSquare } from "lucide-react";
 import { useState } from "react";
 
+import { FIELD_AREA } from "@/lib/field-style";
 import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -44,9 +45,9 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
     );
   };
   return (
-    <article className="grid gap-4 rounded-2xl border border-warning/40 bg-warning/[0.07] px-5 py-4">
+    <article className="grid gap-4 rounded-xl border border-warning/40 bg-warning/[0.07] px-5 py-4">
       <WaitingHead waiting={waiting} />
-      <p className="text-lg leading-snug font-semibold">
+      <p className="text-[15px] leading-snug font-semibold">
         <Markdown text={ask?.question ?? waiting.text} inline />
       </p>
       {ask && ask.answers.length > 0 && (
@@ -59,7 +60,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
           }}
         />
       )}
-      <label className="grid gap-1.5 text-sm">
+      <label className="grid gap-1.5 text-[13px]">
         <span className="text-muted-foreground">Write your own answer</span>
         <textarea
           value={own}
@@ -68,10 +69,10 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
             if (event.target.value.trim()) pick(null);
           }}
           rows={3}
-          className="rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={FIELD_AREA}
         />
       </label>
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
       <div className="flex flex-wrap gap-2">
         <Button size="pill" disabled={!said || sending} onClick={send}>
           {sending ? "Sending…" : "Send answer"}
@@ -101,12 +102,12 @@ function WaitingHead({ waiting }: Readonly<{ waiting: Waiting }>) {
         Kobble is waiting for you · Card #{waiting.number} · {waiting.title}
       </p>
       {ask?.about && (
-        <div className="text-sm">
+        <div className="text-[13px]">
           <Markdown text={ask.about} />
         </div>
       )}
       {ask?.where && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-[13px] text-muted-foreground">
           <Markdown text={ask.where} />
         </div>
       )}
@@ -133,7 +134,7 @@ function Answers({
 }>) {
   return (
     <div role="radiogroup" aria-label="Pick an answer" className="grid gap-2">
-      <p className="text-sm text-muted-foreground">Pick an answer</p>
+      <p className="text-[13px] text-muted-foreground">Pick an answer</p>
       {ask.answers.map((one) => {
         const on = picked === one.key;
         return (
@@ -146,7 +147,7 @@ function Answers({
               onPick(one.key);
             }}
             className={cn(
-              "flex items-start gap-3 rounded-xl border bg-card px-3.5 py-2.5 text-left text-sm",
+              "flex items-start gap-3 rounded-xl border bg-card px-3.5 py-2.5 text-left text-[13px]",
               on ? "border-foreground/40 bg-wash" : "border-border",
             )}
           >

@@ -19,7 +19,7 @@ export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
     <div className="grid gap-6">
       <div className="grid justify-items-center gap-3 pt-6 text-center">
         <KoboldHead size={88} />
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-semibold tracking-[-0.015em]">
           Hi, I’m your kobold.
         </h1>
         <p className="max-w-[56ch] text-muted-foreground">
@@ -28,7 +28,7 @@ export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
             : "I read your project, so you only have to confirm what I found. Let’s go through it."}
         </p>
       </div>
-      <ul className="grid rounded-2xl bg-card shadow-card">
+      <ul className="grid rounded-xl bg-card shadow-card">
         {steps.map((step) => {
           const cards = cardsIn(coach.draft, step.area);
           const open = cards.filter(

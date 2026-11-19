@@ -33,7 +33,7 @@ export function VoiceView({
   const status = statusLine(state, coachProblem);
   const ended = state.phase === "off";
   return (
-    <div className="grid justify-items-center gap-4 rounded-[18px] bg-surface px-3 pt-6 pb-3">
+    <div className="grid justify-items-center gap-4 rounded-xl bg-surface px-3 pt-6 pb-3">
       {!ended && <VoiceOrb call={call} mode={mode} />}
       <VoiceStatus status={status} moment={ended ? "" : MOMENT[mode]} />
       <HeardWords call={call} />

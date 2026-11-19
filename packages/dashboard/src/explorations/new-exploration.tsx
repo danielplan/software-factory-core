@@ -4,6 +4,8 @@
 
 import { useState } from "react";
 
+import { Combobox } from "@/components/ui/combobox";
+import { FIELD_AREA } from "@/lib/field-style";
 import { messageOf, type PersonaRow, post } from "@/api";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
@@ -115,25 +117,20 @@ function More({
           onChange={(event) => {
             onProblem(event.target.value);
           }}
-          className="w-full rounded-[10px] border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className={FIELD_AREA}
         />
       </Field>
       <Field label="For" id="x-persona">
-        <select
+        <Combobox
           id="x-persona"
           value={persona}
-          onChange={(event) => {
-            onPersona(event.target.value);
-          }}
-          className="h-9 rounded-[10px] border border-input bg-card px-3 text-sm"
-        >
-          <option value="">No persona yet</option>
-          {personas.map((one) => (
-            <option key={one.id} value={one.id}>
-              {one.name}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "", label: "No persona yet" },
+            ...personas.map((one) => ({ value: one.id, label: one.name })),
+          ]}
+          onChange={onPersona}
+          className="w-64"
+        />
       </Field>
     </>
   );

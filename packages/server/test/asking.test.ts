@@ -76,7 +76,7 @@ test("the owner answers from the Factory page: the answer is a comment on the ca
       8,
       {
         title: "Prices",
-        stage: "planning",
+        stage: "todo",
         body: withPlan("Prices.", ""),
         comments: [
           {
@@ -91,10 +91,11 @@ test("the owner answers from the Factory page: the answer is a comment on the ca
   ]);
   const { claude } = pretendClaude(() => "Thanks.\nSTATUS: question");
   const { work } = setUp(kept, claude, copy, []);
-  work.switch("chat", true);
+  work.switch("build", true);
   await settled(work);
+  // It waits in To do for the answer, shown on the Factory page.
   assert.equal(work.view().asking?.[0]?.number, 8);
-  work.switch("chat", false);
+  work.switch("build", false);
   await work.answer(8, "**A**: With tax");
   assert.equal(kept.get(8)?.comments.at(-1)?.body, "**A**: With tax");
   assert.equal(work.view().asking?.length, 0);

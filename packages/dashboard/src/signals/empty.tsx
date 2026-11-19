@@ -55,7 +55,7 @@ function Field({
         onChange={(event) => {
           onChange(event.target.value);
         }}
-        className="h-10 rounded-xl border border-border bg-card px-3 text-sm text-foreground outline-none placeholder:text-faint focus-visible:ring-[3px] focus-visible:ring-ring/30"
+        className="h-10 rounded-xl border border-border bg-card px-3 text-[13px] text-foreground outline-none placeholder:text-faint focus-visible:ring-[3px] focus-visible:ring-ring/30"
       />
     </label>
   );
@@ -110,7 +110,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
       <div className="flex items-center gap-3.5">
         <KoboldHead size={48} />
         <div>
-          <div className="text-lg font-semibold">Connect your app</div>
+          <div className="text-[15px] font-semibold">Connect your app</div>
           <div className="text-[13.5px] text-muted-foreground">
             Kobble reads what happens in {app} every 30 minutes.
           </div>
@@ -155,7 +155,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
 // What Kobble reads, as the three kinds of signal.
 function Reads() {
   return (
-    <div className="flex flex-col gap-2.5 text-sm text-foreground-2">
+    <div className="flex flex-col gap-2.5 text-[13px] text-foreground-2">
       {READS.map(([type, words]) => (
         <div key={type} className="flex items-center gap-2.5">
           <TypeChip type={type} />
@@ -222,8 +222,8 @@ export function AllQuiet({
         )}
       >
         <KoboldHead size={64} />
-        <div className="mt-1.5 text-lg font-semibold">All quiet</div>
-        <div className="max-w-[420px] text-sm text-muted-foreground">
+        <div className="mt-1.5 text-[15px] font-semibold">All quiet</div>
+        <div className="max-w-[420px] text-[13px] text-muted-foreground">
           No new bugs, requests or feedback from {app}.{" "}
           {lookAgainWords(sync.next, now)}
         </div>

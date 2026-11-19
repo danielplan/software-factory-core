@@ -28,13 +28,13 @@ export function SetupStep({
     <>
       <header className="grid gap-1.5">
         {eyebrow}
-        <h1 className="text-[30px] leading-tight font-bold tracking-tight">
+        <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
           {words.title}
         </h1>
         <p className="text-muted-foreground">{words.lead}</p>
       </header>
       {says}
-      <ul className="grid rounded-[20px] bg-card shadow-card">
+      <ul className="grid rounded-xl bg-card shadow-card">
         {plan(coach).map((line) => (
           <li
             key={line}

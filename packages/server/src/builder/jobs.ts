@@ -18,22 +18,11 @@ import {
   type Shell,
 } from "./checks.ts";
 import type { BoardCard, Job } from "./decide.ts";
-import {
-  buildPrompt,
-  feedbackPrompt,
-  fixChecksPrompt,
-  planPrompt,
-} from "./prompts.ts";
-import {
-  markComment,
-  type Note,
-  pausedComment,
-  readNote,
-  readStatusLine,
-} from "./protocol.ts";
+import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
+import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
 import { openOrUpdate, type PullRequests } from "./pull-requests.ts";
 import { runSessions } from "./sessions.ts";
-import { type BuildCopy, builderTurn, coachTurn } from "./turn.ts";
+import { type BuildCopy, builderTurn } from "./turn.ts";
 import { Paused, pausedText } from "./usage-limit.ts";
 
 export type ReadCopy = { path: string; prepareReadOnly: () => Promise<void> };
@@ -67,7 +56,6 @@ type Place = {
 };
 
 const BUILD_TIME_MS = 3 * 60 * 60_000;
-const PLAN_NOTES: readonly Note[] = ["question", "plan-agreed", "blocked"];
 
 export class Jobs {
   private readonly options: JobsOptions;
@@ -90,8 +78,7 @@ export class Jobs {
       name: copyName(job.lane, place),
     };
     try {
-      if (job.kind === "plan") await this.plan(card, at, onActivity);
-      else if (job.kind === "build") await this.build(card, at, onActivity);
+      if (job.kind === "build") await this.build(card, at, onActivity);
       else await this.feedback(card, at, onActivity);
     } catch (error) {
       if (!(error instanceof Paused)) throw error;
@@ -106,33 +93,6 @@ export class Jobs {
 
   private now(): Date {
     return this.options.now?.() ?? new Date();
-  }
-
-  private async plan(
-    card: BoardCard,
-    at: Place,
-    onActivity: (line: string) => void,
-  ) {
-    const { cards } = this.options;
-    const result = await coachTurn({
-      claude: this.options.claude,
-      copy: await at.chat(),
-      prompt: planPrompt(card),
-      onActivity,
-      now: this.now(),
-    });
-    if (!result.ok) {
-      await this.say(
-        card.number,
-        `The coach could not answer: ${result.error ?? "it stopped"}. Write a comment to let it try again.`,
-        "failed",
-      );
-      return;
-    }
-    const { text, status } = readStatusLine(result.text);
-    const note = PLAN_NOTES.find((n) => n === status) ?? "question";
-    if (note === "plan-agreed") await cards.writePlan(card.number, text);
-    await this.say(card.number, text, note);
   }
 
   private async build(
@@ -169,7 +129,7 @@ export class Jobs {
     }
     if (answer.status === "blocked") {
       await this.say(card.number, answer.text, "blocked");
-      await cards.move(card.number, "planning");
+      await cards.move(card.number, "todo");
       return;
     }
     if (answer.status !== "done") {
@@ -190,7 +150,7 @@ export class Jobs {
     const checked = await this.checkAndPush(card, at, onActivity);
     if (checked.blocked !== null) {
       await this.say(card.number, checked.blocked, "blocked");
-      await cards.move(card.number, "planning");
+      await cards.move(card.number, "todo");
       return;
     }
     if (!checked.passed) {

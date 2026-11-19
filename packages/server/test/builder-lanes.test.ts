@@ -128,7 +128,7 @@ test("a clash the builder leaves unsettled stops the card with a question", asyn
   const last = kept.get(6)?.comments.at(-1)?.body ?? "";
   assert.equal(readNote(last), "blocked");
   assert.match(last, /clashed in `app\/README.md`/);
-  assert.equal(kept.get(6)?.stage, "planning");
+  assert.equal(kept.get(6)?.stage, "todo");
 });
 
 test("Claude's usage limit pauses the card where it is, and the lanes, until it resets", async () => {

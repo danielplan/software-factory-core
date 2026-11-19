@@ -22,8 +22,14 @@ export function StatusIcon({
     queued: ring(GREY),
     running: (
       <>
-        {ring("var(--blue)")}
-        <path d="M8 4.5 A3.5 3.5 0 0 1 8 11.5 Z" fill="var(--blue)" />
+        {ring("var(--line-soft)")}
+        <path
+          d="M8 2 A6 6 0 0 1 14 8"
+          fill="none"
+          stroke="var(--blue)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </>
     ),
     done: (
@@ -57,7 +63,7 @@ export function StatusIcon({
       height={size}
       viewBox="0 0 16 16"
       aria-hidden
-      className={cn("flex-none", status === "running" && "animate-breathe")}
+      className={cn("flex-none", status === "running" && "animate-spin")}
     >
       {shapes[status]}
     </svg>
@@ -66,7 +72,7 @@ export function StatusIcon({
 
 export function StatusChip({ status }: Readonly<{ status: Status }>) {
   return (
-    <span className="inline-flex h-[26px] items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-foreground-2 shadow-[inset_0_0_0_1px_var(--line-soft)]">
+    <span className="inline-flex h-[22px] items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-foreground-2 shadow-[inset_0_0_0_1px_var(--line-soft)]">
       <StatusIcon status={status} size={12} />
       {TEST_WORDS[status]}
     </span>

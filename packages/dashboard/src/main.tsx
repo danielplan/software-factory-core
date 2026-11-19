@@ -1,13 +1,14 @@
 import "@fontsource-variable/inter";
-import "@fontsource-variable/bricolage-grotesque";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "@/app";
+import { followLogo, THEME_LOADED } from "@/lib/brand";
 import { lightOnly } from "@/lib/light-only";
 import "./index.css";
 
-// Light only, also for the company's theme once it has loaded.
+// Light only, also for the company's theme once it has loaded; its logo
+// as the tab's icon.
 const followChoice = () => {
   lightOnly(document.styleSheets);
 };
@@ -17,7 +18,11 @@ const followChoice = () => {
 const theme = document.createElement("link");
 theme.rel = "stylesheet";
 theme.href = "/theme.css";
-theme.addEventListener("load", followChoice);
+theme.addEventListener("load", () => {
+  followChoice();
+  followLogo();
+  window.dispatchEvent(new Event(THEME_LOADED));
+});
 document.head.append(theme);
 followChoice();
 

@@ -55,7 +55,7 @@ export function TheLook({
             type="button"
             aria-pressed={now === choice.id}
             className={cn(
-              "grid min-w-[220px] flex-1 gap-1.5 rounded-2xl bg-card p-4 text-left shadow-card hover:ring-[1.5px] hover:ring-primary",
+              "grid min-w-[220px] flex-1 gap-1.5 rounded-xl bg-card p-4 text-left shadow-card hover:ring-[1.5px] hover:ring-primary",
               now === choice.id && "bg-[#fbfcff] ring-2 ring-primary",
             )}
             onClick={() => {
@@ -78,7 +78,7 @@ export function TheLook({
           </button>
         ))}
       </div>
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </div>
   );
 }

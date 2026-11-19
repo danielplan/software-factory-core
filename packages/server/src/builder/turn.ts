@@ -23,31 +23,6 @@ export type BuildCopy = {
   abortMerge: () => Promise<void>;
 };
 
-// The coach's turn in a card's conversation, in a read-only copy of main.
-export async function coachTurn(options: {
-  claude: Claude;
-  copy: { path: string; prepareReadOnly: () => Promise<void> };
-  prompt: string;
-  onActivity: (line: string) => void;
-  now: Date;
-}) {
-  await options.copy.prepareReadOnly();
-  const result = await options.claude.run({
-    cwd: options.copy.path,
-    prompt: options.prompt,
-    readOnly: true,
-    tools: ["Read", "Grep", "Glob"],
-    deny: ["Read(**/.env*)"],
-    session: { id: randomUUID(), resume: false },
-    timeLimitMs: PLAN_TIME_MS,
-    onActivity: options.onActivity,
-  });
-  if (!result.ok) pauseOn(result.error, options.now);
-  return result;
-}
-
-const PLAN_TIME_MS = 20 * 60_000;
-
 export type TurnOptions = {
   claude: Claude;
   copy: BuildCopy;

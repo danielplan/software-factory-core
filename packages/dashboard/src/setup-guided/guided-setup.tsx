@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import type { State } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
+import { useKoboldName } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCoachCall } from "@/setup-coach/coach-call";
@@ -98,7 +99,7 @@ function Content({
     return (
       <div className="grid justify-items-center gap-4 pt-16 text-center">
         <KoboldHead size={88} />
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-semibold tracking-[-0.015em]">
           Hi, I’m your kobold.
         </h1>
         <p className="max-w-[56ch] text-muted-foreground">
@@ -120,7 +121,7 @@ function Content({
     <>
       <header className="grid gap-1.5">
         {eyebrow}
-        <h1 className="text-[30px] leading-tight font-bold tracking-tight">
+        <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
           {step.id === "start" ? "Where shall we start?" : step.name}
         </h1>
         <p className="text-muted-foreground">{LEADS[step.id] ?? ""}</p>
@@ -171,7 +172,7 @@ function Rail({
       aria-label="Setup steps"
       className="flex w-[280px] flex-none flex-col gap-1 border-r border-border bg-card px-4 py-5 max-md:w-auto max-md:flex-row max-md:overflow-x-auto max-md:border-r-0 max-md:border-b"
     >
-      <div className="flex items-center gap-2.5 px-1.5 pb-5 font-['Bricolage_Grotesque',sans-serif] text-[22px] font-bold tracking-tight max-md:pb-0">
+      <div className="flex items-center gap-2.5 px-1.5 pb-5 font-wordmark text-[15px] font-semibold tracking-[-0.01em] max-md:pb-0">
         <KoboldHead size={32} />
         kobble
       </div>
@@ -270,17 +271,18 @@ function hintOf(step: Step, coach: SetupState["coach"]): string {
 
 // The rail's foot: how long it takes, and the kobold, at work or not.
 function RailEnd({ working }: Readonly<{ working: boolean }>) {
+  const koboldName = useKoboldName();
   return (
     <div className="mt-auto grid gap-2.5 pt-4 max-md:hidden">
       <p className="px-1.5 text-xs text-muted-foreground">
         About 7 minutes. You can change all of it later in Settings, Workshop
         and Personas.
       </p>
-      <div className="rounded-2xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
+      <div className="rounded-xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
         <div className="flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-[0_0_0_1px_var(--border-soft)]">
           <KoboldHead size={36} />
           <span className="grid">
-            <b className="text-[13.5px]">Your kobold</b>
+            <b className="text-[13.5px]">{koboldName}</b>
             <small className="text-xs text-muted-foreground">
               {working ? "Working…" : "Here to help"}
             </small>

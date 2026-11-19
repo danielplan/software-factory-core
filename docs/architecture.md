@@ -86,9 +86,10 @@ there, and move to `team.env` when the factory opens or the group is saved
 inside the project.
 
 **Where work is tracked** is chosen right after the factory opens, and
-changed on Settings: the factory's own board (nothing to connect), a GitHub
-board, or **Jira Cloud**. Work goes through one set of stages everywhere:
-a draft idea, then Backlog, Planning, To do, In progress, Review and Done (`STAGES`
+changed on Settings: a GitHub board, or **Jira Cloud**; there is no board
+of the factory's own. Work goes through one set of stages everywhere:
+Backlog, To do, In progress, Review and Done, with no Planning (work is
+thought through outside the factory, in explorations) (`STAGES`
 in `packages/server/src/api.ts`). Connecting a board picks the label of
 the work the factory takes in and matches its columns to these stages; the
 factory's `board.json` keeps all of it, and only Jira's API token is kept
@@ -230,7 +231,7 @@ Each change is told on the page's stream as a `kobble-changed` event.
 **The Factory board** (`#build`, `GET /api/kobble/factory`,
 `packages/server/src/kobble/factory-view.ts`) shows the connected GitHub
 board's cards, as the builder last read them, in four columns: To do (with
-the board's Backlog and Planning), Building, Review and Done. A card says
+the board's Backlog), Building, Review and Done. A card says
 where it came from: an exploration whose `work` is its number, with the
 agreed prototype, or a fixed signal. The builder and its switch work as
 before.

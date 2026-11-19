@@ -23,7 +23,7 @@ export function JiraSteps({
   const [found, setFound] = useState<Projects | null>(null);
   const { busy, problem, run } = useRun();
   return (
-    <section className="grid gap-5 rounded-3xl bg-card p-6 shadow-soft">
+    <section className="grid gap-5 rounded-xl bg-card p-6 shadow-soft">
       <ol className="grid gap-5">
         <Step
           n={1}
@@ -182,7 +182,7 @@ function LoginFields({
         href="https://id.atlassian.com/manage-profile/security/api-tokens"
         target="_blank"
         rel="noreferrer"
-        className="inline-flex w-fit items-center gap-1.5 text-sm underline underline-offset-2"
+        className="inline-flex w-fit items-center gap-1.5 text-[13px] underline underline-offset-2"
       >
         <KeyRound className="size-4" aria-hidden />
         Create an API token

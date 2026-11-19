@@ -17,7 +17,7 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { asked, field } from "../asked.ts";
 import type { WorkView } from "../api.ts";
 import type { Cards } from "../cards/cards.ts";
-import { cardsFor } from "../cards/cards-for.ts";
+import { cardsFor, NO_BOARD } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";
 import {
   addPersona,
@@ -32,7 +32,8 @@ import { liveSettings } from "./live-source.ts";
 import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
 import { connect, disconnect } from "./connect.ts";
-import { factoryView } from "./factory-view.ts";
+import { boardIdeas, factoryView } from "./factory-view.ts";
+import { supportOf, supportRoutes } from "./support.ts";
 import {
   handledView,
   personaPage,
@@ -88,6 +89,7 @@ export function servedKobble(options: KobbleOptions) {
       connectedCards(factory, options.cli),
     ),
     ...tests.routes,
+    ...supportRoutes(supportOf(options, changed)),
     ...keptAll(
       explorationRoutes(explorations, tests.tests, () =>
         usageOf(factory, options.project),
@@ -167,7 +169,11 @@ function connectedCards(factory: string, cli: Cli): Cards {
   const found = cardsFor(factory, cli);
   if ("problem" in found)
     throw new Refused(
-      `No GitHub board is connected, so there is nowhere to put it. ${found.problem} Connect one in Settings, under Where work is tracked.`,
+      [
+        "No GitHub board is connected yet, so there is nowhere to put it.",
+        ...(found.problem === NO_BOARD ? [] : [found.problem]),
+        "Connect one in [Settings](#settings), under Where work is tracked.",
+      ].join(" "),
     );
   return found.cards;
 }
@@ -185,6 +191,7 @@ function explorationsAndTests(
     claude: options.claude,
     store,
     cards: () => connectedCards(factory, options.cli),
+    ideas: () => boardIdeas(options.work()),
     onChange: () => {
       changed("explorations");
     },

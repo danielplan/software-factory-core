@@ -46,7 +46,7 @@ export function StepCards({
         acts={acts}
         onProblem={setProblem}
       />
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </div>
   );
 }
@@ -127,7 +127,7 @@ function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
   const rest = cards.filter((card) => !isPerson(card));
   return (
     <>
-      <div className="rounded-[20px] bg-card shadow-card">
+      <div className="rounded-xl bg-card shadow-card">
         {people.map((card) => (
           <PersonRow
             key={card.id}
@@ -155,7 +155,7 @@ function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
 
 function Rows({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
   return (
-    <div className="rounded-[20px] bg-card shadow-card">
+    <div className="rounded-xl bg-card shadow-card">
       {cards.map((card) => (
         <Row key={card.id} card={card} acts={acts} />
       ))}

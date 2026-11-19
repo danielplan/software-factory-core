@@ -43,7 +43,7 @@ export function FirstExploration({ cards }: Readonly<{ cards: Card[] }>) {
             type="button"
             aria-pressed={on}
             className={cn(
-              "flex items-start gap-3 rounded-2xl bg-card p-4 text-left shadow-card hover:ring-[1.5px] hover:ring-primary",
+              "flex items-start gap-3 rounded-xl bg-card p-4 text-left shadow-card hover:ring-[1.5px] hover:ring-primary",
               on && "bg-[#fbfcff] ring-2 ring-primary",
             )}
             onClick={() => {

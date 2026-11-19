@@ -159,11 +159,19 @@ export function NoFace({ size = 36 }: Readonly<{ size?: number }>) {
   );
 }
 
-// Kobble's own kobold, with its floppy cap.
+// Kobble's own kobold, with its floppy cap; the other kobolds (lib/kobolds.ts)
+// with the hat of their job.
 export function KoboldHead({
   size = 28,
   className,
-}: Readonly<{ size?: number; className?: string }>) {
+  hat = "flop",
+  color = "#3156d8",
+}: Readonly<{
+  size?: number;
+  className?: string;
+  hat?: PersonaHat | "flop";
+  color?: string;
+}>) {
   return (
     <svg
       width={size}
@@ -173,7 +181,7 @@ export function KoboldHead({
       className={cn("flex-none overflow-visible", className)}
     >
       <Head skin="#c6d3ff" />
-      <Hat hat="flop" color="#3156d8" />
+      <Hat hat={hat} color={color} />
     </svg>
   );
 }

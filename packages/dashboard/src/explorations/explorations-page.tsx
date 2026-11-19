@@ -23,6 +23,7 @@ import { Markdown } from "@/components/markdown";
 
 import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
+import { FromBoard } from "./from-board";
 import { NewExploration } from "./new-exploration";
 
 export const explorationHash = (id: string) =>
@@ -85,7 +86,13 @@ function Sub({ title, n }: Readonly<{ title: string; n: number }>) {
 }
 
 function isEmpty(view: ExplorationsView): boolean {
-  return view.exploring.length + view.waiting.length + view.done.length === 0;
+  return (
+    view.exploring.length +
+      view.waiting.length +
+      view.done.length +
+      view.fromBoard.length ===
+    0
+  );
 }
 
 // A board in small, for the picture of what an exploration is.
@@ -128,7 +135,7 @@ function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
       )}
     >
       <div className="flex flex-col gap-3">
-        <div className="text-xl font-semibold">Nothing explored yet</div>
+        <div className="text-base font-semibold">Nothing explored yet</div>
         <p className="max-w-[440px] text-[14.5px] text-foreground-2">
           An exploration is a board you work on with the kobold: what the
           problem really is, a few ways to solve it, and a prototype for each.
@@ -162,16 +169,19 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
         </div>
       )}
       {view.exploring.length === 0 && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground">
           Nothing is being explored. Start one that waits.
         </p>
       )}
-      <Sub title="Waiting" n={view.waiting.length} />
+      <Sub title="Waiting" n={view.waiting.length + view.fromBoard.length} />
       <div className={CARD}>
         {view.waiting.map((row) => (
           <Waiting key={row.id} row={row} />
         ))}
-        {view.waiting.length === 0 && (
+        {view.fromBoard.map((idea) => (
+          <FromBoard key={idea.number} idea={idea} />
+        ))}
+        {view.waiting.length + view.fromBoard.length === 0 && (
           <p className="p-[18px] text-center text-muted-foreground">
             Nothing waiting
           </p>

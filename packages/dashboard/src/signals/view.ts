@@ -127,7 +127,7 @@ export const TEST_WORDS: Record<
   string
 > = {
   queued: "Waiting",
-  running: "Running",
+  running: "Testing…",
   done: "Done",
   failed: "Failed",
 };

@@ -6,15 +6,15 @@ import type { FactoryView } from "@/api";
 
 type Column = FactoryView["columns"][number]["id"];
 
-const COLOURS: Record<Column, string> = {
-  todo: "#9a9fad",
+export const COLUMN_COLOURS: Record<Column, string> = {
+  todo: "#6b7280",
   building: "#3156d8",
   review: "#7a4fd0",
   done: "#12a594",
 };
 
 export function ColumnIcon({ column }: Readonly<{ column: Column }>) {
-  const colour = COLOURS[column];
+  const colour = COLUMN_COLOURS[column];
   return (
     <svg
       width="15"

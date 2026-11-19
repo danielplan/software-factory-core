@@ -103,7 +103,7 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
           </span>
         ))}
       </div>
-      <div className="text-xl font-semibold">Who are you building for?</div>
+      <div className="text-base font-semibold">Who are you building for?</div>
       <p className="max-w-[460px] text-[14.5px] text-foreground-2">
         Add the people who use your app, in a few words each. Once Kobble reads
         your live app, the kobold also suggests personas from how people use it.
@@ -184,7 +184,7 @@ function PersonaBody({
       <div className="mb-[22px] flex items-center gap-4">
         <PersonaFace face={persona.face} size={64} />
         <div className="grid flex-1 gap-0.5">
-          <h1 className="text-[28px] leading-[1.15] font-bold tracking-[-0.025em]">
+          <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
             {persona.name}
           </h1>
           <span className="text-[12.5px] text-muted-foreground">
@@ -224,7 +224,7 @@ function PersonaBody({
       ) : (
         <div className={CARD}>
           {signals.length === 0 && (
-            <p className="p-[50px] text-center text-sm text-muted-foreground">
+            <p className="p-[50px] text-center text-[13px] text-muted-foreground">
               No signals from {persona.name} yet.
             </p>
           )}

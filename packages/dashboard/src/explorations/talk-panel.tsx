@@ -4,11 +4,12 @@
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
-import { Mic } from "lucide-react";
+import { ArrowUp, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
+import { useKoboldName } from "@/lib/brand";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 
@@ -33,12 +34,13 @@ export function TalkPanel({
   const { exploration } = page;
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
+  const koboldName = useKoboldName();
   return (
-    <aside className="flex min-h-0 w-[26rem] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
+    <aside className="flex min-h-0 w-[23rem] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
       <div className="flex items-center gap-3 border-b border-border-soft px-5 py-4">
         <KoboldHead size={28} />
         <span className="grid">
-          <span className="text-sm font-semibold">Your kobold</span>
+          <span className="text-[13px] font-semibold">{koboldName}</span>
           <span className="text-xs text-muted-foreground">
             Thinks it through with you and draws on the board
           </span>
@@ -119,7 +121,7 @@ function TalkBox({
 }
 
 // The box to type in, roomy: two lines to start, growing with the words, Enter sends and
-// Shift+Enter starts a new line; Talk and Send below.
+// Shift+Enter starts a new line; Talk and Send (an arrow) below.
 function TypeBox({
   text,
   onText,
@@ -143,7 +145,7 @@ function TypeBox({
   }, [text]);
   return (
     <form
-      className="mx-4 mb-4 grid gap-2 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgb(20_24_36/0.05)] focus-within:ring-2 focus-within:ring-blue/25"
+      className="mx-4 mb-4 grid gap-2 rounded-xl border border-border bg-card p-3 shadow-[0_1px_2px_rgb(20_24_36/0.05)] focus-within:ring-2 focus-within:ring-blue/25"
       onSubmit={(event) => {
         event.preventDefault();
         onSend();
@@ -164,7 +166,7 @@ function TypeBox({
           if (!busy && text.trim()) onSend();
         }}
         ref={grow}
-        className="max-h-48 min-h-12 resize-none overflow-y-auto bg-transparent px-1 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
+        className="max-h-48 min-h-11 resize-none overflow-y-auto bg-transparent px-1 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground"
       />
       <div className="flex items-center gap-2">
         <Button
@@ -179,10 +181,11 @@ function TypeBox({
         <Button
           type="submit"
           size="pill-sm"
+          aria-label="Send"
           className="ml-auto"
           disabled={busy || !text.trim()}
         >
-          Send
+          <ArrowUp aria-hidden className="size-4" />
         </Button>
       </div>
     </form>
@@ -206,7 +209,7 @@ function Messages({
   return (
     <div
       ref={end}
-      className="flex flex-1 flex-col gap-5 overflow-auto px-5 py-5 text-sm leading-relaxed"
+      className="flex flex-1 flex-col gap-4 overflow-auto px-4 py-4 text-[12.5px] leading-relaxed"
     >
       {talk.messages.map((message, at) =>
         message.from === "kobold" ? (
@@ -216,7 +219,7 @@ function Messages({
         ) : (
           <div
             key={at}
-            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-wash px-3.5 py-2 text-foreground"
+            className="max-w-[85%] self-end rounded-xl rounded-br-md bg-wash px-3 py-1.5 text-foreground"
           >
             <Markdown text={message.text} />
           </div>
@@ -224,7 +227,7 @@ function Messages({
       )}
       {talk.writing !== null && <Writing talk={talk} />}
       {(talk.problem ?? refused) && (
-        <p role="alert" className="text-[12.5px] text-destructive">
+        <p role="alert" className="text-xs text-destructive">
           {talk.problem ?? refused}
         </p>
       )}
@@ -241,7 +244,7 @@ function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
       </div>
     );
   return (
-    <p className="flex items-center gap-2 self-start text-[13px] text-muted-foreground">
+    <p className="flex items-center gap-2 self-start text-[12.5px] text-muted-foreground">
       <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
       {talk.activity ?? "Thinking…"}
     </p>

@@ -42,7 +42,12 @@ export type ExplorationsView = {
   exploring: ExplorationRow[];
   waiting: ExplorationRow[];
   done: ExplorationRow[];
+  // The board's ideas (its Backlog) nobody explores yet: they wait here,
+  // not on the Factory page.
+  fromBoard: BoardIdea[];
 };
+
+export type BoardIdea = { number: number; title: string; url: string };
 
 // A prototype's last persona test, in short.
 export type TestResult = {
@@ -90,7 +95,14 @@ export function explorationsView(
   store: KobbleStore,
   talk: (id: string) => TalkView,
   runs: (id: string) => VersionRun[] = () => [],
+  ideas: BoardIdea[] = [],
 ): ExplorationsView {
+  const linked = new Set(
+    store
+      .all("explorations")
+      .flatMap((one) => [one.issue, one.work])
+      .filter((number): number is number => typeof number === "number"),
+  );
   const rows = store.all("explorations").map((exploration) => {
     const board = completed(exploration, store.board(exploration.id));
     return {
@@ -119,6 +131,7 @@ export function explorationsView(
     exploring: rows.filter((row) => row.status === "exploring"),
     waiting: rows.filter((row) => row.status === "waiting"),
     done: rows.filter((row) => ["handed-off", "dropped"].includes(row.status)),
+    fromBoard: ideas.filter((idea) => !linked.has(idea.number)),
   };
 }
 

@@ -32,7 +32,7 @@ the first company's factory; they come here written for any company (see
 
 | Add-on             | What it does                                                                                                                                                                                        | Needs                                 | Built in | Here                          |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------- | ----------------------------- |
-| **Board**          | The work in its stages (draft, Backlog, Planning, To do, In progress, Review, Done); the factory's own board when no tracker is connected                                                           | –                                     | yes      | partly                        |
+| **Board**          | The work in its stages (Backlog, To do, In progress, Review, Done), on the connected board                                                                                                          | –                                     | yes      | partly                        |
 | **GitHub**         | Where work is tracked: a GitHub board, connected through the GitHub CLI                                                                                                                             | Board                                 | yes      | yes                           |
 | **Jira**           | Where work is tracked: Jira Cloud with an API token                                                                                                                                                 | Board                                 | yes      | yes                           |
 | **Builder**        | Works the cards: the coach talks a card's plan through in its comments; the builder builds it test-first in a working copy of its own, runs the checks, opens a pull request, fixes review comments | Board, a tracker, GitHub as code host | yes      | yes, for GitHub boards        |
@@ -46,10 +46,9 @@ the first company's factory; they come here written for any company (see
 
 ### What each brings
 
-- **Board**: Build, the board's page; Planning, where a card that did not come through
-  Ideas has its plan talked through in its conversation until it is agreed;
-  moving cards by dragging them (Backlog, Planning, To do) or
-  with a menu; a card in Review opens its pull request.
+- **Board**: Build, the board's page; a card in Review opens its pull
+  request. There is no Planning stage: work is thought through outside the
+  factory, in explorations.
 - **Made-up worlds** (`core/src/kobble/world.ts`, `situations.ts`;
   `server/src/kobble/world-route.ts`, `explorations/worlds.ts`,
   `world-tools.ts`): a product names a folder of situations as its `world`
@@ -73,15 +72,13 @@ forward`, no public address needed) and a check every few minutes for
   anything missed; a hidden mark on the factory's own comments, because the
   owner and the factory may post with the same account.
 - **Builder** (`server/src/builder/`): Build shows the connected
-  board's cards, read every minute. Two lanes, each switched on there: the
-  coach answers a card's conversation in Planning in a read-only copy of
-  main, and writes the agreed plan into the card; the builder builds one card
+  board's cards, read every minute. The builder builds one card
   at a time on its branch (`factory/issue-<number>`, continuing a prototype
   pushed there) in a copy of its own. The rules are pure (`decide.ts`): a
-  card in Ready without an agreed plan, or with a comment after it, goes back
-  to Planning with a reason; a question goes back to Planning; a build that
-  failed for a technical reason keeps its plan and is tried again when the
-  card goes back to Ready; an interrupted build resumes; merged or closed
+  card in To do is built as it is, its text the plan; it waits while a
+  question on it is open, staying in To do (the Factory page shows it
+  waiting for the owner); a build that failed for a technical reason is
+  tried again; an interrupted build resumes; merged or closed
   cards go to Done. Before a pull request the factory runs each changed
   product's verify command itself, gives the builder one round to fix a
   failure, and opens a draft that says so when the checks still fail.

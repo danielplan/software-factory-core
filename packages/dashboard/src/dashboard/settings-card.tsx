@@ -67,7 +67,7 @@ export function Topic({
       className="scroll-mt-6 gap-5 shadow-soft"
     >
       <CardHeader>
-        <CardTitle className="text-[17px]">{title}</CardTitle>
+        <CardTitle className="text-[15px]">{title}</CardTitle>
         <CardDescription>{about}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5">{children}</CardContent>
@@ -116,11 +116,16 @@ function Saving({
     <>
       {form.problem && <ProblemBox title="Not saved" text={form.problem} />}
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={() => void form.save()} disabled={!changed}>
+        <Button
+          size="sm"
+          variant={changed ? "default" : "outline"}
+          onClick={() => void form.save()}
+          disabled={!changed}
+        >
           Save
         </Button>
         {form.saved && (
-          <span className="text-sm text-success">
+          <span className="text-[13px] text-success">
             Saved.{running.length > 0 && " It counts once restarted:"}
           </span>
         )}

@@ -148,9 +148,6 @@ function routesFor(session: Session): Record<string, Route> {
     "POST /api/add-ons": (body) => {
       session.switchAddOn(text(body, "id"), on(body));
     },
-    "POST /api/connect/own-board": () => {
-      session.chooseBoard("none");
-    },
     ...workRoutes(session),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),

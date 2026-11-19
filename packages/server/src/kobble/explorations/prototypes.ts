@@ -28,6 +28,15 @@ import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
 import { linked, withThing } from "./board-things.ts";
 import { askFor, commitWords, notShared, stopped } from "./making-words.ts";
+
+// A prototype the maker finished: its name, its thing on the board, what
+// the maker said it did, and the files it changed.
+export type MadeReport = {
+  name: string;
+  thing: string;
+  said: string;
+  files: string;
+};
 import { codeMaps } from "./product-picture.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
@@ -218,21 +227,29 @@ export class ExplorationPrototypes {
     this.mode.close();
   }
 
-  // Who is told when a prototype is made (the conversation, which says so
-  // and points at it).
+  // Who is told when a prototype is made (the conversation, which reviews
+  // it and points at it): what the maker said it did, and the files it
+  // changed.
   private ready:
-    | ((exploration: string, key: string, name: string, thing: string) => void)
-    | null = null;
+    ((exploration: string, key: string, made: MadeReport) => void) | null =
+    null;
 
   whenReady(
-    ready: (
-      exploration: string,
-      key: string,
-      name: string,
-      thing: string,
-    ) => void,
+    ready: (exploration: string, key: string, made: MadeReport) => void,
   ): void {
     this.ready = ready;
+  }
+
+  // What each prototype of an exploration being made does now, for the
+  // kobold who talks with the team.
+  beingMade(exploration: string): string[] {
+    return this.mode
+      .view(exploration)
+      .filter((run) => run.state === "making")
+      .map((run) => {
+        const doing = run.activity ? ` (${run.activity})` : "";
+        return `${run.version}: being made${doing}`;
+      });
   }
 
   // Change: the kobold changes an existing prototype as asked, a new
@@ -314,11 +331,11 @@ export class ExplorationPrototypes {
           },
     );
     if (result.ok)
-      this.ready?.(
-        exploration.id,
-        key,
-        change ? `changed: ${change}` : made.name,
-        made.id,
-      );
+      this.ready?.(exploration.id, key, {
+        name: change ? `changed: ${change}` : made.name,
+        thing: made.id,
+        said: result.text.trim().slice(0, 3000),
+        files: (await workspace.changes()).slice(0, 2000),
+      });
   }
 }

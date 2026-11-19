@@ -86,6 +86,9 @@ export const explorationSchema = z.strictObject({
   created: time,
   // The GitHub issue it was handed off as.
   work: z.number().int().positive().nullable(),
+  // The board's issue it started from (an idea in the board's Backlog);
+  // handing off fills in that issue instead of making a new one.
+  issue: z.number().int().positive().nullable().optional(),
 });
 
 // A prototype's branch: proto/X-<n>-<key>, the key in small letters.

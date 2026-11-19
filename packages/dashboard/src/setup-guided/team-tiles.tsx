@@ -70,7 +70,7 @@ export function TeamTiles() {
           }
         />
       </div>
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </div>
   );
 }
@@ -89,7 +89,7 @@ function Tile({
   children?: React.ReactNode;
 }>) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 shadow-card">
+    <div className="flex min-w-0 flex-col gap-2 rounded-xl bg-card px-4 py-3.5 shadow-card">
       <div className="flex items-center gap-2.5">
         <span className="grid size-8 flex-none place-items-center rounded-[10px] bg-wash text-wash-foreground">
           {icon}

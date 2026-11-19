@@ -42,7 +42,6 @@ export type BoardWorkOptions = {
 type Running = { job: Job; title: string; steps: string[]; place: number };
 const STEPS = 40;
 const WHAT: Record<Job["kind"], string> = {
-  plan: "planning",
   build: "building",
   feedback: "answering the review of",
 };

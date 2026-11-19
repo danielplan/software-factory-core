@@ -1,14 +1,13 @@
 // A prototype on the board, its screen always the same size: the live app
 // while it runs (on its branch, at a desktop's size, shrunk; Bigger opens
 // it full size), being made, or a sketch with Start in its middle; how it
-// differs, what odd thing happened, its last persona test, and Test (as
-// the exploration's persona). Agreeing is the badge on its bar.
+// differs, what odd thing happened, and its last persona test. Agreeing is
+// the badge on its bar.
 
 import type { NodeProps } from "@xyflow/react";
 import { Play } from "lucide-react";
 
 import type { TestResult, VersionRun } from "@/api";
-import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
@@ -18,7 +17,6 @@ import { Making } from "./prototype-making";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 
-const SMALL = "h-7 gap-1.5 px-2.5 text-xs";
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
 function stateWords(run: VersionRun | undefined): string | null {
@@ -136,41 +134,6 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
           {result.words}
         </a>
       )}
-      {open && <Actions data={data} run={run} />}
     </Frame>
-  );
-}
-
-// Test, as the exploration's persona.
-function Actions({
-  data,
-  run,
-}: Readonly<{ data: ThingNode["data"]; run: VersionRun | undefined }>) {
-  const { thing, page } = data;
-  const act = useBoardDo(page.exploration.id);
-  if (thing.kind !== "prototype") return null;
-  const persona = page.personas[0];
-  const making = run?.state === "making";
-  return (
-    <div className="nodrag flex items-center gap-1.5">
-      <Button
-        variant="ring"
-        size="pill-sm"
-        className={SMALL}
-        disabled={!persona || making}
-        title={
-          persona ? `Test it as ${persona.name}` : "Testing needs a persona"
-        }
-        onClick={() => {
-          act("test", {
-            key: thing.key,
-            task: `Try “${thing.name}”: ${thing.difference}`,
-          });
-        }}
-      >
-        {persona && <PersonaFace face={persona.face} size={14} />}
-        Test
-      </Button>
-    </div>
   );
 }

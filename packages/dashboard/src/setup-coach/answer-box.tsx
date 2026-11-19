@@ -78,8 +78,8 @@ function Reply({
     <form
       className={cn(
         big
-          ? "grid gap-2 rounded-2xl border border-border bg-card p-3 shadow-soft focus-within:border-foreground/30"
-          : "flex items-end gap-2 rounded-[18px] bg-surface p-2 pl-4",
+          ? "grid gap-2 rounded-xl border border-border bg-card p-3 shadow-soft focus-within:border-foreground/30"
+          : "flex items-end gap-2 rounded-xl bg-surface p-2 pl-4",
         className,
       )}
       onSubmit={(event) => {

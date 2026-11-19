@@ -72,7 +72,7 @@ function whenOf(test: PersonaTest): string {
 function resultWords(test: PersonaTest): string {
   if (test.status === "done")
     return countWords(test.signals.length, "signal", "signals");
-  return { queued: "Waiting", running: "Running", failed: "Failed" }[
+  return { queued: "Waiting", running: "Testing…", failed: "Failed" }[
     test.status
   ];
 }
@@ -147,7 +147,7 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
   );
 }
 
-const TITLE = "mt-[30px] mb-3 text-[17px] font-semibold tracking-[-0.01em]";
+const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
 
 function RunBody({ page }: Readonly<{ page: TestPage }>) {
   const { test, persona } = page;
@@ -167,7 +167,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
             {test.id} · {whenOf(test)}
           </span>
         </div>
-        <h1 className="mb-3.5 text-[28px] leading-[1.15] font-bold tracking-[-0.025em]">
+        <h1 className="mb-3.5 text-[22px] leading-tight font-semibold tracking-[-0.015em]">
           <Markdown text={test.task} inline />
         </h1>
         <div className="flex flex-wrap gap-2">

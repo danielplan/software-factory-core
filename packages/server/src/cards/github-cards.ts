@@ -38,7 +38,7 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     show: (number) => cards.show(number),
     move: (number, stage) => cards.move(number, stage),
     comment: (number, text) => cards.comment(number, text),
-    create: (title, body) => cards.create(title, body),
+    create: (title, body, stage) => cards.create(title, body, stage),
     writePlan: (number, plan) => cards.writePlan(number, plan),
     dependOn: (number, on) => cards.dependOn(number, on),
     replace: (number, by) => cards.replace(number, by),
@@ -104,7 +104,14 @@ class GitHubCards {
     ]);
   }
 
-  async create(title: string, body: string): Promise<Card> {
+  // A new card in the stage asked for (the backlog unless said): the issue,
+  // added to the board, put in its column by the item GitHub answers with,
+  // since a board read right after adding may not list the new item yet.
+  async create(
+    title: string,
+    body: string,
+    stage: Stage = "backlog",
+  ): Promise<Card> {
     const label = this.board.label === "*" ? [] : ["--label", this.board.label];
     const url = (
       await this.gh([
@@ -118,18 +125,33 @@ class GitHubCards {
         ...label,
       ])
     ).trim();
-    await this.gh([
-      "project",
-      "item-add",
-      String(this.board.board),
-      "--owner",
-      this.owner,
-      "--url",
-      url,
-    ]);
+    const added = JSON.parse(
+      (await this.gh([
+        "project",
+        "item-add",
+        String(this.board.board),
+        "--owner",
+        this.owner,
+        "--url",
+        url,
+        "--format",
+        "json",
+      ])) || "{}",
+    ) as { id?: string };
     const number = Number(/\/issues\/(\d+)/.exec(url)?.[1]);
-    await this.move(number, "backlog");
-    return (await this.find(number)).card;
+    const project = await this.project();
+    const item = added.id ?? (await this.find(number)).item.id;
+    await this.setColumn(project.id, item, stage);
+    return {
+      number,
+      title,
+      stage,
+      column: this.board.stages[stage],
+      url,
+      labels: label.slice(1),
+      closed: false,
+      waitsFor: [],
+    };
   }
 
   async writePlan(number: number, plan: string): Promise<void> {

@@ -52,7 +52,7 @@ export function IconTile({
       className={cn(
         "flex flex-none items-center justify-center",
         big
-          ? "size-12 rounded-2xl [&_svg]:size-6"
+          ? "size-12 rounded-xl [&_svg]:size-6"
           : "size-8 rounded-lg [&_svg]:size-4",
       )}
       style={{

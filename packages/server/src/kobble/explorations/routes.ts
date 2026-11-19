@@ -29,7 +29,7 @@ import {
   prototypeOf,
 } from "./prototypes.ts";
 import { ExplorationTalks } from "./talks.ts";
-import { explorationPage, explorationsView } from "./views.ts";
+import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import { ExplorationWorlds } from "./worlds.ts";
 
 type Options = {
@@ -38,6 +38,8 @@ type Options = {
   claude: Claude;
   store: () => KobbleStore;
   cards: () => Cards;
+  // The board's ideas (its Backlog), as the builder last read them.
+  ideas?: () => BoardIdea[];
   onChange: () => void;
 };
 
@@ -46,14 +48,12 @@ export function servedExplorations(options: Options) {
   const worlds = new ExplorationWorlds(options);
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
-  prototypes.whenReady((id, key, name, thing) => {
-    talks.tell(
-      id,
-      `Prototype ${key} is ready (${name}). It runs on the board; try it there, or press Bigger to use it full size.`,
-      thing,
-    );
+  // A prototype made: the kobold who talks with the team reviews it.
+  prototypes.whenReady((id, key, made) => {
+    talks.review(id, key, made);
   });
   talks.makeWith({
+    making: (id) => prototypes.beingMade(id),
     make: (id, choice, option) => {
       prototypes.make(explorationOf(store(), id), choice, option);
       options.onChange();
@@ -74,7 +74,7 @@ export function servedExplorations(options: Options) {
       return answer ?? {};
     };
   const routes = {
-    ...readRoutes(store, talks, prototypes),
+    ...readRoutes(store, talks, prototypes, options.ideas),
     ...buttonRoutes(store, button, { talks, prototypes, cards: options.cards }),
   };
   return {
@@ -123,6 +123,7 @@ function readRoutes(
   store: () => KobbleStore,
   talks: ExplorationTalks,
   prototypes: ExplorationPrototypes,
+  ideas: (() => BoardIdea[]) | undefined,
 ): Record<string, Route> {
   return {
     "GET /api/kobble/explorations/picture": (_body, url) => {
@@ -138,6 +139,7 @@ function readRoutes(
         store(),
         (one) => talks.view(one),
         (one) => prototypes.runs(one),
+        ideas?.() ?? [],
       ),
     "GET /api/kobble/exploration": (_body, url) => {
       const exploration = explorationOf(

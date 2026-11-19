@@ -16,25 +16,9 @@ import {
   setUp,
 } from "./builder-stage.ts";
 
-test("the coach plans in a card, the builder builds an agreed one: checks, one fix, a pull request, review", async () => {
+test("the builder builds a card in To do: checks, one fix, a pull request, review", async () => {
   const { source, copy, folder } = await project();
   const kept = new Map<number, Kept>([
-    [
-      1,
-      {
-        title: "Invoices in euros",
-        stage: "planning",
-        body: "Invoices should be in euros.",
-        comments: [
-          {
-            author: "owner",
-            body: "Can you plan this?",
-            at: now(),
-            where: "card",
-          },
-        ],
-      },
-    ],
     [
       2,
       {
@@ -45,16 +29,11 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
       },
     ],
     [
-      3,
-      { title: "Not planned", stage: "todo", body: "Something", comments: [] },
-    ],
-    [
       4,
       { title: "Old", stage: "review", body: "", comments: [], closed: true },
     ],
   ]);
   const { claude, prompts } = pretendClaude((options) => {
-    if (options.readOnly) return "Plan: euros everywhere.\nSTATUS: plan-agreed";
     if (options.prompt.includes("make the checks pass")) {
       writeFileSync(join(options.cwd, "app", "FIX.md"), "fixed");
       return "Fixed the test.\nSTATUS: done";
@@ -72,23 +51,15 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
   await work.refresh();
   assert.deepEqual(
     work.view().cards.map((c) => c.number),
-    [1, 2, 3, 4],
+    [2, 4],
   );
   assert.equal(work.view().read, "1970-01-01T00:00:00.000Z");
   assert.deepEqual(board.said, []);
 
-  work.switch("chat", true);
   work.switch("build", true);
   await settled(work);
 
-  // The coach's agreed plan is written into the card.
-  assert.match(kept.get(1)?.body ?? "", /euros everywhere/);
-  assert.equal(
-    readNote(kept.get(1)?.comments.at(-1)?.body ?? ""),
-    "plan-agreed",
-  );
-  // Without a plan, back to Planning; the closed card is done.
-  assert.equal(kept.get(3)?.stage, "planning");
+  // The closed card is done.
   assert.equal(kept.get(4)?.stage, "done");
   // Built: the checks failed once, the builder fixed them, they passed.
   assert.deepEqual(checks, ["npm ci", "npm test", "npm ci", "npm test"]);
@@ -150,7 +121,7 @@ test("the coach plans in a card, the builder builds an agreed one: checks, one f
   work.stop();
 });
 
-test("when the builder gives up, its work goes up as a draft and the card waits; a question goes back to Planning", async () => {
+test("when the builder gives up, its work goes up as a draft and the card waits; a question waits in To do for the answer", async () => {
   const { copy } = await project();
   const plan = withPlan("", "The plan.");
   const kept = new Map<number, Kept>([
@@ -193,14 +164,17 @@ test("when the builder gives up, its work goes up as a draft and the card waits;
   owner("Try again");
   await work.refresh();
   await settled(work);
-  assert.equal(card.stage, "planning");
+  assert.equal(card.stage, "todo");
   assert.equal(readNote(last()), "blocked");
+  // Not answered yet: it waits.
+  await work.refresh();
+  await settled(work);
+  assert.equal(card.stage, "todo");
 
-  // Answered and back in Ready: Claude Code cannot start. It gives up,
-  // with the draft of what is there, and waits for a comment.
+  // Answered: Claude Code cannot start. It gives up, with the draft of
+  // what is there, and waits for a comment.
   answer = null;
   owner("Blue");
-  card.stage = "todo";
   await work.refresh();
   await settled(work);
   assert.equal(card.stage, "doing");
@@ -220,16 +194,11 @@ test("when the builder gives up, its work goes up as a draft and the card waits;
   assert.equal(work.view().builder.on, false);
 });
 
-test("a board that cannot be read says why; a coach that cannot start says so in the card", async () => {
+test("a board that cannot be read says why", async () => {
   const { copy } = await project();
-  const kept = new Map<number, Kept>([
-    [6, { title: "Ask", stage: "planning", body: "", comments: [] }],
-  ]);
+  const kept = new Map<number, Kept>();
   const { claude } = pretendClaude(() => null);
   const { work, board } = setUp(kept, claude, copy, []);
-  work.switch("chat", true);
-  await settled(work);
-  assert.equal(readNote(kept.get(6)?.comments.at(-1)?.body ?? ""), "failed");
   assert.match(markComment("x", "failed"), /failed/);
 
   board.cards.list = () => Promise.reject(new Error("GitHub is away"));
@@ -262,7 +231,7 @@ test("a red check only the owner can fix becomes a question in the card", async 
   work.switch("build", true);
   await settled(work);
   assert.equal(prs.made.length, 0);
-  assert.equal(kept.get(7)?.stage, "planning");
+  assert.equal(kept.get(7)?.stage, "todo");
   const said = kept.get(7)?.comments.at(-1)?.body ?? "";
   assert.equal(readNote(said), "blocked");
   assert.match(said, /payment provider's key/);

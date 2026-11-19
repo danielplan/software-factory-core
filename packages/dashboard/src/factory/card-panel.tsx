@@ -83,7 +83,7 @@ export function CardPanel({
           </button>
         </header>
         {problem && (
-          <p className="px-5 pt-4 text-sm text-destructive">{problem}</p>
+          <p className="px-5 pt-4 text-[13px] text-destructive">{problem}</p>
         )}
         {panel ? <Body panel={panel} onPick={pick} /> : !problem && <Loading />}
       </aside>
@@ -112,9 +112,7 @@ function Body({
   return (
     <div className="grid gap-6 px-5 py-5">
       <div className="grid gap-3">
-        <h2 className="text-xl leading-snug font-bold tracking-tight">
-          {panel.title}
-        </h2>
+        <h2 className="text-base leading-snug font-semibold">{panel.title}</h2>
         <TypePicker type={panel.type} onPick={onPick} />
         <p className="flex items-center gap-2 rounded-xl bg-ground px-3 py-2 text-[13px] text-foreground-2">
           <KoboldHead size={20} /> {panel.status}
@@ -137,7 +135,7 @@ function PullRequest({
       href={pr.url}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center gap-3 rounded-2xl px-4 py-3 shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgb(20_24_36/0.3)]"
+      className="flex items-center gap-3 rounded-xl px-4 py-3 shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgb(20_24_36/0.3)]"
     >
       <GitPullRequest className="size-5 text-primary" aria-hidden />
       <span className="flex-1 font-semibold">Pull request</span>
@@ -154,7 +152,7 @@ function Section({ title, text }: Readonly<{ title: string; text: string }>) {
       <h3 className="text-[13px] font-semibold text-muted-foreground">
         {title}
       </h3>
-      <div className="text-sm leading-relaxed">
+      <div className="text-[13px] leading-relaxed">
         <Markdown text={text} />
       </div>
     </section>
@@ -172,7 +170,7 @@ function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
         <div
           key={at}
           className={cn(
-            "grid gap-1 rounded-2xl px-3.5 py-2.5 text-[13.5px] leading-relaxed",
+            "grid gap-1 rounded-xl px-3.5 py-2.5 text-[13.5px] leading-relaxed",
             one.by === "factory" ? "bg-ground" : "bg-wash",
           )}
         >

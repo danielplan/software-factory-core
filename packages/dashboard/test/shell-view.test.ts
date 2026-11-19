@@ -40,8 +40,17 @@ test("the sidebar counts only what there is: explorations, tickets not in the ap
   assert.deepEqual(
     countsOf(
       2,
-      work({ cards: [card(1, "todo"), card(2, "done"), card(3, null)] }),
+      work({
+        cards: [
+          card(1, "todo"),
+          card(2, "done"),
+          card(3, null),
+          card(4, "backlog"),
+          card(5, "review"),
+        ],
+      }),
     ),
+    // Ideas (Backlog, no column) are not the factory's work.
     { explore: 2, build: 2 },
   );
   assert.deepEqual(countsOf(0, work({ cards: [card(2, "done")] })), {});
@@ -90,14 +99,6 @@ test("the kobold's card says what it works on, or that it rests", () => {
     title: "Kobold is thinking",
     detail: "Wish list",
   });
-  assert.deepEqual(
-    koboldStatus(
-      work({ coach: { on: true, working: 12, also: [], steps: [] } }),
-      [],
-      "",
-    ),
-    { busy: true, title: "Kobold is planning", detail: "Card #12" },
-  );
 });
 
 test("light only: every rule for a computer set to dark is switched off", () => {

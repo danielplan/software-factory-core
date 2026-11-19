@@ -36,7 +36,7 @@ function card(over: Partial<BoardCard> = {}): BoardCard {
     title: "Invoices in euros",
     url: "https://github.com/o/r/issues/1",
     body: "",
-    stage: "planning",
+    stage: "backlog",
     closed: false,
     agreedInText: false,
     waitsFor: [],
@@ -127,7 +127,7 @@ test("a card Kobble waits for is never finished silently: it asks in Done until 
       // Answered already, or not Kobble's: finished as before.
       card({ number: 4, closed: true, stage: "done" }),
       // Not finished yet: it is worked on as before.
-      card({ number: 5, stage: "planning", awaitsAnswer: true }),
+      card({ number: 5, stage: "todo", awaitsAnswer: true }),
     ],
     none,
   );
@@ -138,7 +138,7 @@ test("a card Kobble waits for is never finished silently: it asks in Done until 
   ]);
   assert.deepEqual(
     decision.jobs.map((j) => [j.kind, j.number]),
-    [["plan", 5]],
+    [["build", 5]],
   );
   assert.equal(asksIfItWorked(card({ closed: true })), false);
   assert.equal(
@@ -147,55 +147,27 @@ test("a card Kobble waits for is never finished silently: it asks in Done until 
   );
 });
 
-test("the coach speaks first in Planning, then whenever the owner answers", () => {
-  const asked = [owner("Please plan"), factory("Which currency?", "question")];
-  const jobs = (thread: Message[]) => decide([card({ thread })], none).jobs;
-  assert.deepEqual(jobs([]), [{ lane: "chat", kind: "plan", number: 1 }]);
-  assert.deepEqual(jobs(asked), []);
-  assert.deepEqual(jobs([...asked, owner("Euros")]), [
-    { lane: "chat", kind: "plan", number: 1 },
-  ]);
-  // An announcement is not the factory's last word.
-  assert.deepEqual(jobs([...asked, factory("Moved", "moved-back")]), []);
-});
-
-test("Ready builds only an agreed plan; otherwise the card goes back with why", () => {
-  const ready = (over: Partial<BoardCard>) =>
+test("To do builds the card as it is; it waits for the cards it depends on and for an open question", () => {
+  const todo = (over: Partial<BoardCard>) =>
     decide([card({ stage: "todo", ...over })], none);
   const build = [{ lane: "build", kind: "build", number: 1 }];
-  const back = (why: string) => {
-    return (d: ReturnType<typeof decide>) => {
-      assert.deepEqual(d.jobs, []);
-      assert.deepEqual(d.moves, [{ number: 1, stage: "planning" }]);
-      assert.match(d.comments[0]?.body ?? "", new RegExp(why));
-      assert.equal(d.comments[0]?.note, "moved-back");
-    };
-  };
-  back("not agreed yet")(ready({}));
-  assert.deepEqual(ready({ agreedInText: true }).jobs, build);
-  // A card that depends on an open card waits in Ready, untouched.
-  const waiting = ready({ agreedInText: true, waitsFor: [7] });
+  // Its text is the plan: no planning step, nothing moved back.
+  assert.deepEqual(todo({}).jobs, build);
+  assert.deepEqual(todo({}).moves, []);
+  // A card that depends on an open card waits in To do, untouched.
+  const waiting = todo({ waitsFor: [7] });
   assert.deepEqual(waiting.jobs, []);
   assert.deepEqual(waiting.moves, []);
-  const agreed = factory("The plan", "plan-agreed");
-  assert.deepEqual(ready({ thread: [agreed] }).jobs, build);
-  back("new comment after the agreed plan")(
-    ready({ thread: [agreed, owner("One more thing")] }),
-  );
-  back("question about the plan is still open")(
-    ready({ thread: [agreed, factory("Really?", "question")] }),
-  );
+  // The builder's question waits for the owner's answer, then it builds.
   const blocked = factory("Which font?", "blocked");
-  back("builder's question is not answered")(
-    ready({ thread: [agreed, blocked] }),
-  );
+  assert.deepEqual(todo({ thread: [blocked] }).jobs, []);
+  assert.deepEqual(todo({ thread: [blocked] }).moves, []);
+  assert.deepEqual(todo({ thread: [blocked, owner("Inter")] }).jobs, build);
+  const asked = factory("Really?", "question");
+  assert.deepEqual(todo({ thread: [asked] }).jobs, []);
+  // A technical failure does not wait: To do again tries again.
   assert.deepEqual(
-    ready({ thread: [agreed, blocked, owner("Inter")] }).jobs,
-    build,
-  );
-  // A technical failure keeps the plan: Ready again tries again.
-  assert.deepEqual(
-    ready({ thread: [agreed, factory("Crashed", "failed")] }).jobs,
+    todo({ thread: [factory("Crashed", "failed")] }).jobs,
     build,
   );
 });
@@ -236,6 +208,7 @@ test("review comments on the card or the pull request are answered, first of all
   const decision = decide(
     [
       card({ number: 1, stage: "todo", agreedInText: true }),
+      // In the backlog: not the factory's to build yet.
       card({ number: 3 }),
       review({ thread: [ready], pullRequest: pr([owner("Rename it")]) }),
     ],
@@ -246,7 +219,6 @@ test("review comments on the card or the pull request are answered, first of all
     [
       ["feedback", 2],
       ["build", 1],
-      ["plan", 3],
     ],
   );
 });

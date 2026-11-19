@@ -29,8 +29,8 @@ export function StageMapping({
     ...columns.map((column) => ({ value: column, label: column })),
   ];
   return (
-    <div className="grid gap-2.5 rounded-2xl bg-surface-2/60 p-4">
-      <span className="text-sm font-medium">Which column is which</span>
+    <div className="grid gap-2.5 rounded-xl bg-surface-2/60 p-4">
+      <span className="text-[13px] font-medium">Which column is which</span>
       <span className="text-xs text-muted-foreground">
         Matched from the columns' names; change any that is wrong.
       </span>
@@ -40,7 +40,7 @@ export function StageMapping({
             key={stage.id}
             className="grid items-center gap-2 sm:grid-cols-[9rem_minmax(0,1fr)]"
           >
-            <span className="flex items-center gap-2 text-sm">
+            <span className="flex items-center gap-2 text-[13px]">
               <span
                 aria-hidden
                 className="size-2 rounded-full"

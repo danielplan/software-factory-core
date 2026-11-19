@@ -53,7 +53,7 @@ export function LiveScreen({
         </DialogTrigger>
       </div>
       <DialogContent className="h-[90dvh] w-[94vw] max-w-[94vw] grid-rows-[auto_1fr] gap-2 p-3 sm:max-w-[94vw]">
-        <DialogTitle className="pr-8 text-sm">{title}</DialogTitle>
+        <DialogTitle className="pr-8 text-[13px]">{title}</DialogTitle>
         <iframe
           title={title}
           src={url}

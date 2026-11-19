@@ -64,7 +64,9 @@ export function BarAction({
   }
   return (
     <>
-      {problem && <span className="text-sm text-destructive">{problem}</span>}
+      {problem && (
+        <span className="text-[13px] text-destructive">{problem}</span>
+      )}
       <Button size="pill" disabled={busy || coach.working} onClick={act}>
         {label}
         <ArrowRight className="size-4" aria-hidden />

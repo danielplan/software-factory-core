@@ -41,7 +41,8 @@ export type Cards = {
   show: (number: number) => Promise<CardDetail>;
   move: (number: number, stage: Stage) => Promise<void>;
   comment: (number: number, text: string) => Promise<void>;
-  create: (title: string, body: string) => Promise<Card>;
+  // In the backlog unless a stage is said (To do: the go-ahead to build).
+  create: (title: string, body: string, stage?: Stage) => Promise<Card>;
   // Writes the agreed plan into the card (replacing an earlier one).
   writePlan: (number: number, plan: string) => Promise<void>;
   // The card is built only after the other one (where it is tracked: GitHub's

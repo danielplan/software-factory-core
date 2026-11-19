@@ -14,18 +14,6 @@ const GUIDE =
 const SHARED = `You are the software factory, started on the owner's computer while nobody watches.
 Read ${GUIDE} first and follow it: it has the rules for working through the board and for this task.`;
 
-export function planPrompt(card: BoardCard): string {
-  return `${SHARED}
-
-## Your task: planning card #${String(card.number)}
-
-The card is in **Planning**. Follow the guide's "Planning" section.
-
-${cardText(card)}
-
-${answer("question", "plan-agreed", "blocked")}`;
-}
-
 // Other cards may be worked on at the same time, each in a copy of its own.
 function copyLine(copy: string): string {
   return `Your working copy is \`${copy}\`. Other cards may be worked on at the same time in other copies, each with its own settings, test database and ports: never touch theirs.`;

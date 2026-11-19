@@ -75,13 +75,15 @@ belongs to; an area the project has nothing for stays empty.
    too.
 3. **Team and board** (`Team and board`): the people in the history (by
    name, never a role: everyone can do everything) and where work is
-   tracked. A GitHub board is the factory's standard place for work:
-   recommend it when the code is on GitHub, else the factory's own board.
+   tracked. The factory works from a GitHub board: there is no board of its
+   own. When the code is not on GitHub yet, say the owner connects a board
+   right after opening the factory.
    Your first message says where the code is on GitHub and lists the boards
    there, with their columns and cards. Set the board up with the owner
    now: one of those, or a new one the factory makes for the project (its
-   columns are then the factory's stages: Backlog, Planning, To do, In
-   progress, Review, Done). For a board that is there, say which stages it
+   columns are then the factory's stages: Backlog, To do, In progress,
+   Review, Done; there is no Planning: work is thought through in
+   explorations, outside the factory). For a board that is there, say which stages it
    has no column for and ask whether the factory may add them (its cards
    keep their place). Draw the board you agreed on as a card.
 4. **How Kobble works** (`How Kobble works`): the factory's add-ons (listed
@@ -187,10 +189,29 @@ from the map:
    `--font-body`, `--radius`, `--shadow-soft` and `--shadow-big`. Use the
    project's own font files with `@font-face` and
    `url("/api/theme/file?path=<the file's path inside the project>")`.
+   Kobble's own accents in the app's colours too: `--blue` and
+   `--blue-foreground` (its main brand colour, for badges, spinners and
+   what is being built), `--wash` and `--wash-foreground` (a light tint of
+   it, with text), `--picked`, `--tint` and `--tint-line`. The sidebar
+   like the app's own navigation: `--sidebar`, `--sidebar-foreground`,
+   `--sidebar-strong`, `--sidebar-muted`, `--sidebar-hover`,
+   `--sidebar-active`, `--sidebar-active-foreground`, `--sidebar-border`
+   and `--sidebar-accent` (a dark app sidebar stays dark; text readable on
+   it). The company's mark: make `factory/logo.svg`, a copy of the app's
+   own SVG logo or icon (such as its favicon); when it has only a picture
+   (PNG), draw a simple SVG from it (its initial in its wordmark font's
+   shape, on its brand colour, with rounded corners), never a new design.
+   Name it with `--logo: url("/api/theme/file?path=factory/logo.svg")`. Its
+   wordmark the way the app writes it: `--wordmark` (the font, with its
+   `@font-face`), `--wordmark-case` (`uppercase` when it is written in
+   capitals) and `--wordmark-weight`. Take only what the app has; leave out
+   what it does not. When the app's own name for its tools is known (the
+   team says "the Acme Factory"), put it in `factory.json` as
+   `brand.factory`; `brand.kobold` only when the team names the kobold.
    Without an app people see, write no theme.
 5. `configure` where work is tracked, add-ons, settings and tools to
    install, but only what the owner agreed to. Where work is tracked is
-   `tracker`: `none` (the factory's own board), `github` (a GitHub board) or
+   `tracker`: `github` (a GitHub board) or
    `jira` (Jira Cloud); these come with the factory, nothing to switch on.
    For a GitHub board, `configure` with `board` too: its number, or `create`
    with a title for a new one, and `addColumns` only when the owner agreed.

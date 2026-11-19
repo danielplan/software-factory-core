@@ -45,8 +45,8 @@ export async function fixSignal(
       "",
       `<!-- factory:kobble signal=${signal.id} -->`,
     ].join("\n"),
+    "todo",
   );
-  await board.move(card.number, "todo");
   return store.put("signals", {
     ...fresh(store, id),
     status: "fixed",

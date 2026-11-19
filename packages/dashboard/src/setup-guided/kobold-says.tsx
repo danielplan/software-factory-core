@@ -104,7 +104,7 @@ function Question({
           {busy ? "…" : "Answer"}
         </Button>
       </div>
-      {problem && <p className="text-sm text-destructive">{problem}</p>}
+      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </form>
   );
 }

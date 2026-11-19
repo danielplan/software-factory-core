@@ -33,21 +33,33 @@ export type FactoryView = {
   columns: { id: Column; title: string; cards: FactoryCard[] }[];
   // The cards where the factory waits for the owner, oldest first.
   waiting: Asking[];
-  builder: { on: boolean; working: string | null };
+  // The cards it builds now, by number, and the same in words.
+  builder: { on: boolean; working: string | null; cards: number[] };
 };
 
-const OF_STAGE: Record<Stage, Column> = {
-  backlog: "todo",
-  planning: "todo",
+// The Factory page shows agreed work only: an idea in the board's Backlog
+// (or in no column) waits in Explorations instead (boardIdeas).
+const OF_STAGE: Record<Stage, Column | null> = {
+  backlog: null,
   todo: "todo",
   doing: "building",
   review: "review",
   done: "done",
 };
 
-function columnOfCard(card: CardView): Column {
+function columnOfCard(card: CardView): Column | null {
   if (card.closed) return "done";
-  return card.stage ? OF_STAGE[card.stage] : "todo";
+  return card.stage ? OF_STAGE[card.stage] : null;
+}
+
+// The board's ideas: open cards in its Backlog or in no column, not agreed
+// work yet. They wait in Explorations until someone explores one.
+export function boardIdeas(
+  work: WorkView | null,
+): { number: number; title: string; url: string }[] {
+  return (work?.cards ?? [])
+    .filter((card) => !card.closed && columnOfCard(card) === null)
+    .map(({ number, title, url }) => ({ number, title, url }));
 }
 
 // The column of an issue ("#41") on the board, in words; none when the
@@ -115,6 +127,7 @@ function builderOf(work: WorkView | null): FactoryView["builder"] {
   const cards = builder?.working ? [builder.working, ...builder.also] : [];
   return {
     on: builder?.on ?? false,
+    cards: cards.map((one) => one.number),
     working:
       cards.length > 0
         ? cards.map((one) => `#${String(one.number)} · ${one.title}`).join(", ")
