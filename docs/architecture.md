@@ -177,20 +177,33 @@ the personas with their signals (`GET /api/kobble/personas`,
 file may give its kobold's face (`face`: a hat and a colour); otherwise it
 comes from the persona's id (`packages/core/src/kobble/face.ts`).
 
-**Persona tests** (`factory/kobble/tests/T-0001.json`) let the kobold use the
-app as one persona would, on this computer only and never the live app
+**Persona tests**, called missions on the page
+(`factory/kobble/tests/T-0001.json`), let the kobold use the app as one
+persona would, on this computer only and never the live app
 (`packages/server/src/kobble/persona-tests.ts`, with the `persona-test`
-skill). The product starts as the factory starts it (the launcher, with its
-kit's command and port); the persona agent sees it only through a browser,
-Playwright's MCP server (`npx @playwright/mcp`, headless, no saved profile),
-and keeps a diary of each step: what it did, what it expected, and whether
-that happened. Then the analyst turns the diary into signals (`bug` or
-`feedback`, source `test`, the persona set, in the person's words), which go
-through the same "already" check. One test runs at a time; the others wait.
-A test that cannot run says why in its `problem` (no product with a web
-address, the product does not start, no browser, Claude Code missing). The
-routes: `POST /api/kobble/tests` (`persona`, `task`), `GET
-/api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`.
+skill). Before launch they are where the first signals come from: the empty
+Signals page sends the team to Personas. For each persona the kobold first
+suggests one mission (`mission-ideas.ts`, Part 0 of the skill): a sentence
+and the app (product) they would try it in, from who they are, the products
+with a web address and their missions before; it is kept in memory until the
+persona is sent, then the next is asked for. The product starts as the
+factory starts it (the launcher, with its kit's command and port; two
+missions needing it at once start it once); the persona agent sees it only
+through a browser, Playwright's MCP server (`npx @playwright/mcp`, headless,
+no saved profile), writes a `Step N: …` line before each step (kept in the
+test's `doing` while it runs, so the page follows it) and keeps a diary of
+each step: what it did, what it expected, and whether that happened. Then
+the analyst turns the diary into signals (`bug`, `idea` or `question`,
+source `test`, the persona set, in the person's words), each with the
+`step` where it happened (the test, the step's number and what the persona
+did), through the same "already" check. Up to 3 run at once and the others
+wait; one at a time for each persona. A test that cannot run says why in its
+`problem` (no product with a web address, the product does not start, no
+browser, Claude Code missing). The routes: `GET /api/kobble/mission?persona=…`,
+`POST /api/kobble/tests` (`persona`, `task`, `product`), `GET
+/api/kobble/tests?persona=…`, `GET /api/kobble/test?id=…`; the personas on a
+mission now come with the signals (`missions` in `GET /api/kobble/signals`)
+and each persona says whether it is on one (`onMission`).
 
 **Explorations** (`#explore`) are where the team works out what to build
 for a problem, with the kobold

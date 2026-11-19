@@ -44,14 +44,14 @@ export class MissionIdeas {
   }
 
   // The suggestion for a persona: the one asked for already, or a new one.
-  suggest(persona: string): Promise<MissionIdea> {
+  // One that failed stays failed (the page reads again on every change)
+  // until it is asked for again on purpose.
+  suggest(persona: string, again = false): Promise<MissionIdea> {
+    if (again) this.forget(persona);
     const known = this.known.get(persona);
     if (known) return known;
     const asked = this.ask(persona);
     this.known.set(persona, asked);
-    asked.catch(() => {
-      this.known.delete(persona);
-    });
     return asked;
   }
 

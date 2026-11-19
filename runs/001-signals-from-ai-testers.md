@@ -85,10 +85,55 @@ Later (not in this card): missions again after each merge.
 
 ## Status
 
-in progress
+done. Built as planned, in that order: the core (signal kinds `idea` and
+`question`, the `step` on a signal, `product` and `doing` on a test), the
+runner (several at once, one per persona, the step line), the kobold's
+suggestion, then the pages. The card's branch started 55 commits behind main
+(at core 0.11.0); it was moved forward to main first (it had no commits of
+its own), so the pull request has only this card's changes.
 
 ## Result
+
+What was built is in the plan above. Tried on a copy of the example company
+(`examples/acme`), with the real Claude Code for the suggestions:
+
+![The empty Signals page before launch](001-signals-from-ai-testers/signals-empty.png)
+
+![Personas as cards, with Send everyone](001-signals-from-ai-testers/personas.png)
+
+![Mia's page: the kobold's suggestion, in the Shop](001-signals-from-ai-testers/persona-suggested.png)
+
+![Mia's missions, with what each found at its step (made-up records)](001-signals-from-ai-testers/persona-missions.png)
+
+![Noah on a mission: the step he is on (made-up record)](001-signals-from-ai-testers/persona-on-a-mission.png)
+
+![Signals from missions, each at its step, and who is on a mission now (made-up records)](001-signals-from-ai-testers/signals-from-missions.png)
+
+![Send pressed for real: the mission is listed, says plainly why it could not start, and the kobold suggests the next one](001-signals-from-ai-testers/mission-could-not-start.png)
+
+How to try it: open a persona on Personas, wait for the kobold's
+suggestion, press Send (the factory starts the app named under Suggested).
+Follow it on the persona's page or on Signals.
+
+Checked: `npm run verify` passes except `check:docs`, which fails the same 10
+ways on main (since 8 November, not from this card: see Later). New tests
+for several at once, at most 3, one per persona, the app started once, the
+step line, the kinds and steps of findings, the suggestion (kept, refused
+when unreadable, asked again on purpose) and the page's words.
+
+Not checked: a whole real mission (browser and persona agent) to the end:
+the example company's apps do not start on this computer without their
+packages and backend, so the real run stopped at "Shop is waiting for Orders
+service", which the page showed plainly. The finished and running missions
+in the screenshots are made-up records written into the copy.
 
 ## Later
 
 - Missions again after each merge (agreed for later on the card).
+- `npm run check:docs` fails on main: the skills and templates name a
+  company's `docs/index.md`, `docs/decisions/` and so on, which the check
+  looks for at the core's root because the core has a `docs/` folder too.
+  Fixing it changes the check's rules or the skills' words; the owner
+  decides.
+- A persona could say which app it uses (today the kobold picks it each
+  time from who they are).

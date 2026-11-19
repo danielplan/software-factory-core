@@ -145,9 +145,9 @@ test("the kobold suggests one mission for a persona, in one of the apps, until i
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
   });
-  const ask = async (persona: string) => {
+  const ask = async (persona: string, again = "") => {
     const response = await fetch(
-      `${staged.base}/api/kobble/mission?persona=${persona}`,
+      `${staged.base}/api/kobble/mission?persona=${persona}${again}`,
     );
     return {
       status: response.status,
@@ -172,7 +172,7 @@ test("the kobold suggests one mission for a persona, in one of the apps, until i
     assert.match(asked?.prompt ?? "", /You are Mia/);
     assert.match(asked?.prompt ?? "", /- office: Back office/);
     // Sent: the next suggestion is a new one; one that cannot be read says
-    // so, and is asked for again next time.
+    // so, until it is asked for again on purpose.
     await staged.post("/api/kobble/tests", {
       persona: "mia",
       task: first.body.mission.task,
@@ -181,7 +181,9 @@ test("the kobold suggests one mission for a persona, in one of the apps, until i
     const unread = await ask("mia");
     assert.equal(unread.status, 409);
     assert.equal(unread.body.error, "The kobold's mission could not be read.");
-    const next = await ask("mia");
+    assert.equal((await ask("mia")).status, 409);
+    assert.equal(seen.length, 2);
+    const next = await ask("mia", "&again=yes");
     assert.deepEqual(next.body.mission, {
       task: "Pay for the gloves.",
       product: "shop",

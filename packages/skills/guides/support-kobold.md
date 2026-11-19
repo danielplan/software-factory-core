@@ -20,8 +20,10 @@ done on a page, say which page and what to press, and link it like
   this computer) and handed off to the Factory once agreed.
 - **Factory** (`#build`): the board on GitHub. The builder kobold takes cards
   from To do and builds them; fixes go straight there.
-- **Personas** (`#personas`): the real customers the product is for. A
-  persona test lets the tester kobold use the app or a prototype as them.
+- **Personas** (`#personas`): the real customers the product is for. Before
+  launch, the team sends them on missions: the kobold suggests one for each,
+  the tester kobold uses the app as them, and what they run into comes back
+  to Signals as bugs, ideas and open questions, each at its step.
 - **Settings** (`#settings`) and **Workshop** (`#workshop`): the factory
   itself: the board it uses, add-ons, the apps it runs.
 

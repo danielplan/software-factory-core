@@ -249,7 +249,10 @@ function testRoutes(
   const routes: Record<string, Route> = {
     "GET /api/kobble/mission": (_body, url) =>
       kept(async () => ({
-        mission: await ideas.suggest(asked(url, "persona", "persona")),
+        mission: await ideas.suggest(
+          asked(url, "persona", "persona"),
+          url.searchParams.get("again") === "yes",
+        ),
       })),
     "GET /api/kobble/tests": (_body, url) =>
       kept(() => ({

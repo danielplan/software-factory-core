@@ -10,6 +10,7 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 
 import {
+  get,
   type KobblePersonaPage,
   messageOf,
   type MissionIdea,
@@ -37,12 +38,6 @@ export const send = (
     task: idea.task,
     product: idea.product,
   });
-
-// The mission the kobold suggests for a persona (asked for once, then kept
-// by the factory until the persona is sent).
-function useMissionIdea(persona: string) {
-  return useRead(ideaPath(persona)) as Read<{ mission: MissionIdea }>;
-}
 
 export function PersonaMissions({
   page,
@@ -77,6 +72,30 @@ export function PersonaMissions({
   );
 }
 
+// The suggestion, and Try again after it failed (the answer is shown until
+// the page reads it).
+function useIdea(persona: string) {
+  // Asked for once, then kept by the factory until the persona is sent.
+  const read = useRead(ideaPath(persona)) as Read<{ mission: MissionIdea }>;
+  const [again, setAgain] = useState<Read<{ mission: MissionIdea }> | null>(
+    null,
+  );
+  const idea = read.data?.mission ?? again?.data?.mission ?? null;
+  const problem = again ? again.problem : read.problem;
+  const tryAgain = () => {
+    setAgain({ data: null, problem: null });
+    get<{ mission: MissionIdea }>(`${ideaPath(persona)}&again=yes`).then(
+      (data) => {
+        setAgain({ data, problem: null });
+      },
+      (error: unknown) => {
+        setAgain({ data: null, problem: messageOf(error) });
+      },
+    );
+  };
+  return { idea, problem, tryAgain };
+}
+
 // The kobold's suggestion as one calm card: the kobold's face and a
 // Suggested badge, the sentence, then Send and Change.
 function NextMission({
@@ -84,8 +103,7 @@ function NextMission({
   name,
   busy,
 }: Readonly<{ persona: string; name: string; busy: boolean }>) {
-  const { data, problem } = useMissionIdea(persona);
-  const idea = data?.mission ?? null;
+  const { idea, problem, tryAgain } = useIdea(persona);
   // The words as changed here; none while they are the kobold's.
   const [words, setWords] = useState<string | null>(null);
   const [changing, setChanging] = useState(false);
@@ -108,7 +126,7 @@ function NextMission({
           onWords={setWords}
         />
       ) : (
-        <NoIdeaYet name={name} problem={problem} />
+        <NoIdeaYet name={name} problem={problem} onAgain={tryAgain} />
       )}
       {sending.failed && (
         <p role="alert" className="text-[13px] text-destructive">
@@ -200,10 +218,18 @@ function useSending(onSent: () => void) {
 function NoIdeaYet({
   name,
   problem,
-}: Readonly<{ name: string; problem: string | null }>) {
+  onAgain,
+}: Readonly<{ name: string; problem: string | null; onAgain: () => void }>) {
   return problem ? (
     <p role="alert" className="text-[13px] text-destructive">
-      {problem}
+      {problem}{" "}
+      <button
+        type="button"
+        onClick={onAgain}
+        className="font-semibold text-blue"
+      >
+        Try again
+      </button>
     </p>
   ) : (
     <p className="flex items-center gap-2 text-[14px] text-muted-foreground">

@@ -69,26 +69,28 @@ function Found({ found }: Readonly<{ found: SignalRow[] }>) {
     );
   return (
     <ul className="grid gap-1.5">
-      {found.map((signal) => (
-        <li key={signal.id}>
-          <a
-            href={`#signals/${encodeURIComponent(signal.id)}`}
-            className="group -mx-2 flex items-start gap-2.5 rounded-[10px] px-2 py-1.5 hover:bg-surface"
-          >
-            <TypeChip type={signal.type} />
-            <span className="grid min-w-0 gap-0.5 text-[13.5px]">
-              <span className="text-foreground-2 group-hover:underline">
-                <Markdown text={signal.text} inline />
-              </span>
-              {signal.step && (
-                <span className="text-[12px] text-muted-foreground">
-                  {stepWords(signal)}
+      {[...found]
+        .sort((a, b) => (a.step?.number ?? 0) - (b.step?.number ?? 0))
+        .map((signal) => (
+          <li key={signal.id}>
+            <a
+              href={`#signals/${encodeURIComponent(signal.id)}`}
+              className="group -mx-2 flex items-start gap-2.5 rounded-[10px] px-2 py-1.5 hover:bg-surface"
+            >
+              <TypeChip type={signal.type} />
+              <span className="grid min-w-0 gap-0.5 text-[13.5px]">
+                <span className="text-foreground-2 group-hover:underline">
+                  <Markdown text={signal.text} inline />
                 </span>
-              )}
-            </span>
-          </a>
-        </li>
-      ))}
+                {signal.step && (
+                  <span className="text-[12px] text-muted-foreground">
+                    {stepWords(signal)}
+                  </span>
+                )}
+              </span>
+            </a>
+          </li>
+        ))}
     </ul>
   );
 }

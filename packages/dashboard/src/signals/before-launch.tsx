@@ -35,6 +35,7 @@ export function BeforeLaunch({
       {missions.length === 0 && empty && <NoCustomersYet />}
       <ConnectLater
         app={app}
+        more={!empty}
         onConnect={() => {
           setConnecting(true);
         }}
@@ -43,16 +44,24 @@ export function BeforeLaunch({
   );
 }
 
+// "After launch, connect <app>", after "Send more personas" once there are
+// signals.
 function ConnectLater({
   app,
+  more,
   onConnect,
-}: Readonly<{ app: string; onConnect: () => void }>) {
+}: Readonly<{ app: string; more: boolean; onConnect: () => void }>) {
   return (
     <p className="mx-1 text-[12.5px] text-muted-foreground">
-      <a href={personaHash()} className="font-semibold text-blue">
-        Send your personas
-      </a>{" "}
-      to find what to improve. After launch,{" "}
+      {more && (
+        <>
+          <a href={personaHash()} className="font-semibold text-blue">
+            Send more personas
+          </a>{" "}
+          to find what to improve.{" "}
+        </>
+      )}
+      After launch,{" "}
       <button
         type="button"
         onClick={onConnect}
@@ -77,7 +86,7 @@ function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
           <PersonaFace face={mission.face} size={26} />
           <span className="font-semibold">{mission.name}</span>
           <span aria-live="polite" className="truncate text-muted-foreground">
-            {missionWords(mission)}
+            On a mission · {missionWords(mission)}
           </span>
         </a>
       ))}
