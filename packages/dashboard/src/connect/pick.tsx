@@ -1,4 +1,5 @@
 import { Combobox } from "@/components/ui/combobox";
+import { useT } from "@/i18n/use-t";
 
 // A choice from a list, with "Choose the …" until one is chosen.
 export function Pick({
@@ -12,6 +13,7 @@ export function Pick({
   options: { value: string; label: string }[];
   onPick: (value: string) => void;
 }>) {
+  const t = useT();
   return (
     <Combobox
       label={label}
@@ -19,7 +21,7 @@ export function Pick({
       options={options}
       onChange={onPick}
       disabled={options.length === 0}
-      placeholder={`Choose the ${label.toLowerCase()}…`}
+      placeholder={t.connect.pick.choose(label)}
     />
   );
 }
@@ -30,14 +32,19 @@ export function WhichWork({
   value,
   onPick,
   noun,
-}: Readonly<{ value: string; onPick: (value: string) => void; noun: string }>) {
+}: Readonly<{
+  value: string;
+  onPick: (value: string) => void;
+  noun: "cards" | "issues";
+}>) {
+  const t = useT();
   return (
     <Pick
-      label="Work the factory takes in"
+      label={t.connect.pick.work}
       value={value}
       options={[
-        { value: "*", label: `Every ${noun.replace(/s$/, "")} on the board` },
-        { value: "factory", label: `Only ${noun} labelled “factory”` },
+        { value: "*", label: t.connect.pick.every[noun] },
+        { value: "factory", label: t.connect.pick.only[noun] },
       ]}
       onPick={onPick}
     />

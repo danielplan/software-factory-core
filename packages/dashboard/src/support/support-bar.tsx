@@ -17,8 +17,10 @@ import { cn } from "@/lib/utils";
 
 import { onAskSupport } from "./ask-support";
 import { type SupportView, useSupport } from "./use-support";
+import { useT } from "@/i18n/use-t";
 
 export function SupportBar({ page }: Readonly<{ page: Page }>) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const name = useKoboldName();
   const support = useSupport();
@@ -62,7 +64,7 @@ export function SupportBar({ page }: Readonly<{ page: Page }>) {
         >
           <KoboldHead size={22} className={cn(working && "animate-breathe")} />
           <span className="flex-1 truncate">
-            {working ? `${name} is answering…` : `Ask ${name} anything`}
+            {working ? t.support.answering(name) : t.support.ask(name)}
           </span>
           <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
             ⌘J
@@ -84,6 +86,7 @@ function Conversation({
   support: SupportView | null;
   onClose: () => void;
 }>) {
+  const t = useT();
   const [refused, setRefused] = useState<string | null>(null);
   const empty = (support?.messages.length ?? 0) === 0 && !support?.writing;
   return (
@@ -96,14 +99,14 @@ function Conversation({
         <span className="grid flex-1">
           <b className="text-[13px] font-semibold">{name}</b>
           <small className="text-[11.5px] text-muted-foreground">
-            Support · reads your project, changes nothing
+            {t.support.role}
           </small>
         </span>
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="New conversation"
-          title="New conversation"
+          aria-label={t.support.newConversation}
+          title={t.support.newConversation}
           onClick={() => {
             post("/api/kobble/support/new").catch((error: unknown) => {
               setRefused(messageOf(error));
@@ -115,7 +118,7 @@ function Conversation({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Close"
+          aria-label={t.support.close}
           onClick={onClose}
         >
           <X aria-hidden className="size-4" />
@@ -123,8 +126,7 @@ function Conversation({
       </header>
       {empty ? (
         <p className="px-4 py-5 text-[13px] text-muted-foreground">
-          Ask how Kobble works, where something is, or anything about your
-          product.
+          {t.support.empty}
         </p>
       ) : (
         <Messages support={support} />
@@ -140,6 +142,7 @@ function Conversation({
 }
 
 function Messages({ support }: Readonly<{ support: SupportView | null }>) {
+  const t = useT();
   const end = useRef<HTMLDivElement>(null);
   const count = support?.messages.length ?? 0;
   const writing = support?.writing;
@@ -167,7 +170,7 @@ function Messages({ support }: Readonly<{ support: SupportView | null }>) {
           {writing ? (
             <Markdown text={writing} />
           ) : (
-            (support?.activity ?? "Thinking…")
+            (support?.activity ?? t.support.thinking)
           )}
         </div>
       )}
@@ -185,6 +188,7 @@ function Ask({
   busy: boolean;
   onRefused: (problem: string | null) => void;
 }>) {
+  const t = useT();
   const [text, setText] = useState("");
   const send = () => {
     const said = text.trim();
@@ -210,7 +214,7 @@ function Ask({
         autoFocus
         rows={1}
         value={text}
-        placeholder="Ask a question"
+        placeholder={t.support.question}
         onChange={(event) => {
           setText(event.target.value);
         }}
@@ -225,7 +229,7 @@ function Ask({
       <Button
         type="submit"
         size="icon-sm"
-        aria-label="Send"
+        aria-label={t.support.send}
         disabled={busy || !text.trim()}
       >
         <ArrowUp aria-hidden className="size-4" />

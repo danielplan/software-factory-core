@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import type { FactoryState } from "@/dashboard/dashboard";
 import { STAGES } from "./stages";
+import { useT } from "@/i18n/use-t";
 
 type Entry = FactoryState["board"][string];
 
@@ -13,13 +14,14 @@ export function ConnectedBoard({
   state,
   brief = false,
 }: Readonly<{ state: FactoryState; brief?: boolean }>) {
+  const t = useT();
   const board = boardOf(state);
   if (!board) return null;
   const { name, href, entry } = board;
   return (
     <div className="grid gap-3">
       <p className="text-[13px]">
-        {brief ? "Your work is tracked on " : "Connected to "}
+        {brief ? t.connect.connected.tracked : t.connect.connected.to}
         <a
           href={href}
           target="_blank"
@@ -30,8 +32,8 @@ export function ConnectedBoard({
           <ArrowUpRight className="size-3.5" aria-hidden />
         </a>
         {entry.label === "*"
-          ? ", all of its work."
-          : `, the work labelled “${entry.label}”.`}
+          ? t.connect.connected.all
+          : t.connect.connected.labelled(entry.label)}
       </p>
       {!brief && <StageColumns entry={entry} />}
     </div>
@@ -39,8 +41,12 @@ export function ConnectedBoard({
 }
 
 function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
+  const t = useT();
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Stages and columns">
+    <ul
+      className="flex flex-wrap gap-2"
+      aria-label={t.connect.connected.stagesLabel}
+    >
       {STAGES.filter((stage) => stage.id !== "draft").map((stage) => {
         const column = (entry.stages as Record<string, string>)[stage.id];
         return (
@@ -53,7 +59,7 @@ function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
               className="size-2 rounded-full"
               style={{ background: stage.colour }}
             />
-            {stage.title}
+            {t.connect.stages[stage.id]}
             <span className="text-muted-foreground">
               {column ? `= ${column}` : "· no column"}
             </span>

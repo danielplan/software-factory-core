@@ -2,6 +2,8 @@
 // its file is written (areas/<area>.ts).
 
 import type { Locale } from "./locale.ts";
+import { support } from "./areas/support.ts";
+import { connect } from "./areas/connect.ts";
 import { factory } from "./areas/factory.ts";
 import { explore } from "./areas/explore.ts";
 import { personas } from "./areas/personas.ts";
@@ -24,6 +26,8 @@ const AREAS = {
   personas,
   explore,
   factory,
+  connect,
+  support,
 };
 
 type Areas = typeof AREAS;
