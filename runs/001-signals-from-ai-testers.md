@@ -133,6 +133,8 @@ Checked again in a second session (2026-11-19), before the pull request:
 `npm run verify` passes in full, 311 of 311 tests, 97% of lines covered.
 Checked a third time (2026-11-19, the branch up to date with main): the
 same, 311 of 311, 97% of lines; the pull request's description written.
+Checked a fourth time (2026-11-19, a new session, nothing new on main): the
+same, 311 of 311, 97% of lines.
 
 Not checked: a whole real mission (browser and persona agent) to the end:
 the example company's apps do not start on this computer without their
