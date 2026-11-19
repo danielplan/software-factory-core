@@ -129,6 +129,9 @@ the skills' words: a path into `docs/` may also point into any knowledge base
 there is (a `docs/` or `context/` folder with an index.md, as the template).
 A path in none of them is still reported, with a test for both.
 
+Checked again in a second session (2026-11-19), before the pull request:
+`npm run verify` passes in full, 311 of 311 tests, 97% of lines covered.
+
 Not checked: a whole real mission (browser and persona agent) to the end:
 the example company's apps do not start on this computer without their
 packages and backend, so the real run stopped at "Shop is waiting for Orders
