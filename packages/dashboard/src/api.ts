@@ -48,13 +48,8 @@ export type {
 export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 
-// A persona's face from its id, and the hats and colours to pick from.
-export {
-  faceFor,
-  faceFrom,
-  PERSONA_COLORS,
-  PERSONA_HATS,
-} from "../../core/src/kobble/face.ts";
+// A persona's face worked out from who they are.
+export { faceFrom } from "../../core/src/kobble/face.ts";
 
 // The core's version, and where its releases are (for links to its docs).
 export { CORE_VERSION, RELEASE_SOURCE } from "../../core/src/version.ts";

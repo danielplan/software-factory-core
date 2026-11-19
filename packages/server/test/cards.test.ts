@@ -10,6 +10,7 @@ import { GIT } from "@software-factory/knowledge-base";
 import type { Cli } from "../src/add-ons/github/github.ts";
 import { planOf, stageNamed, withPlan } from "../src/cards/cards.ts";
 import { cardCommand } from "../src/cards/command.ts";
+import { githubCards } from "../src/cards/github-cards.ts";
 import { BOARD, pretendGitHub } from "./pretend-github.ts";
 
 // The board's cards for the coding agents: listed, shown, moved, made, and
@@ -209,4 +210,26 @@ test("cards depend on and replace each other; something noticed becomes a card t
     await said("show", "4"),
     /Depends on: #3 Invoices in euros \(done\)/,
   );
+});
+
+test("a card not wanted any more is deleted: closed as not planned and off the board, not while it is being built", async () => {
+  const github = pretendGitHub();
+  github.issues.set(4, {
+    title: "Totals per month",
+    body: "",
+    column: "In progress",
+  });
+  const cards = githubCards(github.cli, BOARD);
+
+  await cards.remove?.(3);
+  assert.ok(github.closed.has(3));
+  assert.ok(github.removed.has(3));
+  assert.ok(!(await cards.list()).some((one) => one.number === 3));
+
+  await assert.rejects(
+    cards.remove?.(4) ?? Promise.resolve(),
+    /builder is on #4/,
+  );
+  assert.ok(!github.closed.has(4));
+  await assert.rejects(cards.remove?.(3) ?? Promise.resolve(), /no card #3/);
 });

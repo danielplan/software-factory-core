@@ -16,6 +16,7 @@ import { PICTURE_TYPES } from "./coach/pictures.ts";
 import { sendTheme, THEME_ROUTES } from "./theme.ts";
 import { type AddOn, addOnRoutes, type Route } from "./add-ons/add-on.ts";
 import { answerAgentTools, isAgentTools } from "./agent-tools.ts";
+import type { SupportTools } from "./kobble/support-tools.ts";
 import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { WEBHOOK_PATH } from "./builder/signals.ts";
 import { readBody, send } from "./http.ts";
@@ -88,6 +89,7 @@ export function startServer(options: {
       routes,
       watchers,
       boardTools: kobble.boardTools,
+      supportTools: kobble.supportTools,
       worlds: kobble.worlds,
       ...options,
     });
@@ -166,6 +168,7 @@ type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
   boardTools: (id: string) => BoardTools;
+  supportTools: () => SupportTools;
   worlds: ExplorationWorlds;
   page: string;
   session: Session;

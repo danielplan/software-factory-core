@@ -34,6 +34,7 @@ import { LiveSync } from "./sync.ts";
 import { connect, disconnect } from "./connect.ts";
 import { boardIdeas, factoryView } from "./factory-view.ts";
 import { supportOf, supportRoutes } from "./support.ts";
+import type { SupportTools } from "./support-tools.ts";
 import {
   handledView,
   personaPage,
@@ -74,6 +75,7 @@ export function servedKobble(options: KobbleOptions) {
   });
   const changing = changingWith(changed);
   const { explorations, tests } = explorationsAndTests(options, store, changed);
+  const support = supportOf(options, store, changed);
   const routes: Record<string, Route> = {
     "GET /api/kobble/signals": () =>
       kept(() => signalsView(store(), sync.view(), options.work())),
@@ -89,7 +91,7 @@ export function servedKobble(options: KobbleOptions) {
       connectedCards(factory, options.cli),
     ),
     ...tests.routes,
-    ...supportRoutes(supportOf(options, changed)),
+    ...supportRoutes(support),
     ...keptAll(
       explorationRoutes(explorations, tests.tests, () =>
         usageOf(factory, options.project),
@@ -102,8 +104,10 @@ export function servedKobble(options: KobbleOptions) {
     serveToolsAt: (base: string) => {
       explorations.talks.serveToolsAt(`${base}/kobble/explorations/mcp`);
       explorations.prototypes.serveWorldAt(`${base}/kobble/world`);
+      support.serveToolsAt(`${base}/kobble/support/mcp`);
     },
     boardTools: (id: string): BoardTools => explorations.talks.tools(id),
+    supportTools: (): SupportTools => support.tools(),
     // The made-up worlds the prototypes share (world-route.ts).
     worlds: explorations.worlds,
     start: () => {

@@ -1,6 +1,7 @@
 // One card of the Factory page, opened beside the board: its plan, what it
 // is about, the conversation with the builder (who said what, the factory's
-// notes in words), the pull request, and its type, which can be changed.
+// notes in words), the pull request, and its type, which can be changed;
+// a card not wanted any more is deleted (closed, off the board).
 
 import type { Route } from "../add-ons/add-on.ts";
 import type { Cli } from "../add-ons/github/github.ts";
@@ -24,6 +25,8 @@ export type CardPanel = {
   title: string;
   url: string;
   column: string;
+  // In the builder's column: it cannot be deleted meanwhile.
+  building: boolean;
   type: CardType | null;
   // What the card asks for, without the agreed plan; the plan apart.
   about: string;
@@ -84,6 +87,14 @@ export function factoryCardRoutes(
       await cards.setType(number, type);
       return { type };
     },
+    "POST /api/kobble/factory/delete": async (body) => {
+      const number = Number((body as { number?: unknown } | null)?.number);
+      if (!Number.isInteger(number)) throw new Refused("Say which card.");
+      const { cards } = connected();
+      if (!cards.remove) throw new Refused("This board cannot delete cards.");
+      await cards.remove(number);
+      return { deleted: number };
+    },
   };
 }
 
@@ -100,6 +111,7 @@ function panelOf(
     title: card.title,
     url: card.url,
     column: card.column,
+    building: card.stage === "doing",
     type: typeOf(card.labels),
     about,
     plan,

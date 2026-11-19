@@ -55,11 +55,19 @@ export type CardView = {
 
 // What the builder is doing: on or off, the card it works on, its last
 // step, and what went wrong last.
+// A card the builder is on: what kind of work, and its latest step.
+type Working = {
+  number: number;
+  title: string;
+  what: string;
+  activity: string | null;
+};
+
 export type BuilderView = {
   on: boolean;
-  working: { number: number; title: string; what: string } | null;
+  working: Working | null;
   // The other cards it works on at the same time (cards at once).
-  also: { number: number; title: string; what: string }[];
+  also: Working[];
   activity: string | null;
   // Its last steps on that card, oldest first.
   steps: string[];

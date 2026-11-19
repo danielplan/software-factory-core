@@ -1,7 +1,8 @@
 // The support kobold at the bottom of every page: a small bar that asks
 // "Ask Sprocket…" (⌘J or a click opens it), and above it, once open, the
 // conversation in a card. It answers questions about Kobble and the
-// project; it changes nothing (server kobble/support.ts).
+// project, and adds the personas and explorations people describe to it
+// (server kobble/support.ts); New persona and New exploration open it.
 
 import { ArrowUp, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +15,7 @@ import { useKoboldName } from "@/lib/brand";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
+import { onAskSupport } from "./ask-support";
 import { type SupportView, useSupport } from "./use-support";
 
 export function SupportBar({ page }: Readonly<{ page: Page }>) {
@@ -29,10 +31,15 @@ export function SupportBar({ page }: Readonly<{ page: Page }>) {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", key);
+    const asked = onAskSupport((text) => {
+      setOpen(true);
+      void post("/api/kobble/support", { text, page }).catch(() => undefined);
+    });
     return () => {
       window.removeEventListener("keydown", key);
+      asked();
     };
-  }, []);
+  }, [page]);
   const working = support?.writing != null;
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">

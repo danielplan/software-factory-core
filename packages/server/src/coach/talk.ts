@@ -26,6 +26,9 @@ const TOOL_LINES: Record<string, string> = {
   draw: "Drawing on the map",
   board: "Changing the board",
   configure: "Setting up the factory",
+  list_personas: "Looking at the personas",
+  add_persona: "Adding the persona",
+  add_exploration: "Adding the exploration",
 };
 const TOOL_PREFIX = "Using mcp__setup__";
 // What the owner sees while the coach works: its tools, not its words

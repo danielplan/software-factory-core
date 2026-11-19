@@ -82,7 +82,12 @@ test("the kobold's card says what it works on, or that it rests", () => {
       work({
         builder: {
           on: true,
-          working: { number: 7, title: "Order status", what: "building" },
+          working: {
+            number: 7,
+            title: "Order status",
+            what: "building",
+            activity: null,
+          },
           also: [],
           activity: null,
           steps: [],

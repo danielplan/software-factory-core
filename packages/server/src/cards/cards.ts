@@ -53,6 +53,9 @@ export type Cards = {
   replace: (number: number, by: number) => Promise<void>;
   // What kind of work it is (a label where it is tracked); none takes it off.
   setType?: (number: number, type: CardType | null) => Promise<void>;
+  // Not wanted any more: taken off the board and closed as not planned
+  // where it is tracked, so it stays findable there.
+  remove?: (number: number) => Promise<void>;
 };
 
 // What kind of work a card is, kept as a label ("type: bug").

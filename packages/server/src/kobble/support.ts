@@ -1,19 +1,22 @@
 // The support kobold: the one that is always there, at the bottom of every
 // page (the dashboard's support bar), for questions about Kobble and the
-// project. The same talk as the other kobolds (coach/talk.ts), but with no
-// tools of its own: it reads the project and answers; it changes nothing.
+// project. The same talk as the other kobolds (coach/talk.ts): it reads the
+// project and answers, and with its own tools (support-tools.ts) adds the
+// personas and explorations the team describes to it; it changes no file
+// of the project.
 // The conversation lives while the factory runs; New conversation starts
 // again.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { Claude } from "@software-factory/core";
+import type { Claude, KobbleStore } from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
 import type { Route } from "../add-ons/add-on.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
+import type { SupportTools } from "./support-tools.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -28,19 +31,21 @@ export type SupportView = {
   problem: string | null;
 };
 
+type SupportOptions = {
+  claude: Claude;
+  project: string;
+  onChange: () => void;
+  // The records its tools add to, and what they tell the page.
+  store: () => KobbleStore;
+  changed: (what: string) => void;
+};
+
 export class SupportTalk {
   private talk: Talk;
-  private readonly options: {
-    claude: Claude;
-    project: string;
-    onChange: () => void;
-  };
+  private toolsUrl = "";
+  private readonly options: SupportOptions;
 
-  constructor(options: {
-    claude: Claude;
-    project: string;
-    onChange: () => void;
-  }) {
+  constructor(options: SupportOptions) {
     this.options = options;
     this.talk = this.fresh();
   }
@@ -75,6 +80,21 @@ export class SupportTalk {
     });
   }
 
+  // Where the server answers its tools, once it listens.
+  serveToolsAt(url: string): void {
+    this.toolsUrl = url;
+    this.talk.serveToolsAt(url);
+  }
+
+  // Its tools, for this conversation's Claude Code only.
+  tools(): SupportTools {
+    return {
+      token: this.talk.token,
+      store: this.options.store,
+      changed: this.options.changed,
+    };
+  }
+
   // A new conversation; refused while the kobold answers.
   restart(): void {
     if (this.talk.working) return;
@@ -83,11 +103,13 @@ export class SupportTalk {
   }
 
   private fresh(): Talk {
-    return new Talk({
+    const talk = new Talk({
       claude: this.options.claude,
       cwd: this.options.project,
       onChange: this.options.onChange,
     });
+    if (this.toolsUrl) talk.serveToolsAt(this.toolsUrl);
+    return talk;
   }
 }
 
@@ -109,6 +131,7 @@ export function supportRoutes(support: SupportTalk): Record<string, Route> {
 // "support".
 export function supportOf(
   options: { claude: Claude; project: string },
+  store: () => KobbleStore,
   changed: (what: string) => void,
 ): SupportTalk {
   return new SupportTalk({
@@ -117,5 +140,7 @@ export function supportOf(
     onChange: () => {
       changed("support");
     },
+    store,
+    changed,
   });
 }

@@ -8,7 +8,7 @@ import { randomUUID } from "node:crypto";
 
 import type { Claude } from "@software-factory/core";
 
-import { branchOf, commitAndPush } from "./branches.ts";
+import { branchOf, commitAndPush, originProblem } from "./branches.ts";
 import type { BoardCard } from "./decide.ts";
 import { CARRY_ON, clashPrompt } from "./prompts.ts";
 import { linkRepositoryFiles, readStatusLine } from "./protocol.ts";
@@ -44,6 +44,10 @@ export async function builderTurn(
   const { copy, card, onActivity, model } = options;
   const branch = branchOf(card.number);
   await copy.prepareSharedBranch(branch);
+  // Pushed elsewhere, the work never reaches the board: said before any
+  // session is spent on it.
+  const elsewhere = await originProblem(copy.path, options.repository);
+  if (elsewhere) return { status: "blocked", text: elsewhere };
   const clashes = await copy.bringInMain();
   if (clashes.length > 0)
     onActivity(`Bringing main in: ${clashes.join(", ")} clash`);

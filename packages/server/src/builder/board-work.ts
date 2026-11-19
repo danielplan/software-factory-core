@@ -310,7 +310,12 @@ export class BoardWork {
 }
 
 function workingOf(one: Running) {
-  return { number: one.job.number, title: one.title, what: WHAT[one.job.kind] };
+  return {
+    number: one.job.number,
+    title: one.title,
+    what: WHAT[one.job.kind],
+    activity: one.steps.at(-1) ?? null,
+  };
 }
 
 function messageOf(error: unknown): string {

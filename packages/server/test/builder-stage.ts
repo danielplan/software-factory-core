@@ -75,7 +75,14 @@ export async function project() {
   const git = (...args: string[]) => run("git", ["-C", source, ...args]);
   await git("add", ".");
   await git("commit", "--quiet", "-m", "start");
-  await git("remote", "add", "origin", join(folder, "origin.git"));
+  // Origin is the board's repository on GitHub, as the builder checks; git
+  // takes that name to the bare repository here.
+  await git("remote", "add", "origin", "https://github.com/o/r.git");
+  await git(
+    "config",
+    `url.${join(folder, "origin.git")}.insteadOf`,
+    "https://github.com/o/r.git",
+  );
   await git("push", "--quiet", "origin", "main");
   const copy = (name: string) =>
     Promise.resolve(
