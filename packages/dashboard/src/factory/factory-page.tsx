@@ -23,8 +23,11 @@ import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { WaitingCards } from "./waiting-card";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
+  const t = useT();
   const { data, problem } = useFactoryView(state);
   const [said, say] = useState<string | null>(null);
   const [open, setOpen] = useState<number | null>(null);
@@ -55,14 +58,14 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <>
       <PageHead
-        title="Factory"
+        title={t.shell.pages.build}
         actions={
           data?.connected ? (
             <Builder view={data} press={press} href={href} />
           ) : undefined
         }
       />
-      {shown && <ProblemBox title="That did not work" text={shown} />}
+      {shown && <ProblemBox title={t.factory.didNotWork} text={shown} />}
       <OpenCard value={setOpen}>
         {data && <Board view={without(data, gone)} />}
       </OpenCard>
@@ -95,12 +98,13 @@ function without(view: FactoryView, gone: number[]): FactoryView {
 
 // What waits for the owner, then the columns.
 function Board({ view }: Readonly<{ view: FactoryView }>) {
+  const t = useT();
   // Connected, but not read yet (just started): no empty columns meanwhile.
   if (view.connected && view.read === null)
     return (
       <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
         <LoaderCircle aria-hidden className="size-4 animate-spin" />
-        Reading the board on GitHub…
+        {t.factory.reading}
       </p>
     );
   return (
@@ -127,14 +131,6 @@ function Columns({ view }: Readonly<{ view: FactoryView }>) {
 
 const DONE_SHOWN = 6;
 
-// What each column means, under its title.
-const MEANS: Record<FactoryView["columns"][number]["id"], string> = {
-  todo: "Waiting to be built",
-  building: "The builder is on it",
-  review: "Waiting for your review",
-  done: "Merged or closed",
-};
-
 function Column({
   column,
   now,
@@ -142,13 +138,14 @@ function Column({
   column: FactoryView["columns"][number];
   now: FactoryView["builder"]["now"];
 }>) {
+  const t = useT();
   const [all, setAll] = useState(false);
   const colour = COLUMN_COLOURS[column.id];
   const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
   const cards = cut ? column.cards.slice(0, DONE_SHOWN) : column.cards;
   return (
     <section
-      aria-label={column.title}
+      aria-label={t.factory.columns[column.id]}
       className="flex min-h-0 flex-col rounded-xl border"
       style={{
         backgroundColor: `color-mix(in srgb, ${colour} 6%, #fafafa)`,
@@ -158,7 +155,7 @@ function Column({
       <header className="grid gap-0.5 px-3.5 pt-3 pb-2.5">
         <h2 className="flex items-center gap-2 text-[13px] font-semibold">
           <ColumnIcon column={column.id} />
-          <span style={{ color: colour }}>{column.title}</span>
+          <span style={{ color: colour }}>{t.factory.columns[column.id]}</span>
           <span
             className="ml-auto grid h-5 min-w-5 place-items-center rounded-md px-1.5 text-[11px] font-semibold"
             style={{
@@ -170,7 +167,7 @@ function Column({
           </span>
         </h2>
         <p className="pl-[23px] text-xs text-muted-foreground">
-          {MEANS[column.id]}
+          {t.factory.means[column.id]}
         </p>
       </header>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
@@ -184,7 +181,7 @@ function Column({
         ))}
         {column.cards.length === 0 && (
           <p className="rounded-lg border border-dashed border-current/15 px-3 py-4 text-center text-xs text-faint">
-            Nothing here
+            {t.factory.nothingHere}
           </p>
         )}
         {cut && (
@@ -195,7 +192,7 @@ function Column({
             }}
             className="rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-card hover:text-foreground"
           >
-            Show all {column.cards.length}
+            {t.factory.showAll(column.cards.length)}
           </button>
         )}
       </div>
@@ -214,6 +211,7 @@ function Builder({
   press: (path: string, body?: object) => void;
   href: string | null;
 }>) {
+  const t = useT();
   const [reading, setReading] = useState(false);
   return (
     <>
@@ -230,7 +228,7 @@ function Builder({
             className="size-3.5 flex-none animate-spin text-blue"
           />
         )}
-        {builderWords(view.builder)}
+        {builderWords(view.builder, t.factory.builder)}
       </label>
       <Button
         variant="ring"
@@ -248,12 +246,13 @@ function Builder({
           strokeWidth={2}
           className={cn("size-[15px]", reading && "animate-spin")}
         />
-        Read it again
+        {t.factory.readAgain}
       </Button>
       {href && (
         <Button asChild variant="ring" size="pill">
           <a href={href} target="_blank" rel="noreferrer">
-            Open on GitHub <ArrowUpRight aria-hidden className="size-4" />
+            {t.factory.openOnGitHub}{" "}
+            <ArrowUpRight aria-hidden className="size-4" />
           </a>
         </Button>
       )}
@@ -261,26 +260,26 @@ function Builder({
   );
 }
 
-function builderWords(builder: FactoryView["builder"]): string {
-  if (builder.working) return `Building ${builder.working}`;
-  return builder.on
-    ? "The builder takes cards from To do"
-    : "The builder is off";
+function builderWords(
+  builder: FactoryView["builder"],
+  m: Messages["factory"]["builder"],
+): string {
+  if (builder.working) return m.building(builder.working);
+  return builder.on ? m.on : m.off;
 }
 
 function NotConnected() {
+  const t = useT();
   return (
     <div className={`${CARD} grid justify-items-start gap-3 px-6 py-6`}>
       <p className="text-[15px] font-semibold">
-        No GitHub board is connected yet.
+        {t.factory.notConnected.title}
       </p>
       <p className="max-w-prose text-[13px] text-muted-foreground">
-        The factory's work lives on a GitHub board: fixes and handed-off
-        prototypes go to its To do column, and the builder takes them from
-        there.
+        {t.factory.notConnected.text}
       </p>
       <Button asChild size="pill" className="mt-1">
-        <a href="#connect">Connect a board</a>
+        <a href="#connect">{t.factory.notConnected.connect}</a>
       </Button>
     </div>
   );

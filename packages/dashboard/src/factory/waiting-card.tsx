@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { answerText, type Waiting } from "./answer-text";
+import { useT } from "@/i18n/use-t";
 
 export function WaitingCards({ waiting }: Readonly<{ waiting: Waiting[] }>) {
   if (waiting.length === 0) return null;
@@ -28,6 +29,7 @@ export function WaitingCards({ waiting }: Readonly<{ waiting: Waiting[] }>) {
 }
 
 function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
+  const t = useT();
   const [picked, pick] = useState<string | null>(null);
   const [own, write] = useState("");
   const [sending, setSending] = useState(false);
@@ -61,7 +63,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
         />
       )}
       <label className="grid gap-1.5 text-[13px]">
-        <span className="text-muted-foreground">Write your own answer</span>
+        <span className="text-muted-foreground">{t.factory.waiting.own}</span>
         <textarea
           value={own}
           onChange={(event) => {
@@ -75,7 +77,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
       <div className="flex flex-wrap gap-2">
         <Button size="pill" disabled={!said || sending} onClick={send}>
-          {sending ? "Sending…" : "Send answer"}
+          {sending ? t.factory.waiting.sending : t.factory.waiting.send}
         </Button>
         <Button
           size="pill"
@@ -87,7 +89,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
           }}
         >
           <MessagesSquare aria-hidden className="size-4" />
-          Talk it through
+          {t.factory.waiting.talk}
         </Button>
       </div>
     </article>
@@ -95,11 +97,12 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
 }
 
 function WaitingHead({ waiting }: Readonly<{ waiting: Waiting }>) {
+  const t = useT();
   const { ask } = waiting;
   return (
     <header className="grid gap-1">
       <p className="text-[12.5px] font-medium text-foreground-2">
-        Kobble is waiting for you · Card #{waiting.number} · {waiting.title}
+        {t.factory.waiting.head(waiting.number, waiting.title)}
       </p>
       {ask?.about && (
         <div className="text-[13px]">
@@ -117,7 +120,8 @@ function WaitingHead({ waiting }: Readonly<{ waiting: Waiting }>) {
         rel="noreferrer"
         className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground"
       >
-        See the whole card <ArrowUpRight aria-hidden className="size-3.5" />
+        {t.factory.waiting.whole}{" "}
+        <ArrowUpRight aria-hidden className="size-3.5" />
       </a>
     </header>
   );
@@ -132,9 +136,16 @@ function Answers({
   picked: string | null;
   onPick: (key: string) => void;
 }>) {
+  const t = useT();
   return (
-    <div role="radiogroup" aria-label="Pick an answer" className="grid gap-2">
-      <p className="text-[13px] text-muted-foreground">Pick an answer</p>
+    <div
+      role="radiogroup"
+      aria-label={t.factory.waiting.pick}
+      className="grid gap-2"
+    >
+      <p className="text-[13px] text-muted-foreground">
+        {t.factory.waiting.pick}
+      </p>
       {ask.answers.map((one) => {
         const on = picked === one.key;
         return (
@@ -164,14 +175,14 @@ function Answers({
             </span>
             {ask.suggested === one.key && (
               <span className="rounded-full bg-panel px-2 py-0.5 text-xs text-muted-foreground">
-                Factory's suggestion
+                {t.factory.waiting.suggestion}
               </span>
             )}
             {on && <Check aria-hidden className="size-4" />}
           </button>
         );
       })}
-      <p className="text-center text-xs text-faint">or</p>
+      <p className="text-center text-xs text-faint">{t.factory.waiting.or}</p>
     </div>
   );
 }

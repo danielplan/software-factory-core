@@ -7,6 +7,7 @@ import { createContext, use } from "react";
 import type { FactoryCard } from "@/api";
 
 import { TypeChip } from "./card-type";
+import { useT } from "@/i18n/use-t";
 
 // A card on the board: it rises in after the ones above it, lifts under the
 // pointer, and a click opens it beside the board (card-panel.tsx). While it
@@ -16,6 +17,7 @@ export function Card({
   at,
   now,
 }: Readonly<{ card: FactoryCard; at: number; now: string | null }>) {
+  const t = useT();
   const open = use(OpenCard);
   const building = now !== null;
   return (
@@ -40,7 +42,7 @@ export function Card({
         {building && (
           <span className="ml-auto inline-flex items-center gap-1 font-medium text-blue">
             <LoaderCircle aria-hidden className="size-3 animate-spin" />
-            Building
+            {t.factory.card.building}
           </span>
         )}
       </span>
@@ -73,10 +75,11 @@ export const OpenCard = createContext<(number: number) => void>(
 // Where a card came from: the exploration it was handed off from, by its
 // title (its id and prototype key mean nothing to people), or a fix.
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
+  const t = useT();
   if (card.from)
     return (
       <span
-        title={`From the exploration “${card.from.title}”`}
+        title={t.factory.card.from(card.from.title)}
         className="inline-flex h-[22px] max-w-full min-w-0 items-center gap-1.5 rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground"
       >
         <FlaskConical
@@ -90,7 +93,7 @@ function Origin({ card }: Readonly<{ card: FactoryCard }>) {
   if (!card.fix) return null;
   return (
     <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-      Fix
+      {t.factory.card.fix}
     </span>
   );
 }

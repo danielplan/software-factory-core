@@ -10,6 +10,7 @@ import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
 import { SCREEN } from "./prototype-screen";
+import { useT } from "@/i18n/use-t";
 
 // The pieces of the page, in the order they appear.
 const PIECES = [
@@ -86,6 +87,7 @@ function Page() {
 }
 
 export function Making({ run }: Readonly<{ run: VersionRun }>) {
+  const t = useT();
   const clock = clockOf(run.since, useNow());
   return (
     <div className="grid gap-2.5">
@@ -95,7 +97,7 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
           <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
           <span className="relative inline-flex size-2 rounded-full bg-blue" />
         </span>
-        The kobold is making it
+        {t.explore.board.making}
         {clock && (
           <span className="ml-auto font-normal text-muted-foreground tabular-nums">
             {clock}

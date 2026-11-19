@@ -8,10 +8,12 @@ import { get, messageOf, type MissionIdea, type PersonaRow } from "@/api";
 import { Button } from "@/components/ui/button";
 
 import { ideaPath, send } from "./missions";
+import { useT } from "@/i18n/use-t";
 
 export function SendEveryone({
   personas,
 }: Readonly<{ personas: PersonaRow[] }>) {
+  const t = useT();
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const waiting = personas.filter((persona) => !persona.onMission);
@@ -49,7 +51,9 @@ export function SendEveryone({
         onClick={go}
       >
         <Send aria-hidden strokeWidth={2} className="size-[15px]" />
-        {waiting.length === 0 ? "Everyone is on a mission" : "Send everyone"}
+        {waiting.length === 0
+          ? t.personas.missions.everyone
+          : t.personas.missions.sendEveryone}
       </Button>
     </>
   );

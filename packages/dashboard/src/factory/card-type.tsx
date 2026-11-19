@@ -4,31 +4,30 @@
 import { Bug, Sparkles, TrendingUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/use-t";
 
 export type CardType = "bug" | "feature" | "improvement";
 
 export const TYPES: {
   id: CardType;
-  name: string;
   Icon: typeof Bug;
   tint: string;
 }[] = [
-  { id: "bug", name: "Bug", Icon: Bug, tint: "bg-[#fdecec] text-[#b42318]" },
+  { id: "bug", Icon: Bug, tint: "bg-[#fdecec] text-[#b42318]" },
   {
     id: "feature",
-    name: "Feature",
     Icon: Sparkles,
     tint: "bg-wash text-wash-foreground",
   },
   {
     id: "improvement",
-    name: "Improvement",
     Icon: TrendingUp,
     tint: "bg-[#e6f6f3] text-[#0d7a6d]",
   },
 ];
 
 export function TypeChip({ type }: Readonly<{ type: CardType | null }>) {
+  const t = useT();
   const shown = TYPES.find((one) => one.id === type);
   if (!shown) return null;
   return (
@@ -39,7 +38,7 @@ export function TypeChip({ type }: Readonly<{ type: CardType | null }>) {
       )}
     >
       <shown.Icon className="size-3" aria-hidden />
-      {shown.name}
+      {t.factory.types[shown.id]}
     </span>
   );
 }
@@ -51,9 +50,14 @@ export function TypePicker({
   type: CardType | null;
   onPick: (type: CardType | null) => void;
 }>) {
+  const t = useT();
   return (
-    <div role="radiogroup" aria-label="Type" className="flex flex-wrap gap-2">
-      {TYPES.map(({ id, name, Icon, tint }) => {
+    <div
+      role="radiogroup"
+      aria-label={t.factory.types.label}
+      className="flex flex-wrap gap-2"
+    >
+      {TYPES.map(({ id, Icon, tint }) => {
         const on = type === id;
         return (
           <button
@@ -72,7 +76,7 @@ export function TypePicker({
             }}
           >
             <Icon className="size-4" aria-hidden />
-            {name}
+            {t.factory.types[id]}
           </button>
         );
       })}

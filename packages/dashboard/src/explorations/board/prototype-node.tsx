@@ -16,26 +16,34 @@ import { Frame, useBoardDo } from "./frame";
 import { Making } from "./prototype-making";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
-function stateWords(run: VersionRun | undefined): string | null {
+function stateWords(
+  run: VersionRun | undefined,
+  t: Messages["explore"],
+): string | null {
   if (!run) return null;
-  if (run.state === "starting") return "Starting…";
-  if (run.state === "failed") return run.problem ?? "It stopped.";
+  if (run.state === "starting") return t.starting;
+  if (run.state === "failed") return run.problem ?? t.board.stopped;
   // Running or stopped: what is odd about it (not shared with the team).
   return run.problem;
 }
 
-function testWords(test: TestResult): { words: string; dot: string } {
+function testWords(
+  test: TestResult,
+  b: Messages["explore"]["board"],
+): { words: string; dot: string } {
   if (test.status === "done")
     return {
-      words: `${String(test.asExpected)} of ${String(test.steps)} steps as expected`,
+      words: b.stepsAsExpected(test.asExpected, test.steps),
       dot: test.asExpected === test.steps ? "bg-success" : "bg-destructive",
     };
   if (test.status === "failed")
-    return { words: "The test did not finish", dot: "bg-faint" };
-  return { words: "Testing…", dot: "bg-blue" };
+    return { words: b.testUnfinished, dot: "bg-faint" };
+  return { words: b.testing, dot: "bg-blue" };
 }
 
 // The screen: the running app, or a sketch of one with Start in its middle
@@ -51,6 +59,7 @@ function Screen({
   title: string;
   start: (() => void) | null;
 }>) {
+  const t = useT();
   if (run?.state === "running" && run.url)
     return <LiveScreen url={run.url} title={title} />;
   const starting = run?.state === "starting";
@@ -67,10 +76,11 @@ function Screen({
           onClick={start ?? undefined}
         >
           {starting ? (
-            "Starting…"
+            t.explore.starting
           ) : (
             <>
-              <Play aria-hidden className="size-4 fill-current" /> Start
+              <Play aria-hidden className="size-4 fill-current" />{" "}
+              {t.explore.start}
             </>
           )}
         </Button>
@@ -89,14 +99,15 @@ function Screen({
 }
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
+  const t = useT();
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "prototype") return null;
   const run = page.runs.find((one) => one.version === thing.key);
   const test = page.tests[thing.key];
   const open = ["waiting", "exploring"].includes(page.exploration.status);
-  const words = stateWords(run);
-  const result = test ? testWords(test) : null;
+  const words = stateWords(run, t.explore);
+  const result = test ? testWords(test, t.explore.board) : null;
   return (
     <Frame
       data={data}

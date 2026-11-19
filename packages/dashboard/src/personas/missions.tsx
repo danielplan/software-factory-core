@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { CARD } from "@/signals/bits";
 
 import { Mission } from "./mission-list";
+import { useT } from "@/i18n/use-t";
 
 const TITLE = "mt-7 mb-3 text-[17px] font-semibold tracking-[-0.01em]";
 
@@ -42,19 +43,19 @@ export const send = (
 export function PersonaMissions({
   page,
 }: Readonly<{ page: KobblePersonaPage }>) {
+  const t = useT();
   const { persona, tests, signals } = page;
   const busy = tests.some(
     (test) => test.status === "queued" || test.status === "running",
   );
   return (
     <div className="mb-8">
-      <h2 className={TITLE}>Send on a mission</h2>
+      <h2 className={TITLE}>{t.personas.missions.send}</h2>
       <NextMission persona={persona.id} name={persona.name} busy={busy} />
-      <h2 className={TITLE}>Missions</h2>
+      <h2 className={TITLE}>{t.personas.missions.title}</h2>
       {tests.length === 0 ? (
         <p className="text-[14px] text-muted-foreground">
-          No missions yet. Send {persona.name} on the suggested mission to get
-          your first signals.
+          {t.personas.missions.none(persona.name)}
         </p>
       ) : (
         <div className={CARD}>
@@ -103,6 +104,7 @@ function NextMission({
   name,
   busy,
 }: Readonly<{ persona: string; name: string; busy: boolean }>) {
+  const t = useT();
   const { idea, problem, tryAgain } = useIdea(persona);
   // The words as changed here; none while they are the kobold's.
   const [words, setWords] = useState<string | null>(null);
@@ -114,7 +116,7 @@ function NextMission({
   const task = (words ?? idea?.task ?? "").trim();
   return (
     <section
-      aria-label="Send on a mission"
+      aria-label={t.personas.missions.send}
       className={cn(CARD, "grid gap-3 px-6 py-5")}
     >
       {idea ? (
@@ -169,6 +171,7 @@ function SendRow({
   onSend: () => void;
   onChange: () => void;
 }>) {
+  const t = useT();
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -178,7 +181,9 @@ function SendRow({
         onClick={onSend}
       >
         <Send aria-hidden strokeWidth={2} className="size-[15px]" />
-        {busy ? `${name} is on a mission` : `Send ${name}`}
+        {busy
+          ? t.personas.missions.isOn(name)
+          : t.personas.missions.sendName(name)}
       </Button>
       {changing !== null && (
         <button
@@ -186,7 +191,7 @@ function SendRow({
           onClick={onChange}
           className="text-[13px] font-semibold text-blue"
         >
-          {changing ? "Done" : "Change"}
+          {changing ? t.personas.missions.done : t.personas.missions.change}
         </button>
       )}
     </div>
@@ -220,6 +225,7 @@ function NoIdeaYet({
   problem,
   onAgain,
 }: Readonly<{ name: string; problem: string | null; onAgain: () => void }>) {
+  const t = useT();
   return problem ? (
     <p role="alert" className="text-[13px] text-destructive">
       {problem}{" "}
@@ -228,13 +234,13 @@ function NoIdeaYet({
         onClick={onAgain}
         className="font-semibold text-blue"
       >
-        Try again
+        {t.personas.missions.tryAgain}
       </button>
     </p>
   ) : (
     <p className="flex items-center gap-2 text-[14px] text-muted-foreground">
       <KoboldHead size={22} />
-      The kobold is thinking of a mission for {name}…
+      {t.personas.missions.thinking(name)}
     </p>
   );
 }
@@ -253,27 +259,28 @@ function IdeaWords({
   changing: boolean;
   onWords: (words: string) => void;
 }>) {
+  const t = useT();
   return (
     <>
       {words === null && (
         <span
-          title={`Suggested by the kobold from who ${name} is`}
+          title={t.personas.missions.suggestedBy(name)}
           className="flex items-center gap-2"
         >
           <KoboldHead size={22} />
           <span className="inline-flex h-[22px] items-center rounded-full bg-blue/10 px-2.5 text-[12px] font-medium text-blue">
-            Suggested
+            {t.personas.missions.suggested}
           </span>
           {idea.app && (
             <span className="text-[12.5px] text-muted-foreground">
-              in {idea.app}
+              {t.personas.missions.inApp(idea.app)}
             </span>
           )}
         </span>
       )}
       {changing ? (
         <textarea
-          aria-label="The mission"
+          aria-label={t.personas.missions.theMission}
           value={words ?? idea.task}
           rows={3}
           autoFocus

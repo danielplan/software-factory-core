@@ -15,6 +15,9 @@ import { cn } from "@/lib/utils";
 import type { CardPanel as Panel } from "../../../server/src/kobble/factory-card.ts";
 import { type CardType, TypePicker } from "./card-type";
 import { DeleteCard } from "./delete-card";
+import { useLocale, useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
+import { momentIn } from "@/i18n/format";
 
 export function CardPanel({
   number,
@@ -25,6 +28,7 @@ export function CardPanel({
   onClose: () => void;
   onDelete: () => void;
 }>) {
+  const t = useT();
   const [panel, setPanel] = useState<Panel | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   useEffect(() => {
@@ -59,7 +63,7 @@ export function CardPanel({
     <div className="fixed inset-0 z-40 flex justify-end">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t.factory.panel.close}
         className="absolute inset-0 bg-[rgb(20_24_36/0.18)]"
         onClick={onClose}
       />
@@ -89,6 +93,7 @@ function PanelHead({
   url,
   onClose,
 }: Readonly<{ number: number; url: string | null; onClose: () => void }>) {
+  const t = useT();
   return (
     <header className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5">
       <span className="text-[13px] text-muted-foreground">#{number}</span>
@@ -100,12 +105,13 @@ function PanelHead({
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary"
         >
-          Open on GitHub <ArrowUpRight className="size-3.5" aria-hidden />
+          {t.factory.openOnGitHub}{" "}
+          <ArrowUpRight className="size-3.5" aria-hidden />
         </a>
       )}
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t.factory.panel.close}
         className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-ground"
         onClick={onClose}
       >
@@ -133,6 +139,7 @@ function Body({
   panel,
   onPick,
 }: Readonly<{ panel: Panel; onPick: (type: CardType | null) => void }>) {
+  const t = useT();
   return (
     <div className="grid gap-6 px-5 py-5">
       <div className="grid gap-3">
@@ -143,8 +150,10 @@ function Body({
         </p>
       </div>
       {panel.pullRequest && <PullRequest pr={panel.pullRequest} />}
-      {panel.about && <Section title="What it asks for" text={panel.about} />}
-      {panel.plan && <Section title="The agreed plan" text={panel.plan} />}
+      {panel.about && (
+        <Section title={t.factory.panel.asksFor} text={panel.about} />
+      )}
+      {panel.plan && <Section title={t.factory.panel.plan} text={panel.plan} />}
       <Conversation said={panel.said} />
     </div>
   );
@@ -153,7 +162,8 @@ function Body({
 function PullRequest({
   pr,
 }: Readonly<{ pr: NonNullable<Panel["pullRequest"]> }>) {
-  const state = prStateOf(pr);
+  const t = useT();
+  const state = prStateOf(pr, t.factory.panel);
   return (
     <a
       href={pr.url}
@@ -162,7 +172,9 @@ function PullRequest({
       className="flex items-center gap-3 rounded-xl px-4 py-3 shadow-card transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgb(20_24_36/0.3)]"
     >
       <GitPullRequest className="size-5 text-primary" aria-hidden />
-      <span className="flex-1 font-semibold">Pull request</span>
+      <span className="flex-1 font-semibold">
+        {t.factory.panel.pullRequest}
+      </span>
       <span className="rounded-full bg-wash px-2.5 py-0.5 text-xs font-medium text-wash-foreground">
         {state}
       </span>
@@ -184,11 +196,13 @@ function Section({ title, text }: Readonly<{ title: string; text: string }>) {
 }
 
 function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
+  const locale = useLocale();
+  const t = useT();
   if (said.length === 0) return null;
   return (
     <section className="grid gap-3">
       <h3 className="text-[13px] font-semibold text-muted-foreground">
-        Conversation
+        {t.factory.panel.conversation}
       </h3>
       {said.map((one, at) => (
         <div
@@ -201,9 +215,7 @@ function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
           <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             {one.by === "factory" ? <KoboldHead size={16} /> : null}
             {one.by === "factory" ? "Kobble" : one.author}
-            <span className="font-normal">
-              · {new Date(one.at).toLocaleString()}
-            </span>
+            <span className="font-normal">· {momentIn(locale, one.at)}</span>
           </span>
           <Markdown text={one.text} />
         </div>
@@ -212,8 +224,11 @@ function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
   );
 }
 
-function prStateOf(pr: NonNullable<Panel["pullRequest"]>): string {
-  if (pr.state === "MERGED") return "Merged";
-  if (pr.state !== "OPEN") return "Closed";
-  return pr.draft ? "Draft" : "Open";
+function prStateOf(
+  pr: NonNullable<Panel["pullRequest"]>,
+  m: Messages["factory"]["panel"],
+): string {
+  if (pr.state === "MERGED") return m.merged;
+  if (pr.state !== "OPEN") return m.closed;
+  return pr.draft ? m.draft : m.open;
 }

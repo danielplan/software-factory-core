@@ -15,8 +15,7 @@ import type { ReactNode } from "react";
 import type { Face, SignalRow } from "@/api";
 import { KoboldHead, NoFace, PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
-
-import { SOURCE_WORDS, TYPE_WORDS } from "./view";
+import { useT } from "@/i18n/use-t";
 
 // A white card: radius 20px, a hairline ring.
 export const CARD = "overflow-hidden rounded-xl bg-card shadow-card";
@@ -52,10 +51,11 @@ export function SourceIcon({
   source,
   size = 34,
 }: Readonly<{ source: SignalRow["source"]; size?: number }>) {
+  const t = useT();
   const { icon: Icon, tone } = SOURCES[source];
   return (
     <span
-      title={SOURCE_WORDS[source]}
+      title={t.words.sources[source]}
       style={{ width: size, height: size }}
       className={cn("grid flex-none place-items-center rounded-full", tone)}
     >
@@ -75,6 +75,7 @@ const TYPES: Record<SignalRow["type"], string> = {
 };
 
 export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {
+  const t = useT();
   return (
     <span
       className={cn(
@@ -82,7 +83,7 @@ export function TypeChip({ type }: Readonly<{ type: SignalRow["type"] }>) {
         TYPES[type],
       )}
     >
-      {TYPE_WORDS[type]}
+      {t.words.types[type]}
     </span>
   );
 }
@@ -122,7 +123,7 @@ export function Toast({
         onClick={onOk}
         className="font-semibold text-[#9fb4ff]"
       >
-        OK
+        {useT().signals.ok}
       </button>
     </div>
   );

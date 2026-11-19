@@ -21,12 +21,9 @@ import { type Read, useRead } from "@/lib/use-read";
 
 import { CARD, TypeChip } from "./bits";
 import { lookAgainWords, statusWords, whoOf } from "./view";
+import { useT } from "@/i18n/use-t";
 
-const READS: [SignalRow["type"], string][] = [
-  ["bug", "people report, and errors and failed automations"],
-  ["request", "people send, and when the assistant can’t do something"],
-  ["feedback", "from persona tests and everything else"],
-];
+const READS = ["bug", "request", "feedback"] as const;
 
 // The guide in the core's repository, at this core's release.
 const HOW = `https://github.com/${RELEASE_SOURCE.replace(/^github:/, "")}/blob/release-${CORE_VERSION}/docs/reference/live-export.md`;
@@ -62,12 +59,13 @@ function Field({
 }
 
 export function ConnectSignals({ app }: Readonly<{ app: string }>) {
+  const t = useT().signals;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-2">
       <ConnectCard app={app} />
       <div>
         <div className="mx-1 mt-1 mb-2.5 text-[12.5px] text-muted-foreground">
-          What you’ll see here
+          {t.connect.seeHere}
         </div>
         <div className={CARD}>
           {(
@@ -91,6 +89,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const t = useT().signals.connect;
   return (
     <form
       className={cn(CARD, "flex flex-col gap-4 px-7 py-[26px]")}
@@ -110,22 +109,22 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
       <div className="flex items-center gap-3.5">
         <KoboldHead size={48} />
         <div>
-          <div className="text-[15px] font-semibold">Connect your app</div>
+          <div className="text-[15px] font-semibold">{t.title}</div>
           <div className="text-[13.5px] text-muted-foreground">
-            Kobble reads what happens in {app} every 30 minutes.
+            {t.reads(app)}
           </div>
         </div>
       </div>
       <Reads />
       <Field
-        label="Address of the export"
+        label={t.address}
         placeholder="https://your-app/api/kobble/export"
         value={url}
         onChange={setUrl}
       />
       <Field
-        label="Token"
-        placeholder="Paste the token from your app"
+        label={t.token}
+        placeholder={t.tokenHint}
         value={token}
         secret
         onChange={setToken}
@@ -141,11 +140,9 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
           size="pill"
           disabled={busy || !url.trim() || !token.trim()}
         >
-          {busy ? "Checking…" : "Connect"}
+          {busy ? t.checking : t.connect}
         </Button>
-        <span className="text-[12.5px] text-muted-foreground">
-          Saved on this computer only, in .env
-        </span>
+        <span className="text-[12.5px] text-muted-foreground">{t.saved}</span>
       </div>
       <Privacy app={app} />
     </form>
@@ -154,12 +151,13 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
 
 // What Kobble reads, as the three kinds of signal.
 function Reads() {
+  const t = useT().signals;
   return (
     <div className="flex flex-col gap-2.5 text-[13px] text-foreground-2">
-      {READS.map(([type, words]) => (
+      {READS.map((type) => (
         <div key={type} className="flex items-center gap-2.5">
           <TypeChip type={type} />
-          <span>{words}</span>
+          <span>{t.reads[type]}</span>
         </div>
       ))}
     </div>
@@ -167,16 +165,17 @@ function Reads() {
 }
 
 function Privacy({ app }: Readonly<{ app: string }>) {
+  const t = useT().signals.connect;
   return (
     <div className="border-t border-border-soft pt-3.5 text-[13px] text-muted-foreground">
-      Only anonymous events leave {app}: no names, no entries.{" "}
+      {t.privacy(app)}{" "}
       <a
         href={HOW}
         target="_blank"
         rel="noreferrer"
         className="font-semibold text-blue"
       >
-        How to add the export to your app
+        {t.how}
       </a>
     </div>
   );
@@ -213,6 +212,7 @@ export function AllQuiet({
   now,
 }: Readonly<{ app: string; sync: SyncView; now: Date }>) {
   const [handled, setHandled] = useState(false);
+  const t = useT();
   return (
     <>
       <div
@@ -224,8 +224,7 @@ export function AllQuiet({
         <KoboldHead size={64} />
         <div className="mt-1.5 text-[15px] font-semibold">All quiet</div>
         <div className="max-w-[420px] text-[13px] text-muted-foreground">
-          No new bugs, requests or feedback from {app}.{" "}
-          {lookAgainWords(sync.next, now)}
+          {t.signals.quiet.none(app)} {lookAgainWords(sync.next, now, t.words)}
         </div>
         <Button
           variant="ring"
@@ -235,7 +234,7 @@ export function AllQuiet({
             setHandled(!handled);
           }}
         >
-          {handled ? "Hide handled signals" : "See handled signals"}
+          {handled ? t.signals.quiet.hide : t.signals.quiet.see}
         </Button>
       </div>
       {handled && <Handled />}
@@ -247,12 +246,13 @@ function Handled() {
   const { data } = useRead("/api/kobble/handled") as Read<{
     signals: SignalRow[];
   }>;
+  const t = useT();
   if (!data) return null;
   return (
     <div className={CARD}>
       {data.signals.length === 0 && (
         <p className="p-[50px] text-center text-muted-foreground">
-          Nothing handled yet
+          {t.signals.quiet.nothingHandled}
         </p>
       )}
       {data.signals.map((signal) => (
@@ -263,7 +263,7 @@ function Handled() {
           <span className="grid min-w-0 flex-1">
             <span className="truncate">{signal.text}</span>
             <span className="text-[12.5px] text-muted-foreground">
-              {whoOf(signal)} · {statusWords(signal)}
+              {whoOf(signal, t.words)} · {statusWords(signal, t.words)}
             </span>
           </span>
           <TypeChip type={signal.type} />

@@ -2,13 +2,29 @@
 // its file is written (areas/<area>.ts).
 
 import type { Locale } from "./locale.ts";
+import { factory } from "./areas/factory.ts";
+import { explore } from "./areas/explore.ts";
+import { personas } from "./areas/personas.ts";
 import { shell } from "./areas/shell.ts";
 import { home } from "./areas/home.ts";
 import { settings } from "./areas/settings.ts";
+import { signals } from "./areas/signals.ts";
 import { system } from "./areas/system.ts";
 import { updates } from "./areas/updates.ts";
+import { words } from "./areas/words.ts";
 
-const AREAS = { shell, home, system, updates, settings };
+const AREAS = {
+  shell,
+  home,
+  system,
+  updates,
+  settings,
+  words,
+  signals,
+  personas,
+  explore,
+  factory,
+};
 
 type Areas = typeof AREAS;
 export type Messages = { [K in keyof Areas]: Areas[K]["en"] };

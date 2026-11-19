@@ -4,11 +4,13 @@ import type { SignalRow } from "@/api";
 
 import { Chevron } from "./bits";
 import { alreadyLine } from "./view";
+import { useT } from "@/i18n/use-t";
 
 // The one plain line about work that exists already: an exploration (it
 // opens it) or a fix.
 export function Already({ signal }: Readonly<{ signal: SignalRow }>) {
-  const line = alreadyLine(signal);
+  const t = useT();
+  const line = alreadyLine(signal, t.words);
   if (!line) return null;
   const words = (
     <span className="flex-1">

@@ -4,21 +4,24 @@
 
 import type { SignalRow } from "@/api";
 import { ROW, SourceIcon, TypeChip } from "@/signals/bits";
-import { agoOf, SOURCE_WORDS, statusWords } from "@/signals/view";
+import { agoOf, statusWords } from "@/signals/view";
 import { Markdown } from "@/components/markdown";
+import { useT } from "@/i18n/use-t";
 
 export function SignalLine({
   signal,
   where = null,
 }: Readonly<{ signal: SignalRow; where?: string | null }>) {
+  const t = useT();
   return (
     <div className={ROW}>
       <SourceIcon source={signal.source} size={32} />
       <span className="grid min-w-0 flex-1">
         <Markdown text={signal.text} inline />
         <span className="text-[12.5px] text-muted-foreground">
-          {where ?? SOURCE_WORDS[signal.source]} ·{" "}
-          {agoOf(signal.at, new Date())} · {statusWords(signal)}
+          {where ?? t.words.sources[signal.source]} ·{" "}
+          {agoOf(signal.at, new Date(), t.words)} ·{" "}
+          {statusWords(signal, t.words)}
         </span>
       </span>
       <TypeChip type={signal.type} />

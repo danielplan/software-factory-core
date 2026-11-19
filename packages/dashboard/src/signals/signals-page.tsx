@@ -6,7 +6,7 @@
 // the live app was last read, with Sync now. On a phone the list and the
 // picked signal are two screens, with a link back to the list.
 
-import { ChevronLeft, RefreshCw } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
@@ -20,6 +20,7 @@ import { AllQuiet } from "./empty";
 import { BeforeLaunch } from "./before-launch";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
 import { StepOf } from "./step";
+import { SyncNow } from "./sync-now";
 import { useSignals } from "./use-signals";
 import {
   type Act,
@@ -29,10 +30,10 @@ import {
   nextAfter,
   primaryOf,
   shownOf,
-  SOURCE_WORDS,
   syncLine,
   whoOf,
 } from "./view";
+import { useT } from "@/i18n/use-t";
 
 const signalHash = (id: string | null) =>
   id ? `#signals/${encodeURIComponent(id)}` : "#signals";
@@ -43,30 +44,26 @@ export function SignalsPage({
 }: Readonly<{ open: string | null; app: string }>) {
   const { data, problem } = useSignals();
   const [said, say] = useState<string | null>(null);
+  const t = useT();
   const now = new Date();
   return (
     <>
       <Head
-        title="Signals"
+        title={t.shell.pages.signals}
         right={
           data?.sync.connected ? (
             <>
               <span className="text-[12.5px] text-muted-foreground">
-                {syncLine(data.sync, now)}
+                {syncLine(data.sync, now, t.words)}
               </span>
               <SyncNow onSaid={say} />
             </>
           ) : undefined
         }
       />
-      {problem && (
-        <ProblemBox title="The signals cannot be read" text={problem} />
-      )}
+      {problem && <ProblemBox title={t.signals.cannotRead} text={problem} />}
       {data?.sync.problem && (
-        <ProblemBox
-          title="The last sync with the live app did not work"
-          text={data.sync.problem}
-        />
+        <ProblemBox title={t.signals.syncFailed} text={data.sync.problem} />
       )}
       {data && (
         <Shown data={data} app={app} open={open} now={now} onSaid={say} />
@@ -129,6 +126,7 @@ function Board({
   now: Date;
   onSaid: (said: string) => void;
 }>) {
+  const t = useT();
   const shown = shownOf(signals, open);
   const picked = open !== null && shown?.id === open;
   return (
@@ -142,7 +140,7 @@ function Board({
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue lg:hidden"
         >
           <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
-          Signals
+          {t.shell.pages.signals}
         </a>
         {shown ? (
           <SignalDetail
@@ -162,7 +160,7 @@ function Board({
               "p-[50px] text-center text-[13px] text-muted-foreground",
             )}
           >
-            No new signals.
+            {t.signals.noneNew}
           </p>
         )}
       </div>
@@ -170,52 +168,16 @@ function Board({
   );
 }
 
-function SyncNow({ onSaid }: Readonly<{ onSaid: (said: string) => void }>) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <Button
-      variant="ring"
-      size="pill"
-      disabled={busy}
-      onClick={() => {
-        setBusy(true);
-        post<{ added: number }>("/api/kobble/sync")
-          .then(
-            ({ added }) => {
-              onSaid(
-                added === 0
-                  ? "Synced with the live app · nothing new"
-                  : `Synced with the live app · ${String(added)} new`,
-              );
-            },
-            (error: unknown) => {
-              onSaid(messageOf(error));
-            },
-          )
-          .finally(() => {
-            setBusy(false);
-          });
-      }}
-    >
-      <RefreshCw
-        aria-hidden
-        strokeWidth={2}
-        className={cn("size-[15px]", busy && "animate-spin")}
-      />
-      Sync now
-    </Button>
-  );
-}
-
 function SignalList({
   signals,
   shown,
 }: Readonly<{ signals: SignalRow[]; shown: string | null }>) {
+  const t = useT();
   return (
-    <nav aria-label="New signals" className={cn(CARD, "grid")}>
+    <nav aria-label={t.signals.newSignals} className={cn(CARD, "grid")}>
       {signals.length === 0 && (
         <p className="p-[50px] text-center text-[13px] text-muted-foreground">
-          No new signals.
+          {t.signals.noneNew}
         </p>
       )}
       {signals.map((signal) => (
@@ -235,7 +197,9 @@ function SignalList({
           )}
           <span className="grid min-w-0 flex-1">
             <span className="flex items-center gap-2">
-              <span className="truncate font-semibold">{whoOf(signal)}</span>
+              <span className="truncate font-semibold">
+                {whoOf(signal, t.words)}
+              </span>
               <span className="ml-auto">
                 <TypeChip type={signal.type} />
               </span>
@@ -263,11 +227,12 @@ function SignalDetail({
   onFailed: (said: string) => void;
 }>) {
   const [busy, setBusy] = useState<Act | null>(null);
+  const t = useT();
   const act = (what: Act) => {
     setBusy(what);
     post(`/api/kobble/signals/${what}`, { id: signal.id }).then(
       (answer) => {
-        onDone(doneWords(what, signal, answer));
+        onDone(doneWords(what, signal, answer, t.words));
       },
       (error: unknown) => {
         setBusy(null);
@@ -292,15 +257,17 @@ function SignalDetail({
   );
   return (
     <article
-      aria-label={`Signal ${signal.id}`}
+      aria-label={t.signals.signal(signal.id)}
       className={cn(CARD, "px-7 py-[26px] max-sm:px-5")}
     >
       <header className="flex items-center gap-2.5">
         <FaceOf face={signal.personaFace} size={36} />
         <span className="grid min-w-0 flex-1">
-          <span className="truncate font-semibold">{whoOf(signal)}</span>
+          <span className="truncate font-semibold">
+            {whoOf(signal, t.words)}
+          </span>
           <span className="text-[12.5px] text-muted-foreground">
-            {SOURCE_WORDS[signal.source]} · {agoOf(signal.at, now)}
+            {t.words.sources[signal.source]} · {agoOf(signal.at, now, t.words)}
           </span>
         </span>
         <TypeChip type={signal.type} />
@@ -311,9 +278,13 @@ function SignalDetail({
       </div>
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">
-        {button("fix", "Fix", primary === "fix")}
-        {button("explore", exploreWords(signal), primary === "explore")}
-        {button("dismiss", "Dismiss", false)}
+        {button("fix", t.signals.fix, primary === "fix")}
+        {button(
+          "explore",
+          exploreWords(signal, t.words),
+          primary === "explore",
+        )}
+        {button("dismiss", t.signals.dismiss, false)}
       </div>
     </article>
   );

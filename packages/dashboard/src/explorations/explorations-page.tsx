@@ -20,29 +20,30 @@ import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
 import { askSupport } from "@/support/ask-support";
 import { explorationHash, Waiting } from "./waiting-row";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 export const useExplorations = () =>
   useRead("/api/kobble/explorations") as Read<ExplorationsView>;
 
 export function ExplorationsPage() {
+  const t = useT();
   const { data, problem } = useExplorations();
   const adding = () => {
-    askSupport("I have an idea or a feature request to explore.");
+    askSupport(t.explore.askNew);
   };
   return (
     <>
       <Head
-        title="Explorations"
+        title={t.shell.pages.explore}
         right={
           <Button size="pill" onClick={adding}>
             <Plus aria-hidden strokeWidth={2.2} />
-            New exploration
+            {t.explore.newExploration}
           </Button>
         }
       />
-      {problem && (
-        <ProblemBox title="The explorations cannot be read" text={problem} />
-      )}
+      {problem && <ProblemBox title={t.explore.cannotReadAll} text={problem} />}
       {data &&
         (isEmpty(data) ? <NothingYet onOwn={adding} /> : <Lists view={data} />)}
     </>
@@ -71,37 +72,40 @@ function isEmpty(view: ExplorationsView): boolean {
 }
 
 // A board in small, for the picture of what an exploration is.
-const EXAMPLE: ExplorationRow = {
-  id: "X-0",
-  title: "",
-  status: "exploring",
-  problem: "",
-  work: null,
-  personas: [],
-  signals: 0,
-  things: [
-    {
-      id: "problem",
-      kind: "problem",
-      agreed: false,
-      label: "Customers can’t pay by card",
-    },
-    { id: "choice", kind: "choice", agreed: false, label: "How do they pay?" },
-    { id: "a", kind: "prototype", agreed: false, label: "A: Pay in the app" },
-    { id: "b", kind: "prototype", agreed: true, label: "B: A payment link" },
-  ],
-  links: [
-    { from: "problem", to: "choice" },
-    { from: "choice", to: "a" },
-    { from: "choice", to: "b" },
-  ],
-  line: null,
-  busy: null,
-};
+function exampleOf(e: Messages["explore"]["example"]): ExplorationRow {
+  return {
+    id: "X-0",
+    title: "",
+    status: "exploring",
+    problem: "",
+    work: null,
+    personas: [],
+    signals: 0,
+    things: [
+      {
+        id: "problem",
+        kind: "problem",
+        agreed: false,
+        label: e.problem,
+      },
+      { id: "choice", kind: "choice", agreed: false, label: e.choice },
+      { id: "a", kind: "prototype", agreed: false, label: e.a },
+      { id: "b", kind: "prototype", agreed: true, label: e.b },
+    ],
+    links: [
+      { from: "problem", to: "choice" },
+      { from: "choice", to: "a" },
+      { from: "choice", to: "b" },
+    ],
+    line: null,
+    busy: null,
+  };
+}
 
 // Before anything is explored: what an exploration is, and two ways to
 // start one.
 function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -110,32 +114,31 @@ function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
       )}
     >
       <div className="flex flex-col gap-3">
-        <div className="text-base font-semibold">Nothing explored yet</div>
+        <div className="text-base font-semibold">{t.explore.nothingYet}</div>
         <p className="max-w-[440px] text-[14.5px] text-foreground-2">
-          An exploration is a board you work on with the kobold: what the
-          problem really is, a few ways to solve it, and a prototype for each.
-          The one you agree on goes to the factory.
+          {t.explore.whatItIs}
         </p>
         <div className="mt-1.5 flex flex-wrap gap-2.5">
           <Button asChild size="pill">
-            <a href="#signals">Explore a signal</a>
+            <a href="#signals">{t.explore.exploreSignal}</a>
           </Button>
           <Button variant="ring" size="pill" onClick={onOwn}>
-            Start from your own idea
+            {t.explore.ownIdea}
           </Button>
         </div>
       </div>
       <div className="opacity-90">
-        <Preview row={EXAMPLE} />
+        <Preview row={exampleOf(t.explore.example)} />
       </div>
     </div>
   );
 }
 
 function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
+  const t = useT();
   return (
     <>
-      <Sub title="Being explored" n={view.exploring.length} />
+      <Sub title={t.explore.beingExplored} n={view.exploring.length} />
       {view.exploring.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
           {view.exploring.map((row) => (
@@ -145,10 +148,13 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
       )}
       {view.exploring.length === 0 && (
         <p className="text-[13px] text-muted-foreground">
-          Nothing is being explored. Start one that waits.
+          {t.explore.nothingExplored}
         </p>
       )}
-      <Sub title="Waiting" n={view.waiting.length + view.fromBoard.length} />
+      <Sub
+        title={t.explore.waiting}
+        n={view.waiting.length + view.fromBoard.length}
+      />
       <div className={CARD}>
         {view.waiting.map((row) => (
           <Waiting key={row.id} row={row} />
@@ -158,7 +164,7 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
         ))}
         {view.waiting.length + view.fromBoard.length === 0 && (
           <p className="p-[18px] text-center text-muted-foreground">
-            Nothing waiting
+            {t.explore.nothingWaiting}
           </p>
         )}
       </div>
@@ -170,7 +176,8 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
 // One being explored: the board as it really is, in small, where it is
 // in its colour, and the kobold's question; a click opens it.
 function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
-  const where = whereItIs(row);
+  const t = useT();
+  const where = whereItIs(row, t.explore.where);
   const { tint } = KINDS[where.kind];
   return (
     <a
@@ -206,6 +213,7 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
 }
 
 function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const handed = rows.filter((row) => row.status === "handed-off").length;
   return (
@@ -217,7 +225,7 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
         }}
         className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-muted-foreground"
       >
-        {handed} handed off · {rows.length - handed} dropped
+        {t.explore.doneLine(handed, rows.length - handed)}
         {open ? (
           <ChevronUp aria-hidden className="size-4" />
         ) : (
@@ -234,7 +242,7 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
             >
               <span className="flex-1">{row.title}</span>
               <span className="text-[12.5px] text-muted-foreground">
-                {row.work ? `#${String(row.work)}` : "Dropped"}
+                {row.work ? `#${String(row.work)}` : t.explore.dropped}
               </span>
               <Chevron />
             </a>
