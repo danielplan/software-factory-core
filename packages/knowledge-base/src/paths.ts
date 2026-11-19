@@ -8,6 +8,11 @@
 //   with a package.json), from the root, or into any project; it is checked
 //   only when its first folder exists next to the page, in the page's
 //   project or at the root;
+// - a path into `docs/` names a project's knowledge base: besides the places
+//   above, it may point into any knowledge base there is (a `docs/` or
+//   `context/` folder with an index.md, as the template), so skills and
+//   templates written for a company's repository are checked against its
+//   shape;
 // - placeholders (`<area>`, `*`, `{a,b}`, `NNN`, `issue-N`, `…`), spaces,
 //   addresses and commands are skipped;
 // - paths git ignores (settings files, build output) are skipped;
@@ -29,7 +34,11 @@ export const HISTORY = [
   /(^|\/)context\/sources\//,
 ];
 
-export type FileIndex = { known: Set<string>; projects: string[] };
+export type FileIndex = {
+  known: Set<string>;
+  projects: string[];
+  knowledgeBases: string[];
+};
 
 // The text of a code span when it looks like a path, otherwise null.
 export function pathIn(code: string): string | null {
@@ -46,18 +55,26 @@ export function pathIn(code: string): string | null {
   return text;
 }
 
-// Every file and folder, and the projects (folders with a package.json).
+// Every file and folder, the projects (folders with a package.json) and the
+// knowledge bases (`docs/` or `context/` folders with an index.md).
 export function indexFiles(files: string[]): FileIndex {
   const known = new Set<string>();
   const projects: string[] = [];
+  const knowledgeBases: string[] = [];
   for (const file of files) {
     const parts = file.split("/");
     for (let index = 1; index <= parts.length; index += 1)
       known.add(parts.slice(0, index).join("/"));
+    const folder = parts.slice(0, -1).join("/");
     if (parts.at(-1) === "package.json" && parts.length > 1)
-      projects.push(parts.slice(0, -1).join("/"));
+      projects.push(folder);
+    if (
+      parts.at(-1) === "index.md" &&
+      /^(docs|context)$/.test(parts.at(-2) ?? "")
+    )
+      knowledgeBases.push(folder);
   }
-  return { known, projects };
+  return { known, projects, knowledgeBases };
 }
 
 function projectOf(page: string, projects: string[]): string | null {
@@ -85,7 +102,17 @@ export function candidatesFor(
   );
   if (!near.some((place) => index.known.has(`${place}${first}`))) return [];
   const places = [...near, ...index.projects.map((project) => `${project}/`)];
-  return [...new Set(places.map((place) => `${place}${clean}`))];
+  const inDocs = /^docs\//.test(clean) ? clean.slice("docs/".length) : null;
+  const inKnowledgeBases =
+    inDocs === null
+      ? []
+      : index.knowledgeBases.map((base) => `${base}/${inDocs}`);
+  return [
+    ...new Set([
+      ...places.map((place) => `${place}${clean}`),
+      ...inKnowledgeBases,
+    ]),
+  ];
 }
 
 export type MissingPath = { code: InlineCode; places: string[] };

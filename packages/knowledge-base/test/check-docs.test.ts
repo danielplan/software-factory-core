@@ -66,6 +66,19 @@ test("a path written in backticks that was moved is found; history, placeholders
   ]);
 });
 
+test("a path into docs/ on a page written for a company is looked for in the knowledge bases there are", async () => {
+  const root = repository({
+    "docs/architecture.md": "# Architecture\n",
+    "template/context/index.md": `${INDEX}\n[Decisions](decisions/index.md)\n`,
+    "template/context/decisions/index.md": INDEX,
+    "skills/plan.md":
+      "# Plan\n\n`docs/index.md`, `docs/decisions/` and `docs/gone/`.\n",
+  });
+  assert.deepEqual(await messages(root), [
+    "skills/plan.md: Path `docs/gone/` does not exist",
+  ]);
+});
+
 test("pages outside the sections, wrong or missing type lines and orphans are found in a context folder", async () => {
   const root = repository({
     "context/index.md": `${INDEX}\n[Guide](how-to/guide.md) [Note](note.md) [Misc](misc/page.md) [Ref](reference/facts.md)\n`,

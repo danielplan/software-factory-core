@@ -115,11 +115,19 @@ How to try it: open a persona on Personas, wait for the kobold's
 suggestion, press Send (the factory starts the app named under Suggested).
 Follow it on the persona's page or on Signals.
 
-Checked: `npm run verify` passes except `check:docs`, which fails the same 10
-ways on main (since 8 November, not from this card: see Later). New tests
-for several at once, at most 3, one per persona, the app started once, the
-step line, the kinds and steps of findings, the suggestion (kept, refused
-when unreadable, asked again on purpose) and the page's words.
+Checked: `npm run verify` passes in full (format, lint, types, unused code,
+copy-paste, 311 tests with coverage at 97% of lines, the records and the docs
+check). New tests for several at once, at most 3, one per persona, the app
+started once, the step line, the kinds and steps of findings, the suggestion
+(kept, refused when unreadable, asked again on purpose) and the page's words.
+
+`check:docs` failed on main the same 10 ways before this card (since
+8 November): skills and templates name a company's `docs/index.md`,
+`docs/decisions/` and so on, which the check looked for at the core's root,
+because the core has a `docs/` of its own. Fixed in the check rather than in
+the skills' words: a path into `docs/` may also point into any knowledge base
+there is (a `docs/` or `context/` folder with an index.md, as the template).
+A path in none of them is still reported, with a test for both.
 
 Not checked: a whole real mission (browser and persona agent) to the end:
 the example company's apps do not start on this computer without their
@@ -130,10 +138,5 @@ in the screenshots are made-up records written into the copy.
 ## Later
 
 - Missions again after each merge (agreed for later on the card).
-- `npm run check:docs` fails on main: the skills and templates name a
-  company's `docs/index.md`, `docs/decisions/` and so on, which the check
-  looks for at the core's root because the core has a `docs/` folder too.
-  Fixing it changes the check's rules or the skills' words; the owner
-  decides.
 - A persona could say which app it uses (today the kobold picks it each
   time from who they are).
