@@ -21,18 +21,18 @@ test("each page has its own address, with what is open in it", () => {
     page: "explore",
     open: "idea-1",
   });
-  assert.deepEqual(placeOf("#workshop/add-ons"), {
-    page: "workshop",
-    open: "add-ons",
+  assert.deepEqual(placeOf("#personas/mia"), {
+    page: "personas",
+    open: "mia",
   });
   assert.deepEqual(placeOf("#explore/"), { page: "explore", open: null });
 });
 
-test("without a page, or with one that does not exist, the signals come first", () => {
-  assert.deepEqual(placeOf(""), { page: "signals", open: null });
-  assert.deepEqual(placeOf("#"), { page: "signals", open: null });
-  assert.deepEqual(placeOf("#nowhere/1"), { page: "signals", open: null });
-  assert.deepEqual(placeOf("#constructor"), { page: "signals", open: null });
+test("without a page, or with one that does not exist, Home comes first", () => {
+  assert.deepEqual(placeOf(""), { page: "home", open: null });
+  assert.deepEqual(placeOf("#"), { page: "home", open: null });
+  assert.deepEqual(placeOf("#nowhere/1"), { page: "home", open: null });
+  assert.deepEqual(placeOf("#constructor"), { page: "home", open: null });
 });
 
 test("connecting a board keeps its own address", () => {
@@ -43,12 +43,13 @@ test("the old addresses lead to the new pages", () => {
   assert.equal(movedHash("#board"), "#build");
   assert.equal(movedHash("#ideas"), "#explore");
   assert.equal(movedHash("#ideas/idea-1"), "#explore/idea-1");
-  assert.equal(movedHash("#system"), "#workshop");
-  assert.equal(movedHash("#add-ons"), "#workshop/add-ons");
+  assert.equal(movedHash("#workshop"), "#system");
+  assert.equal(movedHash("#workshop/add-ons"), "#settings");
+  assert.equal(movedHash("#add-ons"), "#settings");
   assert.equal(movedHash("ideas/idea-1"), "#explore/idea-1");
   assert.equal(movedHash("#today"), "#signals");
   assert.equal(movedHash("#customers"), "#personas");
-  assert.equal(movedHash("#products"), "#workshop");
+  assert.equal(movedHash("#products"), "#system");
   assert.equal(movedHash("#understand/mia/st1"), "#personas/mia/st1");
   assert.equal(movedHash("#prototype/wish/b"), "#explore/");
   assert.deepEqual(placeOf("#prototype/wish"), { page: "explore", open: null });
@@ -56,7 +57,7 @@ test("the old addresses lead to the new pages", () => {
     page: "explore",
     open: "idea-1",
   });
-  assert.deepEqual(placeOf("#add-ons"), { page: "workshop", open: "add-ons" });
+  assert.deepEqual(placeOf("#add-ons"), { page: "settings", open: null });
 });
 
 test("the new addresses have not moved", () => {

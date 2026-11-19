@@ -12,88 +12,99 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHead } from "@/components/page-head";
 import { columnsOf } from "@/lib/columns";
-import { DesktopStartCard, UpdatesCard } from "@/updates/updates-card";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
 
-// The factory at a glance (on Workshop): how it is doing in a line, then its components
-// in two areas side by side, the products and the factory itself,
-// each a map of parts after the parts they need; what is left to set up,
-// the lights, and what each part does.
-export function SystemTab({ state }: Readonly<{ state: FactoryState }>) {
+// System: what the product is made of, as a map of its parts, each after
+// the parts it needs, with its light and its buttons in its box; how it is
+// doing in a line, Start all and Stop all. The factory's own programs are
+// in Settings (FactoryPrograms).
+export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
-  const press = (path: string) => {
+  const press = usePress(setProblem);
+  const products = state.parts.filter((part) => part.area === "products");
+  const top = headline(products);
+  return (
+    <>
+      <PageHead
+        title="System"
+        about="What your product is made of and how its parts connect. Start, stop and open them here."
+        actions={
+          products.length > 0 && (
+            <>
+              <Button
+                variant="outline"
+                className="h-9 px-3.5 text-[13px]"
+                onClick={() => {
+                  press("/api/start-all");
+                }}
+              >
+                Start all
+              </Button>
+              <Button
+                variant="outline"
+                className="h-9 px-3.5 text-[13px]"
+                onClick={() => {
+                  press("/api/stop-all");
+                }}
+              >
+                Stop all
+              </Button>
+            </>
+          )
+        }
+      />
+      <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-foreground-2">
+        <StatusLight light={top.light} />
+        <span className="min-w-0 flex-1">{top.text}</span>
+      </div>
+      {problem && <ProblemBox title="That did not work" text={problem} />}
+      <Area title="Your product" parts={products} onPress={press}>
+        <p className="py-6 text-center text-[13px] text-muted-foreground">
+          No parts to run yet: they come with your first idea, on the{" "}
+          <a
+            href="#explore"
+            className="text-foreground underline underline-offset-2"
+          >
+            Explorations
+          </a>{" "}
+          page.
+        </p>
+      </Area>
+      <Legend />
+    </>
+  );
+}
+
+// The factory's own programs (the builder, the board's reading, …), with
+// their lights and buttons: on Settings, out of the product's way.
+export function FactoryPrograms({ state }: Readonly<{ state: FactoryState }>) {
+  const [problem, setProblem] = useState<string | null>(null);
+  const press = usePress(setProblem);
+  const factory = state.parts.filter((part) => part.area === "factory");
+  if (factory.length === 0) return null;
+  return (
+    <>
+      {problem && <ProblemBox title="That did not work" text={problem} />}
+      <Area
+        title="The factory's own programs"
+        parts={factory}
+        onPress={press}
+      />
+    </>
+  );
+}
+
+function usePress(setProblem: (problem: string | null) => void) {
+  return (path: string) => {
     setProblem(null);
     post(path).catch((error: unknown) => {
       setProblem(messageOf(error));
     });
   };
-  const products = state.parts.filter((part) => part.area === "products");
-  const factory = state.parts.filter((part) => part.area === "factory");
-  const top = headline(state.parts);
-  return (
-    <div className="grid content-start gap-4">
-      <Card className="flex-row flex-wrap items-center gap-3 px-5 py-4 shadow-soft">
-        <StatusLight light={top.light} />
-        <span className="min-w-0 flex-1 text-[15px]">{top.text}</span>
-      </Card>
-      <UpdatesCard />
-      <DesktopStartCard />
-      {problem && <ProblemBox title="That did not work" text={problem} />}
-      <div className="grid gap-4">
-        <Area
-          title="Your products"
-          colour="#5b7cfa"
-          actions={
-            products.length > 0 && (
-              <>
-                <Button
-                  variant="outline"
-                  className="h-9 px-3.5 text-[13px]"
-                  onClick={() => {
-                    press("/api/start-all");
-                  }}
-                >
-                  Start all
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-9 px-3.5 text-[13px]"
-                  onClick={() => {
-                    press("/api/stop-all");
-                  }}
-                >
-                  Stop all
-                </Button>
-              </>
-            )
-          }
-          parts={products}
-          onPress={press}
-        >
-          <p className="py-6 text-center text-[13px] text-muted-foreground">
-            No products yet: describe what you want to build on the{" "}
-            <a
-              href="#explore"
-              className="text-foreground underline underline-offset-2"
-            >
-              Explore
-            </a>{" "}
-            page.
-          </p>
-        </Area>
-        <Area
-          title="The factory's own programs"
-          colour="#8b5cf6"
-          parts={factory}
-          onPress={press}
-        />
-      </div>
-      <Legend />
-    </div>
-  );
 }
 
 // What the lights mean.
@@ -115,14 +126,12 @@ function Legend() {
 // parts it needs, joined by arrows (down on a phone).
 function Area({
   title,
-  colour,
   actions,
   parts,
   onPress,
   children,
 }: Readonly<{
   title: string;
-  colour: string;
   // Buttons at its top right.
   actions?: React.ReactNode;
   parts: PartView[];
@@ -132,7 +141,7 @@ function Area({
 }>) {
   if (parts.length === 0 && !children) return null;
   return (
-    <AreaCard title={title} colour={colour} actions={actions}>
+    <AreaCard title={title} actions={actions}>
       {parts.length === 0 ? (
         children
       ) : (
@@ -157,27 +166,20 @@ function Area({
   );
 }
 
-// An area's frame: a card with its title in the area's colour.
+// An area's frame: a card with its title.
 function AreaCard({
   title,
-  colour,
   actions,
   children,
 }: Readonly<{
   title: string;
-  colour: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
 }>) {
   return (
     <Card aria-label={title} className="gap-3 py-4 shadow-soft">
       <CardHeader className="px-4">
-        <CardTitle
-          className="text-xs font-semibold tracking-[0.08em] uppercase"
-          style={{ color: colour }}
-        >
-          {title}
-        </CardTitle>
+        <CardTitle className="text-[13px] font-semibold">{title}</CardTitle>
         {actions && <CardAction className="flex gap-2">{actions}</CardAction>}
       </CardHeader>
       <CardContent className="grid gap-2.5 px-4">{children}</CardContent>
@@ -199,7 +201,7 @@ function headline(parts: PartView[]): {
   if (lit.length === 0)
     return {
       light: "none",
-      text: "No products to run yet: they come with your first idea.",
+      text: "No parts to run yet: they come with your first idea.",
     };
   if (problems > 0)
     return {
@@ -207,19 +209,19 @@ function headline(parts: PartView[]): {
       text: `${problems === 1 ? "One part" : String(problems) + " parts"} could not start: the card says why and what to do.`,
     };
   if (lit.some((part) => part.light === "starting"))
-    return { light: "starting", text: "Starting your products…" };
+    return { light: "starting", text: "Starting your product…" };
   if (lit.every((part) => part.light === "running"))
     return {
       light: "running",
-      text: "Everything is running: open a product to try it.",
+      text: "Everything is running: open it to try it.",
     };
   if (lit.some((part) => part.light === "running"))
     return {
       light: "stopped",
-      text: "Some of your products are running: start the others to try everything.",
+      text: "Some parts are running: start the others to try everything.",
     };
   return {
     light: "stopped",
-    text: "Your products are not running. Start them to try them on this computer.",
+    text: "Your product is not running. Start it to try it on this computer.",
   };
 }

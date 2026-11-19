@@ -2,7 +2,7 @@
 
 A company chooses which parts of the factory it uses. The kernel is always
 there; every ability beyond it is an add-on, switched on or off in
-`factory.json` and in the dashboard's Workshop. Built-in add-ons
+`factory.json` and in the dashboard's Settings (Add-ons). Built-in add-ons
 (`core: true`) are on unless the company switches them off; the others are
 off until it switches them on. An add-on says what it needs, and
 `assembleFactory` refuses a factory where something it needs is missing.
@@ -17,12 +17,12 @@ the first company's factory; they come here written for any company (see
 | Piece                                                                                                             | Here                  |
 | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Loading products, extensions and kits; the company file; `assembleFactory`                                        | yes                   |
-| Parts: start, watch and stop them; the system in Workshop                                                         | yes                   |
+| Parts: start, watch and stop them; the product's parts on System, the factory's in Settings                       | yes                   |
 | Settings groups and the Settings page                                                                             | yes                   |
 | Running Claude Code (kept open between turns), working copies                                                     | yes                   |
 | The skills the agents follow and the knowledge base with its checks                                               | yes                   |
 | The setup coach on a map; Build and Open the factory                                                              | yes                   |
-| The add-ons in Workshop                                                                                           | yes                   |
+| The add-ons in Settings                                                                                           | yes                   |
 | **The theme**: the dashboard takes the look of the company's own app (see below)                                  | to come               |
 | **Install, add, remove and upgrade** from the command line, on a branch of its own                                | to come               |
 | **Extension points for pages, agent tools and workflow steps**, so the add-ons below plug in like GitHub and Jira | to come, needed first |
@@ -40,9 +40,9 @@ the first company's factory; they come here written for any company (see
 | **Prototypes**     | The coach has a clickable prototype of an idea made in the real app, version by version, before anything is built                                                                                   | Ideas, a kit with prototype mode      | no       | to come                       |
 | **Made-up worlds** | Shared made-up data the prototypes run on, kept in step with the real data's shape; the coach can look at it and change it                                                                          | Prototypes                            | no       | yes, in Kobble's explorations |
 | **Voice**          | The owner talks instead of typing; speech stays on the computer (a one-time download of about 0.8 GB)                                                                                               | –                                     | no       | yes (in the kernel today)     |
-| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; switched on for the team, kept on each computer                                   | Ideas                                 | no       | yes (Settings, Workshop)      |
-| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | yes (Settings, Workshop)      |
-| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | yes (Settings, Workshop)      |
+| **Usage log**      | A record of how the factory is used, for a study: every change to an idea, each prototype version with a picture; switched on for the team, kept on each computer                                   | Ideas                                 | no       | yes (Settings)                |
+| **Updates**        | Tells the owner when a newer version of the project is ready and installs it on their computer, without git                                                                                         | –                                     | no       | yes (Settings, sidebar)       |
+| **Desktop start**  | A shortcut that starts the factory and the products, for owners who do not use a terminal                                                                                                           | –                                     | no       | yes (Settings)                |
 
 ### What each brings
 
@@ -110,10 +110,16 @@ forward`, no public address needed) and a check every few minutes for
   an exploration as a line of JSON in a folder next to the project
   (`<project>-usage`), each prototype's change as a patch and, when it is
   opened, a picture at a computer's and a phone's width.
-- **Updates** (Workshop, the Updates setting): the owner's folder takes the
-  newest main from GitHub without git, only when nothing can be lost, by
-  itself every few minutes when switched on; running products start again.
-- **Desktop start** (Workshop): a file on the desktop that opens the
+- **Updates** (the sidebar when something needs the owner, Settings ›
+  Updates): the owner's folder takes the newest main from GitHub without
+  git, only when nothing can be lost, by itself every few minutes when
+  switched on. After it, what the changes need is installed when their
+  package files changed; when that brings a new Kobble, the factory starts
+  again on it with the parts that ran; otherwise the running products start
+  again. A newer Kobble release is looked for once a day; Prepare the
+  upgrade puts "Upgrade Kobble to <version>" on the board for the builder,
+  whose pull request, once merged, reaches every computer the same way.
+- **Desktop start** (Settings › This computer): a file on the desktop that opens the
   factory with a double-click (`.cmd` on Windows, `.command` on macOS).
 - **Voice**: Talk; live words while the owner speaks; a first draft as soon
   as they go quiet; the answer read out as it is written; "stop" interrupts.

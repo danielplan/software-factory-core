@@ -1,10 +1,11 @@
 // Updates: brings the newest main from GitHub into the owner's folder, so
 // merged work runs on their computer without anyone typing `git pull`: from
-// Workshop's Update button, and by itself every few minutes when the owner
-// switched "Update by itself" on (the Updates setting). It only moves the
-// folder forward when nothing can be lost (on main, no changed files, no
-// commits of its own); otherwise it says why in plain words. The running
-// products then restart with the new version.
+// the Update button in the sidebar, and by itself every few minutes when the
+// owner switched "Update by itself" on (Settings › Updates). It only moves
+// the folder forward when nothing can be lost (on main, no changed files, no
+// commits of its own); otherwise it says why in plain words. Either way, what
+// comes after (installing, upgrading the factory, restarting what runs) is
+// part of the update, so an update by itself finishes the same as a press.
 
 import { run } from "@software-factory/core";
 
@@ -21,7 +22,17 @@ export type UpdatesState = {
   offline: boolean;
   lastLookAt: string | null;
   lastUpdate: { at: string; count: number } | null;
+  // What the update is doing after taking the changes ("Installing what
+  // they need"), while it does.
+  step: string | null;
 };
+
+// What comes after the folder moved forward: the files that changed, and a
+// way to say each step.
+export type AfterUpdate = (
+  changed: string[],
+  say: (step: string) => void,
+) => Promise<void>;
 
 export type Outcome =
   | { kind: "updated"; count: number }
@@ -43,16 +54,19 @@ export class ProjectUpdates {
   private current: UpdatesState;
   private listeners = new Set<(state: UpdatesState) => void>();
   private timer: NodeJS.Timeout | null = null;
+  private readonly after: AfterUpdate;
 
   constructor(options: {
     root: string;
     branch?: string;
     choice?: Choice;
     git?: Git;
+    after?: AfterUpdate;
   }) {
     this.git = options.git ?? gitIn(options.root);
     this.branch = options.branch ?? "main";
     this.choice = options.choice ?? { read: () => false, write: () => {} };
+    this.after = options.after ?? (() => Promise.resolve());
     this.current = {
       byItself: this.choice.read(),
       looking: false,
@@ -62,6 +76,7 @@ export class ProjectUpdates {
       offline: false,
       lastLookAt: null,
       lastUpdate: null,
+      step: null,
     };
   }
 
@@ -93,7 +108,7 @@ export class ProjectUpdates {
     try {
       return await this.updateNow();
     } finally {
-      this.change({ updating: false });
+      this.change({ updating: false, step: null });
     }
   }
 
@@ -138,6 +153,7 @@ export class ProjectUpdates {
     const { waiting, blocked } = this.current;
     if (waiting.count === 0) return { kind: "current" };
     if (blocked) return { kind: "not-updated", reason: blocked.reason };
+    const before = (await this.git(["rev-parse", "HEAD"])).log[0] ?? "";
     const merged = await this.git([
       "merge",
       "--ff-only",
@@ -154,6 +170,10 @@ export class ProjectUpdates {
     }
     const lastUpdate = { at: new Date().toISOString(), count: waiting.count };
     this.change({ waiting: { count: 0, titles: [] }, lastUpdate });
+    const changed = await this.git(["diff", "--name-only", before, "HEAD"]);
+    await this.after(changed.ok ? changed.log : [], (step) => {
+      this.change({ step });
+    });
     return { kind: "updated", count: waiting.count };
   }
 

@@ -22,8 +22,16 @@ done on a page, say which page and what to press, and link it like
   from To do and builds them; fixes go straight there.
 - **Personas** (`#personas`): the real customers the product is for. A
   persona test lets the tester kobold use the app or a prototype as them.
-- **Settings** (`#settings`) and **Workshop** (`#workshop`): the factory
-  itself: the board it uses, add-ons, the apps it runs.
+- **Home** (`#home`, the first page): what waits for the team (pull
+  requests to review, questions on cards, explorations with a next step, new
+  signals) and the loop from signals to what is done.
+- **System** (`#system`): what the product is made of, its parts as a map,
+  each with its light, Start, Stop and Open.
+- **Settings** (`#settings`): the factory itself: the board it uses,
+  updates, add-ons and kits, the factory's own programs, this computer.
+- **Updates** show in the sidebar above Settings only when something needs
+  the team: changes ready on GitHub, an update running, changes this folder
+  cannot take yet, or a newer Kobble (which the builder prepares as a card).
 
 ## The kobolds
 

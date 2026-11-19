@@ -62,6 +62,7 @@ function useSidebarParts(state: FactoryState) {
   const { data: signals } = useSignals();
   const support = useSupport();
   const overall = overallOf(state.parts);
+  const products = state.parts.filter((part) => part.area === "products");
   const all = [
     ...(explorations?.exploring ?? []),
     ...(explorations?.waiting ?? []),
@@ -74,6 +75,10 @@ function useSidebarParts(state: FactoryState) {
     ),
     kobold: koboldStatus(state.work, state.ideas, overall.words, all),
     light: overall.lit,
+    product: {
+      light: overallOf(products).lit,
+      link: products.find((part) => part.link)?.link ?? null,
+    },
     doing: koboldsDoing(state.work, all, support?.writing != null),
   };
 }

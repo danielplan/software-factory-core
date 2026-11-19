@@ -10,12 +10,12 @@ see [the theme](../add-ons.md#the-theme)) may change the same variables.
 
 ## The frame
 
-| Part      | What it is                                                                                                                                                                                     | Where                                             |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                     | `packages/dashboard/src/components/shell.tsx`     |
-| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", Signals, Explorations, Factory, then Personas, the kobold's card, and Settings and Workshop under it. | `packages/dashboard/src/components/sidebar.tsx`   |
-| Page      | On the ground beside the sidebar, at most 1120px wide, padding 34px 40px 60px (16px at the sides on a phone); an exploration fills the whole space.                                            | `packages/dashboard/src/components/shell.tsx`     |
-| Page head | The title (32px, bold, letter-spacing -0.025em) with the page's buttons on the right, and one line about the page (14px, `--muted-foreground`).                                                | `packages/dashboard/src/components/page-head.tsx` |
+| Part      | What it is                                                                                                                                                                                                                                      | Where                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                                                                      | `packages/dashboard/src/components/shell.tsx`     |
+| Sidebar   | White, 256px wide, a line at its right, padding 22px 16px 16px: the kobold and "kobble", Home and System, then Signals, Explorations, Factory, then Personas, and at the bottom the update row (only when updates need the owner) and Settings. | `packages/dashboard/src/components/sidebar.tsx`   |
+| Page      | On the ground beside the sidebar, at most 1120px wide, padding 34px 40px 60px (16px at the sides on a phone); an exploration fills the whole space.                                                                                             | `packages/dashboard/src/components/shell.tsx`     |
+| Page head | The title (32px, bold, letter-spacing -0.025em) with the page's buttons on the right, and one line about the page (14px, `--muted-foreground`).                                                                                                 | `packages/dashboard/src/components/page-head.tsx` |
 
 A page draws its title with `PageHead` and gives its buttons as `actions`;
 they show on the right of the title. A button that belongs to one part of
@@ -136,5 +136,5 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 - **Cards** (`packages/dashboard/src/components/ui/card.tsx`): white, 20px corners, `--shadow-card`.
 - **The kobold** (`KoboldHead` in `packages/dashboard/src/components/kobold-face.tsx`): wherever the
   kobold speaks or works, never a generic icon.
-- **Tabs** inside a page (Workshop): a grey track
+- **Tabs** inside a page: a grey track
   (`--surface-2`) with the chosen one white and lifted.

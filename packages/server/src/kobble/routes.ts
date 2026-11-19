@@ -165,7 +165,7 @@ function liveRoutes(
 
 // The connected board's cards; refused with how to connect one when there
 // is none.
-function connectedCards(factory: string, cli: Cli): Cards {
+export function connectedCards(factory: string, cli: Cli): Cards {
   const found = cardsFor(factory, cli);
   if ("problem" in found)
     throw new Refused(

@@ -81,7 +81,7 @@ export const updateSettings: SettingGroup = {
     {
       key: UPDATE_KEY,
       label: "Update by itself",
-      help: "On: every few minutes, the newest version is taken when nothing here can be lost. Off: Workshop says when one is ready.",
+      help: "On: every few minutes, the newest version is taken when nothing here can be lost. Off: the sidebar says when one is ready. Either way, what the changes need is installed and the products start again.",
       kind: "choice",
       default: "off",
       choices: [

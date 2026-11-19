@@ -188,3 +188,45 @@ test("following looks again and again, and updates only with the switch on", asy
   assert.equal(updates.state.waiting.count, 1);
   assert.equal(existsSync(join(folder, "notes.md")), false);
 });
+
+test("what comes after an update is part of it, with the changed files and each step", async () => {
+  const { folder, merge } = world();
+  merge("package.json", "{}");
+  const seen: { changed: string[]; steps: (string | null)[] } = {
+    changed: [],
+    steps: [],
+  };
+  const updates = new ProjectUpdates({
+    root: folder,
+    after: (changed, say) => {
+      seen.changed = changed;
+      say("Installing what the changes need");
+      return Promise.resolve();
+    },
+  });
+  updates.subscribe((state) => seen.steps.push(state.step));
+  assert.deepEqual(await updates.update(), { kind: "updated", count: 1 });
+  assert.deepEqual(seen.changed, ["package.json"]);
+  assert.ok(seen.steps.includes("Installing what the changes need"));
+  assert.equal(updates.state.step, null);
+});
+
+test("following with the switch on updates, and the update finishes with what comes after", async () => {
+  const { folder, merge } = world();
+  merge("notes.md", "Notes");
+  let after = 0;
+  const updates = new ProjectUpdates({
+    root: folder,
+    choice: { read: () => true, write: () => {} },
+    after: () => {
+      after += 1;
+      return Promise.resolve();
+    },
+  });
+  const stop = updates.follow(10);
+  while (after === 0) await new Promise((resolve) => setTimeout(resolve, 20));
+  stop();
+  while (updates.state.updating)
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(existsSync(join(folder, "notes.md")), true);
+});

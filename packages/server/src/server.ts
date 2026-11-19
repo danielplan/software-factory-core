@@ -53,6 +53,9 @@ export function startServer(options: {
   cli?: Cli;
   // What persona tests run on (stand-ins in the tests).
   testsRunOn?: TestsRunOn;
+  // Starts the factory again on a new Kobble, with the parts that ran; the
+  // command line gives it, the tests do not.
+  restartFactory?: (resume: string[]) => Promise<void>;
 }): { server: Server; changed: () => void } {
   const watchers = new Set<ServerResponse>();
   const tell = (event: string) => {

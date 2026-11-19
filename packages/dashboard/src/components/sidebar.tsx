@@ -1,18 +1,19 @@
 import {
+  Boxes,
   FlaskConical,
+  House,
   Inbox,
   Menu,
   Settings,
   Columns3,
   Users,
-  Wrench,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import type { Light } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { type Doing, PageKobold } from "@/components/page-kobold";
-import { LABEL, StatusLight } from "@/components/status-light";
+import { StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,15 +25,31 @@ import type { Page } from "@/lib/routes";
 import { useFactoryName, useLogo } from "@/lib/brand";
 import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
+import { UpdateRow } from "@/updates/update-row";
 
-// Each page with its own colour: its icon on a tint of it.
-type Item = { page: Page; name: string; icon: ReactNode; color: string };
+import { type Item, PageLink, ProductState } from "./sidebar-links";
 
-// The pages, in labelled groups: the work, from what came in to what is
-// built (Signals, Explorations, the Factory board), then the customers (the
-// personas). Explorations is still the page "explore" and the Factory board
-// the page "build". Settings and Workshop sit quietly under the kobold's
-// card.
+// Home and System at the top (System with the product's light, or Open when
+// it runs), then the pages in labelled groups: the work, from what came in
+// to what is built (Signals, Explorations, the Factory board), then the
+// customers (the personas). Explorations is still the page "explore" and
+// the Factory board the page "build". At the bottom, updates when they need
+// the owner (UpdateRow), and Settings.
+const TOP: Item[] = [
+  {
+    page: "home",
+    name: "Home",
+    icon: <House aria-hidden />,
+    color: "var(--foreground)",
+  },
+  {
+    page: "system",
+    name: "System",
+    icon: <Boxes aria-hidden />,
+    color: "var(--source-usage)",
+  },
+];
+
 const GROUPS: { label: string; items: Item[] }[] = [
   {
     label: "Work",
@@ -85,12 +102,6 @@ const QUIET: Item[] = [
     icon: <Settings aria-hidden />,
     color: "#667085",
   },
-  {
-    page: "workshop",
-    name: "Workshop",
-    icon: <Wrench aria-hidden />,
-    color: "#7a5af8",
-  },
 ];
 
 // The pages whose count is something waiting for you, shown as a badge.
@@ -106,11 +117,13 @@ type SidebarProps = Readonly<{
   // What each kobold does now (lib/kobolds.ts).
   doing: Doing;
   light: Light;
+  // The product's light, and where it opens while it runs.
+  product: { light: Light; link: string | null };
 }>;
 
-// The way around the dashboard: the project's name at the top, the pages with a count where there is
-// something to count, the kobold's card at the bottom and Settings and
-// Workshop under it. White, at the left of a wide screen; on a phone, a bar
+// The way around the dashboard: the project's name at the top, Home and
+// System, the pages with a count where there is something to count, and
+// updates and Settings at the bottom. White, at the left of a wide screen; on a phone, a bar
 // along the top whose menu opens the same list from the side.
 export function Sidebar(props: SidebarProps) {
   const [open, setOpen] = useState(false);
@@ -147,42 +160,34 @@ export function Sidebar(props: SidebarProps) {
 }
 
 function Content(props: SidebarProps & { onGo?: () => void }) {
-  const { current, counts, kobold, light, doing, onGo } = props;
+  const { current, counts, doing, product, onGo } = props;
   return (
     <>
       <span className="px-2 pb-4">
         <Wordmark name={props.name} size="big" />
       </span>
-      <Pages current={current} counts={counts} doing={doing} onGo={onGo} />
-      <nav aria-label="The factory" className="mt-auto grid gap-0.5">
-        {QUIET.map((item) => (
-          <a
-            key={item.page}
-            href={`#${item.page}`}
-            onClick={onGo}
-            aria-current={current === item.page ? "page" : undefined}
-            className={cn(
-              "flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
-              current === item.page &&
-                "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
-            )}
-          >
-            <Tile color={item.color}>{item.icon}</Tile>
-            {item.name}
-            {item.page === "workshop" &&
-              light !== "running" &&
-              light !== "none" && (
-                <span
-                  title={kobold.detail}
-                  className="ml-auto flex items-center gap-2 text-xs font-normal"
-                >
-                  {LABEL[light]}
-                  <StatusLight light={light} />
-                </span>
-              )}
-          </a>
+      <nav aria-label="Overview" className="grid gap-px pb-4">
+        {TOP.map((item) => (
+          <PageLink key={item.page} item={item} current={current} onGo={onGo}>
+            {item.page === "system" && <ProductState product={product} />}
+          </PageLink>
         ))}
       </nav>
+      <Pages current={current} counts={counts} doing={doing} onGo={onGo} />
+      <div className="mt-auto grid gap-0.5 pt-4">
+        <UpdateRow />
+        <nav aria-label="The factory" className="grid gap-0.5">
+          {QUIET.map((item) => (
+            <PageLink
+              key={item.page}
+              item={item}
+              current={current}
+              onGo={onGo}
+              quiet
+            />
+          ))}
+        </nav>
+      </div>
     </>
   );
 }
@@ -258,24 +263,12 @@ function Pages({
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{group.label}</GroupLabel>
           {group.items.map((item) => (
-            <a
-              key={item.page}
-              href={`#${item.page}`}
-              onClick={onGo}
-              aria-current={current === item.page ? "page" : undefined}
-              className={cn(
-                "group flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal text-sidebar-foreground hover:bg-sidebar-hover [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
-                current === item.page &&
-                  "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
-              )}
-            >
-              <Tile color={item.color}>{item.icon}</Tile>
-              {item.name}
+            <PageLink key={item.page} item={item} current={current} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">
                 <PageKobold page={item.page} doing={doing} />
                 <Count page={item.page} n={counts[item.page]} />
               </span>
-            </a>
+            </PageLink>
           ))}
         </div>
       ))}
@@ -291,23 +284,5 @@ function Count({ page, n }: Readonly<{ page: Page; n: number | undefined }>) {
     </span>
   ) : (
     <span className="ml-auto text-xs text-sidebar-muted">{n}</span>
-  );
-}
-
-// A page's icon on a soft tint of its colour.
-function Tile({
-  color,
-  children,
-}: Readonly<{ color: string; children: ReactNode }>) {
-  return (
-    <span
-      className="grid size-[22px] flex-none place-items-center rounded-md"
-      style={{
-        color,
-        backgroundColor: `color-mix(in srgb, ${color} 13%, transparent)`,
-      }}
-    >
-      {children}
-    </span>
   );
 }

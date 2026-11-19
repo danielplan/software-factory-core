@@ -15,7 +15,7 @@ import {
 import type { FactoryState } from "./dashboard";
 import { GroupForm } from "./settings-card";
 
-// The factory's store (on Workshop), in two parts: what it uses now (the board work is
+// The factory's store (on Settings), in two parts: what it uses now (the board work is
 // tracked on, the add-ons it has, the kits of its products), then what it
 // could use, greyed. Add-ons are added or removed here, with their settings
 // while they are on; the board is changed on Settings; kits come with the

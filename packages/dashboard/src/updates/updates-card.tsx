@@ -1,4 +1,4 @@
-// Updates on Workshop: whether a newer version of the project is on GitHub,
+// Updates on Settings: whether a newer version of the project is on GitHub,
 // Update to take it (only when nothing here can be lost), Look again, and
 // the "Update by itself" switch. What is in the way is named in plain words.
 
@@ -7,16 +7,15 @@ import { useState } from "react";
 
 import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { type Read, useRead } from "@/lib/use-read";
 import { Markdown } from "@/components/markdown";
 
-import type { UpdatesState } from "../../../server/src/updates/project-updates.ts";
+import type { UpdatesView } from "../../../server/src/updates/served.ts";
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
-  const { data } = useRead("/api/updates") as Read<UpdatesState>;
+  const { data } = useRead("/api/updates") as Read<UpdatesView>;
   const [problem, setProblem] = useState<string | null>(null);
   if (!data) return null;
   const summary = updatesSummary(data);
@@ -27,7 +26,7 @@ export function UpdatesCard() {
     });
   };
   return (
-    <Card className="grid gap-2 px-5 py-4 shadow-soft">
+    <div className="grid gap-2">
       <div className="flex flex-wrap items-center gap-3">
         <span className="min-w-0 flex-1 text-[15px] font-medium">
           {summary.title}
@@ -84,16 +83,16 @@ export function UpdatesCard() {
         </ul>
       )}
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
-    </Card>
+    </div>
   );
 }
 
 // Desktop start: a file on the desktop that opens the factory with a
 // double-click, for owners who do not use a terminal.
-export function DesktopStartCard() {
+export function DesktopStart() {
   const [said, say] = useState<string | null>(null);
   return (
-    <Card className="flex-row flex-wrap items-center gap-3 px-5 py-4 shadow-soft">
+    <div className="flex flex-wrap items-center gap-3">
       <span className="min-w-0 flex-1 text-[15px]">
         {said ?? "Open the factory with a double-click from the desktop."}
       </span>
@@ -113,6 +112,6 @@ export function DesktopStartCard() {
       >
         Put a start on the desktop
       </Button>
-    </Card>
+    </div>
   );
 }
