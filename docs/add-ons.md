@@ -112,8 +112,8 @@ forward`, no public address needed) and a check every few minutes for
   opened, a picture at a computer's and a phone's width.
 - **Updates** (the sidebar when something needs the owner, Settings ›
   Updates): the owner's folder takes the newest main from GitHub without
-  git, only when nothing can be lost, by itself every few minutes when
-  switched on. After it, what the changes need is installed when their
+  git, only when nothing can be lost, by itself every few minutes (on
+  unless the owner switches it off). After it, what the changes need is installed when their
   package files changed; when that brings a new Kobble, the factory starts
   again on it with the parts that ran; otherwise the running products start
   again. A newer Kobble release is looked for once a day; Prepare the

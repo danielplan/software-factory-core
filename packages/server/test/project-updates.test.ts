@@ -151,7 +151,7 @@ test("without GitHub it says so and changes nothing", async () => {
   assert.equal(updates.state.offline, true);
 });
 
-test("the Update by itself switch is kept as a setting, and switching it on updates", async () => {
+test("Update by itself is on unless switched off, is kept as a setting, and switching it on updates", async () => {
   const { folder, base, merge } = world();
   merge("notes.md", "Notes");
   const root = join(base, "factory");
@@ -162,6 +162,8 @@ test("the Update by itself switch is kept as a setting, and switching it on upda
       chooseUpdatesByItself(root, on);
     },
   };
+  assert.equal(updatesByItself(root), true);
+  chooseUpdatesByItself(root, false);
   const updates = new ProjectUpdates({ root: folder, choice });
   assert.equal(updates.state.byItself, false);
   updates.chooseByItself(true);

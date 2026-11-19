@@ -69,7 +69,7 @@ export function usageFolder(root: string, project: string): string | null {
 export const UPDATE_KEY = "FACTORY_UPDATE_BY_ITSELF";
 
 // Updates: whether the owner's folder takes the newest main from GitHub by
-// itself, every few minutes.
+// itself, every few minutes. On unless the owner switched it off.
 export const updateSettings: SettingGroup = {
   id: "updates",
   name: "Updates",
@@ -81,9 +81,9 @@ export const updateSettings: SettingGroup = {
     {
       key: UPDATE_KEY,
       label: "Update by itself",
-      help: "On: every few minutes, the newest version is taken when nothing here can be lost. Off: the sidebar says when one is ready. Either way, what the changes need is installed and the products start again.",
+      help: "On (the standard): every few minutes, the newest version is taken when nothing here can be lost. Off: the sidebar says when one is ready. Either way, what the changes need is installed and the products start again.",
       kind: "choice",
-      default: "off",
+      default: "on",
       choices: [
         { value: "off", label: "Off" },
         { value: "on", label: "On" },
@@ -93,7 +93,7 @@ export const updateSettings: SettingGroup = {
 };
 
 export function updatesByItself(root: string): boolean {
-  return readSettings(root, updateSettings.file)[UPDATE_KEY] === "on";
+  return readSettings(root, updateSettings.file)[UPDATE_KEY] !== "off";
 }
 
 export function chooseUpdatesByItself(root: string, on: boolean): void {
