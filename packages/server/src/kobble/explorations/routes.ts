@@ -18,16 +18,14 @@ import { addPicture, attachedIn, personActs } from "./person-acts.ts";
 import {
   dropExploration,
   explorationOf,
+  freshExploration,
   handOff,
   newExploration,
   startExploration,
 } from "./actions.ts";
 import { withThing } from "./board-things.ts";
-import {
-  ExplorationPrototypes,
-  prototypeBranch,
-  prototypeOf,
-} from "./prototypes.ts";
+import { ExplorationPrototypes } from "./prototypes.ts";
+import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import { ExplorationWorlds } from "./worlds.ts";
@@ -59,10 +57,22 @@ export function servedExplorations(options: Options) {
       options.onChange();
     },
     change: (id, prototype, change) => {
-      void prototypes
-        .change(explorationOf(store(), id), prototype, change)
-        .then(options.onChange, options.onChange);
+      const made = prototypes.change(
+        explorationOf(store(), id),
+        prototype,
+        change,
+      );
       options.onChange();
+      return made;
+    },
+    another: (id, prototype, way) => {
+      const made = prototypes.another(
+        explorationOf(store(), id),
+        prototype,
+        way,
+      );
+      options.onChange();
+      return made;
     },
   });
   // A button: done, then the page is told.
@@ -169,6 +179,9 @@ function buttonRoutes(
   return {
     "POST /api/kobble/explorations": button((body) => ({
       exploration: newExploration(store(), body),
+    })),
+    "POST /api/kobble/explorations/fresh": button(() => ({
+      exploration: freshExploration(store()),
     })),
     "POST /api/kobble/explorations/start": button((body) => {
       const started = id(body);

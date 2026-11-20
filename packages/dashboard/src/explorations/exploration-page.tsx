@@ -31,7 +31,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         say(messageOf(error));
       });
   }, [waiting, id]);
-  useLivePrototype(data, say);
+  useLivePrototype(data);
   if (!data)
     return problem ? (
       <ProblemBox title="This exploration cannot be read" text={problem} />
@@ -50,24 +50,27 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   return (
     <div className="flex h-dvh flex-col max-md:h-[calc(100dvh-56px)]">
       <TopBar page={data} press={press} pending={pending} />
-      {said && (
-        <div className="px-6 pt-3">
-          <ProblemBox title="That did not work" text={said} />
-        </div>
-      )}
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
         <BoardProblem value={say}>
-          <Board
-            page={data}
-            attached={attached}
-            onPick={(thing) => {
-              setAttached((now) =>
-                now.includes(thing)
-                  ? now.filter((one) => one !== thing)
-                  : [...now, thing],
-              );
-            }}
-          />
+          {/* What did not work shows over the canvas only, not the talk. */}
+          <div className="relative flex min-h-0 min-w-0 flex-1">
+            {said && (
+              <div className="absolute inset-x-4 top-4 z-10 rounded-xl bg-card shadow-card">
+                <ProblemBox title="That did not work" text={said} />
+              </div>
+            )}
+            <Board
+              page={data}
+              attached={attached}
+              onPick={(thing) => {
+                setAttached((now) =>
+                  now.includes(thing)
+                    ? now.filter((one) => one !== thing)
+                    : [...now, thing],
+                );
+              }}
+            />
+          </div>
         </BoardProblem>
         <TalkPanel
           page={data}

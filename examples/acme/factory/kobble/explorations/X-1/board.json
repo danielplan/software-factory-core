@@ -52,7 +52,8 @@
       "name": "Keep it on the phone",
       "difference": "The basket stays in this phone's browser for 30 days",
       "branch": "proto/X-1-a",
-      "tests": []
+      "tests": [],
+      "option": "A"
     },
     {
       "agreed": true,
@@ -64,7 +65,9 @@
       "name": "Bring it back by email",
       "difference": "One tap sends a link that opens the basket on any device",
       "branch": "proto/X-1-b",
-      "tests": ["T-0003"]
+      "tests": ["T-0003"],
+      "option": "B",
+      "frame": "prototype-a"
     },
     {
       "agreed": false,
@@ -86,18 +89,12 @@
       "id": "link-2",
       "from": "choice-1",
       "to": "prototype-a",
-      "label": "A"
-    },
-    {
-      "id": "link-3",
-      "from": "choice-1",
-      "to": "prototype-b",
-      "label": "B"
+      "label": "A · B"
     },
     {
       "id": "link-4",
       "from": "diagram-1",
-      "to": "prototype-b",
+      "to": "prototype-a",
       "label": "shows"
     },
     {

@@ -5,7 +5,7 @@ import {
   askFor,
   commitWords,
 } from "../src/kobble/explorations/making-words.ts";
-import { freeKey, madeFor } from "../src/kobble/explorations/prototypes.ts";
+import { freeKey, madeFor } from "../src/kobble/explorations/versions.ts";
 import { plainWords } from "../src/kobble/explorations/views.ts";
 
 // What things on an exploration's board are called: a preview's short
@@ -57,7 +57,7 @@ test("changing a prototype asks the maker for the change, and its commit says so
   });
   assert.match(
     asked,
-    /^Change prototype A2 .*where it is already made\)\. The change: the empty page sends you to Personas\./,
+    /^Make version A2 .*where it is already made\)\. The change: the empty page sends you to Personas\./,
   );
   assert.match(
     askFor(exploration, board, made, { change: undefined, maps: "" }),

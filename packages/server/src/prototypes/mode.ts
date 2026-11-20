@@ -15,7 +15,6 @@ import { createInterface } from "node:readline";
 import { Refused } from "../refused.ts";
 import {
   companyOf,
-  NO_START,
   type PrototypeCopy,
   urlIn,
   versionWorkspace,
@@ -100,7 +99,7 @@ export class PrototypeMode {
     const start = companyOf(this.options.root).prototype?.start;
     if (!start)
       throw new Refused(
-        `This project cannot run versions yet. ${NO_START} The prototype skill says what the command does.`,
+        "This prototype is made, but it cannot run here yet: the project does not say how to start it. Whoever looks after the factory adds that once (the start command in factory.json).",
       );
     const now = this.runOf(idea, version);
     if (now.state === "making")

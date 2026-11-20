@@ -113,12 +113,28 @@ export function explorationsView(
       work: exploration.work,
       personas: tagsOf(store, exploration.personas),
       signals: exploration.signals.length,
-      things: board.things.map((thing) => ({
-        id: thing.id,
-        kind: thing.kind,
-        agreed: thing.agreed,
-        label: labelOf(thing, exploration.problem),
-      })),
+      // A prototype's versions are one thing in the preview, agreed when
+      // one of them is.
+      things: board.things.flatMap((thing) =>
+        thing.kind === "prototype" && thing.frame
+          ? []
+          : [
+              {
+                id: thing.id,
+                kind: thing.kind,
+                agreed:
+                  thing.agreed ||
+                  (thing.kind === "prototype" &&
+                    board.things.some(
+                      (one) =>
+                        one.kind === "prototype" &&
+                        one.frame === thing.id &&
+                        one.agreed,
+                    )),
+                label: labelOf(thing, exploration.problem),
+              },
+            ],
+      ),
       links: board.links.map(({ from, to }) => ({ from, to })),
       line:
         exploration.status === "exploring"

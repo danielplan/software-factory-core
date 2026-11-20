@@ -19,7 +19,7 @@ import { Refused } from "../../refused.ts";
 import { type Act, applyAct } from "./board-acts.ts";
 import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
-import type { MadeReport } from "./prototypes.ts";
+import type { MadeReport } from "./made.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
 const RIGHTS = {
@@ -53,7 +53,14 @@ type Makers = {
   // What the exploration's prototypes being made do now.
   making: (id: string) => string[];
   make: (id: string, choice: string, option: string) => void;
-  change: (id: string, prototype: string, change: string) => void;
+  // A new version made from a prototype, or another way to do it: the
+  // new version's key.
+  change: (id: string, prototype: string, change: string) => string;
+  another: (
+    id: string,
+    prototype: string,
+    way: { name: string; difference: string },
+  ) => string;
 };
 
 export class ExplorationTalks {
@@ -187,6 +194,8 @@ export class ExplorationTalks {
   async begin(id: string): Promise<void> {
     const talk = this.talk(id);
     if (talk.working || talk.messages.length > 0) return;
+    // A new idea of the team's: the kobold waits for their first words.
+    if (!this.options.store().get("explorations", id)?.problem) return;
     await this.answer(
       id,
       talk,
@@ -221,8 +230,12 @@ export class ExplorationTalks {
         return `Making the prototype of ${option} on ${choice}; it is on the board now.\n\n${this.look(id)}`;
       },
       change: (prototype, change) => {
-        this.makers().change(id, prototype, change);
-        return `Changing prototype ${prototype}; the board shows it being made.`;
+        const made = this.makers().change(id, prototype, change);
+        return `Making ${made}, a new version of ${prototype} with the change, in the same frame; ${prototype} stays, so the team can switch back. The board shows it being made.`;
+      },
+      another: (prototype, way) => {
+        const made = this.makers().another(id, prototype, way);
+        return `Making ${made}, another way beside ${prototype}, in the same frame; the team switches between them there.`;
       },
       rename: ({ title, problem }) => {
         const store = this.options.store();

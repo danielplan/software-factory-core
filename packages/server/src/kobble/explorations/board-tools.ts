@@ -29,6 +29,10 @@ export type BoardTools = {
   // Starts making the prototype of a choice's option, or changing one.
   make: (choice: string, option: string) => string;
   change: (prototype: string, change: string) => string;
+  another: (
+    prototype: string,
+    way: { name: string; difference: string },
+  ) => string;
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -184,7 +188,7 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
     "change_prototype",
     {
       description:
-        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says): the maker changes it in its copy, a new version on its branch, in a few minutes; the board shows it being made, then running again. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
+        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says): the maker makes a new version from it in the same frame, in a few minutes, and the one it came from stays, so the team can switch back. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
       inputSchema: {
         prototype: z.string().describe("The prototype's letter (A, A2 …)."),
         change: z
@@ -194,6 +198,30 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
       },
     },
     (args) => toolAnswer(() => on.change(args.prototype, args.change)),
+  );
+  server.registerTool(
+    "another_way",
+    {
+      description:
+        "Another way to do what a prototype does, made beside it as a version in the same frame (from the product as it is, not from that prototype), so the team switches between the two and compares. Use it when the team is unsure how a screen should look or work, or asks to see it done differently; at most three versions at once. Say in one line how it differs.",
+      inputSchema: {
+        prototype: z
+          .string()
+          .describe("The prototype it is another way to (A, A2 …)."),
+        name: z.string().min(1).describe("A few words."),
+        difference: z
+          .string()
+          .min(1)
+          .describe("How it differs, complete enough for the maker."),
+      },
+    },
+    (args) =>
+      toolAnswer(() =>
+        on.another(args.prototype, {
+          name: args.name,
+          difference: args.difference,
+        }),
+      ),
   );
 }
 

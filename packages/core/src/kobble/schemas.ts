@@ -170,6 +170,14 @@ export const thingSchema = z.discriminatedUnion("kind", [
     // The kobold's last words when it made it: what it changed, and every
     // library it added or piece it copied, so the build checks them.
     said: z.string().optional(),
+    // A version in another prototype's frame (that prototype's id): a
+    // frame shows its versions one at a time, with a switch between them.
+    // Without it, a prototype is a frame of its own and its first version.
+    frame: thingId.optional(),
+    // The version it was changed from (its key), when it is a change.
+    from: prototypeKey.optional(),
+    // The choice's option it is a version of, when it is one.
+    option: optionKey.optional(),
   }),
   z.strictObject({
     ...common,

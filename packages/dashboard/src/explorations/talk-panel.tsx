@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
-import { useKoboldName } from "@/lib/brand";
+import { KOBOLDS } from "@/lib/kobolds";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 
@@ -34,13 +34,14 @@ export function TalkPanel({
   const { exploration } = page;
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
-  const koboldName = useKoboldName();
+  // The explorer kobold, with the hat of its job.
+  const explorer = KOBOLDS.find((kobold) => kobold.id === "explorer");
   return (
     <aside className="flex min-h-0 w-[23rem] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
       <div className="flex items-center gap-3 border-b border-border-soft px-5 py-4">
-        <KoboldHead size={28} />
+        <KoboldHead size={28} hat={explorer?.hat} color={explorer?.color} />
         <span className="grid">
-          <span className="text-[13px] font-semibold">{koboldName}</span>
+          <span className="text-[13px] font-semibold">{explorer?.name}</span>
           <span className="text-xs text-muted-foreground">
             Thinks it through with you and draws on the board
           </span>
@@ -109,6 +110,7 @@ function TalkBox({
   };
   return (
     <TypeBox
+      fresh={!page.exploration.problem}
       text={text}
       onText={setText}
       busy={busy}
@@ -123,12 +125,15 @@ function TalkBox({
 // The box to type in, roomy: two lines to start, growing with the words, Enter sends and
 // Shift+Enter starts a new line; Talk and Send (an arrow) below.
 function TypeBox({
+  fresh,
   text,
   onText,
   busy,
   onSend,
   onTalk,
 }: Readonly<{
+  // A new exploration, waiting for the team's idea.
+  fresh: boolean;
   text: string;
   onText: (text: string) => void;
   busy: boolean;
@@ -153,7 +158,7 @@ function TypeBox({
     >
       <textarea
         aria-label="Talk to the kobold"
-        placeholder="Talk to the kobold…"
+        placeholder={fresh ? "What's your idea?" : "Talk to the kobold…"}
         rows={2}
         value={text}
         onChange={(event) => {

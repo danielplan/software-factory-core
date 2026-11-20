@@ -157,12 +157,22 @@ function line(thing: Thing, exploration: Exploration): string {
         ),
       ].join("\n");
     case "prototype":
-      return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}`;
+      return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}${versionWords(thing)}`;
     case "diagram":
       return `${head}: ${thing.title}`;
     case "picture":
       return `${head}: ${thing.title} (read factory/kobble/explorations/${exploration.id}/pictures/${thing.image} to see it)`;
   }
+}
+
+// Where a version is: in which frame, made from which version.
+function versionWords(made: Extract<Thing, { kind: "prototype" }>): string {
+  const words = [
+    made.frame ? `a version in ${made.frame}'s frame` : "",
+    made.option ? `option ${made.option}` : "",
+    made.from ? `changed from ${made.from}: ${made.difference}` : "",
+  ].filter(Boolean);
+  return words.length > 0 ? ` (${words.join(", ")})` : "";
 }
 
 // The board in short lines, as the kobold reads it.

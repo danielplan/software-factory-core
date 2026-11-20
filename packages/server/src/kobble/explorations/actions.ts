@@ -76,6 +76,39 @@ export function newExploration(
   });
 }
 
+// A fresh exploration, opened at once on its canvas: the team says its idea
+// to the kobold there, who names it. One the team opened and left without
+// a word is opened again instead of making another.
+export function freshExploration(
+  store: KobbleStore,
+  now: Date = new Date(),
+): Exploration {
+  const untouched = store
+    .all("explorations")
+    .find(
+      (one) =>
+        one.status === "exploring" &&
+        !one.problem &&
+        one.signals.length === 0 &&
+        !one.issue &&
+        store.conversation(one.id).messages.length === 0,
+    );
+  if (untouched) return untouched;
+  return store.put("explorations", {
+    id: store.nextId("explorations"),
+    title: NEW_TITLE,
+    status: "exploring",
+    personas: [],
+    signals: [],
+    heard: [],
+    problem: "",
+    created: now.toISOString(),
+    work: null,
+  });
+}
+
+export const NEW_TITLE = "New idea";
+
 export function dropExploration(store: KobbleStore, id: string): Exploration {
   return store.put("explorations", { ...open(store, id), status: "dropped" });
 }

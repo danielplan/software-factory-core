@@ -45,13 +45,40 @@ export function shapeOf(node: ThingNode): string {
   return `${node.id}:${String(round(node.measured?.width))}x${String(round(node.measured?.height))}:${node.data.thing.place ? "fixed" : ""}`;
 }
 
+type Made = Extract<Thing, { kind: "prototype" }>;
+
+// The frame a prototype shows in: its own, or the one it is a version in.
+export function frameOf(made: Made): string {
+  return made.frame ?? made.id;
+}
+
+// A frame's versions, in the order they were made.
+export function versionsIn(page: ExplorationPage, frame: string): Made[] {
+  return page.board.things.flatMap((thing) =>
+    thing.kind === "prototype" && frameOf(thing) === frame ? [thing] : [],
+  );
+}
+
+// Where the kobold points or a person attached: a version is found in its
+// frame.
+function markOf(page: ExplorationPage, id: string | null): string | null {
+  const thing = page.board.things.find((one) => one.id === id);
+  return thing?.kind === "prototype" ? frameOf(thing) : id;
+}
+
 export function nodesOf(
   page: ExplorationPage,
   earlier: ThingNode[],
   marks: { pointed: string | null; attached: string[] },
 ): ThingNode[] {
   const before = new Map(earlier.map((node) => [node.id, node]));
-  return page.board.things.map((thing) => {
+  const pointed = markOf(page, marks.pointed);
+  const attached = marks.attached.map((id) => markOf(page, id));
+  // A version is drawn in its frame, not as a thing of its own.
+  const drawn = page.board.things.filter(
+    (thing) => !(thing.kind === "prototype" && thing.frame),
+  );
+  return drawn.map((thing) => {
     const was = before.get(thing.id);
     return {
       id: thing.id,
@@ -61,8 +88,8 @@ export function nodesOf(
       data: {
         thing,
         page,
-        pointed: marks.pointed === thing.id,
-        attached: marks.attached.includes(thing.id),
+        pointed: pointed === thing.id,
+        attached: attached.includes(thing.id),
         placed: thing.place !== null || (was?.data.placed ?? false),
       },
       // What is inside takes the mouse; a thing is dragged by its bar.
@@ -73,10 +100,11 @@ export function nodesOf(
 }
 
 export function edgesOf(page: ExplorationPage): Edge[] {
+  // Green into a frame with an agreed version.
   const agreed = new Set(
-    page.board.things
-      .filter((thing) => thing.kind === "prototype" && thing.agreed)
-      .map((thing) => thing.id),
+    page.board.things.flatMap((thing) =>
+      thing.kind === "prototype" && thing.agreed ? [frameOf(thing)] : [],
+    ),
   );
   return page.board.links.map((link) => {
     const colour = agreed.has(link.to) ? "#12a594" : "#b6bccb";

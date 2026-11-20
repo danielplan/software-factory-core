@@ -51,10 +51,11 @@ export function askFor(
   made: Made,
   more: { change: string | undefined; maps: string },
 ): string {
-  const { key, branch } = made;
+  const { key, branch, from } = made;
+  const of = from ? `a change of prototype ${from}` : "a change";
   return [
     more.change
-      ? `Change prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${branch}, where it is already made). The change: ${more.change}. Keep what works; change what is asked.`
+      ? `Make version ${key} of the exploration “${exploration.title}”, ${of}, as the explore skill says, in this copy of the code (on the branch ${branch}, where it is already made). The change: ${more.change}. Keep what works; change what is asked.`
       : `Make prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${branch}).`,
     `The problem: ${exploration.problem}`,
     `The question it answers: ${questionOf(board, key)}`,
