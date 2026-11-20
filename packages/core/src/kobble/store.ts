@@ -33,7 +33,7 @@ import { dirname, join } from "node:path";
 
 import { z } from "zod";
 
-import { fromEarlier } from "./board-shape.ts";
+import { fromEarlier, fromVersions } from "./board-shape.ts";
 import {
   KobbleRefused,
   readJson,
@@ -181,7 +181,9 @@ export class KobbleStore {
     const name = `explorations/${id}/${BOARD_FILE}`;
     const data = readJson(file, name);
     // A board in the first shape is read as it is now (board-shape.ts).
-    const parsed = boardSchema.safeParse(fromEarlier(data) ?? data);
+    const parsed = boardSchema.safeParse(
+      fromEarlier(data) ?? fromVersions(data) ?? data,
+    );
     if (!parsed.success)
       throw new KobbleRefused(
         `${name} does not fit: ${z.prettifyError(parsed.error)}`,
