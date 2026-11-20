@@ -74,9 +74,12 @@ export function nodesOf(
   const before = new Map(earlier.map((node) => [node.id, node]));
   const pointed = markOf(page, marks.pointed);
   const attached = marks.attached.map((id) => markOf(page, id));
-  // A version is drawn in its frame, not as a thing of its own.
+  // A version is drawn in its frame, not as a thing of its own; the problem
+  // only once it is said (a new exploration opens on an empty canvas).
   const drawn = page.board.things.filter(
-    (thing) => !(thing.kind === "prototype" && thing.frame),
+    (thing) =>
+      !(thing.kind === "prototype" && thing.frame) &&
+      !(thing.kind === "problem" && unsaid(page)),
   );
   return drawn.map((thing) => {
     const was = before.get(thing.id);
@@ -97,6 +100,16 @@ export function nodesOf(
       ...(was?.measured ? { measured: was.measured } : {}),
     };
   });
+}
+
+// The problem is not said yet and nothing points to or from it.
+function unsaid(page: ExplorationPage): boolean {
+  return (
+    !page.exploration.problem &&
+    !page.board.links.some(
+      (link) => link.from === "problem" || link.to === "problem",
+    )
+  );
 }
 
 export function edgesOf(page: ExplorationPage): Edge[] {
