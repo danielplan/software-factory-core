@@ -33,6 +33,7 @@ export type BoardTools = {
     prototype: string,
     way: { name: string; difference: string },
   ) => string;
+  handOff: () => Promise<string>;
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -188,6 +189,14 @@ function serverFor(on: BoardTools): McpServer {
     (args) => toolAnswer(() => on.rename(args)),
   );
   addPrototypeTools(server, on);
+  server.registerTool(
+    "hand_off",
+    {
+      description:
+        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off, and only with an agreed prototype.",
+    },
+    () => toolAnswer(() => on.handOff()),
+  );
   addWorldTools(server, on.world.worlds, on.world.id);
   return server;
 }

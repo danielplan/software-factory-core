@@ -50,31 +50,7 @@ export function servedExplorations(options: Options) {
   prototypes.whenReady((id, key, made) => {
     talks.review(id, key, made);
   });
-  talks.makeWith({
-    making: (id) => prototypes.beingMade(id),
-    make: (id, choice, letters, opens) => {
-      prototypes.make(explorationOf(store(), id), choice, letters, opens);
-      options.onChange();
-    },
-    change: (id, prototype, change) => {
-      const made = prototypes.change(
-        explorationOf(store(), id),
-        prototype,
-        change,
-      );
-      options.onChange();
-      return made;
-    },
-    another: (id, prototype, way) => {
-      const made = prototypes.another(
-        explorationOf(store(), id),
-        prototype,
-        way,
-      );
-      options.onChange();
-      return made;
-    },
-  });
+  talks.makeWith(makersFor(store, prototypes, options));
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>
@@ -98,6 +74,47 @@ export function servedExplorations(options: Options) {
       button((body) => ({ test: testPrototype(store(), tests, body) })),
     close: () => {
       prototypes.close();
+    },
+  };
+}
+
+// What the kobold who talks with the team can have made and done: making
+// and changing prototypes, and handing the exploration off.
+function makersFor(
+  store: () => KobbleStore,
+  prototypes: ExplorationPrototypes,
+  options: Options,
+): Parameters<ExplorationTalks["makeWith"]>[0] {
+  return {
+    making: (id) => prototypes.beingMade(id),
+    make: (id, choice, letters, opens) => {
+      prototypes.make(explorationOf(store(), id), choice, letters, opens);
+      options.onChange();
+    },
+    change: (id, prototype, change) => {
+      const made = prototypes.change(
+        explorationOf(store(), id),
+        prototype,
+        change,
+      );
+      options.onChange();
+      return made;
+    },
+    // Handed off by the kobold, on the team's yes: as the button does.
+    handOff: async (id) => {
+      const handed = await handOff(store(), id, options.cards);
+      await prototypes.stopAll(id);
+      options.onChange();
+      return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
+    },
+    another: (id, prototype, way) => {
+      const made = prototypes.another(
+        explorationOf(store(), id),
+        prototype,
+        way,
+      );
+      options.onChange();
+      return made;
     },
   };
 }

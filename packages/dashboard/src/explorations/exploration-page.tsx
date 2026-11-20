@@ -5,7 +5,7 @@
 // it closes.
 
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage as Page, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -33,6 +33,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       });
   }, [waiting, id]);
   useLivePrototype(data);
+  useClosed(data?.exploration.status);
   if (!data)
     return problem ? (
       <ProblemBox title="This exploration cannot be read" text={problem} />
@@ -90,6 +91,19 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       </div>
     </div>
   );
+}
+
+// Handed off or dropped while open (by the kobold too), it closes: back to
+// the explorations.
+function useClosed(status: string | undefined): void {
+  const was = useRef(status);
+  useEffect(() => {
+    const open = (one: string | undefined) =>
+      one === "waiting" || one === "exploring";
+    if (open(was.current) && status && !open(status))
+      location.hash = "#explore";
+    was.current = status;
+  }, [status]);
 }
 
 function TopBar({

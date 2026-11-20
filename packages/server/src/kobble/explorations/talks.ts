@@ -61,6 +61,8 @@ type Makers = {
     prototype: string,
     way: { name: string; difference: string },
   ) => string;
+  // Hands the exploration off, as the Hand off button does.
+  handOff: (id: string) => Promise<string>;
 };
 
 export class ExplorationTalks {
@@ -226,6 +228,7 @@ export class ExplorationTalks {
         this.makers().change(id, prototype, change);
         return `Changing prototype ${prototype}; the board shows it being made.`;
       },
+      handOff: () => this.makers().handOff(id),
       another: (prototype, way) => {
         const variant = this.makers().another(id, prototype, way);
         return `Adding variant ${variant} to prototype ${prototype}; the team switches between its variants on the board.`;
