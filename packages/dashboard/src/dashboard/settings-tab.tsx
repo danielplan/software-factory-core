@@ -5,6 +5,7 @@ import {
   Plug,
   Puzzle,
   RefreshCw,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Fragment, type ReactNode, useState } from "react";
 
@@ -80,6 +81,24 @@ const TAB_ICONS: Record<Theme, { icon: ReactNode; color: string }> = {
     color: "var(--understand)",
   },
 };
+
+// A splits the last theme in two: this computer, and everything advanced
+// (the factory's programs and each part's own settings).
+type Tab = Exclude<Theme, "This computer & advanced"> | "This computer" | "Advanced";
+const TABS: Tab[] = ["Connections", "Updates", "Add-ons", "This computer", "Advanced"];
+const TAB_LOOKS: Record<Tab, { icon: ReactNode; color: string }> = {
+  Connections: TAB_ICONS.Connections,
+  Updates: TAB_ICONS.Updates,
+  "Add-ons": TAB_ICONS["Add-ons"],
+  "This computer": TAB_ICONS["This computer & advanced"],
+  Advanced: { icon: <SlidersHorizontal aria-hidden />, color: "var(--understand)" },
+};
+const tabOf = (section: SettingsSection): Tab =>
+  section.theme !== "This computer & advanced"
+    ? section.theme
+    : section.name === "This computer"
+      ? "This computer"
+      : "Advanced";
 
 type SettingsSection = {
   name: string;
@@ -214,19 +233,17 @@ const chosen = <T extends { name: string }>(
   all.find((one) => open !== null && hashOf(one.name) === `#settings/${open}`) ??
   all[0];
 
-// A: the side list as four tabs, one per theme; only the chosen theme
-// shows, at its own address (#settings/updates). Each part's own settings
-// sit under This computer & advanced. The chosen tab looks like the chosen
-// page in the sidebar (its text and its coloured icon), without the fill.
+// A: the side list as five tabs; only the chosen tab shows, at its own
+// address (#settings/updates). Each part's own settings sit under Advanced.
+// The chosen tab sits on white, like a card on the grey page, with the
+// chosen sidebar page's dark text and coloured icon; the others are plain.
 function OneAtATime({
   sections,
   open,
 }: Readonly<{ sections: SettingsSection[]; open: string | null }>) {
-  const tabs = THEMES.map((name) => ({
+  const tabs = TABS.map((name) => ({
     name,
-    sections: sections.filter(
-      (section) => section.theme === name,
-    ),
+    sections: sections.filter((section) => tabOf(section) === name),
   })).filter((tab) => tab.sections.length > 0);
   const shown = chosen(tabs, open);
   return (
@@ -240,17 +257,17 @@ function OneAtATime({
               href={hashOf(tab.name)}
               aria-current={tab === shown ? "page" : undefined}
               className={cn(
-                "flex h-8 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-left text-[13px] font-normal text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
+                "flex h-8 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-left text-[13px] font-normal text-sidebar-muted hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
                 tab === shown &&
-                  "text-sidebar-active-foreground hover:text-sidebar-active-foreground",
+                  "bg-card text-sidebar-active-foreground shadow-[0_1px_3px_rgb(20_24_36/0.1)] hover:text-sidebar-active-foreground",
               )}
             >
               <Tile
                 color={
-                  tab === shown ? TAB_ICONS[tab.name].color : "var(--sidebar-muted)"
+                  tab === shown ? TAB_LOOKS[tab.name].color : "var(--sidebar-muted)"
                 }
               >
-                {TAB_ICONS[tab.name].icon}
+                {TAB_LOOKS[tab.name].icon}
               </Tile>
               {tab.name}
             </a>
