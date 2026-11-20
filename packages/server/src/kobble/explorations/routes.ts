@@ -52,8 +52,8 @@ export function servedExplorations(options: Options) {
   });
   talks.makeWith({
     making: (id) => prototypes.beingMade(id),
-    make: (id, choice, letters) => {
-      prototypes.make(explorationOf(store(), id), choice, letters);
+    make: (id, choice, letters, opens) => {
+      prototypes.make(explorationOf(store(), id), choice, letters, opens);
       options.onChange();
     },
     change: (id, prototype, change) => {

@@ -35,6 +35,9 @@ import {
   opensIn,
   shownAddress,
   choicePrototype,
+  cutOffIn,
+  cutRun,
+  markedIn,
   freeVariant,
   withVariant,
 } from "./versions.ts";
@@ -94,8 +97,26 @@ export class ExplorationPrototypes {
     this.worldUrl = url;
   }
 
+  // How each prototype runs; one the factory closed on while it was being
+  // made says so.
   runs(exploration: string): VersionRun[] {
-    return this.mode.view(exploration);
+    const cut = this.cutOff(exploration);
+    const runs = this.mode.view(exploration);
+    const known = new Set(runs.map((run) => run.version));
+    return [
+      ...runs.map((run) => (cut.has(run.version) ? cutRun(run) : run)),
+      ...[...cut]
+        .filter((key) => !known.has(key))
+        .map((key) => cutRun(this.mode.runOf(exploration, key))),
+    ];
+  }
+
+  // The prototypes marked as being made that no maker is on now.
+  private cutOff(exploration: string): Set<string> {
+    return cutOffIn(
+      this.options.store().board(exploration),
+      (key) => this.mode.runOf(exploration, key).state === "making",
+    );
   }
 
   // Make: a choice's options (all of them when none are named) as the
@@ -103,13 +124,19 @@ export class ExplorationPrototypes {
   // It goes on the board at once, joined to the choice by an arrow, and the
   // kobold makes it in the background; when the choice has one already,
   // the options not made yet are added to it.
-  make(exploration: Exploration, choice: string, keys: string[]): Board {
+  make(
+    exploration: Exploration,
+    choice: string,
+    keys: string[],
+    opens?: string,
+  ): Board {
     const store = this.options.store();
     const planned = choicePrototype(
       store.board(exploration.id),
       exploration.id,
       choice,
       keys,
+      opens,
     );
     if (planned.change) this.free(exploration.id, planned.key);
     const saved = store.saveBoard(exploration.id, planned.board);
@@ -164,8 +191,10 @@ export class ExplorationPrototypes {
       activity: change ? "Starting the change" : "Starting",
       problem: null,
     });
+    this.mark(exploration.id, key, { making: true });
     void this.making(exploration, board, key, change).catch(
       (error: unknown) => {
+        this.mark(exploration.id, key, {});
         this.mode.set(exploration.id, key, {
           state: "failed",
           activity: null,
@@ -248,15 +277,16 @@ export class ExplorationPrototypes {
       });
   }
 
-  // The page the maker said the change is on, kept with the prototype.
-  private opensAt(exploration: string, key: string, page: string | undefined) {
+  // Kept with the prototype: being made, or done (and the page the maker
+  // said the change is on).
+  private mark(
+    exploration: string,
+    key: string,
+    now: { making?: boolean; opens?: string },
+  ): void {
     const store = this.options.store();
-    const made = prototypeOf(store.board(exploration), key);
-    if (made && page)
-      store.saveBoard(
-        exploration,
-        withThing(store.board(exploration), { ...made, opens: page }),
-      );
+    const marked = markedIn(store.board(exploration), key, now);
+    if (marked) store.saveBoard(exploration, marked);
   }
 
   // Change: the kobold changes a prototype as asked, in its copy, a new
@@ -302,11 +332,8 @@ export class ExplorationPrototypes {
         this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
       },
     });
-    this.opensAt(
-      exploration.id,
-      key,
-      result.ok ? opensIn(result.text) : undefined,
-    );
+    const opens = result.ok ? opensIn(result.text) : undefined;
+    this.mark(exploration.id, key, opens ? { opens } : {});
     const shown =
       prototypeOf(this.options.store().board(exploration.id), key) ?? made;
     await finishMaking({

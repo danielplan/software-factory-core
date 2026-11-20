@@ -6,6 +6,8 @@
 
 import type { Board } from "@software-factory/core";
 
+import type { VersionRun } from "../../prototypes/mode.ts";
+
 import { Refused } from "../../refused.ts";
 import { linked, type Option, nextLetter, withThing } from "./board-things.ts";
 
@@ -114,17 +116,9 @@ export function choicePrototype(
   exploration: string,
   choice: string,
   keys: string[],
+  opens?: string,
 ): { board: Board; key: string; change?: string } {
-  const card = board.things.find((one) => one.id === choice);
-  if (card?.kind !== "choice")
-    throw new Refused(`There is no choice “${choice}” on the board.`);
-  const options = (keys.length > 0 ? keys : card.options.map((o) => o.key))
-    .map((key) => {
-      const option = card.options.find((one) => one.key === key);
-      if (!option) throw new Refused(`${choice} has no option ${key}.`);
-      return option;
-    })
-    .filter((option) => !madeFor(board, choice, option.key));
+  const { card, options } = optionsToMake(board, choice, keys);
   const [first] = options;
   if (!first)
     throw new Refused(
@@ -138,6 +132,7 @@ export function choicePrototype(
   if (had?.variants) {
     let made = had;
     for (const option of options) made = withVariant(made, option).made;
+    if (opens) made = { ...made, opens };
     return {
       board: withThing(board, made),
       key: had.key,
@@ -160,9 +155,70 @@ export function choicePrototype(
     tests: [],
     variants: options,
     variant: first.key,
+    ...(opens ? { opens } : {}),
   };
   return {
     board: linked(withThing(board, made), choice, id, letters.join(" · ")),
     key,
+  };
+}
+
+// The choice and its options to make: those named (all when none are), less
+// those made already.
+function optionsToMake(board: Board, choice: string, keys: string[]) {
+  const card = board.things.find((one) => one.id === choice);
+  if (card?.kind !== "choice")
+    throw new Refused(`There is no choice “${choice}” on the board.`);
+  const options = (keys.length > 0 ? keys : card.options.map((o) => o.key))
+    .map((key) => {
+      const option = card.options.find((one) => one.key === key);
+      if (!option) throw new Refused(`${choice} has no option ${key}.`);
+      return option;
+    })
+    .filter((option) => !madeFor(board, choice, option.key));
+  return { card, options };
+}
+
+// A prototype marked as being made, or as done (with the page the maker
+// said the change is on); null when there is no such prototype.
+export function markedIn(
+  board: Board,
+  key: string,
+  now: { making?: boolean; opens?: string },
+): Board | null {
+  const made = prototypeOf(board, key);
+  if (!made) return null;
+  const rest: Made = { ...made };
+  delete rest.making;
+  return withThing(board, {
+    ...rest,
+    ...(now.opens ? { opens: now.opens } : {}),
+    ...(now.making ? { making: true } : {}),
+  });
+}
+
+// The prototypes marked as being made that no maker is on now: the factory
+// closed before they were done.
+export function cutOffIn(
+  board: Board,
+  making: (key: string) => boolean,
+): Set<string> {
+  return new Set(
+    board.things.flatMap((thing) =>
+      thing.kind === "prototype" && thing.making && !making(thing.key)
+        ? [thing.key]
+        : [],
+    ),
+  );
+}
+
+// How such a prototype shows: stopped, and why.
+export function cutRun(run: VersionRun): VersionRun {
+  return {
+    ...run,
+    state: "failed",
+    url: null,
+    problem:
+      "It stopped while being made: the factory closed. Ask the kobold to make it again.",
   };
 }

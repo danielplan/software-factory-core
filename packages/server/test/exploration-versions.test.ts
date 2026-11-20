@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
-import { opensIn, shownAddress } from "../src/kobble/explorations/versions.ts";
+import {
+  cutOffIn,
+  cutRun,
+  markedIn,
+  opensIn,
+  shownAddress,
+} from "../src/kobble/explorations/versions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 import { inGit } from "./git-project.ts";
 
@@ -163,4 +169,37 @@ test("a choice marks the option the kobold recommends, and only one it has", () 
   ).board.things[0];
   assert.ok(again?.kind === "choice");
   assert.equal(again.recommended, "A");
+});
+
+test("a prototype the factory closed on while it was being made says so", () => {
+  const made = {
+    id: "prototype-a",
+    kind: "prototype" as const,
+    agreed: false,
+    place: null,
+    by: "kobold" as const,
+    key: "A",
+    name: "One",
+    difference: "",
+    branch: "proto/X-1-a",
+    tests: [],
+  };
+  const board = { things: [made], links: [] };
+  const marked = markedIn(board, "A", { making: true });
+  assert.ok(marked);
+  assert.deepEqual([...cutOffIn(marked, () => false)], ["A"]);
+  assert.deepEqual([...cutOffIn(marked, () => true)], []);
+  const done = markedIn(marked, "A", { opens: "#build" });
+  assert.ok(done);
+  assert.deepEqual([...cutOffIn(done, () => false)], []);
+  assert.equal(markedIn(board, "Z", {}), null);
+  const run = cutRun({
+    idea: "X-1",
+    version: "A",
+    state: "running",
+    url: "https://x.test",
+    problem: null,
+  } as never);
+  assert.equal(run.state, "failed");
+  assert.match(run.problem ?? "", /stopped while being made/);
 });

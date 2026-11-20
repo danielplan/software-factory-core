@@ -27,7 +27,7 @@ export type BoardTools = {
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
   // Starts making the prototype of a choice's option, or changing one.
-  make: (choice: string, options: string[]) => string;
+  make: (choice: string, options: string[], opens?: string) => string;
   change: (prototype: string, change: string) => string;
   another: (
     prototype: string,
@@ -194,9 +194,17 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
           .array(z.string())
           .optional()
           .describe("The options' letters (A, B …); none: all of them."),
+        opens: z
+          .string()
+          .regex(/^[/#?]/)
+          .optional()
+          .describe(
+            "The page the change is on, where the prototype opens: a path (/orders) or a page of an app that keeps its pages after # (#build).",
+          ),
       },
     },
-    (args) => toolAnswer(() => on.make(args.choice, args.options ?? [])),
+    (args) =>
+      toolAnswer(() => on.make(args.choice, args.options ?? [], args.opens)),
   );
   server.registerTool(
     "change_prototype",
@@ -213,6 +221,11 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
     },
     (args) => toolAnswer(() => on.change(args.prototype, args.change)),
   );
+  addAnotherWay(server, on);
+}
+
+// Another way: a variant added to a prototype.
+function addAnotherWay(server: McpServer, on: BoardTools): void {
   server.registerTool(
     "another_way",
     {

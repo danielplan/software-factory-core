@@ -52,7 +52,7 @@ type TalksOptions = {
 type Makers = {
   // What the exploration's prototypes being made do now.
   making: (id: string) => string[];
-  make: (id: string, choice: string, options: string[]) => void;
+  make: (id: string, choice: string, options: string[], opens?: string) => void;
   // A prototype changed in its copy; another way added as a variant (its
   // letter).
   change: (id: string, prototype: string, change: string) => string;
@@ -214,8 +214,8 @@ export class ExplorationTalks {
         this.options.onChange();
         return `Pointing at ${thing}.`;
       },
-      make: (choice, options) => {
-        this.makers().make(id, choice, options);
+      make: (choice, options, opens) => {
+        this.makers().make(id, choice, options, opens);
         const which =
           options.length > 0
             ? `options ${options.join(", ")}`

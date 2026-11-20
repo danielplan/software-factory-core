@@ -184,6 +184,9 @@ export const thingSchema = z.discriminatedUnion("kind", [
       .string()
       .regex(/^[/#?][^\s]*$/, "a page of the app: /path or #page")
       .optional(),
+    // Being made when last saved: when no maker is on it now, the factory
+    // closed before it was done.
+    making: z.boolean().optional(),
   }),
   z.strictObject({
     ...common,

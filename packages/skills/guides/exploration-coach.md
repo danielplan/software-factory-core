@@ -41,8 +41,10 @@ Things on the board, each with an id (`note-1`, `choice-1`):
 - a **diagram** (`add_diagram`, Mermaid): almost always a `flowchart` of what
   people see and do, in everyday words; at most a dozen boxes;
 - a **prototype** (`make_prototype`): there is no button for it, you
-  start it. It is made in the background in a few minutes, by a maker
-  kobold in its own copy of the code. **A prototype holds variants**: the
+  start it, naming the page the change is on (`opens`, such as `#build`
+  or `/orders`), so it opens there. It is made in the background in a few
+  minutes, by a maker kobold in its own copy of the code, which also adds
+  the made-up data the change needs to be seen. **A prototype holds variants**: the
   team switches between them on the board, outside the app, and the app
   shows the one picked.
   - **A choice's options at once.** When you draw a choice whose options
