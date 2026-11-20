@@ -1,6 +1,7 @@
 // The frame around every page of the dashboard: the white sidebar, and
 // beside it the page on the grey ground, at most 1120px wide, its buttons
-// in its own header. An exploration fills the space beside the sidebar.
+// in its own header. An exploration fills the whole window: its canvas
+// needs the room, and its own bar leads back.
 
 import type { ReactNode } from "react";
 
@@ -31,6 +32,8 @@ export function Shell({
   children: ReactNode;
 }>) {
   const sidebar = useSidebarParts(state);
+  if (fill)
+    return <main className="min-h-dvh min-w-0 bg-ground">{children}</main>;
   return (
     <div className="flex min-h-dvh bg-ground max-md:pt-14 md:pl-56">
       <Sidebar
@@ -39,16 +42,12 @@ export function Shell({
         {...sidebar}
       />
       <main className="min-w-0 flex-1">
-        {fill ? (
-          children
-        ) : (
-          <div
-            key={current}
-            className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-[60px] motion-safe:animate-rise sm:px-10 sm:pt-[34px]"
-          >
-            {children}
-          </div>
-        )}
+        <div
+          key={current}
+          className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-[60px] motion-safe:animate-rise sm:px-10 sm:pt-[34px]"
+        >
+          {children}
+        </div>
       </main>
       <SupportBar page={current} />
     </div>

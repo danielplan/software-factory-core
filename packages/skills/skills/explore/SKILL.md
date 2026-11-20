@@ -26,12 +26,13 @@ An idea is what the team thinks would help one persona. It starts from a story t
 You are in the version's own copy of the code, on its branch. Change only files in this folder; the factory commits what you leave when you are done, on this branch only. Never push, never switch branches, never touch the person's own folder.
 
 1. Read the idea, its story and what the person asked for this version.
-2. **As simple as possible: one place, your way.** Build only what the person needs to try the idea, in the one place where it matters most, from a similar page and the product's own pieces. No variants side by side, nothing around it they did not ask for.
-3. **Read little.** Your prompt has a map of the product: its screens and its shared pieces. Open the files the change needs; look further only when the map does not say enough.
-4. **Built from the product's own pieces.** Start from the most similar page and build the same way: the same components, layout, spacing and words. Extend a screen or area that exists rather than adding a page, unless asked. A piece the product lacks: first copy one from another product in this repository and adapt it (never import across products); else add the standard one from the product's own kit.
-5. **A library when it helps.** When a screen needs what the product's kit does not do (a chart, a map, a calendar), you may add one well-known, maintained library that fits its framework, never a little-known one.
-6. Data is made up and says so, never real people's. Try, don't check: no tests, lint or builds while prototyping.
-7. **End with your last words**, two or three plain lines, shown on the prototype's card and kept with the version, so the build checks them: what you changed, where to look when it runs, and every library you added or piece you copied ("added a chart library, recharts"; "copied the list from the shop").
+2. **As simple as possible: one place, your way.** Build only what the person needs to try the idea, in the one place where it matters most, from a similar page and the product's own pieces. Nothing around it they did not ask for.
+3. **Variants, when your prompt names them,** all in this one copy. Which one shows is chosen outside the app, by the page address (`?variant=B`; the first one without it): read it when the app loads, keep it for the visit (sessionStorage), and let only the places where the variants differ ask which one shows. Nothing in the app shows or switches them. Without variants named, make one way only.
+4. **Read little.** Your prompt has a map of the product: its screens and its shared pieces. Open the files the change needs; look further only when the map does not say enough.
+5. **Built from the product's own pieces.** Start from the most similar page and build the same way: the same components, layout, spacing and words. Extend a screen or area that exists rather than adding a page, unless asked. A piece the product lacks: first copy one from another product in this repository and adapt it (never import across products); else add the standard one from the product's own kit.
+6. **A library when it helps.** When a screen needs what the product's kit does not do (a chart, a map, a calendar), you may add one well-known, maintained library that fits its framework, never a little-known one.
+7. Data is made up and says so, never real people's. Try, don't check: no tests, lint or builds while prototyping.
+8. **End with your last words**, two or three plain lines, shown on the prototype's card and kept with the version, so the build checks them: what you changed, where to look when it runs, and every library you added or piece you copied ("added a chart library, recharts"; "copied the list from the shop"). Then one last line with the page the change is on, where the prototype opens: `Opens at: /fuel/planner` (a path) or `Opens at: #build` (a page of an app that keeps its pages after #).
 
 ## The made-up world
 

@@ -165,14 +165,15 @@ function line(thing: Thing, exploration: Exploration): string {
   }
 }
 
-// Where a version is: in which frame, made from which version.
+// A prototype's variants, and the one the team looks at.
 function versionWords(made: Extract<Thing, { kind: "prototype" }>): string {
-  const words = [
-    made.frame ? `a version in ${made.frame}'s frame` : "",
-    made.option ? `option ${made.option}` : "",
-    made.from ? `changed from ${made.from}: ${made.difference}` : "",
-  ].filter(Boolean);
-  return words.length > 0 ? ` (${words.join(", ")})` : "";
+  const variants = made.variants ?? [];
+  if (variants.length < 2) return "";
+  const lines = variants.map(
+    (one) =>
+      `    ${one.key}. ${one.name}: ${one.difference || "—"}${one.key === made.variant ? " (shown)" : ""}`,
+  );
+  return ["; variants:", ...lines].join("\n");
 }
 
 // The board in short lines, as the kobold reads it.

@@ -52,8 +52,8 @@ export function servedExplorations(options: Options) {
   });
   talks.makeWith({
     making: (id) => prototypes.beingMade(id),
-    make: (id, choice, option) => {
-      prototypes.make(explorationOf(store(), id), choice, option);
+    make: (id, choice, letters) => {
+      prototypes.make(explorationOf(store(), id), choice, letters);
       options.onChange();
     },
     change: (id, prototype, change) => {
@@ -203,7 +203,7 @@ function buttonRoutes(
       board: prototypes.make(
         explorationOf(store(), id(body)),
         field(body, "choice"),
-        key(body),
+        [key(body)],
       ),
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({

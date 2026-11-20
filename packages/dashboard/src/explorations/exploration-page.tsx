@@ -48,7 +48,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       });
   };
   return (
-    <div className="flex h-dvh flex-col max-md:h-[calc(100dvh-56px)]">
+    <div className="flex h-dvh flex-col">
       <TopBar page={data} press={press} pending={pending} />
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
         <BoardProblem value={say}>

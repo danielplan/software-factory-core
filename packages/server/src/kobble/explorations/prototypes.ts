@@ -21,20 +21,22 @@ import { skillsFolder } from "@software-factory/skills";
 
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
+import type { Photograph } from "../usage-pictures.ts";
 import { Refused } from "../../refused.ts";
-import { linked, withThing } from "./board-things.ts";
+import { withThing } from "./board-things.ts";
 import { askFor } from "./making-words.ts";
+import { lookAt } from "./looks.ts";
 import { finishMaking, type MadeReport, type Ready } from "./made.ts";
 
 import { codeMaps } from "./product-picture.ts";
 import {
-  frameFor,
-  freeKey,
-  madeFor,
-  namedArrow,
-  versionOf,
-  prototypeBranch,
+  type Made,
   prototypeOf,
+  opensIn,
+  shownAddress,
+  choicePrototype,
+  freeVariant,
+  withVariant,
 } from "./versions.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
@@ -42,6 +44,8 @@ const TIME_LIMIT_MS = 60 * 60_000;
 const START_WITHIN_MS = 3 * 60_000;
 
 type PrototypesOptions = {
+  // How a made prototype is photographed (Playwright, unless a test says).
+  photograph?: Photograph;
   project: string;
   root: string;
   claude: Claude;
@@ -94,46 +98,27 @@ export class ExplorationPrototypes {
     return this.mode.view(exploration);
   }
 
-  // Make: the option's prototype goes on the board at once and the kobold
-  // makes it in the background. The choice's first one is a frame of its
-  // own, joined to the choice by an arrow; the other options become
-  // versions in that frame, and the arrow names them all.
-  make(exploration: Exploration, choice: string, key: string): Board {
+  // Make: a choice's options (all of them when none are named) as the
+  // variants of one prototype, made at once in its one copy of the code.
+  // It goes on the board at once, joined to the choice by an arrow, and the
+  // kobold makes it in the background; when the choice has one already,
+  // the options not made yet are added to it.
+  make(exploration: Exploration, choice: string, keys: string[]): Board {
     const store = this.options.store();
-    const board = store.board(exploration.id);
-    const card = board.things.find((one) => one.id === choice);
-    if (card?.kind !== "choice")
-      throw new Refused(`There is no choice “${choice}” on the board.`);
-    const option = card.options.find((one) => one.key === key);
-    if (!option) throw new Refused(`${choice} has no option ${key}.`);
-    if (madeFor(board, choice, key))
-      throw new Refused(`Option ${key} has a prototype already.`);
-    const frame = frameFor(board, choice);
-    const name = freeKey(board, key);
-    const id = `prototype-${name.toLowerCase()}`;
-    const added = withThing(board, {
-      id,
-      kind: "prototype",
-      agreed: false,
-      place: null,
-      by: "person",
-      ...option,
-      key: name,
-      option: key,
-      branch: prototypeBranch(exploration.id, name),
-      tests: [],
-      ...(frame ? { frame } : {}),
-    });
-    const saved = store.saveBoard(
+    const planned = choicePrototype(
+      store.board(exploration.id),
       exploration.id,
-      frame ? namedArrow(added, choice, frame) : linked(added, choice, id, key),
+      choice,
+      keys,
     );
-    this.begin(exploration, saved, name);
+    if (planned.change) this.free(exploration.id, planned.key);
+    const saved = store.saveBoard(exploration.id, planned.board);
+    this.begin(exploration, saved, planned.key, planned.change);
     return saved;
   }
 
-  // Another way: a new version in the same frame, made from the latest
-  // main as the kobold describes it, beside the one it is another way to.
+  // Another way: a variant added to the prototype, made in its copy beside
+  // the others; the new variant's letter.
   another(
     exploration: Exploration,
     key: string,
@@ -141,22 +126,38 @@ export class ExplorationPrototypes {
   ): string {
     const store = this.options.store();
     const board = store.board(exploration.id);
-    const base = prototypeOf(board, key);
-    if (!base) throw new Refused(`There is no prototype ${key} on the board.`);
-    const made = versionOf(board, exploration.id, base, way);
+    const made = this.unbusy(board, exploration.id, key);
+    const added = withVariant(made, { key: freeVariant(board, made), ...way });
+    void this.mode.stop(exploration.id, key);
     this.begin(
       exploration,
-      store.saveBoard(exploration.id, withThing(board, made)),
-      made.key,
+      store.saveBoard(exploration.id, withThing(board, added.made)),
+      key,
+      `Add variant ${added.key} (“${way.name}”): ${way.difference}. Keep the other variants as they are.`,
     );
-    return made.key;
+    return added.key;
+  }
+
+  // A prototype that is not being made, or why it cannot be changed now.
+  private unbusy(board: Board, exploration: string, key: string): Made {
+    const made = prototypeOf(board, key);
+    if (!made) throw new Refused(`There is no prototype ${key} on the board.`);
+    this.free(exploration, key);
+    return made;
+  }
+
+  private free(exploration: string, key: string): void {
+    if (this.mode.runOf(exploration, key).state === "making")
+      throw new Refused(
+        `Prototype ${key} is still being made: change it once it is ready.`,
+      );
   }
 
   private begin(
     exploration: Exploration,
     board: Board,
     key: string,
-    change?: { request: string; startFrom: string },
+    change?: string,
   ): void {
     this.mode.set(exploration.id, key, {
       state: "making",
@@ -201,7 +202,11 @@ export class ExplorationPrototypes {
     const until = Date.now() + START_WITHIN_MS;
     for (;;) {
       const run = this.mode.runOf(exploration, key);
-      if (run.state === "running" && run.url) return run.url;
+      if (run.state === "running" && run.url)
+        return shownAddress(
+          run.url,
+          prototypeOf(this.options.store().board(exploration), key),
+        );
       if (run.state === "failed" || Date.now() > until)
         throw new Refused(
           `Prototype ${key} did not start: ${run.problem ?? "it took too long"}`,
@@ -243,37 +248,32 @@ export class ExplorationPrototypes {
       });
   }
 
-  // Change: the kobold changes a prototype as asked, as a new version in
-  // its frame, made from it on a branch of its own; the version it was
-  // made from stays, so the team can switch back. The new version's key.
-  change(exploration: Exploration, key: string, request: string): string {
+  // The page the maker said the change is on, kept with the prototype.
+  private opensAt(exploration: string, key: string, page: string | undefined) {
     const store = this.options.store();
-    const board = store.board(exploration.id);
-    const base = prototypeOf(board, key);
-    if (!base) throw new Refused(`There is no prototype ${key} on the board.`);
-    if (this.mode.runOf(exploration.id, key).state === "making")
-      throw new Refused(
-        `Prototype ${key} is still being made: change it once it is ready.`,
+    const made = prototypeOf(store.board(exploration), key);
+    if (made && page)
+      store.saveBoard(
+        exploration,
+        withThing(store.board(exploration), { ...made, opens: page }),
       );
-    const made = versionOf(board, exploration.id, base, {
-      name: base.name,
-      difference: request,
-      from: base.key,
-    });
-    this.begin(
-      exploration,
-      store.saveBoard(exploration.id, withThing(board, made)),
-      made.key,
-      { request, startFrom: base.branch },
-    );
-    return made.key;
+  }
+
+  // Change: the kobold changes a prototype as asked, in its copy, a new
+  // commit on its branch; it is stopped meanwhile and shown being made.
+  change(exploration: Exploration, key: string, request: string): string {
+    const board = this.options.store().board(exploration.id);
+    this.unbusy(board, exploration.id, key);
+    void this.mode.stop(exploration.id, key);
+    this.begin(exploration, board, key, request);
+    return key;
   }
 
   private async making(
     exploration: Exploration,
     board: Board,
     key: string,
-    change?: { request: string; startFrom: string },
+    change?: string,
   ): Promise<void> {
     const made = prototypeOf(board, key);
     if (!made) return;
@@ -283,15 +283,11 @@ export class ExplorationPrototypes {
       key,
       made.branch,
     );
-    const workspace = await versionWorkspace(
-      this.options.project,
-      copy,
-      change?.startFrom,
-    );
+    const workspace = await versionWorkspace(this.options.project, copy);
     const result = await this.options.claude.run({
       cwd: copy.folder,
       prompt: askFor(exploration, board, made, {
-        change: change?.request,
+        change,
         maps: codeMaps(this.options.root),
       }),
       readOnly: false,
@@ -306,14 +302,29 @@ export class ExplorationPrototypes {
         this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
       },
     });
+    this.opensAt(
+      exploration.id,
+      key,
+      result.ok ? opensIn(result.text) : undefined,
+    );
+    const shown =
+      prototypeOf(this.options.store().board(exploration.id), key) ?? made;
     await finishMaking({
       mode: this.mode,
       workspace,
       exploration: exploration.id,
       made,
-      change: change?.request,
+      change,
       result,
       ready: this.ready,
+      look: () =>
+        lookAt({
+          mode: this.mode,
+          root: this.options.root,
+          exploration: exploration.id,
+          made: shown,
+          photograph: this.options.photograph,
+        }),
     });
   }
 }

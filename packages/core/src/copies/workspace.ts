@@ -105,29 +105,29 @@ export class Workspace {
 
   // A prototype's branch: continued when this computer has it, otherwise
   // started from origin's when a teammate pushed it (pushBranch), otherwise
-  // from the latest main, or from `startFrom` when given (another prototype's
-  // branch, this computer's or origin's: a version made from another).
-  async prepareLocalBranch(branch: string, startFrom?: string): Promise<void> {
+  // from the latest main.
+  async prepareLocalBranch(branch: string): Promise<void> {
     await this.download();
     const exists = await this.git("branch", "--list", branch);
     if (exists.trim() === "") {
-      const start = await this.startOf(branch, startFrom);
-      await this.git("checkout", "--quiet", "--force", "-b", branch, start);
+      const pushed = await this.git(
+        "branch",
+        "--remotes",
+        "--list",
+        `origin/${branch}`,
+      );
+      const from = pushed.trim() === "" ? this.settings.baseBranch : branch;
+      await this.git(
+        "checkout",
+        "--quiet",
+        "--force",
+        "-b",
+        branch,
+        `origin/${from}`,
+      );
     } else await this.git("checkout", "--quiet", "--force", branch);
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
-  }
-
-  // Where a new local branch starts: origin's copy, else the latest main.
-  private async startOf(branch: string, startFrom?: string): Promise<string> {
-    const has = async (...list: string[]) =>
-      (await this.git("branch", "--list", ...list)).trim() !== "";
-    const remote = (name: string) => has("--remotes", `origin/${name}`);
-    if (await remote(branch)) return `origin/${branch}`;
-    // Made from another version: from this computer's, else origin's.
-    if (startFrom && (await has(startFrom))) return startFrom;
-    if (startFrom && (await remote(startFrom))) return `origin/${startFrom}`;
-    return `origin/${this.settings.baseBranch}`;
   }
 
   // A branch kept on GitHub (a card's build): continued from what GitHub

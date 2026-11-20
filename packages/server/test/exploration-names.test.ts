@@ -57,7 +57,7 @@ test("changing a prototype asks the maker for the change, and its commit says so
   });
   assert.match(
     asked,
-    /^Make version A2 .*where it is already made\)\. The change: the empty page sends you to Personas\./,
+    /^Change prototype A2 .*where it is already made\)\. The change: the empty page sends you to Personas\./,
   );
   assert.match(
     askFor(exploration, board, made, { change: undefined, maps: "" }),

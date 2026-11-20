@@ -1,11 +1,10 @@
-// A prototype on the board: a frame with its versions (the choice's
-// options, the changes, other ways), a switch between them on top, and the
-// version shown below, its screen always the same size: the live app while
-// it runs (on its branch, at a desktop's size, shrunk; Bigger opens it full
-// size), being made, or a sketch with Start in its middle; how it differs,
-// what odd thing happened, and its last persona test. Agreeing (the badge
-// on its bar) is for the version shown. Switching while one runs runs the
-// other instead.
+// A prototype on the board: its variants (a choice's options, other ways)
+// switched on top, outside the app, and its screen below, always the same
+// size: the live app while it runs (on its branch, on the page the change
+// is on, with the variant picked; at a desktop's size, shrunk; Bigger opens
+// it full size), being made, or a sketch with Start in its middle; how the
+// variant differs, what odd thing happened, and its last persona test.
+// Agreeing (the badge on its bar) agrees to the variant shown.
 
 import type { NodeProps } from "@xyflow/react";
 import { Check, Play } from "lucide-react";
@@ -19,7 +18,7 @@ import { Markdown } from "@/components/markdown";
 import { Frame, useBoardDo } from "./frame";
 import { Making } from "./prototype-making";
 import { LiveScreen, SCREEN } from "./prototype-screen";
-import { type ThingNode, versionsIn } from "./nodes";
+import type { ThingNode } from "./nodes";
 
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
@@ -92,71 +91,66 @@ function Screen({
   );
 }
 
-type Made = ReturnType<typeof versionsIn>[number];
+type Made = Extract<ThingNode["data"]["thing"], { kind: "prototype" }>;
 
-const LIVE = new Set(["running", "starting"]);
+// Where the prototype shows: on the page the change is on, with the variant
+// picked (?variant=), chosen outside the app.
+function shownUrl(url: string, opens: string | undefined, variant: string) {
+  const address = new URL(opens ?? "", url);
+  if (variant) address.searchParams.set("variant", variant);
+  return address.toString();
+}
 
-// The version shown: the one picked, else one being made, else the one
-// running, else the agreed one, else the newest. A new version shows
-// itself.
-function useShown(versions: Made[], runs: VersionRun[]) {
-  // What was picked, and among how many versions: a new one shows itself.
-  const [picked, setPicked] = useState<{ key: string; of: number } | null>(
-    null,
-  );
-  const count = versions.length;
-  const pick = (key: string) => {
-    setPicked({ key, of: count });
-  };
-  const state = (made: Made) =>
-    runs.find((run) => run.version === made.key)?.state;
-  const shown =
-    versions.find((made) => picked?.of === count && made.key === picked.key) ??
-    versions.findLast((made) => state(made) === "making") ??
-    versions.find((made) => LIVE.has(state(made) ?? "")) ??
-    versions.find((made) => made.agreed) ??
-    versions.at(-1);
-  return { shown, pick };
+// A prototype's variants (none when it is one way only) and the one shown:
+// the one picked here, at once, else the one the board keeps.
+function variantsOf(made: Made, picked: string | null) {
+  const variants =
+    (made.variants?.length ?? 0) > 1 ? (made.variants ?? []) : [];
+  const first = variants[0]?.key ?? "";
+  const variant = variants.length > 0 ? (picked ?? made.variant ?? first) : "";
+  return { variants, variant };
+}
+
+function shownOf(
+  run: VersionRun | undefined,
+  opens: string | undefined,
+  variant: string,
+): VersionRun | undefined {
+  return run?.url ? { ...run, url: shownUrl(run.url, opens, variant) } : run;
 }
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
-  const { thing: first, page } = data;
+  const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
-  const versions = first.kind === "prototype" ? versionsIn(page, first.id) : [];
-  const { shown: thing, pick } = useShown(versions, page.runs);
-  if (!thing) return null;
-  const runOf = (key: string) => page.runs.find((one) => one.version === key);
-  const run = runOf(thing.key);
+  const [picked, pick] = useState<string | null>(null);
+  if (thing.kind !== "prototype") return null;
+  const { variants, variant } = variantsOf(thing, picked);
+  const run = page.runs.find((one) => one.version === thing.key);
   const open = ["waiting", "exploring"].includes(page.exploration.status);
-  // Switching while another version of this frame runs runs this one.
-  const switchTo = (key: string) => {
-    pick(key);
-    const live = versions.some(
-      (made) => made.key !== key && LIVE.has(runOf(made.key)?.state ?? ""),
-    );
-    const state = runOf(key)?.state;
-    if (open && live && state !== "making" && !LIVE.has(state ?? ""))
-      act("open", { key });
-  };
+  const shownRun = shownOf(run, thing.opens, variant);
+  const about = variants.find((one) => one.key === variant);
   return (
     <Frame
-      data={{ ...data, thing }}
+      data={data}
       title={`${thing.key} · ${thing.name}`}
       glow={run?.state === "making"}
     >
-      {versions.length > 1 && (
-        <Versions
-          versions={versions}
-          shown={thing.key}
-          stateOf={(key) => runOf(key)?.state}
-          onPick={switchTo}
+      {variants.length > 0 && (
+        <Variants
+          variants={variants}
+          shown={variant}
+          agreed={thing.agreed ? variant : undefined}
+          onPick={(key) => {
+            pick(key);
+            act("board", { do: { act: "show", id: thing.id, variant: key } });
+          }}
         />
       )}
       {run?.state === "making" ? (
         <Making run={run} />
       ) : (
         <Screen
-          run={run}
+          run={shownRun}
           at={thing.key.charCodeAt(0) - 65}
           title={`${thing.key} · ${thing.name}`}
           start={
@@ -169,7 +163,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         />
       )}
       <About
-        thing={thing}
+        difference={about?.difference ?? thing.difference}
         words={stateWords(run)}
         test={page.tests[thing.key] ?? null}
       />
@@ -180,20 +174,19 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
 // How the version shown differs (and what it was changed from), what odd
 // thing happened, and its last persona test.
 function About({
-  thing,
+  difference,
   words,
   test,
-}: Readonly<{ thing: Made; words: string | null; test: TestResult | null }>) {
+}: Readonly<{
+  difference: string;
+  words: string | null;
+  test: TestResult | null;
+}>) {
   const result = test ? testWords(test) : null;
   return (
     <>
       <div className="text-xs text-muted-foreground">
-        {thing.from && (
-          <span className="font-medium text-foreground-2">
-            Changed from {thing.from}:{" "}
-          </span>
-        )}
-        <Markdown text={thing.difference} />
+        <Markdown text={difference} />
       </div>
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
@@ -211,58 +204,49 @@ function About({
   );
 }
 
-// The switch between a frame's versions: one segment each, its letter, a
-// dot while it is made or runs, a tick when agreed.
-function Versions({
-  versions,
+// The switch between a prototype's variants, outside the app: one segment
+// each, its letter and name, a tick on the agreed one.
+function Variants({
+  variants,
   shown,
-  stateOf,
+  agreed,
   onPick,
 }: Readonly<{
-  versions: Made[];
+  variants: NonNullable<Made["variants"]>;
   shown: string;
-  stateOf: (key: string) => VersionRun["state"] | undefined;
+  agreed: string | undefined;
   onPick: (key: string) => void;
 }>) {
   return (
     <div
       role="tablist"
-      aria-label="Versions"
+      aria-label="Variants"
       className="nodrag flex flex-wrap gap-1 rounded-[10px] bg-[#f3f4f7] p-1"
     >
-      {versions.map((made) => {
-        const state = stateOf(made.key);
-        const on = made.key === shown;
+      {variants.map((one) => {
+        const on = one.key === shown;
         return (
           <button
-            key={made.key}
+            key={one.key}
             type="button"
             role="tab"
             aria-selected={on}
-            title={[`${made.key} · ${made.name}`, made.difference]
+            title={[`${one.key} · ${one.name}`, one.difference]
               .filter(Boolean)
               .join(": ")}
             onClick={() => {
-              onPick(made.key);
+              onPick(one.key);
             }}
             className={cn(
-              "inline-flex h-7 max-w-[11rem] items-center gap-1.5 rounded-[7px] px-2.5 text-xs",
+              "inline-flex h-7 max-w-[12rem] items-center gap-1.5 rounded-[7px] px-2.5 text-xs",
               on
                 ? "bg-card font-semibold text-foreground shadow-[0_1px_2px_rgb(20_24_36/0.12)]"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {state === "making" && (
-              <span className="size-1.5 flex-none rounded-full bg-blue motion-safe:animate-pulse" />
-            )}
-            {state && LIVE.has(state) && (
-              <span className="size-1.5 flex-none rounded-full bg-success" />
-            )}
-            <span className="flex-none">{made.key}</span>
-            <span className="truncate font-normal">
-              {made.from ? `from ${made.from}` : made.name}
-            </span>
-            {made.agreed && (
+            <span className="flex-none">{one.key}</span>
+            <span className="truncate font-normal">{one.name}</span>
+            {one.key === agreed && (
               <Check aria-hidden className="size-3 flex-none text-[#197653]" />
             )}
           </button>

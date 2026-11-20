@@ -1,50 +1,38 @@
-// An exploration's prototypes as frames of versions: the prototype of an
-// option, a frame and its versions, the frame of a choice, whether an
-// option has its prototype, free keys and branches, and a new version made
-// from another or beside it.
+// An exploration's prototypes and their variants: the prototype of a key,
+// the prototype a choice leads to, whether an option has been made, free
+// keys, branches, a variant added, and the address that shows a variant.
+// A prototype holds its variants in its one copy of the code; which one
+// shows is chosen outside the app, by the page address (?variant=B).
 
 import type { Board } from "@software-factory/core";
 
-import { linked } from "./board-things.ts";
+import { Refused } from "../../refused.ts";
+import { linked, type Option, nextLetter, withThing } from "./board-things.ts";
 
 export type Made = Extract<Board["things"][number], { kind: "prototype" }>;
 
-// The prototype of an option, on the board.
 export function prototypeOf(board: Board, key: string): Made | null {
   for (const thing of board.things)
     if (thing.kind === "prototype" && thing.key === key) return thing;
   return null;
 }
 
-// The frame a prototype shows in: its own, or the one it is a version in.
-export function frameOf(made: Made): string {
-  return made.frame ?? made.id;
-}
-
-// A frame's versions, in the order they were made.
-export function versionsOf(board: Board, frame: string): Made[] {
-  return board.things.flatMap((thing) =>
-    thing.kind === "prototype" && frameOf(thing) === frame ? [thing] : [],
-  );
-}
-
-// The frame of a choice's prototypes: the one its arrow leads to.
-export function frameFor(board: Board, choice: string): string | null {
+// The prototype a choice's arrow leads to, when it has one.
+export function prototypeFor(board: Board, choice: string): Made | null {
   for (const link of board.links) {
     if (link.from !== choice) continue;
     const made = board.things.find((thing) => thing.id === link.to);
-    if (made?.kind === "prototype") return frameOf(made);
+    if (made?.kind === "prototype") return made;
   }
   return null;
 }
 
-// Whether a choice's option has its prototype: a version of it in the
-// choice's frame, or (on older boards) an arrow from the choice, labelled
-// with the option, to a prototype.
+// Whether a choice's option has been made: a variant of the choice's
+// prototype, or (on older boards) a prototype of its own, on an arrow
+// labelled with the option.
 export function madeFor(board: Board, choice: string, key: string): boolean {
-  const frame = frameFor(board, choice);
-  if (frame && versionsOf(board, frame).some((one) => one.option === key))
-    return true;
+  const made = prototypeFor(board, choice);
+  if (made?.variants?.some((one) => one.key === key)) return true;
   return board.links.some(
     (link) =>
       link.from === choice &&
@@ -68,38 +56,113 @@ export function prototypeBranch(exploration: string, key: string): string {
   return `proto/${exploration}-${key.toLowerCase()}`;
 }
 
-// The arrow from a choice to its frame names every option in it (A · B).
-export function namedArrow(board: Board, choice: string, frame: string): Board {
-  const options = [
-    ...new Set(
-      versionsOf(board, frame).map((one) => one.option ?? one.key.charAt(0)),
-    ),
-  ];
-  return linked(board, choice, frame, options.join(" · "));
+// A variant added to a prototype, under the next free letter (or the
+// option's own letter when it is one).
+export function withVariant(
+  made: Made,
+  way: { key?: string; name: string; difference: string },
+): { made: Made; key: string } {
+  const now = made.variants ?? [];
+  if (now.length >= 4)
+    throw new Refused(`Prototype ${made.key} has four variants already.`);
+  const key = way.key ?? nextLetter(now.map((one) => one.key));
+  const variant: Option = {
+    key,
+    name: way.name.trim(),
+    difference: way.difference.trim(),
+  };
+  return { made: { ...made, variants: [...now, variant] }, key };
 }
 
-// A new version in a prototype's frame, made from it (`from`) or as
-// another way beside it, under the next free key of its letter.
-export function versionOf(
+// The address that shows a prototype where the change is (the page it
+// opens on), with the variant shown (?variant=).
+export function shownAddress(url: string, made: Made | null): string {
+  const address = new URL(made?.opens ?? "", url);
+  if (made?.variant && (made.variants?.length ?? 0) > 1)
+    address.searchParams.set("variant", made.variant);
+  return address.toString();
+}
+
+// The page the maker said the change is on: its line "Opens at: #build".
+export function opensIn(said: string): string | undefined {
+  const line = said.split("\n").findLast((one) => one.includes("Opens at:"));
+  const after = line?.slice(line.indexOf("Opens at:") + 9).trim() ?? "";
+  const page = after.replaceAll(/[`*_]/g, "").trim().split(/\s/)[0] ?? "";
+  return /^[/#?]/.test(page) ? page : undefined;
+}
+
+// A new variant's letter: after every option and variant the board has, so
+// it is never taken for one of a choice's options.
+export function freeVariant(board: Board, made: Made): string {
+  const taken = [
+    ...board.things.flatMap((one) =>
+      one.kind === "choice" ? one.options.map((option) => option.key) : [],
+    ),
+    ...(made.variants ?? []).map((one) => one.key),
+  ];
+  return String.fromCharCode(
+    Math.max(64, ...taken.map((key) => key.charCodeAt(0))) + 1,
+  );
+}
+
+// A choice's options (all of them when none are named) as the variants of
+// one prototype, joined to the choice by an arrow; when the choice has one
+// with variants already, the options not made yet are added to it, and the
+// maker is asked for them (`change`).
+export function choicePrototype(
   board: Board,
   exploration: string,
-  base: Made,
-  shape: { name: string; difference: string; from?: string },
-): Made {
-  const key = freeKey(board, base.key.charAt(0));
-  return {
-    id: `prototype-${key.toLowerCase()}`,
+  choice: string,
+  keys: string[],
+): { board: Board; key: string; change?: string } {
+  const card = board.things.find((one) => one.id === choice);
+  if (card?.kind !== "choice")
+    throw new Refused(`There is no choice “${choice}” on the board.`);
+  const options = (keys.length > 0 ? keys : card.options.map((o) => o.key))
+    .map((key) => {
+      const option = card.options.find((one) => one.key === key);
+      if (!option) throw new Refused(`${choice} has no option ${key}.`);
+      return option;
+    })
+    .filter((option) => !madeFor(board, choice, option.key));
+  const [first] = options;
+  if (!first)
+    throw new Refused(
+      keys.length === 1
+        ? `Option ${keys.join("")} has a prototype already.`
+        : "Those options have a prototype already.",
+    );
+  const letters = options.map((one) => one.key);
+  // On older boards each option has a prototype of its own: so does a new one.
+  const had = prototypeFor(board, choice);
+  if (had?.variants) {
+    let made = had;
+    for (const option of options) made = withVariant(made, option).made;
+    return {
+      board: withThing(board, made),
+      key: had.key,
+      change: `Add the variants ${letters.join(", ")}, beside the ones it has.`,
+    };
+  }
+  const key = freeKey(board, first.key);
+  const id = `prototype-${key.toLowerCase()}`;
+  const several = options.length > 1;
+  const made: Made = {
+    id,
     kind: "prototype",
     agreed: false,
     place: null,
-    by: "kobold",
+    by: "person",
     key,
-    name: shape.name.trim() || base.name,
-    difference: shape.difference.trim(),
+    name: several ? card.title : first.name,
+    difference: several ? "" : first.difference,
     branch: prototypeBranch(exploration, key),
     tests: [],
-    frame: frameOf(base),
-    ...(shape.from ? { from: shape.from } : {}),
-    ...(base.option ? { option: base.option } : {}),
+    variants: options,
+    variant: first.key,
+  };
+  return {
+    board: linked(withThing(board, made), choice, id, letters.join(" · ")),
+    key,
   };
 }

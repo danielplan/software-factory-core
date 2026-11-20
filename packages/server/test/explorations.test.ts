@@ -33,8 +33,8 @@ test("the list: being explored with the board in small and the kobold's line, wa
         ["problem", false],
         ["choice-1", false],
         ["diagram-1", false],
-        // B is a version in A's frame, and agreed: one thing, agreed.
-        ["prototype-a", true],
+        ["prototype-a", false],
+        ["prototype-b", true],
         ["note-1", false],
       ],
     );
@@ -336,17 +336,12 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       .things.find((t) => t.id === "prototype-c");
     assert.ok(made?.kind === "prototype");
     assert.equal(made.branch, "proto/X-1-c");
-    // A version in the choice's frame, named on its arrow.
-    assert.equal(made.frame, "prototype-a");
-    assert.equal(made.option, "C");
     assert.ok(
       factory.store
         .board("X-1")
         .links.some(
           (l) =>
-            l.from === "choice-1" &&
-            l.to === "prototype-a" &&
-            l.label === "A · B · C",
+            l.from === "choice-1" && l.to === "prototype-c" && l.label === "C",
         ),
     );
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");

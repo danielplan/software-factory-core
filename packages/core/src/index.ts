@@ -170,7 +170,11 @@ export {
   WorldRefused,
   worldText,
 } from "./kobble/world.ts";
-export { IGNORED_SIGNALS, ignoreSignals } from "./kobble/ignored.ts";
+export {
+  addToGitignore,
+  IGNORED_SIGNALS,
+  ignoreSignals,
+} from "./kobble/ignored.ts";
 export {
   type Conversation,
   heardOf,

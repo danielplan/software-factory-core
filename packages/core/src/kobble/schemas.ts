@@ -170,14 +170,18 @@ export const thingSchema = z.discriminatedUnion("kind", [
     // The kobold's last words when it made it: what it changed, and every
     // library it added or piece it copied, so the build checks them.
     said: z.string().optional(),
-    // A version in another prototype's frame (that prototype's id): a
-    // frame shows its versions one at a time, with a switch between them.
-    // Without it, a prototype is a frame of its own and its first version.
-    frame: thingId.optional(),
-    // The version it was changed from (its key), when it is a change.
-    from: prototypeKey.optional(),
-    // The choice's option it is a version of, when it is one.
-    option: optionKey.optional(),
+    // Its variants (a choice's options, and other ways), all made in this
+    // one copy; which one shows is chosen outside the app, by the page
+    // address (?variant=<key>). Without them, it is one way only.
+    variants: z.array(optionSchema).optional(),
+    // The variant shown on the board, and the one agreed with it.
+    variant: optionKey.optional(),
+    // Where it opens: the page the change is on, as the maker said
+    // (a path, "/fuel/planner", or a page of the app, "#build").
+    opens: z
+      .string()
+      .regex(/^[/#?][^\s]*$/, "a page of the app: /path or #page")
+      .optional(),
   }),
   z.strictObject({
     ...common,

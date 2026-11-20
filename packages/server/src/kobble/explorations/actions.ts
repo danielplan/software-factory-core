@@ -161,6 +161,19 @@ async function handedOffCard(
   return { number: exploration.issue, url };
 }
 
+// The agreed variant, when the prototype has several: build only that one.
+function variantLines(agreed: Made): string[] {
+  const variants = agreed.variants ?? [];
+  const chosen = variants.find((one) => one.key === agreed.variant);
+  if (variants.length < 2 || !chosen) return [];
+  return [
+    "",
+    `**Variant:** ${chosen.key} · ${chosen.name}. ${chosen.difference}`,
+    "",
+    `The prototype holds the variants ${variants.map((one) => one.key).join(", ")}, shown by the page address (\`?variant=${chosen.key}\`). Build only ${chosen.key}: leave out the others and the variant switch.`,
+  ];
+}
+
 function handoffText(
   exploration: Exploration,
   board: Board,
@@ -191,6 +204,7 @@ function handoffText(
     `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
     "",
     `**Agreed:** ${agreed.key} · ${agreed.name}. ${agreed.difference}`,
+    ...variantLines(agreed),
     "",
     `**The prototype:** on the branch \`${agreed.branch}\`.`,
     ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),

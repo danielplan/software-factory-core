@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { opensIn, shownAddress } from "../src/kobble/explorations/versions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 import { inGit } from "./git-project.ts";
 
-// A new exploration opened at once, and a prototype as a frame of
-// versions: a change made from the one before, another way beside it.
+// A new exploration opened at once, and a prototype with variants, switched
+// outside the app, opened on the page the change is on.
 
 test("New exploration opens a fresh one at once, waits for the idea, and opens the untouched one again", async () => {
   const factory = await explorationsFactory();
@@ -30,48 +31,95 @@ test("New exploration opens a fresh one at once, waits for the idea, and opens t
   }
 });
 
-test("a change is a new version made from the one before, which stays; another way is made beside it", async () => {
+test("a choice's options are the variants of one prototype, switched outside the app; another way adds one", async () => {
   const factory = await explorationsFactory([
     {
       calls: [
-        ["change_prototype", { prototype: "A", change: "A bigger button" }],
+        [
+          "add_choice",
+          {
+            title: "Where does the button sit?",
+            options: [{ name: "Top" }, { name: "Bottom" }],
+          },
+        ],
+        ["make_prototype", { choice: "choice-2" }],
+      ],
+      reply: "Making it.",
+    },
+    { calls: [], reply: "Moved the button.\n\n**Opens at:** `#build`" },
+    {
+      calls: [
         [
           "another_way",
-          { prototype: "A", name: "A list", difference: "As a list" },
+          { prototype: "A2", name: "Floating", difference: "It floats" },
         ],
       ],
-      reply: "Making both.",
+      reply: "Adding another.",
     },
-    { calls: [], reply: "Made A2." },
-    { calls: [], reply: "Made A3." },
+    { calls: [], reply: "Added D." },
   ]);
   try {
     inGit(factory.project);
-    await factory.press("/say", { id: "X-1", text: "Bigger, or a list?" });
-    await factory.settled("X-1");
-    const board = factory.store.board("X-1");
-    const version = (key: string) =>
-      board.things.find((t) => t.kind === "prototype" && t.key === key);
-    const changed = version("A2");
-    const other = version("A3");
-    assert.ok(changed?.kind === "prototype" && other?.kind === "prototype");
-    assert.equal(changed.frame, "prototype-a");
-    assert.equal(changed.from, "A");
-    assert.equal(changed.difference, "A bigger button");
-    assert.equal(other.frame, "prototype-a");
-    assert.equal(other.from, undefined);
-    assert.equal(other.name, "A list");
-    assert.ok(version("A"));
-    assert.match(
-      factory.answers[0]?.[0] ?? "",
-      /Making A2, a new version of A/,
+    await factory.press("/say", { id: "X-1", text: "Where should it go?" });
+    const made = () => {
+      const thing = factory.store
+        .board("X-1")
+        .things.find((t) => t.kind === "prototype" && t.key === "A2");
+      assert.ok(thing?.kind === "prototype");
+      return thing;
+    };
+    while (factory.seen.length < 4 || made().variants?.length !== 3)
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    const prototype = made();
+    assert.deepEqual(
+      prototype.variants?.map((one) => one.key),
+      ["A", "B", "D"],
     );
-    assert.match(factory.answers[0]?.[1] ?? "", /Making A3, another way/);
+    assert.equal(prototype.variant, "A");
+    assert.equal(prototype.opens, "#build");
+    assert.match(factory.seen[1]?.prompt ?? "", /\?variant=A/);
     assert.match(
-      (await factory.page("X-1")).talk.messages.at(-1)?.text ?? "",
-      /Making both/,
+      factory.seen[2]?.prompt ?? "",
+      /could not be looked at running: .*cannot run here yet/,
+    );
+    assert.match(factory.seen[3]?.prompt ?? "", /Add variant D \(“Floating”\)/);
+    await factory.press("/board", {
+      id: "X-1",
+      do: { act: "show", id: "prototype-a2", variant: "B" },
+    });
+    assert.equal(made().variant, "B");
+    assert.match(
+      (
+        await factory.press("/board", {
+          id: "X-1",
+          do: { act: "show", id: "prototype-a2", variant: "Z" },
+        })
+      ).body.error as string,
+      /no variant Z/,
     );
   } finally {
     factory.close();
   }
+});
+
+test("the page a prototype opens on and the variant shown make its address", () => {
+  assert.equal(opensIn("Done.\n\nOpens at: /fuel/planner"), "/fuel/planner");
+  assert.equal(opensIn("Opens at: somewhere"), undefined);
+  assert.equal(opensIn("no line"), undefined);
+  const made = {
+    opens: "#build",
+    variant: "B",
+    variants: [
+      { key: "A", name: "a", difference: "" },
+      { key: "B", name: "b", difference: "" },
+    ],
+  } as never;
+  assert.equal(
+    shownAddress("http://127.0.0.1:5301/", made),
+    "http://127.0.0.1:5301/?variant=B#build",
+  );
+  assert.equal(
+    shownAddress("http://127.0.0.1:5301/x", null),
+    "http://127.0.0.1:5301/x",
+  );
 });

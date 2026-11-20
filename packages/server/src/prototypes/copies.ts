@@ -90,12 +90,10 @@ function envOf(project: string, branch: string, folder: string) {
 
 // A version's copy as a working copy (core's Workspace): made when it is not
 // there yet, on the version's branch (this computer's, else the one a
-// teammate pushed to origin), or a new branch from the latest main, or from
-// `startFrom` (the branch of the version it is made from).
+// teammate pushed to origin), or a new branch from the latest main.
 export async function versionWorkspace(
   project: string,
   copy: PrototypeCopy,
-  startFrom?: string,
 ): Promise<Workspace> {
   const workspace = new Workspace(
     {
@@ -107,7 +105,7 @@ export async function versionWorkspace(
   );
   if (existsSync(copy.folder)) return workspace;
   try {
-    await workspace.prepareLocalBranch(copy.branch, startFrom);
+    await workspace.prepareLocalBranch(copy.branch);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Refused(`The copy of ${copy.name} could not be made: ${message}`);

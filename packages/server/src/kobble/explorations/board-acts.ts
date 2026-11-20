@@ -35,6 +35,7 @@ export type Act =
   | { act: "unlink"; from: string; to: string }
   | { act: "agree"; id: string; agreed: boolean }
   | { act: "choose"; id: string; option: string | null }
+  | { act: "show"; id: string; variant: string }
   | { act: "move"; id: string; x: number; y: number };
 
 type By = Thing["by"];
@@ -134,9 +135,10 @@ export function applyAct(board: Board, act: Act, by: By): Done {
 
 function placedOrChosen(
   board: Board,
-  act: Extract<Act, { act: "choose" | "move" }>,
+  act: Extract<Act, { act: "choose" | "move" | "show" }>,
 ): Done {
   const thing = thingOf(board, act.id);
+  if (act.act === "show") return shown(board, thing, act.variant);
   if (act.act === "move")
     return {
       board: withThing(board, { ...thing, place: { x: act.x, y: act.y } }),
@@ -150,6 +152,19 @@ function placedOrChosen(
     said: act.option
       ? `Chose ${act.option} on ${act.id}.`
       : `Took back the choice on ${act.id}.`,
+  };
+}
+
+// A prototype's variant shown on the board (and agreed with it).
+function shown(board: Board, thing: Thing, variant: string): Done {
+  if (
+    thing.kind !== "prototype" ||
+    !thing.variants?.some((one) => one.key === variant)
+  )
+    throw new Refused(`${thing.id} has no variant ${variant}.`);
+  return {
+    board: withThing(board, { ...thing, variant }),
+    said: `Showing variant ${variant} of ${thing.id}.`,
   };
 }
 
@@ -168,6 +183,8 @@ export function personWords(act: Act, board: Board): string {
         : `took back the choice on ${name(act.id)}`;
     case "move":
       return `moved ${name(act.id)}`;
+    case "show":
+      return `looked at variant ${act.variant} of ${name(act.id)}`;
     case "remove":
       return `removed ${act.id}`;
     default:
