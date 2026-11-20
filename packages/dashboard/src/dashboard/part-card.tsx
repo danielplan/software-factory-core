@@ -20,10 +20,34 @@ const FRAME: Record<PartView["light"], string> = {
   none: "border-border-soft",
 };
 
+// How a card stands to the card under the pointer: the card itself, a part
+// it needs, a part that uses it, or none of these (faded).
+export type Mark = "self" | "needs" | "usedBy" | "apart" | null;
+
+const MARK: Record<Exclude<Mark, null>, string> = {
+  self: "border-primary shadow-[0_0_0_4px_var(--tint-line)]",
+  needs: "border-primary/70 bg-tint",
+  usedBy: "border-success/70 bg-success/[0.06]",
+  apart: "opacity-40",
+};
+
+// What a part is linked to, by name: what it needs and what uses it.
+export type Links = { needs: string[]; usedBy: string[] };
+
 export function PartCard({
   part,
   onPress,
-}: Readonly<{ part: PartView; onPress: (path: string) => void }>) {
+  links,
+  mark = null,
+  onPoint,
+}: Readonly<{
+  part: PartView;
+  onPress: (path: string) => void;
+  links?: Links;
+  mark?: Mark;
+  // The pointer comes onto the card (its id) or leaves it (null).
+  onPoint?: (id: string | null) => void;
+}>) {
   // Only what the light does not say: a step, or that it was started
   // elsewhere.
   const step =
@@ -35,11 +59,26 @@ export function PartCard({
     <div
       data-light={part.light}
       title={part.does}
+      onMouseEnter={() => onPoint?.(part.id)}
+      onMouseLeave={() => onPoint?.(null)}
+      onFocus={() => onPoint?.(part.id)}
+      onBlur={() => onPoint?.(null)}
       className={cn(
-        "grid gap-1.5 rounded-xl border bg-surface px-3 py-2.5",
+        "grid gap-1.5 rounded-xl border bg-surface px-3 py-2.5 transition-[opacity,border-color,background-color] duration-150",
         FRAME[part.light],
+        mark && MARK[mark],
       )}
     >
+      {(mark === "needs" || mark === "usedBy") && (
+        <span
+          className={cn(
+            "text-[11px] font-medium",
+            mark === "needs" ? "text-primary" : "text-success",
+          )}
+        >
+          {mark === "needs" ? "Needed by it" : "Uses it"}
+        </span>
+      )}
       <div className="flex items-center gap-2">
         <StatusLight light={part.light} />
         <span className="truncate text-[13px] font-medium">{part.name}</span>
@@ -62,9 +101,26 @@ export function PartCard({
       {status && (
         <span className="text-xs text-muted-foreground">{status}</span>
       )}
+      {links && <PartLinks links={links} />}
       <PartButtons part={part} onPress={onPress} />
       {part.problem && <PartProblem problem={part.problem} />}
     </div>
+  );
+}
+
+// Its links, in two short lines: what it needs, and what uses it.
+function PartLinks({ links }: Readonly<{ links: Links }>) {
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 border-t border-border-soft pt-1.5 text-xs">
+      <dt className="text-muted-foreground">Needs</dt>
+      <dd className="min-w-0 text-foreground/80">
+        {links.needs.length > 0 ? links.needs.join(", ") : "nothing else"}
+      </dd>
+      <dt className="text-muted-foreground">Used by</dt>
+      <dd className="min-w-0 text-foreground/80">
+        {links.usedBy.length > 0 ? links.usedBy.join(", ") : "no other part"}
+      </dd>
+    </dl>
   );
 }
 

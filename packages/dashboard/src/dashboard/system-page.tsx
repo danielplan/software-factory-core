@@ -1,7 +1,6 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 import { messageOf, type PartView, post } from "@/api";
-import { Arrow } from "@/components/arrow";
 import { ProblemBox } from "@/components/problem-box";
 import { LABEL, LIGHTS, StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
@@ -16,10 +15,10 @@ import { PageHead } from "@/components/page-head";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
-import { PartCard } from "./part-card";
+import { type Links, type Mark, PartCard } from "./part-card";
 
 // System: what the product is made of, as a map of its parts, each after
-// the parts it needs, with its light and its buttons in its box; how it is
+// the parts it needs and saying its links, with its light and its buttons in its box; how it is
 // doing in a line, Start all and Stop all. The factory's own programs are
 // in Settings (FactoryPrograms).
 export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
@@ -123,7 +122,8 @@ function Legend() {
 }
 
 // One area of the factory, framed: its parts in columns, each after the
-// parts it needs, joined by arrows (down on a phone).
+// parts it needs. Each card says what it needs and what uses it; under the
+// pointer, its partners light up and the others fade.
 function Area({
   title,
   actions,
@@ -139,30 +139,65 @@ function Area({
   // Shown while the area has no parts.
   children?: React.ReactNode;
 }>) {
+  const [pointed, setPointed] = useState<string | null>(null);
   if (parts.length === 0 && !children) return null;
+  const linksOf = linksIn(parts);
+  const markOf = (part: PartView): Mark => {
+    if (pointed === null) return null;
+    if (part.id === pointed) return "self";
+    const links = linksOf.get(pointed);
+    if (links?.needIds.includes(part.id)) return "needs";
+    if (links?.usedByIds.includes(part.id)) return "usedBy";
+    return "apart";
+  };
   return (
     <AreaCard title={title} actions={actions}>
       {parts.length === 0 ? (
         children
       ) : (
-        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:gap-0">
+        <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:gap-3">
           {columnsOf(parts).map((column, index) => (
-            <Fragment key={column[0]?.id ?? index}>
-              {index > 0 && (
-                <span className="mx-2 flex rotate-90 self-center sm:rotate-0">
-                  <Arrow />
-                </span>
-              )}
-              <div className="grid min-w-0 flex-1 content-center gap-2.5">
-                {column.map((part) => (
-                  <PartCard key={part.id} part={part} onPress={onPress} />
-                ))}
-              </div>
-            </Fragment>
+            <div
+              key={column[0]?.id ?? index}
+              className="grid min-w-0 flex-1 content-center gap-2.5"
+            >
+              {column.map((part) => (
+                <PartCard
+                  key={part.id}
+                  part={part}
+                  onPress={onPress}
+                  links={linksOf.get(part.id)}
+                  mark={markOf(part)}
+                  onPoint={setPointed}
+                />
+              ))}
+            </div>
           ))}
         </div>
       )}
     </AreaCard>
+  );
+}
+
+// Each part's links within the area: the parts it needs and the parts that
+// need it, by id and by name.
+function linksIn(
+  parts: PartView[],
+): Map<string, Links & { needIds: string[]; usedByIds: string[] }> {
+  const byId = new Map(parts.map((part) => [part.id, part]));
+  return new Map(
+    parts.map((part) => {
+      const needIds = part.dependsOn.filter((id) => byId.has(id));
+      const usedByIds = parts
+        .filter((other) => other.dependsOn.includes(part.id))
+        .map((other) => other.id);
+      const names = (ids: string[]) =>
+        ids.map((id) => byId.get(id)?.name ?? id);
+      return [
+        part.id,
+        { needIds, usedByIds, needs: names(needIds), usedBy: names(usedByIds) },
+      ];
+    }),
   );
 }
 
