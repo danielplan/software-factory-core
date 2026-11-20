@@ -32,6 +32,7 @@ import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import {
+  hintsOf,
   minesOf,
   STUCK_COLOUR,
   StuckCard,
@@ -182,6 +183,7 @@ function Columns({
   stuck,
 }: Readonly<{ view: FactoryView; stuck: StuckState }>) {
   const mine = minesOf(stuck);
+  const hints = hintsOf(stuck);
   const column = VARIANT === "B";
   return (
     <div
@@ -192,7 +194,13 @@ function Columns({
     >
       {column && <StuckColumn stuck={stuck} />}
       {view.columns.map((one) => (
-        <Column key={one.id} column={one} now={view.builder.now} mine={mine} />
+        <Column
+          key={one.id}
+          column={one}
+          now={view.builder.now}
+          mine={mine}
+          hints={hints}
+        />
       ))}
     </div>
   );
@@ -218,8 +226,8 @@ function StuckColumn({ stuck }: Readonly<{ stuck: StuckState }>) {
         <StuckCard
           key={one.card.number}
           one={one}
-          onMove={(to) => {
-            stuck.move(one.card.number, to);
+          onMove={(how) => {
+            stuck.move(one.card.number, how);
           }}
         />
       ))}
@@ -242,10 +250,12 @@ function Column({
   column,
   now,
   mine,
+  hints,
 }: Readonly<{
   column: FactoryView["columns"][number];
   now: FactoryView["builder"]["now"];
   mine: number[];
+  hints: Record<number, string>;
 }>) {
   const [all, setAll] = useState(false);
   const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
@@ -265,6 +275,7 @@ function Column({
           at={at}
           now={now[card.number] ?? null}
           mine={mine.includes(card.number)}
+          hint={hints[card.number] ?? null}
         />
       ))}
       {column.cards.length === 0 && <Empty />}

@@ -1,7 +1,7 @@
 // A card on the Factory board, opened beside it on a click; while the
 // builder is on it, what it is doing right now.
 
-import { FlaskConical, Hand, LoaderCircle } from "lucide-react";
+import { FlaskConical, Hand, LoaderCircle, MessageCircle } from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
@@ -16,12 +16,15 @@ export function Card({
   at,
   now,
   mine = false,
+  hint = null,
 }: Readonly<{
   card: FactoryCard;
   at: number;
   now: string | null;
   // A person took it on: the builder leaves it alone.
   mine?: boolean;
+  // What the person told the builder when they sent it back from Stuck.
+  hint?: string | null;
 }>) {
   const open = use(OpenCard);
   const building = now !== null;
@@ -58,6 +61,21 @@ export function Card({
         <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
           <Hand aria-hidden strokeWidth={2} className="size-3 flex-none" />
           You took it · the builder leaves it alone
+        </span>
+      )}
+      {hint && (
+        <span className="grid w-full gap-1">
+          <span className="w-full rounded-md border-l-2 border-current/15 bg-wash/60 px-2 py-1 text-xs leading-snug text-muted-foreground italic">
+            “{hint}”
+          </span>
+          <span className="inline-flex items-center gap-1.5 justify-self-start rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
+            <MessageCircle
+              aria-hidden
+              strokeWidth={2}
+              className="size-3 flex-none"
+            />
+            Your hint is with the builder
+          </span>
         </span>
       )}
       {now && (
