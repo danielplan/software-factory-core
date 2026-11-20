@@ -30,6 +30,21 @@ const KINDS_OF_COMMAND: [RegExp, string][] = [
   ],
 ];
 
+// A tool of an MCP server (mcp__<server>__<tool>) in words: the browser's
+// as what it does there ("In the browser: click"), any other by its name.
+function otherTool(name: string): string {
+  if (!name.startsWith("mcp__")) return `Using ${name}`;
+  const rest = name.slice(5);
+  const cut = rest.lastIndexOf("__");
+  if (cut <= 0) return `Using ${name}`;
+  const server = rest.slice(0, cut);
+  const tool = rest.slice(cut + 2);
+  const words = tool.replace(/^browser_/, "").replaceAll("_", " ");
+  return /playwright|browser/.test(server)
+    ? `In the browser: ${words}`
+    : `Using ${words} (${server.replace(/^plugin_/, "")})`;
+}
+
 function commandWords(description: string, command: string): string {
   if (description) return `Running: ${shorten(description, 120)}`;
   const kind = KINDS_OF_COMMAND.find(([pattern]) => pattern.test(command));
@@ -102,7 +117,7 @@ function describeTool(
     workspace,
   );
   const line = Object.hasOwn(TOOL_LINES, name) ? TOOL_LINES[name] : undefined;
-  return line ? line({ text, path }) : `Using ${name}`;
+  return line ? line({ text, path }) : otherTool(name);
 }
 
 function relative(path: string, workspace: string): string {

@@ -175,6 +175,17 @@ test("tool calls become short plain descriptions with paths relative to the work
     ),
     ["Running: Run all checks"],
   );
+  assert.deepEqual(
+    describeEvent(
+      toolUse("mcp__plugin_playwright_playwright__browser_take_screenshot", {}),
+      workspace,
+    ),
+    ["In the browser: take screenshot"],
+  );
+  assert.deepEqual(
+    describeEvent(toolUse("mcp__board__add_note", {}), workspace),
+    ["Using add note (board)"],
+  );
   // Without a description, the kind of command, never the command itself.
   for (const [command, words] of [
     ["node --experimental-strip-types --test a.test.ts", "Running the tests"],

@@ -3,6 +3,7 @@
 // the newest last, in view and lit while it works.
 
 import {
+  AppWindow,
   BookOpen,
   CircleCheck,
   CircleX,
@@ -38,6 +39,7 @@ const KINDS: [RegExp, LucideIcon, string][] = [
   [/^(Running|Building)/, SquareTerminal, "text-[#e5e7eb]"],
   [/^Asking a helper/, Users, "text-[#c4b5fd]"],
   [/^Looking up/, Globe, "text-[#7dd3fc]"],
+  [/^In the browser/, AppWindow, "text-[#7dd3fc]"],
   [/^Updating its to-do/, ListTodo, "text-[#9ca3af]"],
   [/^Using/, Wrench, "text-[#9ca3af]"],
   [/^Finished/, CircleCheck, "text-[#86efac]"],
@@ -86,13 +88,13 @@ export function AgentTrace({
           return (
             <li
               key={`${String(at)}-${step}`}
-              className={cn("flex gap-2", last && "text-white")}
+              className={cn("flex min-w-0 gap-2", last && "text-white")}
             >
               <Icon
                 aria-hidden
                 className={cn("mt-[2px] size-3.5 flex-none", tint)}
               />
-              <span className="min-w-0 break-words">
+              <span className="min-w-0 [overflow-wrap:anywhere]">
                 {step}
                 {last && (
                   <span className="ml-1 inline-block h-3 w-1.5 translate-y-[1px] bg-[#d1d5db] motion-safe:animate-pulse" />
