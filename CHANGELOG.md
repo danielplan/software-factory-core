@@ -4,6 +4,11 @@ What changed in each release of the core, and what a company has to do when it
 upgrades. Newest first. Versions follow [semantic versioning](https://semver.org/):
 a major version may need a company to change something, and says what.
 
+## Unreleased
+
+- Changed: System draws your product as a real map: each part a box with a line to each part that needs it, its arrow at the part that needs it. Pointing at a part brings out its own lines and the parts at their other ends. Each box has a small tag next to the part's name saying its type (Screen, Backend, Data or Outside service); pointing at the tag, focusing it or tapping it says what that type means. On a narrow screen (a phone) the map runs top to bottom instead. The factory's own programs in Settings keep their columns. Nothing to do.
+- New: a part says its type: `type` on a part (`screen`, `backend`, `data` or `outside`, `PART_TYPES`), optional. The kits set it (React web app, SvelteKit app and Expo app: `screen`; NestJS backend and TypeScript package: `backend`); a product may say its own in its `product.json` (`"type": "data"`), which wins over its kit's. A product of Other code has no tag until its `product.json` says its type. A kit or extension of a company's own can set `type` on its parts. Nothing to do.
+
 ## 0.12.0 (2026-11-19)
 
 **To upgrade:** pin `release-0.12.0`, `npm install`, `npx software-factory upgrade`, and commit what it changed (with `factory/team.env`). 0.11.1 was never published: its changes (below) come with this release, and the upgrade runs its migration too. Home is the first page, System shows the product's parts, Workshop is gone (its parts are in Settings), and updates come by themselves: after this release, merged work and new Kobble releases reach every computer without git.

@@ -10,6 +10,8 @@ import { dirname, resolve } from "node:path";
 
 import { z } from "zod";
 
+import { PART_TYPES } from "../parts/part.ts";
+
 const command = z.string().min(1);
 
 export const productSchema = z.object({
@@ -29,6 +31,9 @@ export const productSchema = z.object({
   users: z
     .array(z.object({ who: z.string().min(1), does: z.string().min(1) }))
     .default([]),
+  // What type of part it is on the System map (screen, backend, data or
+  // outside, PART_TYPES), when its kit cannot tell or tells it wrong.
+  type: z.enum(PART_TYPES).optional(),
   // Where it answers while it runs on this computer, when it answers at all.
   port: z.number().int().min(1024).max(65535).optional(),
   // The commands the factory runs in the product's folder; a kit gives the
