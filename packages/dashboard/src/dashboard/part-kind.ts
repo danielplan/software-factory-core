@@ -1,5 +1,5 @@
 // What kind of part a part is, told on its box on the System map by a
-// small coloured tag, and in the key under the map.
+// small coloured tag next to its name, which tells what it means when pointed at.
 // Prototype: parts do not record their kind yet, so `kindOf` guesses it
 // from the part's name and its Open link. This is the one place to change
 // when a part says its own kind: return that, and keep the guess only for

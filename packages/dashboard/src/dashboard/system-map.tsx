@@ -2,8 +2,9 @@
 // left to right with ELK (the same layout as an exploration's board), and a
 // line from each part to exactly the parts it needs. Pointing at a part
 // brings out its own lines and the parts at their other ends.
-// Each box has a tag saying what kind of part it is, explained in a key
-// under the map (the kind is guessed for now, in part-kind.ts).
+// Each box has a tag next to its name saying what kind of part it is; pointing
+// at it tells what that kind means (the kind is guessed for now, in
+// part-kind.ts).
 // Prototype: a first try of a clearer System map.
 
 import "@xyflow/react/dist/style.css";
@@ -20,6 +21,7 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react";
+import { Popover } from "radix-ui";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import type { PartView } from "@/api";
@@ -51,7 +53,7 @@ function PartBox({ data }: NodeProps<PartNode>) {
     <div
       style={{ width: WIDTH }}
       className={cn(
-        "nodrag relative cursor-default pt-2.5 transition-opacity",
+        "nodrag cursor-default transition-opacity",
         !data.placed && "invisible",
         data.faded && "opacity-35",
       )}
@@ -62,8 +64,11 @@ function PartBox({ data }: NodeProps<PartNode>) {
         isConnectable={false}
         className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-arrow"
       />
-      <KindTag kind={kindOf(data.part)} className="absolute top-0 left-3 z-10" />
-      <PartCard part={data.part} onPress={data.onPress} />
+      <PartCard
+        part={data.part}
+        onPress={data.onPress}
+        tag={<KindTag kind={kindOf(data.part)} />}
+      />
       <Handle
         type="source"
         position={Position.Right}
@@ -74,37 +79,58 @@ function PartBox({ data }: NodeProps<PartNode>) {
   );
 }
 
-// A small coloured tag saying what kind of part it is.
-function KindTag({
-  kind,
-  className,
-}: Readonly<{ kind: PartKind; className?: string }>) {
-  const { label, icon: Icon, look } = KINDS[kind];
+// A small coloured tag saying what kind of part it is. Pointing at it,
+// focusing it or tapping it tells what that kind means.
+function KindTag({ kind }: Readonly<{ kind: PartKind }>) {
+  const { label, means, icon: Icon, look } = KINDS[kind];
+  const [open, setOpen] = useState(false);
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium ring-1",
-        look,
-        className,
-      )}
-    >
-      <Icon className="size-3" aria-hidden />
-      {label}
-    </span>
-  );
-}
-
-// What each tag means, under the map.
-function KindKey() {
-  return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
-      {(Object.keys(KINDS) as PartKind[]).map((kind) => (
-        <li key={kind} className="inline-flex items-center gap-1.5">
-          <KindTag kind={kind} />
-          {KINDS[kind].means}
-        </li>
-      ))}
-    </ul>
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger
+        // Not the card's own hint, only this tag's.
+        title=""
+        aria-label={`${label}: ${means}`}
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") setOpen(true);
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setOpen(false);
+        }}
+        onFocus={() => {
+          setOpen(true);
+        }}
+        onBlur={() => {
+          setOpen(false);
+        }}
+        // A tap (or click) opens it rather than toggling it, since the
+        // focus that comes with it has opened it already.
+        onClick={(event) => {
+          event.preventDefault();
+          setOpen(true);
+        }}
+        className={cn(
+          "inline-flex shrink-0 cursor-help items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium ring-1 outline-none focus-visible:ring-2",
+          look,
+        )}
+      >
+        <Icon className="size-3" aria-hidden />
+        {label}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          side="top"
+          sideOffset={6}
+          // The tag keeps the focus; the hint only tells.
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+          }}
+          className="z-50 max-w-56 rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md"
+        >
+          <span className="font-medium">{label}</span>: {means}
+          <Popover.Arrow className="fill-foreground" />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 
@@ -271,7 +297,6 @@ function PartsMap({
           style={COLOURS}
         />
       </div>
-      <KindKey />
       <p className="px-1 text-xs text-muted-foreground">
         Each line joins a part to a part that needs it, its arrow at the one
         that needs it. Point at a part to see only its lines.
