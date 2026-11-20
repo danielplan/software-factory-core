@@ -200,6 +200,7 @@ function Columns({
           now={view.builder.now}
           mine={mine}
           hints={hints}
+          quote={column}
         />
       ))}
     </div>
@@ -251,11 +252,13 @@ function Column({
   now,
   mine,
   hints,
+  quote,
 }: Readonly<{
   column: FactoryView["columns"][number];
   now: FactoryView["builder"]["now"];
   mine: number[];
   hints: Record<number, string>;
+  quote: boolean;
 }>) {
   const [all, setAll] = useState(false);
   const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
@@ -276,6 +279,7 @@ function Column({
           now={now[card.number] ?? null}
           mine={mine.includes(card.number)}
           hint={hints[card.number] ?? null}
+          quote={quote}
         />
       ))}
       {column.cards.length === 0 && <Empty />}

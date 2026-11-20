@@ -3,7 +3,9 @@
 // says why in one plain line and how long it has been stuck. The main way
 // on is helping the builder: answer it or give it a hint (for a question,
 // its suggested answers are quick picks) and send, which puts the card at
-// the top of To do with the reply on it. In the Stuck column (variant B)
+// the top of To do with a chip "Your hint is with the builder" (variant B
+// also quotes the reply on it; in variant A the reply belongs in the card's
+// conversation, not on its face). In the Stuck column (variant B)
 // two quiet links stay under it: "Try again as it is" (back to To do, no
 // hint) and "I'll do it myself" (to Building as a person's, so the builder
 // leaves it alone). The list above the board (variant A) has only the box.

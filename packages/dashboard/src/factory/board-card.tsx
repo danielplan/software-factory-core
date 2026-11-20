@@ -17,6 +17,7 @@ export function Card({
   now,
   mine = false,
   hint = null,
+  quote = true,
 }: Readonly<{
   card: FactoryCard;
   at: number;
@@ -25,6 +26,9 @@ export function Card({
   mine?: boolean;
   // What the person told the builder when they sent it back from Stuck.
   hint?: string | null;
+  // Whether the hint itself shows on the card, or only that it was sent
+  // (variant A: the reply belongs in the card's conversation, not its face).
+  quote?: boolean;
 }>) {
   const open = use(OpenCard);
   const building = now !== null;
@@ -65,9 +69,11 @@ export function Card({
       )}
       {hint && (
         <span className="grid w-full gap-1">
-          <span className="w-full rounded-md border-l-2 border-current/15 bg-wash/60 px-2 py-1 text-xs leading-snug text-muted-foreground italic">
-            “{hint}”
-          </span>
+          {quote && (
+            <span className="w-full rounded-md border-l-2 border-current/15 bg-wash/60 px-2 py-1 text-xs leading-snug text-muted-foreground italic">
+              “{hint}”
+            </span>
+          )}
           <span className="inline-flex items-center gap-1.5 justify-self-start rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
             <MessageCircle
               aria-hidden
