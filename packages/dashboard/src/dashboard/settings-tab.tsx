@@ -65,6 +65,8 @@ const THEMES: Theme[] = [
 type SettingsSection = {
   name: string;
   theme: Theme;
+  // A part's own settings (a settings group no add-on has).
+  part?: true;
   // What is set now, in a line.
   summary: ReactNode;
   body: ReactNode;
@@ -149,6 +151,7 @@ function sectionsOf(state: FactoryState): SettingsSection[] {
     ...groups.map((group) => ({
       name: group.name,
       theme: "This computer & advanced" as const,
+      part: true as const,
       summary: groupNow(group),
       body: <GroupCard group={group} state={state} />,
     })),
@@ -195,34 +198,45 @@ const chosen = <T extends { name: string }>(
   all.find((one) => open !== null && hashOf(one.name) === `#settings/${open}`) ??
   all[0];
 
-// A: the side list as tabs; only the chosen section shows, at its own
-// address (#settings/updates).
+// A: the side list as four tabs, one per theme; only the chosen theme
+// shows, at its own address (#settings/updates). Each part's own settings
+// sit with the add-ons and kits.
 function OneAtATime({
   sections,
   open,
 }: Readonly<{ sections: SettingsSection[]; open: string | null }>) {
-  const shown = chosen(sections, open);
+  const tabs = THEMES.map((name) => ({
+    name,
+    sections: sections.filter(
+      (section) => (section.part ? "Add-ons" : section.theme) === name,
+    ),
+  })).filter((tab) => tab.sections.length > 0);
+  const shown = chosen(tabs, open);
   return (
     <>
       <PageHead title="Settings" about={ABOUT} />
-      <div className="grid items-start gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
-        <nav aria-label="Sections" className="sticky top-6 grid gap-0.5">
-          {sections.map((section) => (
+      <div className="grid items-start gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
+        <nav aria-label="Sections" className="sticky top-6 grid gap-1">
+          {tabs.map((tab) => (
             <a
-              key={section.name}
-              href={hashOf(section.name)}
-              aria-current={section === shown ? "page" : undefined}
+              key={tab.name}
+              href={hashOf(tab.name)}
+              aria-current={tab === shown ? "page" : undefined}
               className={cn(
-                "rounded-lg px-3 py-2 text-left text-[13px] text-muted-foreground hover:bg-hover hover:text-foreground",
-                section === shown &&
-                  "bg-picked font-medium text-foreground hover:bg-picked",
+                "rounded-lg px-3 py-2.5 text-left text-[14px] text-muted-foreground hover:bg-hover hover:text-foreground",
+                tab === shown &&
+                  "bg-primary font-semibold text-primary-foreground shadow-soft hover:bg-primary hover:text-primary-foreground",
               )}
             >
-              {section.name}
+              {tab.name}
             </a>
           ))}
         </nav>
-        <div className="grid gap-5">{shown?.body}</div>
+        <div className="grid gap-5">
+          {shown?.sections.map((section) => (
+            <Fragment key={section.name}>{section.body}</Fragment>
+          ))}
+        </div>
       </div>
     </>
   );
