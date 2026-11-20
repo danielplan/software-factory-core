@@ -1,4 +1,11 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Laptop,
+  Plug,
+  Puzzle,
+  RefreshCw,
+} from "lucide-react";
 import { Fragment, type ReactNode, useState } from "react";
 
 import type { GroupView } from "@/api";
@@ -10,6 +17,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { PageHead } from "@/components/page-head";
+import { Tile } from "@/components/sidebar-links";
 import { Button } from "@/components/ui/button";
 import { type Read, useRead } from "@/lib/use-read";
 import { cn } from "@/lib/utils";
@@ -62,11 +70,20 @@ const THEMES: Theme[] = [
   "This computer & advanced",
 ];
 
+// Each theme's tab: its icon on a tint of its colour, as in the sidebar.
+const TAB_ICONS: Record<Theme, { icon: ReactNode; color: string }> = {
+  Connections: { icon: <Plug aria-hidden />, color: "var(--source-app)" },
+  Updates: { icon: <RefreshCw aria-hidden />, color: "var(--build)" },
+  "Add-ons": { icon: <Puzzle aria-hidden />, color: "var(--explore)" },
+  "This computer & advanced": {
+    icon: <Laptop aria-hidden />,
+    color: "var(--understand)",
+  },
+};
+
 type SettingsSection = {
   name: string;
   theme: Theme;
-  // A part's own settings (a settings group no add-on has).
-  part?: true;
   // What is set now, in a line.
   summary: ReactNode;
   body: ReactNode;
@@ -151,7 +168,6 @@ function sectionsOf(state: FactoryState): SettingsSection[] {
     ...groups.map((group) => ({
       name: group.name,
       theme: "This computer & advanced" as const,
-      part: true as const,
       summary: groupNow(group),
       body: <GroupCard group={group} state={state} />,
     })),
@@ -200,7 +216,8 @@ const chosen = <T extends { name: string }>(
 
 // A: the side list as four tabs, one per theme; only the chosen theme
 // shows, at its own address (#settings/updates). Each part's own settings
-// sit with the add-ons and kits.
+// sit under This computer & advanced. The chosen tab looks like the chosen
+// page in the sidebar (its text and its coloured icon), without the fill.
 function OneAtATime({
   sections,
   open,
@@ -208,14 +225,14 @@ function OneAtATime({
   const tabs = THEMES.map((name) => ({
     name,
     sections: sections.filter(
-      (section) => (section.part ? "Add-ons" : section.theme) === name,
+      (section) => section.theme === name,
     ),
   })).filter((tab) => tab.sections.length > 0);
   const shown = chosen(tabs, open);
   return (
     <>
       <PageHead title="Settings" about={ABOUT} />
-      <div className="grid items-start gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <nav aria-label="Sections" className="sticky top-6 grid gap-1">
           {tabs.map((tab) => (
             <a
@@ -223,11 +240,18 @@ function OneAtATime({
               href={hashOf(tab.name)}
               aria-current={tab === shown ? "page" : undefined}
               className={cn(
-                "rounded-lg px-3 py-2.5 text-left text-[14px] text-muted-foreground hover:bg-hover hover:text-foreground",
+                "flex h-8 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-left text-[13px] font-normal text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
                 tab === shown &&
-                  "bg-primary font-semibold text-primary-foreground shadow-soft hover:bg-primary hover:text-primary-foreground",
+                  "text-sidebar-active-foreground hover:text-sidebar-active-foreground",
               )}
             >
+              <Tile
+                color={
+                  tab === shown ? TAB_ICONS[tab.name].color : "var(--sidebar-muted)"
+                }
+              >
+                {TAB_ICONS[tab.name].icon}
+              </Tile>
               {tab.name}
             </a>
           ))}
