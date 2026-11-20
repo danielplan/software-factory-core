@@ -75,15 +75,43 @@ Checks:
 
 ## Status
 
-in progress
+done
 
-- [ ] Board rules (decide): whose card, stuck, hand-back, cards from before
-- [ ] The builder: stuck → Backlog + label, label off on start, branch taken
-- [ ] Core: free only the factory's own copies
-- [ ] Server: stuck cards in the work view, hint endpoint, ideas without them
-- [ ] Factory page: Stuck list, hint chip; Home
-- [ ] Docs, CHANGELOG, show-result, update-context
+- [x] Board rules (decide): whose card, stuck, hand-back, cards from before
+- [x] The builder: stuck → Backlog + label, label off on start, branch taken
+- [x] Core: free only the factory's own copies
+- [x] Server: stuck cards in the work view, hint on the answer, ideas without them
+- [x] Factory page: Stuck list, hint chip; Home
+- [x] Docs (architecture), CHANGELOG, show-result
 
 ## Result
 
+The Factory page with two stuck cards: one where the builder asks (its
+suggested answers as quick picks), one with red checks:
+
+![The Stuck list above the board](002-builder-keeps-to-its-own-cards/stuck-list.png)
+
+After picking B and sending: the card leaves Stuck, and at the board's next
+reading it is first in To do with "Your hint is with the builder":
+
+![The card in To do with the hint chip](002-builder-keeps-to-its-own-cards/hint-in-to-do.png)
+
+Checked: `npm run verify` passes in full (337 tests, 96.8% of lines
+covered). New tests: the board rules (a card in In progress without the
+builder's start is not resumed, with it it is, a later note ends it; stuck
+cards, hand-back, cards from before), the builder (red checks, a question and
+a failure each go to Backlog with the label; To do again starts it and takes
+the label off; a card moved to In progress by hand and one whose branch is
+open in a person's worktree are left alone, with one `by-hand` note), the
+core (a branch open outside the factory's folders, or in the owner's own
+checkout, is never detached), the Stuck list's words and Home.
+
+Not checked: against a real GitHub board. The screenshots are the real page
+on a copy of the example company with the board's answer made up in the
+browser (the copy has no board); the label commands are checked as the
+commands they make, not run against GitHub.
+
 ## Later
+
+- A card a person works on in In progress could say so on the Factory page
+  ("In progress by hand"); the plan did not ask for it.
