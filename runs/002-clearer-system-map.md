@@ -26,8 +26,8 @@ What people see (as in prototype A3):
    to exactly the parts that need it, its arrow at the part that needs it.
    Pointing at a part brings out its own lines and the parts at their other
    ends; the others fade. A line under the map says how to read it.
-2. **A type tag in each box,** on its own small line just above the part's
-   name, at the box's left edge: Screen, Backend, Data or Outside service,
+2. **A type tag in each box,** inside it, in the header row right after the
+   part's name, on the same line: Screen, Backend, Data or Outside service,
    each with its own colour and small icon. No key under the map: pointing
    at a tag, focusing it with the keyboard or tapping it shows only that
    tag's meaning: Screen "what people open, a web page or app"; Backend
@@ -55,10 +55,12 @@ Checks:
 
 Decisions made while building (cheap to change):
 
-- The tag follows the prototype's last version (its own line above the name,
-  at the box's left edge), not the earlier "beside the name" in the card's
-  text: "What we learned" and the last prototype change both say above the
-  name.
+- The tag first followed the prototype (its own line above the name); the
+  card's agreed text, updated by the owner, asks for it in the header row next
+  to the name, on the same line, so it now sits there.
+- A long name next to a wide tag ("Payment service" beside "Outside
+  service") wraps onto a second line rather than being cut short, so the tag
+  never hides part of the name.
 - No guessing of a part's type from its name (the prototype guessed, since
   parts did not say): a guess shown as a fact can be wrong; a part without a
   type shows no tag, and its product can say it.
@@ -76,7 +78,7 @@ done
 
 System's "Your product" is a map: each part a box with a line to each part
 that needs it, laid out left to right (top to bottom on a phone). Each box
-has a small coloured type tag above the part's name; pointing at it, focusing
+has a small coloured type tag right after the part's name, on the same line; pointing at it, focusing
 it with the keyboard or tapping it shows only that type's meaning. There is no
 key under the map. Parts say their type: the kits set it, and a product's
 `product.json` may say its own (`"type": "data"`), which wins.
@@ -90,15 +92,16 @@ copy-paste, tests with coverage, records, docs). In the browser, with a copy of
 the example company given three made-up products more (a back office, a
 database and a payment service, only in a throwaway folder): the map and its
 lines, pointing at a part and at a tag, a tag focused with the keyboard (only
-its meaning shows), a phone-sized screen and a tap on a tag.
+its meaning shows), a phone-sized screen. Later, with the tag moved next to the name: the map,
+pointing at a tag and the phone again; every part's name shows in full (a
+long one on two lines).
 
 ![System with the map: five parts, each with its type tag](002-clearer-system-map/system-map.png)
 ![Pointing at the Outside service tag: its meaning, and Payments' own line brought out](002-clearer-system-map/pointing-at-a-tag.png)
-![On a phone the map runs top to bottom](002-clearer-system-map/phone.png)
-![On a phone, a tap on a tag shows its meaning](002-clearer-system-map/phone-tap-a-tag.png)
+![On a phone the map runs top to bottom; the Outside service tag's meaning shown](002-clearer-system-map/phone.png)
 
-Not checked: a real phone or tablet (the phone screenshots are a narrow
-desktop browser; the tap was a mouse click); screen readers beyond the tag's
+Not checked: a real phone or tablet (the phone screenshot is a narrow
+desktop browser; a tap was tried as a mouse click, before the tag moved); screen readers beyond the tag's
 name, which carries its meaning; parts actually running (the example
 company's apps do not start here), so the lights are all "stopped".
 

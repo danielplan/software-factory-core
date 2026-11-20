@@ -5,7 +5,7 @@
 // brings out its own lines and the parts at their other ends. On a narrow
 // screen (a phone) the map runs top to bottom instead, so the boxes keep a
 // size that can be read. Each box has a
-// tag on a small line above its name saying what type of part it is;
+// tag right after its name, on the same line, saying what type of part it is;
 // pointing at the tag, focusing it or tapping it tells what that type means.
 
 import "@xyflow/react/dist/style.css";
