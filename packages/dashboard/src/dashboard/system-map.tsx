@@ -2,9 +2,9 @@
 // left to right with ELK (the same layout as an exploration's board), and a
 // line from each part to exactly the parts it needs. Pointing at a part
 // brings out its own lines and the parts at their other ends.
-// Each box has a tag next to its name saying what kind of part it is; pointing
-// at it tells what that kind means (the kind is guessed for now, in
-// part-kind.ts).
+// Each box has a tag on a small line above its name saying what kind of part
+// it is; pointing at it tells what that kind means (the kind is guessed for
+// now, in part-kind.ts).
 // Prototype: a first try of a clearer System map.
 
 import "@xyflow/react/dist/style.css";

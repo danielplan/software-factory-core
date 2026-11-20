@@ -13,7 +13,8 @@ import {
 
 // One part, compact: its light, name and Open link, what it is doing, its
 // buttons, and its problem below; its frame tells how it is. A `tag`, when
-// given, sits next to the name (the System map's kind of part).
+// given, sits on its own small line just above the name, lined up with it
+// (the System map's kind of part).
 const FRAME: Record<PartView["light"], string> = {
   running: "border-success/40",
   starting: "border-primary/60 shadow-[0_0_0_4px_var(--tint-line)]",
@@ -47,10 +48,16 @@ export function PartCard({
         FRAME[part.light],
       )}
     >
+      {tag && (
+        // Lined up with the name: past the light (its dot and the gap after
+        // it), when there is one.
+        <div className={cn("-mb-0.5 flex", part.light !== "none" && "pl-4")}>
+          {tag}
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <StatusLight light={part.light} />
         <span className="truncate text-[13px] font-medium">{part.name}</span>
-        {tag}
         {part.link && (
           <a
             href={part.link}
