@@ -36,6 +36,8 @@ export type VersionRun = {
   // when it makes it.
   activity: string | null;
   since: string | null;
+  // What the kobold did while it made it, oldest first: its trace.
+  steps: string[];
   // Why it stopped or could not start, or what is odd about it.
   problem: string | null;
 };
@@ -77,6 +79,7 @@ export class PrototypeMode {
         url: null,
         activity: null,
         since: null,
+        steps: [],
         problem: null,
       }
     );

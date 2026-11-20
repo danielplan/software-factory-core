@@ -33,8 +33,7 @@ import {
   prototypeOf,
   shownAddress,
   choicePrototype,
-  cutOffIn,
-  cutRun,
+  runsShown,
   type Made,
   markedIn,
   freeVariant,
@@ -99,22 +98,10 @@ export class ExplorationPrototypes {
   // How each prototype runs; one the factory closed on while it was being
   // made says so.
   runs(exploration: string): VersionRun[] {
-    const cut = this.cutOff(exploration);
-    const runs = this.mode.view(exploration);
-    const known = new Set(runs.map((run) => run.version));
-    return [
-      ...runs.map((run) => (cut.has(run.version) ? cutRun(run) : run)),
-      ...[...cut]
-        .filter((key) => !known.has(key))
-        .map((key) => cutRun(this.mode.runOf(exploration, key))),
-    ];
-  }
-
-  // The prototypes marked as being made that no maker is on now.
-  private cutOff(exploration: string): Set<string> {
-    return cutOffIn(
+    return runsShown(
       this.options.store().board(exploration),
-      (key) => this.mode.runOf(exploration, key).making,
+      (key) => this.mode.runOf(exploration, key),
+      this.mode.view(exploration),
     );
   }
 
@@ -181,6 +168,7 @@ export class ExplorationPrototypes {
     this.mode.set(exploration.id, key, {
       making: true,
       activity: change ? "Starting the change" : "Starting",
+      steps: [],
       problem: null,
     });
     this.mark(exploration.id, key, { making: true });
@@ -334,7 +322,11 @@ export class ExplorationPrototypes {
         session: { id: session, resume },
         timeLimitMs: TIME_LIMIT_MS,
         onActivity: (line) => {
-          this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
+          const { steps } = this.mode.runOf(exploration.id, key);
+          this.mode.set(exploration.id, key, {
+            activity: line.slice(0, 80),
+            steps: [...steps, line.slice(0, 200)].slice(-60),
+          });
         },
       });
     const asked = askFor(exploration, board, made, {

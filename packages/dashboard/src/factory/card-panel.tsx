@@ -8,6 +8,7 @@ import { ArrowUpRight, GitPullRequest, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { get, messageOf, post } from "@/api";
+import { AgentTrace } from "@/components/agent-trace";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
@@ -18,10 +19,16 @@ import { DeleteCard } from "./delete-card";
 
 export function CardPanel({
   number,
+  title,
+  trace,
   onClose,
   onDelete,
 }: Readonly<{
   number: number;
+  // Shown at once, from the board, while the rest loads.
+  title: string | null;
+  // What the builder did on it so far, while it builds.
+  trace: string[];
   onClose: () => void;
   onDelete: () => void;
 }>) {
@@ -71,7 +78,16 @@ export function CardPanel({
         {problem && (
           <p className="px-5 pt-4 text-[13px] text-destructive">{problem}</p>
         )}
-        {panel ? <Body panel={panel} onPick={pick} /> : !problem && <Loading />}
+        {trace.length > 0 && (
+          <div className="border-b border-border-soft px-5 py-4">
+            <AgentTrace steps={trace} live title="What the builder is doing" />
+          </div>
+        )}
+        {panel ? (
+          <Body panel={panel} onPick={pick} />
+        ) : (
+          !problem && <Loading title={title} />
+        )}
         {panel && (
           <DeleteCard
             number={number}
@@ -115,9 +131,10 @@ function PanelHead({
   );
 }
 
-function Loading() {
+function Loading({ title }: Readonly<{ title: string | null }>) {
   return (
     <div className="grid gap-3 p-5">
+      {title && <h2 className="text-[17px] font-semibold">{title}</h2>}
       {[70, 40, 90].map((width) => (
         <span
           key={width}

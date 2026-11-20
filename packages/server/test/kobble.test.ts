@@ -476,6 +476,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
           title: "Basket",
           what: "building",
           activity: "Running the checks",
+          steps: [],
         },
         also: [],
         activity: null,

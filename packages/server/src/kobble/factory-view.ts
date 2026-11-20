@@ -25,6 +25,8 @@ export type FactoryCard = {
   // A fix of a signal.
   fix: boolean;
   type: CardView["type"];
+  // The pull request the builder opened for it, once it has.
+  pullRequest: string | null;
 };
 
 export type FactoryView = {
@@ -41,6 +43,7 @@ export type FactoryView = {
     working: string | null;
     cards: number[];
     now: Record<number, string>;
+    trace: Record<number, string[]>;
   };
 };
 
@@ -111,6 +114,7 @@ export function factoryView(
           : null,
         fix: fixes.has(`#${String(card.number)}`),
         type: card.type ?? null,
+        pullRequest: card.pullRequest,
       },
     };
   });
@@ -136,6 +140,8 @@ function builderOf(work: WorkView | null): FactoryView["builder"] {
   return {
     on: builder?.on ?? false,
     cards: cards.map((one) => one.number),
+    // What it did on each card so far, step by step: its trace.
+    trace: Object.fromEntries(cards.map((one) => [one.number, one.steps])),
     now: Object.fromEntries(
       cards.map((one) => [
         one.number,

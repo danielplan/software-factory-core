@@ -319,6 +319,7 @@ function workingOf(one: Running) {
     title: one.title,
     what: WHAT[one.job.kind],
     activity: one.steps.at(-1) ?? null,
+    steps: [...one.steps],
   };
 }
 

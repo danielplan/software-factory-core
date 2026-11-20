@@ -222,3 +222,20 @@ export function cutRun(run: VersionRun): VersionRun {
       "It stopped while being made: the factory closed. Ask the kobold to make it again.",
   };
 }
+
+// How each prototype runs, as the board shows it: one marked as being made
+// that no maker is on now (the factory closed meanwhile) says so.
+export function runsShown(
+  board: Board,
+  runOf: (key: string) => VersionRun,
+  runs: VersionRun[],
+): VersionRun[] {
+  const cut = cutOffIn(board, (key) => runOf(key).making);
+  const known = new Set(runs.map((run) => run.version));
+  return [
+    ...runs.map((run) => (cut.has(run.version) ? cutRun(run) : run)),
+    ...[...cut]
+      .filter((key) => !known.has(key))
+      .map((key) => cutRun(runOf(key))),
+  ];
+}

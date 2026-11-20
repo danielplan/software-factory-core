@@ -1,7 +1,12 @@
 // A card on the Factory board, opened beside it on a click; while the
 // builder is on it, what it is doing right now.
 
-import { FlaskConical, LoaderCircle } from "lucide-react";
+import {
+  ArrowUpRight,
+  FlaskConical,
+  GitPullRequest,
+  LoaderCircle,
+} from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
@@ -19,9 +24,16 @@ export function Card({
   const open = use(OpenCard);
   const building = now !== null;
   return (
-    <button
-      type="button"
-      className="relative flex flex-none flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
+    <div
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(card.number);
+        }
+      }}
+      className="relative flex flex-none cursor-pointer flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
       style={{ animationDelay: `${String(Math.min(at, 8) * 45)}ms` }}
       onClick={() => {
         open(card.number);
@@ -66,7 +78,8 @@ export function Card({
         </span>
       )}
       <Origin card={card} />
-    </button>
+      <PullRequestLink url={card.pullRequest} />
+    </div>
   );
 }
 
@@ -74,6 +87,26 @@ export function Card({
 export const OpenCard = createContext<(number: number) => void>(
   () => undefined,
 );
+
+// The card's pull request, a click away, without opening the card.
+function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
+  if (!url) return null;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+      className="inline-flex h-[24px] items-center gap-1.5 rounded-md border border-border bg-card px-2 text-xs font-medium text-foreground hover:bg-ground"
+    >
+      <GitPullRequest aria-hidden className="size-3.5" />
+      Pull request
+      <ArrowUpRight aria-hidden className="size-3 text-muted-foreground" />
+    </a>
+  );
+}
 
 // The exploration a card was handed off from, as one quiet line; nothing
 // when the card has its title already.
