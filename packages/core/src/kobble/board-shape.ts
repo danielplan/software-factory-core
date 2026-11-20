@@ -60,55 +60,97 @@ export function fromEarlier(data: unknown): unknown {
 
 // A board from the short-lived versions shape (20 Nov 2026): a prototype's
 // versions in one frame (`frame`, `from`, `option`), each on its own branch.
-// Read as prototypes of their own: each option joined to its choice, each
-// change to the prototype it was made from. Null when it is not that shape.
+// Read as one prototype per option: a chain of changes (A → A2 → A3) is
+// one prototype iterated, shown at its latest change (agreed when any of
+// the chain was), and the arrows to any of the chain lead there; each
+// option is joined to its choice. Null when it is not that shape.
 type Loose = Record<string, unknown>;
+
+const versionedIn = (thing: Loose) =>
+  thing.kind === "prototype" && ("frame" in thing || "option" in thing);
 
 export function fromVersions(data: unknown): unknown {
   const board = data as { things?: Loose[]; links?: Loose[] } | null;
   const things = board?.things;
   if (!Array.isArray(things) || !Array.isArray(board?.links)) return null;
-  const versioned = (thing: Loose) =>
-    thing.kind === "prototype" && ("frame" in thing || "option" in thing);
-  if (!things.some(versioned)) return null;
-  const byKey = new Map(things.map((thing) => [thing.key, thing.id]));
-  const links = [...board.links];
+  if (!things.some(versionedIn)) return null;
+  const chains = chainsOf(things);
   const isChoice = (id: unknown) =>
     things.some((thing) => thing.id === id && thing.kind === "choice");
   const choiceOf = new Map(
-    links
-      .filter((link) => isChoice(link.from))
-      .map((link) => [link.to, link.from]),
+    board.links.filter((l) => isChoice(l.from)).map((l) => [l.to, l.from]),
   );
-  const cleaned = things.map((thing) => {
-    if (!versioned(thing)) return thing;
-    const { frame, from, option, ...rest } = thing;
-    const base = typeof from === "string" ? byKey.get(from) : undefined;
-    const choice = choiceOf.get(typeof frame === "string" ? frame : thing.id);
-    const source = base ?? (frame === undefined ? undefined : choice);
-    if (source && !links.some((link) => link.to === thing.id))
-      links.push({
-        id: `link-${String(thing.id)}`,
-        from: source,
-        to: thing.id,
-        label: base ? "changed" : optionOf(option),
-      });
-    return rest;
-  });
-  return {
-    things: cleaned,
-    links: links.map((link) => {
-      const made = things.find((t) => t.id === link.to && versioned(t));
-      return made &&
-        isChoice(link.from) &&
-        !made.frame &&
-        typeof made.option === "string"
-        ? { ...link, label: made.option }
-        : link;
-    }),
+  const links: Loose[] = [];
+  const add = (link: Loose) => {
+    if (link.from === link.to) return;
+    if (links.some((one) => one.from === link.from && one.to === link.to))
+      return;
+    links.push(link);
   };
+  for (const link of board.links)
+    add({
+      ...link,
+      from: chains.at.get(link.from) ?? link.from,
+      to: chains.at.get(link.to) ?? link.to,
+    });
+  const kept = things.flatMap((thing): Loose[] => {
+    if (!versionedIn(thing)) return [thing];
+    if (typeof thing.from === "string") return [];
+    const last = chains.latest.get(thing.id) ?? thing;
+    const { frame, option } = thing;
+    const choice = choiceOf.get(typeof frame === "string" ? frame : thing.id);
+    if (typeof choice === "string") {
+      const label = typeof option === "string" ? option : "";
+      const at = links.findIndex(
+        (one) => one.from === choice && one.to === last.id,
+      );
+      if (at >= 0) links[at] = { ...links[at], label };
+      else
+        add({
+          id: `link-${String(last.id)}`,
+          from: choice,
+          to: last.id,
+          label,
+        });
+    }
+    const plain = Object.fromEntries(
+      Object.entries(last).filter(
+        ([name]) => !["frame", "from", "option"].includes(name),
+      ),
+    );
+    return [
+      {
+        ...plain,
+        place: thing.place ?? null,
+        agreed: chains.agreed.has(thing.id),
+      },
+    ];
+  });
+  return { things: kept, links };
 }
 
-function optionOf(option: unknown): string {
-  return typeof option === "string" ? option : "";
+// Each chain of changes: where its things now are (the latest change), the
+// latest change of each first one, and which chains are agreed.
+function chainsOf(things: Loose[]) {
+  const changedTo = new Map<unknown, Loose>();
+  for (const thing of things)
+    if (versionedIn(thing) && typeof thing.from === "string")
+      changedTo.set(thing.from, thing);
+  const at = new Map<unknown, unknown>();
+  const latest = new Map<unknown, Loose>();
+  const agreed = new Set<unknown>();
+  for (const first of things) {
+    if (!versionedIn(first) || typeof first.from === "string") continue;
+    const chain = [first];
+    let next = changedTo.get(first.key);
+    while (next && !chain.includes(next)) {
+      chain.push(next);
+      next = changedTo.get(next.key);
+    }
+    const last = chain.at(-1) ?? first;
+    latest.set(first.id, last);
+    for (const one of chain) at.set(one.id, last.id);
+    if (chain.some((one) => one.agreed === true)) agreed.add(first.id);
+  }
+  return { at, latest, agreed };
 }

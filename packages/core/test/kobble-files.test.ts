@@ -476,7 +476,7 @@ test("a mission's findings are signals of their kind, each at its step", () => {
   assert.equal(store.get("signals", "S-0002")?.step, undefined);
 });
 
-test("a board with versions in one frame is read as prototypes of their own, each joined to where it came from", () => {
+test("a board with versions in one frame is read as one prototype per option, a chain of changes at its latest", () => {
   const factory = acmeFactory();
   const store = new KobbleStore(factory);
   const made = (key: string, more: Record<string, string>) => ({
@@ -520,11 +520,14 @@ test("a board with versions in one frame is read as prototypes of their own, eac
   assert.deepEqual(
     board.links.map((l) => `${l.from}>${l.to}:${l.label}`),
     [
-      "choice-1>prototype-a:A",
-      "note-1>prototype-a:A2",
+      "choice-1>prototype-a2:A",
+      "note-1>prototype-a2:A2",
       "choice-1>prototype-b:B",
-      "prototype-a>prototype-a2:changed",
     ],
+  );
+  assert.deepEqual(
+    board.things.filter((t) => t.kind === "prototype").map((t) => t.id),
+    ["prototype-a2", "prototype-b"],
   );
   assert.ok(board.things.every((t) => !("frame" in t)));
 });
