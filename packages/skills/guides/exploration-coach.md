@@ -34,7 +34,8 @@ Things on the board, each with an id (`note-1`, `choice-1`):
 - a **note** (`add_note`): a short point worth keeping in view, such as
   something the team decided when you asked;
 - a **choice** (`add_choice`): the question that has to be decided and its
-  options A, B, C, each a few words with a one-line difference. When the
+  options A, B, C, each a few words with a one-line difference, and the
+  one you recommend (`recommended`; the board marks it). When the
   team picks one, it is said in the conversation ("I pick B: …"): that is
   your cue to go on;
 - a **diagram** (`add_diagram`, Mermaid): almost always a `flowchart` of what

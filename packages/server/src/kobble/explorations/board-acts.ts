@@ -20,7 +20,12 @@ import {
 export type Act =
   | { act: "note"; text: string }
   | { act: "diagram"; title: string; diagram: string }
-  | { act: "choice"; title: string; options: Partial<Option>[] }
+  | {
+      act: "choice";
+      title: string;
+      options: Partial<Option>[];
+      recommended?: string;
+    }
   | {
       act: "change";
       id: string;
@@ -29,6 +34,7 @@ export type Act =
       diagram?: string;
       options?: Partial<Option>[];
       removeOptions?: string[];
+      recommended?: string;
     }
   | { act: "remove"; id: string }
   | { act: "link"; from: string; to: string; label?: string }
@@ -78,9 +84,44 @@ function changed(board: Board, act: Change): Done {
   )
     next.title = act.title.trim();
   if (next.kind === "diagram" && act.diagram) next.diagram = act.diagram;
-  if (next.kind === "choice")
+  if (next.kind === "choice") {
     next.options = choiceOptions(board, next.options, act);
+    const recommended = recommendedOf(next.options, act.recommended);
+    if (recommended) next.recommended = recommended;
+    else if (!next.options.some((one) => one.key === next.recommended))
+      delete next.recommended;
+  }
   return { board: withThing(board, next), said: `Changed ${act.id}.` };
+}
+
+function newChoice(
+  board: Board,
+  act: Extract<Act, { act: "choice" }>,
+  by: By,
+): Thing {
+  const options = withOptions([], act.options);
+  const recommended = recommendedOf(options, act.recommended);
+  return {
+    id: newId(board, "choice"),
+    kind: "choice",
+    ...fresh(by),
+    title: act.title.trim(),
+    options,
+    chosen: null,
+    ...(recommended ? { recommended } : {}),
+  };
+}
+
+// The option recommended, by its letter; one the choice has not refused.
+function recommendedOf(
+  options: Option[],
+  key: string | undefined,
+): string | undefined {
+  const letter = key?.trim().toUpperCase();
+  if (!letter) return undefined;
+  if (!options.some((one) => one.key === letter))
+    throw new Refused(`There is no option ${letter} to recommend.`);
+  return letter;
 }
 
 export function applyAct(board: Board, act: Act, by: By): Done {
@@ -101,14 +142,7 @@ export function applyAct(board: Board, act: Act, by: By): Done {
         diagram: act.diagram,
       });
     case "choice":
-      return added(board, {
-        id: newId(board, "choice"),
-        kind: "choice",
-        ...fresh(by),
-        title: act.title.trim(),
-        options: withOptions([], act.options),
-        chosen: null,
-      });
+      return added(board, newChoice(board, act, by));
     case "change":
       return changed(board, act);
     case "remove":

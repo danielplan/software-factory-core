@@ -153,7 +153,8 @@ function line(thing: Thing, exploration: Exploration): string {
       return [
         `${head}: ${thing.title}${thing.chosen ? " (chosen: " + thing.chosen + ")" : ""}`,
         ...thing.options.map(
-          (o) => `    ${o.key}. ${o.name}: ${o.difference || "—"}`,
+          (o) =>
+            `    ${o.key}. ${o.name}: ${o.difference || "—"}${o.key === thing.recommended ? " (you recommend it)" : ""}`,
         ),
       ].join("\n");
     case "prototype":

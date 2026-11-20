@@ -155,6 +155,8 @@ export const thingSchema = z.discriminatedUnion("kind", [
     title: text,
     options: z.array(optionSchema),
     chosen: optionKey.nullable(),
+    // The option the kobold recommends, when it does.
+    recommended: optionKey.optional(),
   }),
   z.strictObject({
     ...common,

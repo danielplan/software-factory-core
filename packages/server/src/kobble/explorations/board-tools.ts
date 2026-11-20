@@ -73,18 +73,28 @@ const TOOLS: {
   {
     name: "add_choice",
     description:
-      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference.",
-    input: { title: z.string().min(1), options: z.array(option) },
+      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference, and the one you recommend (its letter), which the board marks.",
+    input: {
+      title: z.string().min(1),
+      options: z.array(option),
+      recommended: z
+        .string()
+        .optional()
+        .describe("The option you recommend (A, B …)."),
+    },
     act: (a) => ({
       act: "choice",
       title: String(a.title),
       options: a.options as Partial<Option>[],
+      ...(typeof a.recommended === "string"
+        ? { recommended: a.recommended }
+        : {}),
     }),
   },
   {
     name: "change_thing",
     description:
-      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter).",
+      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter) or the option you recommend.",
     input: {
       id: z.string(),
       text: z.string().optional(),
@@ -92,6 +102,7 @@ const TOOLS: {
       diagram: z.string().optional(),
       options: z.array(option).optional(),
       removeOptions: z.array(z.string()).optional(),
+      recommended: z.string().optional(),
     },
     act: (a) => ({ act: "change", ...(a as { id: string }) }),
   },

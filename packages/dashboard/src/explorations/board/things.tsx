@@ -2,10 +2,12 @@
 // (a yellow note with its personas), what we heard (its signals with their
 // persona's face), a note, a choice (the question and its options: click
 // one to pick it, and the kobold goes on, making its prototype when that
-// helps; a picked option with a prototype says so), a diagram (drawn
+// helps; the one the kobold recommends and those with a prototype say so),
+// a diagram (drawn
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
+import { Sparkles } from "lucide-react";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
@@ -75,17 +77,15 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "choice") return null;
-  // This choice's options that have a prototype: the arrows from it,
-  // labelled with the option, to a prototype.
-  const prototypes = new Set(
-    page.board.things.flatMap((one) =>
-      one.kind === "prototype" ? [one.id] : [],
-    ),
-  );
+  // This choice's options that have a prototype: the variants of the
+  // prototypes its arrows lead to, or (older boards) the arrows' labels.
   const made = new Set(
-    page.board.links.flatMap((link) =>
-      link.from === thing.id && prototypes.has(link.to) ? [link.label] : [],
-    ),
+    page.board.links.flatMap((link) => {
+      if (link.from !== thing.id) return [];
+      const to = page.board.things.find((one) => one.id === link.to);
+      if (to?.kind !== "prototype") return [];
+      return to.variants?.map((one) => one.key) ?? [link.label];
+    }),
   );
   return (
     <Frame data={data} title={thing.title}>
@@ -116,6 +116,15 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
               {option.key}
             </span>
             <span className="flex-1">{option.name}</span>
+            {thing.recommended === option.key && (
+              <span
+                title="The kobold recommends this one"
+                className="inline-flex h-5 flex-none items-center gap-1 rounded-full bg-wash px-2 text-[11px] font-medium text-wash-foreground"
+              >
+                <Sparkles aria-hidden className="size-3" />
+                Recommended
+              </span>
+            )}
           </button>
           {made.has(option.key) && (
             <span className="text-[11px] font-medium text-muted-foreground">

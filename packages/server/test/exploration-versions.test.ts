@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import { opensIn, shownAddress } from "../src/kobble/explorations/versions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 import { inGit } from "./git-project.ts";
@@ -122,4 +123,44 @@ test("the page a prototype opens on and the variant shown make its address", () 
     shownAddress("http://127.0.0.1:5301/x", null),
     "http://127.0.0.1:5301/x",
   );
+});
+
+test("a choice marks the option the kobold recommends, and only one it has", () => {
+  const empty = { things: [], links: [] };
+  const made = applyAct(
+    empty,
+    {
+      act: "choice",
+      title: "Where?",
+      options: [{ name: "Top" }, { name: "Bottom" }],
+      recommended: "b",
+    },
+    "kobold",
+  ).board;
+  const choice = made.things[0];
+  assert.ok(choice?.kind === "choice");
+  assert.equal(choice.recommended, "B");
+  assert.throws(
+    () =>
+      applyAct(
+        made,
+        { act: "change", id: "choice-1", recommended: "Z" },
+        "kobold",
+      ),
+    /no option Z to recommend/,
+  );
+  const changed = applyAct(
+    made,
+    { act: "change", id: "choice-1", removeOptions: ["B"] },
+    "kobold",
+  ).board.things[0];
+  assert.ok(changed?.kind === "choice");
+  assert.equal(changed.recommended, undefined);
+  const again = applyAct(
+    made,
+    { act: "change", id: "choice-1", recommended: "A" },
+    "kobold",
+  ).board.things[0];
+  assert.ok(again?.kind === "choice");
+  assert.equal(again.recommended, "A");
 });
