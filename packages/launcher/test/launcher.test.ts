@@ -307,6 +307,22 @@ test("a part that starts with others has no buttons of its own, until it has a p
   assert.equal(viewOf(part, inner, null).canStart, true);
 });
 
+test("a part's view says its type, or null when it has none", () => {
+  const part = (type?: string): Part =>
+    partSchema.parse({
+      id: "web",
+      name: "Web",
+      area: "products",
+      does: "Shows.",
+      run: ["npm", "start"],
+      start: "auto",
+      type,
+    });
+  const view = (one: Part) => viewOf(one, newPartLight(one), null).type;
+  assert.equal(view(part("screen")), "screen");
+  assert.equal(view(part()), null);
+});
+
 test("a program of another copy of the project on a part's port is a problem, not this part", async () => {
   const port = await freePort();
   const copy = launcherWith([serving("api", port)]);
