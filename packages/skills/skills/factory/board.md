@@ -123,6 +123,9 @@ names the files: settle them first.
 
 ## Review comments (the builder, card in Review)
 
+Your answer here is said on the pull request as a comment; the pull
+request's description stays about the whole card.
+
 The owner commented on the card or the pull request. Change what they asked
 on the same branch, run the checks again, and answer what you changed, point
 by point. `STATUS: done`, or `STATUS: blocked` with one clear question.

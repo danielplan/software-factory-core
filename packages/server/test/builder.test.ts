@@ -98,7 +98,10 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
   );
   assert.deepEqual(work.view().builder.steps, []);
 
-  // A review comment is answered on the same branch.
+  // A review comment is answered on the same branch; a draft becomes
+  // ready, and its description stays about the whole card.
+  const description = pr.body;
+  pr.draft = true;
   pr.thread.push({
     author: "owner",
     body: "Rename it",
@@ -109,6 +112,8 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
   await settled(work);
   assert.equal(readNote(pr.thread.at(-1)?.body ?? ""), "fixed");
   assert.match(pr.thread.at(-1)?.body ?? "", /Renamed it/);
+  assert.equal(pr.draft, false);
+  assert.equal(pr.body, description);
   assert.match(
     await run("git", [
       "-C",

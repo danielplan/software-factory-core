@@ -260,12 +260,10 @@ export class Jobs {
         await this.sayOnPullRequest(pr.number, checked.blocked, "blocked");
         return;
       }
+      // The description stays about the whole card: what this round did
+      // is said on the pull request instead.
       if (!checked.passed) {
-        await this.options.pullRequests.update(
-          pr.number,
-          `${answer.text}\n\n${failedChecksSection(checked.report)}`,
-          true,
-        );
+        await this.options.pullRequests.update(pr.number, null, true);
         await this.sayOnPullRequest(
           pr.number,
           `${answer.text}\n\nThe checks still fail after ${String(FIX_ROUNDS)} rounds of fixing, so this is a draft until they pass:\n\n${checked.report}`,
@@ -274,11 +272,7 @@ export class Jobs {
         return;
       }
       if (pr.draft)
-        await this.options.pullRequests.update(
-          pr.number,
-          `${answer.text}\n\nCloses #${String(card.number)}.`,
-          false,
-        );
+        await this.options.pullRequests.update(pr.number, null, false);
     }
     await this.sayOnPullRequest(pr.number, answer.text, note);
   }

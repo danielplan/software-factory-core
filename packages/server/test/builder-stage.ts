@@ -200,7 +200,7 @@ export function pretendPullRequests() {
     },
     update: (number, body, draft) => {
       const pr = made.find((p) => p.number === number);
-      if (pr) Object.assign(pr, { body, draft });
+      if (pr) Object.assign(pr, { draft, ...(body === null ? {} : { body }) });
       return Promise.resolve();
     },
     comment: (number, text) => {
