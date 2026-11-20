@@ -13,7 +13,7 @@ function doingOf(page: ExplorationPage): string | null {
   if (talk.writing !== null)
     return talk.writing ? "Talking with you" : (talk.activity ?? "Thinking…");
   const making = page.runs.find((run) => run.state === "making");
-  return making ? `Making version ${making.version}` : null;
+  return making ? `Making prototype ${making.version}` : null;
 }
 
 // Who talks here: the explorer kobold on a tile of its colour, its name and

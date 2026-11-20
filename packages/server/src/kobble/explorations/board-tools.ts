@@ -131,6 +131,17 @@ const TOOLS: {
     act: (a) => ({ act: "unlink", from: String(a.from), to: String(a.to) }),
   },
   {
+    name: "choose_option",
+    description:
+      "Mark the option the team picked on a choice (its letter), or none to take it back. Use it when they decide; never write the decision into the choice's title.",
+    input: { id: z.string(), option: z.string().nullable() },
+    act: (a) => ({
+      act: "choose",
+      id: String(a.id),
+      option: typeof a.option === "string" ? a.option.toUpperCase() : null,
+    }),
+  },
+  {
     name: "agree",
     description:
       "Mark a thing agreed (talked through and agreed with the team) or a sketch again. One prototype at most is agreed.",
