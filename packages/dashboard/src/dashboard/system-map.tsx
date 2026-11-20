@@ -2,6 +2,8 @@
 // left to right with ELK (the same layout as an exploration's board), and a
 // line from each part to exactly the parts it needs. Pointing at a part
 // brings out its own lines and the parts at their other ends.
+// Each box has a tag saying what kind of part it is, explained in a key
+// under the map (the kind is guessed for now, in part-kind.ts).
 // Prototype: a first try of a clearer System map.
 
 import "@xyflow/react/dist/style.css";
@@ -25,6 +27,7 @@ import { arrange } from "@/explorations/board/layout";
 import { cn } from "@/lib/utils";
 
 import { PartCard } from "./part-card";
+import { KINDS, kindOf, type PartKind } from "./part-kind";
 
 type PartData = {
   part: PartView;
@@ -48,7 +51,7 @@ function PartBox({ data }: NodeProps<PartNode>) {
     <div
       style={{ width: WIDTH }}
       className={cn(
-        "nodrag cursor-default transition-opacity",
+        "nodrag relative cursor-default pt-2.5 transition-opacity",
         !data.placed && "invisible",
         data.faded && "opacity-35",
       )}
@@ -59,6 +62,7 @@ function PartBox({ data }: NodeProps<PartNode>) {
         isConnectable={false}
         className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-arrow"
       />
+      <KindTag kind={kindOf(data.part)} className="absolute top-0 left-3 z-10" />
       <PartCard part={data.part} onPress={data.onPress} />
       <Handle
         type="source"
@@ -67,6 +71,40 @@ function PartBox({ data }: NodeProps<PartNode>) {
         className="!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-arrow"
       />
     </div>
+  );
+}
+
+// A small coloured tag saying what kind of part it is.
+function KindTag({
+  kind,
+  className,
+}: Readonly<{ kind: PartKind; className?: string }>) {
+  const { label, icon: Icon, look } = KINDS[kind];
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium ring-1",
+        look,
+        className,
+      )}
+    >
+      <Icon className="size-3" aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+// What each tag means, under the map.
+function KindKey() {
+  return (
+    <ul className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
+      {(Object.keys(KINDS) as PartKind[]).map((kind) => (
+        <li key={kind} className="inline-flex items-center gap-1.5">
+          <KindTag kind={kind} />
+          {KINDS[kind].means}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -233,6 +271,7 @@ function PartsMap({
           style={COLOURS}
         />
       </div>
+      <KindKey />
       <p className="px-1 text-xs text-muted-foreground">
         Each line joins a part to a part that needs it, its arrow at the one
         that needs it. Point at a part to see only its lines.
