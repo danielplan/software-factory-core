@@ -226,13 +226,20 @@ a thing, mark it agreed or a sketch). Its guide is
 `packages/skills/guides/exploration-coach.md`. People move things, switch
 sketch and agreed, choose an option, add pictures and click things to
 attach them to what they type next; the kobold hears what they did with
-their next words. **Make** builds an option's prototype on its branch
-`proto/X-<n>-<key>`, in a copy of the code next to the project, like a
-version in prototype mode, and pushes the branch to origin once it is
-committed, so a teammate's computer opens it from origin's branch (when it
-cannot be pushed, or there is no origin, the board says it is only on this
-computer); **Open** runs it with the project's
-`prototype.start` command, one at a time, and the board shows it live;
+their next words. The kobold makes a choice's prototype itself
+(`prototypes.ts`, `making.ts`): one prototype on its branch
+`proto/X-<n>-<key>`, in a copy of the code next to the project, holding the
+options as **variants**, which the board switches outside the app through
+the page address (`?variant=B`, `versions.ts`). It runs while it is made
+(the maker's edits show as they happen) and starts again once they are
+done; it opens on the page the change is on (`opens`). The maker has its
+own tool over MCP (`maker-tools.ts`, `look_at_prototype`) to photograph it
+running, and is made to look once when it did not (`looks.ts`); the kobold
+reviews the pictures. The branch is pushed to origin once committed, so a
+teammate's computer opens it from origin's branch (when it cannot be
+pushed, or there is no origin, the board says it is only on this
+computer); **Open** runs it with the project's `prototype.start` command,
+one at a time, and the board shows it live;
 **Test** starts a persona test on that branch, as the exploration's first
 persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the
 connected board with the problem, the agreed prototype's branch and what
