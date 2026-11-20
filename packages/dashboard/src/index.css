@@ -227,6 +227,13 @@
       opacity: 0.45;
     }
   }
+  /* A kobold at work bobs a little. */
+  --animate-bob: bob 1.4s ease-in-out infinite;
+  @keyframes bob {
+    50% {
+      transform: translateY(-2px) rotate(-4deg);
+    }
+  }
   /* Something new on the setup map arrives with a small pop. */
   --animate-pop: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
   @keyframes pop {

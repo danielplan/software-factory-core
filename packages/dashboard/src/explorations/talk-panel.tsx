@@ -8,8 +8,6 @@ import { ArrowUp, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
-import { KoboldHead } from "@/components/kobold-face";
-import { KOBOLDS } from "@/lib/kobolds";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +16,7 @@ import { useVoiceCall } from "@/voice/use-voice-call";
 import { VoiceView } from "@/voice/voice-view";
 
 import { nameOf } from "./board/nodes";
+import { Who } from "./explorer-header";
 import { useKoboldCall } from "./kobold-call";
 
 export function TalkPanel({
@@ -34,19 +33,9 @@ export function TalkPanel({
   const { exploration } = page;
   const [refused, setRefused] = useState<string | null>(null);
   const open = ["waiting", "exploring"].includes(exploration.status);
-  // The explorer kobold, with the hat of its job.
-  const explorer = KOBOLDS.find((kobold) => kobold.id === "explorer");
   return (
     <aside className="flex min-h-0 w-[23rem] flex-none flex-col border-l border-border bg-card max-lg:w-full max-lg:border-t max-lg:border-l-0">
-      <div className="flex items-center gap-3 border-b border-border-soft px-5 py-4">
-        <KoboldHead size={28} hat={explorer?.hat} color={explorer?.color} />
-        <span className="grid">
-          <span className="text-[13px] font-semibold">{explorer?.name}</span>
-          <span className="text-xs text-muted-foreground">
-            Thinks it through with you and draws on the board
-          </span>
-        </span>
-      </div>
+      <Who page={page} />
       <Messages page={page} refused={refused} />
       {open && attached.length > 0 && (
         <Attached page={page} attached={attached} onDetach={onDetach} />
