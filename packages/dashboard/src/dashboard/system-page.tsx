@@ -16,10 +16,12 @@ import { PageHead } from "@/components/page-head";
 import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
+import { LayerMap } from "./layer-map";
 import { PartCard } from "./part-card";
 
-// System: what the product is made of, as a map of its parts, each after
-// the parts it needs, with its light and its buttons in its box; how it is
+// System: what the product is made of, as a map of its parts in layers
+// (what people open, what works behind, where data lives) joined by lines
+// to the parts each needs, with its light and its buttons in its box; how it is
 // doing in a line, Start all and Stop all. The factory's own programs are
 // in Settings (FactoryPrograms).
 export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
@@ -62,18 +64,19 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
         <span className="min-w-0 flex-1">{top.text}</span>
       </div>
       {problem && <ProblemBox title="That did not work" text={problem} />}
-      <Area title="Your product" parts={products} onPress={press}>
-        <p className="py-6 text-center text-[13px] text-muted-foreground">
-          No parts to run yet: they come with your first idea, on the{" "}
-          <a
-            href="#explore"
-            className="text-foreground underline underline-offset-2"
-          >
-            Explorations
-          </a>{" "}
-          page.
-        </p>
-      </Area>
+      {products.length >= 2 ? (
+        <AreaCard title="Your product">
+          <LayerMap parts={products} onPress={press} />
+        </AreaCard>
+      ) : (
+        <AreaCard title="Example: a made-up product">
+          <p className="text-xs text-muted-foreground">
+            Your product has too few parts for a map yet, so here is how one
+            looks with made-up parts. Its buttons do nothing.
+          </p>
+          <LayerMap parts={EXAMPLE} onPress={() => undefined} />
+        </AreaCard>
+      )}
       <Legend />
     </>
   );
@@ -223,5 +226,42 @@ function headline(parts: PartView[]): {
   return {
     light: "stopped",
     text: "Your product is not running. Start it to try it on this computer.",
+  };
+}
+
+// Made-up parts, for the map while the product has too few of its own.
+const EXAMPLE: PartView[] = [
+  example("shop", "Shop", "The shop people buy from.", ["orders-api", "design-kit", "files"], "running", true),
+  example("back-office", "Back office", "Where the team handles orders.", ["orders-api", "payments", "design-kit"], "stopped", true),
+  example("orders-api", "Orders server", "Takes and keeps the orders.", ["database", "payments"], "running"),
+  example("payments", "Payments", "Talks to the payment provider.", ["database"], "running"),
+  example("design-kit", "Design kit", "Buttons and pages both screens share.", [], "none", false, "with"),
+  example("database", "Database", "Where orders and customers are kept.", [], "running", false, "never"),
+  example("files", "File storage", "Product photos.", [], "stopped", false, "never"),
+];
+
+function example(
+  id: string,
+  name: string,
+  does: string,
+  dependsOn: string[],
+  light: PartView["light"],
+  opens = false,
+  start: PartView["start"] = "auto",
+): PartView {
+  return {
+    id,
+    name,
+    area: "products",
+    does,
+    dependsOn,
+    start,
+    light,
+    step: null,
+    problem: null,
+    link: opens ? "#system" : null,
+    canStart: false,
+    canStop: false,
+    outside: false,
   };
 }
