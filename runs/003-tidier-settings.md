@@ -50,10 +50,51 @@ Checks:
 
 Decisions made while building (cheap to change):
 
+- On a phone the tabs wrap into rows above the chosen tab's cards (two
+  rows on a 390px screen). Before, the side list was hidden on a phone; with
+  one tab at a time it must stay, or the other tabs could not be reached.
+  The prototype did not show a phone.
+- "This computer" comes before "Advanced" in the tabs, and the factory's
+  programs come first in Advanced, before the settings groups, as in the
+  prototype.
+- The grouping and the addresses live in their own small file
+  (`settings-tabs.ts`) so they can be tested without a browser; the page
+  (`settings-tab.tsx`) only draws them.
+- A board add-on's "Change" link (on Add-ons) now opens Connections, where
+  the board is changed; before it opened Settings at the top, which is the
+  same place.
+
 ## Status
 
-in progress
+done
 
 ## Result
+
+Settings shows five tabs at the side: Connections, Updates, Add-ons, This
+computer and Advanced; only the chosen one's cards show, at its own address
+(`#settings/updates`). The chosen tab is white with dark text and its icon
+in colour; the others are plain grey. Variants B and C and the variant
+switch were left out.
+
+How to try it: start the factory (`npx software-factory`), open Settings,
+click through the tabs, reload on one (it stays), use the back button.
+
+Checked: `npm run verify` passes in full (format, lint, types, unused code,
+copy-paste, 347 tests with coverage, records, docs); new tests for the tabs
+(which section goes where, the addresses, the tab an address opens, empty
+tabs left out) and for the old addresses. In the browser, on a copy of the
+example company (in a throwaway folder): each tab, the chosen tab's look,
+`#add-ons` opening Add-ons, a reload and the back button staying on the
+right tab, a phone-sized screen.
+
+![Settings on Updates: five tabs at the side, Updates chosen on white](003-tidier-settings/updates.png)
+![Advanced: the parts' own settings (AI model, Builder, Usage log)](003-tidier-settings/advanced.png)
+![On a phone the tabs wrap above the cards; This computer chosen](003-tidier-settings/phone.png)
+
+Not checked: the factory's programs under Advanced (the example company has
+none, so that section does not show; it is the same card as before); a real
+phone; a screen reader beyond the tabs being links with the chosen one
+marked as the current page. Connections was looked at but not kept as a
+screenshot, since it showed the signed-in GitHub account.
 
 ## Later
