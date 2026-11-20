@@ -15,7 +15,7 @@ import {
   ITEMS,
   type ProjectAnswer,
 } from "./github-items.ts";
-import { labelArgs, planOf, typeEdit, withPlan } from "./cards.ts";
+import { labelArgs, planOf, stuckArgs, typeEdit, withPlan } from "./cards.ts";
 
 // The board as board.json keeps it.
 export type GitHubBoard = {
@@ -39,6 +39,7 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     dependOn: (number, on) => cards.dependOn(number, on),
     replace: (number, by) => cards.replace(number, by),
     setType: (number, type) => cards.setType(number, type),
+    markStuck: (number, stuck) => cards.markStuck(number, stuck),
     remove: (number) => cards.remove(number),
   };
 }
@@ -172,6 +173,13 @@ class GitHubCards {
     const edit = typeEdit(card.labels, type);
     if (edit.length > 0)
       await this.gh(["issue", "edit", String(number), ...this.repo, ...edit]);
+  }
+
+  // The stuck mark as a label (made when GitHub has none of that name).
+  async markStuck(number: number, stuck: boolean): Promise<void> {
+    const { card } = await this.find(number);
+    for (const args of stuckArgs(number, card.labels, stuck, this.repo))
+      await this.gh(args);
   }
 
   // GitHub's "blocked by": the card waits for the other one.

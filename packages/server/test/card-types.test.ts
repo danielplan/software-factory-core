@@ -4,8 +4,11 @@ import { test } from "node:test";
 import { markComment, readNote, stripMarker } from "../src/builder/protocol.ts";
 import {
   aboutOf,
+  isStuck,
   labelArgs,
   planOf,
+  STUCK_LABEL,
+  stuckArgs,
   typeEdit,
   typeOf,
   withPlan,
@@ -30,6 +33,24 @@ test("a card's type is a label: read from its labels, changed one for another", 
     "create",
     "type: bug",
   ]);
+});
+
+test("a card the builder got stuck on carries the stuck label, made where there is none yet", () => {
+  const repo = ["--repo", "o/r"];
+  assert.equal(isStuck(["factory", STUCK_LABEL]), true);
+  assert.equal(isStuck(["factory"]), false);
+  assert.deepEqual(
+    stuckArgs(7, ["factory"], true, repo).map((args) => args.slice(0, 3)),
+    [
+      ["label", "create", STUCK_LABEL],
+      ["issue", "edit", "7"],
+    ],
+  );
+  assert.deepEqual(stuckArgs(7, [STUCK_LABEL], true, repo), []);
+  assert.deepEqual(stuckArgs(7, [STUCK_LABEL], false, repo), [
+    ["issue", "edit", "7", ...repo, "--remove-label", STUCK_LABEL],
+  ]);
+  assert.deepEqual(stuckArgs(7, [], false, repo), []);
 });
 
 test("an earlier factory's notes and plan are read too", () => {

@@ -51,6 +51,10 @@ export type CardView = {
   asks: boolean;
   // What kind of work it is (its "type: …" label), when it has one.
   type?: "bug" | "feature" | "improvement" | null;
+  // The builder got stuck on it (its stuck label): not a new idea.
+  stuck?: boolean;
+  // Handed back to the builder with the owner's hint (in To do).
+  hint?: boolean;
 };
 
 // What the builder is doing: on or off, the card it works on, its last
@@ -98,6 +102,15 @@ export type Asking = {
   } | null;
 };
 
+// A card the builder got stuck on, waiting in Backlog for the owner: its
+// last word on it (a question, or why it gave up, as the note says), the
+// question in the page's shape when it asked one, and since when.
+export type StuckView = Omit<Asking, "text"> & {
+  text: string;
+  note: string;
+  since: string;
+};
+
 export type WorkView = {
   cards: CardView[];
   // Why the cards could not be read last time.
@@ -108,6 +121,8 @@ export type WorkView = {
   coach: CoachInCardsView;
   // The cards where the factory waits for the owner's answer.
   asking?: Asking[];
+  // The cards the builder got stuck on, oldest first.
+  stuck?: StuckView[];
   // GitHub's signals as they happen; none before they are set up.
   signals?: { live: boolean; moves: boolean; problem: string | null };
 };

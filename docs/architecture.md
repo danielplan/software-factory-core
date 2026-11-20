@@ -251,6 +251,21 @@ where it came from: an exploration whose `work` is its number, with the
 agreed prototype, or a fixed signal. The builder and its switch work as
 before.
 
+**The builder keeps to its own cards** (`packages/server/src/builder/decide.ts`).
+A card in In progress is the builder's only when its start (the note
+`started`) is the factory's last word on it; a card a person moved there is
+left to them. When the builder asks a question, cannot finish, or the checks
+stay red after three rounds, it says why on the card, gives it the label
+`factory: stuck` and moves it to Backlog. There it is not a new idea: the
+Factory page shows it in **Stuck**, above the columns, with the builder's
+suggested answers and a box for a hint; sending posts the hint as a comment
+and moves the card to To do ("Your hint is with the builder"). Moving it to
+To do on the board hands it back the same way. A card's branch is freed only
+from the factory's own copies (`<project>-factory-copies/` and
+`<project>-prototypes/`, `CopySettings.ownCopies`); open in any other copy,
+the builder leaves the card to the person working there, with the note
+`by-hand`.
+
 ## Extension points
 
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of

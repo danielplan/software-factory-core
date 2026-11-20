@@ -18,7 +18,13 @@ import type {
   PullRequest,
   PullRequests,
 } from "../src/builder/pull-requests.ts";
-import { type Card, type Cards, planOf, withPlan } from "../src/cards/cards.ts";
+import {
+  type Card,
+  type Cards,
+  planOf,
+  STUCK_LABEL,
+  withPlan,
+} from "../src/cards/cards.ts";
 
 // The builder and the coach working a board: GitHub's board and pull
 // requests are stand-ins that remember what they were told, Claude Code is
@@ -104,6 +110,7 @@ export type Kept = {
   body: string;
   comments: Message[];
   closed?: boolean;
+  labels?: string[];
 };
 
 export function pretendBoard(kept: Map<number, Kept>) {
@@ -117,7 +124,7 @@ export function pretendBoard(kept: Map<number, Kept>) {
           stage: c.stage,
           column: c.stage,
           url: `https://github.com/o/r/issues/${String(number)}`,
-          labels: [],
+          labels: c.labels ?? [],
           closed: c.closed ?? false,
           waitsFor: [],
         })),
@@ -150,6 +157,15 @@ export function pretendBoard(kept: Map<number, Kept>) {
     create: () => Promise.reject(new Error("not here")),
     dependOn: () => Promise.reject(new Error("not here")),
     replace: () => Promise.reject(new Error("not here")),
+    markStuck: (number, stuck) => {
+      const c = kept.get(number);
+      if (c)
+        c.labels = stuck
+          ? [...new Set([...(c.labels ?? []), STUCK_LABEL])]
+          : (c.labels ?? []).filter((label) => label !== STUCK_LABEL);
+      said.push(`#${String(number)} ${stuck ? "stuck" : "not stuck"}`);
+      return Promise.resolve();
+    },
     writePlan: (number, plan) => {
       const c = kept.get(number);
       if (c) c.body = withPlan(c.body, plan);

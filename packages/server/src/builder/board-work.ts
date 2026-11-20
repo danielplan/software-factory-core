@@ -5,16 +5,27 @@
 // back to Planning, and each lane (the coach's, the builder's) starts its
 // next job when it is free. A finished job reads the board again. A card
 // Kobble waits for "did it work?" about is shown asking it, in Done, until
-// a person answers.
+// a person answers. The cards the builder got stuck on are shown apart
+// (Stuck); the owner's hint on one hands it back to the builder (To do).
 
-import type { Asking, BuilderView, CardView, Stage, WorkView } from "../api.ts";
-import { type Card, type Cards, typeOf } from "../cards/cards.ts";
+import type {
+  Asking,
+  BuilderView,
+  CardView,
+  Stage,
+  StuckView,
+  WorkView,
+} from "../api.ts";
+import { type Card, type Cards, isStuck, typeOf } from "../cards/cards.ts";
 import {
   asksIfItWorked,
   type BoardCard,
   decide,
+  type Decision,
+  handedBack,
   type Job,
   type Lane,
+  stuckCards,
   waitsForOwner,
 } from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
@@ -57,6 +68,9 @@ export class BoardWork {
   private asked = new Set<number>();
   private decided = new Set<number>();
   private asking: Asking[] = [];
+  private stuck: StuckView[] = [];
+  // The cards in To do handed back with the owner's hint.
+  private hinted = new Set<number>();
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -91,10 +105,12 @@ export class BoardWork {
         asks:
           (this.asked.has(card.number) || this.decided.has(card.number)) &&
           waiting.has(card.number),
+        hint: this.hinted.has(card.number),
       })),
       problem: this.problem,
       read: this.read,
       asking: this.asking,
+      stuck: this.stuck,
       builder,
       coach: {
         on: this.on.chat,
@@ -138,10 +154,14 @@ export class BoardWork {
   }
 
   // The owner's answer to a card the factory waits on, from the Factory
-  // page: a comment on the card, as if written on GitHub.
+  // page: a comment on the card, as if written on GitHub. A stuck card is
+  // handed back to the builder with it: moved to To do.
   async answer(number: number, text: string): Promise<void> {
     await this.options.cards.comment(number, text);
+    if (this.stuck.some((one) => one.number === number))
+      await this.options.cards.move(number, "todo");
     this.asking = this.asking.filter((one) => one.number !== number);
+    this.stuck = this.stuck.filter((one) => one.number !== number);
     this.options.onChange();
     void this.refresh();
   }
@@ -233,6 +253,7 @@ export class BoardWork {
         closed,
         asks: false,
         type: typeOf(labels),
+        stuck: isStuck(labels),
       }),
     );
     this.problem = null;
@@ -250,20 +271,32 @@ export class BoardWork {
         ? [{ number: card.number, title: card.title, url: card.url, ...waits }]
         : [];
     });
+    this.stuck = stuckCards(board);
+    this.hinted = new Set(board.filter(handedBack).map((card) => card.number));
     const busy = new Set(this.running.keys());
     const decision = decide(board, busy, this.now());
     this.decided = new Set(decision.asks);
-    for (const move of decision.moves)
-      if (move.stage === "done" || this.on.build) await this.move(move);
-    if (this.on.build)
-      for (const c of decision.comments)
-        await cards.comment(c.number, markComment(c.body, c.note));
+    await this.apply(decision);
     for (const next of this.paused() ? [] : decision.jobs) {
       const card = board.find((c) => c.number === next.number);
       const place = this.on[next.lane] ? this.freePlace(next.lane) : null;
       if (card && place !== null && !this.running.has(next.number))
         this.begin(next, card, place);
     }
+  }
+
+  // The rules' moves (to Done always; the rest while the builder is on),
+  // stuck marks and comments.
+  private async apply(decision: Decision): Promise<void> {
+    const { cards } = this.options;
+    if (this.on.build)
+      for (const number of decision.stuck)
+        await cards.markStuck?.(number, true);
+    for (const move of decision.moves)
+      if (move.stage === "done" || this.on.build) await this.move(move);
+    if (this.on.build)
+      for (const c of decision.comments)
+        await cards.comment(c.number, markComment(c.body, c.note));
   }
 
   // The pull requests the cards have, shown on them from now on.

@@ -1,7 +1,8 @@
 // A card on the Factory board, opened beside it on a click; while the
-// builder is on it, what it is doing right now.
+// builder is on it, what it is doing right now; handed back from Stuck, that
+// the owner's hint is with the builder.
 
-import { FlaskConical, LoaderCircle } from "lucide-react";
+import { FlaskConical, LoaderCircle, MessageCircle } from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
@@ -47,6 +48,16 @@ export function Card({
       <span className="text-[13px] leading-[1.35] font-medium">
         {card.title}
       </span>
+      {card.hint && !building && (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
+          <MessageCircle
+            aria-hidden
+            strokeWidth={2}
+            className="size-3 flex-none"
+          />
+          Your hint is with the builder
+        </span>
+      )}
       {now && (
         <span
           title={now}
