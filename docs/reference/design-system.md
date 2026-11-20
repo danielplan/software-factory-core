@@ -37,6 +37,12 @@ row is `--picked`; the current page in the sidebar `--wash` with
 its type a tinted pill (`--type-bug`, `--type-request`, `--type-feedback`);
 "Found in usage" is `--usage`.
 
+A page with several sections that do not belong together (Settings) shows
+them as tabs at the side, one at a time, each at its own address
+(`#settings/updates`); on a phone the tabs wrap above it. The chosen tab is
+white, like a card on the ground, with the chosen sidebar page's dark text
+and its icon in colour; the others are plain grey text with a grey icon.
+
 ## Faces
 
 The kobold and the personas are drawn as kobolds

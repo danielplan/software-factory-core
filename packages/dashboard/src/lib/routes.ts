@@ -30,9 +30,9 @@ const FIRST: Page = "home";
 const MOVED = new Map([
   ["board", "build"],
   ["ideas", "explore"],
-  ["workshop/add-ons", "settings"],
+  ["workshop/add-ons", "settings/add-ons"],
   ["workshop", "system"],
-  ["add-ons", "settings"],
+  ["add-ons", "settings/add-ons"],
   ["today", "signals"],
   ["customers", "personas"],
   ["products", "system"],

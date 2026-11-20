@@ -99,6 +99,6 @@ function PageBody({
     case "system":
       return <SystemPage state={state} />;
     case "settings":
-      return <SettingsTab state={state} />;
+      return <SettingsTab state={state} open={open} />;
   }
 }
