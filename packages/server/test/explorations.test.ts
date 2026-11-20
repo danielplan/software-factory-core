@@ -345,7 +345,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
         ),
     );
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
-    while (run?.state === "making") {
+    while (run?.making) {
       await new Promise((resolve) => setTimeout(resolve, 20));
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }
@@ -401,7 +401,7 @@ test("a prototype that cannot be pushed stays on this computer, and the board sa
     chmodSync(hook, 0o755);
     await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
-    while (run?.state === "making") {
+    while (run?.making) {
       await new Promise((resolve) => setTimeout(resolve, 20));
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }

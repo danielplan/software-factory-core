@@ -234,7 +234,7 @@ function linksAsWords(text: string): string {
 
 // What the kobold is busy with in one exploration.
 function busyWith(talk: TalkView, runs: VersionRun[]): string | null {
-  const making = runs.find((run) => run.state === "making");
+  const making = runs.find((run) => run.making);
   if (making) return `Making prototype ${making.version}`;
   if (talk.writing !== null || talk.activity !== null) return "Thinking";
   return null;

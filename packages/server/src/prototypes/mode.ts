@@ -20,13 +20,16 @@ import {
   versionWorkspace,
 } from "./copies.ts";
 
-export type RunState = "stopped" | "making" | "starting" | "running" | "failed";
+export type RunState = "stopped" | "starting" | "running" | "failed";
 
 // A version as prototype mode knows it now.
 export type VersionRun = {
   idea: string;
   version: string;
   state: RunState;
+  // Being made by the kobold now: it may run meanwhile, and the page
+  // reloads as the kobold changes it.
+  making: boolean;
   // Where it runs, once the start command said so.
   url: string | null;
   // What the kobold is doing while it makes it, in a few words, and since
@@ -70,6 +73,7 @@ export class PrototypeMode {
         idea,
         version,
         state: "stopped",
+        making: false,
         url: null,
         activity: null,
         since: null,
@@ -82,8 +86,7 @@ export class PrototypeMode {
   set(idea: string, version: string, change: Partial<VersionRun>): void {
     const now = this.runOf(idea, version);
     const run = { ...now, ...change };
-    if (run.state === "making" && now.state !== "making")
-      run.since = new Date().toISOString();
+    if (run.making && !now.making) run.since = new Date().toISOString();
     this.runs.set(keyOf(idea, version), run);
     this.options.onChange();
   }
@@ -102,8 +105,6 @@ export class PrototypeMode {
         "This prototype is made, but it cannot run here yet: the project does not say how to start it. Whoever looks after the factory adds that once (the start command in factory.json).",
       );
     const now = this.runOf(idea, version);
-    if (now.state === "making")
-      throw new Refused("The kobold is still making it.");
     if (now.state === "running" || now.state === "starting") return now;
     this.set(idea, version, { state: "starting", url: null, problem: null });
     try {

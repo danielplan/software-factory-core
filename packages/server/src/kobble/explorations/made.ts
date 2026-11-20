@@ -38,17 +38,13 @@ export async function finishMaking(on: {
     commitWords(exploration, made, change, result.ok ? result.text : ""),
   );
   const unshared = notShared(await workspace.pushBranch(made.branch));
-  mode.set(
-    exploration,
-    made.key,
-    result.ok
-      ? { state: "stopped", activity: null, problem: unshared }
-      : {
-          state: "failed",
-          activity: null,
-          problem: stopped(result.error, made.branch, unshared),
-        },
-  );
+  mode.set(exploration, made.key, {
+    making: false,
+    activity: null,
+    problem: result.ok
+      ? unshared
+      : stopped(result.error, made.branch, unshared),
+  });
   if (result.ok)
     on.ready?.(exploration, made.key, {
       name: change ? `changed: ${change}` : made.name,

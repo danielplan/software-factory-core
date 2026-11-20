@@ -247,8 +247,8 @@ test("a prototype is told where its world is, and opened for a persona starts in
         (await (
           await fetch(`${factory.base}/api/kobble/exploration?id=X-1`)
         ).json()) as ExplorationPage
-      ).runs.find((run) => run.version === "C")?.state;
-    while ((await state()) === "making")
+      ).runs.find((run) => run.version === "C")?.making;
+    while (await state())
       await new Promise((resolve) => setTimeout(resolve, 20));
     const opened = await factory.post("/api/kobble/explorations/open", {
       id: "X-1",

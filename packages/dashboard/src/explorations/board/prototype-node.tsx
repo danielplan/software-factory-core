@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
-import { Making } from "./prototype-making";
+import { Making, MakingLine } from "./prototype-making";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 
@@ -111,6 +111,31 @@ function variantsOf(made: Made, picked: string | null) {
   return { variants, variant };
 }
 
+// What the frame shows: the live screen (with what the kobold does, while
+// it is made), the kobold at work before it runs, or Start.
+function Shown({
+  run,
+  shown,
+  title,
+  at,
+  start,
+}: Readonly<{
+  run: VersionRun | undefined;
+  shown: VersionRun | undefined;
+  title: string;
+  at: number;
+  start: (() => void) | null;
+}>) {
+  const live = run?.state === "running" && run.url !== null;
+  if (run?.making && !live) return <Making run={run} />;
+  return (
+    <>
+      {run?.making && <MakingLine run={run} />}
+      <Screen run={shown} at={at} title={title} start={start} />
+    </>
+  );
+}
+
 function shownOf(
   run: VersionRun | undefined,
   opens: string | undefined,
@@ -133,7 +158,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
     <Frame
       data={data}
       title={`${thing.key} · ${thing.name}`}
-      glow={run?.state === "making"}
+      glow={run?.making === true}
     >
       {variants.length > 0 && (
         <Variants
@@ -146,22 +171,19 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
           }}
         />
       )}
-      {run?.state === "making" ? (
-        <Making run={run} />
-      ) : (
-        <Screen
-          run={shownRun}
-          at={thing.key.charCodeAt(0) - 65}
-          title={`${thing.key} · ${thing.name}`}
-          start={
-            open
-              ? () => {
-                  act("open", { key: thing.key });
-                }
-              : null
-          }
-        />
-      )}
+      <Shown
+        run={run}
+        shown={shownRun}
+        title={`${thing.key} · ${thing.name}`}
+        at={thing.key.charCodeAt(0) - 65}
+        start={
+          open
+            ? () => {
+                act("open", { key: thing.key });
+              }
+            : null
+        }
+      />
       <About
         difference={about?.difference ?? thing.difference}
         words={stateWords(run)}

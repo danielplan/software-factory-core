@@ -12,7 +12,7 @@ function doingOf(page: ExplorationPage): string | null {
   const { talk } = page;
   if (talk.writing !== null)
     return talk.writing ? "Talking with you" : (talk.activity ?? "Thinking…");
-  const making = page.runs.find((run) => run.state === "making");
+  const making = page.runs.find((run) => run.making);
   return making ? `Making prototype ${making.version}` : null;
 }
 

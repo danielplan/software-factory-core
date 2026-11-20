@@ -115,7 +115,7 @@ export class ExplorationPrototypes {
   private cutOff(exploration: string): Set<string> {
     return cutOffIn(
       this.options.store().board(exploration),
-      (key) => this.mode.runOf(exploration, key).state === "making",
+      (key) => this.mode.runOf(exploration, key).making,
     );
   }
 
@@ -155,7 +155,6 @@ export class ExplorationPrototypes {
     const board = store.board(exploration.id);
     const made = this.unbusy(board, exploration.id, key);
     const added = withVariant(made, { key: freeVariant(board, made), ...way });
-    void this.mode.stop(exploration.id, key);
     this.begin(
       exploration,
       store.saveBoard(exploration.id, withThing(board, added.made)),
@@ -174,7 +173,7 @@ export class ExplorationPrototypes {
   }
 
   private free(exploration: string, key: string): void {
-    if (this.mode.runOf(exploration, key).state === "making")
+    if (this.mode.runOf(exploration, key).making)
       throw new Refused(
         `Prototype ${key} is still being made: change it once it is ready.`,
       );
@@ -187,7 +186,7 @@ export class ExplorationPrototypes {
     change?: string,
   ): void {
     this.mode.set(exploration.id, key, {
-      state: "making",
+      making: true,
       activity: change ? "Starting the change" : "Starting",
       problem: null,
     });
@@ -196,7 +195,7 @@ export class ExplorationPrototypes {
       (error: unknown) => {
         this.mark(exploration.id, key, {});
         this.mode.set(exploration.id, key, {
-          state: "failed",
+          making: false,
           activity: null,
           problem: error instanceof Error ? error.message : String(error),
         });
@@ -270,7 +269,7 @@ export class ExplorationPrototypes {
   beingMade(exploration: string): string[] {
     return this.mode
       .view(exploration)
-      .filter((run) => run.state === "making")
+      .filter((run) => run.making)
       .map((run) => {
         const doing = run.activity ? ` (${run.activity})` : "";
         return `${run.version}: being made${doing}`;
@@ -290,11 +289,11 @@ export class ExplorationPrototypes {
   }
 
   // Change: the kobold changes a prototype as asked, in its copy, a new
-  // commit on its branch; it is stopped meanwhile and shown being made.
+  // commit on its branch; it keeps running, and its page reloads as the
+  // kobold changes it.
   change(exploration: Exploration, key: string, request: string): string {
     const board = this.options.store().board(exploration.id);
     this.unbusy(board, exploration.id, key);
-    void this.mode.stop(exploration.id, key);
     this.begin(exploration, board, key, request);
     return key;
   }
@@ -314,6 +313,8 @@ export class ExplorationPrototypes {
       made.branch,
     );
     const workspace = await versionWorkspace(this.options.project, copy);
+    // It runs while it is made: the team watches it change.
+    this.mode.start(exploration.id, key).catch(() => undefined);
     const result = await this.options.claude.run({
       cwd: copy.folder,
       prompt: askFor(exploration, board, made, {
