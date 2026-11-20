@@ -413,3 +413,21 @@ test("a TypeScript package is checked by its build and kept built by its watch s
   ])
     assert.equal(typescriptPackage.detect(folderWith(not)), null);
 });
+
+test("each kit says what type of part it makes; the product's own type wins", () => {
+  // Kept built while others run: its type matters only when it shows.
+  const running = { commands: { start: "npm run dev" } };
+  const typeOf = (kit: Kit, fields: Partial<Product> = {}) =>
+    kit.partsFor(productOf(kit, { ...running, ...fields }))[0]?.type;
+  assert.deepEqual(
+    [reactWebApp, sveltekitApp, expoApp, nestjsBackend, typescriptPackage].map(
+      (kit) => typeOf(kit),
+    ),
+    ["screen", "screen", "screen", "backend", "backend"],
+  );
+  // Other code cannot tell, unless its product says.
+  assert.equal(typeOf(otherCode), undefined);
+  assert.equal(typeOf(otherCode, { type: "data" }), "data");
+  for (const kit of allKits)
+    assert.equal(typeOf(kit, { type: "outside" }), "outside", kit.id);
+});

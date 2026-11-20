@@ -70,6 +70,7 @@ export const typescriptPackage = defineKit({
         name: product.name,
         area: "products",
         does: doesOf(product, "package"),
+        type: product.type ?? "backend",
         dependsOn: product.dependsOn,
         folder: product.folder,
         prepare: [{ label: "Installing packages", packages: true }],
