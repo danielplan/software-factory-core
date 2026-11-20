@@ -7,6 +7,12 @@ import { z } from "zod";
 
 export const AREAS = ["products", "factory"] as const;
 
+// What type of part it is, for the people who read the System map: a
+// screen (what people open, a web page or app), a backend (works behind
+// the screens), data (where data is stored) or an outside service (run by
+// someone else, like payments).
+export const PART_TYPES = ["screen", "backend", "data", "outside"] as const;
+
 // Where a part answers: a value in a settings file, a fixed port, or the
 // same address as another part.
 const portSchema = z.union([
@@ -34,6 +40,8 @@ export const partSchema = z.object({
   area: z.enum(AREAS),
   // What it does, in a sentence the owner understands.
   does: z.string().min(1),
+  // Its type (PART_TYPES), when its kit or its product says it.
+  type: z.enum(PART_TYPES).optional(),
   dependsOn: z.array(z.string()).default([]),
   folder: z.string().optional(),
   // Files it cannot start without (its settings file).
@@ -60,6 +68,7 @@ export const partSchema = z.object({
 
 export type Part = z.infer<typeof partSchema>;
 export type Area = (typeof AREAS)[number];
+export type PartType = (typeof PART_TYPES)[number];
 
 // What is wrong with the list, in plain words: a part twice, an unknown
 // dependency or address, nothing to start, a circle, or a part listed

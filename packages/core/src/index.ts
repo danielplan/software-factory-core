@@ -38,9 +38,11 @@ export {
   AREAS,
   checkParts,
   inStartOrder,
+  PART_TYPES,
   partSchema,
   type Area,
   type Part,
+  type PartType,
 } from "./parts/part.ts";
 export {
   findProducts,

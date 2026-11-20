@@ -10,6 +10,7 @@ import {
   envOf,
   inStartOrder,
   linkOf,
+  PART_TYPES,
   partSchema,
   portOf,
   type Part,
@@ -92,4 +93,14 @@ test("addresses come from the settings files, fixed ports or another part", () =
   // A part that points at itself has no address.
   const self = part({ id: "self", port: { part: "self" } });
   assert.equal(portOf(self, [self], root), null);
+});
+
+test("a part may say what type of part it is, one of four", () => {
+  assert.deepEqual(PART_TYPES, ["screen", "backend", "data", "outside"]);
+  assert.equal(part({ id: "web", type: "screen" }).type, "screen");
+  assert.equal(part({ id: "web" }).type, undefined);
+  assert.equal(
+    partSchema.safeParse({ ...part({ id: "web" }), type: "robot" }).success,
+    false,
+  );
 });
