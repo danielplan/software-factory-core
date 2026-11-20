@@ -53,6 +53,8 @@ export type CardView = {
   type?: "bug" | "feature" | "improvement" | null;
   // The builder got stuck on it (its stuck label): not a new idea.
   stuck?: boolean;
+  // Handed back to the builder with the owner's hint (in To do).
+  hint?: boolean;
 };
 
 // What the builder is doing: on or off, the card it works on, its last

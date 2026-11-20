@@ -5,6 +5,7 @@ import {
   asksIfItWorked,
   type BoardCard,
   decide,
+  handedBack,
   type Message,
   stuckOf,
   waitsForOwner,
@@ -262,10 +263,19 @@ test("stuck cards wait in Backlog for the owner, shown with what the builder sai
     stuckOf(card({ thread: [blocked], stuck: true, closed: true })),
     null,
   );
-  // Handed back already: in To do, it is not stuck any more.
+  // Handed back already: in To do, it is not stuck any more; with a hint
+  // from the owner, the page says so on it.
   assert.equal(
     stuckOf(card({ stage: "todo", thread: [blocked], stuck: true })),
     null,
+  );
+  const todo = (thread: Message[]) => card({ stage: "todo", thread });
+  assert.equal(handedBack(todo([blocked, owner("Inter")])), true);
+  assert.equal(handedBack(todo([blocked])), false);
+  assert.equal(handedBack(todo([owner("Hm")])), false);
+  assert.equal(
+    handedBack(card({ thread: [blocked, owner("Inter")], stuck: true })),
+    false,
   );
 });
 

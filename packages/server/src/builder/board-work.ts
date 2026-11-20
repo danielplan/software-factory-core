@@ -22,6 +22,7 @@ import {
   type BoardCard,
   decide,
   type Decision,
+  handedBack,
   type Job,
   type Lane,
   stuckCards,
@@ -68,6 +69,8 @@ export class BoardWork {
   private decided = new Set<number>();
   private asking: Asking[] = [];
   private stuck: StuckView[] = [];
+  // The cards in To do handed back with the owner's hint.
+  private hinted = new Set<number>();
   private problem: string | null = null;
   private laneProblem: string | null = null;
   private read: string | null = null;
@@ -102,6 +105,7 @@ export class BoardWork {
         asks:
           (this.asked.has(card.number) || this.decided.has(card.number)) &&
           waiting.has(card.number),
+        hint: this.hinted.has(card.number),
       })),
       problem: this.problem,
       read: this.read,
@@ -268,6 +272,7 @@ export class BoardWork {
         : [];
     });
     this.stuck = stuckCards(board);
+    this.hinted = new Set(board.filter(handedBack).map((card) => card.number));
     const busy = new Set(this.running.keys());
     const decision = decide(board, busy, this.now());
     this.decided = new Set(decision.asks);

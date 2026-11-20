@@ -106,4 +106,9 @@ test("the owner answers from the Factory page: the answer is a comment on the ca
   assert.equal(kept.get(8)?.comments.at(-1)?.body, "**A**: With tax");
   assert.equal(kept.get(8)?.stage, "todo");
   assert.equal(work.view().stuck?.length, 0);
+  // On the board, it says the hint is with the builder.
+  work.switch("chat", true);
+  await settled(work);
+  assert.equal(work.view().cards.find((c) => c.number === 8)?.hint, true);
+  work.switch("chat", false);
 });

@@ -207,6 +207,21 @@ const OWNING_NOTES: readonly Note[] = NOTES.filter(
 // it could not finish.
 const GAVE_UP: readonly Note[] = ["checks-failed", "failed"];
 
+// A card handed back with the owner's hint: in To do, after the builder's
+// question or giving up, with a comment from the owner since.
+export function handedBack(
+  card: Pick<BoardCard, "stage" | "closed" | "thread">,
+): boolean {
+  if (card.closed || card.stage !== "todo") return false;
+  const last = lastNote(card.thread, OWNING_NOTES);
+  const stopped: readonly Note[] = ["blocked", "question", ...GAVE_UP];
+  return (
+    last !== null &&
+    stopped.includes(last) &&
+    ownerSpokeAfter(card.thread, OWNING_NOTES)
+  );
+}
+
 // Where a stuck card waits for the owner (Backlog), with the builder's last
 // word on it: the question it asks, or why it gave up, and since when.
 export function stuckOf(

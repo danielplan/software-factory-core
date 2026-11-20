@@ -1,10 +1,12 @@
 // What Home shows, worked out from what the server sends: what waits for
-// the owner (a pull request to review, a question on a card, an exploration
+// the owner (a pull request to review, a question on a card, a card the
+// builder got stuck on, an exploration
 // with a next step, new signals to sort), and the loop from what came in to
 // what is done, each stage with its count and its latest two. Kept apart
 // from the page so it is checked on its own.
 
 import type { WorkView } from "../api.ts";
+import { reasonOf } from "../factory/stuck-view.ts";
 
 export type WaitingItem = {
   id: string;
@@ -51,15 +53,6 @@ export function waitingOf(input: HomeInput): WaitingItem[] {
       href: card.pullRequest ?? card.url,
       outside: true,
     }));
-  const answer: WaitingItem[] = (work?.asking ?? []).map((asking) => ({
-    id: `answer-${String(asking.number)}`,
-    kind: "Answer",
-    title: asking.title,
-    about: asking.ask?.question ?? "The builder stopped and asks you",
-    number: `#${String(asking.number)}`,
-    href: "#build",
-    outside: false,
-  }));
   const go: WaitingItem[] = input.exploring
     .filter((row) => row.line && !row.busy)
     .map((row) => ({
@@ -85,7 +78,33 @@ export function waitingOf(input: HomeInput): WaitingItem[] {
           },
         ]
       : [];
-  return [...answer, ...review, ...go, ...sort].slice(0, MOST);
+  return [...answersOf(work), ...review, ...go, ...sort].slice(0, MOST);
+}
+
+// The builder's questions, then the cards it got stuck on (they wait for a
+// hint), each answered on the Factory page.
+function answersOf(work: WorkView | null): WaitingItem[] {
+  const item = (number: number, title: string, about: string) => ({
+    id: `answer-${String(number)}`,
+    kind: "Answer" as const,
+    title,
+    about,
+    number: `#${String(number)}`,
+    href: "#build",
+    outside: false,
+  });
+  return [
+    ...(work?.asking ?? []).map((asking) =>
+      item(
+        asking.number,
+        asking.title,
+        asking.ask?.question ?? "The builder stopped and asks you",
+      ),
+    ),
+    ...(work?.stuck ?? []).map((one) =>
+      item(one.number, one.title, reasonOf(one)),
+    ),
+  ];
 }
 
 export type Stage = {

@@ -462,6 +462,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     const work = {
       cards: [
         card(77, "todo"),
+        { ...card(78, "todo"), hint: true },
         card(51, "doing"),
         card(41, "review", true),
         card(9, null),
@@ -492,7 +493,8 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
         column.cards.map((c) => c.number),
       ]),
       [
-        ["todo", [77]],
+        // Handed back with a hint: first.
+        ["todo", [78, 77]],
         ["building", [51]],
         ["review", [12]],
         ["done", [41]],
@@ -509,7 +511,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       title: x1.title,
       key: "B",
     });
-    assert.equal(view.columns[0]?.cards[0]?.fix, true);
+    assert.equal(view.columns[0]?.cards[1]?.fix, true);
     assert.equal(view.builder.working, "#51 · Basket");
     assert.deepEqual(view.builder.cards, [51]);
     assert.deepEqual(view.builder.now, { 51: "Running the checks" });

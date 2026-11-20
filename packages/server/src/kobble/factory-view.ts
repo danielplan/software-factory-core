@@ -25,6 +25,8 @@ export type FactoryCard = {
   // A fix of a signal.
   fix: boolean;
   type: CardView["type"];
+  // Handed back from Stuck with the owner's hint: first in To do.
+  hint: boolean;
 };
 
 export type FactoryView = {
@@ -118,6 +120,7 @@ export function factoryView(
           : null,
         fix: fixes.has(`#${String(card.number)}`),
         type: card.type ?? null,
+        hint: card.hint ?? false,
       },
     };
   });
@@ -129,9 +132,11 @@ export function factoryView(
     stuck: work?.stuck ?? [],
     columns: FACTORY_COLUMNS.map((column) => ({
       ...column,
+      // The cards handed back with a hint first, else the board's order.
       cards: cards
         .filter((one) => one.column === column.id)
-        .map((one) => one.card),
+        .map((one) => one.card)
+        .sort((a, b) => Number(b.hint) - Number(a.hint)),
     })),
     builder: builderOf(work),
   };
