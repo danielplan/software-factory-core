@@ -3,9 +3,10 @@
 // says why in one plain line and how long it has been stuck. The main way
 // on is helping the builder: answer it or give it a hint (for a question,
 // its suggested answers are quick picks) and send, which puts the card at
-// the top of To do with the reply on it. Two quiet links stay under it:
-// "Try again as it is" (back to To do, no hint) and "I'll do it myself"
-// (to Building as a person's, so the builder leaves it alone).
+// the top of To do with the reply on it. In the Stuck column (variant B)
+// two quiet links stay under it: "Try again as it is" (back to To do, no
+// hint) and "I'll do it myself" (to Building as a person's, so the builder
+// leaves it alone). The list above the board (variant A) has only the box.
 // Shown on this page only, not on GitHub or Jira.
 //
 // Prototype: the stuck cards are made up, so they show without a board.
@@ -117,18 +118,24 @@ export function minesOf(stuck: StuckState): number[] {
 // What the person told the builder, by card number.
 export function hintsOf(stuck: StuckState): Record<number, string> {
   const hints: Record<number, string> = {};
-  for (const one of stuck.moved.todo) if (one.hint) hints[one.card.number] = one.hint;
+  for (const one of stuck.moved.todo)
+    if (one.hint) hints[one.card.number] = one.hint;
   return hints;
 }
 
 export const STUCK_COLOUR = "#d9534f";
 
 // One stuck card: number, title, why, how long; then the box to help the
-// builder, and the two quiet links.
+// builder, and the two quiet links unless `boxOnly`.
 export function StuckCard({
   one,
   onMove,
-}: Readonly<{ one: Stuck; onMove: (how: Move) => void }>) {
+  boxOnly = false,
+}: Readonly<{
+  one: Stuck;
+  onMove: (how: Move) => void;
+  boxOnly?: boolean;
+}>) {
   const [hint, write] = useState("");
   const said = hint.trim();
   return (
@@ -148,9 +155,7 @@ export function StuckCard({
         />
         {one.reason}
       </p>
-      {one.picks && (
-        <QuickPicks picks={one.picks} said={said} onPick={write} />
-      )}
+      {one.picks && <QuickPicks picks={one.picks} said={said} onPick={write} />}
       <textarea
         aria-label={`Answer the builder on card #${String(one.card.number)}`}
         placeholder="Answer the builder, or give it a hint"
@@ -172,22 +177,24 @@ export function StuckCard({
         <Send aria-hidden className="size-3.5" />
         Send and let it try again
       </Button>
-      <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-        <QuietLink
-          onClick={() => {
-            onMove({ to: "todo", hint: null });
-          }}
-        >
-          Try again as it is
-        </QuietLink>
-        <QuietLink
-          onClick={() => {
-            onMove({ to: "mine" });
-          }}
-        >
-          I'll do it myself
-        </QuietLink>
-      </p>
+      {!boxOnly && (
+        <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <QuietLink
+            onClick={() => {
+              onMove({ to: "todo", hint: null });
+            }}
+          >
+            Try again as it is
+          </QuietLink>
+          <QuietLink
+            onClick={() => {
+              onMove({ to: "mine" });
+            }}
+          >
+            I'll do it myself
+          </QuietLink>
+        </p>
+      )}
     </article>
   );
 }
@@ -284,6 +291,7 @@ export function StuckList({ stuck }: Readonly<{ stuck: StuckState }>) {
           <StuckCard
             key={one.card.number}
             one={one}
+            boxOnly
             onMove={(how) => {
               stuck.move(one.card.number, how);
             }}
