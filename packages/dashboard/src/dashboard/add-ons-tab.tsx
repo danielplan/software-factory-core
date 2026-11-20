@@ -174,7 +174,7 @@ function Action({
   if (addOn.tracker)
     return (
       <a
-        href="#settings"
+        href="#settings/connections"
         className="rounded-full px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
       >
         {used ? "Change" : "Use instead"}
