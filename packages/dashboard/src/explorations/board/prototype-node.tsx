@@ -13,7 +13,6 @@ import { useState } from "react";
 import type { TestResult, VersionRun } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AgentTrace } from "@/components/agent-trace";
 import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
@@ -189,11 +188,6 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         difference={about?.difference ?? thing.difference}
         words={stateWords(run)}
         test={page.tests[thing.key] ?? null}
-      />
-      <AgentTrace
-        steps={run?.steps ?? []}
-        live={run?.making === true}
-        title="What the kobold did"
       />
     </Frame>
   );

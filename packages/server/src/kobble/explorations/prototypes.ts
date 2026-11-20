@@ -14,18 +14,17 @@ import type {
   KobbleStore,
 } from "@software-factory/core";
 
-import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
+import { versionCopy } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import type { Photograph } from "../usage-pictures.ts";
 import { Refused } from "../../refused.ts";
 import { withThing } from "./board-things.ts";
-import { askFor } from "./making-words.ts";
-import { askerFor, MakerDesk } from "./maker-desk.ts";
+import { MakerDesk } from "./maker-desk.ts";
+import { makeOne } from "./making.ts";
 import type { MakerTools } from "./maker-tools.ts";
-import { beingMadeIn, lookAndFix, lookAt, notWhileMade } from "./looks.ts";
-import { finishMaking, type MadeReport, type Ready } from "./made.ts";
+import { beingMadeIn, lookAt, notWhileMade, running } from "./looks.ts";
+import type { MadeReport, Ready } from "./made.ts";
 
-import { codeMaps } from "./product-picture.ts";
 import {
   prototypeOf,
   shownAddress,
@@ -37,8 +36,6 @@ import {
   withVariant,
 } from "./versions.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
-
-const START_WITHIN_MS = 3 * 60_000;
 
 type PrototypesOptions = {
   // How a made prototype is photographed (Playwright, unless a test says).
@@ -207,20 +204,17 @@ export class ExplorationPrototypes {
     persona?: string,
   ): Promise<string> {
     await this.open(exploration, key, persona);
-    const until = Date.now() + START_WITHIN_MS;
-    for (;;) {
-      const run = this.mode.runOf(exploration, key);
-      if (run.state === "running" && run.url)
-        return shownAddress(
-          run.url,
-          prototypeOf(this.options.store().board(exploration), key),
-        );
-      if (run.state === "failed" || Date.now() > until)
+    const url = await running(this.mode, exploration, key).catch(
+      (error: unknown) => {
         throw new Refused(
-          `Prototype ${key} did not start: ${run.problem ?? "it took too long"}`,
+          `Prototype ${key} did not start: ${error instanceof Error ? error.message : String(error)}`,
         );
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
+      },
+    );
+    return shownAddress(
+      url,
+      prototypeOf(this.options.store().board(exploration), key),
+    );
   }
 
   async stopAll(exploration: string): Promise<void> {
@@ -294,9 +288,14 @@ export class ExplorationPrototypes {
   // Change: the kobold changes a prototype as asked, in its copy, a new
   // commit on its branch; it keeps running, and its page reloads as the
   // kobold changes it.
-  change(exploration: Exploration, key: string, request: string): string {
+  change(
+    exploration: Exploration,
+    key: string,
+    request: string,
+  ): "now" | "waits" {
     const store = this.options.store();
-    const made = this.unbusy(store.board(exploration.id), exploration.id, key);
+    const made = prototypeOf(store.board(exploration.id), key);
+    if (!made) throw new Refused(`There is no prototype ${key} on the board.`);
     const board = store.saveBoard(
       exploration.id,
       withThing(store.board(exploration.id), {
@@ -304,8 +303,14 @@ export class ExplorationPrototypes {
         changes: [...(made.changes ?? []), request.trim()],
       }),
     );
+    // Asked while the maker is on it: it waits, and starts by itself once
+    // the maker is done.
+    if (this.mode.runOf(exploration.id, key).making) {
+      this.desk.wait(exploration.id, key, request);
+      return "waits";
+    }
     this.begin(exploration, board, key, request);
-    return key;
+    return "now";
   }
 
   private async making(
@@ -316,49 +321,22 @@ export class ExplorationPrototypes {
   ): Promise<void> {
     const made = prototypeOf(board, key);
     if (!made) return;
-    const copy = versionCopy(
-      this.options.project,
-      exploration.id,
-      key,
-      made.branch,
-    );
-    const workspace = await versionWorkspace(this.options.project, copy);
-    // It runs while it is made: the team watches it change.
-    this.mode.start(exploration.id, key).catch(() => undefined);
-    const ask = askerFor({
-      claude: this.options.claude,
-      folder: copy.folder,
-      mcp: this.desk.mcpFor(exploration.id, key),
-      onStep: (line) => {
-        const { steps } = this.mode.runOf(exploration.id, key);
-        this.mode.set(exploration.id, key, {
-          activity: line.slice(0, 80),
-          steps: [...steps, line.slice(0, 200)].slice(-60),
-        });
-      },
-    });
-    const asked = askFor(exploration, board, made, {
-      change,
-      maps: codeMaps(this.options.root),
-    });
-    const result = await lookAndFix(await ask(asked, false), {
-      ask: (prompt) => ask(prompt, true),
-      look: () => this.look(exploration.id, key, made),
-      looked: () => this.desk.hasLooked(exploration.id, key),
-      opens: (page) => {
-        this.mark(exploration.id, key, { opens: page });
-      },
-    });
-    this.mark(exploration.id, key, {});
-    await finishMaking({
+    await makeOne({
+      ...this.options,
       mode: this.mode,
-      workspace,
-      exploration: exploration.id,
+      desk: this.desk,
+      ready: this.ready,
+      exploration,
+      board,
       made,
       change,
-      result,
-      ready: this.ready,
+      mark: (now) => {
+        this.mark(exploration.id, key, now);
+      },
       look: () => this.look(exploration.id, key, made),
     });
+    const next = this.desk.waiting(exploration.id, key);
+    const store = this.options.store();
+    if (next) this.begin(exploration, store.board(exploration.id), key, next);
   }
 }

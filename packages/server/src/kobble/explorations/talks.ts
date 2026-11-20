@@ -53,9 +53,9 @@ type Makers = {
   // What the exploration's prototypes being made do now.
   making: (id: string) => string[];
   make: (id: string, choice: string, options: string[], opens?: string) => void;
-  // A prototype changed in its copy; another way added as a variant (its
-  // letter).
-  change: (id: string, prototype: string, change: string) => string;
+  // A prototype changed in its copy (now, or once its maker is done);
+  // another way added as a variant (its letter).
+  change: (id: string, prototype: string, change: string) => "now" | "waits";
   another: (
     id: string,
     prototype: string,
@@ -225,8 +225,9 @@ export class ExplorationTalks {
         return `Making the prototype of ${choice}, ${which} as variants the team switches between; it is on the board now.\n\n${this.look(id)}`;
       },
       change: (prototype, change) => {
-        this.makers().change(id, prototype, change);
-        return `Changing prototype ${prototype}; the board shows it being made.`;
+        return this.makers().change(id, prototype, change) === "now"
+          ? `Changing prototype ${prototype}; the board shows it being made.`
+          : `Prototype ${prototype} is still being made: the change waits and starts by itself once it is ready. Say so.`;
       },
       handOff: () => this.makers().handOff(id),
       another: (prototype, way) => {

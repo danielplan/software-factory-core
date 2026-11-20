@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
+import { MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
 import { lookAndFix, notWhileMade } from "../src/kobble/explorations/looks.ts";
 import {
   cutOffIn,
@@ -258,4 +259,20 @@ test("the maker is shown pictures of what it made and fixes it, before it is cal
   assert.throws(() => {
     notWhileMade({ version: "A", making: true } as never);
   }, /still being made/);
+});
+
+test("changes asked while the maker works wait, and come as one request once it is done", () => {
+  const desk = new MakerDesk();
+  assert.equal(desk.waiting("X-1", "A"), null);
+  desk.wait("X-1", "A", "Bigger tabs");
+  assert.equal(desk.waiting("X-1", "A"), "Bigger tabs");
+  assert.equal(desk.waiting("X-1", "A"), null);
+  desk.wait("X-1", "A", "Bigger tabs");
+  desk.wait("X-1", "A", " Bold when chosen ");
+  assert.equal(desk.waiting("X-1", "A"), "1. Bigger tabs\n2. Bold when chosen");
+  assert.equal(desk.mcpFor("X-1", "A"), undefined);
+  assert.throws(
+    () => desk.tools("X-1", "B", () => Promise.reject(new Error())),
+    /Nobody makes/,
+  );
 });

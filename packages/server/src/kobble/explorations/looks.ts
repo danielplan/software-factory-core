@@ -61,8 +61,8 @@ export async function lookAt(on: {
   return { pictures, problem: null };
 }
 
-// Started and waited for, without stopping what else runs.
-async function running(
+// Started and waited for, without stopping what else runs; where it runs.
+export async function running(
   mode: PrototypeMode,
   exploration: string,
   key: string,
@@ -73,7 +73,7 @@ async function running(
     const run = mode.runOf(exploration, key);
     if (run.state === "running" && run.url) return run.url;
     if (run.state === "failed" || Date.now() > until)
-      throw new Error(`it did not start: ${run.problem ?? "it took too long"}`);
+      throw new Error(run.problem ?? "it took too long");
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }

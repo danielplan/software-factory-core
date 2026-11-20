@@ -7,7 +7,7 @@
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
-import { Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
@@ -89,50 +89,66 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
   );
   return (
     <Frame data={data} title={thing.title}>
-      {thing.options.map((option) => (
-        <div
-          key={option.key}
-          className={cn(
-            "nodrag flex items-center gap-2 rounded-[10px] px-2 py-[7px]",
-            thing.chosen === option.key ? "bg-[#e3f5ee]" : "bg-ground",
-          )}
-        >
-          <button
-            type="button"
-            aria-pressed={thing.chosen === option.key}
-            title={option.difference}
-            className="flex flex-1 items-center gap-2 text-left"
-            onClick={() => {
-              act("board", {
-                do: {
-                  act: "choose",
-                  id: thing.id,
-                  option: thing.chosen === option.key ? null : option.key,
-                },
-              });
-            }}
+      {thing.options.map((option) => {
+        const chosen = thing.chosen === option.key;
+        return (
+          <div
+            key={option.key}
+            className={cn(
+              "nodrag flex min-w-0 items-center gap-2 rounded-[10px] px-2 py-[7px]",
+              chosen
+                ? "bg-[#e3f5ee] shadow-[inset_0_0_0_1.5px_#12a594]"
+                : "bg-ground",
+            )}
           >
-            <span className="grid size-5 flex-none place-items-center rounded-md bg-card text-[11px] font-semibold text-wash-foreground">
-              {option.key}
-            </span>
-            <span className="flex-1">{option.name}</span>
-            {thing.recommended === option.key && (
+            <button
+              type="button"
+              aria-pressed={chosen}
+              title={option.difference}
+              className="flex min-w-0 flex-1 items-center gap-2 text-left"
+              onClick={() => {
+                act("board", {
+                  do: {
+                    act: "choose",
+                    id: thing.id,
+                    option: chosen ? null : option.key,
+                  },
+                });
+              }}
+            >
               <span
-                title="The kobold recommends this one"
-                className="inline-flex h-5 flex-none items-center gap-1 rounded-full bg-wash px-2 text-[11px] font-medium text-wash-foreground"
+                className={cn(
+                  "grid size-5 flex-none place-items-center rounded-md text-[11px] font-semibold",
+                  chosen
+                    ? "bg-[#12a594] text-white"
+                    : "bg-card text-wash-foreground",
+                )}
               >
-                <Sparkles aria-hidden className="size-3" />
-                Recommended
+                {chosen ? <Check aria-hidden className="size-3" /> : option.key}
+              </span>
+              <span className="grid min-w-0 flex-1">
+                <span className={cn(chosen && "font-semibold")}>
+                  {option.name}
+                </span>
+                {thing.recommended === option.key && (
+                  <span
+                    title="The kobold recommends this one"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-wash-foreground"
+                  >
+                    <Sparkles aria-hidden className="size-3 flex-none" />
+                    Recommended
+                  </span>
+                )}
+              </span>
+            </button>
+            {made.has(option.key) && (
+              <span className="flex-none text-[11px] font-medium text-muted-foreground">
+                Prototype
               </span>
             )}
-          </button>
-          {made.has(option.key) && (
-            <span className="text-[11px] font-medium text-muted-foreground">
-              Prototype
-            </span>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </Frame>
   );
 }

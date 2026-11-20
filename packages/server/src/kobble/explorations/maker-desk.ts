@@ -20,6 +20,24 @@ export class MakerDesk {
   private url = "";
   private readonly tokens = new Map<string, string>();
   private readonly looked = new Set<string>();
+  // Changes asked while the maker was on the prototype, oldest first.
+  private readonly asked = new Map<string, string[]>();
+
+  wait(exploration: string, key: string, request: string): void {
+    const at = keyOf(exploration, key);
+    this.asked.set(at, [...(this.asked.get(at) ?? []), request.trim()]);
+  }
+
+  // The changes that waited, as one request (taken), or none.
+  waiting(exploration: string, key: string): string | null {
+    const at = keyOf(exploration, key);
+    const asked = this.asked.get(at) ?? [];
+    this.asked.delete(at);
+    if (asked.length === 0) return null;
+    return asked.length === 1
+      ? (asked[0] ?? null)
+      : asked.map((one, n) => `${String(n + 1)}. ${one}`).join("\n");
+  }
 
   // Where the server answers the makers' tools (exploration and key added).
   serveAt(url: string): void {

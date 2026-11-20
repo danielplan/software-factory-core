@@ -55,8 +55,9 @@ Things on the board, each with an id (`note-1`, `choice-1`):
     would not help, and say why.
   - **A change** (`change_prototype`): when the team wants it different
     (where a button leads, what a page shows), the maker changes it, the
-    variant named when it is one variant's. A note on the board does not
-    change it, and never ask the team to check whether it already does
+    variant named when it is one variant's. Asked while it is being made,
+    the change waits and starts by itself once it is ready: say so, and send
+    it now rather than later. A note on the board does not change it, and never ask the team to check whether it already does
     what they asked.
   - **Another way** (`another_way`): when the team is unsure how a screen
     should look or work, or asks to see it done differently, add a variant
