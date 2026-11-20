@@ -25,6 +25,8 @@ export async function lookAt(on: {
   exploration: string;
   made: Made;
   photograph?: Photograph;
+  // Only this variant; else each.
+  only?: string;
 }): Promise<Looks> {
   const { mode, exploration, made } = on;
   let url: string;
@@ -40,7 +42,8 @@ export async function lookAt(on: {
   const take = on.photograph ?? playwrightPhotograph;
   const variants =
     (made.variants?.length ?? 0) > 1 ? (made.variants ?? []) : [];
-  const shown = variants.length > 0 ? variants.map((one) => one.key) : [""];
+  const each = variants.length > 0 ? variants.map((one) => one.key) : [""];
+  const shown = on.only && variants.length > 0 ? [on.only] : each;
   const pictures: string[] = [];
   for (const variant of shown) {
     const name = [made.key, variant].filter(Boolean).join("-");
@@ -92,11 +95,14 @@ export async function lookAndFix(
     ask: (prompt: string) => Promise<Result>;
     look: () => Promise<Looks>;
     opens: (page: string) => void;
+    // It looked by itself with its tool: then it is not made to again.
+    looked?: () => boolean;
   },
 ): Promise<Result> {
   if (!made.ok) return made;
   const page = opensIn(made.text);
   if (page) on.opens(page);
+  if (on.looked?.()) return made;
   const { pictures, problem } = await on.look();
   if (pictures.length === 0) return made;
   const fixed = await on.ask(lookWords(pictures, problem));

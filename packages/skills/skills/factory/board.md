@@ -94,8 +94,12 @@ own working copy; it has its own settings files, made from the examples.
   open a pull request for part of the scope, and do not ask the owner whether
   to go on. Each session must add at least one commit, or the factory stops.
 - When the agreed scope is built and checked, write the pull request's
-  description: what was built, how to try it, what was checked and measured
-  (with the numbers), what was not checked and why. `STATUS: done`.
+  description, and only that: your whole answer becomes it. It is about the
+  whole card, every session and every change asked (the run file has them),
+  never only what this session did: a heading with the card's title, what
+  was built, how to try it, what was checked and measured (with the
+  numbers), what was not checked and why. What this last session fixed
+  belongs in the run file, not here. `STATUS: done`.
 - Say plainly what is not done. When you report progress or stop early,
   list the plan's stages as done, partly done or not started; never call
   part of the scope finished.

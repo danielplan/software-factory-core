@@ -54,7 +54,11 @@ test("a choice's options are the variants of one prototype, switched outside the
       ],
       reply: "Making it.",
     },
-    { calls: [], reply: "Moved the button.\n\n**Opens at:** `#build`" },
+    {
+      // The maker looks at its prototype with its own tool.
+      calls: [["look_at_prototype", { variant: "B" }]],
+      reply: "Moved the button.\n\n**Opens at:** `#build`",
+    },
     {
       calls: [
         [
@@ -86,6 +90,11 @@ test("a choice's options are the variants of one prototype, switched outside the
     assert.equal(prototype.variant, "A");
     assert.equal(prototype.opens, "#build");
     assert.match(factory.seen[1]?.prompt ?? "", /\?variant=A/);
+    assert.equal(factory.seen[1]?.mcp?.name, "prototype");
+    assert.match(
+      factory.answers[1]?.[0] ?? "",
+      /could not be looked at: .*cannot run here yet/,
+    );
     assert.match(
       factory.seen[2]?.prompt ?? "",
       /could not be looked at running: .*cannot run here yet/,

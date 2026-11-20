@@ -21,6 +21,7 @@ import { type Cli, realCli } from "./add-ons/github/github.ts";
 import { WEBHOOK_PATH } from "./builder/signals.ts";
 import { readBody, send } from "./http.ts";
 import { on, optionalText, record } from "./asked.ts";
+import type { MakerTools } from "./kobble/explorations/maker-tools.ts";
 import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
 import { answerWorld, isWorldRoute } from "./kobble/world-route.ts";
@@ -86,11 +87,10 @@ export function startServer(options: {
   };
   const server = createServer((incoming, response) => {
     void answer(incoming, response, {
+      // Kobble's agents' tools and worlds; the routes are all of them.
+      ...kobble,
       routes,
       watchers,
-      boardTools: kobble.boardTools,
-      supportTools: kobble.supportTools,
-      worlds: kobble.worlds,
       ...options,
     });
   });
@@ -167,9 +167,13 @@ function routesFor(session: Session): Record<string, Route> {
 type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
-  boardTools: (id: string) => BoardTools;
-  supportTools: () => SupportTools;
   worlds: ExplorationWorlds;
+} & AgentTools;
+
+type AgentTools = {
+  boardTools: (id: string) => BoardTools;
+  makerTools: (id: string, key: string) => MakerTools;
+  supportTools: () => SupportTools;
   page: string;
   session: Session;
 };

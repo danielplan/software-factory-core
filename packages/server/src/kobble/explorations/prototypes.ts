@@ -7,17 +7,12 @@
 // answers (FACTORY_WORLD_URL). Each version is pushed to origin once made,
 // so a teammate opens it too; when it cannot be, the board says so.
 
-import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import type {
   Board,
   Claude,
   Exploration,
   KobbleStore,
 } from "@software-factory/core";
-import { skillsFolder } from "@software-factory/skills";
 
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
@@ -25,6 +20,8 @@ import type { Photograph } from "../usage-pictures.ts";
 import { Refused } from "../../refused.ts";
 import { withThing } from "./board-things.ts";
 import { askFor } from "./making-words.ts";
+import { askerFor, MakerDesk } from "./maker-desk.ts";
+import type { MakerTools } from "./maker-tools.ts";
 import { beingMadeIn, lookAndFix, lookAt, notWhileMade } from "./looks.ts";
 import { finishMaking, type MadeReport, type Ready } from "./made.ts";
 
@@ -41,7 +38,6 @@ import {
 } from "./versions.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
-const TIME_LIMIT_MS = 60 * 60_000;
 const START_WITHIN_MS = 3 * 60_000;
 
 type PrototypesOptions = {
@@ -57,6 +53,8 @@ type PrototypesOptions = {
 
 export class ExplorationPrototypes {
   readonly mode: PrototypeMode;
+  // Where the makers' own tools are served.
+  readonly desk = new MakerDesk();
   private readonly options: PrototypesOptions;
   private worldUrl = "";
 
@@ -91,8 +89,9 @@ export class ExplorationPrototypes {
 
   // Where the server answers the made-up worlds (the exploration's id is
   // added).
-  serveWorldAt(url: string): void {
-    this.worldUrl = url;
+  serveAt(base: string): void {
+    this.worldUrl = `${base}/kobble/world`;
+    this.desk.serveAt(`${base}/kobble/explorations/maker`);
   }
 
   // How each prototype runs; one the factory closed on while it was being
@@ -251,15 +250,33 @@ export class ExplorationPrototypes {
     return beingMadeIn(this.mode.view(exploration));
   }
 
-  // How it looks running, on the page it opens on, one picture a variant.
-  private look(exploration: string, key: string, made: Made) {
+  // How it looks running, on the page it opens on (or another), one
+  // picture a variant (or only one).
+  private look(
+    exploration: string,
+    key: string,
+    made: Made,
+    want: { variant?: string; page?: string } = {},
+  ) {
+    const now =
+      prototypeOf(this.options.store().board(exploration), key) ?? made;
     return lookAt({
       mode: this.mode,
       root: this.options.root,
       exploration,
-      made: prototypeOf(this.options.store().board(exploration), key) ?? made,
+      made: want.page ? { ...now, opens: want.page } : now,
       photograph: this.options.photograph,
+      ...(want.variant ? { only: want.variant } : {}),
     });
+  }
+
+  // The maker's own tool: it looks at the prototype it makes.
+  makerTools(exploration: string, key: string): MakerTools {
+    const made = prototypeOf(this.options.store().board(exploration), key);
+    if (!made) throw new Refused(`There is no prototype ${key} on the board.`);
+    return this.desk.tools(exploration, key, (want) =>
+      this.look(exploration, key, made, want),
+    );
   }
 
   // Kept with the prototype: being made, or done (and the page the maker
@@ -308,27 +325,18 @@ export class ExplorationPrototypes {
     const workspace = await versionWorkspace(this.options.project, copy);
     // It runs while it is made: the team watches it change.
     this.mode.start(exploration.id, key).catch(() => undefined);
-    const session = randomUUID();
-    const ask = (prompt: string, resume: boolean) =>
-      this.options.claude.run({
-        cwd: copy.folder,
-        prompt,
-        readOnly: false,
-        deny: ["Read(**/.env*)"],
-        instructions: readFileSync(
-          join(skillsFolder, "explore", "SKILL.md"),
-          "utf8",
-        ),
-        session: { id: session, resume },
-        timeLimitMs: TIME_LIMIT_MS,
-        onActivity: (line) => {
-          const { steps } = this.mode.runOf(exploration.id, key);
-          this.mode.set(exploration.id, key, {
-            activity: line.slice(0, 80),
-            steps: [...steps, line.slice(0, 200)].slice(-60),
-          });
-        },
-      });
+    const ask = askerFor({
+      claude: this.options.claude,
+      folder: copy.folder,
+      mcp: this.desk.mcpFor(exploration.id, key),
+      onStep: (line) => {
+        const { steps } = this.mode.runOf(exploration.id, key);
+        this.mode.set(exploration.id, key, {
+          activity: line.slice(0, 80),
+          steps: [...steps, line.slice(0, 200)].slice(-60),
+        });
+      },
+    });
     const asked = askFor(exploration, board, made, {
       change,
       maps: codeMaps(this.options.root),
@@ -336,6 +344,7 @@ export class ExplorationPrototypes {
     const result = await lookAndFix(await ask(asked, false), {
       ask: (prompt) => ask(prompt, true),
       look: () => this.look(exploration.id, key, made),
+      looked: () => this.desk.hasLooked(exploration.id, key),
       opens: (page) => {
         this.mark(exploration.id, key, { opens: page });
       },
