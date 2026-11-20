@@ -124,9 +124,11 @@ acme/                    the project, one repository
 ```
 
 Each product describes itself next to its code (`shop/product.json`: kind,
-users, commands; `shop/BLUEPRINT.md`: its structure, promises and checks),
-and `factory.json` lists the products' folders from the project's root, so
-the project can move as a whole. What the company knows is one space with its
+users, commands, what it needs and, when its kit cannot tell, its type:
+screen, backend, data or outside service, which the System map shows;
+`shop/BLUEPRINT.md`: its structure, promises and checks), and
+`factory.json` lists the products' folders from the project's root, so the
+project can move as a whole. What the company knows is one space with its
 own documentation: the project's `docs/`, the knowledge base's sections beside
 the pages it already had (from 0.6.0; before, `factory/context/` and
 `factory/products/`, which the upgrade moves).

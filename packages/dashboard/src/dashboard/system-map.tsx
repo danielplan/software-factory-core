@@ -1,7 +1,10 @@
 // The product's parts as a real map: each part a box on a canvas, laid out
 // left to right with ELK (the same layout as an exploration's board), and a
-// line from each part to exactly the parts that need it. Pointing at a part
-// brings out its own lines and the parts at their other ends. Each box has a
+// line from each part to exactly the parts that need it (its type tag in
+// type-tag.tsx). Pointing at a part
+// brings out its own lines and the parts at their other ends. On a narrow
+// screen (a phone) the map runs top to bottom instead, so the boxes keep a
+// size that can be read. Each box has a
 // tag on a small line above its name saying what type of part it is;
 // pointing at the tag, focusing it or tapping it tells what that type means.
 
@@ -18,25 +21,17 @@ import {
   ReactFlowProvider,
   useNodesState,
   useReactFlow,
+  useUpdateNodeInternals,
 } from "@xyflow/react";
-import {
-  Cloud,
-  Database,
-  type LucideIcon,
-  Monitor,
-  Server,
-} from "lucide-react";
-import { Popover } from "radix-ui";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import type { PartView } from "@/api";
 import { arrange } from "@/explorations/board/layout";
-import { type Line, linesOf, nearOf, TYPES } from "@/lib/system-map";
+import { type Line, linesOf, nearOf } from "@/lib/system-map";
 import { cn } from "@/lib/utils";
 
 import { PartCard } from "./part-card";
-
-type PartType = NonNullable<PartView["type"]>;
+import { TypeTag } from "./type-tag";
 
 type PartData = {
   part: PartView;
@@ -45,10 +40,15 @@ type PartData = {
   faded: boolean;
   // Hidden until the layout has placed it, so it does not jump.
   placed: boolean;
+  // The map runs top to bottom: lines come in above and leave below.
+  down: boolean;
 };
 type PartNode = Node<PartData, "part">;
 
 const WIDTH = 248;
+// Narrower than this, the map runs top to bottom: two boxes side by side
+// with room between them.
+const NARROW = 600;
 
 const COLOURS = {
   "--xy-background-color": "transparent",
@@ -56,20 +56,15 @@ const COLOURS = {
   "--xy-edge-stroke-width-default": "1.5",
 } as React.CSSProperties;
 
-// Each type's icon and colours on its tag.
-const LOOK: Record<PartType, { icon: LucideIcon; look: string }> = {
-  screen: { icon: Monitor, look: "bg-sky-50 text-sky-700 ring-sky-200" },
-  backend: {
-    icon: Server,
-    look: "bg-violet-50 text-violet-700 ring-violet-200",
-  },
-  data: { icon: Database, look: "bg-amber-50 text-amber-800 ring-amber-200" },
-  outside: { icon: Cloud, look: "bg-rose-50 text-rose-700 ring-rose-200" },
-};
-
 const HANDLE = "!size-1.5 !min-h-0 !min-w-0 !border-0 !bg-arrow";
 
-function PartBox({ data }: NodeProps<PartNode>) {
+function PartBox({ id, data }: NodeProps<PartNode>) {
+  // The lines meet the box on other sides when the map turns, so React Flow
+  // measures where they meet again.
+  const update = useUpdateNodeInternals();
+  useEffect(() => {
+    update(id);
+  }, [id, data.down, update]);
   return (
     <div
       style={{ width: WIDTH }}
@@ -81,7 +76,7 @@ function PartBox({ data }: NodeProps<PartNode>) {
     >
       <Handle
         type="target"
-        position={Position.Left}
+        position={data.down ? Position.Top : Position.Left}
         isConnectable={false}
         className={HANDLE}
       />
@@ -92,67 +87,11 @@ function PartBox({ data }: NodeProps<PartNode>) {
       />
       <Handle
         type="source"
-        position={Position.Right}
+        position={data.down ? Position.Bottom : Position.Right}
         isConnectable={false}
         className={HANDLE}
       />
     </div>
-  );
-}
-
-// A small coloured tag saying what type of part it is. Pointing at it,
-// focusing it or tapping it tells what that type means; only this tag's.
-function TypeTag({ type }: Readonly<{ type: PartType }>) {
-  const { label, means } = TYPES[type];
-  const { icon: Icon, look } = LOOK[type];
-  const [open, setOpen] = useState(false);
-  return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger
-        // Not the box's own hint (what the part does), only this tag's.
-        title=""
-        aria-label={`${label}: ${means}`}
-        onPointerEnter={(event) => {
-          if (event.pointerType === "mouse") setOpen(true);
-        }}
-        onPointerLeave={(event) => {
-          if (event.pointerType === "mouse") setOpen(false);
-        }}
-        onFocus={() => {
-          setOpen(true);
-        }}
-        onBlur={() => {
-          setOpen(false);
-        }}
-        // A tap (or click) opens it rather than toggling it, since the
-        // focus that comes with it has opened it already.
-        onClick={(event) => {
-          event.preventDefault();
-          setOpen(true);
-        }}
-        className={cn(
-          "inline-flex shrink-0 cursor-help items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium ring-1 outline-none focus-visible:ring-2",
-          look,
-        )}
-      >
-        <Icon className="size-3" aria-hidden />
-        {label}
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          side="top"
-          sideOffset={6}
-          // The tag keeps the focus; the hint only tells.
-          onOpenAutoFocus={(event) => {
-            event.preventDefault();
-          }}
-          className="z-50 max-w-56 rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md"
-        >
-          <span className="font-medium">{label}</span>: {means}
-          <Popover.Arrow className="fill-foreground" />
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
   );
 }
 
@@ -173,18 +112,20 @@ function PartsMap({
   onPress,
 }: Readonly<{ parts: PartView[]; onPress: (path: string) => void }>) {
   const [pointed, setPointed] = useState<string | null>(null);
+  const [frame, down] = useNarrow();
   const lines = useMemo(() => linesOf(parts), [parts]);
   const edges = useEdges(lines, pointed);
-  const { nodes, onNodesChange, height } = useLaidOut(
-    parts,
-    lines,
+  const { nodes, onNodesChange, height } = useLaidOut(parts, lines, {
     pointed,
     onPress,
-  );
+    down,
+    frame,
+  });
 
   return (
     <div className="grid gap-2">
       <div
+        ref={frame}
         style={{ height }}
         className="overflow-hidden rounded-xl border border-border-soft bg-[radial-gradient(#dde1ea_1px,transparent_1px)] [background-size:16px_16px]"
       >
@@ -250,14 +191,42 @@ function useEdges(lines: Line[], pointed: string | null): Edge[] {
   );
 }
 
+// Whether the map is narrow (a phone), so it runs top to bottom; watched as
+// the window changes size.
+function useNarrow() {
+  const frame = useRef<HTMLDivElement>(null);
+  const [down, setDown] = useState(false);
+  useEffect(() => {
+    const element = frame.current;
+    if (!element) return;
+    const watch = new ResizeObserver(([entry]) => {
+      if (entry) setDown(entry.contentRect.width < NARROW);
+    });
+    watch.observe(element);
+    return () => {
+      watch.disconnect();
+    };
+  }, []);
+  return [frame, down] as const;
+}
+
 // The parts' boxes, faded when away from the pointed one, laid out once
 // every box is measured, and again when a part comes, goes, changes size or
 // needs something else; and the map's height to hold them.
 function useLaidOut(
   parts: PartView[],
   lines: Line[],
-  pointed: string | null,
-  onPress: (path: string) => void,
+  {
+    pointed,
+    onPress,
+    down,
+    frame,
+  }: {
+    pointed: string | null;
+    onPress: (path: string) => void;
+    down: boolean;
+    frame: React.RefObject<HTMLDivElement | null>;
+  },
 ) {
   const [nodes, setNodes, onNodesChange] = useNodesState<PartNode>([]);
   const [height, setHeight] = useState(320);
@@ -280,11 +249,12 @@ function useLaidOut(
             onPress,
             faded: near !== null && !near.has(part.id),
             placed: old?.data.placed ?? false,
+            down,
           },
         };
       });
     });
-  }, [parts, onPress, near, setNodes]);
+  }, [parts, onPress, near, down, setNodes]);
 
   const latest = useRef({ nodes, lines });
   useLayoutEffect(() => {
@@ -292,12 +262,7 @@ function useLaidOut(
   });
   const measured =
     nodes.length > 0 && nodes.every((n) => n.measured?.height !== undefined);
-  const shape = [
-    ...nodes.map(
-      (n) => `${n.id}:${String(Math.round(n.measured?.height ?? 0))}`,
-    ),
-    ...lines.map((line) => line.id),
-  ].join("|");
+  const shape = shapeOf(nodes, lines, down);
   useEffect(() => {
     if (!measured) return;
     let stale = false;
@@ -306,27 +271,55 @@ function useLaidOut(
       width: n.measured?.width ?? WIDTH,
       height: n.measured?.height ?? 0,
     }));
-    void arrange(boxes, latest.current.lines).then((places) => {
-      if (stale) return;
-      const bottom = Math.max(
-        ...boxes.map((box) => (places.get(box.id)?.y ?? 0) + box.height),
-      );
-      setHeight(Math.min(640, Math.max(220, bottom + 48)));
-      setNodes((now) =>
-        now.map((n) => ({
-          ...n,
-          position: places.get(n.id) ?? n.position,
-          data: { ...n.data, placed: true },
-        })),
-      );
-      requestAnimationFrame(() => {
-        void flow.fitView({ padding: 0.08, maxZoom: 1 });
-      });
-    });
+    void arrange(boxes, latest.current.lines, down ? "DOWN" : "RIGHT").then(
+      (places) => {
+        if (stale) return;
+        setHeight(heightOf(boxes, places, down, frame.current?.clientWidth));
+        setNodes((now) =>
+          now.map((n) => ({
+            ...n,
+            position: places.get(n.id) ?? n.position,
+            data: { ...n.data, placed: true },
+          })),
+        );
+        requestAnimationFrame(() => {
+          void flow.fitView({ padding: 0.08, maxZoom: 1 });
+        });
+      },
+    );
     return () => {
       stale = true;
     };
-  }, [shape, measured, setNodes, flow]);
+  }, [shape, measured, down, frame, setNodes, flow]);
 
   return { nodes, onNodesChange, height };
+}
+
+// What the layout depends on: the boxes' heights, the lines and the way the
+// map runs; laid out again when it changes.
+function shapeOf(nodes: PartNode[], lines: Line[], down: boolean) {
+  return [
+    ...nodes.map(
+      (n) => `${n.id}:${String(Math.round(n.measured?.height ?? 0))}`,
+    ),
+    ...lines.map((line) => line.id),
+    down ? "down" : "right",
+  ].join("|");
+}
+
+// The map's height to hold the laid out boxes. Top to bottom, it may be
+// taller, as a phone's page scrolls, and holds the boxes once shrunk to fit
+// the map's width (with the room fitView leaves around them).
+function heightOf(
+  boxes: { id: string; width: number; height: number }[],
+  places: Map<string, { x: number; y: number }>,
+  down: boolean,
+  width: number | undefined,
+) {
+  const end = (box: (typeof boxes)[number], side: "x" | "y") =>
+    (places.get(box.id)?.[side] ?? 0) + (side === "x" ? box.width : box.height);
+  const right = Math.max(...boxes.map((box) => end(box, "x")));
+  const bottom = Math.max(...boxes.map((box) => end(box, "y")));
+  const shrink = down && width ? Math.min(1, width / (right * 1.16)) : 1;
+  return Math.min(down ? 1200 : 640, Math.max(220, bottom * shrink + 48));
 }

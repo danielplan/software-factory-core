@@ -63,11 +63,48 @@ Decisions made while building (cheap to change):
   parts did not say): a guess shown as a fact can be wrong; a part without a
   type shows no tag, and its product can say it.
 - The field is called `type`, since a product's `kind` already means its kit.
+- On a narrow screen (under 600 pixels wide, a phone) the map runs top to
+  bottom, lines coming in above each box and leaving below: left to right,
+  the map shrank so far on a phone that the boxes could not be read. The
+  prototype did not show a phone.
 
 ## Status
 
-in progress
+done
 
 ## Result
 
+System's "Your product" is a map: each part a box with a line to each part
+that needs it, laid out left to right (top to bottom on a phone). Each box
+has a small coloured type tag above the part's name; pointing at it, focusing
+it with the keyboard or tapping it shows only that type's meaning. There is no
+key under the map. Parts say their type: the kits set it, and a product's
+`product.json` may say its own (`"type": "data"`), which wins.
+
+How to try it: start the factory on a project
+(`npx software-factory`), open System. To see Data and Outside service tags,
+add `"type": "data"` or `"type": "outside"` to a product's `product.json`.
+
+Checked: `npm run verify` passes in full (format, lint, types, unused code,
+copy-paste, tests with coverage, records, docs). In the browser, with a copy of
+the example company given three made-up products more (a back office, a
+database and a payment service, only in a throwaway folder): the map and its
+lines, pointing at a part and at a tag, a tag focused with the keyboard (only
+its meaning shows), a phone-sized screen and a tap on a tag.
+
+![System with the map: five parts, each with its type tag](002-clearer-system-map/system-map.png)
+![Pointing at the Outside service tag: its meaning, and Payments' own line brought out](002-clearer-system-map/pointing-at-a-tag.png)
+![On a phone the map runs top to bottom](002-clearer-system-map/phone.png)
+![On a phone, a tap on a tag shows its meaning](002-clearer-system-map/phone-tap-a-tag.png)
+
+Not checked: a real phone or tablet (the phone screenshots are a narrow
+desktop browser; the tap was a mouse click); screen readers beyond the tag's
+name, which carries its meaning; parts actually running (the example
+company's apps do not start here), so the lights are all "stopped".
+
 ## Later
+
+- A product of Other code with no start command (a database or an outside
+  service the team does not run) makes no part, so it is not on the map even
+  when its `product.json` says its type. Showing such products on the map,
+  without Start, would make the map complete.
