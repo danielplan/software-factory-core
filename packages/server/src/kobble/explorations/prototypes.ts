@@ -25,18 +25,17 @@ import type { Photograph } from "../usage-pictures.ts";
 import { Refused } from "../../refused.ts";
 import { withThing } from "./board-things.ts";
 import { askFor } from "./making-words.ts";
-import { lookAt } from "./looks.ts";
+import { beingMadeIn, lookAndFix, lookAt, notWhileMade } from "./looks.ts";
 import { finishMaking, type MadeReport, type Ready } from "./made.ts";
 
 import { codeMaps } from "./product-picture.ts";
 import {
-  type Made,
   prototypeOf,
-  opensIn,
   shownAddress,
   choicePrototype,
   cutOffIn,
   cutRun,
+  type Made,
   markedIn,
   freeVariant,
   withVariant,
@@ -138,7 +137,8 @@ export class ExplorationPrototypes {
       keys,
       opens,
     );
-    if (planned.change) this.free(exploration.id, planned.key);
+    if (planned.change)
+      notWhileMade(this.mode.runOf(exploration.id, planned.key));
     const saved = store.saveBoard(exploration.id, planned.board);
     this.begin(exploration, saved, planned.key, planned.change);
     return saved;
@@ -168,15 +168,8 @@ export class ExplorationPrototypes {
   private unbusy(board: Board, exploration: string, key: string): Made {
     const made = prototypeOf(board, key);
     if (!made) throw new Refused(`There is no prototype ${key} on the board.`);
-    this.free(exploration, key);
+    notWhileMade(this.mode.runOf(exploration, key));
     return made;
-  }
-
-  private free(exploration: string, key: string): void {
-    if (this.mode.runOf(exploration, key).making)
-      throw new Refused(
-        `Prototype ${key} is still being made: change it once it is ready.`,
-      );
   }
 
   private begin(
@@ -267,13 +260,18 @@ export class ExplorationPrototypes {
   // What each prototype of an exploration being made does now, for the
   // kobold who talks with the team.
   beingMade(exploration: string): string[] {
-    return this.mode
-      .view(exploration)
-      .filter((run) => run.making)
-      .map((run) => {
-        const doing = run.activity ? ` (${run.activity})` : "";
-        return `${run.version}: being made${doing}`;
-      });
+    return beingMadeIn(this.mode.view(exploration));
+  }
+
+  // How it looks running, on the page it opens on, one picture a variant.
+  private look(exploration: string, key: string, made: Made) {
+    return lookAt({
+      mode: this.mode,
+      root: this.options.root,
+      exploration,
+      made: prototypeOf(this.options.store().board(exploration), key) ?? made,
+      photograph: this.options.photograph,
+    });
   }
 
   // Kept with the prototype: being made, or done (and the page the maker
@@ -292,8 +290,15 @@ export class ExplorationPrototypes {
   // commit on its branch; it keeps running, and its page reloads as the
   // kobold changes it.
   change(exploration: Exploration, key: string, request: string): string {
-    const board = this.options.store().board(exploration.id);
-    this.unbusy(board, exploration.id, key);
+    const store = this.options.store();
+    const made = this.unbusy(store.board(exploration.id), exploration.id, key);
+    const board = store.saveBoard(
+      exploration.id,
+      withThing(store.board(exploration.id), {
+        ...made,
+        changes: [...(made.changes ?? []), request.trim()],
+      }),
+    );
     this.begin(exploration, board, key, request);
     return key;
   }
@@ -315,28 +320,35 @@ export class ExplorationPrototypes {
     const workspace = await versionWorkspace(this.options.project, copy);
     // It runs while it is made: the team watches it change.
     this.mode.start(exploration.id, key).catch(() => undefined);
-    const result = await this.options.claude.run({
-      cwd: copy.folder,
-      prompt: askFor(exploration, board, made, {
-        change,
-        maps: codeMaps(this.options.root),
-      }),
-      readOnly: false,
-      deny: ["Read(**/.env*)"],
-      instructions: readFileSync(
-        join(skillsFolder, "explore", "SKILL.md"),
-        "utf8",
-      ),
-      session: { id: randomUUID(), resume: false },
-      timeLimitMs: TIME_LIMIT_MS,
-      onActivity: (line) => {
-        this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
+    const session = randomUUID();
+    const ask = (prompt: string, resume: boolean) =>
+      this.options.claude.run({
+        cwd: copy.folder,
+        prompt,
+        readOnly: false,
+        deny: ["Read(**/.env*)"],
+        instructions: readFileSync(
+          join(skillsFolder, "explore", "SKILL.md"),
+          "utf8",
+        ),
+        session: { id: session, resume },
+        timeLimitMs: TIME_LIMIT_MS,
+        onActivity: (line) => {
+          this.mode.set(exploration.id, key, { activity: line.slice(0, 80) });
+        },
+      });
+    const asked = askFor(exploration, board, made, {
+      change,
+      maps: codeMaps(this.options.root),
+    });
+    const result = await lookAndFix(await ask(asked, false), {
+      ask: (prompt) => ask(prompt, true),
+      look: () => this.look(exploration.id, key, made),
+      opens: (page) => {
+        this.mark(exploration.id, key, { opens: page });
       },
     });
-    const opens = result.ok ? opensIn(result.text) : undefined;
-    this.mark(exploration.id, key, opens ? { opens } : {});
-    const shown =
-      prototypeOf(this.options.store().board(exploration.id), key) ?? made;
+    this.mark(exploration.id, key, {});
     await finishMaking({
       mode: this.mode,
       workspace,
@@ -345,14 +357,7 @@ export class ExplorationPrototypes {
       change,
       result,
       ready: this.ready,
-      look: () =>
-        lookAt({
-          mode: this.mode,
-          root: this.options.root,
-          exploration: exploration.id,
-          made: shown,
-          photograph: this.options.photograph,
-        }),
+      look: () => this.look(exploration.id, key, made),
     });
   }
 }

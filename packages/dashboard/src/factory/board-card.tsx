@@ -55,12 +55,17 @@ export function Card({
           {now}
         </span>
       )}
-      {(card.type ?? card.from ?? card.fix) && (
-        <span className="flex flex-wrap gap-1.5">
+      {(card.type ?? card.fix) && (
+        <span className="flex w-full min-w-0 flex-wrap gap-1.5">
           <TypeChip type={card.type ?? null} />
-          <Origin card={card} />
+          {card.fix && (
+            <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
+              Fix
+            </span>
+          )}
         </span>
       )}
+      <Origin card={card} />
     </button>
   );
 }
@@ -70,30 +75,17 @@ export const OpenCard = createContext<(number: number) => void>(
   () => undefined,
 );
 
-// Where a card came from: the exploration it was handed off from, by its
-// title (its id and prototype key mean nothing to people), just "Explored"
-// when the card has the same title; or a fix.
+// The exploration a card was handed off from, as one quiet line; nothing
+// when the card has its title already.
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
-  if (card.from)
-    return (
-      <span
-        title={`From the exploration “${card.from.title}”`}
-        className="inline-flex h-[22px] max-w-full min-w-0 items-center gap-1.5 rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground"
-      >
-        <FlaskConical
-          aria-hidden
-          strokeWidth={2}
-          className="size-3 flex-none"
-        />
-        <span className="truncate">
-          {card.from.title === card.title ? "Explored" : card.from.title}
-        </span>
-      </span>
-    );
-  if (!card.fix) return null;
+  if (!card.from || card.from.title === card.title) return null;
   return (
-    <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-      Fix
+    <span
+      title={`From the exploration “${card.from.title}”`}
+      className="flex w-full min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
+    >
+      <FlaskConical aria-hidden strokeWidth={2} className="size-3 flex-none" />
+      <span className="truncate">From “{card.from.title}”</span>
     </span>
   );
 }

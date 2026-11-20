@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
+import { lookAndFix, notWhileMade } from "../src/kobble/explorations/looks.ts";
 import {
   cutOffIn,
   cutRun,
@@ -202,4 +203,50 @@ test("a prototype the factory closed on while it was being made says so", () => 
   } as never);
   assert.equal(run.state, "failed");
   assert.match(run.problem ?? "", /stopped while being made/);
+});
+
+test("the maker is shown pictures of what it made and fixes it, before it is called ready", async () => {
+  const pages: string[] = [];
+  const asked: string[] = [];
+  const done = await lookAndFix(
+    { ok: true, text: "Made it.\n\nOpens at: #signals" },
+    {
+      ask: (prompt) => {
+        asked.push(prompt);
+        return Promise.resolve({
+          ok: true,
+          text: "Fixed.\n\nOpens at: #build",
+        });
+      },
+      look: () =>
+        Promise.resolve({ pictures: ["/looks/A-A.png"], problem: null }),
+      opens: (page) => {
+        pages.push(page);
+      },
+    },
+  );
+  assert.equal(done.text, "Fixed.\n\nOpens at: #build");
+  assert.deepEqual(pages, ["#signals", "#build"]);
+  assert.match(asked[0] ?? "", /\/looks\/A-A\.png/);
+  const blind = await lookAndFix(
+    { ok: true, text: "Made it." },
+    {
+      ask: () => Promise.reject(new Error("not asked")),
+      look: () => Promise.resolve({ pictures: [], problem: "no browser" }),
+      opens: () => undefined,
+    },
+  );
+  assert.equal(blind.text, "Made it.");
+  const failed = { ok: false, text: "", error: "stopped" };
+  assert.equal(
+    await lookAndFix(failed, {
+      ask: () => Promise.reject(new Error("not asked")),
+      look: () => Promise.reject(new Error("not looked")),
+      opens: () => undefined,
+    }),
+    failed,
+  );
+  assert.throws(() => {
+    notWhileMade({ version: "A", making: true } as never);
+  }, /still being made/);
 });

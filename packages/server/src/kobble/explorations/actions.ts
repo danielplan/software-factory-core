@@ -161,6 +161,18 @@ async function handedOffCard(
   return { number: exploration.issue, url };
 }
 
+// What the team asked to change on the prototype along the way, in order:
+// all of it is on its branch, and all of it is to be built.
+function changeLines(agreed: Made): string[] {
+  const changes = agreed.changes ?? [];
+  if (changes.length === 0) return [];
+  return [
+    "",
+    "**Changed along the way** (all of it is on the prototype's branch, and all of it is to be built):",
+    ...changes.map((one, at) => `${String(at + 1)}. ${one}`),
+  ];
+}
+
 // The agreed variant, when the prototype has several: build only that one.
 function variantLines(agreed: Made): string[] {
   const variants = agreed.variants ?? [];
@@ -205,6 +217,7 @@ function handoffText(
     "",
     `**Agreed:** ${agreed.key} · ${agreed.name}. ${agreed.difference}`,
     ...variantLines(agreed),
+    ...changeLines(agreed),
     "",
     `**The prototype:** on the branch \`${agreed.branch}\`.`,
     ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),

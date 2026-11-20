@@ -187,6 +187,8 @@ export const thingSchema = z.discriminatedUnion("kind", [
     // Being made when last saved: when no maker is on it now, the factory
     // closed before it was done.
     making: z.boolean().optional(),
+    // What the team asked to change on it, in order: the handoff says it.
+    changes: z.array(z.string()).optional(),
   }),
   z.strictObject({
     ...common,
