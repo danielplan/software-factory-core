@@ -17,6 +17,7 @@ import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
+import { SystemMap } from "./system-map";
 
 // System: what the product is made of, as a map of its parts, each after
 // the parts it needs, with its light and its buttons in its box; how it is
@@ -62,7 +63,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
         <span className="min-w-0 flex-1">{top.text}</span>
       </div>
       {problem && <ProblemBox title="That did not work" text={problem} />}
-      <Area title="Your product" parts={products} onPress={press}>
+      <Area title="Your product" parts={products} onPress={press} map>
         <p className="py-6 text-center text-[13px] text-muted-foreground">
           No parts to run yet: they come with your first idea, on the{" "}
           <a
@@ -123,12 +124,14 @@ function Legend() {
 }
 
 // One area of the factory, framed: its parts in columns, each after the
-// parts it needs, joined by arrows (down on a phone).
+// parts it needs, joined by arrows (down on a phone); or, as a map, each
+// part a box with a line to each part it needs.
 function Area({
   title,
   actions,
   parts,
   onPress,
+  map = false,
   children,
 }: Readonly<{
   title: string;
@@ -136,6 +139,8 @@ function Area({
   actions?: React.ReactNode;
   parts: PartView[];
   onPress: (path: string) => void;
+  // Drawn as a map with a line for each part another one needs.
+  map?: boolean;
   // Shown while the area has no parts.
   children?: React.ReactNode;
 }>) {
@@ -144,6 +149,8 @@ function Area({
     <AreaCard title={title} actions={actions}>
       {parts.length === 0 ? (
         children
+      ) : map ? (
+        <SystemMap parts={parts} onPress={onPress} />
       ) : (
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:gap-0">
           {columnsOf(parts).map((column, index) => (
