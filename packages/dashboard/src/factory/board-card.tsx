@@ -1,7 +1,7 @@
 // A card on the Factory board, opened beside it on a click; while the
 // builder is on it, what it is doing right now.
 
-import { FlaskConical, LoaderCircle } from "lucide-react";
+import { FlaskConical, Hand, LoaderCircle } from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
@@ -15,7 +15,14 @@ export function Card({
   card,
   at,
   now,
-}: Readonly<{ card: FactoryCard; at: number; now: string | null }>) {
+  mine = false,
+}: Readonly<{
+  card: FactoryCard;
+  at: number;
+  now: string | null;
+  // A person took it on: the builder leaves it alone.
+  mine?: boolean;
+}>) {
   const open = use(OpenCard);
   const building = now !== null;
   return (
@@ -47,6 +54,12 @@ export function Card({
       <span className="text-[13px] leading-[1.35] font-medium">
         {card.title}
       </span>
+      {mine && (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
+          <Hand aria-hidden strokeWidth={2} className="size-3 flex-none" />
+          You took it · the builder leaves it alone
+        </span>
+      )}
       {now && (
         <span
           title={now}

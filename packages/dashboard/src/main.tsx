@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "@/app";
 import { followLogo, THEME_LOADED } from "@/lib/brand";
 import { lightOnly } from "@/lib/light-only";
+import "@/lib/variant";
 import "./index.css";
 
 // Light only, also for the company's theme once it has loaded; its logo
