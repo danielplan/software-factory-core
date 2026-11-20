@@ -45,7 +45,7 @@ test("the older time stamp, an unknown reset, and other errors", () => {
 
 test("a paused card waits until the reset, or until the owner writes", async () => {
   const { decide } = await import("../src/builder/decide.ts");
-  const { pausedComment, stripMarker } =
+  const { markComment, pausedComment, stripMarker } =
     await import("../src/builder/protocol.ts");
   const until = new Date("2026-11-18T18:52:00Z");
   const paused = pausedComment("Paused.", until);
@@ -62,13 +62,19 @@ test("a paused card waits until the reset, or until the owner writes", async () 
     thread: more.map((m) => ({ ...m, author: "x", where: "card" as const })),
     pullRequest: null,
     awaitsAnswer: false,
+    stuck: false,
   });
+  const started = markComment("Started.", "started");
   const before = new Date("2026-11-18T18:00:00Z");
   const after = new Date("2026-11-18T19:00:00Z");
-  const pausedCard = card([{ body: paused, at: "1" }]);
+  const pausedCard = card([
+    { body: started, at: "0" },
+    { body: paused, at: "1" },
+  ]);
   assert.equal(decide([pausedCard], new Set(), before).jobs.length, 0);
   assert.equal(decide([pausedCard], new Set(), after).jobs.length, 1);
   const answered = card([
+    { body: started, at: "0" },
     { body: paused, at: "1" },
     { body: "Go on now", at: "2" },
   ]);

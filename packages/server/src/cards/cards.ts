@@ -53,6 +53,9 @@ export type Cards = {
   replace: (number: number, by: number) => Promise<void>;
   // What kind of work it is (a label where it is tracked); none takes it off.
   setType?: (number: number, type: CardType | null) => Promise<void>;
+  // Marks the card as one the builder got stuck on (STUCK_LABEL), or takes
+  // the mark off.
+  markStuck?: (number: number, stuck: boolean) => Promise<void>;
   // Not wanted any more: taken off the board and closed as not planned
   // where it is tracked, so it stays findable there.
   remove?: (number: number) => Promise<void>;
@@ -62,6 +65,14 @@ export type Cards = {
 export const CARD_TYPES = ["bug", "feature", "improvement"] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 export const typeLabel = (type: CardType) => `type: ${type}`;
+
+// The builder got stuck on the card: it waits in Backlog for the owner,
+// apart from the new ideas there.
+export const STUCK_LABEL = "factory: stuck";
+
+export function isStuck(labels: string[]): boolean {
+  return labels.includes(STUCK_LABEL);
+}
 
 export function typeOf(labels: string[]): CardType | null {
   return CARD_TYPES.find((type) => labels.includes(typeLabel(type))) ?? null;
@@ -125,6 +136,33 @@ export function stageNamed(name: string): Stage | null {
         stage === wanted || STAGE_COLUMNS[stage].title.toLowerCase() === wanted,
     ) ?? null
   );
+}
+
+const STUCK_COLOR = "d9534f";
+
+// GitHub's commands that mark a card stuck (making the label when there is
+// none yet), or take the mark off; none when it is as asked already.
+export function stuckArgs(
+  number: number,
+  labels: string[],
+  stuck: boolean,
+  repo: string[],
+): string[][] {
+  if (isStuck(labels) === stuck) return [];
+  const edit = ["issue", "edit", String(number), ...repo];
+  if (!stuck) return [[...edit, "--remove-label", STUCK_LABEL]];
+  return [
+    [
+      "label",
+      "create",
+      STUCK_LABEL,
+      ...repo,
+      "--color",
+      STUCK_COLOR,
+      "--force",
+    ],
+    [...edit, "--add-label", STUCK_LABEL],
+  ];
 }
 
 const TYPE_COLORS: Record<CardType, string> = {

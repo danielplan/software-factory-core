@@ -2,8 +2,10 @@
 // Review, Done). Each card has its number and title, and either the
 // exploration and prototype it was handed off from (it opens it) or a red
 // Fix chip. The builder, which builds the cards in To do, has a quiet line
-// and its switch in the header; "Read it again" reads the board now.
-// Without a board, the page says so and leads to connecting one.
+// and its switch in the header; "Read it again" reads the board now. Above
+// the columns, what waits for the owner: the builder's questions, and the
+// cards it got stuck on (Stuck). Without a board, the page says so and
+// leads to connecting one.
 
 import { ArrowUpRight, LoaderCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -22,6 +24,7 @@ import { CARD } from "@/signals/bits";
 import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
+import { StuckList } from "./stuck-cards";
 import { WaitingCards } from "./waiting-card";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
@@ -119,6 +122,7 @@ function Board({ view }: Readonly<{ view: FactoryView }>) {
   return (
     <>
       {view.connected && <WaitingCards waiting={view.waiting} />}
+      {view.connected && <StuckList stuck={view.stuck} />}
       <Columns view={view} />
     </>
   );

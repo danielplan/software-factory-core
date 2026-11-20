@@ -38,9 +38,11 @@ export {
   AREAS,
   checkParts,
   inStartOrder,
+  PART_TYPES,
   partSchema,
   type Area,
   type Part,
+  type PartType,
 } from "./parts/part.ts";
 export {
   findProducts,
@@ -118,9 +120,9 @@ export {
   resultOf,
   type ClaudeResult,
 } from "./agents/events.ts";
+export { stageAllButSettings } from "./copies/settings-files.ts";
 export {
   retryWhileLocked,
-  stageAllButSettings,
   Workspace,
   type CopySettings,
 } from "./copies/workspace.ts";

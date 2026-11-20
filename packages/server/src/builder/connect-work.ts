@@ -19,6 +19,7 @@ import { type Cli, realCli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
 import { cardsFor } from "../cards/cards-for.ts";
 import { readBoard } from "../connect/board-file.ts";
+import { homeOf } from "../prototypes/copies.ts";
 import { BoardWork, EVERY_MS } from "./board-work.ts";
 import { copyName, Jobs } from "./jobs.ts";
 import { githubPullRequests } from "./pull-requests.ts";
@@ -56,6 +57,9 @@ export function workFor(
       {
         source: project,
         workspaces: copies,
+        // The prototype copies are the factory's too: a card's branch is
+        // freed from them; anywhere else it is a person's.
+        ownCopies: [homeOf(project)],
         baseBranch: await pullRequests.baseBranch(),
       },
       name,

@@ -5,10 +5,11 @@ import { test } from "node:test";
 
 import { type Claude, run } from "@software-factory/core";
 
-import { readNote } from "../src/builder/protocol.ts";
+import { markComment, readNote } from "../src/builder/protocol.ts";
 import { withPlan } from "../src/cards/cards.ts";
 import {
   type Kept,
+  now,
   pretendClaude,
   project,
   settled,
@@ -77,7 +78,15 @@ async function clashingBranch() {
         title: "Carry on",
         stage: "doing",
         body: withPlan("Go on.", "Change the README."),
-        comments: [],
+        // The builder's own build, interrupted.
+        comments: [
+          {
+            author: "me",
+            body: markComment("The builder started on this card.", "started"),
+            at: now(),
+            where: "card",
+          },
+        ],
       },
     ],
   ]);
@@ -128,7 +137,7 @@ test("a clash the builder leaves unsettled stops the card with a question", asyn
   const last = kept.get(6)?.comments.at(-1)?.body ?? "";
   assert.equal(readNote(last), "blocked");
   assert.match(last, /clashed in `app\/README.md`/);
-  assert.equal(kept.get(6)?.stage, "todo");
+  assert.equal(kept.get(6)?.stage, "backlog");
 });
 
 test("Claude's usage limit pauses the card where it is, and the lanes, until it resets", async () => {

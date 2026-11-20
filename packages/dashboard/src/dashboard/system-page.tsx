@@ -17,9 +17,11 @@ import { columnsOf } from "@/lib/columns";
 
 import type { FactoryState } from "./dashboard";
 import { PartCard } from "./part-card";
+import { SystemMap } from "./system-map";
 
-// System: what the product is made of, as a map of its parts, each after
-// the parts it needs, with its light and its buttons in its box; how it is
+// System: what the product is made of, as a map of its parts with a line to
+// each part that needs it, each with its type, its light and its buttons in
+// its box; how it is
 // doing in a line, Start all and Stop all. The factory's own programs are
 // in Settings (FactoryPrograms).
 export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
@@ -62,7 +64,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
         <span className="min-w-0 flex-1">{top.text}</span>
       </div>
       {problem && <ProblemBox title="That did not work" text={problem} />}
-      <Area title="Your product" parts={products} onPress={press}>
+      <Area title="Your product" parts={products} onPress={press} map>
         <p className="py-6 text-center text-[13px] text-muted-foreground">
           No parts to run yet: they come with your first idea, on the{" "}
           <a
@@ -123,12 +125,14 @@ function Legend() {
 }
 
 // One area of the factory, framed: its parts in columns, each after the
-// parts it needs, joined by arrows (down on a phone).
+// parts it needs, joined by arrows (down on a phone); or, as a map, each
+// part a box with a line to each part that needs it.
 function Area({
   title,
   actions,
   parts,
   onPress,
+  map = false,
   children,
 }: Readonly<{
   title: string;
@@ -136,6 +140,8 @@ function Area({
   actions?: React.ReactNode;
   parts: PartView[];
   onPress: (path: string) => void;
+  // Drawn as a map, with a line for each part another one needs.
+  map?: boolean;
   // Shown while the area has no parts.
   children?: React.ReactNode;
 }>) {
@@ -145,24 +151,40 @@ function Area({
       {parts.length === 0 ? (
         children
       ) : (
-        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:gap-0">
-          {columnsOf(parts).map((column, index) => (
-            <Fragment key={column[0]?.id ?? index}>
-              {index > 0 && (
-                <span className="mx-2 flex rotate-90 self-center sm:rotate-0">
-                  <Arrow />
-                </span>
-              )}
-              <div className="grid min-w-0 flex-1 content-center gap-2.5">
-                {column.map((part) => (
-                  <PartCard key={part.id} part={part} onPress={onPress} />
-                ))}
-              </div>
-            </Fragment>
-          ))}
-        </div>
+        <AreaParts parts={parts} onPress={onPress} map={map} />
       )}
     </AreaCard>
+  );
+}
+
+// An area's parts: as a map, or in columns.
+function AreaParts({
+  parts,
+  onPress,
+  map,
+}: Readonly<{
+  parts: PartView[];
+  onPress: (path: string) => void;
+  map: boolean;
+}>) {
+  if (map) return <SystemMap parts={parts} onPress={onPress} />;
+  return (
+    <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:gap-0">
+      {columnsOf(parts).map((column, index) => (
+        <Fragment key={column[0]?.id ?? index}>
+          {index > 0 && (
+            <span className="mx-2 flex rotate-90 self-center sm:rotate-0">
+              <Arrow />
+            </span>
+          )}
+          <div className="grid min-w-0 flex-1 content-center gap-2.5">
+            {column.map((part) => (
+              <PartCard key={part.id} part={part} onPress={onPress} />
+            ))}
+          </div>
+        </Fragment>
+      ))}
+    </div>
   );
 }
 

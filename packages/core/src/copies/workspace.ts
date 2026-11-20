@@ -9,33 +9,20 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  readdirSync,
   rmSync,
   symlinkSync,
 } from "node:fs";
-import { basename, dirname, join, sep } from "node:path";
+import { dirname, join } from "node:path";
 
 import { run } from "../processes.ts";
-import { freeBranch } from "./free-branch.ts";
-
-// Settings files an older factory may have copied into a copy; removed when
-// found, so a job never runs with the owner's settings. The examples the
-// project keeps (.env.example, .env.test.example …) stay: a copy's own
-// settings start from them.
-const EXAMPLE_END = ".example";
-
-function isSettings(file: string): boolean {
-  const name = basename(file);
-  return name === ".env" || name.startsWith(".env.");
-}
-
-function isExample(file: string): boolean {
-  return isSettings(file) && file.endsWith(EXAMPLE_END);
-}
-
-function leftOut(file: string): boolean {
-  return isSettings(file) && !isExample(file);
-}
+import { freeBranch, heldElsewhere } from "./free-branch.ts";
+import {
+  EXAMPLE_END,
+  isExample,
+  leftOut,
+  settingsIn,
+  stageAllButSettings,
+} from "./settings-files.ts";
 
 export type CopySettings = {
   // The owner's checkout, with the local-only files.
@@ -45,6 +32,10 @@ export type CopySettings = {
   baseBranch: string;
   // Folders git does not keep, linked in from the owner's checkout.
   linked?: string[];
+  // The factory's other copies' folders (its prototypes'): a branch one of
+  // them holds is freed for this copy. A branch checked out anywhere else
+  // (but in `workspaces`) is a person's, and is never taken.
+  ownCopies?: string[];
 };
 
 // All copies share one git store. Downloading into
@@ -137,7 +128,7 @@ export class Workspace {
   // branch went another way, that work is kept on a branch of its own.
   async prepareSharedBranch(branch: string): Promise<void> {
     await this.download();
-    await freeBranch(this.path, branch, this.path);
+    await freeBranch(this.path, branch, this.path, this.ownFolders());
     const remote = await this.git(
       "branch",
       "--remotes",
@@ -160,6 +151,19 @@ export class Workspace {
     );
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
+  }
+
+  // Where the branch is checked out outside the factory's own copies (a
+  // person works on it there); none when it is not, or nowhere.
+  async heldElsewhere(branch: string): Promise<string | null> {
+    const from = existsSync(join(this.path, ".git"))
+      ? this.path
+      : this.settings.source;
+    return await heldElsewhere(from, branch, this.path, this.ownFolders());
+  }
+
+  private ownFolders(): string[] {
+    return [this.settings.workspaces, ...(this.settings.ownCopies ?? [])];
   }
 
   // Brings the latest main into the card's branch before more work on it.
@@ -355,33 +359,4 @@ export class Workspace {
       env: { LEFTHOOK: "0" },
     });
   }
-}
-
-// Stages everything in a copy but its own settings files (.env, .env.test
-// …, made from the examples), which are never committed; changes to the examples are.
-// Everything is added the plain way, which keeps to the project's
-// .gitignore, and a settings file the project does not ignore is taken out
-// again. (Leaving them out by name instead makes git refuse when the
-// project ignores them already.)
-export async function stageAllButSettings(folder: string): Promise<void> {
-  const git = (...args: string[]) => run("git", ["-C", folder, ...args]);
-  await git("add", "--all");
-  const staged = (await git("diff", "--cached", "--name-only", "-z"))
-    .split("\0")
-    .filter(leftOut);
-  if (staged.length > 0)
-    await git("rm", "--cached", "--quiet", "--", ...staged);
-}
-
-// The settings files (.env, .env.*) anywhere in a copy but in installed
-// packages and git's own folder, as paths inside it. (fs.globSync's "**"
-// does not find them on every Node version: the folder is read instead.)
-function settingsIn(folder: string): string[] {
-  return readdirSync(folder, { recursive: true, encoding: "utf8" })
-    .map((path) => path.split(sep).join("/"))
-    .filter(
-      (path) =>
-        /(^|\/)\.env(\.[\w.-]+)?$/.test(path) &&
-        !/(^|\/)(node_modules|\.git)\//.test(path),
-    );
 }

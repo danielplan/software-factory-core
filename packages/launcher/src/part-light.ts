@@ -2,7 +2,7 @@
 // part with nothing to start or check) and what a screen shows of it. Plain
 // data and the rules for changing it; the launcher decides when.
 
-import type { Part } from "@software-factory/core";
+import type { Part, PartType } from "@software-factory/core";
 
 import type { Program } from "./programs.ts";
 
@@ -15,6 +15,8 @@ export type PartView = {
   name: string;
   area: Part["area"];
   does: string;
+  // Its type (a screen, a backend, …), when its kit or product says.
+  type: PartType | null;
   dependsOn: string[];
   start: Part["start"];
   light: Light;
@@ -86,6 +88,7 @@ export function viewOf(
     name: part.name,
     area: part.area,
     does: part.does,
+    type: part.type ?? null,
     dependsOn: part.dependsOn,
     start: part.start,
     light: inner.light,

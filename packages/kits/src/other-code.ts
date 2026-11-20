@@ -62,6 +62,7 @@ export const otherCode = defineKit({
         name: product.name,
         area: "products",
         does: doesOf(product, "code"),
+        type: product.type,
         dependsOn: product.dependsOn,
         folder: product.folder,
         run,
