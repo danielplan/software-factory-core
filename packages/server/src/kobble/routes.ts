@@ -26,6 +26,7 @@ import {
   fixSignal,
 } from "./actions.ts";
 import type { BoardTools } from "./explorations/board-tools.ts";
+import type { MakerTools } from "./explorations/maker-tools.ts";
 import { branchParts, servedExplorations } from "./explorations/routes.ts";
 import { explorationRoutes, storeOf, usageOf } from "./usage-routes.ts";
 import { liveSettings } from "./live-source.ts";
@@ -64,13 +65,16 @@ type KobbleOptions = {
   };
 };
 
+// Tells the page what of Kobble changed ("signals", "explorations" …).
+function tellerOf(tell: (event: string) => void) {
+  return (what: string) => {
+    tell(`event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`);
+  };
+}
+
 export function servedKobble(options: KobbleOptions) {
   const factory = join(options.project, FACTORY_FOLDER);
-  const changed = (what: string) => {
-    options.tell(
-      `event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`,
-    );
-  };
+  const changed = tellerOf(options.tell);
   const { maybe, store } = storesOf(factory, options.project);
   const sync = new LiveSync({
     store: maybe,
@@ -109,10 +113,12 @@ export function servedKobble(options: KobbleOptions) {
     // Where the server answers the kobold's board tools.
     serveToolsAt: (base: string) => {
       explorations.talks.serveToolsAt(`${base}/kobble/explorations/mcp`);
-      explorations.prototypes.serveWorldAt(`${base}/kobble/world`);
+      explorations.prototypes.serveAt(base);
       support.serveToolsAt(`${base}/kobble/support/mcp`);
     },
     boardTools: (id: string): BoardTools => explorations.talks.tools(id),
+    makerTools: (id: string, key: string): MakerTools =>
+      explorations.prototypes.makerTools(id, key),
     supportTools: (): SupportTools => support.tools(),
     // The made-up worlds the prototypes share (world-route.ts).
     worlds: explorations.worlds,

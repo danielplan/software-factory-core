@@ -2,7 +2,13 @@
 // builder is on it, what it is doing right now; handed back from Stuck, that
 // the owner's hint is with the builder.
 
-import { FlaskConical, LoaderCircle, MessageCircle } from "lucide-react";
+import {
+  ArrowUpRight,
+  FlaskConical,
+  GitPullRequest,
+  LoaderCircle,
+  MessageCircle,
+} from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
@@ -20,9 +26,16 @@ export function Card({
   const open = use(OpenCard);
   const building = now !== null;
   return (
-    <button
-      type="button"
-      className="relative flex flex-none flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
+    <div
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(card.number);
+        }
+      }}
+      className="relative flex flex-none cursor-pointer flex-col items-start gap-1.5 overflow-hidden rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors duration-150 ease-out hover:border-[#d4d4da] motion-safe:animate-rise"
       style={{ animationDelay: `${String(Math.min(at, 8) * 45)}ms` }}
       onClick={() => {
         open(card.number);
@@ -66,13 +79,19 @@ export function Card({
           {now}
         </span>
       )}
-      {(card.type ?? card.from ?? card.fix) && (
-        <span className="flex flex-wrap gap-1.5">
+      {(card.type ?? card.fix) && (
+        <span className="flex w-full min-w-0 flex-wrap gap-1.5">
           <TypeChip type={card.type ?? null} />
-          <Origin card={card} />
+          {card.fix && (
+            <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
+              Fix
+            </span>
+          )}
         </span>
       )}
-    </button>
+      <Origin card={card} />
+      <PullRequestLink url={card.pullRequest} />
+    </div>
   );
 }
 
@@ -81,27 +100,37 @@ export const OpenCard = createContext<(number: number) => void>(
   () => undefined,
 );
 
-// Where a card came from: the exploration it was handed off from, by its
-// title (its id and prototype key mean nothing to people), or a fix.
-function Origin({ card }: Readonly<{ card: FactoryCard }>) {
-  if (card.from)
-    return (
-      <span
-        title={`From the exploration “${card.from.title}”`}
-        className="inline-flex h-[22px] max-w-full min-w-0 items-center gap-1.5 rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground"
-      >
-        <FlaskConical
-          aria-hidden
-          strokeWidth={2}
-          className="size-3 flex-none"
-        />
-        <span className="truncate">{card.from.title}</span>
-      </span>
-    );
-  if (!card.fix) return null;
+// The card's pull request, a click away, without opening the card.
+function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
+  if (!url) return null;
   return (
-    <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-      Fix
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+      className="inline-flex h-[24px] items-center gap-1.5 rounded-md border border-border bg-card px-2 text-xs font-medium text-foreground hover:bg-ground"
+    >
+      <GitPullRequest aria-hidden className="size-3.5" />
+      Pull request
+      <ArrowUpRight aria-hidden className="size-3 text-muted-foreground" />
+    </a>
+  );
+}
+
+// The exploration a card was handed off from, as one quiet line; nothing
+// when the card has its title already.
+function Origin({ card }: Readonly<{ card: FactoryCard }>) {
+  if (!card.from || card.from.title === card.title) return null;
+  return (
+    <span
+      title={`From the exploration “${card.from.title}”`}
+      className="flex w-full min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
+    >
+      <FlaskConical aria-hidden strokeWidth={2} className="size-3 flex-none" />
+      <span className="truncate">From “{card.from.title}”</span>
     </span>
   );
 }

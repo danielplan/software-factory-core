@@ -60,7 +60,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
     <Shell
       state={state}
       current={page === "connect" ? "settings" : page}
-      // An exploration fills the space beside the sidebar.
+      // An exploration fills the whole window.
       fill={page === "explore" && open !== null}
     >
       {state.problems.length > 0 && (

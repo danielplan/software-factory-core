@@ -51,7 +51,12 @@ export function nodesOf(
   marks: { pointed: string | null; attached: string[] },
 ): ThingNode[] {
   const before = new Map(earlier.map((node) => [node.id, node]));
-  return page.board.things.map((thing) => {
+  // The problem only once it is said: a new exploration opens on an
+  // empty canvas.
+  const drawn = page.board.things.filter(
+    (thing) => !(thing.kind === "problem" && unsaid(page)),
+  );
+  return drawn.map((thing) => {
     const was = before.get(thing.id);
     return {
       id: thing.id,
@@ -70,6 +75,16 @@ export function nodesOf(
       ...(was?.measured ? { measured: was.measured } : {}),
     };
   });
+}
+
+// The problem is not said yet and nothing points to or from it.
+function unsaid(page: ExplorationPage): boolean {
+  return (
+    !page.exploration.problem &&
+    !page.board.links.some(
+      (link) => link.from === "problem" || link.to === "problem",
+    )
+  );
 }
 
 export function edgesOf(page: ExplorationPage): Edge[] {

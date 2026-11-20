@@ -153,16 +153,28 @@ function line(thing: Thing, exploration: Exploration): string {
       return [
         `${head}: ${thing.title}${thing.chosen ? " (chosen: " + thing.chosen + ")" : ""}`,
         ...thing.options.map(
-          (o) => `    ${o.key}. ${o.name}: ${o.difference || "—"}`,
+          (o) =>
+            `    ${o.key}. ${o.name}: ${o.difference || "—"}${o.key === thing.recommended ? " (you recommend it)" : ""}`,
         ),
       ].join("\n");
     case "prototype":
-      return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}`;
+      return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}${versionWords(thing)}`;
     case "diagram":
       return `${head}: ${thing.title}`;
     case "picture":
       return `${head}: ${thing.title} (read factory/kobble/explorations/${exploration.id}/pictures/${thing.image} to see it)`;
   }
+}
+
+// A prototype's variants, and the one the team looks at.
+function versionWords(made: Extract<Thing, { kind: "prototype" }>): string {
+  const variants = made.variants ?? [];
+  if (variants.length < 2) return "";
+  const lines = variants.map(
+    (one) =>
+      `    ${one.key}. ${one.name}: ${one.difference || "—"}${one.key === made.variant ? " (shown)" : ""}`,
+  );
+  return ["; variants:", ...lines].join("\n");
 }
 
 // The board in short lines, as the kobold reads it.

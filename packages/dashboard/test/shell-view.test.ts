@@ -87,6 +87,7 @@ test("the kobold's card says what it works on, or that it rests", () => {
             title: "Order status",
             what: "building",
             activity: null,
+            steps: [],
           },
           also: [],
           activity: null,

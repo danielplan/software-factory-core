@@ -65,6 +65,8 @@ type Working = {
   title: string;
   what: string;
   activity: string | null;
+  // Everything it did on the card so far (its last steps), oldest first.
+  steps: string[];
 };
 
 export type BuilderView = {

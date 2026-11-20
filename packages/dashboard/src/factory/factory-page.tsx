@@ -72,6 +72,7 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
       {open !== null && (
         <CardPanel
           number={open}
+          {...knownOf(data, open)}
           onClose={() => {
             setOpen(null);
           }}
@@ -82,6 +83,18 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
       )}
     </>
   );
+}
+
+// What the board knows of a card already: its title, shown while its panel
+// loads, and what the builder did on it so far.
+function knownOf(view: FactoryView | null | undefined, number: number) {
+  const card = view?.columns
+    .flatMap((column) => column.cards)
+    .find((one) => one.number === number);
+  return {
+    title: card?.title ?? null,
+    trace: view?.builder.trace[number] ?? [],
+  };
 }
 
 // The board less the cards just deleted.

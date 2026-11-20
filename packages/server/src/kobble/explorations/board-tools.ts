@@ -27,8 +27,13 @@ export type BoardTools = {
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
   // Starts making the prototype of a choice's option, or changing one.
-  make: (choice: string, option: string) => string;
+  make: (choice: string, options: string[], opens?: string) => string;
   change: (prototype: string, change: string) => string;
+  another: (
+    prototype: string,
+    way: { name: string; difference: string },
+  ) => string;
+  handOff: () => Promise<string>;
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -69,18 +74,28 @@ const TOOLS: {
   {
     name: "add_choice",
     description:
-      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference.",
-    input: { title: z.string().min(1), options: z.array(option) },
+      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference, and the one you recommend (its letter), which the board marks.",
+    input: {
+      title: z.string().min(1),
+      options: z.array(option),
+      recommended: z
+        .string()
+        .optional()
+        .describe("The option you recommend (A, B …)."),
+    },
     act: (a) => ({
       act: "choice",
       title: String(a.title),
       options: a.options as Partial<Option>[],
+      ...(typeof a.recommended === "string"
+        ? { recommended: a.recommended }
+        : {}),
     }),
   },
   {
     name: "change_thing",
     description:
-      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter).",
+      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter) or the option you recommend.",
     input: {
       id: z.string(),
       text: z.string().optional(),
@@ -88,6 +103,7 @@ const TOOLS: {
       diagram: z.string().optional(),
       options: z.array(option).optional(),
       removeOptions: z.array(z.string()).optional(),
+      recommended: z.string().optional(),
     },
     act: (a) => ({ act: "change", ...(a as { id: string }) }),
   },
@@ -114,6 +130,17 @@ const TOOLS: {
     description: "Take an arrow off.",
     input: { from: z.string(), to: z.string() },
     act: (a) => ({ act: "unlink", from: String(a.from), to: String(a.to) }),
+  },
+  {
+    name: "choose_option",
+    description:
+      "Mark the option the team picked on a choice (its letter), or none to take it back. Use it when they decide; never write the decision into the choice's title.",
+    input: { id: z.string(), option: z.string().nullable() },
+    act: (a) => ({
+      act: "choose",
+      id: String(a.id),
+      option: typeof a.option === "string" ? a.option.toUpperCase() : null,
+    }),
   },
   {
     name: "agree",
@@ -162,6 +189,14 @@ function serverFor(on: BoardTools): McpServer {
     (args) => toolAnswer(() => on.rename(args)),
   );
   addPrototypeTools(server, on);
+  server.registerTool(
+    "hand_off",
+    {
+      description:
+        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off, and only with an agreed prototype.",
+    },
+    () => toolAnswer(() => on.handOff()),
+  );
   addWorldTools(server, on.world.worlds, on.world.id);
   return server;
 }
@@ -172,19 +207,30 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
     "make_prototype",
     {
       description:
-        "Start making the prototype of one option of a choice: it appears on the board at once and is made in the background (a few minutes), in its own copy of the code. Make one when trying it will teach more than talking (the team picked the option, or asked for it, or it settles the question); say in one line what you started.",
+        "Start making a choice's prototype: one prototype with its options as variants (all of them unless you name some), made at once in one copy of the code in a few minutes. It appears on the board at once; the team switches between the variants on the board. Calling it again for options not made yet adds them as variants. Say in one line what you started.",
       inputSchema: {
         choice: z.string().describe("The choice's id (choice-1)."),
-        option: z.string().describe("The option's letter (A, B …)."),
+        options: z
+          .array(z.string())
+          .optional()
+          .describe("The options' letters (A, B …); none: all of them."),
+        opens: z
+          .string()
+          .regex(/^[/#?]/)
+          .optional()
+          .describe(
+            "The page the change is on, where the prototype opens: a path (/orders) or a page of an app that keeps its pages after # (#build).",
+          ),
       },
     },
-    (args) => toolAnswer(() => on.make(args.choice, args.option)),
+    (args) =>
+      toolAnswer(() => on.make(args.choice, args.options ?? [], args.opens)),
   );
   server.registerTool(
     "change_prototype",
     {
       description:
-        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says): the maker changes it in its copy, a new version on its branch, in a few minutes; the board shows it being made, then running again. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
+        "Change a prototype that is already on the board, as the team asks (what it shows, where a button leads, what a page says; name the variant when it is one variant's): the maker changes it in its copy in a few minutes; the board shows it being made, then running again. Use it whenever the team wants a prototype different; a note does not change it. Say in one line what you started.",
       inputSchema: {
         prototype: z.string().describe("The prototype's letter (A, A2 …)."),
         change: z
@@ -194,6 +240,35 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
       },
     },
     (args) => toolAnswer(() => on.change(args.prototype, args.change)),
+  );
+  addAnotherWay(server, on);
+}
+
+// Another way: a variant added to a prototype.
+function addAnotherWay(server: McpServer, on: BoardTools): void {
+  server.registerTool(
+    "another_way",
+    {
+      description:
+        "Another way to do what a prototype does: a variant added to it, made in its copy beside the others, so the team switches between them on the board and compares. Use it when the team is unsure how a screen should look or work, or asks to see it done differently; four variants at most. Say in one line how it differs.",
+      inputSchema: {
+        prototype: z
+          .string()
+          .describe("The prototype it is a variant of (A, A2 …)."),
+        name: z.string().min(1).describe("A few words."),
+        difference: z
+          .string()
+          .min(1)
+          .describe("How it differs, complete enough for the maker."),
+      },
+    },
+    (args) =>
+      toolAnswer(() =>
+        on.another(args.prototype, {
+          name: args.name,
+          difference: args.difference,
+        }),
+      ),
   );
 }
 

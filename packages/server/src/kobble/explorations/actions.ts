@@ -76,6 +76,39 @@ export function newExploration(
   });
 }
 
+// A fresh exploration, opened at once on its canvas: the team says its idea
+// to the kobold there, who names it. One the team opened and left without
+// a word is opened again instead of making another.
+export function freshExploration(
+  store: KobbleStore,
+  now: Date = new Date(),
+): Exploration {
+  const untouched = store
+    .all("explorations")
+    .find(
+      (one) =>
+        one.status === "exploring" &&
+        !one.problem &&
+        one.signals.length === 0 &&
+        !one.issue &&
+        store.conversation(one.id).messages.length === 0,
+    );
+  if (untouched) return untouched;
+  return store.put("explorations", {
+    id: store.nextId("explorations"),
+    title: NEW_TITLE,
+    status: "exploring",
+    personas: [],
+    signals: [],
+    heard: [],
+    problem: "",
+    created: now.toISOString(),
+    work: null,
+  });
+}
+
+export const NEW_TITLE = "New idea";
+
 export function dropExploration(store: KobbleStore, id: string): Exploration {
   return store.put("explorations", { ...open(store, id), status: "dropped" });
 }
@@ -128,6 +161,31 @@ async function handedOffCard(
   return { number: exploration.issue, url };
 }
 
+// What the team asked to change on the prototype along the way, in order:
+// all of it is on its branch, and all of it is to be built.
+function changeLines(agreed: Made): string[] {
+  const changes = agreed.changes ?? [];
+  if (changes.length === 0) return [];
+  return [
+    "",
+    "**Changed along the way** (all of it is on the prototype's branch, and all of it is to be built):",
+    ...changes.map((one, at) => `${String(at + 1)}. ${one}`),
+  ];
+}
+
+// The agreed variant, when the prototype has several: build only that one.
+function variantLines(agreed: Made): string[] {
+  const variants = agreed.variants ?? [];
+  const chosen = variants.find((one) => one.key === agreed.variant);
+  if (variants.length < 2 || !chosen) return [];
+  return [
+    "",
+    `**Variant:** ${chosen.key} · ${chosen.name}. ${chosen.difference}`,
+    "",
+    `The prototype holds the variants ${variants.map((one) => one.key).join(", ")}, shown by the page address (\`?variant=${chosen.key}\`). Build only ${chosen.key}: leave out the others and the variant switch.`,
+  ];
+}
+
 function handoffText(
   exploration: Exploration,
   board: Board,
@@ -158,6 +216,8 @@ function handoffText(
     `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
     "",
     `**Agreed:** ${agreed.key} · ${agreed.name}. ${agreed.difference}`,
+    ...variantLines(agreed),
+    ...changeLines(agreed),
     "",
     `**The prototype:** on the branch \`${agreed.branch}\`.`,
     ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),

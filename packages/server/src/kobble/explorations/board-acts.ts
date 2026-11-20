@@ -20,7 +20,12 @@ import {
 export type Act =
   | { act: "note"; text: string }
   | { act: "diagram"; title: string; diagram: string }
-  | { act: "choice"; title: string; options: Partial<Option>[] }
+  | {
+      act: "choice";
+      title: string;
+      options: Partial<Option>[];
+      recommended?: string;
+    }
   | {
       act: "change";
       id: string;
@@ -29,12 +34,14 @@ export type Act =
       diagram?: string;
       options?: Partial<Option>[];
       removeOptions?: string[];
+      recommended?: string;
     }
   | { act: "remove"; id: string }
   | { act: "link"; from: string; to: string; label?: string }
   | { act: "unlink"; from: string; to: string }
   | { act: "agree"; id: string; agreed: boolean }
   | { act: "choose"; id: string; option: string | null }
+  | { act: "show"; id: string; variant: string }
   | { act: "move"; id: string; x: number; y: number };
 
 type By = Thing["by"];
@@ -77,9 +84,44 @@ function changed(board: Board, act: Change): Done {
   )
     next.title = act.title.trim();
   if (next.kind === "diagram" && act.diagram) next.diagram = act.diagram;
-  if (next.kind === "choice")
+  if (next.kind === "choice") {
     next.options = choiceOptions(board, next.options, act);
+    const recommended = recommendedOf(next.options, act.recommended);
+    if (recommended) next.recommended = recommended;
+    else if (!next.options.some((one) => one.key === next.recommended))
+      delete next.recommended;
+  }
   return { board: withThing(board, next), said: `Changed ${act.id}.` };
+}
+
+function newChoice(
+  board: Board,
+  act: Extract<Act, { act: "choice" }>,
+  by: By,
+): Thing {
+  const options = withOptions([], act.options);
+  const recommended = recommendedOf(options, act.recommended);
+  return {
+    id: newId(board, "choice"),
+    kind: "choice",
+    ...fresh(by),
+    title: act.title.trim(),
+    options,
+    chosen: null,
+    ...(recommended ? { recommended } : {}),
+  };
+}
+
+// The option recommended, by its letter; one the choice has not refused.
+function recommendedOf(
+  options: Option[],
+  key: string | undefined,
+): string | undefined {
+  const letter = key?.trim().toUpperCase();
+  if (!letter) return undefined;
+  if (!options.some((one) => one.key === letter))
+    throw new Refused(`There is no option ${letter} to recommend.`);
+  return letter;
 }
 
 export function applyAct(board: Board, act: Act, by: By): Done {
@@ -100,14 +142,7 @@ export function applyAct(board: Board, act: Act, by: By): Done {
         diagram: act.diagram,
       });
     case "choice":
-      return added(board, {
-        id: newId(board, "choice"),
-        kind: "choice",
-        ...fresh(by),
-        title: act.title.trim(),
-        options: withOptions([], act.options),
-        chosen: null,
-      });
+      return added(board, newChoice(board, act, by));
     case "change":
       return changed(board, act);
     case "remove":
@@ -134,9 +169,10 @@ export function applyAct(board: Board, act: Act, by: By): Done {
 
 function placedOrChosen(
   board: Board,
-  act: Extract<Act, { act: "choose" | "move" }>,
+  act: Extract<Act, { act: "choose" | "move" | "show" }>,
 ): Done {
   const thing = thingOf(board, act.id);
+  if (act.act === "show") return shown(board, thing, act.variant);
   if (act.act === "move")
     return {
       board: withThing(board, { ...thing, place: { x: act.x, y: act.y } }),
@@ -150,6 +186,19 @@ function placedOrChosen(
     said: act.option
       ? `Chose ${act.option} on ${act.id}.`
       : `Took back the choice on ${act.id}.`,
+  };
+}
+
+// A prototype's variant shown on the board (and agreed with it).
+function shown(board: Board, thing: Thing, variant: string): Done {
+  if (
+    thing.kind !== "prototype" ||
+    !thing.variants?.some((one) => one.key === variant)
+  )
+    throw new Refused(`${thing.id} has no variant ${variant}.`);
+  return {
+    board: withThing(board, { ...thing, variant }),
+    said: `Showing variant ${variant} of ${thing.id}.`,
   };
 }
 
@@ -168,6 +217,8 @@ export function personWords(act: Act, board: Board): string {
         : `took back the choice on ${name(act.id)}`;
     case "move":
       return `moved ${name(act.id)}`;
+    case "show":
+      return `looked at variant ${act.variant} of ${name(act.id)}`;
     case "remove":
       return `removed ${act.id}`;
     default:

@@ -4,12 +4,12 @@
 
 import type { ExplorationPage } from "@/api";
 
-const BUSY = new Set(["running", "starting", "making"]);
+const BUSY = new Set(["running", "starting"]);
 
 // Which prototype to start, or null when one already runs or none can.
 export function toStart(page: ExplorationPage): string | null {
   if (!["waiting", "exploring"].includes(page.exploration.status)) return null;
-  if (page.runs.some((run) => BUSY.has(run.state))) return null;
+  if (page.runs.some((run) => run.making || BUSY.has(run.state))) return null;
   const made = page.board.things.flatMap((thing) =>
     thing.kind === "prototype" ? [thing] : [],
   );

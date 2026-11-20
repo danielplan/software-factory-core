@@ -1,6 +1,7 @@
-// A prototype while the kobold makes it: its page drawing itself piece by
-// piece with a light sweeping over it, the kobold hopping at its work, what
-// it does now, and how long it has been at it.
+// A prototype while the kobold makes it, before it runs: its page drawing
+// itself piece by piece with a light sweeping over it, the kobold hopping at
+// its work, what it does now, and how long it has been at it. Once it runs,
+// the live screen shows instead, with one line of what the kobold does.
 // Motion only when the computer allows it.
 
 import { type CSSProperties, useEffect, useState } from "react";
@@ -81,6 +82,30 @@ function Page() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// While it runs and is made at once: one line above the live screen, with
+// what the kobold does now and its clock.
+export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
+  const clock = clockOf(run.since, useNow());
+  if (!(run.state === "running" && run.url)) return null;
+  return (
+    <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
+      <span className="relative flex size-2 flex-none">
+        <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
+        <span className="relative inline-flex size-2 rounded-full bg-blue" />
+      </span>
+      <span className="flex-none font-medium">Being made, live:</span>
+      <span key={run.activity} className="truncate motion-safe:animate-pop">
+        {run.activity ?? "the kobold is at work"}
+      </span>
+      {clock && (
+        <span className="ml-auto flex-none text-muted-foreground tabular-nums">
+          {clock}
+        </span>
+      )}
     </div>
   );
 }

@@ -18,16 +18,14 @@ import { addPicture, attachedIn, personActs } from "./person-acts.ts";
 import {
   dropExploration,
   explorationOf,
+  freshExploration,
   handOff,
   newExploration,
   startExploration,
 } from "./actions.ts";
 import { withThing } from "./board-things.ts";
-import {
-  ExplorationPrototypes,
-  prototypeBranch,
-  prototypeOf,
-} from "./prototypes.ts";
+import { ExplorationPrototypes } from "./prototypes.ts";
+import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import { ExplorationWorlds } from "./worlds.ts";
@@ -52,19 +50,7 @@ export function servedExplorations(options: Options) {
   prototypes.whenReady((id, key, made) => {
     talks.review(id, key, made);
   });
-  talks.makeWith({
-    making: (id) => prototypes.beingMade(id),
-    make: (id, choice, option) => {
-      prototypes.make(explorationOf(store(), id), choice, option);
-      options.onChange();
-    },
-    change: (id, prototype, change) => {
-      void prototypes
-        .change(explorationOf(store(), id), prototype, change)
-        .then(options.onChange, options.onChange);
-      options.onChange();
-    },
-  });
+  talks.makeWith(makersFor(store, prototypes, options));
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>
@@ -88,6 +74,47 @@ export function servedExplorations(options: Options) {
       button((body) => ({ test: testPrototype(store(), tests, body) })),
     close: () => {
       prototypes.close();
+    },
+  };
+}
+
+// What the kobold who talks with the team can have made and done: making
+// and changing prototypes, and handing the exploration off.
+function makersFor(
+  store: () => KobbleStore,
+  prototypes: ExplorationPrototypes,
+  options: Options,
+): Parameters<ExplorationTalks["makeWith"]>[0] {
+  return {
+    making: (id) => prototypes.beingMade(id),
+    make: (id, choice, letters, opens) => {
+      prototypes.make(explorationOf(store(), id), choice, letters, opens);
+      options.onChange();
+    },
+    change: (id, prototype, change) => {
+      const made = prototypes.change(
+        explorationOf(store(), id),
+        prototype,
+        change,
+      );
+      options.onChange();
+      return made;
+    },
+    // Handed off by the kobold, on the team's yes: as the button does.
+    handOff: async (id) => {
+      const handed = await handOff(store(), id, options.cards);
+      await prototypes.stopAll(id);
+      options.onChange();
+      return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
+    },
+    another: (id, prototype, way) => {
+      const made = prototypes.another(
+        explorationOf(store(), id),
+        prototype,
+        way,
+      );
+      options.onChange();
+      return made;
     },
   };
 }
@@ -170,6 +197,9 @@ function buttonRoutes(
     "POST /api/kobble/explorations": button((body) => ({
       exploration: newExploration(store(), body),
     })),
+    "POST /api/kobble/explorations/fresh": button(() => ({
+      exploration: freshExploration(store()),
+    })),
     "POST /api/kobble/explorations/start": button((body) => {
       const started = id(body);
       if (startExploration(store(), started)) void talks.begin(started);
@@ -190,7 +220,7 @@ function buttonRoutes(
       board: prototypes.make(
         explorationOf(store(), id(body)),
         field(body, "choice"),
-        key(body),
+        [key(body)],
       ),
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({
@@ -202,9 +232,12 @@ function buttonRoutes(
     "POST /api/kobble/explorations/picture": button((body) => ({
       thing: addPicture(store(), talks, id(body), body),
     })),
-    "POST /api/kobble/explorations/hand-off": button((body) =>
-      handOff(store(), id(body), on.cards),
-    ),
+    // Handed off, the exploration is done: its prototypes stop.
+    "POST /api/kobble/explorations/hand-off": button(async (body) => {
+      const handed = await handOff(store(), id(body), on.cards);
+      await prototypes.stopAll(field(body, "id"));
+      return handed;
+    }),
   };
 }
 

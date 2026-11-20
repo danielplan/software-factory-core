@@ -1,12 +1,18 @@
 // Explorations: what is being explored (a card each, with a small preview
 // of its canvas, its personas and one line from the kobold about what is
 // next), what waits (Start), and one quiet line for what was handed off or
-// dropped, which opens. New exploration asks the support kobold, who adds a team idea with them.
+// dropped, which opens. New exploration opens a fresh canvas at once, where
+// the team says its idea to the kobold.
 
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { useState } from "react";
 
-import { type ExplorationRow, type ExplorationsView } from "@/api";
+import {
+  type ExplorationRow,
+  type ExplorationsView,
+  messageOf,
+  post,
+} from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
@@ -18,7 +24,6 @@ import { Markdown } from "@/components/markdown";
 import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
-import { askSupport } from "@/support/ask-support";
 import { explorationHash, Waiting } from "./waiting-row";
 
 export const useExplorations = () =>
@@ -26,8 +31,16 @@ export const useExplorations = () =>
 
 export function ExplorationsPage() {
   const { data, problem } = useExplorations();
+  const [refused, setRefused] = useState<string | null>(null);
   const adding = () => {
-    askSupport("I have an idea or a feature request to explore.");
+    setRefused(null);
+    post<{ exploration: { id: string } }>("/api/kobble/explorations/fresh", {})
+      .then(({ exploration }) => {
+        location.hash = explorationHash(exploration.id);
+      })
+      .catch((error: unknown) => {
+        setRefused(messageOf(error));
+      });
   };
   return (
     <>
@@ -42,6 +55,9 @@ export function ExplorationsPage() {
       />
       {problem && (
         <ProblemBox title="The explorations cannot be read" text={problem} />
+      )}
+      {refused && (
+        <ProblemBox title="A new exploration could not start" text={refused} />
       )}
       {data &&
         (isEmpty(data) ? <NothingYet onOwn={adding} /> : <Lists view={data} />)}

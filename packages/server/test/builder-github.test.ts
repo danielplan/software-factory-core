@@ -172,7 +172,9 @@ test("the board work is put together from a factory with a connected board, and 
   );
   connected.connect(root);
   const work = connected.orRefuse();
-  assert.equal(connected.view()?.builder.on, false);
+  // The builder works as soon as the factory starts; the coach waits.
+  assert.equal(connected.view()?.builder.on, true);
+  assert.equal(connected.view()?.coach.on, false);
   connected.connect(root);
   assert.equal(connected.orRefuse(), work);
   connected.stop();

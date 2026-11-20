@@ -2,10 +2,12 @@
 // (a yellow note with its personas), what we heard (its signals with their
 // persona's face), a note, a choice (the question and its options: click
 // one to pick it, and the kobold goes on, making its prototype when that
-// helps; a picked option with a prototype says so), a diagram (drawn
+// helps; the one the kobold recommends and those with a prototype say so),
+// a diagram (drawn
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
+import { Check, Sparkles } from "lucide-react";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
@@ -75,55 +77,78 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "choice") return null;
-  // This choice's options that have a prototype: the arrows from it,
-  // labelled with the option, to a prototype.
-  const prototypes = new Set(
-    page.board.things.flatMap((one) =>
-      one.kind === "prototype" ? [one.id] : [],
-    ),
-  );
+  // This choice's options that have a prototype: the variants of the
+  // prototypes its arrows lead to, or (older boards) the arrows' labels.
   const made = new Set(
-    page.board.links.flatMap((link) =>
-      link.from === thing.id && prototypes.has(link.to) ? [link.label] : [],
-    ),
+    page.board.links.flatMap((link) => {
+      if (link.from !== thing.id) return [];
+      const to = page.board.things.find((one) => one.id === link.to);
+      if (to?.kind !== "prototype") return [];
+      return to.variants?.map((one) => one.key) ?? [link.label];
+    }),
   );
   return (
     <Frame data={data} title={thing.title}>
-      {thing.options.map((option) => (
-        <div
-          key={option.key}
-          className={cn(
-            "nodrag flex items-center gap-2 rounded-[10px] px-2 py-[7px]",
-            thing.chosen === option.key ? "bg-[#e3f5ee]" : "bg-ground",
-          )}
-        >
-          <button
-            type="button"
-            aria-pressed={thing.chosen === option.key}
-            title={option.difference}
-            className="flex flex-1 items-center gap-2 text-left"
-            onClick={() => {
-              act("board", {
-                do: {
-                  act: "choose",
-                  id: thing.id,
-                  option: thing.chosen === option.key ? null : option.key,
-                },
-              });
-            }}
+      {thing.options.map((option) => {
+        const chosen = thing.chosen === option.key;
+        return (
+          <div
+            key={option.key}
+            className={cn(
+              "nodrag flex min-w-0 items-center gap-2 rounded-[10px] px-2 py-[7px]",
+              chosen
+                ? "bg-[#e3f5ee] shadow-[inset_0_0_0_1.5px_#12a594]"
+                : "bg-ground",
+            )}
           >
-            <span className="grid size-5 flex-none place-items-center rounded-md bg-card text-[11px] font-semibold text-wash-foreground">
-              {option.key}
-            </span>
-            <span className="flex-1">{option.name}</span>
-          </button>
-          {made.has(option.key) && (
-            <span className="text-[11px] font-medium text-muted-foreground">
-              Prototype
-            </span>
-          )}
-        </div>
-      ))}
+            <button
+              type="button"
+              aria-pressed={chosen}
+              title={option.difference}
+              className="flex min-w-0 flex-1 items-center gap-2 text-left"
+              onClick={() => {
+                act("board", {
+                  do: {
+                    act: "choose",
+                    id: thing.id,
+                    option: chosen ? null : option.key,
+                  },
+                });
+              }}
+            >
+              <span
+                className={cn(
+                  "grid size-5 flex-none place-items-center rounded-md text-[11px] font-semibold",
+                  chosen
+                    ? "bg-[#12a594] text-white"
+                    : "bg-card text-wash-foreground",
+                )}
+              >
+                {chosen ? <Check aria-hidden className="size-3" /> : option.key}
+              </span>
+              <span className="grid min-w-0 flex-1">
+                <span className={cn(chosen && "font-semibold")}>
+                  {option.name}
+                </span>
+                {thing.recommended === option.key && (
+                  <span
+                    title="The kobold recommends this one"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-wash-foreground"
+                  >
+                    <Sparkles aria-hidden className="size-3 flex-none" />
+                    Recommended
+                  </span>
+                )}
+              </span>
+            </button>
+            {made.has(option.key) && (
+              <span className="flex-none text-[11px] font-medium text-muted-foreground">
+                Prototype
+              </span>
+            )}
+          </div>
+        );
+      })}
     </Frame>
   );
 }

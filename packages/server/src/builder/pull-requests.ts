@@ -28,7 +28,13 @@ export type PullRequests = {
   find: (branch: string) => Promise<PullRequest | null>;
   open: (opening: Opening) => Promise<PullRequest>;
   // A new description, and ready for review or back to a draft.
-  update: (number: number, body: string, draft: boolean) => Promise<void>;
+  // A new description (none: the description stays as it is) and whether
+  // it is a draft.
+  update: (
+    number: number,
+    body: string | null,
+    draft: boolean,
+  ) => Promise<void>;
   comment: (number: number, text: string) => Promise<void>;
   said: (number: number) => Promise<Message[]>;
 };
@@ -73,7 +79,8 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
       return made;
     },
     update: async (number, body, draft) => {
-      await gh(["pr", "edit", String(number), ...repo, "--body", body]);
+      if (body !== null)
+        await gh(["pr", "edit", String(number), ...repo, "--body", body]);
       await gh([
         "pr",
         "ready",

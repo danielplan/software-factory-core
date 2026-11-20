@@ -4,10 +4,11 @@
 // backdrop closes it. A card not wanted any more is deleted at its foot,
 // after a second click: closed as not planned and taken off the board.
 
-import { ArrowUpRight, GitPullRequest, X } from "lucide-react";
+import { ArrowUpRight, GitPullRequest, SquareTerminal, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { get, messageOf, post } from "@/api";
+import { AgentTrace } from "@/components/agent-trace";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
@@ -18,15 +19,23 @@ import { DeleteCard } from "./delete-card";
 
 export function CardPanel({
   number,
+  title,
+  trace,
   onClose,
   onDelete,
 }: Readonly<{
   number: number;
+  // Shown at once, from the board, while the rest loads.
+  title: string | null;
+  // What the builder did on it so far, while it builds.
+  trace: string[];
   onClose: () => void;
   onDelete: () => void;
 }>) {
   const [panel, setPanel] = useState<Panel | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  // The card, or what the builder does on it (while it builds).
+  const [tab, setTab] = useState<"card" | "trace">("card");
   useEffect(() => {
     let current = true;
     get<Panel>(`/api/kobble/factory/card?number=${String(number)}`).then(
@@ -71,7 +80,14 @@ export function CardPanel({
         {problem && (
           <p className="px-5 pt-4 text-[13px] text-destructive">{problem}</p>
         )}
-        {panel ? <Body panel={panel} onPick={pick} /> : !problem && <Loading />}
+        {trace.length > 0 && <Tabs tab={tab} onTab={setTab} steps={trace} />}
+        {tab === "trace" && trace.length > 0 ? (
+          <div className="p-5">
+            <AgentTrace steps={trace} live />
+          </div>
+        ) : (
+          <Shown panel={panel} problem={problem} title={title} onPick={pick} />
+        )}
         {panel && (
           <DeleteCard
             number={number}
@@ -115,9 +131,71 @@ function PanelHead({
   );
 }
 
-function Loading() {
+// The card, or its trace while the builder is on it.
+function Tabs({
+  tab,
+  onTab,
+  steps,
+}: Readonly<{
+  tab: "card" | "trace";
+  onTab: (tab: "card" | "trace") => void;
+  steps: string[];
+}>) {
+  const tabs = [
+    { id: "card" as const, name: "Card" },
+    { id: "trace" as const, name: `Trace · ${String(steps.length)}` },
+  ];
+  return (
+    <div
+      role="tablist"
+      className="flex gap-1 border-b border-border-soft px-5 pt-2"
+    >
+      {tabs.map((one) => (
+        <button
+          key={one.id}
+          type="button"
+          role="tab"
+          aria-selected={tab === one.id}
+          onClick={() => {
+            onTab(one.id);
+          }}
+          className={cn(
+            "-mb-px inline-flex items-center gap-1.5 border-b-2 px-2.5 py-2 text-[13px]",
+            tab === one.id
+              ? "border-foreground font-semibold text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {one.id === "trace" && (
+            <SquareTerminal aria-hidden className="size-3.5" />
+          )}
+          {one.name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// The card's own page: what it is, or a sketch of it while it loads.
+function Shown({
+  panel,
+  problem,
+  title,
+  onPick,
+}: Readonly<{
+  panel: Panel | null;
+  problem: string | null;
+  title: string | null;
+  onPick: (type: CardType | null) => void;
+}>) {
+  if (panel) return <Body panel={panel} onPick={onPick} />;
+  return problem ? null : <Loading title={title} />;
+}
+
+function Loading({ title }: Readonly<{ title: string | null }>) {
   return (
     <div className="grid gap-3 p-5">
+      {title && <h2 className="text-[17px] font-semibold">{title}</h2>}
       {[70, 40, 90].map((width) => (
         <span
           key={width}

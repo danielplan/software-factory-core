@@ -1,80 +1,21 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import {
-  chmodSync,
-  cpSync,
-  existsSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { chmodSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { KobbleStore } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/kobble/explorations/actions.ts";
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
-import type {
-  ExplorationPage,
-  ExplorationsView,
-} from "../src/kobble/explorations/views.ts";
+import type { ExplorationsView } from "../src/kobble/explorations/views.ts";
 import { inGit } from "./git-project.ts";
-import { pretendClaude } from "./pretend-claude.ts";
-import { stage } from "./stage.ts";
+import { explorationsFactory } from "./explorations-factory.ts";
 
 // Explorations: the list, one exploration's canvas and the conversation
 // with the kobold (which changes the board with its tool), and the buttons
 // on it: Start, New, Drop, Agree, Make, Open, Test, Hand off.
-
-const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
-
-type Turn = Parameters<typeof pretendClaude>[0][number];
-
-async function explorationsFactory(turns: Turn[] = []) {
-  const pretend = pretendClaude(turns);
-  const staged = await stage(pretend.claude);
-  const root = staged.session.createCompany({ name: "Acme", about: "" });
-  cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
-    recursive: true,
-  });
-  const store = new KobbleStore(root);
-  const read = async <T>(path: string) =>
-    (await (await fetch(`${staged.base}${path}`)).json()) as T;
-  const press = async (path: string, body: unknown = {}) => {
-    const response = await staged.post(`/api/kobble/explorations${path}`, body);
-    return {
-      status: response.status,
-      body: (await response.json()) as Record<string, unknown>,
-    };
-  };
-  const page = (id: string) =>
-    read<ExplorationPage>(`/api/kobble/exploration?id=${id}`);
-  // The page once the kobold is not writing any more.
-  const settled = async (id: string) => {
-    for (;;) {
-      const now = await page(id);
-      if (now.talk.writing === null) return now;
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-  };
-  const close = () => {
-    staged.session.close();
-    staged.server.close();
-  };
-  return {
-    ...staged,
-    ...pretend,
-    root,
-    store,
-    read,
-    press,
-    page,
-    settled,
-    close,
-  };
-}
 
 const PIXEL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
@@ -404,7 +345,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
         ),
     );
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
-    while (run?.state === "making") {
+    while (run?.making) {
       await new Promise((resolve) => setTimeout(resolve, 20));
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }
@@ -428,7 +369,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       existsSync(join(factory.project, "..", "project-prototypes", "X-1", "c")),
     );
     const opened = await factory.press("/open", { id: "X-1", key: "C" });
-    assert.match(String(opened.body.error), /cannot run versions yet/);
+    assert.match(String(opened.body.error), /cannot run here yet/);
     const tested = await factory.press("/test", {
       id: "X-1",
       key: "C",
@@ -440,7 +381,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
     const kept = factory.store.get("tests", id);
     assert.ok(kept);
     assert.equal(kept.on, "proto/X-1-c");
-    assert.match(kept.problem ?? "", /cannot run versions yet/);
+    assert.match(kept.problem ?? "", /cannot run here yet/);
     assert.equal(
       (await factory.press("/test", { id: "X-3", key: "A", task: "x" })).body
         .error,
@@ -460,7 +401,7 @@ test("a prototype that cannot be pushed stays on this computer, and the board sa
     chmodSync(hook, 0o755);
     await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
     let run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
-    while (run?.state === "making") {
+    while (run?.making) {
       await new Promise((resolve) => setTimeout(resolve, 20));
       run = (await factory.page("X-1")).runs.find((r) => r.version === "C");
     }

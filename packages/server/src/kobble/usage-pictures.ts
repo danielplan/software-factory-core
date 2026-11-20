@@ -1,6 +1,7 @@
 // The usage log's pictures: when a prototype is opened, a picture of it as
 // it runs, at a computer's and a phone's width, kept with the exploration
-// in the log's folder. Taken with Playwright's own command; when it cannot
+// in the log's folder. Taken with Playwright's own command (the computer's
+// Chrome, else Playwright's browser); when it cannot
 // (no browser installed, the prototype did not start), nothing is kept and
 // nobody is stopped.
 
@@ -23,16 +24,28 @@ export type Photograph = (
   size: string,
 ) => Promise<void>;
 
+// Playwright's own command, at a fixed version, so it does not change under
+// the factory; with the computer's Chrome first (no browser to download),
+// else with Playwright's own browser when it is installed.
+const PLAYWRIGHT = "playwright@1.57.0";
+
 export const playwrightPhotograph: Photograph = async (url, file, size) => {
-  await run(NPX, [
-    "--yes",
-    "playwright",
-    "screenshot",
-    `--viewport-size=${size}`,
-    "--wait-for-timeout=3000",
-    url,
-    file,
-  ]);
+  const take = (browser: string[]) =>
+    run(NPX, [
+      "--yes",
+      PLAYWRIGHT,
+      "screenshot",
+      ...browser,
+      `--viewport-size=${size}`,
+      "--wait-for-timeout=3000",
+      url,
+      file,
+    ]);
+  try {
+    await take(["--channel=chrome"]);
+  } catch {
+    await take([]);
+  }
 };
 
 export async function pictureOfPrototype(options: {

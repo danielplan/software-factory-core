@@ -59,10 +59,23 @@ export function askFor(
     `The problem: ${exploration.problem}`,
     `The question it answers: ${questionOf(board, key)}`,
     `This prototype: ${made.name}. ${made.difference}`,
+    variantsWords(made),
     more.maps,
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+// A prototype's variants, all in this one copy, and how the one shown is
+// chosen: outside the app, by the page address.
+function variantsWords(made: Made): string {
+  const variants = made.variants ?? [];
+  if (variants.length < 2) return "";
+  return [
+    "Its variants, all in this one copy of the code:",
+    ...variants.map((one) => `- ${one.key}. ${one.name}: ${one.difference}`),
+    `Which one shows is chosen outside the app, by the page address: \`?variant=${variants[0]?.key ?? "A"}\` (the first one without it). Read it when the app loads and keep it for the visit (sessionStorage), so moving between pages keeps it. Nothing in the app shows or switches the variants. Share everything that is the same; only where the variants differ does the code ask which one shows.`,
+  ].join("\n");
 }
 
 // The version's commit: which prototype, made or what was changed, and the

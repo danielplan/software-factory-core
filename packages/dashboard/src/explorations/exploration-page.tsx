@@ -1,10 +1,11 @@
 // One exploration: a bar at the top (back, its title, Drop, Hand off the
 // agreed prototype), the canvas the kobold and the team work on (left), and
 // the conversation with the kobold (right). Opening one that waits starts
-// it, and its prototype runs on the board by itself.
+// it, and its prototype runs on the board by itself. Handed off or dropped,
+// it closes.
 
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage as Page, messageOf, post } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
@@ -31,7 +32,8 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         say(messageOf(error));
       });
   }, [waiting, id]);
-  useLivePrototype(data, say);
+  useLivePrototype(data);
+  useClosed(data?.exploration.status);
   if (!data)
     return problem ? (
       <ProblemBox title="This exploration cannot be read" text={problem} />
@@ -40,6 +42,10 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
     say(null);
     setPending(path);
     post(`/api/kobble/explorations/${path}`, { id, ...body })
+      .then(() => {
+        // Handed off or dropped, it is done: back to the explorations.
+        if (path === "hand-off" || path === "drop") location.hash = "#explore";
+      })
       .catch((error: unknown) => {
         say(messageOf(error));
       })
@@ -48,26 +54,29 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       });
   };
   return (
-    <div className="flex h-dvh flex-col max-md:h-[calc(100dvh-56px)]">
+    <div className="flex h-dvh flex-col">
       <TopBar page={data} press={press} pending={pending} />
-      {said && (
-        <div className="px-6 pt-3">
-          <ProblemBox title="That did not work" text={said} />
-        </div>
-      )}
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
         <BoardProblem value={say}>
-          <Board
-            page={data}
-            attached={attached}
-            onPick={(thing) => {
-              setAttached((now) =>
-                now.includes(thing)
-                  ? now.filter((one) => one !== thing)
-                  : [...now, thing],
-              );
-            }}
-          />
+          {/* What did not work shows over the canvas only, not the talk. */}
+          <div className="relative flex min-h-0 min-w-0 flex-1">
+            {said && (
+              <div className="absolute inset-x-4 top-4 z-10 rounded-xl bg-card shadow-card">
+                <ProblemBox title="That did not work" text={said} />
+              </div>
+            )}
+            <Board
+              page={data}
+              attached={attached}
+              onPick={(thing) => {
+                setAttached((now) =>
+                  now.includes(thing)
+                    ? now.filter((one) => one !== thing)
+                    : [...now, thing],
+                );
+              }}
+            />
+          </div>
         </BoardProblem>
         <TalkPanel
           page={data}
@@ -82,6 +91,19 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       </div>
     </div>
   );
+}
+
+// Handed off or dropped while open (by the kobold too), it closes: back to
+// the explorations.
+function useClosed(status: string | undefined): void {
+  const was = useRef(status);
+  useEffect(() => {
+    const open = (one: string | undefined) =>
+      one === "waiting" || one === "exploring";
+    if (open(was.current) && status && !open(status))
+      location.hash = "#explore";
+    was.current = status;
+  }, [status]);
 }
 
 function TopBar({

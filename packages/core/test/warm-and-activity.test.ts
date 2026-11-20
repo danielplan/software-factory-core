@@ -176,6 +176,28 @@ test("tool calls become short plain descriptions with paths relative to the work
     ["Running: Run all checks"],
   );
   assert.deepEqual(
+    describeEvent(
+      toolUse("mcp__plugin_playwright_playwright__browser_take_screenshot", {}),
+      workspace,
+    ),
+    ["In the browser: take screenshot"],
+  );
+  assert.deepEqual(
+    describeEvent(toolUse("mcp__board__add_note", {}), workspace),
+    ["Using add note (board)"],
+  );
+  // Without a description, the kind of command, never the command itself.
+  for (const [command, words] of [
+    ["node --experimental-strip-types --test a.test.ts", "Running the tests"],
+    ["cd /tmp/copy && git status", "Working with git"],
+    ["npx eslint packages", "Checking the code's style"],
+    ["npm ci", "Installing packages"],
+    ["make something", "Running a command"],
+  ])
+    assert.deepEqual(describeEvent(toolUse("Bash", { command }), workspace), [
+      words,
+    ]);
+  assert.deepEqual(
     describeEvent(toolUse("Grep", { pattern: "OrderCard" }), workspace),
     ["Searching for “OrderCard”"],
   );
@@ -202,7 +224,7 @@ test("Claude's own words are shown shortened, and the final result is reported",
   );
   assert.deepEqual(
     describeEvent({ type: "system", subtype: "init" }, workspace),
-    ["Claude started"],
+    ["Getting started"],
   );
   assert.deepEqual(describeEvent({ type: "user" }, workspace), []);
 });

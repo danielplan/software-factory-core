@@ -96,7 +96,7 @@ function Conversation({
         <span className="grid flex-1">
           <b className="text-[13px] font-semibold">{name}</b>
           <small className="text-[11.5px] text-muted-foreground">
-            Support · reads your project, changes nothing
+            Support · answers questions, adds explorations and personas
           </small>
         </span>
         <Button

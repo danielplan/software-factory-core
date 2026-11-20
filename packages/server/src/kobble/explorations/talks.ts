@@ -19,7 +19,7 @@ import { Refused } from "../../refused.ts";
 import { type Act, applyAct } from "./board-acts.ts";
 import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
-import type { MadeReport } from "./prototypes.ts";
+import { type MadeReport, reviewWords } from "./made.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 
 const RIGHTS = {
@@ -52,8 +52,17 @@ type TalksOptions = {
 type Makers = {
   // What the exploration's prototypes being made do now.
   making: (id: string) => string[];
-  make: (id: string, choice: string, option: string) => void;
-  change: (id: string, prototype: string, change: string) => void;
+  make: (id: string, choice: string, options: string[], opens?: string) => void;
+  // A prototype changed in its copy (now, or once its maker is done);
+  // another way added as a variant (its letter).
+  change: (id: string, prototype: string, change: string) => "now" | "waits";
+  another: (
+    id: string,
+    prototype: string,
+    way: { name: string; difference: string },
+  ) => string;
+  // Hands the exploration off, as the Hand off button does.
+  handOff: (id: string) => Promise<string>;
 };
 
 export class ExplorationTalks {
@@ -129,13 +138,6 @@ export class ExplorationTalks {
   // the next message instead.
   review(id: string, key: string, made: MadeReport): void {
     const talk = this.talk(id);
-    const report = [
-      `Prototype ${key} (${made.name}) is ready.`,
-      made.said ? `The maker who built it says:\n${made.said}` : "",
-      made.files ? `The files it changed:\n${made.files}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n\n");
     if (talk.working) {
       this.done.set(id, [
         ...(this.done.get(id) ?? []),
@@ -150,11 +152,7 @@ export class ExplorationTalks {
     }
     const times = (this.pointed.get(id)?.times ?? 0) + 1;
     this.pointed.set(id, { thing: made.thing, times });
-    void this.answer(
-      id,
-      talk,
-      `(Not from the team: ${report}\n\nReview it for the team: is it what the plan and the problem asked for, what is missing or off, and one thing to try or change. Then ask them to try it on the board.)`,
-    );
+    void this.answer(id, talk, reviewWords(key, made));
   }
 
   personDid(id: string, words: string): void {
@@ -187,6 +185,8 @@ export class ExplorationTalks {
   async begin(id: string): Promise<void> {
     const talk = this.talk(id);
     if (talk.working || talk.messages.length > 0) return;
+    // A new idea of the team's: the kobold waits for their first words.
+    if (!this.options.store().get("explorations", id)?.problem) return;
     await this.answer(
       id,
       talk,
@@ -216,13 +216,23 @@ export class ExplorationTalks {
         this.options.onChange();
         return `Pointing at ${thing}.`;
       },
-      make: (choice, option) => {
-        this.makers().make(id, choice, option);
-        return `Making the prototype of ${option} on ${choice}; it is on the board now.\n\n${this.look(id)}`;
+      make: (choice, options, opens) => {
+        this.makers().make(id, choice, options, opens);
+        const which =
+          options.length > 0
+            ? `options ${options.join(", ")}`
+            : "all its options";
+        return `Making the prototype of ${choice}, ${which} as variants the team switches between; it is on the board now.\n\n${this.look(id)}`;
       },
       change: (prototype, change) => {
-        this.makers().change(id, prototype, change);
-        return `Changing prototype ${prototype}; the board shows it being made.`;
+        return this.makers().change(id, prototype, change) === "now"
+          ? `Changing prototype ${prototype}; the board shows it being made.`
+          : `Prototype ${prototype} is still being made: the change waits and starts by itself once it is ready. Say so.`;
+      },
+      handOff: () => this.makers().handOff(id),
+      another: (prototype, way) => {
+        const variant = this.makers().another(id, prototype, way);
+        return `Adding variant ${variant} to prototype ${prototype}; the team switches between its variants on the board.`;
       },
       rename: ({ title, problem }) => {
         const store = this.options.store();
@@ -288,7 +298,7 @@ export class ExplorationTalks {
       ...(heard.length > 0 ? ["What we heard:", ...heard] : []),
       ")",
       "",
-      "(Answer in at most 60 words: what changed, then one question.)",
+      "(Answer in at most 60 words, in short Markdown: what changed in a line, a short list when there is more than one point, then one question on its own line.)",
     ].join("\n");
     await talk.answer(prompt, spokenIn, {
       ...RIGHTS,

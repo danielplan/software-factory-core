@@ -475,3 +475,59 @@ test("a mission's findings are signals of their kind, each at its step", () => {
   assert.equal(back?.step?.did, "Looked at the delivery");
   assert.equal(store.get("signals", "S-0002")?.step, undefined);
 });
+
+test("a board with versions in one frame is read as one prototype per option, a chain of changes at its latest", () => {
+  const factory = acmeFactory();
+  const store = new KobbleStore(factory);
+  const made = (key: string, more: Record<string, string>) => ({
+    id: `prototype-${key.toLowerCase()}`,
+    kind: "prototype",
+    agreed: false,
+    place: null,
+    by: "kobold",
+    key,
+    name: key,
+    difference: "",
+    branch: `proto/X-2-${key.toLowerCase()}`,
+    tests: [],
+    ...more,
+  });
+  const fresh = { agreed: false, place: null, by: "kobold" };
+  writeFileSync(
+    join(store.root, "explorations", "X-2", "board.json"),
+    JSON.stringify({
+      things: [
+        {
+          id: "choice-1",
+          kind: "choice",
+          ...fresh,
+          title: "How?",
+          chosen: null,
+          options: [],
+        },
+        { id: "note-1", kind: "note", ...fresh, text: "See A2" },
+        made("A", { option: "A" }),
+        made("B", { option: "B", frame: "prototype-a" }),
+        made("A2", { option: "A", frame: "prototype-a", from: "A" }),
+      ],
+      links: [
+        { id: "link-1", from: "choice-1", to: "prototype-a", label: "A · B" },
+        { id: "link-2", from: "note-1", to: "prototype-a", label: "A2" },
+      ],
+    }),
+  );
+  const board = store.board("X-2");
+  assert.deepEqual(
+    board.links.map((l) => `${l.from}>${l.to}:${l.label}`),
+    [
+      "choice-1>prototype-a2:A",
+      "note-1>prototype-a2:A2",
+      "choice-1>prototype-b:B",
+    ],
+  );
+  assert.deepEqual(
+    board.things.filter((t) => t.kind === "prototype").map((t) => t.id),
+    ["prototype-a2", "prototype-b"],
+  );
+  assert.ok(board.things.every((t) => !("frame" in t)));
+});
