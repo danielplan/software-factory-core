@@ -36,6 +36,9 @@ export type BoardWorkOptions = {
   waiting?: () => ReadonlySet<number>;
   // Cards each lane works on at once (the Builder setting); 1 when not given.
   places?: () => number;
+  // The builder on from the start (the factory's own board work); off
+  // when not given, until it is switched on.
+  building?: boolean;
 };
 
 // A job on a card, at its lane's place (its working copy).
@@ -63,7 +66,7 @@ export class BoardWork {
   private timer: NodeJS.Timeout | null = null;
   private reading: Promise<void> | null = null;
   private again = false;
-  private readonly on: Record<Lane, boolean> = { chat: false, build: false };
+  private readonly on: Record<Lane, boolean>;
   // The jobs under way, by card.
   private readonly running = new Map<number, Running>();
   // Claude's usage limit: no new job starts before then.
@@ -71,6 +74,7 @@ export class BoardWork {
 
   constructor(options: BoardWorkOptions) {
     this.options = options;
+    this.on = { chat: false, build: options.building === true };
   }
 
   view(): WorkView {

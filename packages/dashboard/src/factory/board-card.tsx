@@ -71,7 +71,8 @@ export const OpenCard = createContext<(number: number) => void>(
 );
 
 // Where a card came from: the exploration it was handed off from, by its
-// title (its id and prototype key mean nothing to people), or a fix.
+// title (its id and prototype key mean nothing to people), just "Explored"
+// when the card has the same title; or a fix.
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
   if (card.from)
     return (
@@ -84,7 +85,9 @@ function Origin({ card }: Readonly<{ card: FactoryCard }>) {
           strokeWidth={2}
           className="size-3 flex-none"
         />
-        <span className="truncate">{card.from.title}</span>
+        <span className="truncate">
+          {card.from.title === card.title ? "Explored" : card.from.title}
+        </span>
       </span>
     );
   if (!card.fix) return null;

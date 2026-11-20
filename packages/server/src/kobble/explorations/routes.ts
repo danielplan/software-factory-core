@@ -215,9 +215,12 @@ function buttonRoutes(
     "POST /api/kobble/explorations/picture": button((body) => ({
       thing: addPicture(store(), talks, id(body), body),
     })),
-    "POST /api/kobble/explorations/hand-off": button((body) =>
-      handOff(store(), id(body), on.cards),
-    ),
+    // Handed off, the exploration is done: its prototypes stop.
+    "POST /api/kobble/explorations/hand-off": button(async (body) => {
+      const handed = await handOff(store(), id(body), on.cards);
+      await prototypes.stopAll(field(body, "id"));
+      return handed;
+    }),
   };
 }
 

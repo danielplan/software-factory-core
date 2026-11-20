@@ -20,7 +20,7 @@ export function describeEvent(
   workspace: string,
 ): string[] {
   if (event.type === "system" && event.subtype === "init")
-    return ["Claude started"];
+    return ["Getting started"];
   if (event.type === "result") return [describeResult(event)];
   if (event.type !== "assistant") return [];
   return describeMessage(event, workspace);

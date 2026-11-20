@@ -1,5 +1,6 @@
 // The connected board's work, put together: its cards, the builder and the
-// coach in the cards (each off until the owner switches it on), with their
+// coach in the cards (the builder on from the start, the coach off until
+// the owner switches it on), with their
 // working copies in a folder next to the project. None without a connected
 // board. Which issues Kobble waits for "did it work?" about comes from the
 // records, once the server serves them.
@@ -77,6 +78,8 @@ export function workFor(
     jobs,
     onChange,
     places: () => parallelCards(root),
+    // The builder works as soon as the factory starts.
+    building: true,
     ...(waiting ? { waiting } : {}),
   });
   return { work, repository: found.repository };

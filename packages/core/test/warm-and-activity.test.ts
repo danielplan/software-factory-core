@@ -202,7 +202,7 @@ test("Claude's own words are shown shortened, and the final result is reported",
   );
   assert.deepEqual(
     describeEvent({ type: "system", subtype: "init" }, workspace),
-    ["Claude started"],
+    ["Getting started"],
   );
   assert.deepEqual(describeEvent({ type: "user" }, workspace), []);
 });
