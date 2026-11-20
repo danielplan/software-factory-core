@@ -1,4 +1,5 @@
 import { ChevronDown, ExternalLink } from "lucide-react";
+import type { ReactNode } from "react";
 
 import type { PartView } from "@/api";
 import { StatusLight } from "@/components/status-light";
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/collapsible";
 
 // One part, compact: its light, name and Open link, what it is doing, its
-// buttons, and its problem below; its frame tells how it is.
+// buttons, and its problem below; its frame tells how it is. A `tag`, when
+// given, sits on its own small line just above the name, at the box's left
+// edge (the System map's type of part).
 const FRAME: Record<PartView["light"], string> = {
   running: "border-success/40",
   starting: "border-primary/60 shadow-[0_0_0_4px_var(--tint-line)]",
@@ -23,7 +26,12 @@ const FRAME: Record<PartView["light"], string> = {
 export function PartCard({
   part,
   onPress,
-}: Readonly<{ part: PartView; onPress: (path: string) => void }>) {
+  tag,
+}: Readonly<{
+  part: PartView;
+  onPress: (path: string) => void;
+  tag?: ReactNode;
+}>) {
   // Only what the light does not say: a step, or that it was started
   // elsewhere.
   const step =
@@ -40,6 +48,7 @@ export function PartCard({
         FRAME[part.light],
       )}
     >
+      {tag && <div className="-mb-0.5 flex">{tag}</div>}
       <div className="flex items-center gap-2">
         <StatusLight light={part.light} />
         <span className="truncate text-[13px] font-medium">{part.name}</span>
