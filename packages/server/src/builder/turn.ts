@@ -17,6 +17,9 @@ import { pauseOn } from "./usage-limit.ts";
 export type BuildCopy = {
   path: string;
   prepareSharedBranch: (branch: string) => Promise<void>;
+  // Where the branch is checked out outside the factory's own copies; none
+  // when it is not.
+  heldElsewhere: (branch: string) => Promise<string | null>;
   // The latest main merged in: the files that clash, none when it went in.
   bringInMain: () => Promise<string[]>;
   clashing: () => Promise<string[]>;

@@ -118,9 +118,9 @@ export {
   resultOf,
   type ClaudeResult,
 } from "./agents/events.ts";
+export { stageAllButSettings } from "./copies/settings-files.ts";
 export {
   retryWhileLocked,
-  stageAllButSettings,
   Workspace,
   type CopySettings,
 } from "./copies/workspace.ts";

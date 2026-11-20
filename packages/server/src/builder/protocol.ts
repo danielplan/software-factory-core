@@ -18,6 +18,9 @@ export const NOTES = [
   "did-it-work",
   // Claude's usage limit: the card waits until it resets (untilOf).
   "paused",
+  // The card's branch is open in a copy that is not the factory's: a person
+  // works on it by hand, and the builder leaves the card to them.
+  "by-hand",
 ] as const;
 export type Note = (typeof NOTES)[number];
 

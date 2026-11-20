@@ -466,6 +466,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
         card(41, "review", true),
         card(9, null),
         card(12, "review"),
+        { ...card(14, "backlog"), stuck: true },
       ],
       problem: null,
       read: null,
@@ -498,7 +499,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       ],
     );
     // A card in no column (or the Backlog) is an idea: it waits in
-    // Explorations, not on the Factory page.
+    // Explorations, not on the Factory page. A stuck one is not an idea.
     assert.deepEqual(
       boardIdeas(work).map((idea) => idea.number),
       [9],

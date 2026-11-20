@@ -1,9 +1,10 @@
 // The board as the rules need it (decide.ts): every card that is not done,
 // with its text and its thread, and its pull request where the builder
-// opened one. Cards that are done, or in the backlog, need no more reading.
+// opened one. Cards that are done, or in the backlog, need no more reading,
+// but for the stuck ones there (what the builder said shows on them).
 // Which issues Kobble waits for "did it work?" about comes from the records.
 
-import type { Card, Cards } from "../cards/cards.ts";
+import { type Card, type Cards, isStuck } from "../cards/cards.ts";
 import { branchOf } from "./branches.ts";
 import type { BoardCard } from "./decide.ts";
 import type { PullRequests } from "./pull-requests.ts";
@@ -45,8 +46,11 @@ async function boardCard(
     thread: [],
     pullRequest: null,
     awaitsAnswer: waiting.has(card.number),
+    stuck: isStuck(card.labels),
   };
-  if (card.closed || !READ.includes(card.stage)) return plain;
+  const read =
+    READ.includes(card.stage) || (plain.stuck && card.stage === "backlog");
+  if (card.closed || !read) return plain;
   const detail = await cards.show(card.number);
   const found =
     card.stage === "doing" || card.stage === "review"

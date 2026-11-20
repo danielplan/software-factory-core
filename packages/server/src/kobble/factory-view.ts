@@ -5,7 +5,7 @@
 
 import type { KobbleStore } from "@software-factory/core";
 
-import type { Asking, CardView, Stage, WorkView } from "../api.ts";
+import type { Asking, CardView, Stage, StuckView, WorkView } from "../api.ts";
 
 export const FACTORY_COLUMNS = [
   { id: "todo", title: "To do" },
@@ -34,6 +34,9 @@ export type FactoryView = {
   columns: { id: Column; title: string; cards: FactoryCard[] }[];
   // The cards where the factory waits for the owner, oldest first.
   waiting: Asking[];
+  // The cards the builder got stuck on, waiting in Backlog for a hint,
+  // longest stuck first.
+  stuck: StuckView[];
   // The cards it builds now, by number, and the same in words; on each,
   // what it is doing right now (its latest step), by card number.
   builder: {
@@ -60,12 +63,16 @@ function columnOfCard(card: CardView): Column | null {
 }
 
 // The board's ideas: open cards in its Backlog or in no column, not agreed
-// work yet. They wait in Explorations until someone explores one.
+// work yet. They wait in Explorations until someone explores one. A card the
+// builder got stuck on waits in Backlog too, but is not an idea: it shows in
+// the Factory page's Stuck list only.
 export function boardIdeas(
   work: WorkView | null,
 ): { number: number; title: string; url: string }[] {
   return (work?.cards ?? [])
-    .filter((card) => !card.closed && columnOfCard(card) === null)
+    .filter(
+      (card) => !card.closed && !card.stuck && columnOfCard(card) === null,
+    )
     .map(({ number, title, url }) => ({ number, title, url }));
 }
 
@@ -119,6 +126,7 @@ export function factoryView(
     problem: work?.problem ?? null,
     read: work?.read ?? null,
     waiting: [...(work?.asking ?? [])].sort((a, b) => a.number - b.number),
+    stuck: work?.stuck ?? [],
     columns: FACTORY_COLUMNS.map((column) => ({
       ...column,
       cards: cards

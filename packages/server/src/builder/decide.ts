@@ -4,8 +4,14 @@
 // is. A card Kobble knows (an idea's version sent to Build) is never
 // finished silently: once it is closed or merged, or moved to Done, it waits
 // there for a person to say whether it worked.
+//
+// The builder keeps to its own cards: a card in In progress is its own only
+// when its start is the factory's last word on it; a person who moves a card
+// there works on it by hand. A card it got stuck on (a question, a failure,
+// checks still red) goes to Backlog marked stuck (a label), where the owner
+// sees it apart from the new ideas; moving it to To do hands it back.
 
-import type { Stage } from "../api.ts";
+import type { Stage, StuckView } from "../api.ts";
 import {
   AGREEMENT_NOTES,
   type Ask,
@@ -46,6 +52,8 @@ export type BoardCard = {
   // Kobble knows its issue as an idea's version, and nobody has said yet
   // whether it worked.
   awaitsAnswer: boolean;
+  // The builder got stuck on it (the stuck label where it is tracked).
+  stuck: boolean;
 };
 
 // The coach answers in the cards (chat); the builder builds (build).
@@ -59,6 +67,9 @@ export type Decision = {
   jobs: Job[];
   // The cards that wait in Done for "did it work?".
   asks: number[];
+  // The cards to mark stuck (an older builder left them waiting in To do or
+  // In progress); each also moves to Backlog.
+  stuck: number[];
 };
 
 type Found = Decision & { order: Record<JobKind | "resumed", Job[]> };
@@ -75,6 +86,7 @@ export function decide(
     comments: [],
     jobs: [],
     asks: [],
+    stuck: [],
     order: { feedback: [], resumed: [], build: [] },
   };
   for (const card of cards) look(card, running, found, now);
@@ -84,6 +96,7 @@ export function decide(
     comments: found.comments,
     jobs: [...feedback, ...resumed, ...build],
     asks: found.asks,
+    stuck: found.stuck,
   };
 }
 
@@ -139,15 +152,14 @@ function lookInStage(card: BoardCard, found: Found): void {
   const { order } = found;
   switch (card.stage) {
     case "todo":
-      // It waits in To do until the cards it depends on are done, and
-      // while a question on it is open; there is no planning stage to send
-      // it back to (work is thought through outside the factory).
-      if (card.waitsFor.length > 0 || waitsForAnswer(card)) break;
-      order.build.push({ lane: "build", kind: "build", number });
+      // It waits in To do until the cards it depends on are done. Moved
+      // here, a stuck card is handed back to the builder.
+      if (card.waitsFor.length > 0) break;
+      if (!card.stuck && waitsForAnswer(card)) markStuck(card, found);
+      else order.build.push({ lane: "build", kind: "build", number });
       break;
     case "doing":
-      if (!waitingAfterFailedChecks(card.thread))
-        order.resumed.push({ lane: "build", kind: "build", number });
+      lookInProgress(card, found);
       break;
     case "review":
       if (
@@ -159,6 +171,60 @@ function lookInStage(card: BoardCard, found: Found): void {
     default:
       break;
   }
+}
+
+// In progress: the builder resumes its own interrupted build and leaves a
+// person's card alone. A card an older builder gave up on there (it waited
+// for the owner's comment) goes to Backlog as stuck, or to To do once the
+// owner wrote.
+function lookInProgress(card: BoardCard, found: Found): void {
+  const last = lastNote(card.thread, OWNING_NOTES);
+  if (last === "started") {
+    found.order.resumed.push({
+      lane: "build",
+      kind: "build",
+      number: card.number,
+    });
+    return;
+  }
+  if (card.stuck || last === null || !GAVE_UP.includes(last)) return;
+  if (ownerSpokeAfter(card.thread, GAVE_UP))
+    found.moves.push({ number: card.number, stage: "todo" });
+  else markStuck(card, found);
+}
+
+function markStuck(card: BoardCard, found: Found): void {
+  found.moves.push({ number: card.number, stage: "backlog" });
+  found.stuck.push(card.number);
+}
+
+// The notes that say who has the card: every one but the reports.
+const OWNING_NOTES: readonly Note[] = NOTES.filter(
+  (n) => n !== "progress" && n !== "paused",
+);
+
+// The builder gave up: the checks still red after its rounds of fixing, or
+// it could not finish.
+const GAVE_UP: readonly Note[] = ["checks-failed", "failed"];
+
+// Where a stuck card waits for the owner (Backlog), with the builder's last
+// word on it: the question it asks, or why it gave up, and since when.
+export function stuckOf(
+  card: Pick<BoardCard, "stage" | "closed" | "stuck" | "thread">,
+): { note: Note; text: string; ask: Ask | null; since: string } | null {
+  if (!card.stuck || card.closed || card.stage !== "backlog") return null;
+  const last = card.thread.findLast((m) => {
+    const note = readNote(m.body);
+    return note !== null && OWNING_NOTES.includes(note);
+  });
+  const note = last ? readNote(last.body) : null;
+  if (!last || !note) return null;
+  return {
+    note,
+    text: stripMarker(last.body),
+    ask: readAsk(last.body),
+    since: last.at,
+  };
 }
 
 // Feedback comes on the card, on the pull request, or on its lines.
@@ -197,26 +263,29 @@ function lastNote(thread: Message[], kinds: readonly Note[]): Note | null {
   return null;
 }
 
-// The builder gave up (the checks still red after its rounds of fixing, or
-// it could not finish): the build waits for the owner's comment.
-function waitingAfterFailedChecks(thread: Message[]): boolean {
-  const gaveUp: readonly Note[] = ["checks-failed", "failed"];
-  return (
-    thread.some((m) => gaveUp.includes(readNote(m.body) ?? "started")) &&
-    !ownerSpokeAfter(thread, gaveUp)
-  );
-}
-
 // The factory waits for the owner on this card: its last word is a
 // question (planning) or a stop that only the owner can unblock, and the
 // owner has not answered yet. The question as the Factory page shows it.
 export function waitsForOwner(
-  card: Pick<BoardCard, "thread" | "closed">,
+  card: Pick<BoardCard, "thread" | "closed"> & { stuck?: boolean },
 ): { text: string; ask: Ask | null } | null {
-  if (card.closed) return null;
+  // A stuck card asks in the Stuck list instead.
+  if (card.closed || card.stuck) return null;
   const asking: readonly Note[] = ["question", "blocked"];
   const last = card.thread.findLast((m) => readNote(m.body) !== null);
   if (!last || !asking.includes(readNote(last.body) ?? "started")) return null;
   if (ownerSpokeAfter(card.thread, NOTES)) return null;
   return { text: stripMarker(last.body), ask: readAsk(last.body) };
+}
+
+// The stuck cards, oldest first, with the builder's last word on each.
+export function stuckCards(board: BoardCard[]): StuckView[] {
+  return board
+    .flatMap((card) => {
+      const said = stuckOf(card);
+      return said
+        ? [{ number: card.number, title: card.title, url: card.url, ...said }]
+        : [];
+    })
+    .sort((a, b) => a.since.localeCompare(b.since));
 }

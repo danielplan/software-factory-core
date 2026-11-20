@@ -69,7 +69,7 @@ test("the factory waits for the owner after a question or a stop, until they ans
   );
 });
 
-test("the owner answers from the Factory page: the answer is a comment on the card", async () => {
+test("the owner answers from the Factory page: the answer is a comment on the card, and a stuck card goes back to To do with it", async () => {
   const { copy } = await project();
   const kept = new Map<number, Kept>([
     [
@@ -93,10 +93,17 @@ test("the owner answers from the Factory page: the answer is a comment on the ca
   const { work } = setUp(kept, claude, copy, []);
   work.switch("build", true);
   await settled(work);
-  // It waits in To do for the answer, shown on the Factory page.
-  assert.equal(work.view().asking?.[0]?.number, 8);
+  // An older builder left it waiting in To do: it goes to Backlog, stuck,
+  // shown with its question in the Stuck list on the Factory page.
+  assert.equal(kept.get(8)?.stage, "backlog");
+  assert.deepEqual(work.view().asking, []);
+  const stuck = work.view().stuck?.[0];
+  assert.equal(stuck?.number, 8);
+  assert.equal(stuck.note, "question");
+  assert.equal(stuck.ask?.question, "Show prices with or without tax?");
   work.switch("build", false);
   await work.answer(8, "**A**: With tax");
   assert.equal(kept.get(8)?.comments.at(-1)?.body, "**A**: With tax");
-  assert.equal(work.view().asking?.length, 0);
+  assert.equal(kept.get(8)?.stage, "todo");
+  assert.equal(work.view().stuck?.length, 0);
 });

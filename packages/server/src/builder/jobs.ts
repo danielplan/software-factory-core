@@ -2,14 +2,16 @@
 // builder builds it or answers its review comments (the card's branch in a
 // copy of its own). After a build the factory runs the checks itself, gives
 // the builder up to three rounds to fix what is red, pushes, and opens the
-// pull request once every check passes. When it gives up, what it did goes
-// up as a draft pull request that says what is wrong, and the card waits in
-// In progress.
+// pull request once every check passes. When it gives up or asks, the card
+// goes to Backlog marked stuck (what it did so far up as a draft pull request
+// that says what is wrong), and waits for the owner to move it to To do.
+// It never takes a card's branch from a copy that is not the factory's: a
+// person works on that card by hand.
 
 import { type Available, type Claude } from "@software-factory/core";
 
 import type { Cards } from "../cards/cards.ts";
-import { copyName, headOf } from "./branches.ts";
+import { branchOf, copyName, headOf } from "./branches.ts";
 import {
   changedFiles,
   checkWithFixes,
@@ -57,6 +59,10 @@ type Place = {
 
 const BUILD_TIME_MS = 3 * 60 * 60_000;
 
+// How the owner lets the builder try again on a card it gave up on.
+const HAND_BACK =
+  "The card waits in **Backlog**, marked stuck: write a hint here (or on the Factory page) and move it to **To do** to let the builder try again.";
+
 export class Jobs {
   private readonly options: JobsOptions;
 
@@ -101,6 +107,12 @@ export class Jobs {
     onActivity: (line: string) => void,
   ) {
     const { cards } = this.options;
+    if (
+      await this.byHand(card, at, (text) =>
+        this.say(card.number, text, "by-hand"),
+      )
+    )
+      return;
     const continued =
       card.stage === "doing" ||
       card.thread.some((m) => readNote(m.body) === "started");
@@ -111,6 +123,7 @@ export class Jobs {
         "The builder started on this card.",
         "started",
       );
+      if (card.stuck) await cards.markStuck?.(card.number, false);
     }
     const { answer, gaveUp } = await runSessions(continued, {
       session: (earlier) =>
@@ -128,8 +141,7 @@ export class Jobs {
       return;
     }
     if (answer.status === "blocked") {
-      await this.say(card.number, answer.text, "blocked");
-      await cards.move(card.number, "todo");
+      await this.stuck(card.number, answer.text, "blocked");
       return;
     }
     if (answer.status !== "done") {
@@ -137,6 +149,34 @@ export class Jobs {
       return;
     }
     await this.checkedPullRequest(card, at, answer.text, onActivity);
+  }
+
+  // The card's branch is open in a copy that is not the factory's (a person
+  // works on it there): said once, and the card is left to them, in In
+  // progress. Then nothing is built.
+  private async byHand(
+    card: BoardCard,
+    at: Place,
+    say: (text: string) => Promise<void>,
+  ): Promise<boolean> {
+    const branch = branchOf(card.number);
+    const where = await (await at.build()).heldElsewhere(branch);
+    if (where === null) return false;
+    await say(
+      `The branch \`${branch}\` is open in \`${where}\`, which is not one of the factory's copies: someone works on this card by hand there, so the builder leaves it to them. To hand it back, switch that copy to another branch and move the card to **To do**.`,
+    );
+    if (card.stage === "todo")
+      await this.options.cards.move(card.number, "doing");
+    return true;
+  }
+
+  // The builder is stuck on the card (a question, or it gave up): it says
+  // why, and the card waits in Backlog, marked stuck, for the owner.
+  private async stuck(number: number, text: string, note: Note) {
+    const { cards } = this.options;
+    await this.say(number, text, note);
+    await cards.markStuck?.(number, true);
+    await cards.move(number, "backlog");
   }
 
   // A build the builder calls done: the checks, then the pull request.
@@ -149,8 +189,7 @@ export class Jobs {
     const { cards } = this.options;
     const checked = await this.checkAndPush(card, at, onActivity);
     if (checked.blocked !== null) {
-      await this.say(card.number, checked.blocked, "blocked");
-      await cards.move(card.number, "todo");
+      await this.stuck(card.number, checked.blocked, "blocked");
       return;
     }
     if (!checked.passed) {
@@ -174,7 +213,7 @@ export class Jobs {
 
   // The builder gave up: what it did so far goes up as a draft pull request
   // that says what is wrong (none when it changed nothing), and the card
-  // waits in In progress for the owner's comment.
+  // waits in Backlog, stuck, for the owner.
   private async giveUp(
     card: BoardCard,
     at: Place,
@@ -192,11 +231,7 @@ export class Jobs {
     const draft = url
       ? `What it did so far is in a draft pull request, not to merge yet: ${url}`
       : "It changed nothing yet.";
-    await this.say(
-      card.number,
-      `${text}\n\n${draft}\n\nThe card stays in **In progress**: write a comment here to let the builder try again, with any hint you have.`,
-      note,
-    );
+    await this.stuck(card.number, `${text}\n\n${draft}\n\n${HAND_BACK}`, note);
   }
 
   private async feedback(
@@ -206,6 +241,12 @@ export class Jobs {
   ) {
     const pr = card.pullRequest;
     if (!pr) return;
+    if (
+      await this.byHand(card, at, (text) =>
+        this.sayOnPullRequest(pr.number, text, "by-hand"),
+      )
+    )
+      return;
     const answer = await this.agent(
       card,
       at,

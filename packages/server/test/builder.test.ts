@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { run } from "@software-factory/core";
 
 import { markComment, readNote } from "../src/builder/protocol.ts";
-import { withPlan } from "../src/cards/cards.ts";
+import { STUCK_LABEL, withPlan } from "../src/cards/cards.ts";
 import {
   type Kept,
   now,
@@ -121,7 +121,7 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
   work.stop();
 });
 
-test("when the builder gives up, its work goes up as a draft and the card waits; a question waits in To do for the answer", async () => {
+test("when the builder gives up or asks, the card waits in Backlog marked stuck; moved to To do, it is the builder's again", async () => {
   const { copy } = await project();
   const plan = withPlan("", "The plan.");
   const kept = new Map<number, Kept>([
@@ -141,57 +141,125 @@ test("when the builder gives up, its work goes up as a draft and the card waits;
   const card = kept.get(5);
   assert.ok(card);
   const last = () => card.comments.at(-1)?.body ?? "";
-  const owner = (body: string) =>
+  // The owner's hint, and the card moved to To do: handed back.
+  const handBack = (body: string) => {
     card.comments.push({ author: "owner", body, at: now(), where: "card" });
+    card.stage = "todo";
+  };
+  const stuck = () => card.labels?.includes(STUCK_LABEL) ?? false;
   work.switch("build", true);
   await settled(work);
   // Checked, then three rounds of fixing, each checked again: still red, so
-  // a draft that says what fails, and the card waits in In progress.
+  // a draft that says what fails, and the card waits in Backlog, stuck.
   assert.equal(checks.filter((c) => c === "npm test").length, 4);
   assert.ok(prompts.some((p) => p.includes("(round 3 of 3)")));
   assert.equal(prs.made.length, 1);
   assert.equal(prs.made[0]?.draft, true);
   assert.match(prs.made[0].body, /## The checks fail[\s\S]*1 test failed/);
-  assert.equal(card.stage, "doing");
+  assert.equal(card.stage, "backlog");
+  assert.equal(stuck(), true);
   assert.equal(readNote(last()), "checks-failed");
   assert.match(last(), /draft pull request, not to merge yet/);
+  assert.match(last(), /\*\*Backlog\*\*, marked stuck/);
+  // Shown in the Stuck list, not asked as a question too.
   await work.refresh();
   await settled(work);
   assert.equal(checks.filter((c) => c === "npm test").length, 4);
+  assert.deepEqual(
+    work.view().stuck?.map((one) => [one.number, one.note]),
+    [[5, "checks-failed"]],
+  );
+  assert.deepEqual(work.view().asking, []);
 
-  // The owner's hint lets it try again; this time it asks a question.
+  // Handed back with a hint: started again (the mark comes off); this time
+  // it asks a question, and the card goes back to Backlog.
   answer = "Which colour?\nSTATUS: blocked";
-  owner("Try again");
+  handBack("Try again");
   await work.refresh();
   await settled(work);
-  assert.equal(card.stage, "todo");
+  assert.equal(card.stage, "backlog");
+  assert.equal(stuck(), true);
   assert.equal(readNote(last()), "blocked");
-  // Not answered yet: it waits.
+  const notes = card.comments.map((c) => readNote(c.body));
+  assert.equal(notes.filter((n) => n === "started").length, 2);
+  assert.equal(work.view().stuck?.[0]?.text, "Which colour?");
+  // Not handed back yet: it waits.
   await work.refresh();
   await settled(work);
-  assert.equal(card.stage, "todo");
+  assert.equal(card.stage, "backlog");
 
-  // Answered: Claude Code cannot start. It gives up, with the draft of
-  // what is there, and waits for a comment.
+  // Handed back: Claude Code cannot start. It gives up, with the draft of
+  // what is there.
   answer = null;
-  owner("Blue");
+  handBack("Blue");
   await work.refresh();
   await settled(work);
-  assert.equal(card.stage, "doing");
+  assert.equal(card.stage, "backlog");
   assert.equal(readNote(last()), "failed");
   assert.match(last(), /The build stopped: spawn claude ENOENT/);
   assert.match(last(), /pull\/100/);
 
-  // A comment lets it go on; an answer that never says how it ended gives
-  // up the same way, after it was told twice to carry on.
+  // An answer that never says how it ended gives up the same way, after it
+  // was told twice to carry on.
   answer = "I did something";
-  owner("Go on");
+  handBack("Go on");
   await work.refresh();
   await settled(work);
-  assert.equal(card.stage, "doing");
+  assert.equal(card.stage, "backlog");
   assert.match(last(), /stopped 3 times without finishing/);
   work.switch("build", false);
   assert.equal(work.view().builder.on, false);
+});
+
+test("a card moved to In progress by a person is left to them; so is one whose branch is open in a copy that is not the factory's", async () => {
+  const { copy, source, folder } = await project();
+  const plan = withPlan("", "The plan.");
+  const kept = new Map<number, Kept>([
+    // Moved to In progress by hand: no start from the builder.
+    [3, { title: "Mine", stage: "doing", body: plan, comments: [] }],
+    // Ready, but its branch is checked out in a person's own copy.
+    [6, { title: "Taken", stage: "todo", body: plan, comments: [] }],
+  ]);
+  await run("git", [
+    "-C",
+    source,
+    "worktree",
+    "add",
+    "--quiet",
+    "-b",
+    "factory/issue-6",
+    join(folder, "by-hand"),
+  ]);
+  const { claude, prompts } = pretendClaude(() => "Built.\nSTATUS: done");
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  assert.equal(prompts.length, 0);
+  assert.deepEqual(kept.get(3)?.comments, []);
+  assert.equal(kept.get(3)?.stage, "doing");
+  const taken = kept.get(6);
+  assert.equal(taken?.stage, "doing");
+  assert.equal(readNote(taken.comments.at(-1)?.body ?? ""), "by-hand");
+  assert.match(
+    taken.comments.at(-1)?.body ?? "",
+    /by-hand`, which is not one of the factory's copies/,
+  );
+  // Said once: from now on it is a person's card.
+  await work.refresh();
+  await settled(work);
+  assert.equal(taken.comments.length, 1);
+  assert.equal(
+    (
+      await run("git", [
+        "-C",
+        join(folder, "by-hand"),
+        "branch",
+        "--show-current",
+      ])
+    ).trim(),
+    "factory/issue-6",
+  );
+  work.switch("build", false);
 });
 
 test("a board that cannot be read says why", async () => {
@@ -231,7 +299,7 @@ test("a red check only the owner can fix becomes a question in the card", async 
   work.switch("build", true);
   await settled(work);
   assert.equal(prs.made.length, 0);
-  assert.equal(kept.get(7)?.stage, "todo");
+  assert.equal(kept.get(7)?.stage, "backlog");
   const said = kept.get(7)?.comments.at(-1)?.body ?? "";
   assert.equal(readNote(said), "blocked");
   assert.match(said, /payment provider's key/);
@@ -334,7 +402,7 @@ test("a builder that says it is not finished but adds nothing twice in a row is 
   assert.ok(card);
   // Session 1 adds a commit, 2 and 3 add none.
   assert.equal(session, 3);
-  assert.equal(card.stage, "doing");
+  assert.equal(card.stage, "backlog");
   assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "failed");
   assert.match(card.comments.at(-1)?.body ?? "", /added nothing/);
   work.switch("build", false);

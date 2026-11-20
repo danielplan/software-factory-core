@@ -6,6 +6,8 @@ import {
   type BoardCard,
   decide,
   type Message,
+  stuckOf,
+  waitsForOwner,
 } from "../src/builder/decide.ts";
 import {
   isFactory,
@@ -43,6 +45,7 @@ function card(over: Partial<BoardCard> = {}): BoardCard {
     thread: [],
     pullRequest: null,
     awaitsAnswer: false,
+    stuck: false,
     ...over,
   };
 }
@@ -147,7 +150,7 @@ test("a card Kobble waits for is never finished silently: it asks in Done until 
   );
 });
 
-test("To do builds the card as it is; it waits for the cards it depends on and for an open question", () => {
+test("To do builds the card as it is; it waits for the cards it depends on", () => {
   const todo = (over: Partial<BoardCard>) =>
     decide([card({ stage: "todo", ...over })], none);
   const build = [{ lane: "build", kind: "build", number: 1 }];
@@ -158,13 +161,12 @@ test("To do builds the card as it is; it waits for the cards it depends on and f
   const waiting = todo({ waitsFor: [7] });
   assert.deepEqual(waiting.jobs, []);
   assert.deepEqual(waiting.moves, []);
-  // The builder's question waits for the owner's answer, then it builds.
+  // A stuck card moved to To do is handed back: built, with or without a
+  // comment since.
   const blocked = factory("Which font?", "blocked");
-  assert.deepEqual(todo({ thread: [blocked] }).jobs, []);
-  assert.deepEqual(todo({ thread: [blocked] }).moves, []);
+  assert.deepEqual(todo({ thread: [blocked], stuck: true }).jobs, build);
+  assert.deepEqual(todo({ thread: [blocked], stuck: true }).moves, []);
   assert.deepEqual(todo({ thread: [blocked, owner("Inter")] }).jobs, build);
-  const asked = factory("Really?", "question");
-  assert.deepEqual(todo({ thread: [asked] }).jobs, []);
   // A technical failure does not wait: To do again tries again.
   assert.deepEqual(
     todo({ thread: [factory("Crashed", "failed")] }).jobs,
@@ -172,21 +174,99 @@ test("To do builds the card as it is; it waits for the cards it depends on and f
   );
 });
 
-test("an interrupted build resumes, unless it waits for the owner after failed checks", () => {
+test("a card an older builder left in To do with an open question goes to Backlog as stuck", () => {
+  const todo = (thread: Message[]) =>
+    decide([card({ stage: "todo", thread })], none);
+  for (const asked of [
+    factory("Which font?", "blocked"),
+    factory("Really?", "question"),
+  ]) {
+    const decision = todo([factory("Started", "started"), asked]);
+    assert.deepEqual(decision.jobs, []);
+    assert.deepEqual(decision.moves, [{ number: 1, stage: "backlog" }]);
+    assert.deepEqual(decision.stuck, [1]);
+  }
+});
+
+test("a card is the builder's only when the builder itself last moved it to In progress", () => {
+  const doing = (thread: Message[], over: Partial<BoardCard> = {}) =>
+    decide([card({ stage: "doing", thread, ...over })], none);
+  const resumed = [{ lane: "build", kind: "build", number: 1 }];
+  const started = factory("The builder started on this card.", "started");
+  // Interrupted: the builder's start is its last word (reports aside).
+  assert.deepEqual(doing([started]).jobs, resumed);
+  assert.deepEqual(
+    doing([
+      started,
+      factory("Session 1 done", "progress"),
+      owner("Looks good so far"),
+    ]).jobs,
+    resumed,
+  );
+  // Moved there by a person: no start, or a later word ended the builder's
+  // (it asked, handed it to review, saw it worked on by hand).
+  for (const thread of [
+    [],
+    [owner("I'll do this one")],
+    [started, factory("Which font?", "blocked"), owner("Inter")],
+    [started, factory("Ready for review", "review-ready")],
+    [started, factory("Open in another copy", "by-hand")],
+  ]) {
+    const decision = doing(thread);
+    assert.deepEqual(decision.jobs, [], JSON.stringify(thread));
+    assert.deepEqual(decision.moves, []);
+  }
+  // A stuck card a person took to In progress is theirs too.
+  const gaveUp = factory("Still red", "checks-failed");
+  assert.deepEqual(doing([started, gaveUp], { stuck: true }).jobs, []);
+  assert.deepEqual(doing([started, gaveUp], { stuck: true }).moves, []);
+});
+
+test("a card an older builder left in In progress after giving up goes to Backlog as stuck, or to To do when the owner answered", () => {
   const doing = (thread: Message[]) =>
-    decide([card({ stage: "doing", thread })], none).jobs;
-  assert.deepEqual(doing([]), [{ lane: "build", kind: "build", number: 1 }]);
-  const failed = factory("Still red", "checks-failed");
-  assert.deepEqual(doing([failed]), []);
-  assert.deepEqual(doing([failed, owner("Try the other port")]), [
-    { lane: "build", kind: "build", number: 1 },
-  ]);
-  // Gave up without a red check (it could not finish): it waits the same way.
-  const stopped = factory("Stopped", "failed");
-  assert.deepEqual(doing([stopped]), []);
-  assert.deepEqual(doing([stopped, owner("Go on")]), [
-    { lane: "build", kind: "build", number: 1 },
-  ]);
+    decide([card({ stage: "doing", thread })], none);
+  const started = factory("Started", "started");
+  for (const gaveUp of [
+    factory("Still red", "checks-failed"),
+    factory("Stopped", "failed"),
+  ]) {
+    const waiting = doing([started, gaveUp]);
+    assert.deepEqual(waiting.jobs, []);
+    assert.deepEqual(waiting.moves, [{ number: 1, stage: "backlog" }]);
+    assert.deepEqual(waiting.stuck, [1]);
+    const answered = doing([started, gaveUp, owner("Try the other port")]);
+    assert.deepEqual(answered.moves, [{ number: 1, stage: "todo" }]);
+    assert.deepEqual(answered.stuck, []);
+  }
+});
+
+test("stuck cards wait in Backlog for the owner, shown with what the builder said; their question is not asked twice", () => {
+  const blocked = factory("Which font?", "blocked");
+  const decision = decide([card({ thread: [blocked], stuck: true })], none);
+  assert.deepEqual(decision.jobs, []);
+  assert.deepEqual(decision.moves, []);
+  assert.equal(waitsForOwner(card({ thread: [blocked], stuck: true })), null);
+  assert.equal(waitsForOwner(card({ thread: [blocked] }))?.text, "Which font?");
+  const said = stuckOf(
+    card({
+      thread: [factory("Started", "started"), blocked, owner("Hm")],
+      stuck: true,
+    }),
+  );
+  assert.ok(said);
+  assert.equal(said.note, "blocked");
+  assert.equal(said.text, "Which font?");
+  assert.equal(said.since, blocked.at);
+  assert.equal(stuckOf(card({ thread: [blocked] })), null);
+  assert.equal(
+    stuckOf(card({ thread: [blocked], stuck: true, closed: true })),
+    null,
+  );
+  // Handed back already: in To do, it is not stuck any more.
+  assert.equal(
+    stuckOf(card({ stage: "todo", thread: [blocked], stuck: true })),
+    null,
+  );
 });
 
 test("review comments on the card or the pull request are answered, first of all", () => {
