@@ -40,6 +40,24 @@ ${cardText(card)}
 ${answer("done", "blocked", "continue")}`;
 }
 
+// What a run file says when the knowledge base has nothing to change.
+export const NOTHING_TO_KEEP = "Knowledge base: nothing to change, because";
+
+// The knowledge base left out: one round of update-context before the
+// pull request.
+export function knowledgePrompt(card: BoardCard, copy = "build"): string {
+  return `${SHARED}
+
+## Your task: the knowledge base for card #${String(card.number)}
+
+The work on branch \`${branchOf(card.number)}\` is built, but it changes code and none of the knowledge files (docs/, BLUEPRINT.md, AGENTS.md). Follow the \`update-context\` skill now: bring the feature pages, the blueprint, the conventions, the design guide and the decisions in line with what was built, then run the knowledge base's checks and commit. Only when truly nothing there needs to change, write one line in the run file instead: "${NOTHING_TO_KEEP} …" with the reason, and commit it.
+${copyLine(copy)}
+
+${cardText(card)}
+
+${answer("done", "blocked")}`;
+}
+
 export function feedbackPrompt(card: BoardCard, copy = "build"): string {
   return `${SHARED}
 

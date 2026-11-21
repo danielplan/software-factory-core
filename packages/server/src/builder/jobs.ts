@@ -12,7 +12,7 @@ import { type Available, type Claude } from "@software-factory/core";
 
 import type { Browser } from "../kobble/persona-tests.ts";
 import type { Cards } from "../cards/cards.ts";
-import { branchOf, copyName, headOf } from "./branches.ts";
+import { copyName, headOf } from "./branches.ts";
 import {
   changedFiles,
   checkWithFixes,
@@ -21,6 +21,8 @@ import {
   type Shell,
 } from "./checks.ts";
 import type { BoardCard, Job } from "./decide.ts";
+import { byHand } from "./by-hand.ts";
+import { keepKnowledge } from "./knowledge-kept.ts";
 import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
 import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
 import { openOrUpdate, type PullRequests } from "./pull-requests.ts";
@@ -113,7 +115,7 @@ export class Jobs {
   ) {
     const { cards } = this.options;
     if (
-      await this.byHand(card, at, (text) =>
+      await byHand(card, at, this.options.cards, (text) =>
         this.say(card.number, text, "by-hand"),
       )
     )
@@ -156,25 +158,6 @@ export class Jobs {
     await this.checkedPullRequest(card, at, answer.text, onActivity);
   }
 
-  // The card's branch is open in a copy that is not the factory's (a person
-  // works on it there): said once, and the card is left to them, in In
-  // progress. Then nothing is built.
-  private async byHand(
-    card: BoardCard,
-    at: Place,
-    say: (text: string) => Promise<void>,
-  ): Promise<boolean> {
-    const branch = branchOf(card.number);
-    const where = await (await at.build()).heldElsewhere(branch);
-    if (where === null) return false;
-    await say(
-      `The branch \`${branch}\` is open in \`${where}\`, which is not one of the factory's copies: someone works on this card by hand there, so the builder leaves it to them. To hand it back, switch that copy to another branch and move the card to **To do**.`,
-    );
-    if (card.stage === "todo")
-      await this.options.cards.move(card.number, "doing");
-    return true;
-  }
-
   // The builder is stuck on the card (a question, or it gave up): it says
   // why, and the card waits in Backlog, marked stuck, for the owner.
   private async stuck(number: number, text: string, note: Note) {
@@ -191,7 +174,10 @@ export class Jobs {
     text: string,
     onActivity: (line: string) => void,
   ) {
-    const { cards } = this.options;
+    const { cards, pullRequests } = this.options;
+    await keepKnowledge(card, at, pullRequests.baseBranch, (prompt) =>
+      this.agent(card, at, prompt, onActivity),
+    );
     const checked = await this.checkAndPush(card, at, onActivity);
     if (checked.blocked !== null) {
       await this.stuck(card.number, checked.blocked, "blocked");
@@ -247,7 +233,7 @@ export class Jobs {
     const pr = card.pullRequest;
     if (!pr) return;
     if (
-      await this.byHand(card, at, (text) =>
+      await byHand(card, at, this.options.cards, (text) =>
         this.sayOnPullRequest(pr.number, text, "by-hand"),
       )
     )

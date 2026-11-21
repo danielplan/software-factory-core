@@ -16,6 +16,8 @@ Follow the knowledge base's page on maintaining it (docs/how-to/maintain-the-kno
 5. Run the knowledge base's checks (`npx software-factory check-docs`), then tell the person what changed in the knowledge base in one or two lines. Besides links and page rules it checks that every file or folder path written in backticks still exists: when the build moved or deleted a file, fix the pages that name it.
 6. If the agreed work is complete, set the run status to `done` only when checks passed or unverified checks and their reasons are recorded. If ending with unfinished work, use `stopped` with the reason. Mid-run updates leave the status alone.
 
+**The factory checks it.** Before a card's pull request, a branch that changes code but none of the knowledge files (docs/, a context/ folder, a BLUEPRINT.md, AGENTS.md) gets one more round of this skill. When truly nothing needs to change, write one line in the run file instead: `Knowledge base: nothing to change, because …` with the reason.
+
 **A lesson for every company.** When something you learnt would hold for any company using the same kind of product or the same tool (not only this company's products), write it in this company's lessons as usual, and also mark it in the run's Later section as a suggestion for the factory core, written without this company's names, data or wording. The core's maintainer decides whether it becomes a kit or core rule.
 
 Write only what you saw in this run. Mark anything uncertain as uncertain.
