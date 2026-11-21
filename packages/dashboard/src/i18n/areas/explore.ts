@@ -37,8 +37,7 @@ const en = {
   handOff: (key: string) => `Hand off ${key}`,
   handOffBoard: "Hand off",
   handingOff: "Handing off…",
-  handingOffAbout: "Writing the card from the conversation and the board",
-  handingOffTitle: (title: string) => `Handing off “${title}”`,
+  handOffStep: (n: number, of: number) => `Step ${String(n)} of ${String(of)}`,
   handOffStages: {
     spec: "Writing the spec",
     card: "Making the card on the board",

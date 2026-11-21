@@ -186,9 +186,7 @@ function TopBar({
             {pending === "drop" ? t.explore.dropping : t.explore.drop}
           </Button>
           <HandOffButton page={page} press={press} pending={pending} />
-          {page.handingOff && (
-            <HandingOff handing={page.handingOff} title={exploration.title} />
-          )}
+          {page.handingOff && <HandingOff handing={page.handingOff} />}
         </>
       ) : (
         <span className="inline-flex h-[22px] items-center rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">

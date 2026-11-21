@@ -37,8 +37,8 @@ export const exploreGerman: ExploreWords = {
   handOff: (key) => `${key} übergeben`,
   handOffBoard: "Übergeben",
   handingOff: "Übergebe…",
-  handingOffAbout: "Schreibe die Karte aus dem Gespräch und dem Board",
-  handingOffTitle: (title: string) => `Übergebe „${title}“`,
+  handOffStep: (n: number, of: number) =>
+    `Schritt ${String(n)} von ${String(of)}`,
   handOffStages: {
     spec: "Schreibe die Spezifikation",
     card: "Lege die Karte auf dem Board an",

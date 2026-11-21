@@ -37,8 +37,7 @@ export const exploreItalian: ExploreWords = {
   handOff: (key) => `Consegna ${key}`,
   handOffBoard: "Consegna",
   handingOff: "Consegno…",
-  handingOffAbout: "Scrivo la scheda dalla conversazione e dalla lavagna",
-  handingOffTitle: (title: string) => `Consegno «${title}»`,
+  handOffStep: (n: number, of: number) => `Passo ${String(n)} di ${String(of)}`,
   handOffStages: {
     spec: "Scrivo la specifica",
     card: "Creo la scheda sulla bacheca",

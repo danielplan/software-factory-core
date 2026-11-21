@@ -1,27 +1,29 @@
-// While an exploration is handed off: a panel over the page with each stage
-// (the spec written, the card made, the prototypes stopped), for how long,
-// and what the spec writer did; closed, a line in the bar opens it again.
+// While an exploration is handed off: a small card over the page with
+// Doodle, the explorer, writing it up, and the step it is at (the spec,
+// the card, the prototypes stopped) with for how long. Closed, a line in
+// the bar opens it again.
 
-import { Check, Circle, LoaderCircle } from "lucide-react";
+import { LoaderCircle, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import type { ExplorationPage } from "@/api";
+import { KoboldHead } from "@/components/kobold-face";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/i18n/use-t";
+import { KOBOLDS } from "@/lib/kobolds";
 
 import { clockOf, useNow } from "./board/prototype-making";
 
 type Handing = NonNullable<ExplorationPage["handingOff"]>;
 
-const STAGES = ["spec", "card", "prototypes"] as const;
+const STAGES: Handing["stage"][] = ["spec", "card", "prototypes"];
 
-export function HandingOff({
-  handing,
-  title,
-}: Readonly<{ handing: Handing; title: string }>) {
+export function HandingOff({ handing }: Readonly<{ handing: Handing }>) {
   const t = useT().explore;
   const [open, setOpen] = useState(true);
   const clock = clockOf(handing.since, useNow());
+  const step = t.handOffStages[handing.stage];
+  const at = STAGES.indexOf(handing.stage) + 1;
   return (
     <>
       <button
@@ -32,78 +34,49 @@ export function HandingOff({
         className="flex w-full items-center gap-2 text-left text-xs text-muted-foreground hover:text-foreground"
       >
         <LoaderCircle aria-hidden className="size-3.5 animate-spin text-blue" />
-        <span className="min-w-0 flex-1 truncate">
-          {t.handOffStages[handing.stage]}
-        </span>
+        <span className="min-w-0 flex-1 truncate">{step}</span>
         {clock && <span className="tabular-nums">{clock}</span>}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="grid h-[85vh] w-[min(1100px,calc(100vw-32px))] max-w-none sm:max-w-none grid-rows-[auto_auto_1fr] gap-5">
-          <div className="flex items-baseline gap-3 pr-10">
-            <DialogTitle className="min-w-0 flex-1 text-base">
-              {t.handingOffTitle(title)}
-            </DialogTitle>
-            {clock && (
-              <span className="text-sm text-muted-foreground tabular-nums">
-                {clock}
-              </span>
-            )}
-          </div>
-          <Stages handing={handing} />
-          <Steps steps={handing.steps} />
+        <DialogContent className="grid w-[300px] max-w-none justify-items-center gap-3 px-6 pt-8 pb-6 text-center sm:max-w-none">
+          <DoodleWriting />
+          <DialogTitle
+            key={step}
+            className="text-[15px] leading-snug motion-safe:animate-pop"
+          >
+            {step}
+          </DialogTitle>
+          <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
+            {t.handOffStep(at, STAGES.length)}
+            {clock && <span>· {clock}</span>}
+          </span>
         </DialogContent>
       </Dialog>
     </>
   );
 }
 
-function Stages({ handing }: Readonly<{ handing: Handing }>) {
-  const t = useT().explore;
-  const at = STAGES.indexOf(handing.stage);
+// Doodle with its beret, bobbing, and a pencil writing lines on a sheet.
+function DoodleWriting() {
+  const doodle = KOBOLDS.find((kobold) => kobold.id === "explorer");
   return (
-    <ol className="grid gap-2 text-sm">
-      {STAGES.map((stage, n) => (
-        <li key={stage} className="flex items-center gap-2">
-          <StageMark state={stateOf(n, at)} />
-          <span className={n > at ? "text-muted-foreground" : undefined}>
-            {t.handOffStages[stage]}
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function stateOf(n: number, at: number): "done" | "now" | "next" {
-  if (n < at) return "done";
-  return n === at ? "now" : "next";
-}
-
-function StageMark({ state }: Readonly<{ state: "done" | "now" | "next" }>) {
-  if (state === "done")
-    return <Check aria-hidden className="size-4 text-green" />;
-  if (state === "now")
-    return (
-      <LoaderCircle aria-hidden className="size-4 animate-spin text-blue" />
-    );
-  return <Circle aria-hidden className="size-4 text-muted-foreground" />;
-}
-
-function Steps({ steps }: Readonly<{ steps: string[] }>) {
-  const t = useT().explore;
-  return (
-    <div className="min-h-[160px] overflow-y-auto rounded-md bg-muted px-3 py-2 font-mono text-xs leading-relaxed text-muted-foreground">
-      {steps.length === 0 ? (
-        <p>{t.handingOffAbout}</p>
-      ) : (
-        <ol className="grid gap-0.5">
-          {steps.map((step, n) => (
-            <li key={`${String(n)}-${step}`} className="truncate" title={step}>
-              {step}
-            </li>
-          ))}
-        </ol>
-      )}
+    <div aria-hidden className="relative h-[76px] w-[120px]">
+      <KoboldHead
+        size={52}
+        hat={doodle?.hat ?? "beret"}
+        color={doodle?.color ?? "#e9a23b"}
+        className="absolute top-2 left-0 motion-safe:animate-bob"
+      />
+      <div className="absolute right-0 bottom-0 grid h-[62px] w-[54px] content-start gap-[7px] rounded-md bg-card px-2 pt-3 shadow-[0_4px_14px_-4px_rgb(20_24_36/0.35)]">
+        {[0, 1, 2].map((line) => (
+          <span
+            key={line}
+            className="block h-[3px] origin-left rounded-full bg-muted-foreground/30 motion-safe:animate-[write_2.4s_ease-in-out_infinite]"
+            style={{ animationDelay: `${String(line * 0.8)}s` }}
+          />
+        ))}
+        <Pencil className="absolute -right-1 bottom-2 size-4 text-wash-foreground motion-safe:animate-[scribble_0.8s_ease-in-out_infinite]" />
+      </div>
     </div>
   );
 }

@@ -255,6 +255,25 @@
       transform: translateY(8px);
     }
   }
+  /* Doodle writing up a hand-off: lines filling in, the pencil moving. */
+  @keyframes write {
+    0% {
+      transform: scaleX(0);
+    }
+    45%,
+    100% {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes scribble {
+    0%,
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(-3px, -1px) rotate(-8deg);
+    }
+  }
   /* A card being built: a light running along its top edge. */
   --animate-run-light: run-light 1.6s ease-in-out infinite;
   @keyframes run-light {
