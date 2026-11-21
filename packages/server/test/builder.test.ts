@@ -402,7 +402,7 @@ test("a builder that is not finished but not blocked goes on in the next session
   const { claude, prompts } = pretendClaude((options) => {
     session++;
     writeFileSync(join(options.cwd, "app", "BIG.md"), String(session));
-    return session < 4
+    return session < 3
       ? `Step ${String(session)} is built.\nSTATUS: continue`
       : "Everything is built and checked.\nSTATUS: done";
   });
@@ -412,15 +412,86 @@ test("a builder that is not finished but not blocked goes on in the next session
   const card = kept.get(9);
   assert.ok(card);
   const notes = card.comments.map((c) => readNote(c.body));
-  assert.equal(session, 4);
+  assert.equal(session, 3);
   assert.equal(card.stage, "review");
   assert.equal(prs.made.length, 1);
   assert.equal(prs.made[0]?.draft, false);
-  // Told once that it started, once how far it is (after three sessions),
-  // never asked a question.
-  assert.equal(notes.filter((n) => n === "progress").length, 1);
+  // Told after each unfinished session how far it is, never asked a question.
+  assert.equal(notes.filter((n) => n === "progress").length, 2);
+  assert.match(
+    card.comments.map((c) => c.body).join("\n"),
+    /Session 1 of 3 done/,
+  );
+  assert.match(
+    card.comments.map((c) => c.body).join("\n"),
+    /Session 2 of 3 done/,
+  );
   assert.equal(notes.includes("blocked"), false);
   assert.match(prompts[1] ?? "", /earlier work on this branch exists/);
+  work.switch("build", false);
+});
+
+test("a builder still not finished after 3 sessions is stopped with a draft and asks a person", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      12,
+      {
+        title: "Huge",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  let session = 0;
+  const { claude } = pretendClaude((options) => {
+    session++;
+    writeFileSync(join(options.cwd, "app", "HUGE.md"), String(session));
+    return "More to do.\nSTATUS: continue";
+  });
+  const { work, prs } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  const card = kept.get(12);
+  assert.ok(card);
+  assert.equal(session, 3);
+  assert.equal(card.stage, "backlog");
+  assert.equal(prs.made.length, 1);
+  assert.equal(prs.made[0]?.draft, true);
+  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "failed");
+  assert.match(card.comments.at(-1)?.body ?? "", /3 sessions were not enough/);
+  work.switch("build", false);
+});
+
+test("a builder that is blocked after an unfinished session stops the card at once", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      13,
+      {
+        title: "Blocked",
+        stage: "todo",
+        body: withPlan("", "The plan."),
+        comments: [],
+      },
+    ],
+  ]);
+  let session = 0;
+  const { claude } = pretendClaude((options) => {
+    session++;
+    writeFileSync(join(options.cwd, "app", "BLOCKED.md"), String(session));
+    return session < 2
+      ? "Step one built.\nSTATUS: continue"
+      : "I need an account.\nSTATUS: blocked";
+  });
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  const card = kept.get(13);
+  assert.ok(card);
+  assert.equal(session, 2);
+  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "blocked");
   work.switch("build", false);
 });
 

@@ -136,10 +136,10 @@ export class Jobs {
       session: (earlier) =>
         this.agent(card, at, buildPrompt(card, earlier, at.name), onActivity),
       head: async () => headOf((await at.build()).path),
-      progress: (n, text) =>
+      progress: (n, of, text) =>
         this.say(
           card.number,
-          `Session ${String(n)} done:\n\n${text}`,
+          `Session ${String(n)} of ${String(of)} done:\n\n${text}`,
           "progress",
         ),
     });

@@ -1,15 +1,14 @@
 // A card's building sessions in a row. A session that ends with "continue"
 // (the agreed scope is not finished and nothing blocks it) is followed by the
 // next one, which carries on from the run file, with no question to the
-// owner. It gives up when sessions add no commit twice in a row, or after
-// CONTINUE_SESSIONS in all.
+// owner, and a short note on the card says how far it is. It gives up when
+// sessions add no commit twice in a row, or when the last of CONTINUE_SESSIONS
+// still ends with "continue".
 
 // Sessions in a row on one card before the builder gives up with a draft.
-const CONTINUE_SESSIONS = 12;
+const CONTINUE_SESSIONS = 3;
 // Sessions in a row that may add no commit.
 const STALLED_SESSIONS = 2;
-// A progress note on the card every this many sessions.
-const PROGRESS_EVERY = 3;
 
 export type Answer = { status: string; text: string };
 
@@ -19,7 +18,7 @@ export type SessionSteps = {
   // The commit the branch is on.
   head: () => Promise<string>;
   // Tells the owner how far it is.
-  progress: (session: number, text: string) => Promise<void>;
+  progress: (session: number, of: number, text: string) => Promise<void>;
 };
 
 export async function runSessions(
@@ -44,8 +43,8 @@ export async function runSessions(
     if (n >= CONTINUE_SESSIONS)
       return {
         answer,
-        gaveUp: `${answer.text}\n\nThe builder worked ${String(CONTINUE_SESSIONS)} sessions in a row and is still not finished, so it stopped.`,
+        gaveUp: `${answer.text}\n\nThe builder worked ${String(CONTINUE_SESSIONS)} sessions in a row and is still not finished: ${String(CONTINUE_SESSIONS)} sessions were not enough, so it stopped. Move the card to **To do** to give it ${String(CONTINUE_SESSIONS)} more sessions, or split the card.`,
       };
-    if (n % PROGRESS_EVERY === 0) await steps.progress(n, answer.text);
+    await steps.progress(n, CONTINUE_SESSIONS, answer.text);
   }
 }

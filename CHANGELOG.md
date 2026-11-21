@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Changed: a card gets at most 3 build sessions in a row instead of 12. After each session that ends with `continue` the builder leaves a short note on the card (`Session 2 of 3 done:`, what is done and what is next). If the third still has not finished, it stops with a draft pull request and the card waits in Backlog, marked stuck, for a person to move it to To do or split it. Nothing to do.
+
 - Changed: the explorer adds a note, diagram or choice together with its arrow (`from` and `label` on `add_note`, `add_diagram` and `add_choice`), so the board shows the new thing already joined instead of loose for a moment. Nothing to do.
 
 - Changed: an exploration whose idea changes no screen (how the builder works, a rule, a background job) is handed off without a prototype: its agreed choices, notes and diagrams become the card (**Agreed, without a prototype**), and the spec is written from the board and the conversation. Hand off is enabled once anything on the board is agreed; the explorer hands off such an idea itself instead of asking the team to make the card by hand. `branch` in the spec writer's input is optional. Nothing to do.
