@@ -50,7 +50,7 @@ export function LiveScreen({
             type="button"
             className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-card/95 px-2.5 py-1 text-xs font-medium shadow-card transition-opacity group-hover:opacity-100 focus-visible:opacity-100 md:opacity-0"
           >
-            <Maximize2 aria-hidden className="size-3" /> Bigger
+            <Maximize2 aria-hidden className="size-3" /> {t.explore.bigger}
           </button>
         </DialogTrigger>
       </div>

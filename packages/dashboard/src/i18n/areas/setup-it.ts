@@ -84,6 +84,8 @@ export const setupItalian: SetupWords = {
     guessFrom: (source) => `la mia ipotesi, da ${source}`,
     guess: "la mia ipotesi",
   },
+  connected: "Collegato",
+  now: (activity) => `Ora: ${activity}`,
   cards: {
     forEveryone: "Per tutti",
     addOns: "Componenti aggiuntivi",

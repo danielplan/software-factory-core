@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { KINDS } from "./kinds";
 import { columnsOf } from "./view";
+import { useT } from "@/i18n/use-t";
 
 export function Faces({
   personas,
@@ -31,6 +32,7 @@ export function Faces({
 // past the problem.
 export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
   const columns = columnsOf(row.things, row.links);
+  const t = useT().explore;
   return (
     <div className="relative flex h-[132px] items-center gap-2.5 overflow-hidden rounded-xl bg-[#f7f8fa] bg-[radial-gradient(#dde1ea_1px,transparent_1px)] bg-size-[10px_10px] px-4">
       {columns.map((column, at) => (
@@ -42,7 +44,7 @@ export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
             ))}
             {column.length > 3 && (
               <span className="text-[10.5px] text-muted-foreground">
-                +{column.length - 3} more
+                {t.more(column.length - 3)}
               </span>
             )}
           </div>
@@ -52,7 +54,7 @@ export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
         <>
           <span className="text-[#b6bccb]">→</span>
           <div className="grid h-[38px] w-[110px] flex-none place-items-center rounded-lg border-[1.5px] border-dashed border-[#d3d7e0] text-[10.5px] text-faint">
-            ways come here
+            {t.waysComeHere}
           </div>
         </>
       )}

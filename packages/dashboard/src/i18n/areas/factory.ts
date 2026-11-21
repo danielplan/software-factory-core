@@ -77,6 +77,7 @@ const en = {
     builderOnIt: "The builder is on it",
     deleteCard: "Delete card",
   },
+  waitingForYou: "Waiting for you",
   waiting: {
     own: "Write your own answer",
     sending: "Sending…",
@@ -167,6 +168,7 @@ export const factory = area(
       builderOnIt: "Ci sta lavorando il costruttore",
       deleteCard: "Elimina la scheda",
     },
+    waitingForYou: "Ti aspettano",
     waiting: {
       own: "Scrivi la tua risposta",
       sending: "Invio…",
@@ -254,6 +256,7 @@ export const factory = area(
       builderOnIt: "Der Baumeister ist dran",
       deleteCard: "Karte löschen",
     },
+    waitingForYou: "Warten auf dich",
     waiting: {
       own: "Schreib deine eigene Antwort",
       sending: "Sende…",

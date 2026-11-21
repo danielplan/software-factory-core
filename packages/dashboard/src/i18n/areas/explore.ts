@@ -66,6 +66,10 @@ const en = {
     thinking: "Thinking…",
     takeOff: "Take it off",
   },
+  more: (n: number) => `+${String(n)} more`,
+  waysComeHere: "ways come here",
+  fromBacklog: "an idea from the board's Backlog",
+  bigger: "Bigger",
   board: {
     label: "The exploration's board",
     agreedHint: "Agreed: click to make it a sketch",
@@ -158,6 +162,10 @@ export const explore = area(
       thinking: "Ci penso…",
       takeOff: "Toglilo",
     },
+    more: (n) => `+${String(n)} altri`,
+    waysComeHere: "qui arrivano le strade",
+    fromBacklog: "un'idea dal Backlog della bacheca",
+    bigger: "Più grande",
     board: {
       label: "La lavagna dell'esplorazione",
       agreedHint: "D'accordo: clicca per farne una bozza",
@@ -247,6 +255,10 @@ export const explore = area(
       thinking: "Denkt nach…",
       takeOff: "Abnehmen",
     },
+    more: (n) => `+${String(n)} weitere`,
+    waysComeHere: "hier kommen die Wege hin",
+    fromBacklog: "eine Idee aus dem Backlog des Boards",
+    bigger: "Größer",
     board: {
       label: "Das Board der Erkundung",
       agreedHint: "Vereinbart: klicken, um daraus eine Skizze zu machen",

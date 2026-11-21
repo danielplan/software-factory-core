@@ -10,4 +10,3 @@ export { Chips, Thinking } from "./chips";
 export { Feed } from "./feed";
 export { LiveCard } from "./live-card";
 export { SimilarAsYouType } from "./similar-posts";
-export { START } from "./starts";

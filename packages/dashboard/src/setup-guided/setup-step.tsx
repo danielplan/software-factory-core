@@ -52,7 +52,7 @@ export function SetupStep({
       </ul>
       {coach.phase === "build" && !setUpDone(coach) && coach.activity && (
         <p className="text-[13px] text-muted-foreground">
-          Now: {coach.activity}
+          {t.setup.now(coach.activity)}
         </p>
       )}
     </>

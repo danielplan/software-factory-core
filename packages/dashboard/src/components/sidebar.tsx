@@ -157,12 +157,13 @@ export function Sidebar(props: SidebarProps) {
 
 function Content(props: SidebarProps & { onGo?: () => void }) {
   const { current, counts, doing, product, onGo } = props;
+  const nav = useT().shell.nav;
   return (
     <>
       <span className="px-2 pb-4">
         <Wordmark name={props.name} size="big" />
       </span>
-      <nav aria-label="Overview" className="grid gap-px pb-4">
+      <nav aria-label={nav.overview} className="grid gap-px pb-4">
         {TOP.map((item) => (
           <PageLink key={item.page} item={item} current={current} onGo={onGo}>
             {item.page === "system" && <ProductState product={product} />}
@@ -173,7 +174,7 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
       <div className="mt-auto grid gap-0.5 pt-4">
         <UpdateRow />
         <FeedbackRow current={current} />
-        <nav aria-label="The factory" className="grid gap-0.5">
+        <nav aria-label={nav.factory} className="grid gap-0.5">
           {QUIET.map((item) => (
             <PageLink
               key={item.page}
@@ -256,7 +257,7 @@ function Pages({
 }>) {
   const t = useT().shell;
   return (
-    <nav aria-label="Pages" className="grid gap-px">
+    <nav aria-label={t.nav.pages} className="grid gap-px">
       {GROUPS.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{t.groups[group.label]}</GroupLabel>

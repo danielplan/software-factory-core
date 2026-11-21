@@ -79,6 +79,8 @@ export const setupGerman: SetupWords = {
     guessFrom: (source) => `meine Vermutung, aus ${source}`,
     guess: "meine Vermutung",
   },
+  connected: "Verbunden",
+  now: (activity) => `Jetzt: ${activity}`,
   cards: {
     forEveryone: "Für alle",
     addOns: "Erweiterungen",

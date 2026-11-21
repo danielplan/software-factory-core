@@ -38,6 +38,7 @@ const en = {
   listening: "Listening. Go ahead.",
   thinking: "Got it. Working on it…",
   speaking: "Speaking… say “stop” to interrupt.",
+  quietly: "A short sound is being written down quietly.",
   orb: {
     preparing: "Getting ready…",
     listening: "Listening",
@@ -87,6 +88,7 @@ export const voice = area(
     listening: "Ti ascolto. Vai pure.",
     thinking: "Ricevuto. Ci lavoro…",
     speaking: "Sto parlando… di' “stop” per interrompere.",
+    quietly: "Un breve suono viene trascritto in silenzio.",
     orb: {
       preparing: "Mi preparo…",
       listening: "Ascolto",
@@ -134,6 +136,7 @@ export const voice = area(
     listening: "Ich höre zu. Leg los.",
     thinking: "Verstanden. Ich arbeite daran…",
     speaking: 'Ich spreche… sag „stop", um zu unterbrechen.',
+    quietly: "Ein kurzes Geräusch wird leise aufgeschrieben.",
     orb: {
       preparing: "Bereite mich vor…",
       listening: "Höre zu",

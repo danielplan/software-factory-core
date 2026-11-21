@@ -18,9 +18,10 @@ import { answerText, type Waiting } from "./answer-text";
 import { useT } from "@/i18n/use-t";
 
 export function WaitingCards({ waiting }: Readonly<{ waiting: Waiting[] }>) {
+  const t = useT().factory;
   if (waiting.length === 0) return null;
   return (
-    <section aria-label="Waiting for you" className="grid gap-3">
+    <section aria-label={t.waitingForYou} className="grid gap-3">
       {waiting.map((one) => (
         <WaitingCard key={one.number} waiting={one} />
       ))}

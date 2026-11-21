@@ -191,6 +191,7 @@ export function BoardCard({
   card,
   acts,
 }: Readonly<{ card: Card; acts: CardActs }>) {
+  const t = useT();
   return (
     <div className="flex items-center gap-3 rounded-xl bg-card px-5 py-4 shadow-card">
       <Icon card={card} />
@@ -204,7 +205,7 @@ export function BoardCard({
       </div>
       {card.confirmed && (
         <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#e6f6f3] px-2.5 text-xs font-medium text-[#0d7a6d]">
-          <Check className="size-3" aria-hidden /> Connected
+          <Check className="size-3" aria-hidden /> {t.setup.connected}
         </span>
       )}
       <Remove card={card} acts={acts} />

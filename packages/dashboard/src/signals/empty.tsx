@@ -224,7 +224,9 @@ export function AllQuiet({
         )}
       >
         <KoboldHead size={64} />
-        <div className="mt-1.5 text-[15px] font-semibold">All quiet</div>
+        <div className="mt-1.5 text-[15px] font-semibold">
+          {t.signals.quietTitle}
+        </div>
         <div className="max-w-[420px] text-[13px] text-muted-foreground">
           {t.signals.quiet.none(app)} {lookAgainWords(sync.next, now, t.words)}
         </div>

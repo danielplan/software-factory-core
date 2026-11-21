@@ -28,6 +28,7 @@ here reach every company with its next upgrade, so they are made with care.
   say why.
 - Simple, clear and consistent language in code, comments and docs. The people
   who use a factory are not developers, but are curious and capable.
+- **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [the design system's languages](docs/reference/design-system.md#languages). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
 - Never loosen a check or add a lint-disabling comment without asking.
 
 ## Layout

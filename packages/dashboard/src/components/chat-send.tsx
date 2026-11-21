@@ -13,6 +13,7 @@ export function ChatSend({
   onStop,
   size,
   className,
+  label,
 }: Readonly<{
   // The kobold is answering.
   busy: boolean;
@@ -21,6 +22,8 @@ export function ChatSend({
   onStop: () => void;
   size: "pill-sm" | "icon-sm";
   className?: string;
+  // Its name, when the place has another Send (Sprocket's window).
+  label?: string;
 }>) {
   const t = useT();
   if (busy && !typed)
@@ -41,8 +44,8 @@ export function ChatSend({
     <Button
       type="submit"
       size={size}
-      aria-label={t.chat.send}
-      title={busy ? t.chat.steer : t.chat.send}
+      aria-label={label ?? t.chat.send}
+      title={busy ? t.chat.steer : (label ?? t.chat.send)}
       className={className}
       disabled={!typed}
     >

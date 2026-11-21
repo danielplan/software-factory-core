@@ -80,6 +80,8 @@ const en = {
     guessFrom: (source: string) => `my guess, from ${source}`,
     guess: "my guess",
   },
+  connected: "Connected",
+  now: (activity: string) => `Now: ${activity}`,
   cards: {
     forEveryone: "For everyone",
     addOns: "Add-ons",

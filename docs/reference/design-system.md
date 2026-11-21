@@ -51,7 +51,7 @@ Every word the dashboard shows is in one typed catalogue,
 `area(en, it, de)` (`define.ts`): English is the source, and Italian and
 German must have every key it has, with the same kind of value (a text, or
 a function that makes one from what it names), or the types refuse them;
-`test/i18n.test.ts` checks it again at run time. A component gets the words
+`test/i18n.test.ts` checks it again at run time, and `test/words-in-catalogue.test.ts` fails on any word written straight into a screen (JSX text, or a `title`, `aria-label`, `placeholder`, `alt` or `label` written as a string), names such as Kobble or GitHub, addresses and shortcuts aside. A component gets the words
 with `useT()` (`use-t.tsx`) and the language with `useLocale()`, for times
 and dates (`format.ts`, through `Intl`). Code outside components takes the
 words as an argument, English by default, so its tests stay in English.

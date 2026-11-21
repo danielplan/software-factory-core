@@ -119,4 +119,107 @@ export const feedbackGerman: typeof feedbackEnglish = {
       done: (n) => `#${String(n)} ist erledigt: es ist in einem neuen Kobble.`,
     },
   },
+  window: {
+    howCanIHelp: "Wie kann ich helfen?",
+    reportIt: "Melden",
+    choices: {
+      bug: "Etwas stimmt nicht",
+      wish: "Ich wünschte, Kobble könnte…",
+      ask: "Eine Frage stellen",
+    },
+    here: {
+      home: { text: "Fehlt dir etwas auf Home? Sag es mir" },
+      system: {
+        text: "Ein Produkt sieht falsch aus? Melde es",
+        said: "Ein Produkt auf der Seite System sieht falsch aus",
+      },
+      signals: { text: "Fehlt eine Art von Signal? Sag es mir" },
+      explore: {
+        text: "Der Prototyp ist nicht, was du wolltest? Melde es",
+        said: "Ein Prototyp zeigt nicht, was ich wollte",
+      },
+      build: {
+        text: "Der Baumeister hat angehalten? Melde es",
+        said: "Der Baumeister hat angehalten",
+      },
+      personas: { text: "Sollen Personas mehr können? Sag es mir" },
+      settings: { text: "Findest du eine Einstellung nicht? Frag mich" },
+    },
+    starts: {
+      startBug: {
+        line: "Das tut mir leid. Was ist schiefgegangen?",
+        examples: [
+          "Der Baumeister hat mittendrin angehalten",
+          "Meine Karten werden nicht angezeigt",
+          "Eine Seite zeigt einen Fehler",
+        ],
+      },
+      startWish: {
+        line: "Sag mir, was Kobble können soll.",
+        examples: [
+          "An zwei Karten gleichzeitig arbeiten",
+          "Signale aus Slack sehen",
+          "Das Board exportieren",
+        ],
+      },
+      startAsk: {
+        line: "Was möchtest du wissen?",
+        examples: [
+          "Wie starte ich einen Bau?",
+          "Was ist eine Persona?",
+          "Woher kommen Signale?",
+        ],
+      },
+    },
+    replies: {
+      askWish: ["Es würde mir Zeit sparen", "Mein Team fragt ständig danach"],
+      askBug: ["Ich habe auf Bauen geklickt", "Es ist von selbst passiert"],
+      askError: [
+        "Ich habe eine Karte zu Bauen verschoben",
+        "Nichts, es hat einfach angehalten",
+      ],
+    },
+    lines: {
+      askError:
+        "Ich habe den Fehler oben in den Beitrag gesetzt. Was hast du gemacht, als es passiert ist?",
+      draft: "Hier ist er, oben. Ändere, was du willst, oder sende ihn.",
+      added: "Zum Beitrag hinzugefügt.",
+      cleaned: "Erledigt: die Daten deines Teams sind draußen.",
+    },
+    askBugAfterSorry:
+      "Was hast du gemacht, als es passiert ist, und was hast du erwartet?",
+    similar: (teams, bug) =>
+      `${String(teams)} Teams ${bug ? "sind auch darauf gestoßen" : "wollen das auch"}:`,
+    thumbed: (n) => `Dein 👍 ist auf #${String(n)}. Ich verfolge es oben.`,
+    posted: (n) => `Gesendet als #${String(n)}. Ich verfolge es oben.`,
+    placeholders: {
+      choose: "Frag, oder sag mir, was nicht stimmt…",
+      ask: "Stell eine Frage…",
+      listen: "Sag es mit deinen Worten…",
+      question: "Deine Antwort…",
+      again: "Deine Antwort…",
+      similar: "Oder erzähl mir mehr…",
+      draft: "Sag mir, was ich ändern soll…",
+      sent: "Sonst noch etwas?",
+    },
+    takeOut: "Die Daten meines Teams entfernen",
+    addDetail: "Ein Detail hinzufügen",
+    somethingElse: "Etwas anderes",
+    startOver: "Neu anfangen",
+    alreadyOnBoard: "Schon auf dem Board?",
+    kinds: { bug: "Fehler", wish: "Wunsch" },
+    newPost: "neuer Beitrag",
+    ready: "Bereit zum Senden",
+    writing: "Schreibt sich gerade…",
+    titleLabel: "Titel",
+    errorPrefix: "Fehler: ",
+    publicBoard: (remove) => `${remove}: das Board ist öffentlich`,
+    signedInAs: (name) => `als @${name}`,
+    withSignIn: "mit deiner GitHub-Anmeldung",
+    send: "Senden",
+    sendPost: "Den Beitrag senden",
+    typeBefore: "Gib",
+    typeAfter: "auf github.com/login/device ein, dann sende ich es.",
+    sendMessage: "Deine Nachricht senden",
+  },
 };

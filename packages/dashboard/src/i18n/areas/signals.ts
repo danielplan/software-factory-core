@@ -34,6 +34,7 @@ const en = {
       `Only anonymous events leave ${app}: no names, no entries.`,
     how: "How to add the export to your app",
   },
+  quietTitle: "All quiet",
   quiet: {
     none: (app: string) => `No new bugs, requests or feedback from ${app}.`,
     hide: "Hide handled signals",
@@ -88,6 +89,7 @@ export const signals = area(
         `Da ${app} escono solo eventi anonimi: niente nomi, niente contenuti.`,
       how: "Come aggiungere l'esportazione alla tua app",
     },
+    quietTitle: "Tutto tranquillo",
     quiet: {
       none: (app) => `Nessun nuovo bug, richiesta o feedback da ${app}.`,
       hide: "Nascondi i segnali gestiti",
@@ -137,6 +139,7 @@ export const signals = area(
         `Nur anonyme Ereignisse verlassen ${app}: keine Namen, keine Einträge.`,
       how: "So fügst du den Export zu deiner App hinzu",
     },
+    quietTitle: "Alles ruhig",
     quiet: {
       none: (app) =>
         `Keine neuen Fehler, Wünsche oder Rückmeldungen aus ${app}.`,

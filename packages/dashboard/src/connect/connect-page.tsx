@@ -93,7 +93,7 @@ export function TrackerChoice({
       <div
         className="grid gap-3 sm:grid-cols-2"
         role="radiogroup"
-        aria-label="Tracker"
+        aria-label={t.connect.trackerLabel}
       >
         {choices.map((one) => (
           <ChoiceCard

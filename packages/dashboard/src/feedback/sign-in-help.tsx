@@ -2,14 +2,17 @@
 // send did not work.
 
 import { useSigning } from "./feedback-board";
+import { useT } from "@/i18n/use-t";
 
 export function SignInHelp({ problem }: Readonly<{ problem: string | null }>) {
   const signing = useSigning();
+  const w = useT().feedback.window;
   if (signing?.code)
     return (
       <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-        Type <b className="tracking-[0.08em] text-foreground">{signing.code}</b>{" "}
-        at github.com/login/device, then I send it.
+        {w.typeBefore}{" "}
+        <b className="tracking-[0.08em] text-foreground">{signing.code}</b>{" "}
+        {w.typeAfter}
       </p>
     );
   const said = signing?.problem ?? problem;

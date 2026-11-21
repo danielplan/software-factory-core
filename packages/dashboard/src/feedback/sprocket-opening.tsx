@@ -22,35 +22,25 @@ import {
   type Thread,
 } from "./tell-kobold";
 
-// What the opening offers on each page.
-const HERE: Record<Page, { text: string; kind: Kind | "ask"; said?: string }> =
-  {
-    home: { text: "Missing something on Home? Tell me", kind: "wish" },
-    system: {
-      text: "A product looks wrong? Report it",
-      kind: "bug",
-      said: "A product on the System page looks wrong",
-    },
-    signals: { text: "Missing a kind of signal? Tell me", kind: "wish" },
-    explore: {
-      text: "Prototype not what you asked? Report it",
-      kind: "bug",
-      said: "A prototype doesn't show what I asked for",
-    },
-    build: {
-      text: "Builder stopped? Report it",
-      kind: "bug",
-      said: "The builder stopped",
-    },
-    personas: { text: "Wish personas did more? Tell me", kind: "wish" },
-    settings: { text: "Can't find a setting? Ask me", kind: "ask" },
-  };
+// What the opening offers on each page: the kind of talk it starts (its
+// words, and what the person says by it, are in the feedback words).
+const HERE: Record<Page, Kind | "ask"> = {
+  home: "wish",
+  system: "bug",
+  signals: "wish",
+  explore: "bug",
+  build: "bug",
+  personas: "wish",
+  settings: "ask",
+};
 
 const CHOICES = [
-  { choice: "bug", icon: Bug, label: "Something is wrong" },
-  { choice: "wish", icon: Lightbulb, label: "I wish Kobble could…" },
-  { choice: "ask", icon: CircleHelp, label: "Ask a question" },
+  { choice: "bug", icon: Bug },
+  { choice: "wish", icon: Lightbulb },
+  { choice: "ask", icon: CircleHelp },
 ] as const;
+
+type Feedback = ReturnType<typeof useT>["feedback"];
 
 const short = (text: string) => {
   const up = text.charAt(0).toUpperCase() + text.slice(1);
@@ -70,8 +60,9 @@ function suggestionFor(
   thread: Thread,
   fresh: CaughtError | null,
   errors: CaughtError[],
-  report: string,
+  words: Feedback,
 ): Suggestion {
+  const w = words.window;
   if (fresh)
     return {
       key: "error",
@@ -79,22 +70,25 @@ function suggestionFor(
       text: (
         <>
           <span className="truncate">{short(fresh.text)}</span>
-          <span className="flex-none text-muted-foreground">· Report it</span>
+          <span className="flex-none text-muted-foreground">
+            · {w.reportIt}
+          </span>
         </>
       ),
       go: () => {
-        reportError(fresh, thread.page, report);
+        reportError(fresh, thread.page, words.report);
       },
     };
-  const here = HERE[page];
+  const kind = HERE[page];
+  const here = w.here[page];
   return {
     key: "here",
     icon: <span className="size-1.5 rounded-full bg-[#8b8ff0]" />,
     text: <span className="truncate">{here.text}</span>,
     go: () => {
-      if (here.kind === "ask") askMode(thread.page);
-      else if (here.said) startWith(here.kind, here.said, thread.page, errors);
-      else start(here.kind);
+      if (kind === "ask") askMode(thread.page);
+      else if ("said" in here) startWith(kind, here.said, thread.page, errors);
+      else start(kind);
     },
   };
 }
@@ -108,13 +102,11 @@ export function Opening({
   const t = useT();
   const fresh = useFreshError();
   const errors = useCaughtErrors();
-  const suggestions = [
-    suggestionFor(page, thread, fresh, errors, t.feedback.report),
-  ];
+  const suggestions = [suggestionFor(page, thread, fresh, errors, t.feedback)];
   return (
     <div className="flex flex-none flex-col gap-3 px-4 pt-1 pb-4">
       <p className="text-[14px] leading-snug motion-safe:animate-rise">
-        How can I help?
+        {t.feedback.window.howCanIHelp}
       </p>
       <ul className="grid gap-1.5">
         {suggestions.map((one, at) => (
@@ -138,7 +130,7 @@ export function Opening({
         className="flex flex-wrap gap-1.5 motion-safe:animate-rise"
         style={{ animationDelay: "240ms" }}
       >
-        {CHOICES.map(({ choice, icon: Icon, label }) => (
+        {CHOICES.map(({ choice, icon: Icon }) => (
           <button
             key={choice}
             type="button"
@@ -150,7 +142,7 @@ export function Opening({
             className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[12px] text-foreground-2 transition-colors hover:border-[#c7cbfb] hover:bg-[#8b8ff0]/8 [&_svg]:size-3"
           >
             <Icon aria-hidden className="text-muted-foreground" />
-            {label}
+            {t.feedback.window.choices[choice]}
           </button>
         ))}
       </div>

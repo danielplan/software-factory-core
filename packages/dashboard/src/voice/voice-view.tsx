@@ -40,9 +40,7 @@ export function VoiceView({
       <VoiceStatus status={status} moment={ended ? "" : t.voice.orb[mode]} />
       <HeardWords call={call} />
       {state.quietly && (
-        <p className="text-[11px] text-muted-foreground">
-          A short sound is being written down quietly.
-        </p>
+        <p className="text-[11px] text-muted-foreground">{t.voice.quietly}</p>
       )}
       <div className="flex w-full flex-wrap items-center gap-2">
         <LanguageSwitch language={language} onChoose={chooseLanguage} />

@@ -43,15 +43,16 @@ function Heading({
   thread,
   ready,
 }: Readonly<{ thread: Thread; ready: boolean }>) {
+  const w = useT().feedback.window;
   return (
     <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground [&_svg]:size-3">
       {thread.kind === "bug" ? <Bug aria-hidden /> : <Lightbulb aria-hidden />}
-      {thread.kind === "bug" ? "Bug" : "Wish"} · new post
+      {w.kinds[thread.kind === "bug" ? "bug" : "wish"]} · {w.newPost}
       <span className="ml-auto flex items-center gap-1.5">
         {!ready && (
           <span className="size-1.5 rounded-full bg-[#8b8ff0] motion-safe:animate-breathe" />
         )}
-        {ready ? "Ready to send" : "Writing itself…"}
+        {ready ? w.ready : w.writing}
       </span>
     </span>
   );
@@ -61,11 +62,12 @@ function Title({
   draft,
   ready,
 }: Readonly<{ draft: Draft | null; ready: boolean }>) {
+  const w = useT().feedback.window;
   if (!draft) return <Placeholder className="h-4 w-2/3" />;
   if (ready)
     return (
       <input
-        aria-label="Title"
+        aria-label={w.titleLabel}
         value={draft.title}
         onChange={(event) => {
           editDraft({ title: event.target.value });
@@ -111,13 +113,13 @@ function PartText({
   const t = useT().feedback;
   return (
     <span className="min-w-0 break-words">
-      {part.label === "error" ? "error: " : ""}
+      {part.label === "error" ? t.window.errorPrefix : ""}
       {teamBits(part.text).map((bit, at) =>
         bit.team && !part.removed ? (
           <button
             key={at}
             type="button"
-            title={`${t.remove}: the board is public`}
+            title={t.window.publicBoard(t.remove)}
             onClick={() => {
               onChange({ text: part.text.replace(bit.text, t.chat.taken) });
             }}
@@ -173,22 +175,24 @@ function SendBar({
   sending,
 }: Readonly<{ draft: Draft; sending: boolean }>) {
   const signedIn = useSignedIn();
+  const w = useT().feedback.window;
   return (
     <div className="flex items-center gap-2 border-t border-line-soft pt-2.5 text-[11.5px] text-muted-foreground motion-safe:animate-rise [&_svg]:size-3.5">
       <CircleUserRound aria-hidden />
       <span className="flex-1">
-        {signedIn ? `as @${signedIn}` : "with your GitHub sign-in"}
+        {signedIn ? w.signedInAs(signedIn) : w.withSignIn}
       </span>
       <Button
         size="sm"
         disabled={!draft.title.trim()}
         busy={sending}
+        aria-label={w.sendPost}
         onClick={() => {
           withSignIn(sendDraft);
         }}
       >
         <Send aria-hidden />
-        Send
+        {w.send}
       </Button>
     </div>
   );

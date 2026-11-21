@@ -4,6 +4,7 @@
 import { area } from "../define.ts";
 
 const en = {
+  nav: { overview: "Overview", factory: "The factory", pages: "Pages" },
   pages: {
     home: "Home",
     system: "System",
@@ -58,6 +59,7 @@ const en = {
 export const shell = area(
   en,
   {
+    nav: { overview: "Panoramica", factory: "La fabbrica", pages: "Pagine" },
     pages: {
       home: "Home",
       system: "Sistema",
@@ -109,6 +111,7 @@ export const shell = area(
     misfit: "Qualcosa nei file della fabbrica non torna",
   },
   {
+    nav: { overview: "Überblick", factory: "Die Fabrik", pages: "Seiten" },
     pages: {
       home: "Start",
       system: "System",

@@ -84,6 +84,9 @@ own working copy; it has its own settings files, made from the examples.
   command (its `product.json`) once, when the scope is built. The factory
   runs it again before the pull request, so never run it twice for the same
   code, and in a round of fixing run only the check that failed.
+- Words people see: when the product is translated (it has a catalogue of
+  words), every new text goes into it, in every language it speaks;
+  screen-reader labels, tooltips and field hints count too.
 - Every state a screen can be in: what you change must hold in each one it
   can show (empty, loading or starting, running, stopped, a problem with its
   message, long names and long messages such as a folder's path, many

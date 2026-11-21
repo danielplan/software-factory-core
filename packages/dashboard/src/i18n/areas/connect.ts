@@ -4,6 +4,7 @@ import { area } from "../define.ts";
 
 const en = {
   didNotWork: "That did not work",
+  trackerLabel: "Where work is tracked",
   page: {
     title: "Where should the factory keep its work?",
     about:
@@ -96,6 +97,7 @@ export const connect = area(
   en,
   {
     didNotWork: "Non ha funzionato",
+    trackerLabel: "Dove si tiene il lavoro",
     page: {
       title: "Dove deve tenere il suo lavoro la fabbrica?",
       about:
@@ -186,6 +188,7 @@ export const connect = area(
   },
   {
     didNotWork: "Das hat nicht geklappt",
+    trackerLabel: "Wo die Arbeit verwaltet wird",
     page: {
       title: "Wo soll die Fabrik ihre Arbeit führen?",
       about:

@@ -119,4 +119,107 @@ export const feedbackItalian: typeof feedbackEnglish = {
       done: (n) => `#${String(n)} è fatto: è in un nuovo Kobble.`,
     },
   },
+  window: {
+    howCanIHelp: "Come posso aiutarti?",
+    reportIt: "Segnalalo",
+    choices: {
+      bug: "Qualcosa non va",
+      wish: "Vorrei che Kobble potesse…",
+      ask: "Fai una domanda",
+    },
+    here: {
+      home: { text: "Manca qualcosa nella Home? Dimmelo" },
+      system: {
+        text: "Un prodotto sembra sbagliato? Segnalalo",
+        said: "Un prodotto nella pagina Sistema sembra sbagliato",
+      },
+      signals: { text: "Manca un tipo di segnale? Dimmelo" },
+      explore: {
+        text: "Il prototipo non è come lo volevi? Segnalalo",
+        said: "Un prototipo non mostra quello che ho chiesto",
+      },
+      build: {
+        text: "Il costruttore si è fermato? Segnalalo",
+        said: "Il costruttore si è fermato",
+      },
+      personas: { text: "Vorresti che le personas facessero di più? Dimmelo" },
+      settings: { text: "Non trovi un'impostazione? Chiedimelo" },
+    },
+    starts: {
+      startBug: {
+        line: "Mi dispiace. Cosa è andato storto?",
+        examples: [
+          "Il costruttore si è fermato a metà",
+          "Le mie schede non si vedono",
+          "Una pagina mostra un errore",
+        ],
+      },
+      startWish: {
+        line: "Dimmi cosa vorresti che Kobble facesse.",
+        examples: [
+          "Lavorare su due schede insieme",
+          "Vedere i segnali da Slack",
+          "Esportare la bacheca",
+        ],
+      },
+      startAsk: {
+        line: "Cosa vorresti sapere?",
+        examples: [
+          "Come faccio a far partire una costruzione?",
+          "Cos'è una persona?",
+          "Da dove arrivano i segnali?",
+        ],
+      },
+    },
+    replies: {
+      askWish: ["Mi farebbe risparmiare tempo", "Il mio team lo chiede spesso"],
+      askBug: ["Ho cliccato Costruisci", "È successo da solo"],
+      askError: [
+        "Ho spostato una scheda in Costruzione",
+        "Niente, si è fermato e basta",
+      ],
+    },
+    lines: {
+      askError:
+        "Ho messo l'errore nel post qui sopra. Cosa stavi facendo quando è successo?",
+      draft: "Eccolo, qui sopra. Cambia quello che vuoi, o invialo.",
+      added: "L'ho aggiunto al post.",
+      cleaned: "Fatto: i dati del tuo team sono fuori.",
+    },
+    askBugAfterSorry:
+      "Cosa stavi facendo quando è successo, e cosa ti aspettavi?",
+    similar: (teams, bug) =>
+      `${String(teams)} team ${bug ? "ci sono finiti anche loro" : "lo vogliono anche loro"}:`,
+    thumbed: (n) => `Il tuo 👍 è su #${String(n)}. Lo seguo qui sopra.`,
+    posted: (n) => `Inviato come #${String(n)}. Lo seguo qui sopra.`,
+    placeholders: {
+      choose: "Chiedi, o dimmi cosa non va…",
+      ask: "Fai una domanda…",
+      listen: "Dillo con parole tue…",
+      question: "La tua risposta…",
+      again: "La tua risposta…",
+      similar: "Oppure dimmi di più…",
+      draft: "Dimmi cosa cambiare…",
+      sent: "Altro?",
+    },
+    takeOut: "Togli i dati del mio team",
+    addDetail: "Aggiungi un dettaglio",
+    somethingElse: "Qualcos'altro",
+    startOver: "Ricomincia",
+    alreadyOnBoard: "Già sulla bacheca?",
+    kinds: { bug: "Bug", wish: "Desiderio" },
+    newPost: "nuovo post",
+    ready: "Pronto da inviare",
+    writing: "Si sta scrivendo…",
+    titleLabel: "Titolo",
+    errorPrefix: "errore: ",
+    publicBoard: (remove) => `${remove}: la bacheca è pubblica`,
+    signedInAs: (name) => `come @${name}`,
+    withSignIn: "con il tuo accesso a GitHub",
+    send: "Invia",
+    sendPost: "Invia il post",
+    typeBefore: "Scrivi",
+    typeAfter: "su github.com/login/device, poi lo invio.",
+    sendMessage: "Invia il tuo messaggio",
+  },
 };

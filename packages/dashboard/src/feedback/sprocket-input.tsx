@@ -7,7 +7,7 @@ import type { Page } from "@/lib/routes";
 import { useSupport } from "@/support/use-support";
 
 import { useCaughtErrors } from "./factory-errors";
-import { Chips, START, Thinking } from "./kobold-chat";
+import { Chips, Thinking } from "./kobold-chat";
 import { Messages } from "./support-messages";
 import { askMode, looksLikeFeedback, say, type Thread } from "./tell-kobold";
 
@@ -17,6 +17,7 @@ export function AskFeed({
   page,
 }: Readonly<{ thread: Thread; page: Page }>) {
   const support = useSupport();
+  const { startAsk } = useT().feedback.window.starts;
   const asked = (support?.messages.length ?? 0) > 0 || support?.writing != null;
   if (asked) return <Messages support={support} />;
   return (
@@ -27,10 +28,10 @@ export function AskFeed({
         thread.lines.length > 0 && (
           <>
             <p className="self-start motion-safe:animate-rise">
-              {START.startAsk.line}
+              {startAsk.line}
             </p>
             <Chips
-              choices={START.startAsk.examples}
+              choices={startAsk.examples}
               onPick={(text) => {
                 void post("/api/kobble/support", { text, page }).catch(
                   () => undefined,
@@ -75,16 +76,7 @@ export function Input({
     }
     say(said, where, errors);
   };
-  const placeholder = {
-    choose: "Ask, or tell me what's wrong…",
-    ask: "Ask a question…",
-    listen: "Say it in your own words…",
-    question: "Your answer…",
-    again: "Your answer…",
-    similar: "Or tell me more…",
-    draft: "Tell me what to change…",
-    sent: "Anything else?",
-  }[thread.step];
+  const placeholder = t.feedback.window.placeholders[thread.step];
   return (
     <form
       className="mx-4 mt-2 mb-4 flex flex-none items-end gap-2 rounded-xl border border-border bg-card p-1.5 transition-colors focus-within:border-[#c7cbfb]"
@@ -117,6 +109,7 @@ export function Input({
           void post("/api/kobble/support/stop", {}).catch(() => undefined);
         }}
         size="icon-sm"
+        label={t.feedback.window.sendMessage}
       />
     </form>
   );

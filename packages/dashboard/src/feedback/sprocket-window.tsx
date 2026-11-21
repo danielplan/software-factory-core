@@ -155,6 +155,7 @@ function Header({
   onNew,
   onClose,
 }: Readonly<{ begun: boolean; onNew: () => void; onClose: () => void }>) {
+  const t = useT().feedback;
   return (
     <header className="flex flex-none items-center gap-2 py-3 pr-2.5 pl-4">
       <KoboldHead size={22} />
@@ -166,13 +167,13 @@ function Header({
           onClick={onNew}
           className="px-1.5 text-[12px] text-muted-foreground hover:text-foreground hover:underline"
         >
-          Start over
+          {t.window.startOver}
         </button>
       )}
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Close"
+        aria-label={t.close}
         onClick={onClose}
       >
         <X aria-hidden className="size-4" />

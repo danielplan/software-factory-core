@@ -55,7 +55,7 @@ export function FromBoard({
           >
             #{idea.number}
           </a>{" "}
-          · an idea from the board's Backlog
+          · {t.explore.fromBacklog}
         </span>
         {problem && (
           <span role="alert" className="text-[12.5px] text-destructive">

@@ -10,7 +10,6 @@ import { Thinking } from "./chips";
 import { useOnBoard } from "./feedback-board";
 import { QuickReplies } from "./quick-replies";
 import { SimilarOffer, SimilarRow } from "./similar-posts";
-import { START } from "./starts";
 import type { Line, Thread } from "./tell-kobold";
 
 // The kobold's lines already typed in, so they do not type again.
@@ -18,25 +17,21 @@ const typed = new Set<number>();
 
 type KoboldSaid = Extract<Line, { from: "kobold" }>;
 
-// The lines that say the same every time.
-const PLAIN: Partial<Record<string, string>> = {
-  askError:
-    "I put the error in the post above. What were you doing when it happened?",
-  draft: "Here it is, above. Change anything, or send it.",
-  added: "Added it to the post.",
-  cleaned: "Done: your team's data is out.",
-};
+type Words = ReturnType<typeof useT>["feedback"];
 
-type Chat = ReturnType<typeof useT>["feedback"]["chat"];
+// The lines that say the same every time.
+const PLAIN = ["askError", "draft", "added", "cleaned"] as const;
+const isPlain = (say: string): say is (typeof PLAIN)[number] =>
+  PLAIN.some((one) => one === say);
 
 // The lines that depend on the thread or on a number.
 function saidWith(
   line: KoboldSaid,
   thread: Thread,
   thumbs: number,
-  t: Chat,
+  t: Words,
 ): string | null {
-  const n = String(line.number ?? 0);
+  const n = line.number ?? 0;
   switch (line.say) {
     case "askBug":
       // "Sorry" was said already, when the person chose "Something is
@@ -44,16 +39,16 @@ function saidWith(
       return thread.lines.some(
         (one) => one.from === "kobold" && one.say === "startBug",
       )
-        ? "What were you doing when it happened, and what did you expect?"
-        : t.askBug;
+        ? t.window.askBugAfterSorry
+        : t.chat.askBug;
     case "similar":
-      return `${String(thumbs)} teams ${thread.kind === "bug" ? "ran into this too" : "want this too"}:`;
+      return t.window.similar(thumbs, thread.kind === "bug");
     case "thumbed":
-      return `Your 👍 is on #${n}. I'll follow it above.`;
+      return t.window.thumbed(n);
     case "posted":
-      return `Sent as #${n}. I'll follow it above.`;
+      return t.window.posted(n);
     case "moved":
-      return t.moved[line.state ?? "sent"](line.number ?? 0);
+      return t.chat.moved[line.state ?? "sent"](n);
     default:
       return null;
   }
@@ -64,19 +59,20 @@ function wordsOf(
   line: KoboldSaid,
   thread: Thread,
   thumbs: number,
-  t: Chat,
+  t: Words,
 ): string {
-  const plain = PLAIN[line.say] ?? saidWith(line, thread, thumbs, t);
-  if (plain) return plain;
+  if (isPlain(line.say)) return t.window.lines[line.say];
+  const said = saidWith(line, thread, thumbs, t);
+  if (said) return said;
   switch (line.say) {
     case "startBug":
     case "startWish":
     case "startAsk":
-      return START[line.say].line;
+      return t.window.starts[line.say].line;
     case "invite":
     case "askWish":
     case "askAgain":
-      return t[line.say];
+      return t.chat[line.say];
     default:
       return "";
   }
@@ -122,7 +118,7 @@ function KoboldLine({
   onGrow: () => void;
   onDone: () => void;
 }>) {
-  const t = useT().feedback.chat;
+  const t = useT().feedback;
   const n = line.number ?? 0;
   const onBoard = useOnBoard().find((one) => one.number === n);
   const text = wordsOf(line, thread, onBoard?.thumbs ?? 0, t);
