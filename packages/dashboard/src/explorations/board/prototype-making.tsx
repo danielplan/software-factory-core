@@ -29,14 +29,14 @@ const SPARKS = [
   { x: "16px", y: "-4px", delay: "0.6s" },
 ];
 
-function clockOf(since: string | null, now: number): string | null {
+export function clockOf(since: string | null, now: number): string | null {
   if (!since) return null;
   const seconds = Math.max(0, Math.floor((now - Date.parse(since)) / 1000));
   const minutes = Math.floor(seconds / 60);
   return `${String(minutes)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-function useNow(): number {
+export function useNow(): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = setInterval(() => {

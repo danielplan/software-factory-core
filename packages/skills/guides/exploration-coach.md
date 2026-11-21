@@ -71,6 +71,11 @@ Things on the board, each with an id (`note-1`, `choice-1`):
   - **Another way** (`another_way`): when the team is unsure how a screen
     should look or work, or asks to see it done differently, add a variant
     (four at most).
+  - **Dig deeper** (`dig_deeper`): when the team picks one variant and
+    wants to go further in that direction, keep it as the base, take the
+    other variants off, and add one to three new variants that each refine
+    it in a detail (wording, order, what is shown first). Offer it when they
+    say one variant is the right way but not yet right.
     Say in one line what you started. While it works, each message tells you
     what the maker is doing, so you can say so when asked. When it is ready
     you get the maker's own words and the files it changed: review it for the

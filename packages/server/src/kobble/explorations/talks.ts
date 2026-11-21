@@ -24,6 +24,8 @@ import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
 import type { ChangeStart } from "./prototypes.ts";
 import { inLanguage } from "../../language.ts";
+import type { Way } from "./deeper.ts";
+import { renameExploration } from "./actions.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -59,11 +61,14 @@ type Makers = {
   // A prototype changed in its copy (now, or once its maker is done);
   // another way added as a variant (its letter).
   change: (id: string, prototype: string, change: string) => ChangeStart;
-  another: (
+  another: (id: string, prototype: string, way: Way) => string;
+  // The kept variant as the base, new ones refining it (their letters).
+  deeper: (
     id: string,
     prototype: string,
-    way: { name: string; difference: string },
-  ) => string;
+    keep: string,
+    ways: Way[],
+  ) => string[];
   // Hands the exploration off, as the Hand off button does.
   handOff: (id: string) => Promise<string>;
 };
@@ -233,19 +238,14 @@ export class ExplorationTalks {
         );
       },
       handOff: () => this.makers().handOff(id),
+      deeper: (prototype, keep, ways) =>
+        this.makers().deeper(id, prototype, keep, ways),
       another: (prototype, way) => {
         const variant = this.makers().another(id, prototype, way);
         return `Adding variant ${variant} to prototype ${prototype}; the team switches between its variants on the board.`;
       },
-      rename: ({ title, problem }) => {
-        const store = this.options.store();
-        const exploration = store.get("explorations", id);
-        if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
-        store.put("explorations", {
-          ...exploration,
-          title: title?.trim() || exploration.title,
-          problem: problem?.trim() || exploration.problem,
-        });
+      rename: (words) => {
+        renameExploration(this.options.store(), id, words);
         this.options.onChange();
         return this.look(id);
       },

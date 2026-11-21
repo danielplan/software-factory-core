@@ -2,7 +2,7 @@
 // to fit its card, so a page for a computer shows its real layout and can
 // be used there. Bigger opens it over the board at full size.
 
-import { Maximize2 } from "lucide-react";
+import { LoaderCircle, Maximize2 } from "lucide-react";
 
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useT } from "@/i18n/use-t";
+import { cn } from "@/lib/utils";
 
 const DESKTOP = { width: 1280, height: 800 };
 // The card's inside width (nodes.ts: 520, less its padding and border).
@@ -27,12 +28,17 @@ export const SCREEN = {
 export function LiveScreen({
   url,
   title,
-}: Readonly<{ url: string; title: string }>) {
+  making = false,
+}: Readonly<{ url: string; title: string; making?: boolean }>) {
   const t = useT();
   return (
     <Dialog>
       <div
-        className="nodrag nowheel group relative overflow-hidden rounded-[9px] shadow-[0_0_0_1px_var(--line-soft)]"
+        className={cn(
+          "nodrag nowheel group relative overflow-hidden rounded-[9px] shadow-[0_0_0_1px_var(--line-soft)]",
+          // Still being made: usable, with a ring and a note that it changes.
+          making && "shadow-[0_0_0_2px_var(--blue)]",
+        )}
         style={SCREEN}
       >
         <iframe
@@ -53,9 +59,17 @@ export function LiveScreen({
             <Maximize2 aria-hidden className="size-3" /> {t.explore.bigger}
           </button>
         </DialogTrigger>
+        {making && <StillMade />}
       </div>
       <DialogContent className="h-[90dvh] w-[94vw] max-w-[94vw] grid-rows-[auto_1fr] gap-2 p-3 sm:max-w-[94vw]">
-        <DialogTitle className="pr-8 text-[13px]">{title}</DialogTitle>
+        <DialogTitle className="flex items-center gap-3 pr-8 text-[13px]">
+          {title}
+          {making && (
+            <span className="text-xs font-normal text-blue">
+              {t.explore.board.stillMade}
+            </span>
+          )}
+        </DialogTitle>
         <iframe
           title={title}
           src={url}
@@ -63,5 +77,17 @@ export function LiveScreen({
         />
       </DialogContent>
     </Dialog>
+  );
+}
+
+// On a prototype still being made: a note at its foot that it is not done,
+// which lets the clicks through to the app.
+function StillMade() {
+  const t = useT().explore.board;
+  return (
+    <span className="pointer-events-none absolute inset-x-2 bottom-2 flex items-center gap-1.5 rounded-full bg-blue px-2.5 py-1 text-[11px] font-medium text-blue-foreground shadow-card">
+      <LoaderCircle aria-hidden className="size-3 flex-none animate-spin" />
+      <span className="truncate">{t.stillMade}</span>
+    </span>
   );
 }

@@ -7,7 +7,7 @@ import { setup } from "./areas/setup-area.ts";
 import { support } from "./areas/support.ts";
 import { connect } from "./areas/connect.ts";
 import { factory } from "./areas/factory.ts";
-import { explore } from "./areas/explore.ts";
+import { explore } from "./areas/explore-area.ts";
 import { personas } from "./areas/personas.ts";
 import { shell } from "./areas/shell.ts";
 import { home } from "./areas/home.ts";

@@ -17,6 +17,8 @@ import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
 import { Making, MakingLine } from "./prototype-making";
+import { Starting } from "./prototype-starting";
+import { States } from "./prototype-states";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 import { useT } from "@/i18n/use-t";
@@ -56,39 +58,39 @@ function Screen({
   at,
   title,
   start,
+  making = false,
 }: Readonly<{
   run: VersionRun | undefined;
   at: number;
   title: string;
   start: (() => void) | null;
+  making?: boolean;
 }>) {
   const t = useT();
   if (run?.state === "running" && run.url)
-    return <LiveScreen url={run.url} title={title} />;
+    return <LiveScreen url={run.url} title={title} making={making} />;
   const starting = run?.state === "starting";
   return (
     <div
       className="relative grid place-items-center rounded-[9px] bg-[#f3f4f7]"
       style={SCREEN}
     >
-      {(start ?? starting) && (
+      {run?.state === "starting" && <Starting run={run} />}
+      {start && !starting && (
         <Button
           size="pill"
           className="nodrag absolute z-10 gap-2 shadow-[0_8px_24px_-10px_rgb(20_24_36/0.45)]"
-          disabled={starting}
-          onClick={start ?? undefined}
+          onClick={start}
         >
-          {starting ? (
-            t.explore.starting
-          ) : (
-            <>
-              <Play aria-hidden className="size-4 fill-current" />{" "}
-              {t.explore.start}
-            </>
-          )}
+          <Play aria-hidden className="size-4 fill-current" /> {t.explore.start}
         </Button>
       )}
-      <div className="flex h-36 w-[300px] flex-col gap-2.5 rounded-lg bg-card p-3.5 opacity-60 shadow-[0_1px_4px_rgb(0_0_0/0.1)]">
+      <div
+        className={cn(
+          "flex h-36 w-[300px] flex-col gap-2.5 rounded-lg bg-card p-3.5 opacity-60 shadow-[0_1px_4px_rgb(0_0_0/0.1)]",
+          starting && "motion-safe:animate-pulse",
+        )}
+      >
         <div
           className="h-[6px] w-1/2 rounded-[3px]"
           style={{ background: TINTS[at % TINTS.length] }}
@@ -105,11 +107,14 @@ type Made = Extract<ThingNode["data"]["thing"], { kind: "prototype" }>;
 
 // Where the prototype shows: on the page the change is on, with the variant
 // picked (?variant=), chosen outside the app.
-function shownUrl(url: string, opens: string | undefined, variant: string) {
+function shownUrl(url: string, opens: string | undefined, picked: Picked) {
   const address = new URL(opens ?? "", url);
-  if (variant) address.searchParams.set("variant", variant);
+  if (picked.variant) address.searchParams.set("variant", picked.variant);
+  if (picked.state) address.searchParams.set("state", picked.state);
   return address.toString();
 }
+
+type Picked = { variant: string; state: string };
 
 // A prototype's variants (none when it is one way only) and the one shown:
 // the one picked here, at once, else the one the board keeps.
@@ -141,7 +146,13 @@ function Shown({
   return (
     <>
       {run?.making && <MakingLine run={run} />}
-      <Screen run={shown} at={at} title={title} start={start} />
+      <Screen
+        run={shown}
+        at={at}
+        title={title}
+        start={start}
+        making={run?.making === true}
+      />
     </>
   );
 }
@@ -149,9 +160,9 @@ function Shown({
 function shownOf(
   run: VersionRun | undefined,
   opens: string | undefined,
-  variant: string,
+  picked: Picked,
 ): VersionRun | undefined {
-  return run?.url ? { ...run, url: shownUrl(run.url, opens, variant) } : run;
+  return run?.url ? { ...run, url: shownUrl(run.url, opens, picked) } : run;
 }
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
@@ -159,11 +170,12 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   const [picked, pick] = useState<string | null>(null);
+  const [state, setState] = useState("");
   if (thing.kind !== "prototype") return null;
   const { variants, variant } = variantsOf(thing, picked);
   const run = page.runs.find((one) => one.version === thing.key);
   const open = ["waiting", "exploring"].includes(page.exploration.status);
-  const shownRun = shownOf(run, thing.opens, variant);
+  const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);
   return (
     <Frame
@@ -182,6 +194,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
           }}
         />
       )}
+      <States states={thing.states ?? []} shown={state} onPick={setState} />
       <Shown
         run={run}
         shown={shownRun}
