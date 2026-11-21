@@ -14,7 +14,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
@@ -31,7 +31,6 @@ import {
   useMine,
   useSignedIn,
 } from "./feedback-board";
-import { StatePill } from "./feedback-row";
 import {
   back,
   editDraft,
@@ -199,7 +198,7 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
                 onClick={() => {
                   changePart(part, { removed: !part.removed });
                 }}
-                className="mt-px flex-none opacity-0 group-hover:opacity-100 [&_svg]:size-3"
+                className="mt-px flex-none opacity-40 hover:opacity-100 group-hover:opacity-70 [&_svg]:size-3"
               >
                 {part.removed ? <RotateCcw aria-hidden /> : <X aria-hidden />}
               </button>
@@ -258,7 +257,6 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
       <span className="flex items-center gap-2 text-[12.5px] [&_svg]:size-3 [&_svg]:flex-none">
         <span className="text-faint">#{post.number}</span>
         <span className="flex-1 truncate font-medium">{post.title}</span>
-        <StatePill state={post.state} />
         <ExternalLink aria-hidden className="text-faint" />
       </span>
       <ol className="grid grid-cols-4 gap-1 text-[10.5px]">
@@ -294,42 +292,64 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
 const typed = new Set<number>();
 
 export function Feed({ thread }: Readonly<{ thread: Thread }>) {
-  const end = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const inside = useRef<HTMLDivElement>(null);
+  // Kept at the newest line, unless the person scrolled up to read.
+  const pinned = useRef(true);
   const [, setDone] = useState(0);
-  const scroll = () => {
-    end.current?.scrollIntoView({ block: "end" });
-  };
-  useEffect(scroll, [thread.lines.length, thread.thinking]);
+  const scroll = useCallback(() => {
+    const el = box.current;
+    if (el && pinned.current) el.scrollTop = el.scrollHeight;
+  }, []);
+  // Whatever grows (a line typing in, quick replies, the offer, the card
+  // above taking room), the newest stays in view.
+  useEffect(() => {
+    const observer = new ResizeObserver(scroll);
+    if (box.current) observer.observe(box.current);
+    if (inside.current) observer.observe(inside.current);
+    return () => {
+      observer.disconnect();
+    };
+  }, [scroll]);
+  useEffect(scroll, [thread.lines.length, thread.thinking, scroll]);
   const last = thread.lines.at(-1);
   const lastTyped = last?.from === "kobold" && typed.has(last.id);
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-auto px-4 pt-3 pb-2 text-[13px] leading-relaxed">
+    <div
+      ref={box}
+      onScroll={(event) => {
+        const el = event.currentTarget;
+        pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+      }}
+      className="flex min-h-0 flex-1 flex-col overflow-auto px-4 pt-3 pb-2 text-[13px] leading-relaxed [mask-image:linear-gradient(to_bottom,transparent,black_14px)]"
+    >
       <div className="flex-1" />
-      {thread.lines.map((line) =>
-        line.from === "you" ? (
-          <div
-            key={line.id}
-            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-surface px-3 py-1.5 motion-safe:animate-rise"
-          >
-            {line.text}
-          </div>
-        ) : (
-          <KoboldLine
-            key={line.id}
-            line={line}
-            thread={thread}
-            onGrow={scroll}
-            onDone={() => {
-              setDone((n) => n + 1);
-            }}
-          />
-        ),
-      )}
-      {thread.thinking && <Thinking />}
-      {!thread.thinking && lastTyped && (
-        <QuickReplies thread={thread} say={last.say} />
-      )}
-      <div ref={end} />
+      <div ref={inside} className="flex flex-col gap-2.5">
+        {thread.lines.map((line) =>
+          line.from === "you" ? (
+            <div
+              key={line.id}
+              className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-surface px-3 py-1.5 motion-safe:animate-rise"
+            >
+              {line.text}
+            </div>
+          ) : (
+            <KoboldLine
+              key={line.id}
+              line={line}
+              thread={thread}
+              onGrow={scroll}
+              onDone={() => {
+                setDone((n) => n + 1);
+              }}
+            />
+          ),
+        )}
+        {thread.thinking && <Thinking />}
+        {!thread.thinking && lastTyped && (
+          <QuickReplies thread={thread} say={last.say} />
+        )}
+      </div>
     </div>
   );
 }
@@ -367,6 +387,14 @@ function KoboldLine({
   const onBoard = ON_BOARD.find((one) => one.number === n);
   const text = (() => {
     switch (line.say) {
+      case "askBug":
+        // "Sorry" was said already, when the person chose "Something is
+        // wrong".
+        return thread.lines.some(
+          (one) => one.from === "kobold" && one.say === "startBug",
+        )
+          ? "What were you doing when it happened, and what did you expect?"
+          : t.askBug;
       case "askError":
         return "I put the error in the post above. What were you doing when it happened?";
       case "similar":
@@ -420,7 +448,11 @@ function KoboldLine({
       {line.say === "similar" &&
         onBoard &&
         shown >= text.length &&
-        thread.step === "similar" && <SimilarOffer post={onBoard} />}
+        (thread.step === "similar" ? (
+          <SimilarOffer post={onBoard} />
+        ) : (
+          <SimilarRow post={onBoard} thumbed={thread.follows === n} />
+        ))}
     </div>
   );
 }
@@ -440,10 +472,17 @@ function SimilarOffer({ post }: Readonly<{ post: (typeof ON_BOARD)[number] }>) {
   );
 }
 
+// A post on the board, with its 👍: a button while it is offered, after
+// that only the count (with the person's own 👍, when given).
 export function SimilarRow({
   post,
   onThumb,
-}: Readonly<{ post: (typeof ON_BOARD)[number]; onThumb: () => void }>) {
+  thumbed = false,
+}: Readonly<{
+  post: (typeof ON_BOARD)[number];
+  onThumb?: () => void;
+  thumbed?: boolean;
+}>) {
   const signedIn = useSignedIn();
   return (
     <div className="flex items-center gap-2 rounded-xl border border-line-soft bg-card px-3 py-2 text-[12.5px] [&_svg]:size-3.5 [&_svg]:flex-none">
@@ -456,17 +495,31 @@ export function SimilarRow({
         <span className="text-faint">#{post.number}</span>
         <span className="truncate">{post.title}</span>
       </a>
-      <button
-        type="button"
-        onClick={() => {
-          if (!signedIn) signIn();
-          onThumb();
-        }}
-        className="flex flex-none items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11.5px] text-foreground-2 transition-colors hover:border-[#8b8ff0] hover:bg-[#8b8ff0]/10"
-      >
-        <ThumbsUp aria-hidden />
-        {post.thumbs}
-      </button>
+      {onThumb ? (
+        <button
+          type="button"
+          onClick={() => {
+            if (!signedIn) signIn();
+            onThumb();
+          }}
+          className="flex flex-none items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11.5px] text-foreground-2 transition-colors hover:border-[#8b8ff0] hover:bg-[#8b8ff0]/10"
+        >
+          <ThumbsUp aria-hidden />
+          {post.thumbs}
+        </button>
+      ) : (
+        <span
+          className={cn(
+            "flex flex-none items-center gap-1 rounded-full border px-2 py-0.5 text-[11.5px]",
+            thumbed
+              ? "border-[#c7cbfb] bg-[#8b8ff0]/10 text-foreground-2"
+              : "border-line-soft text-muted-foreground",
+          )}
+        >
+          <ThumbsUp aria-hidden />
+          {post.thumbs + (thumbed ? 1 : 0)}
+        </span>
+      )}
     </div>
   );
 }

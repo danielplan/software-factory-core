@@ -211,8 +211,16 @@ export function askMode(page: string, greet = true) {
 export function thumbFor(number: number) {
   const there = ON_BOARD.find((one) => one.number === number);
   if (!there) return;
-  if (!thread || thread.step === "sent") thread = empty(thread?.page ?? "");
-  thread = { ...thread, kind: there.kind, similar: number };
+  if (!thread || ["sent", "choose", "ask"].includes(thread.step))
+    thread = empty(thread?.page ?? "");
+  // What the 👍 went to, said as the person's own line.
+  const liked = you(`👍 #${String(number)} ${there.title}`);
+  thread = {
+    ...thread,
+    kind: there.kind,
+    similar: number,
+    lines: [...thread.lines, liked],
+  };
   thumb();
 }
 
@@ -309,7 +317,15 @@ export function say(text: string, page: string, errors: CaughtError[]) {
 // as the reply, kept as the answer: "Skip" keeps nothing).
 export function reply(shown: string, text = shown) {
   if (!thread) return;
-  const answers = text ? [...thread.answers, text] : thread.answers;
+  // Kept with what it answers, so the post reads on its own.
+  const label =
+    thread.step === "again"
+      ? "How often"
+      : thread.kind === "bug"
+        ? "When it happened"
+        : null;
+  const kept = label ? `${label}: ${lowerFirst(text)}` : text;
+  const answers = text ? [...thread.answers, kept] : thread.answers;
   const lines =
     thread.lines.at(-1)?.from === "you"
       ? thread.lines
@@ -343,22 +359,61 @@ function findSimilar(text: string, kind: Kind) {
 
 // The posts on the board that sound like the text, the closest first.
 export function findSimilarPosts(text: string, kind: Kind | null, most = 2) {
-  const words = text
-    .toLowerCase()
-    .split(/\W+/)
-    .filter((word) => word.length > 3);
-  const score = (one: (typeof ON_BOARD)[number]) =>
-    words.filter((word) => one.title.toLowerCase().includes(word)).length;
+  const words = [...new Set(wordsOf(text))];
+  // Two shared words, when there are two to share ("board" alone is not
+  // "export the board").
+  const needed = Math.min(2, words.length);
+  const score = (one: (typeof ON_BOARD)[number]) => {
+    const title = new Set(wordsOf(one.title));
+    return words.filter((word) => title.has(word)).length;
+  };
   return ON_BOARD.filter(
-    (one) => (kind == null || one.kind === kind) && score(one) > 0,
+    (one) =>
+      (kind == null || one.kind === kind) && needed > 0 && score(one) >= needed,
   )
     .sort((a, b) => score(b) - score(a) || b.thumbs - a.thumbs)
     .slice(0, most);
 }
 
+// The words that say something, roughly stemmed ("stopped", "stops":
+// "stop").
+const COMMON = new Set([
+  "about",
+  "could",
+  "every",
+  "happen",
+  "happened",
+  "kobble",
+  "often",
+  "only",
+  "please",
+  "should",
+  "that",
+  "there",
+  "this",
+  "time",
+  "when",
+  "wish",
+  "with",
+  "would",
+]);
+function wordsOf(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length > 3 && !COMMON.has(word))
+    .map((word) =>
+      word
+        .replace(/(ing|ed|es|s)$/, "")
+        .replace(/([b-df-hj-np-tv-z])\1$/, "$1"),
+    );
+}
+
 // The person adds a 👍 to the similar post instead of a new one.
 export function thumb() {
   if (thread?.similar == null) return;
+  // An error that went along is reported with it.
+  if (thread.errors.length > 0) putAway();
   addThumb(thread.similar);
   const number = thread.similar;
   const state = ON_BOARD.find((one) => one.number === number)?.state ?? null;
@@ -379,9 +434,15 @@ function draftOf(at: Thread): Draft {
     title: titleOf(said, kind),
     // An error goes along below, where its team data can be taken out.
     body: [
-      at.fromError ? "The factory hit the error below." : sentence(said),
+      at.fromError
+        ? "The factory hit the error below."
+        : answers.length > 0 && same(said, titleOf(said, kind))
+          ? null
+          : sentence(said),
       ...answers.map(sentence),
-    ].join("\n\n"),
+    ]
+      .filter((one) => one != null)
+      .join("\n\n"),
     parts: [
       {
         id: "version",
@@ -409,6 +470,11 @@ export function editDraft(edit: Partial<Draft>) {
 export function sendDraft() {
   if (!thread?.draft) return;
   const posted = sendToBoard(thread.kind, thread.draft.title.trim());
+  // The errors it took along are reported: the notice goes.
+  if (
+    thread.draft.parts.some((part) => part.label === "error" && !part.removed)
+  )
+    putAway();
   change({ step: "sent", follows: posted.number, followsState: "sent" });
   answer([kobold("posted", { number: posted.number })], {}, 500);
   // PROTOTYPE: the makers plan it, then do it (made up, quickly).
@@ -450,6 +516,14 @@ function titleOf(said: string, kind: Kind): string {
   title = title.charAt(0).toUpperCase() + title.slice(1);
   return title.length > 80 ? `${title.slice(0, 77)}…` : title;
 }
+
+// "Not sure" after "How often:" reads "not sure"; "I clicked" stays "I".
+const lowerFirst = (text: string) =>
+  /^I\b/.test(text) ? text : text.charAt(0).toLowerCase() + text.slice(1);
+
+const same = (a: string, b: string) =>
+  a.toLowerCase().replaceAll(/[^\p{L}\p{N}]+/gu, "") ===
+  b.toLowerCase().replaceAll(/[^\p{L}\p{N}]+/gu, "");
 
 const sentence = (text: string) => {
   const trimmed = text.trim();

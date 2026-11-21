@@ -182,7 +182,9 @@ export function send(kind: Kind, title: string): Mine {
 export function addThumb(number: number): void {
   const there = ON_BOARD.find((one) => one.number === number);
   if (!there || mine.some((one) => one.number === number)) return;
-  mine = [{ ...there, sent: 0 }, ...mine];
+  // Followed from now: it moves on after a while, not the moment it is
+  // given a 👍.
+  mine = [{ ...there, sent: Date.now() }, ...mine];
   localStorage.setItem(MINE_KEY, JSON.stringify(mine));
   tell();
 }

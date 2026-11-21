@@ -13,7 +13,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
@@ -119,6 +119,30 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
     if (followed) moved(followed.number, followed.state);
   }, [followed]);
   const working = support?.writing != null;
+  // The opening is as tall as what it shows (more when posts slide in
+  // while typing); a conversation gets the room.
+  const fits = open && thread?.step === "choose";
+  const inner = useRef<HTMLDivElement>(null);
+  const [natural, setNatural] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = inner.current;
+    if (!fits || !el) return;
+    const measure = () => {
+      setNatural(el.offsetHeight + 2);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, [fits]);
+  const roomy = Math.min(window.innerHeight * 0.8, 620);
+  const height = !open
+    ? 40
+    : fits && natural
+      ? Math.min(natural, roomy)
+      : roomy;
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
       <section
@@ -126,17 +150,18 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
         className={cn(
           "pointer-events-auto flex max-w-full flex-col overflow-hidden border border-border bg-card/95 backdrop-blur transition-[width,height,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.9,0.3,1)]",
           open
-            ? cn(
-                "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]",
-                // The opening is small; a conversation gets room.
-                thread?.step === "choose" ? "h-[372px]" : "h-[min(80vh,620px)]",
-              )
-            : "h-10 w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
+            ? "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]"
+            : "w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
+        style={{ height }}
       >
         {open && thread ? (
           <div
-            className="flex min-h-0 flex-1 flex-col motion-safe:animate-rise"
+            ref={inner}
+            className={cn(
+              "flex min-h-0 flex-col motion-safe:animate-rise",
+              fits ? "flex-none" : "flex-1",
+            )}
             style={{ animationDelay: "120ms" }}
           >
             <Header
@@ -279,7 +304,7 @@ function Opening({ page, thread }: Readonly<{ page: Page; thread: Thread }>) {
         },
       ];
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-end gap-4 overflow-auto px-4 pb-3">
+    <div className="flex flex-none flex-col gap-4 px-4 pt-2 pb-3">
       <p className="text-[14px] leading-snug motion-safe:animate-rise">
         How can I help?
       </p>
