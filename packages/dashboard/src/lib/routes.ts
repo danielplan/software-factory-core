@@ -34,6 +34,7 @@ const MOVED = new Map([
   ["workshop", "system"],
   ["add-ons", "settings/add-ons"],
   ["today", "signals"],
+  ["feedback", "signals"],
   ["customers", "personas"],
   ["products", "system"],
   ["understand", "personas"],

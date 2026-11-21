@@ -8,6 +8,7 @@ import {
   Bug,
   ChevronRight,
   FlaskConical,
+  MessageSquareHeart,
   SquarePlus,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -45,6 +46,10 @@ const SOURCES: Record<SignalRow["source"], { icon: typeof Bug; tone: string }> =
     usage: { icon: Activity, tone: "bg-source-usage/10 text-source-usage" },
     errors: { icon: Bug, tone: "bg-source-errors/10 text-source-errors" },
     test: { icon: FlaskConical, tone: "bg-source-test/10 text-source-test" },
+    feedback: {
+      icon: MessageSquareHeart,
+      tone: "bg-[#8b8ff0]/12 text-[#6366d8]",
+    },
   };
 
 export function SourceIcon({

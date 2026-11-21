@@ -54,7 +54,7 @@ function ConnectLater({
 }: Readonly<{ app: string; more: boolean; onConnect: () => void }>) {
   const t = useT().signals.before;
   return (
-    <p className="mx-1 text-[12.5px] text-muted-foreground">
+    <p className="mx-1 mt-2 text-[12.5px] text-muted-foreground">
       {more && (
         <>
           <a href={personaHash()} className="font-semibold text-blue">

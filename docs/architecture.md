@@ -273,6 +273,43 @@ from the factory's own copies (`<project>-factory-copies/` and
 the builder leaves the card to the person working there, with the note
 `by-hand`.
 
+## The feedback board
+
+Every factory can send a wish or a bug to the people who make the core, with
+nothing to host. They land on a public GitHub repository just for feedback,
+`<owner>/software-factory-feedback`, beside the core's own (the owner is the
+one in `RELEASE_SOURCE`); the person's code stays private. Sending uses their
+own GitHub sign-in, the GitHub CLI's, as the factory's board does.
+
+The dashboard side is Sprocket's window (`packages/dashboard/src/feedback/`):
+"Ask Sprocket anything", "Send feedback" in the sidebar and "Report this
+error" all open the same window. A wish or something wrong is told in words;
+the kobold (a short script in the browser, not a model) asks one or two
+questions, offers a 👍 on a similar post, and writes the post live in a card:
+title, what happened, and what goes along (version, page, the errors the
+factory caught). What looks like the team's data in it (repositories, quoted
+titles, names) is marked, and the person can take it out before one Send.
+Errors are caught in the page (`factory-errors.ts`); nothing leaves the
+computer before Send.
+
+The server side is `packages/server/src/feedback/`: `GET /api/feedback` (the
+board's posts, who is signed in, what this person sent and where each stands),
+`POST /api/feedback/send` and `POST /api/feedback/thumb`. A post is an issue;
+its kind is the label `bug` or `wish`, and where it stands comes from the
+issue: no label yet is **sent**, the label `seen` or `planned`, and a closed
+issue is **done**. What a person sent is kept in
+`factory/settings/feedback-sent.json` (never in git).
+
+In the factory that reads the board (the makers' own: `FACTORY_FEEDBACK_READS=yes`
+in `factory/team.env`), every open post that is not the person's own arrives
+as a signal with the source `feedback` (once, every ten minutes and at
+start): `sourceId` is `feedback-<issue number>`, `customer` the poster's GitHub
+login. The kobold matches each new one to the persona it fits best, with a
+short reason (`why`), or leaves it with none; `POST /api/feedback/persona`
+changes or removes the match. On the Signals page, feedback is part of the one
+list, with a Feedback filter, a "Feedback board" source label and the state of
+the post.
+
 ## Extension points
 
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of

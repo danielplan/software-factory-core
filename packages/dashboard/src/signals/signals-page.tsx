@@ -16,9 +16,17 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
+import { FeedbackExtras } from "./feedback-extras";
+import {
+  Filter,
+  SentDetail,
+  type SentSignal,
+  useSentSignals,
+} from "./feedback-signals";
+import { isSent, type Listed, signalHash, SignalList } from "./signal-list";
 import { AllQuiet } from "./empty";
 import { BeforeLaunch } from "./before-launch";
-import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
+import { CARD, FaceOf, Head, Toast, TypeChip } from "./bits";
 import { StepOf } from "./step";
 import { SyncNow } from "./sync-now";
 import { useSignals } from "./use-signals";
@@ -34,9 +42,6 @@ import {
   whoOf,
 } from "./view";
 import { useT } from "@/i18n/use-t";
-
-const signalHash = (id: string | null) =>
-  id ? `#signals/${encodeURIComponent(id)}` : "#signals";
 
 export function SignalsPage({
   open,
@@ -96,17 +101,28 @@ function Shown({
   now: Date;
   onSaid: (said: string) => void;
 }>) {
+  const sent = useSentSignals();
+  const [only, setOnly] = useState(false);
+  const feedback = data.signals.filter((one) => one.source === "feedback");
+  const count = feedback.length + sent.length;
   const before = !data.sync.connected && (
     <BeforeLaunch
       app={app}
       missions={data.missions}
-      empty={data.signals.length === 0}
+      empty={data.signals.length + sent.length === 0}
     />
   );
-  if (data.signals.length > 0)
+  if (data.signals.length + sent.length > 0)
     return (
       <div className="grid gap-4">
-        <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+        {count > 0 && <Filter feedback={only} count={count} onPick={setOnly} />}
+        <Board
+          signals={only ? feedback : data.signals}
+          sent={sent}
+          open={open}
+          now={now}
+          onSaid={onSaid}
+        />
         {before}
       </div>
     );
@@ -117,22 +133,29 @@ function Shown({
 // them).
 function Board({
   signals,
+  sent,
   open,
   now,
   onSaid,
 }: Readonly<{
   signals: SignalRow[];
+  sent: SentSignal[];
   open: string | null;
   now: Date;
   onSaid: (said: string) => void;
 }>) {
   const t = useT();
-  const shown = shownOf(signals, open);
+  // One list, newest first: the signals and what this person sent, mixed by
+  // time.
+  const all: Listed[] = [...sent, ...signals].sort(
+    (a, b) => Date.parse(b.at) - Date.parse(a.at),
+  );
+  const shown = shownOf(all, open);
   const picked = open !== null && shown?.id === open;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[430px_minmax(0,1fr)]">
       <div className={cn(picked && "max-lg:hidden")}>
-        <SignalList signals={signals} shown={shown?.id ?? null} />
+        <SignalList all={all} shown={shown?.id ?? null} />
       </div>
       <div className={cn("grid gap-3.5", !picked && "max-lg:hidden")}>
         <a
@@ -142,76 +165,32 @@ function Board({
           <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
           {t.shell.pages.signals}
         </a>
-        {shown ? (
+        {shown && isSent(shown) && <SentDetail one={shown} />}
+        {shown && !isSent(shown) ? (
           <SignalDetail
             key={shown.id}
             signal={shown}
             now={now}
             onDone={(text) => {
-              window.location.hash = signalHash(nextAfter(signals, shown.id));
+              window.location.hash = signalHash(nextAfter(all, shown.id));
               onSaid(text);
             }}
             onFailed={onSaid}
           />
         ) : (
-          <p
-            className={cn(
-              CARD,
-              "p-[50px] text-center text-[13px] text-muted-foreground",
-            )}
-          >
-            {t.signals.noneNew}
-          </p>
+          !shown && (
+            <p
+              className={cn(
+                CARD,
+                "p-[50px] text-center text-[13px] text-muted-foreground",
+              )}
+            >
+              {t.signals.noneNew}
+            </p>
+          )
         )}
       </div>
     </div>
-  );
-}
-
-function SignalList({
-  signals,
-  shown,
-}: Readonly<{ signals: SignalRow[]; shown: string | null }>) {
-  const t = useT();
-  return (
-    <nav aria-label={t.signals.newSignals} className={cn(CARD, "grid")}>
-      {signals.length === 0 && (
-        <p className="p-[50px] text-center text-[13px] text-muted-foreground">
-          {t.signals.noneNew}
-        </p>
-      )}
-      {signals.map((signal) => (
-        <a
-          key={signal.id}
-          href={signalHash(signal.id)}
-          aria-current={signal.id === shown ? "true" : undefined}
-          className={cn(
-            "flex items-start gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface",
-            signal.id === shown && "bg-picked hover:bg-picked",
-          )}
-        >
-          {signal.personaFace ? (
-            <FaceOf face={signal.personaFace} size={34} />
-          ) : (
-            <SourceIcon source={signal.source} />
-          )}
-          <span className="grid min-w-0 flex-1">
-            <span className="flex items-center gap-2">
-              <span className="truncate font-semibold">
-                {whoOf(signal, t.words)}
-              </span>
-              <span className="ml-auto">
-                <TypeChip type={signal.type} />
-              </span>
-            </span>
-            <span className="mt-0.5 line-clamp-2 text-foreground-2">
-              <Markdown text={signal.text} inline />
-            </span>
-            <StepOf signal={signal} />
-          </span>
-        </a>
-      ))}
-    </nav>
   );
 }
 
@@ -276,6 +255,7 @@ function SignalDetail({
         <Markdown text={signal.text} />
         <StepOf signal={signal} link />
       </div>
+      {signal.source === "feedback" && <FeedbackExtras signal={signal} />}
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">
         {button("fix", t.signals.fix, primary === "fix")}

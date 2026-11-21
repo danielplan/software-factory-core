@@ -30,8 +30,15 @@ export const SIGNAL_TYPES = [
 // Where a signal came from: the app's own "Report a bug" and "Suggest
 // something" (app), how people use it, such as the assistant hitting
 // something it cannot do (usage), machine errors and failed automations
-// (errors), or a persona test (test).
-export const SIGNAL_SOURCES = ["app", "usage", "errors", "test"] as const;
+// (errors), a persona test (test), or a post on the public feedback board
+// (feedback).
+export const SIGNAL_SOURCES = [
+  "app",
+  "usage",
+  "errors",
+  "test",
+  "feedback",
+] as const;
 export const SIGNAL_STATUSES = [
   "new",
   "explored",
@@ -72,6 +79,8 @@ export const kobbleSignalSchema = z.strictObject({
   // The exploration or factory item it went to.
   to: text.nullable(),
   already: alreadySchema.nullable(),
+  // Why the kobold matched the persona (a signal from the feedback board).
+  why: text.optional(),
 });
 
 export const EXPLORATION_STATUSES = [
