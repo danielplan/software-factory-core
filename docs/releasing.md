@@ -19,8 +19,7 @@ patches.
   setup. The changelog says what to do.
 - **1.0.0**: when a company runs its factory without us helping.
 
-A batch of features is not a reason for a minor. The changelog keeps the
-overview with its plain headings, not with the number.
+A batch of features is not a reason for a minor.
 
 ## Making a release
 
@@ -28,10 +27,8 @@ overview with its plain headings, not with the number.
    `packages/server/src/upgrade/migrations.ts`, for this version.
 2. Raise `CORE_VERSION` in `packages/core/src/version.ts`, by the rule in
    [Which number to raise](#which-number-to-raise).
-3. In `CHANGELOG.md`, turn "Unreleased" into the version's section, with
-   the date and how to upgrade.
-4. `npm run verify`, commit, and tag the commit on main `v<version>`.
-5. `npm run release -- --push`: builds the core as one package (compiled to
+3. `npm run verify`, commit, and tag the commit on main `v<version>`.
+4. `npm run release -- --push`: builds the core as one package (compiled to
    JavaScript, its own packages bundled in it, the dashboard built), commits
    it to the `release` branch and tags it `release-<version>`, then pushes
    the branch and the tag. Without `--push` it stops before pushing.

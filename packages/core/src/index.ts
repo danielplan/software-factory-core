@@ -1,6 +1,7 @@
 // The core's published API: what extensions, kits and a company's factory
 // may use. Anything not exported here is the core's own and may change in
-// any release; a change to what is here goes in CHANGELOG.md.
+// any release; a change to what is here is said in its commit message, with
+// a migration when a company has to act.
 
 export {
   COMPANY_FILE,

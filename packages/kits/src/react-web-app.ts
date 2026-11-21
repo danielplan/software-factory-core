@@ -12,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { rulesOf } from "./libraries.ts";
 import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 5173;
@@ -24,10 +25,7 @@ export const reactWebApp = defineKit({
   about: "A web app made with React and Vite.",
   kind: "react-web-app",
   commands: { start: "npm run dev" },
-  rules: [
-    "rules/react-web-app/conventions.md",
-    "rules/react-web-app/lessons.md",
-  ],
+  rules: rulesOf("react-web-app"),
   port: PORT,
   detect: (folder) => {
     const file = readPackageJson(folder);

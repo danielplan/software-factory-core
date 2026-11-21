@@ -68,6 +68,7 @@ const en = {
     clashes: "Clashes with main",
     resolve: "Resolve",
     asked: "Back in To do: the builder resolves it",
+    resolving: "The builder is resolving the clash with main",
   },
   remove: {
     ask: (number: number) =>
@@ -159,6 +160,7 @@ export const factory = area(
       clashes: "In conflitto con main",
       resolve: "Risolvi",
       asked: "Di nuovo in Da fare: il costruttore lo risolve",
+      resolving: "Il costruttore sta risolvendo il conflitto con main",
     },
     remove: {
       ask: (number) =>
@@ -247,6 +249,7 @@ export const factory = area(
       clashes: "Konflikt mit main",
       resolve: "Lösen",
       asked: "Zurück in Zu erledigen: der Baumeister löst ihn",
+      resolving: "Der Baumeister löst den Konflikt mit main",
     },
     remove: {
       ask: (number) =>

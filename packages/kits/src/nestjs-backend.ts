@@ -12,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { rulesOf } from "./libraries.ts";
 import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 3000;
@@ -22,10 +23,7 @@ export const nestjsBackend = defineKit({
   about: "A server made with NestJS.",
   kind: "nestjs-backend",
   commands: { start: "npm start" },
-  rules: [
-    "rules/nestjs-backend/conventions.md",
-    "rules/nestjs-backend/lessons.md",
-  ],
+  rules: rulesOf("nestjs-backend"),
   port: PORT,
   detect: (folder) => {
     const file = readPackageJson(folder);

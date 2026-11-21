@@ -20,12 +20,22 @@ here reach every company with its next upgrade, so they are made with care.
   leaves to the owner, said in a line. How a release is made and reaches the
   projects: [releasing the core](docs/releasing.md).
 - **Every change to what a company sees or relies on** (an extension point, a
-  product description field, a file a company writes, a command) gets a line in
-  `CHANGELOG.md` under "Unreleased", and says what a company has to do, if
-  anything. Removing something is announced one release before.
+  product description field, a file a company writes, a command) says so in
+  its commit message, with what a company has to do, if anything; what a
+  company would have to do by hand comes as a migration, or as a line the
+  upgrade leaves to the owner. Removing something is announced one release
+  before. There is no changelog file: it made every merge clash.
 - **Standards before home-made code**: what the platform provides first, then a
   widely used, maintained library; write your own only when neither fits, and
   say why.
+- **Kobble is built with its own kits.** The page (`packages/dashboard`) is a
+  React web app: it follows `packages/kits/rules/react-web-app/` like any
+  product a factory makes, and uses the library the kit's libraries table
+  names for each job. A job the table lacks gets a row, with why, in the kit
+  when other products would need it too, otherwise in the page's
+  `BLUEPRINT.md` (`## Libraries`); `packages/kits/test/libraries.test.ts`
+  fails on a package no table names. What still differs from the kit is
+  listed in the blueprint and only shrinks.
 - Simple, clear and consistent language in code, comments and docs. The people
   who use a factory are not developers, but are curious and capable.
 - **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [the design system's languages](docs/reference/design-system.md#languages). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.

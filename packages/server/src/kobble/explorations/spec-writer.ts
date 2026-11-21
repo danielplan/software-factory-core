@@ -1,7 +1,8 @@
-// The spec written at hand-off: Claude Code, reading the project, writes the
-// card the builder builds from, in the shape of the plan skill's agreed plan
-// (guide handoff-spec.md), from the exploration's conversation, its board,
-// the agreed prototype and what its branch changes. The fixed summary
+// The spec written at hand-off: Claude Code writes the short card the
+// builder builds from (guide handoff-spec.md): what was planned, at the
+// level it was planned, from the exploration's conversation, its board, the
+// agreed prototype and the files its branch changed. It does not read the
+// code: the builder does, when it builds. The fixed summary
 // (handoffText) is what it starts from, and what the card gets when it
 // cannot write.
 
@@ -17,10 +18,7 @@ import { guidesFolder } from "@software-factory/skills";
 import { boardText } from "./board-things.ts";
 import { productPicture } from "./product-picture.ts";
 
-// What the branch changes, at most this much of it: the rest is read in the
-// code.
-const MOST_DIFF = 60_000;
-const TIME_LIMIT_MS = 10 * 60_000;
+const TIME_LIMIT_MS = 5 * 60_000;
 // Shorter than this is not a spec.
 const LEAST_SPEC = 400;
 
@@ -62,7 +60,7 @@ export function specWriter(options: {
       "",
       ...(branch
         ? [
-            `## What the prototype's branch \`${branch}\` changes`,
+            `## The files the prototype's branch \`${branch}\` changes`,
             changesOf(options.project, branch),
           ]
         : [
@@ -77,7 +75,7 @@ export function specWriter(options: {
       cwd: options.project,
       prompt,
       readOnly: true,
-      tools: ["Read", "Grep", "Glob"],
+      tools: [],
       deny: ["Read(**/.env*)"],
       instructions: readFileSync(join(guidesFolder, "handoff-spec.md"), "utf8"),
       session: { id: randomUUID(), resume: false },
@@ -89,8 +87,7 @@ export function specWriter(options: {
   };
 }
 
-// The files the branch changed and the change itself (cut short), since
-// where it left the project's branch.
+// The files the branch changed, since where it left the project's branch.
 function changesOf(project: string, branch: string): string {
   const git = (...args: string[]) =>
     execFileSync(GIT, args, {
@@ -99,13 +96,7 @@ function changesOf(project: string, branch: string): string {
       maxBuffer: 64 * 1024 * 1024,
     });
   try {
-    const files = git("diff", "--stat", `HEAD...${branch}`);
-    const change = git("diff", `HEAD...${branch}`);
-    const cut =
-      change.length > MOST_DIFF
-        ? `${change.slice(0, MOST_DIFF)}\n… (cut short: the rest is in the code the branch changed)`
-        : change;
-    return `${files}\n${cut}`;
+    return git("diff", "--stat", `HEAD...${branch}`);
   } catch {
     return "(The branch could not be read here.)";
   }

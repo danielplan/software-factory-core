@@ -8,17 +8,20 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { findFactory } from "@software-factory/core";
+import { allKits } from "@software-factory/kits";
 
 import { CARD_USAGE } from "./cards/command.ts";
 import { PROTOTYPE_USAGE } from "./prototypes/command.ts";
 import { checkKnowledge } from "./knowledge-check.ts";
 import { checkRecordsHere } from "./check-command.ts";
+import { rulesHere } from "./rules-command.ts";
 
 export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
                                              start the project's factory and open it
 software-factory new <name>                  a folder for a new idea, set up there
 software-factory check [folder]              the checks of Kobble's files (factory/kobble/)
 software-factory check-docs                  the knowledge base's checks (docs/)
+software-factory rules [product]             the rules of a product's kit: conventions, libraries, lessons
 software-factory upgrade                     the project's factory, to this core's version
 software-factory help                        this help
 ${CARD_USAGE}
@@ -48,6 +51,7 @@ export async function topCommand(
   }
   if (first === "check-docs") return checkDocsHere(from, out);
   if (first === "check") return checkRecordsHere(from, positionals[1], out);
+  if (first === "rules") return rulesHere(from, positionals[1], allKits, out);
   // Starting the factory, and the commands answered elsewhere (card, upgrade).
   if (
     first === undefined ||

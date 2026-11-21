@@ -103,9 +103,9 @@ More detail:
 Kobble is at `0.x`. A release you can take without doing anything is a patch
 (`0.13.0` → `0.13.1`), even when it brings new features. A release that needs
 something from you, such as a migration or a new setting, is a minor
-(`0.14.0`), and the changelog says what to do. See
-[the changelog](CHANGELOG.md) for what each version brought, and
-[releasing](docs/releasing.md) for how a version is made.
+(`0.14.0`), and `npx software-factory upgrade` says what to do. What each
+version brought is in the commits between its `v<version>` tag and the one
+before; [releasing](docs/releasing.md) says how a version is made.
 
 ## Working on Kobble
 

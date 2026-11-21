@@ -4,6 +4,7 @@
 import type { Kit } from "@software-factory/core";
 
 import { expoApp } from "./expo-app.ts";
+import { librariesIn, unlisted, unlistedPackagesOf } from "./libraries.ts";
 import { nestjsBackend } from "./nestjs-backend.ts";
 import { otherCode } from "./other-code.ts";
 import { reactWebApp } from "./react-web-app.ts";
@@ -12,6 +13,9 @@ import { typescriptPackage } from "./typescript-package.ts";
 
 export {
   expoApp,
+  librariesIn,
+  unlisted,
+  unlistedPackagesOf,
   nestjsBackend,
   otherCode,
   reactWebApp,

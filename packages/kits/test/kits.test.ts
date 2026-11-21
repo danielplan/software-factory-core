@@ -244,9 +244,8 @@ test("the example company's factory, with the core's kits", () => {
 });
 
 test("each kit's rules are there", () => {
-  const root = join(import.meta.dirname, "..");
   for (const kit of allKits)
-    for (const file of kit.rules) assert.ok(existsSync(join(root, file)), file);
+    for (const file of kit.rules) assert.ok(existsSync(file), file);
 });
 
 // A folder with these files in it, each with its text.

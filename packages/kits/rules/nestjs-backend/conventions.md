@@ -4,21 +4,25 @@ The usual way for a server made with NestJS and TypeScript. A product may do
 something its own way: then its own rule, written in its blueprint, wins over
 this one.
 
-## The tools
+## The libraries
 
-- **NestJS** with its default Express adapter: modules, controllers,
-  services, guards, pipes and dependency injection, used the way the Nest
-  documentation shows.
-- **Input checks** with class-validator classes through the global
-  ValidationPipe.
-- **Settings** with `@nestjs/config`: every setting listed and checked at
-  start-up; code reads them through ConfigService, never from the
-  environment directly.
-- **A database** through a widely used query builder or ORM (for example
-  Drizzle with PostgreSQL), with generated migrations; never SQL text built
-  from strings.
-- **Vitest** or Jest for tests, with requests sent to the app without
-  opening a port.
+One library per job. Use the one named here. A job this table does not
+have is never written by hand: take what the platform gives first, then a
+widely used, maintained library, and add its row, with why, in the same
+change: in this kit when other products would need it too, in the
+product's blueprint (`## Libraries`, the same table) when only it does. Code
+of your own is allowed only as a row that says why no library fits. Every
+package in the product's `dependencies` is named in one of the two tables;
+the core's checks refuse one that is not.
+
+| Job            | Library                                                                                                                              | Why                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| The server     | **NestJS** on its default Express adapter (`@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs`) | modules, controllers, services, guards and pipes, used as the Nest documentation shows |
+| Checking input | **class-validator** classes through the global ValidationPipe (`class-validator`, `class-transformer`)                               | Nest's own way                                                                         |
+| Settings       | **@nestjs/config** (`@nestjs/config`)                                                                                                | every setting listed and checked at start-up                                           |
+| The database   | **Drizzle** with **PostgreSQL** (`drizzle-orm`, `drizzle-kit`, `pg`)                                                                 | typed queries and generated migrations, never SQL built from strings                   |
+| Transactions   | **nestjs-cls** with its Drizzle adapter (`nestjs-cls`, `@nestjs-cls/*`)                                                              | one transaction across services without passing it by hand                             |
+| Tests          | **Vitest** or Jest, with requests sent without opening a port (development only)                                                     | see How we test                                                                        |
 
 ## The folder layout
 

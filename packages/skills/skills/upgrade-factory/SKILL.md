@@ -8,12 +8,12 @@ The upgrade command does what can be done by code: each release's migrations, th
 ## Steps
 
 1. **Look first.** Note what is uncommitted in the project (`git status`): others may be working in this copy. The upgrade only changes the factory's own files (`factory/`, the skills it put in `.claude/skills` and `.agents/skills`, `.mcp.json`, the core's pin in `package.json`, the factory's line in `AGENTS.md` and `CLAUDE.md`); keep it that way.
-2. **Newer core, if asked.** The project pins the core in its package.json (`software-factory` in devDependencies, at a `#release-<version>` of the core's repository). For a newer one, set that to the new release (the core's CHANGELOG lists them) and run `npm install`; then say which version it is now.
+2. **Newer core, if asked.** The project pins the core in its package.json (`software-factory` in devDependencies, at a `#release-<version>` of the core's repository). For a newer one, set that to the new release (the core's releases are its `release-<version>` tags) and run `npm install`; then say which version it is now.
 3. **Run it:** `npx software-factory upgrade`. Read all it says: from which version to which, what it did, what needs you, what the checks find.
 4. **Do what needs you**, one line at a time:
    - **Small and clear** (a line to add, a kind to write in a blueprint, a path that moved): do it, in the way the line says, and nothing more.
    - **A choice that is the person's** (a product's purpose or promises, which board or label, switching something on or off): ask, with your recommendation, in plain words; then do what they say.
-   - Read the release's section in the core's CHANGELOG when a line needs its reason.
+   - Read the core's commits between the two releases (`https://github.com/danielplan/software-factory-core/compare/v<from>...v<to>`) when a line needs its reason.
 5. **Check again:** run `npx software-factory upgrade` once more: it finds nothing more to migrate and runs the checks. Put right what the checks find, the same way as step 4.
 6. **Hand it over.** Say in a few lines which version the factory is on now, what changed (the upgrade's and yours), and anything still open. Show the changed files (`git diff --stat` for the factory's files). Commit only when the person agrees, and only the factory's files, with a message naming the version ("The factory on core 0.3.0").
 

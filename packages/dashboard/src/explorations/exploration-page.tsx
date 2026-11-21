@@ -15,6 +15,7 @@ import { type Read, useRead } from "@/lib/use-read";
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
+import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
 import { useT } from "@/i18n/use-t";
 
@@ -108,6 +109,42 @@ function useClosed(status: string | undefined): void {
   }, [status]);
 }
 
+// Hand off the agreed prototype, or, without one (an idea that changes no
+// screen), the board's agreed choices and notes; busy while it is handed
+// off, also after the page was opened again.
+function HandOffButton({
+  page,
+  press,
+  pending,
+}: Readonly<{
+  page: Page;
+  press: (path: string, body: object) => void;
+  pending: string | null;
+}>) {
+  const t = useT().explore;
+  const { board } = page;
+  const agreed = board.things.find(
+    (one) => one.kind === "prototype" && one.agreed,
+  );
+  const key = agreed?.kind === "prototype" ? agreed.key : "";
+  const ready = agreed !== undefined || board.things.some((one) => one.agreed);
+  const busy = pending === "hand-off" || page.handingOff !== null;
+  const handOffWords = key ? t.handOff(key) : t.handOffBoard;
+  return (
+    <Button
+      size="pill-sm"
+      busy={busy}
+      disabled={!ready || pending !== null || page.handingOff !== null}
+      onClick={() => {
+        press("hand-off", {});
+      }}
+    >
+      <Send aria-hidden />
+      {busy ? t.handingOff : handOffWords}
+    </Button>
+  );
+}
+
 function TopBar({
   page,
   press,
@@ -119,16 +156,8 @@ function TopBar({
   pending: string | null;
 }>) {
   const t = useT();
-  const { exploration, board } = page;
+  const { exploration } = page;
   const open = ["waiting", "exploring"].includes(exploration.status);
-  const agreed = board.things.find(
-    (one) => one.kind === "prototype" && one.agreed,
-  );
-  const key = agreed?.kind === "prototype" ? agreed.key : "";
-  // Without a prototype (an idea that changes no screen), the board's agreed
-  // choices and notes are handed off.
-  const ready = agreed !== undefined || board.things.some((one) => one.agreed);
-  const handOffWords = key ? t.explore.handOff(key) : t.explore.handOffBoard;
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border bg-card px-6 py-4">
       <a
@@ -156,17 +185,10 @@ function TopBar({
             <Archive aria-hidden />
             {pending === "drop" ? t.explore.dropping : t.explore.drop}
           </Button>
-          <Button
-            size="pill-sm"
-            busy={pending === "hand-off"}
-            disabled={!ready || pending !== null}
-            onClick={() => {
-              press("hand-off", {});
-            }}
-          >
-            <Send aria-hidden />
-            {pending === "hand-off" ? t.explore.handingOff : handOffWords}
-          </Button>
+          <HandOffButton page={page} press={press} pending={pending} />
+          {page.handingOff && (
+            <HandingOff handing={page.handingOff} title={exploration.title} />
+          )}
         </>
       ) : (
         <span className="inline-flex h-[22px] items-center rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">

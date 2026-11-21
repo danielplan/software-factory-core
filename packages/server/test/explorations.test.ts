@@ -7,10 +7,8 @@ import { test } from "node:test";
 import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
-import type { Claude } from "@software-factory/core";
 
 import { handOff } from "../src/kobble/explorations/actions.ts";
-import { specWriter } from "../src/kobble/explorations/spec-writer.ts";
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import type { ExplorationsView } from "../src/kobble/explorations/views.ts";
 import { inGit } from "./git-project.ts";
@@ -483,43 +481,6 @@ test("hand off gives the card the written spec, with the mark of the agreed prot
       made[0] ?? "",
       /<!-- factory:kobble exploration=X-1 prototype=B -->$/,
     );
-  } finally {
-    factory.close();
-  }
-});
-
-test("the spec writer reads the branch's changes and the conversation, and gives up on a short answer", async () => {
-  const factory = await explorationsFactory();
-  try {
-    const prompts: string[] = [];
-    const answers = [
-      "Too short.",
-      `## The agreed plan\n\n${"Built so. ".repeat(60)}`,
-    ];
-    const claude = {
-      run: (options: { prompt: string; readOnly?: boolean }) => {
-        prompts.push(options.prompt);
-        assert.equal(options.readOnly, true);
-        return Promise.resolve({ ok: true, text: answers.shift() ?? "" });
-      },
-    } as unknown as Claude;
-    const write = specWriter({
-      claude,
-      project: factory.project,
-      root: factory.root,
-      store: () => factory.store,
-    });
-    const exploration = factory.store.get("explorations", "X-1");
-    assert.ok(exploration);
-    const input = { exploration, summary: "In short.", branch: "proto/X-1-b" };
-    assert.equal(await write(input), null);
-    assert.match((await write(input)) ?? "", /^## The agreed plan/);
-    assert.match(
-      prompts[0] ?? "",
-      /## What the prototype's branch `proto\/X-1-b` changes/,
-    );
-    assert.match(prompts[0] ?? "", /## The conversation/);
-    assert.match(prompts[0] ?? "", /In short\./);
   } finally {
     factory.close();
   }

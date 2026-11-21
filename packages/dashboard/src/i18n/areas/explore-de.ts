@@ -36,7 +36,14 @@ export const exploreGerman: ExploreWords = {
   dropping: "Verwerfe…",
   handOff: (key) => `${key} übergeben`,
   handOffBoard: "Übergeben",
-  handingOff: "Schreibe die Spezifikation…",
+  handingOff: "Übergebe…",
+  handingOffAbout: "Schreibe die Karte aus dem Gespräch und dem Board",
+  handingOffTitle: (title: string) => `Übergebe „${title}“`,
+  handOffStages: {
+    spec: "Schreibe die Spezifikation",
+    card: "Lege die Karte auf dem Board an",
+    prototypes: "Stoppe die Prototypen",
+  },
   handedOffAs: (number) => `Übergeben als #${String(number)}`,
   where: {
     handedOff: "An die Fabrik übergeben",

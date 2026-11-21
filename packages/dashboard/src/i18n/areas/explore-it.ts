@@ -36,7 +36,14 @@ export const exploreItalian: ExploreWords = {
   dropping: "Lascio…",
   handOff: (key) => `Consegna ${key}`,
   handOffBoard: "Consegna",
-  handingOff: "Scrivo la specifica…",
+  handingOff: "Consegno…",
+  handingOffAbout: "Scrivo la scheda dalla conversazione e dalla lavagna",
+  handingOffTitle: (title: string) => `Consegno «${title}»`,
+  handOffStages: {
+    spec: "Scrivo la specifica",
+    card: "Creo la scheda sulla bacheca",
+    prototypes: "Fermo i prototipi",
+  },
   handedOffAs: (number) => `Consegnata come #${String(number)}`,
   where: {
     handedOff: "Consegnata alla Fabbrica",
