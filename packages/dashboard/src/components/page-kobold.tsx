@@ -5,6 +5,7 @@
 import { KoboldHead } from "@/components/kobold-face";
 import { type KoboldId, KOBOLDS } from "@/lib/kobolds";
 import type { Page } from "@/lib/routes";
+import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 export type Doing = Partial<Record<KoboldId, string>>;
@@ -13,13 +14,14 @@ export function PageKobold({
   page,
   doing,
 }: Readonly<{ page: Page; doing: Doing }>) {
+  const t = useT().shell;
   const here = KOBOLDS.filter((kobold) => kobold.page === page);
   const kobold = here.find((one) => doing[one.id]) ?? here[0];
   if (!kobold) return null;
   const now = doing[kobold.id];
   return (
     <span
-      title={`${kobold.name}: ${now ?? kobold.job}`}
+      title={`${kobold.name}: ${now ?? t.jobs[kobold.id]}`}
       className={cn(
         "relative flex-none transition-opacity",
         now ? "opacity-100" : "opacity-70 group-hover:opacity-100",
@@ -35,7 +37,7 @@ export function PageKobold({
         <span className="absolute -top-0.5 -right-0.5 size-[7px] rounded-full bg-success ring-2 ring-sidebar" />
       )}
       <span className="sr-only">
-        {now ? `${kobold.name} is working: ${now}` : kobold.name}
+        {now ? t.kobold.working(kobold.name, now) : kobold.name}
       </span>
     </span>
   );

@@ -34,6 +34,7 @@ import {
 import { useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
+import { useT } from "@/i18n/use-t";
 
 const NODE_TYPES: NodeTypes = {
   problem: ProblemNode,
@@ -70,6 +71,7 @@ export function Board(props: BoardProps) {
 }
 
 function Canvas({ page, attached, onPick }: BoardProps) {
+  const t = useT();
   const pointed = page.talk.pointed;
   const marks = useMemo(
     () => ({ pointed: pointed?.thing ?? null, attached }),
@@ -122,7 +124,7 @@ function Canvas({ page, attached, onPick }: BoardProps) {
         edgesFocusable={false}
         minZoom={0.15}
         maxZoom={2}
-        aria-label="The exploration's board"
+        aria-label={t.explore.board.label}
         style={COLOURS}
       >
         <Background gap={16} />

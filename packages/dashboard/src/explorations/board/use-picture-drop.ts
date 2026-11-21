@@ -5,19 +5,20 @@
 import { type RefObject, useCallback, useEffect, useState } from "react";
 
 import { messageOf, post } from "@/api";
+import { useT } from "@/i18n/use-t";
 
 const SHOWN_MS = 6000;
 
-function read(file: File): Promise<string> {
+function read(file: File, unreadable: string): Promise<string> {
   return new Promise((done, fail) => {
     const reader = new FileReader();
     reader.onload = () => {
       const { result } = reader;
       if (typeof result === "string") done(result);
-      else fail(new Error("The picture could not be read."));
+      else fail(new Error(unreadable));
     };
     reader.onerror = () => {
-      fail(new Error("The picture could not be read."));
+      fail(new Error(unreadable));
     };
     reader.readAsDataURL(file);
   });
@@ -33,13 +34,14 @@ export function usePictureDrop(
 ) {
   const [dropping, setDropping] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  const words = useT().explore.board;
   const add = useCallback(
     (file: File | null, title: string) => {
       if (!file) {
-        setRefused("Only pictures can go on the board.");
+        setRefused(words.onlyPictures);
         return;
       }
-      read(file)
+      read(file, words.pictureUnreadable)
         .then((data) =>
           post("/api/kobble/explorations/picture", {
             id: exploration,
@@ -51,9 +53,9 @@ export function usePictureDrop(
           setRefused(messageOf(error));
         });
     },
-    [exploration],
+    [exploration, words],
   );
-  usePaste(add);
+  usePaste(add, words.pasted);
   useDrop(area, add, setDropping);
   useEffect(() => {
     if (!refused) return;
@@ -69,7 +71,7 @@ export function usePictureDrop(
 
 type Add = (file: File | null, title: string) => void;
 
-function usePaste(add: Add) {
+function usePaste(add: Add, pasted: string) {
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
       const file = imageIn(event.clipboardData?.files);
@@ -78,13 +80,13 @@ function usePaste(add: Add) {
         target instanceof HTMLElement && target.matches("input, textarea");
       if (!file || typing) return;
       event.preventDefault();
-      add(file, "Pasted picture");
+      add(file, pasted);
     };
     window.addEventListener("paste", onPaste);
     return () => {
       window.removeEventListener("paste", onPaste);
     };
-  }, [add]);
+  }, [add, pasted]);
 }
 
 function useDrop(

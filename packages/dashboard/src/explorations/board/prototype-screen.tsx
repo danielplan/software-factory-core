@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useT } from "@/i18n/use-t";
 
 const DESKTOP = { width: 1280, height: 800 };
 // The card's inside width (nodes.ts: 520, less its padding and border).
@@ -27,6 +28,7 @@ export function LiveScreen({
   url,
   title,
 }: Readonly<{ url: string; title: string }>) {
+  const t = useT();
   return (
     <Dialog>
       <div
@@ -34,7 +36,7 @@ export function LiveScreen({
         style={SCREEN}
       >
         <iframe
-          title={`${title}, running`}
+          title={t.explore.board.running(title)}
           src={url}
           className="origin-top-left border-0"
           style={{

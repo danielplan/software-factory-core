@@ -25,6 +25,7 @@ import {
 import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/use-t";
 
 // The kind of a step, from its first words, with its icon and colour.
 const KINDS: [RegExp, LucideIcon, string][] = [
@@ -57,6 +58,7 @@ export function AgentTrace({
   steps,
   live,
 }: Readonly<{ steps: string[]; live: boolean }>) {
+  const t = useT().builder.trace;
   const end = useRef<HTMLOListElement>(null);
   useEffect(() => {
     const list = end.current;
@@ -73,15 +75,17 @@ export function AgentTrace({
           />
         ))}
         <span className="ml-2 font-mono text-[11px] text-[#6b7280]">
-          {steps.length} {steps.length === 1 ? "step" : "steps"}
-          {live ? " · live" : ""}
+          {t.steps(steps.length)}
+          {live ? t.live : ""}
         </span>
       </div>
       <ol
         ref={end}
         className="grid max-h-[60vh] gap-1 overflow-y-auto px-3 py-2.5 font-mono text-[12px] leading-snug text-[#d1d5db]"
       >
-        {steps.length === 0 && <li className="text-[#6b7280]">Nothing yet.</li>}
+        {steps.length === 0 && (
+          <li className="text-[#6b7280]">{t.nothingYet}</li>
+        )}
         {steps.map((step, at) => {
           const { Icon, tint } = kindOf(step);
           const last = live && at === steps.length - 1;

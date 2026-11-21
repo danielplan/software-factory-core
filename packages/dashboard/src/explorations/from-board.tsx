@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { ROW } from "@/signals/bits";
 
 import { RemoveRow } from "./remove-row";
+import { useT } from "@/i18n/use-t";
 
 // An idea in the board's Backlog: not agreed work, so it waits here.
 // Starting it makes an exploration of it; handing that off fills in this
@@ -18,6 +19,7 @@ import { RemoveRow } from "./remove-row";
 export function FromBoard({
   idea,
 }: Readonly<{ idea: ExplorationsView["fromBoard"][number] }>) {
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
@@ -67,12 +69,12 @@ export function FromBoard({
         busy={busy}
         onClick={() => void start()}
       >
-        {busy ? "Starting…" : "Start"}
+        {busy ? t.explore.starting : t.explore.start}
       </Button>
       <RemoveRow
         path="/api/kobble/factory/delete"
         body={{ number: idea.number }}
-        what="Close it on GitHub?"
+        what={t.explore.closeOnGitHub}
         onGone={setGone}
         onProblem={setProblem}
       />

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
 import { LANGUAGE_CODES, LANGUAGES, type Language } from "./languages";
+import { useT } from "@/i18n/use-t";
 
 // The language the owner speaks, beside End call: the speech model writes
 // their words down in it instead of guessing, and the coach answers in it.
@@ -8,10 +9,11 @@ export function LanguageSwitch({
   language,
   onChoose,
 }: Readonly<{ language: Language; onChoose: (language: Language) => void }>) {
+  const t = useT();
   return (
     <div
       role="radiogroup"
-      aria-label="The language you speak"
+      aria-label={t.voice.youSpeak}
       className="inline-flex shrink-0 rounded-full bg-surface-2 p-0.5 text-xs"
     >
       {LANGUAGE_CODES.map((code) => {

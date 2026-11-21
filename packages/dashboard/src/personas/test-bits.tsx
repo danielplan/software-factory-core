@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import type { PersonaTest } from "@/api";
 import { cn } from "@/lib/utils";
-import { TEST_WORDS } from "@/signals/view";
+import { useT } from "@/i18n/use-t";
 
 type Status = PersonaTest["status"];
 
@@ -70,10 +70,11 @@ export function StatusIcon({
 }
 
 export function StatusChip({ status }: Readonly<{ status: Status }>) {
+  const t = useT();
   return (
     <span className="inline-flex h-[22px] items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-foreground-2 shadow-[inset_0_0_0_1px_var(--line-soft)]">
       <StatusIcon status={status} size={12} />
-      {TEST_WORDS[status]}
+      {t.words.tests[status]}
     </span>
   );
 }

@@ -25,6 +25,7 @@ import { skillsFolder } from "@software-factory/skills";
 import { z } from "zod";
 
 import { Refused } from "../refused.ts";
+import { inLanguage } from "../language.ts";
 
 // A reason a test cannot go on, said in plain words.
 export class TestProblem extends Error {}
@@ -300,7 +301,7 @@ export class PersonaTests {
       // No tool of its own: only the browser, when it has one.
       tools: [],
       ...more,
-      instructions: personaTestSkill(),
+      instructions: inLanguage(personaTestSkill()),
       session: { id: randomUUID(), resume: false },
       timeLimitMs: TIME_LIMIT_MS,
       onActivity: () => {},

@@ -18,6 +18,7 @@ import { VoiceView } from "@/voice/voice-view";
 import { nameOf } from "./board/nodes";
 import { Who } from "./explorer-header";
 import { useKoboldCall } from "./kobold-call";
+import { useT } from "@/i18n/use-t";
 
 export function TalkPanel({
   page,
@@ -129,6 +130,7 @@ function TypeBox({
   onSend: () => void;
   onTalk: () => void;
 }>) {
+  const t = useT();
   // It grows with the words, up to about eight lines, and shrinks when sent.
   const grow = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -146,8 +148,10 @@ function TypeBox({
       }}
     >
       <textarea
-        aria-label="Talk to the kobold"
-        placeholder={fresh ? "What's your idea?" : "Talk to the kobold…"}
+        aria-label={t.explore.talk.talk}
+        placeholder={
+          fresh ? t.explore.talk.yourIdea : t.explore.talk.placeholder
+        }
         rows={2}
         value={text}
         onChange={(event) => {
@@ -167,7 +171,7 @@ function TypeBox({
           type="button"
           size="pill-sm"
           variant="ring"
-          aria-label="Talk out loud"
+          aria-label={t.explore.talk.outLoud}
           onClick={onTalk}
         >
           <Mic aria-hidden className="size-4" />
@@ -175,7 +179,7 @@ function TypeBox({
         <Button
           type="submit"
           size="pill-sm"
-          aria-label="Send"
+          aria-label={t.explore.talk.send}
           className="ml-auto"
           disabled={busy || !text.trim()}
         >
@@ -231,6 +235,7 @@ function Messages({
 
 // The kobold's answer while it writes, or what it is doing before it does.
 function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
+  const t = useT();
   if (talk.writing)
     return (
       <div className="max-w-[94%] self-start text-muted-foreground">
@@ -240,7 +245,7 @@ function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
   return (
     <p className="flex items-center gap-2 self-start text-[12.5px] text-muted-foreground">
       <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
-      {talk.activity ?? "Thinking…"}
+      {talk.activity ?? t.explore.talk.thinking}
     </p>
   );
 }
@@ -255,6 +260,7 @@ function Attached({
   attached: string[];
   onDetach: (thing: string) => void;
 }>) {
+  const t = useT();
   return (
     <div className="flex flex-wrap gap-1.5 px-5 pb-2">
       {attached.map((id) => {
@@ -267,9 +273,9 @@ function Attached({
               onDetach(id);
             }}
             className="inline-flex h-6 max-w-[200px] items-center gap-1 rounded-full bg-wash px-2.5 text-xs text-wash-foreground"
-            title="Take it off"
+            title={t.explore.talk.takeOff}
           >
-            <span className="truncate">{nameOf(thing)}</span> ×
+            <span className="truncate">{nameOf(thing, t.explore.kinds)}</span> ×
           </button>
         ) : null;
       })}

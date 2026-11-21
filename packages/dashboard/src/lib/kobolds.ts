@@ -12,7 +12,6 @@ export type KoboldId = "support" | "explorer" | "builder" | "tester" | "sorter";
 export type Kobold = {
   id: KoboldId;
   name: string;
-  job: string;
   hat: PersonaHat | "flop";
   color: string;
   // Where it works; none for the support kobold, which is on every page.
@@ -23,7 +22,6 @@ export const KOBOLDS: Kobold[] = [
   {
     id: "support",
     name: "Sprocket",
-    job: "Answers your questions, on every page",
     hat: "flop",
     color: "#3156d8",
     page: null,
@@ -31,7 +29,6 @@ export const KOBOLDS: Kobold[] = [
   {
     id: "explorer",
     name: "Doodle",
-    job: "Thinks explorations through and makes prototypes",
     hat: "beret",
     color: "#e9a23b",
     page: "explore",
@@ -39,7 +36,6 @@ export const KOBOLDS: Kobold[] = [
   {
     id: "builder",
     name: "Bolt",
-    job: "Builds the agreed cards on the Factory board",
     hat: "trucker",
     color: "#1f9a6e",
     page: "build",
@@ -47,7 +43,6 @@ export const KOBOLDS: Kobold[] = [
   {
     id: "tester",
     name: "Mimic",
-    job: "Uses the app as one of your personas",
     hat: "cap",
     color: "#e64f86",
     page: "personas",
@@ -55,7 +50,6 @@ export const KOBOLDS: Kobold[] = [
   {
     id: "sorter",
     name: "Sieve",
-    job: "Sorts the signals that come in",
     hat: "phones",
     color: "#0f7f8c",
     page: "signals",

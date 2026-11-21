@@ -6,6 +6,7 @@
 import type { Edge, Node } from "@xyflow/react";
 
 import type { ExplorationPage } from "../../api.ts";
+import { ENGLISH, type Messages } from "../../i18n/messages.ts";
 
 export type Thing = ExplorationPage["board"]["things"][number];
 
@@ -107,12 +108,15 @@ export function edgesOf(page: ExplorationPage): Edge[] {
 }
 
 // A thing's name in a few words, for the chips of what is attached.
-export function nameOf(thing: Thing): string {
+export function nameOf(
+  thing: Thing,
+  kinds: Messages["explore"]["kinds"] = ENGLISH.explore.kinds,
+): string {
   switch (thing.kind) {
     case "problem":
-      return "The problem";
+      return kinds.problem;
     case "heard":
-      return "What we heard";
+      return kinds.heard;
     case "note":
       return thing.text;
     case "prototype":

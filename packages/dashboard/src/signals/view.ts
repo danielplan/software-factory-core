@@ -5,29 +5,23 @@
 // on its own.
 
 import type { MissionNow, SignalRow, SyncView } from "../api.ts";
+import { ENGLISH, type Messages } from "../i18n/messages.ts";
+
+type Words = Messages["words"];
+const W = ENGLISH.words;
 
 type Signal = Pick<
   SignalRow,
   "type" | "source" | "personaName" | "already" | "workColumn"
 >;
 
-export const TYPE_WORDS: Record<Signal["type"], string> = {
-  bug: "Bug",
-  request: "Feature request",
-  feedback: "Feedback",
-  idea: "Idea",
-  question: "Open question",
-};
+export const TYPE_WORDS: Record<Signal["type"], string> = W.types;
 
-export const SOURCE_WORDS: Record<Signal["source"], string> = {
-  app: "In the app",
-  usage: "Usage",
-  errors: "Errors",
-  test: "Mission",
-};
-
-export function whoOf(signal: Pick<Signal, "personaName">): string {
-  return signal.personaName ?? "Someone";
+export function whoOf(
+  signal: Pick<Signal, "personaName">,
+  m: Words = W,
+): string {
+  return signal.personaName ?? m.someone;
 }
 
 // The type only decides which button comes first: Fix for a bug, Explore
@@ -36,24 +30,25 @@ export function primaryOf(signal: Pick<Signal, "type">): "fix" | "explore" {
   return signal.type === "bug" ? "fix" : "explore";
 }
 
-export function exploreWords(signal: Pick<Signal, "already">): string {
+export function exploreWords(
+  signal: Pick<Signal, "already">,
+  m: Words = W,
+): string {
   return signal.already?.kind === "exploration"
-    ? `Add to ${signal.already.id}`
-    : "Explore";
+    ? m.addTo(signal.already.id)
+    : m.explore;
 }
 
 // The one plain line about work that exists already ("Already explored in"
 // and "X-1 · its title"), or null.
 export function alreadyLine(
   signal: Pick<Signal, "already" | "workColumn">,
+  m: Words = W,
 ): { words: string; what: string; column: string | null } | null {
   const { already } = signal;
   if (!already) return null;
   return {
-    words:
-      already.kind === "exploration"
-        ? "Already explored in"
-        : "Already fixed in",
+    words: already.kind === "exploration" ? m.alreadyExplored : m.alreadyFixed,
     what: `${already.id} · ${already.title}`,
     column:
       already.kind === "work" && signal.workColumn
@@ -65,21 +60,21 @@ export function alreadyLine(
 const MINUTE = 60_000;
 
 // How long ago a time was, in plain words.
-export function agoOf(at: string, now: Date): string {
+export function agoOf(at: string, now: Date, m: Words = W): string {
   const minutes = Math.floor((now.getTime() - Date.parse(at)) / MINUTE);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${String(minutes)} min ago`;
+  if (minutes < 1) return m.ago.now;
+  if (minutes < 60) return m.ago.minutes(minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${String(hours)} h ago`;
+  if (hours < 24) return m.ago.hours(hours);
   const days = Math.floor(hours / 24);
-  return days === 1 ? "yesterday" : `${String(days)} days ago`;
+  return days === 1 ? m.ago.yesterday : m.ago.days(days);
 }
 
 // The line beside the page's title about the live app.
-export function syncLine(sync: SyncView, now: Date): string {
-  if (!sync.connected) return "Not connected to the live app";
-  if (!sync.last) return "Not synced with the live app yet · every 30 min";
-  return `Synced with the live app ${agoOf(sync.last, now)} · every 30 min`;
+export function syncLine(sync: SyncView, now: Date, m: Words = W): string {
+  if (!sync.connected) return m.sync.notConnected;
+  if (!sync.last) return m.sync.notYet;
+  return m.sync.synced(agoOf(sync.last, now, m));
 }
 
 // The signal shown: the one picked while it is still new, else the first.
@@ -111,43 +106,41 @@ export function tintIndexOf(id: string): number {
   return sum;
 }
 
-export function originWords(origin: "developer" | "usage"): string {
-  return origin === "usage" ? "Found in usage" : "Added by you";
+export function originWords(
+  origin: "developer" | "usage",
+  m: Words = W,
+): string {
+  return m.origin[origin];
 }
 
 // What became of a signal, in a few words.
-export function statusWords(signal: Pick<SignalRow, "status" | "to">): string {
+export function statusWords(
+  signal: Pick<SignalRow, "status" | "to">,
+  m: Words = W,
+): string {
   if (signal.status === "explored" && signal.to)
-    return `Explored in ${signal.to}`;
+    return m.status.explored(signal.to);
   if (signal.status === "fixed")
-    return signal.to ? `Fixed in ${signal.to}` : "Sent to be fixed";
-  return signal.status === "new" ? "New" : "Dismissed";
+    return signal.to ? m.status.fixed(signal.to) : m.status.sentToFix;
+  return signal.status === "new" ? m.status.new : m.status.dismissed;
 }
 
 // A mission running or waiting, in a few words: the step it is on.
 export function missionWords(
   mission: Pick<MissionNow, "status" | "doing">,
+  m: Words = W,
 ): string {
-  if (mission.status === "queued") return "Waits for its turn";
-  return mission.doing ?? "Opening the app…";
+  if (mission.status === "queued") return m.mission.queued;
+  return mission.doing ?? m.mission.opening;
 }
 
 // Where a signal from a mission happened: "At step 2: Opened the basket".
-export function stepWords(signal: Pick<SignalRow, "step">): string | null {
-  return signal.step
-    ? `At step ${String(signal.step.number)}: ${signal.step.did}`
-    : null;
+export function stepWords(
+  signal: Pick<SignalRow, "step">,
+  m: Words = W,
+): string | null {
+  return signal.step ? m.step(signal.step.number, signal.step.did) : null;
 }
-
-export const TEST_WORDS: Record<
-  "queued" | "running" | "done" | "failed",
-  string
-> = {
-  queued: "Waiting",
-  running: "On a mission",
-  done: "Done",
-  failed: "Failed",
-};
 
 // On a persona's page, what is open: their signals (#personas/<id>), their
 // tests (#personas/<id>/tests) or one test (#personas/<id>/tests/<test>).
@@ -167,11 +160,15 @@ export function personaPlaceOf(open: string): {
 }
 
 // When the kobold reads the live app again, in words.
-export function lookAgainWords(next: string | null, now: Date): string {
-  if (!next) return "The kobold looks again soon.";
+export function lookAgainWords(
+  next: string | null,
+  now: Date,
+  m: Words = W,
+): string {
+  if (!next) return m.lookAgain.soon;
   const minutes = Math.ceil((Date.parse(next) - now.getTime()) / MINUTE);
-  if (minutes <= 1) return "The kobold looks again in a minute.";
-  return `The kobold looks again in ${String(minutes)} minutes.`;
+  if (minutes <= 1) return m.lookAgain.minute;
+  return m.lookAgain.minutes(minutes);
 }
 
 export type Act = "fix" | "explore" | "dismiss";
@@ -181,14 +178,15 @@ export function doneWords(
   act: Act,
   signal: SignalRow,
   answer: unknown,
+  m: Words = W,
 ): string {
   if (act === "fix") {
     const fixed = (answer as { signal: { to: string | null } }).signal.to;
-    return `${fixed ?? signal.id} is in the factory's To do`;
+    return m.done.fixed(fixed ?? signal.id);
   }
-  if (act === "dismiss") return "Dismissed";
+  if (act === "dismiss") return m.done.dismissed;
   const { exploration } = answer as { exploration: { id: string } };
   return signal.already?.kind === "exploration"
-    ? `Added to ${exploration.id}`
-    : `${exploration.id} is waiting in Explorations`;
+    ? m.done.added(exploration.id)
+    : m.done.waiting(exploration.id);
 }

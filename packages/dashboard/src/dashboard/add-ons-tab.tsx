@@ -14,6 +14,8 @@ import {
 
 import type { FactoryState } from "./dashboard";
 import { GroupForm } from "./settings-card";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 // The factory's store (on Settings), in two parts: what it uses now (the board work is
 // tracked on, the add-ons it has, the kits of its products), then what it
@@ -21,6 +23,7 @@ import { GroupForm } from "./settings-card";
 // while they are on; the board is changed on Settings; kits come with the
 // products they know, so they are only shown.
 export function AddOnsTab({ state }: Readonly<{ state: FactoryState }>) {
+  const t = useT();
   const used = (addOn: AddOnView) =>
     addOn.tracker ? state.company.tracker === addOn.id : addOn.on;
   const kitUsed = (kit: KitView) => usersOf(kit, state).length > 0;
@@ -33,11 +36,11 @@ export function AddOnsTab({ state }: Readonly<{ state: FactoryState }>) {
       <header className="px-1">
         <p className="text-muted-foreground">
           {inUse.length > 0
-            ? `Your factory uses ${inUse.join(", ")}.`
-            : "Your factory uses nothing extra yet."}
+            ? t.connect.addOns.uses(inUse.join(", "))
+            : t.connect.addOns.nothing}
         </p>
       </header>
-      <Shelf title="In use" about="What your factory works with now.">
+      <Shelf title={t.connect.addOns.inUse} about={t.connect.addOns.inUseAbout}>
         {state.addOns.filter(used).map((addOn) => (
           <AddOnTile key={addOn.id} addOn={addOn} state={state} used />
         ))}
@@ -46,8 +49,8 @@ export function AddOnsTab({ state }: Readonly<{ state: FactoryState }>) {
         ))}
       </Shelf>
       <Shelf
-        title="Not used"
-        about="What else it can work with: another board, more abilities, other kinds of product."
+        title={t.connect.addOns.notUsed}
+        about={t.connect.addOns.notUsedAbout}
       >
         {state.addOns
           .filter((addOn) => !used(addOn))
@@ -129,6 +132,7 @@ function AddOnTile({
   state,
   used = false,
 }: Readonly<{ addOn: AddOnView; state: FactoryState; used?: boolean }>) {
+  const t = useT();
   const [problem, setProblem] = useState<string | null>(null);
   const turn = (on: boolean) => {
     setProblem(null);
@@ -144,17 +148,17 @@ function AddOnTile({
     <Tile
       id={addOn.id}
       name={addOn.name}
-      from={addOn.builtIn ? "Comes with the factory" : "Add-on"}
+      from={addOn.builtIn ? t.connect.addOns.builtIn : t.connect.addOns.addOn}
       about={addOn.about}
       idle={!used}
     >
       <div className="flex min-h-9 items-center gap-3">
         <span className="flex-1 text-xs text-muted-foreground">
-          {noteOf(addOn, used)}
+          {noteOf(addOn, used, t.connect.addOns)}
         </span>
         <Action addOn={addOn} used={used} turn={turn} />
       </div>
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
       {groups.length > 0 && <Settings groups={groups} state={state} />}
     </Tile>
   );
@@ -171,13 +175,14 @@ function Action({
   used: boolean;
   turn: (on: boolean) => void;
 }>) {
+  const t = useT();
   if (addOn.tracker)
     return (
       <a
         href="#settings/connections"
         className="rounded-full px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
       >
-        {used ? "Change" : "Use instead"}
+        {used ? t.connect.addOns.change : t.connect.addOns.useInstead}
       </a>
     );
   return used ? (
@@ -188,7 +193,7 @@ function Action({
         turn(false);
       }}
     >
-      Remove
+      {t.connect.addOns.remove}
     </Button>
   ) : (
     <Button
@@ -197,7 +202,7 @@ function Action({
         turn(true);
       }}
     >
-      <Plus aria-hidden /> Add
+      <Plus aria-hidden /> {t.connect.addOns.add}
     </Button>
   );
 }
@@ -207,10 +212,11 @@ function Settings({
   groups,
   state,
 }: Readonly<{ groups: FactoryState["settings"]; state: FactoryState }>) {
+  const t = useT();
   return (
     <Collapsible className="grid gap-4 border-t border-border-soft pt-3">
       <CollapsibleTrigger className="group flex items-center gap-1.5 text-[13px] font-medium">
-        Settings
+        {t.connect.addOns.settings}
         <ChevronDown
           className="size-4 transition group-data-[state=open]:rotate-180"
           aria-hidden
@@ -226,11 +232,12 @@ function Settings({
 }
 
 function KitTile({ kit, users }: Readonly<{ kit: KitView; users: string[] }>) {
+  const t = useT();
   return (
     <Tile
       id={kit.id}
       name={kit.name}
-      from="Kit"
+      from={t.connect.addOns.kit}
       about={kit.about}
       idle={users.length === 0}
     >
@@ -246,7 +253,7 @@ function KitTile({ kit, users }: Readonly<{ kit: KitView; users: string[] }>) {
           ))
         ) : (
           <span className="text-xs text-muted-foreground">
-            For a new product of this kind.
+            {t.connect.addOns.forNew}
           </span>
         )}
       </div>
@@ -262,12 +269,16 @@ function usersOf(kit: KitView, state: FactoryState): string[] {
 }
 
 // What an add-on is doing for this factory now.
-function noteOf(addOn: AddOnView, used: boolean): ReactNode {
+function noteOf(
+  addOn: AddOnView,
+  used: boolean,
+  m: Messages["connect"]["addOns"],
+): ReactNode {
   if (!used) return null;
   return (
     <span className="inline-flex items-center gap-1 font-medium text-success">
       <Check className="size-3.5" aria-hidden />
-      {addOn.tracker ? "Your work is tracked here" : "Added"}
+      {addOn.tracker ? m.tracked : m.added}
     </span>
   );
 }

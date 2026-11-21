@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { CARD } from "./bits";
 import { ConnectSignals } from "./empty";
 import { missionWords } from "./view";
+import { useT } from "@/i18n/use-t";
 
 // Before launch: the personas on a mission now, or (with no signal yet)
 // the empty page; then the line about connecting the live app, which opens
@@ -51,32 +52,34 @@ function ConnectLater({
   more,
   onConnect,
 }: Readonly<{ app: string; more: boolean; onConnect: () => void }>) {
+  const t = useT().signals.before;
   return (
     <p className="mx-1 text-[12.5px] text-muted-foreground">
       {more && (
         <>
           <a href={personaHash()} className="font-semibold text-blue">
-            Send more personas
+            {t.sendMore}
           </a>{" "}
-          to find what to improve.{" "}
+          {t.toImprove}{" "}
         </>
       )}
-      After launch,{" "}
+      {t.afterLaunch}{" "}
       <button
         type="button"
         onClick={onConnect}
         className="font-semibold text-blue"
       >
-        connect {app}
+        {t.connectApp(app)}
       </button>{" "}
-      to hear from customers.
+      {t.toHear}
     </p>
   );
 }
 
 function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
+  const t = useT();
   return (
-    <section aria-label="On a mission" className={CARD}>
+    <section aria-label={t.signals.before.onMission} className={CARD}>
       {missions.map((mission) => (
         <a
           key={mission.id}
@@ -86,7 +89,7 @@ function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
           <PersonaFace face={mission.face} size={26} />
           <span className="font-semibold">{mission.name}</span>
           <span aria-live="polite" className="truncate text-muted-foreground">
-            On a mission · {missionWords(mission)}
+            {t.signals.before.onMission} · {missionWords(mission, t.words)}
           </span>
         </a>
       ))}
@@ -108,6 +111,7 @@ function NoCustomersYet() {
   const faces = data?.personas.length
     ? data.personas.slice(0, 4).map((persona) => persona.face)
     : STAND_INS;
+  const t = useT();
   return (
     <div
       className={cn(
@@ -117,13 +121,12 @@ function NoCustomersYet() {
     >
       <FacesAndScreen faces={faces} />
       <p className="mt-2 max-w-[400px] text-[15.5px] text-foreground-2">
-        No customers yet. Send your personas to try the app, and what they find
-        shows up here.
+        {t.signals.before.noCustomers}
       </p>
       <Button asChild size="pill" className="mt-1.5">
         <a href={personaHash()}>
           <Send aria-hidden strokeWidth={2} className="size-[15px]" />
-          Send a persona
+          {t.signals.before.send}
         </a>
       </Button>
     </div>

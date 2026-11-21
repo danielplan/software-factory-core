@@ -11,6 +11,7 @@ import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
 import { SCREEN } from "./prototype-screen";
+import { useT } from "@/i18n/use-t";
 
 // The pieces of the page, in the order they appear.
 const PIECES = [
@@ -90,6 +91,7 @@ function Page() {
 // what the kobold does now and its clock.
 export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   const clock = clockOf(run.since, useNow());
+  const t = useT().explore.board;
   if (!(run.state === "running" && run.url)) return null;
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
@@ -97,9 +99,9 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
         <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
         <span className="relative inline-flex size-2 rounded-full bg-blue" />
       </span>
-      <span className="flex-none font-medium">Being made, live:</span>
+      <span className="flex-none font-medium">{t.beingMade}</span>
       <span key={run.activity} className="truncate motion-safe:animate-pop">
-        {run.activity ?? "the kobold is at work"}
+        {run.activity ?? t.atWork}
       </span>
       {clock && (
         <span className="ml-auto flex-none text-muted-foreground tabular-nums">
@@ -111,6 +113,7 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
 }
 
 export function Making({ run }: Readonly<{ run: VersionRun }>) {
+  const t = useT();
   const clock = clockOf(run.since, useNow());
   return (
     <div className="grid gap-2.5">
@@ -120,7 +123,7 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
           <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
           <span className="relative inline-flex size-2 rounded-full bg-blue" />
         </span>
-        The kobold is making it
+        {t.explore.board.making}
         {clock && (
           <span className="ml-auto font-normal text-muted-foreground tabular-nums">
             {clock}

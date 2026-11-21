@@ -5,6 +5,7 @@
 import { messageOf, post, type Card } from "@/api";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useT } from "@/i18n/use-t";
 
 const CHOICES = [
   {
@@ -29,6 +30,7 @@ export function TheLook({
   cards,
   area,
 }: Readonly<{ cards: Card[]; area: string }>) {
+  const t = useT();
   const card = cards.find(isLook);
   const now = card?.text?.includes("Kobble’s own") ? "kobble" : "yours";
   const [problem, setProblem] = useState<string | null>(null);
@@ -71,9 +73,13 @@ export function TheLook({
                 />
               ))}
             </span>
-            <span className="font-semibold">{choice.name}</span>
+            <span className="font-semibold">
+              {choice.id === "yours" ? t.setup.look.yours : t.setup.look.own}
+            </span>
             <span className="text-[12.5px] text-muted-foreground">
-              {choice.text}
+              {choice.id === "yours"
+                ? t.setup.look.yoursText
+                : t.setup.look.ownText}
             </span>
           </button>
         ))}

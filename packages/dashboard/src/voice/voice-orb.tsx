@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 import { useVoiceLevel } from "./use-voice-level";
 import type { VoiceCall } from "./voice-call";
+import { useT } from "@/i18n/use-t";
 
 export type OrbMode =
   "preparing" | "listening" | "writing" | "thinking" | "speaking";
@@ -18,15 +19,6 @@ const MOTION: Record<OrbMode, string> = {
   speaking: "animate-orb-talk",
 };
 
-// Each moment's short label, under the orb.
-export const MOMENT: Record<OrbMode, string> = {
-  preparing: "Getting ready…",
-  listening: "Listening",
-  writing: "Writing it down…",
-  thinking: "Thinking…",
-  speaking: "Speaking",
-};
-
 // The voice, as the coach's orb (the same as in the chat), moving with the
 // moment. Its meter says how loud the microphone hears the owner (zero
 // unless listening).
@@ -34,12 +26,13 @@ export function VoiceOrb({
   call,
   mode,
 }: Readonly<{ call: VoiceCall; mode: OrbMode }>) {
+  const t = useT();
   const level = useVoiceLevel(call);
   const percent = mode === "listening" ? Math.round(level * 100) : 0;
   return (
     <div
       role="meter"
-      aria-label="Your voice"
+      aria-label={t.voice.yourVoice}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}

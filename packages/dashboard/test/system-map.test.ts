@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { PartView } from "../src/api.ts";
-import { linesOf, nearOf, TYPES } from "../src/lib/system-map.ts";
+import { ENGLISH } from "../src/i18n/messages.ts";
+import { linesOf, nearOf } from "../src/lib/system-map.ts";
 
 function part(id: string, dependsOn: string[] = []): PartView {
   return {
@@ -54,7 +55,7 @@ test("pointing at a part brings out it and the parts at the other ends of its li
 
 test("each type of part says what it means, in plain words", () => {
   assert.deepEqual(
-    Object.entries(TYPES).map(([type, { label, means }]) => [
+    Object.entries(ENGLISH.system.types).map(([type, { label, means }]) => [
       type,
       label,
       means,

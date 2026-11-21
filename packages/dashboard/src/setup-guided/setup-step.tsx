@@ -9,6 +9,8 @@ import type { State } from "@/api";
 
 import { isApp, isPerson } from "./card-bits";
 import { cardsIn, setUpDone } from "./steps";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 type Coach = SetupState["coach"];
@@ -22,8 +24,9 @@ export function SetupStep({
   says: React.ReactNode;
   eyebrow: React.ReactNode;
 }>) {
+  const t = useT();
   const { coach } = state;
-  const words = wordsOf(coach);
+  const words = wordsOf(coach, t.setup);
   return (
     <>
       <header className="grid gap-1.5">
@@ -35,7 +38,7 @@ export function SetupStep({
       </header>
       {says}
       <ul className="grid rounded-xl bg-card shadow-card">
-        {plan(coach).map((line) => (
+        {plan(coach, t.setup.plan).map((line) => (
           <li
             key={line}
             className="flex items-center gap-3 border-t border-border-soft px-[18px] py-3 first:border-t-0"
@@ -74,7 +77,7 @@ function Mark({ coach }: Readonly<{ coach: Coach }>) {
 }
 
 // What setting up writes, from what the owner went through.
-function plan(coach: Coach): string[] {
+function plan(coach: Coach, m: Messages["setup"]["plan"]): string[] {
   const { draft } = coach;
   const count = (area: string) =>
     cardsIn(draft, area).filter((c) => c.tone !== "question");
@@ -84,32 +87,20 @@ function plan(coach: Coach): string[] {
   const bring = count("Bring over").length > 0;
   const start = count("Where to start").length;
   return [
-    "Writing the factory folder, its settings and the rules each app keeps",
-    `Describing ${String(apps)} apps and their checks`,
-    `Adding ${String(people)} people as personas`,
-    ...(board ? ["Connecting the board"] : []),
-    ...(bring
-      ? [
-          "Bringing over what you have: the knowledge base into docs/, Kobble’s skills",
-        ]
-      : []),
-    `Starting ${String(start)} explorations`,
+    m.folder,
+    m.apps(apps),
+    m.people(people),
+    ...(board ? [m.board] : []),
+    ...(bring ? [m.bring] : []),
+    m.start(start),
   ];
 }
 
-function wordsOf(coach: Coach): { title: string; lead: string } {
-  if (setUpDone(coach))
-    return {
-      title: "Kobble is set up",
-      lead: "Everything is in place. One last step: pick where to start.",
-    };
-  if (coach.phase === "build")
-    return {
-      title: "Setting up Kobble",
-      lead: "The kobold writes everything we went through into your repository. This takes a few minutes.",
-    };
-  return {
-    title: "Set up",
-    lead: "Kobble writes all of this into your repository, in a branch you can look at before you share it.",
-  };
+function wordsOf(
+  coach: Coach,
+  m: Messages["setup"],
+): { title: string; lead: string } {
+  if (setUpDone(coach)) return m.done;
+  if (coach.phase === "build") return m.building;
+  return m.before;
 }

@@ -2,6 +2,7 @@
 // under its words; as a link to the mission where it is picked.
 
 import type { SignalRow } from "@/api";
+import { useT } from "@/i18n/use-t";
 import { personaHash } from "@/lib/routes";
 
 import { stepWords } from "./view";
@@ -10,7 +11,8 @@ export function StepOf({
   signal,
   link = false,
 }: Readonly<{ signal: SignalRow; link?: boolean }>) {
-  const words = stepWords(signal);
+  const t = useT();
+  const words = stepWords(signal, t.words);
   if (!words) return null;
   if (!link || !signal.persona || !signal.step)
     return (

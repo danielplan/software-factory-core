@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Step } from "@/connect/step";
 import { Pick, WhichWork } from "@/connect/pick";
 import { type Columns, StageMapping } from "@/connect/stage-map";
+import { useT } from "@/i18n/use-t";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };
@@ -19,6 +20,7 @@ type Projects = { name: string; projects: { key: string; name: string }[] };
 export function JiraSteps({
   onDone,
 }: Readonly<{ onDone: (message: string) => void }>) {
+  const t = useT();
   const [login, setLogin] = useState<Login>({ site: "", email: "", token: "" });
   const [found, setFound] = useState<Projects | null>(null);
   const { busy, problem, run } = useRun();
@@ -27,7 +29,11 @@ export function JiraSteps({
       <ol className="grid gap-5">
         <Step
           n={1}
-          title={found ? `Signed in as ${found.name}` : "Your Jira and a token"}
+          title={
+            found
+              ? t.connect.github.signedInAs(found.name)
+              : t.connect.jira.login
+          }
           done={found !== null}
         >
           <LoginFields
@@ -49,11 +55,11 @@ export function JiraSteps({
                 })
               }
             >
-              {busy ? "Checking…" : "Check"}
+              {busy ? t.connect.checking : t.connect.jira.check}
             </Button>
           )}
         </Step>
-        <Step n={2} title="Your project" done={false}>
+        <Step n={2} title={t.connect.jira.project} done={false}>
           {found && (
             <ProjectStep
               login={login}
@@ -65,7 +71,7 @@ export function JiraSteps({
           )}
         </Step>
       </ol>
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
     </section>
   );
 }
@@ -85,6 +91,7 @@ function ProjectStep({
   run: (step: () => Promise<void>) => Promise<void>;
   onDone: (message: string) => void;
 }>) {
+  const t = useT();
   const [project, setProject] = useState("");
   const [label, setLabel] = useState("*");
   const [columns, setColumns] = useState<Columns | null>(null);
@@ -104,7 +111,7 @@ function ProjectStep({
   return (
     <div className="grid gap-3">
       <Pick
-        label="Project"
+        label={t.connect.jira.projectPick}
         value={project}
         options={found.projects.map((one) => ({
           value: one.key,
@@ -133,7 +140,7 @@ function ProjectStep({
           })
         }
       >
-        Connect
+        {t.connect.connect}
       </Button>
     </div>
   );
@@ -143,6 +150,7 @@ function LoginFields({
   login,
   onLogin,
 }: Readonly<{ login: Login; onLogin: (login: Login) => void }>) {
+  const t = useT();
   const type =
     (key: keyof Login) => (event: React.ChangeEvent<HTMLInputElement>) => {
       onLogin({ ...login, [key]: event.target.value });
@@ -152,23 +160,23 @@ function LoginFields({
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
           id="jira-site"
-          label="Site"
-          help="For example acme.atlassian.net."
+          label={t.connect.jira.site}
+          help={t.connect.jira.siteHelp}
         >
           <Input id="jira-site" value={login.site} onChange={type("site")} />
         </Field>
         <Field
           id="jira-email"
-          label="Your email"
-          help="The one you sign in to Jira with."
+          label={t.connect.jira.email}
+          help={t.connect.jira.emailHelp}
         >
           <Input id="jira-email" value={login.email} onChange={type("email")} />
         </Field>
       </div>
       <Field
         id="jira-token"
-        label="API token"
-        help="Kept only on this computer."
+        label={t.connect.jira.token}
+        help={t.connect.jira.tokenHelp}
       >
         <Input
           id="jira-token"
@@ -185,7 +193,7 @@ function LoginFields({
         className="inline-flex w-fit items-center gap-1.5 text-[13px] underline underline-offset-2"
       >
         <KeyRound className="size-4" aria-hidden />
-        Create an API token
+        {t.connect.jira.createToken}
         <ExternalLink className="size-3.5 text-muted-foreground" aria-hidden />
       </a>
     </>

@@ -8,21 +8,21 @@ import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
 import { useSignals } from "@/signals/use-signals";
 
+import { useT } from "@/i18n/use-t";
+
 import { Topic } from "./settings-card";
 
 export function LiveAppCard() {
   const { data } = useSignals();
   const [problem, setProblem] = useState<string | null>(null);
+  const t = useT();
   const sync = data?.sync;
   return (
-    <Topic
-      title="The live app"
-      about="Where Kobble reads what happens in your app, every 30 minutes."
-    >
+    <Topic title={t.settings.sections.liveApp} about={t.settings.liveApp.about}>
       {sync?.connected ? (
         <div className="grid gap-3">
           <p className="text-[13px]">
-            Reads from{" "}
+            {t.settings.liveApp.readsFrom}{" "}
             <span className="font-medium break-all">{sync.address}</span>
           </p>
           <Button
@@ -36,14 +36,14 @@ export function LiveAppCard() {
               });
             }}
           >
-            Disconnect
+            {t.settings.liveApp.disconnect}
           </Button>
         </div>
       ) : (
         <p className="text-[13px] text-muted-foreground">
-          Not connected. Connect it on{" "}
+          {t.settings.liveApp.notConnected}{" "}
           <a href="#signals" className="font-semibold text-blue">
-            Signals
+            {t.shell.pages.signals}
           </a>
           .
         </p>

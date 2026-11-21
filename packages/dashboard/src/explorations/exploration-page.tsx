@@ -16,8 +16,10 @@ import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
 import { TalkPanel } from "./talk-panel";
+import { useT } from "@/i18n/use-t";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
+  const t = useT();
   const { data, problem } = useRead(
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
   ) as Read<Page>;
@@ -36,7 +38,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   useClosed(data?.exploration.status);
   if (!data)
     return problem ? (
-      <ProblemBox title="This exploration cannot be read" text={problem} />
+      <ProblemBox title={t.explore.cannotRead} text={problem} />
     ) : null;
   const press = (path: string, body: object) => {
     say(null);
@@ -62,7 +64,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
           <div className="relative flex min-h-0 min-w-0 flex-1">
             {said && (
               <div className="absolute inset-x-4 top-4 z-10 rounded-xl bg-card shadow-card">
-                <ProblemBox title="That did not work" text={said} />
+                <ProblemBox title={t.explore.didNotWork} text={said} />
               </div>
             )}
             <Board
@@ -116,6 +118,7 @@ function TopBar({
   // The button whose work runs now.
   pending: string | null;
 }>) {
+  const t = useT();
   const { exploration, board } = page;
   const open = ["waiting", "exploring"].includes(exploration.status);
   const agreed = board.things.find(
@@ -129,7 +132,7 @@ function TopBar({
         className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
       >
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
-        Explorations
+        {t.shell.pages.explore}
       </a>
       <span className="text-[12.5px] text-muted-foreground">/</span>
       <span className="min-w-0 flex-1 text-[15px] font-semibold">
@@ -146,7 +149,7 @@ function TopBar({
               press("drop", {});
             }}
           >
-            {pending === "drop" ? "Dropping…" : "Drop"}
+            {pending === "drop" ? t.explore.dropping : t.explore.drop}
           </Button>
           <Button
             size="pill-sm"
@@ -156,14 +159,16 @@ function TopBar({
               press("hand-off", {});
             }}
           >
-            {pending === "hand-off" ? "Handing off…" : `Hand off ${key}`}
+            {pending === "hand-off"
+              ? t.explore.handingOff
+              : t.explore.handOff(key)}
           </Button>
         </>
       ) : (
         <span className="inline-flex h-[22px] items-center rounded-md bg-wash px-2.5 text-xs font-medium text-wash-foreground">
           {exploration.work
-            ? `Handed off as #${String(exploration.work)}`
-            : "Dropped"}
+            ? t.explore.handedOffAs(exploration.work)
+            : t.explore.dropped}
         </span>
       )}
     </div>

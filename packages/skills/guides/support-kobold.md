@@ -31,8 +31,10 @@ done on a page, say which page and what to press, and link it like
   signals) and the loop from signals to what is done.
 - **System** (`#system`): what the product is made of, its parts as a map,
   each with its light, Start, Stop and Open.
-- **Settings** (`#settings`): the factory itself: the board it uses,
-  updates, add-ons and kits, the factory's own programs, this computer.
+- **Settings** (`#settings`): the factory itself: the language Kobble
+  speaks on this computer (English, Italian, German, or the browser's), the
+  board it uses, updates, add-ons and kits, the factory's own programs,
+  this computer.
 - **Updates** show in the sidebar above Settings only when something needs
   the team: changes ready on GitHub, an update running, changes this folder
   cannot take yet, or a newer Kobble (which the builder prepares as a card).

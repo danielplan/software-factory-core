@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import { pickedStart } from "./first-exploration";
 import { setUpDone, type Step } from "./steps";
+import { useT } from "@/i18n/use-t";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -24,6 +25,7 @@ export function BarAction({
   at: number;
   onGo: (n: number) => void;
 }>) {
+  const t = useT();
   const { coach } = state;
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -43,13 +45,13 @@ export function BarAction({
   const next = () => {
     onGo(at + 1);
   };
-  let label = "Continue";
+  let label = t.setup.bar.continue;
   let act = next;
-  if (step.id === "hello") label = "Let’s go";
+  if (step.id === "hello") label = t.setup.bar.go;
   if (step.id === "setup") {
     const done = setUpDone(coach);
     if (coach.phase === "build" && !done) return null;
-    label = done ? "Pick where to start" : "Set up Kobble";
+    label = done ? t.setup.bar.pickStart : t.setup.bar.setUp;
     if (!done)
       act = () => {
         run(() => post("/api/setup/build"));
@@ -57,7 +59,7 @@ export function BarAction({
   }
   if (step.id === "start") {
     const picked = pickedStart();
-    label = picked ? "Open it" : "Look around first";
+    label = picked ? t.setup.bar.open : t.setup.bar.look;
     act = () => {
       run(() => openKobble(picked));
     };

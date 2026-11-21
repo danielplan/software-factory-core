@@ -13,7 +13,7 @@ import { Popover } from "radix-ui";
 import { useState } from "react";
 
 import type { PartView } from "@/api";
-import { TYPES } from "@/lib/system-map";
+import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 type PartType = NonNullable<PartView["type"]>;
@@ -32,7 +32,7 @@ const LOOK: Record<PartType, { icon: LucideIcon; look: string }> = {
 // A small coloured tag saying what type of part it is. Pointing at it,
 // focusing it or tapping it tells what that type means; only this tag's.
 export function TypeTag({ type }: Readonly<{ type: PartType }>) {
-  const { label, means } = TYPES[type];
+  const { label, means } = useT().system.types[type];
   const { icon: Icon, look } = LOOK[type];
   const [open, setOpen] = useState(false);
   return (

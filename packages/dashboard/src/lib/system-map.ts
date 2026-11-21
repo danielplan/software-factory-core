@@ -1,11 +1,9 @@
 // What the System map draws, worked out from the parts: a line from each
 // part to each part that needs it, which parts come out when one is pointed
-// at, and what each type of part means. Kept apart from the map so it is
+// at. Kept apart from the map so it is
 // checked on its own.
 
 import type { PartView } from "../api.ts";
-
-type PartType = NonNullable<PartView["type"]>;
 
 export type Line = { id: string; source: string; target: string };
 
@@ -35,15 +33,3 @@ export function nearOf(lines: Line[], pointed: string | null) {
   }
   return near;
 }
-
-// Each type's name on its tag and what it means, told when the tag is
-// pointed at.
-export const TYPES: Record<PartType, { label: string; means: string }> = {
-  screen: { label: "Screen", means: "what people open, a web page or app" },
-  backend: { label: "Backend", means: "works behind the screens" },
-  data: { label: "Data", means: "where data is stored" },
-  outside: {
-    label: "Outside service",
-    means: "run by someone else, like payments",
-  },
-};

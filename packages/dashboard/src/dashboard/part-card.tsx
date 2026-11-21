@@ -5,6 +5,9 @@ import type { PartView } from "@/api";
 import { StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { problemTitle } from "@/i18n/server-texts";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,13 +35,14 @@ export function PartCard({
   onPress: (path: string) => void;
   tag?: ReactNode;
 }>) {
+  const t = useT().system;
   // Only what the light does not say: a step, or that it was started
   // elsewhere.
   const step =
     part.light === "starting" && part.step
-      ? `Starting · ${part.step}`
+      ? t.part.starting(part.step)
       : part.step;
-  const status = step ?? quietStatus(part);
+  const status = step ?? quietStatus(part, t.part);
   return (
     <div
       data-light={part.light}
@@ -63,7 +67,7 @@ export function PartCard({
             rel="noreferrer"
             className="ml-auto inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground hover:text-foreground hover:underline"
           >
-            Open <ExternalLink className="size-3" aria-hidden />
+            {t.part.open} <ExternalLink className="size-3" aria-hidden />
           </a>
         )}
       </div>
@@ -83,23 +87,29 @@ export function PartCard({
 
 // What a part that is not starting says: started elsewhere, or that it
 // runs with what uses it.
-function quietStatus(part: PartView): string | null {
-  if (part.outside) return "Running, started outside the factory";
-  if (part.start === "with") return "Runs with the products that use it";
+function quietStatus(
+  part: PartView,
+  says: Messages["system"]["part"],
+): string | null {
+  if (part.outside) return says.outside;
+  if (part.start === "with") return says.withOthers;
   return null;
 }
 
 function PartProblem({
   problem,
 }: Readonly<{ problem: NonNullable<PartView["problem"]> }>) {
+  const t = useT().system;
   return (
     <div className="grid gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-xs">
-      <p className="font-medium text-destructive">{problem.title}</p>
+      <p className="font-medium text-destructive">
+        {problemTitle(problem.title, t.problems)}
+      </p>
       <p className="text-foreground/80">{problem.text}</p>
       {problem.details.length > 0 && (
         <Collapsible>
           <CollapsibleTrigger className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline">
-            Technical details <ChevronDown className="size-3" aria-hidden />
+            {t.part.details} <ChevronDown className="size-3" aria-hidden />
           </CollapsibleTrigger>
           <CollapsibleContent>
             <pre className="mt-1 max-h-40 overflow-auto text-xs whitespace-pre-wrap">
@@ -121,22 +131,23 @@ function PartButtons({
   const press = (action: string) => () => {
     onPress(`/api/parts/${encodeURIComponent(part.id)}/${action}`);
   };
+  const t = useT().system.part;
   if (!part.canStart && !part.canStop) return null;
   const look = "h-7 rounded-lg px-2.5 text-xs font-normal";
   return (
     <div className="flex flex-wrap gap-1.5">
       {part.canStart && (
         <Button variant="outline" className={look} onClick={press("start")}>
-          {part.light === "problem" ? "Try again" : "Start"}
+          {part.light === "problem" ? t.tryAgain : t.start}
         </Button>
       )}
       {part.canStop && (
         <>
           <Button variant="outline" className={look} onClick={press("restart")}>
-            Restart
+            {t.restart}
           </Button>
           <Button variant="outline" className={look} onClick={press("stop")}>
-            Stop
+            {t.stop}
           </Button>
         </>
       )}

@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { messageOf, post } from "@/api";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/use-t";
 
 export function RemoveRow({
   path,
@@ -22,14 +23,15 @@ export function RemoveRow({
   onGone: (gone: boolean) => void;
   onProblem: (problem: string) => void;
 }>) {
+  const t = useT();
   const [asking, setAsking] = useState(false);
   if (!asking)
     return (
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Delete"
-        title="Delete"
+        aria-label={t.explore.delete}
+        title={t.explore.delete}
         className="text-muted-foreground hover:text-destructive"
         onClick={() => {
           setAsking(true);
@@ -48,7 +50,7 @@ export function RemoveRow({
           setAsking(false);
         }}
       >
-        Cancel
+        {t.explore.cancel}
       </Button>
       <Button
         variant="destructive"
@@ -62,7 +64,7 @@ export function RemoveRow({
           });
         }}
       >
-        Delete
+        {t.explore.delete}
       </Button>
     </span>
   );

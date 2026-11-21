@@ -21,6 +21,7 @@ import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
 import { type MadeReport, reviewWords } from "./made.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
+import { inLanguage } from "../../language.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -302,10 +303,12 @@ export class ExplorationTalks {
     ].join("\n");
     await talk.answer(prompt, spokenIn, {
       ...RIGHTS,
-      instructions: [
-        readFileSync(join(guidesFolder, "exploration-coach.md"), "utf8"),
-        productPicture(this.options.root ?? "", this.options.project),
-      ].join("\n\n"),
+      instructions: inLanguage(
+        [
+          readFileSync(join(guidesFolder, "exploration-coach.md"), "utf8"),
+          productPicture(this.options.root ?? "", this.options.project),
+        ].join("\n\n"),
+      ),
     });
   }
 

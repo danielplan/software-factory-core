@@ -6,21 +6,20 @@ import { TRACKER_STEPS } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n/use-t";
 
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
 export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
+  const t = useT();
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
         <h1 className="text-[22px] font-semibold tracking-[-0.015em]">
-          Where should the factory keep its work?
+          {t.connect.page.title}
         </h1>
-        <p className="text-muted-foreground">
-          The ideas you agree to become cards on your team's board, and the
-          factory builds from there. Connect the board it works from.
-        </p>
+        <p className="text-muted-foreground">{t.connect.page.about}</p>
       </header>
       {done ? (
         <section className="grid gap-4 rounded-xl bg-card p-6 shadow-soft">
@@ -31,7 +30,7 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
               window.location.hash = "build";
             }}
           >
-            Go to the board
+            {t.connect.page.goToBoard}
           </Button>
         </section>
       ) : (
@@ -57,6 +56,7 @@ export function TrackerChoice({
   connected?: Board;
   onDone: (message: string) => void;
 }>) {
+  const t = useT();
   const [choice, setChoice] = useState(current === "none" ? "github" : current);
   const choices = [
     ...trackers
@@ -107,7 +107,7 @@ export function TrackerChoice({
         ))}
       </div>
       {Steps && <Steps onDone={onDone} connected={connected?.[choice]} />}
-      {problem && <ProblemBox title="That did not work" text={problem} />}
+      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
     </div>
   );
 }

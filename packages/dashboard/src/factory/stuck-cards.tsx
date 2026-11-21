@@ -16,11 +16,14 @@ import { Button } from "@/components/ui/button";
 import { FIELD_AREA } from "@/lib/field-style";
 import { cn } from "@/lib/utils";
 
+import { useT } from "@/i18n/use-t";
+
 import { reasonOf, type Stuck, stuckFor } from "./stuck-view";
 
 export const STUCK_COLOUR = "#d9534f";
 
 export function StuckList({ stuck }: Readonly<{ stuck: Stuck[] }>) {
+  const t = useT().builder.stuck;
   // Sent ones leave the list at once; the board's next reading has them in
   // To do.
   const [sent, setSent] = useState<number[]>([]);
@@ -29,7 +32,7 @@ export function StuckList({ stuck }: Readonly<{ stuck: Stuck[] }>) {
   const now = new Date();
   return (
     <section
-      aria-label="Stuck"
+      aria-label={t.title}
       className="grid gap-3 rounded-xl border px-4 py-3.5"
       style={{
         backgroundColor: `color-mix(in srgb, ${STUCK_COLOUR} 5%, #fafafa)`,
@@ -42,11 +45,9 @@ export function StuckList({ stuck }: Readonly<{ stuck: Stuck[] }>) {
           className="size-[15px]"
           style={{ color: STUCK_COLOUR }}
         />
-        <span style={{ color: STUCK_COLOUR }}>Stuck</span>
+        <span style={{ color: STUCK_COLOUR }}>{t.title}</span>
         <span className="text-xs font-normal text-muted-foreground">
-          {shown.length === 1
-            ? "1 card the builder could not finish"
-            : `${String(shown.length)} cards the builder could not finish`}
+          {t.count(shown.length)}
         </span>
       </h2>
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -72,6 +73,7 @@ function StuckCard({
   now,
   onSent,
 }: Readonly<{ one: Stuck; now: Date; onSent: () => void }>) {
+  const { builder: t } = useT();
   const [hint, write] = useState("");
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -94,14 +96,14 @@ function StuckCard({
           href={one.url}
           target="_blank"
           rel="noreferrer"
-          title="See the whole card"
+          title={t.stuck.seeCard}
           className="inline-flex items-center gap-0.5 hover:text-foreground"
         >
           #{one.number}
           <ArrowUpRight aria-hidden className="size-3" />
         </a>
         <span className="ml-auto font-medium" style={{ color: STUCK_COLOUR }}>
-          {stuckFor(one.since, now)}
+          {stuckFor(one.since, now, t.since)}
         </span>
       </p>
       <p className="text-[13px] leading-[1.35] font-medium">{one.title}</p>
@@ -111,14 +113,14 @@ function StuckCard({
           className="mt-px size-3.5 flex-none"
           style={{ color: STUCK_COLOUR }}
         />
-        <Markdown text={reasonOf(one)} inline />
+        <Markdown text={reasonOf(one, t.why)} inline />
       </div>
       {one.ask && one.ask.answers.length > 0 && (
         <QuickPicks ask={one.ask} said={said} onPick={write} />
       )}
       <textarea
-        aria-label={`Answer the builder on card #${String(one.number)}`}
-        placeholder="Answer the builder, or give it a hint"
+        aria-label={t.stuck.answerOn(one.number)}
+        placeholder={t.stuck.placeholder}
         value={hint}
         onChange={(event) => {
           write(event.target.value);
@@ -134,7 +136,7 @@ function StuckCard({
         onClick={send}
       >
         <Send aria-hidden className="size-3.5" />
-        {sending ? "Sending…" : "Send and let it try again"}
+        {sending ? t.stuck.sending : t.stuck.send}
       </Button>
     </article>
   );
@@ -150,12 +152,9 @@ function QuickPicks({
   said: string;
   onPick: (answer: string) => void;
 }>) {
+  const t = useT().builder.stuck;
   return (
-    <div
-      role="radiogroup"
-      aria-label="Pick an answer"
-      className="mt-1 grid gap-1"
-    >
+    <div role="radiogroup" aria-label={t.pick} className="mt-1 grid gap-1">
       {ask.answers.map((pick) => {
         const on = said === pick.answer;
         return (
@@ -177,7 +176,7 @@ function QuickPicks({
             <span className="flex-1 leading-snug">{pick.answer}</span>
             {ask.suggested === pick.key && !on && (
               <span className="rounded-full bg-panel px-1.5 py-px text-[11px] text-muted-foreground">
-                Suggested
+                {t.suggested}
               </span>
             )}
             {on && <Check aria-hidden className="size-3.5 flex-none" />}

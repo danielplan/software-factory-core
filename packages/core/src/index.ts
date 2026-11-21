@@ -99,6 +99,14 @@ export {
   parallelCards,
 } from "./agents/builder-settings.ts";
 export {
+  answerIn,
+  chooseLanguage,
+  isLanguageChoice,
+  type Language,
+  type LanguageChoice,
+  languageChoice,
+} from "./agents/language-settings.ts";
+export {
   chooseUpdatesByItself,
   updatesByItself,
   updateSettings,

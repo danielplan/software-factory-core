@@ -25,6 +25,7 @@ import {
   waitingOf,
 } from "@/lib/home-view";
 import { overallOf } from "@/lib/shell-view";
+import { useT } from "@/i18n/use-t";
 import { useSignals } from "@/signals/use-signals";
 
 import type { FactoryState } from "./dashboard";
@@ -46,6 +47,7 @@ const STAGE_LOOK: Record<Stage["id"], { icon: ReactNode; colour: string }> = {
 export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const { data: explorations } = useExplorations();
   const { data: signals } = useSignals();
+  const t = useT();
   const input: HomeInput = {
     work: state.work,
     signals: signals?.signals ?? [],
@@ -54,15 +56,12 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   };
   const products = state.parts.filter((part) => part.area === "products");
   const shown = products.filter((part) => part.light !== "none");
-  const product = overallOf(products).lit;
+  const product = overallOf(products, t.shell).lit;
   const building = state.work?.builder.working;
-  const waiting = waitingOf(input);
+  const waiting = waitingOf(input, t.home);
   return (
     <>
-      <PageHead
-        title="Home"
-        about="What waits for you, and where the work is."
-      />
+      <PageHead title={t.shell.pages.home} about={t.home.about} />
       <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-foreground-2">
         <StatusLight light={product} />
         <span className="min-w-0 flex-1">
@@ -73,23 +72,24 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
               shown: shown.length,
             },
             building ? `#${String(building.number)} ${building.title}` : null,
+            t.home,
           )}
         </span>
         <a href="#system" className="font-medium text-blue hover:underline">
-          System
+          {t.shell.pages.system}
         </a>
       </div>
       <Card className="gap-0 py-0 shadow-soft">
         {waiting.length === 0 ? (
           <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-            Nothing waits for you. The kobolds are on it.
+            {t.home.nothingWaits}
           </p>
         ) : (
           waiting.map((item) => <WaitingRow key={item.id} item={item} />)
         )}
       </Card>
       <Card className="grid gap-0 overflow-hidden py-0 shadow-soft sm:grid-cols-2 lg:grid-cols-4">
-        {loopOf(input).map((stage, at) => (
+        {loopOf(input, t.home, t.shell.pages).map((stage, at) => (
           <StageCell key={stage.id} stage={stage} first={at === 0} />
         ))}
       </Card>
@@ -98,13 +98,14 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
 }
 
 function WaitingRow({ item }: Readonly<{ item: WaitingItem }>) {
+  const t = useT().home;
   return (
     <div className="grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-4 py-2.5 first:border-t-0">
       <span
         className="text-xs font-medium"
         style={{ color: KIND_COLOUR[item.kind] }}
       >
-        {item.kind}
+        {t.kinds[item.kind]}
       </span>
       <span className="min-w-0">
         <span className="block truncate text-[13px]">
@@ -126,7 +127,7 @@ function WaitingRow({ item }: Readonly<{ item: WaitingItem }>) {
         {...(item.outside ? { target: "_blank", rel: "noreferrer" } : {})}
         className="inline-flex h-7 items-center gap-1 rounded-lg border border-border px-2.5 text-xs hover:bg-hover"
       >
-        {item.kind === "Review" ? "Open" : item.kind}
+        {item.kind === "Review" ? t.openPullRequest : t.kinds[item.kind]}
         {item.outside ? (
           <ExternalLink aria-hidden className="size-3" />
         ) : (

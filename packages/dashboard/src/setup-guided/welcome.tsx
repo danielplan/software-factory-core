@@ -7,12 +7,15 @@ import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
 import { cardsIn, stepsOf } from "./steps";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
 // The welcome: what the kobold read, step by step, while it reads and once
 // it is done; no question here, they wait in the steps they are about.
 export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
+  const t = useT();
   const steps = stepsOf(coach.draft).filter((step) => step.area);
   const reading = coach.working;
   return (
@@ -20,12 +23,10 @@ export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
       <div className="grid justify-items-center gap-3 pt-6 text-center">
         <KoboldHead size={88} />
         <h1 className="text-2xl font-semibold tracking-[-0.015em]">
-          Hi, I’m your kobold.
+          {t.setup.hi}
         </h1>
         <p className="max-w-[56ch] text-muted-foreground">
-          {reading
-            ? (coach.activity ?? "I’m reading your project…")
-            : "I read your project, so you only have to confirm what I found. Let’s go through it."}
+          {reading ? (coach.activity ?? t.setup.reading) : t.setup.read}
         </p>
       </div>
       <ul className="grid rounded-xl bg-card shadow-card">
@@ -55,9 +56,16 @@ export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
                 />
               )}
               <span className="grid">
-                <span className="font-semibold">{step.name}</span>
+                <span className="font-semibold">
+                  {(
+                    t.setup.steps as Record<
+                      string,
+                      { name: string } | undefined
+                    >
+                  )[step.id]?.name ?? step.name}
+                </span>
                 <span className="text-[13px] text-muted-foreground">
-                  {foundLine(cards.length, open, reading)}
+                  {foundLine(cards.length, open, reading, t.setup.found)}
                 </span>
               </span>
             </li>
@@ -69,10 +77,14 @@ export function Welcome({ coach }: Readonly<{ coach: SetupState["coach"] }>) {
 }
 
 // What the kobold found for a step, in a few words.
-function foundLine(cards: number, open: number, reading: boolean): string {
-  if (cards === 0) return reading ? "Reading…" : "Nothing found";
-  const found = `${String(cards)} ${cards === 1 ? "card" : "cards"}`;
+function foundLine(
+  cards: number,
+  open: number,
+  reading: boolean,
+  m: Messages["setup"]["found"],
+): string {
+  if (cards === 0) return reading ? m.reading : m.nothing;
+  const found = m.cards(cards);
   if (open === 0) return found;
-  const questions = open === 1 ? "1 question" : `${String(open)} questions`;
-  return `${found}, ${questions} for you`;
+  return m.questions(found, open);
 }

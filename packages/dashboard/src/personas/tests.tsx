@@ -17,20 +17,23 @@ import { Markdown } from "@/components/markdown";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
-function whenOf(test: PersonaTest): string {
-  if (test.status === "queued") return "waiting for its turn";
-  return test.started ? agoOf(test.started, new Date()) : "";
+function whenOf(test: PersonaTest, t: Messages): string {
+  if (test.status === "queued") return t.personas.run.waitingTurn;
+  return test.started ? agoOf(test.started, new Date(), t.words) : "";
 }
 
 export function TestRun({ id }: Readonly<{ id: string }>) {
+  const t = useT();
   const { data, problem } = useRead(
     `/api/kobble/test?id=${encodeURIComponent(id)}`,
   ) as Read<TestPage>;
   return (
     <div>
       {problem && (
-        <ProblemBox title="This test cannot be read" text={problem} />
+        <ProblemBox title={t.personas.run.cannotRead} text={problem} />
       )}
       {data && <RunBody page={data} />}
     </div>
@@ -40,6 +43,7 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
 const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
 
 function RunBody({ page }: Readonly<{ page: TestPage }>) {
+  const t = useT();
   const { test, persona } = page;
   return (
     <>
@@ -54,7 +58,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
         <div className="mb-3 flex items-center gap-2">
           <StatusChip status={test.status} />
           <span className="text-[12.5px] text-muted-foreground">
-            {test.id} · {whenOf(test)}
+            {test.id} · {whenOf(test, t)}
           </span>
         </div>
         <h1 className="mb-3.5 text-[22px] leading-tight font-semibold tracking-[-0.015em]">
@@ -66,33 +70,37 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
             className="inline-flex h-[34px] items-center gap-[7px] rounded-full bg-card pr-3.5 pl-1.5 text-[13px] font-medium text-foreground-2 shadow-card"
           >
             <PersonaFace face={persona.face} size={24} />
-            As {persona.name}
+            {t.personas.run.as(persona.name)}
           </a>
           <span className="inline-flex h-[34px] items-center rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground-2 shadow-card">
-            {test.on === "main" ? "On the app as it is now" : "On a prototype"}
+            {test.on === "main"
+              ? t.personas.run.onMain
+              : t.personas.run.onPrototype}
           </span>
         </div>
       </div>
       {test.problem && (
         <div className="mt-4">
           <ProblemBox
-            title="The mission could not finish"
+            title={t.personas.run.couldNotFinish}
             text={test.problem}
           />
         </div>
       )}
-      <h2 className={TITLE}>What the kobold did</h2>
+      <h2 className={TITLE}>{t.personas.run.whatDid}</h2>
       <Steps test={test} />
-      <h2 className={TITLE}>What {persona.name} found</h2>
+      <h2 className={TITLE}>{t.personas.run.whatFound(persona.name)}</h2>
       <div className={CARD}>
         {page.signals.length === 0 && (
-          <p className="p-[50px] text-center text-muted-foreground">None yet</p>
+          <p className="p-[50px] text-center text-muted-foreground">
+            {t.personas.run.noneYet}
+          </p>
         )}
         {page.signals.map((signal) => (
           <SignalLine
             key={signal.id}
             signal={signal}
-            where={stepWords(signal)}
+            where={stepWords(signal, t.words)}
           />
         ))}
       </div>
@@ -101,6 +109,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
 }
 
 function Steps({ test }: Readonly<{ test: PersonaTest }>) {
+  const t = useT();
   const working = test.status === "running" || test.status === "queued";
   return (
     <div className={CARD}>
@@ -114,7 +123,7 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
               <Markdown text={step.did} inline />
             </span>
             <span className="text-[12.5px] text-muted-foreground">
-              Expected: <Markdown text={step.expected} inline />
+              {t.personas.run.expected} <Markdown text={step.expected} inline />
               {step.note && (
                 <>
                   {" · "}
@@ -131,7 +140,9 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
                 : "bg-[#fdecec] text-[#c4323a]",
             )}
           >
-            {step.asExpected ? "As expected" : "Surprised"}
+            {step.asExpected
+              ? t.personas.run.asExpected
+              : t.personas.run.surprised}
           </span>
         </div>
       ))}
@@ -140,13 +151,15 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
           <StatusIcon status={test.status} />
           <span className="text-[12.5px] text-muted-foreground">
             {test.status === "queued"
-              ? "Waiting for its turn…"
-              : (test.doing ?? "The kobold is opening the app…")}
+              ? t.personas.run.waitingForTurn
+              : (test.doing ?? t.personas.run.opening)}
           </span>
         </div>
       )}
       {!working && test.steps.length === 0 && (
-        <p className="p-[50px] text-center text-muted-foreground">No steps</p>
+        <p className="p-[50px] text-center text-muted-foreground">
+          {t.personas.run.noSteps}
+        </p>
       )}
     </div>
   );

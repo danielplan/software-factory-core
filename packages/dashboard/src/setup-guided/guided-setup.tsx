@@ -21,6 +21,8 @@ import { BarAction } from "./bar-action";
 import { SetupStep } from "./setup-step";
 import { StepCards } from "./step-cards";
 import { cardsIn, setUpDone, type Step, stepsOf } from "./steps";
+import { useT } from "@/i18n/use-t";
+import type { Messages } from "@/i18n/messages";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -94,25 +96,25 @@ function Content({
   of: number;
   call: ReturnType<typeof useCoachCall>;
 }>) {
+  const t = useT();
   const { coach } = state;
   if (!coach.started)
     return (
       <div className="grid justify-items-center gap-4 pt-16 text-center">
         <KoboldHead size={88} />
         <h1 className="text-2xl font-semibold tracking-[-0.015em]">
-          Hi, I’m your kobold.
+          {t.setup.hi}
         </h1>
-        <p className="max-w-[56ch] text-muted-foreground">
-          Tell me what you want to build, and I’ll set up Kobble with you.
-        </p>
+        <p className="max-w-[56ch] text-muted-foreground">{t.setup.tellMe}</p>
         <CoachStart coach={coach} call={call} />
       </div>
     );
   if (step.id === "hello") return <Welcome coach={coach} />;
+  const shownStep = stepIn(t, step);
   const says = <KoboldSays coach={coach} step={step} />;
   const eyebrow = (
     <span className="text-[12.5px] text-muted-foreground">
-      Step {n} of {of}
+      {t.setup.stepOf(n, of)}
     </span>
   );
   if (step.id === "setup")
@@ -122,9 +124,11 @@ function Content({
       <header className="grid gap-1.5">
         {eyebrow}
         <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
-          {step.id === "start" ? "Where shall we start?" : step.name}
+          {step.id === "start" ? t.setup.whereStart : shownStep.name}
         </h1>
-        <p className="text-muted-foreground">{LEADS[step.id] ?? ""}</p>
+        <p className="text-muted-foreground">
+          {(t.setup.leads as Record<string, string | undefined>)[step.id] ?? ""}
+        </p>
       </header>
       {says}
       {step.area && (
@@ -137,19 +141,6 @@ function Content({
     </>
   );
 }
-
-const LEADS: Record<string, string> = {
-  hello:
-    "I read your project so you only have to confirm what I found. Go through the steps; you can always come back.",
-  product: "What your product is, its parts, and how far it has come.",
-  people:
-    "The people you build for. Kobble tests ideas against them, so they should be real. Add your own.",
-  team: "Who works on it, and where the work is tracked. Everyone can do everything.",
-  how: "The parts of Kobble that fit how you work. You can change them later in Settings.",
-  bring: "What you have already, and what happens to it.",
-  start:
-    "Pick one and Kobble opens it with the canvas already started. Or look around first.",
-};
 
 function Rail({
   project,
@@ -167,9 +158,10 @@ function Rail({
   reach: number;
   onGo: (n: number) => void;
 }>) {
+  const t = useT();
   return (
     <nav
-      aria-label="Setup steps"
+      aria-label={t.setup.rail.label}
       className="flex w-[280px] flex-none flex-col gap-1 border-r border-border bg-card px-4 py-5 max-md:w-auto max-md:flex-row max-md:overflow-x-auto max-md:border-r-0 max-md:border-b"
     >
       <div className="flex items-center gap-2.5 px-1.5 pb-5 font-wordmark text-[15px] font-semibold tracking-[-0.01em] max-md:pb-0">
@@ -177,7 +169,7 @@ function Rail({
         kobble
       </div>
       <p className="px-1.5 pb-4 text-[12.5px] text-muted-foreground max-md:hidden">
-        Setting up{" "}
+        {t.setup.rail.settingUp}{" "}
         <b className="font-semibold text-foreground">
           {project.split(/[\\/]/).filter(Boolean).at(-1)}
         </b>
@@ -209,9 +201,9 @@ function Rail({
                 {n < at ? <Check className="size-3" aria-hidden /> : n}
               </span>
               <span className="grid">
-                {step.name}
+                {stepIn(t, step).name}
                 <small className="text-xs font-normal text-muted-foreground max-md:hidden">
-                  {step.hint}
+                  {stepIn(t, step).hint}
                 </small>
               </span>
             </button>
@@ -234,6 +226,7 @@ function Bar({
   at: number;
   onGo: (n: number) => void;
 }>) {
+  const t = useT();
   const { coach } = state;
   const building = coach.phase === "build" && !setUpDone(coach);
   return (
@@ -247,11 +240,11 @@ function Bar({
               onGo(at - 1);
             }}
           >
-            <ArrowLeft className="size-4" aria-hidden /> Back
+            <ArrowLeft className="size-4" aria-hidden /> {t.setup.rail.back}
           </Button>
         )}
         <span className="flex-1 text-[12.5px] text-faint">
-          {hintOf(step, coach)}
+          {hintOf(step, coach, t.setup.rail)}
         </span>
         <BarAction state={state} step={step} at={at} onGo={onGo} />
       </div>
@@ -259,24 +252,25 @@ function Bar({
   );
 }
 
-function hintOf(step: Step, coach: SetupState["coach"]): string {
+function hintOf(
+  step: Step,
+  coach: SetupState["coach"],
+  m: Messages["setup"]["rail"],
+): string {
   if (step.id === "hello") return "";
-  if (step.id === "setup")
-    return coach.phase === "build"
-      ? ""
-      : "Next, Kobble writes all of this into your repository.";
+  if (step.id === "setup") return coach.phase === "build" ? "" : m.nextWrites;
   if (step.id === "start") return "";
-  return "You can change this later.";
+  return m.canChange;
 }
 
 // The rail's foot: how long it takes, and the kobold, at work or not.
 function RailEnd({ working }: Readonly<{ working: boolean }>) {
+  const t = useT();
   const koboldName = useKoboldName();
   return (
     <div className="mt-auto grid gap-2.5 pt-4 max-md:hidden">
       <p className="px-1.5 text-xs text-muted-foreground">
-        About 7 minutes. You can change all of it later in Settings and
-        Personas.
+        {t.setup.rail.minutes}
       </p>
       <div className="rounded-xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
         <div className="flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-[0_0_0_1px_var(--border-soft)]">
@@ -284,11 +278,20 @@ function RailEnd({ working }: Readonly<{ working: boolean }>) {
           <span className="grid">
             <b className="text-[13.5px]">{koboldName}</b>
             <small className="text-xs text-muted-foreground">
-              {working ? "Working…" : "Here to help"}
+              {working ? t.setup.rail.working : t.setup.rail.help}
             </small>
           </span>
         </div>
       </div>
     </div>
   );
+}
+
+// A step's name and hint in the language shown.
+function stepIn(t: Messages, step: Step): { name: string; hint: string } {
+  const words = t.setup.steps as Record<
+    string,
+    { name: string; hint: string } | undefined
+  >;
+  return words[step.id] ?? step;
 }

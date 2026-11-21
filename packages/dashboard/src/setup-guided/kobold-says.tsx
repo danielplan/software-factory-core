@@ -10,23 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown";
 
 import { cardsIn, type Step } from "./steps";
-
-const LINES: Record<string, string> = {
-  product:
-    "Here is your product as I read it. Click a card to correct it, or take it off.",
-  people:
-    "These are the people I think you build for. Add the real ones you know.",
-  team: "I found who works on it in the history, and where the work is tracked.",
-  how: "These fit how you’ve worked so far. Change anything you like.",
-  bring: "This is what you have already, and what happens to it.",
-  setup: "When you press Set up Kobble, I write it all into your repository.",
-  start: "From what I read, these are worth starting with.",
-};
+import { useT } from "@/i18n/use-t";
 
 export function KoboldSays({
   coach,
   step,
 }: Readonly<{ coach: CoachView; step: Step }>) {
+  const t = useT();
   const open = cardsIn(coach.draft, step.area).filter(
     (card) => card.tone === "question" && !card.confirmed,
   );
@@ -37,8 +27,9 @@ export function KoboldSays({
         {open.length === 0 ? (
           <p>
             {coach.working
-              ? "One moment, I’m changing the cards…"
-              : (LINES[step.id] ?? "")}
+              ? t.setup.says.changing
+              : (((t.setup.says as Record<string, unknown>)[step.id] as
+                  string | undefined) ?? "")}
           </p>
         ) : (
           open.map((card) => (
@@ -61,6 +52,7 @@ function Question({
   step,
   busy,
 }: Readonly<{ card: Card; step: Step; busy: boolean }>) {
+  const t = useT();
   const [answer, setAnswer] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const send = () => {
@@ -92,16 +84,16 @@ function Question({
       </p>
       <div className="flex gap-2">
         <input
-          aria-label={`Answer: ${card.title}`}
+          aria-label={t.setup.says.answerOn(card.title)}
           className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
-          placeholder="Your answer"
+          placeholder={t.setup.says.yourAnswer}
           value={answer}
           onChange={(event) => {
             setAnswer(event.target.value);
           }}
         />
         <Button type="submit" size="pill-sm" disabled={busy || !answer.trim()}>
-          {busy ? "…" : "Answer"}
+          {busy ? "…" : t.setup.says.answer}
         </Button>
       </div>
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}

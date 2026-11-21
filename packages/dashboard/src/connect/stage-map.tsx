@@ -2,6 +2,7 @@ import type { StageMap } from "@/api";
 import { STAGES } from "./stages";
 
 import { Pick } from "./pick";
+import { useT } from "@/i18n/use-t";
 
 export type Columns = { columns: string[]; suggested: StageMap };
 
@@ -24,15 +25,18 @@ export function StageMapping({
   value: StageMap;
   onChange: (value: StageMap) => void;
 }>) {
+  const t = useT();
   const options = [
-    { value: NONE, label: "Not on this board" },
+    { value: NONE, label: t.connect.pick.notOnBoard },
     ...columns.map((column) => ({ value: column, label: column })),
   ];
   return (
     <div className="grid gap-2.5 rounded-xl bg-surface-2/60 p-4">
-      <span className="text-[13px] font-medium">Which column is which</span>
+      <span className="text-[13px] font-medium">
+        {t.connect.pick.whichColumn}
+      </span>
       <span className="text-xs text-muted-foreground">
-        Matched from the columns' names; change any that is wrong.
+        {t.connect.pick.matched}
       </span>
       {ROWS.map((stage) => {
         return (
@@ -46,10 +50,10 @@ export function StageMapping({
                 className="size-2 rounded-full"
                 style={{ background: stage.colour }}
               />
-              {stage.title}
+              {t.connect.stages[stage.id]}
             </span>
             <Pick
-              label={`Column for ${stage.title}`}
+              label={t.connect.pick.columnFor(t.connect.stages[stage.id])}
               value={value[stage.id] || NONE}
               options={options}
               onPick={(picked) => {

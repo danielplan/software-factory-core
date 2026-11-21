@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- New: Kobble speaks English, Italian and German. The dashboard follows the browser's language (English for any other), unless someone chooses one in Settings › This computer (Language); the choice is kept per computer, in the personal settings file (`FACTORY_LANGUAGE` in `factory/settings/factory.env`), never in `team.env`. The kobolds (Sprocket, the explorer, the setup and idea coaches, the persona missions) answer in the language shown; their guides stay in English, and the language is added where their instructions are put together. Times and dates follow the language. The launcher's problem titles and the updates' steps and reasons are said again in the language shown; other texts the server writes stay in English. New endpoints: `GET /api/language` (`choice`), `POST /api/language` (`choice`, and `spoken`, the language the page shows). New in the core's API: `languageChoice`, `chooseLanguage`, `isLanguageChoice`, `answerIn`, the types `Language` and `LanguageChoice`. Nothing to do.
+
 ## 0.13.0 (2026-11-20)
 
 **To upgrade:** pin `release-0.13.0`, `npm install`, `npx software-factory upgrade`. Upgrade every computer of the team together: a core from before cannot read exploration boards with variants.

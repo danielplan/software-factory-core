@@ -7,6 +7,7 @@ import type { VoiceCall } from "@/voice/voice-call";
 
 import { Answer } from "./answer-box";
 import { CoachRouteContext } from "./route";
+import { useT } from "@/i18n/use-t";
 
 type Attached = { id: string; name: string };
 
@@ -34,22 +35,21 @@ export function CoachStart({
   coach,
   call,
 }: Readonly<{ coach: CoachView; call: VoiceCall }>) {
+  const t = useT();
   const { say, problem } = useSay([], () => undefined);
   return (
     <section
-      aria-label="The coach"
+      aria-label={t.setup.coach.label}
       className="grid w-full max-w-[640px] animate-pop gap-3"
     >
       <Answer
         call={call}
         coach={coach}
         onSay={say}
-        placeholder="What do you want to build?"
+        placeholder={t.setup.coach.build}
         className="glow-ring p-3 pl-5 text-base shadow-big"
       />
-      {problem && (
-        <ProblemBox title="The coach could not answer" text={problem} />
-      )}
+      {problem && <ProblemBox title={t.setup.coach.couldNot} text={problem} />}
     </section>
   );
 }

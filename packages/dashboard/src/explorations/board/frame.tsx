@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { KINDS } from "../kinds";
 import type { ThingData } from "./nodes";
+import { useT } from "@/i18n/use-t";
 
 // Where a button on the board says why it did not work (the page shows it).
 export const BoardProblem = createContext<(problem: string | null) => void>(
@@ -34,6 +35,7 @@ export function useBoardDo(exploration: string) {
 }
 
 function AgreeTick({ data }: Readonly<{ data: ThingData }>) {
+  const t = useT();
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   return (
@@ -41,9 +43,7 @@ function AgreeTick({ data }: Readonly<{ data: ThingData }>) {
       type="button"
       aria-pressed={thing.agreed}
       aria-label={
-        thing.agreed
-          ? "Agreed: click to make it a sketch"
-          : "Sketch: click to agree"
+        thing.agreed ? t.explore.board.agreedHint : t.explore.board.sketchHint
       }
       onClick={() => {
         act("board", {
@@ -58,7 +58,7 @@ function AgreeTick({ data }: Readonly<{ data: ThingData }>) {
       )}
     >
       {thing.agreed && <Check aria-hidden className="size-3" />}
-      {thing.agreed ? "Agreed" : "Sketch"}
+      {thing.agreed ? t.explore.board.agreed : t.explore.board.sketch}
     </button>
   );
 }
@@ -73,6 +73,7 @@ function outlineOf(agreed: boolean, tone: "card" | "note"): string {
 
 // The person's own pictures and notes can be taken off.
 function RemoveButton({ data }: Readonly<{ data: ThingData }>) {
+  const t = useT();
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (
@@ -83,7 +84,7 @@ function RemoveButton({ data }: Readonly<{ data: ThingData }>) {
   return (
     <button
       type="button"
-      aria-label="Remove it"
+      aria-label={t.explore.board.remove}
       className="nodrag grid size-5 place-items-center rounded-full text-faint hover:text-foreground"
       onClick={() => {
         act("board", { do: { act: "remove", id: thing.id } });
@@ -108,11 +109,14 @@ export function Frame({
   glow?: boolean;
   children: ReactNode;
 }>) {
+  const t = useT();
   const { thing, pointed, attached, placed } = data;
   return (
     <article
       aria-label={
-        title ? `${KINDS[thing.kind].name}: ${title}` : KINDS[thing.kind].name
+        title
+          ? `${t.explore.kinds[thing.kind]}: ${title}`
+          : t.explore.kinds[thing.kind]
       }
       className={cn(
         "grid gap-2 rounded-[14px] border-[1.5px] p-3 text-left text-[13px] shadow-[0_1px_2px_rgb(20_24_36/0.04)] transition-[opacity,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_-14px_rgb(20_24_36/0.35)]",
@@ -142,7 +146,8 @@ export function Frame({
 }
 
 function KindBadge({ kind }: Readonly<{ kind: ThingData["thing"]["kind"] }>) {
-  const { name, Icon, tint } = KINDS[kind];
+  const t = useT();
+  const { Icon, tint } = KINDS[kind];
   return (
     <span
       className={cn(
@@ -151,7 +156,7 @@ function KindBadge({ kind }: Readonly<{ kind: ThingData["thing"]["kind"] }>) {
       )}
     >
       <Icon aria-hidden className="size-3" />
-      {name}
+      {t.explore.kinds[kind]}
     </span>
   );
 }

@@ -11,8 +11,10 @@ import { type Read, useRead } from "@/lib/use-read";
 import { cn } from "@/lib/utils";
 
 import type { TeamChoices } from "../../../server/src/coach/setup-team.ts";
+import { useT } from "@/i18n/use-t";
 
 export function TeamTiles() {
+  const t = useT();
   const { data } = useRead("/api/setup/team") as Read<TeamChoices>;
   const [shown, show] = useState<TeamChoices | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -33,8 +35,8 @@ export function TeamTiles() {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3">
         <Tile
           icon={<Layers className="size-[17px]" aria-hidden />}
-          title="Cards at once"
-          text="How many cards each computer builds at the same time."
+          title={t.setup.team.cards}
+          text={t.setup.team.cardsText}
         >
           <div className="flex w-fit gap-0.5 rounded-[14px] bg-[#eceef2] p-1">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -57,12 +59,12 @@ export function TeamTiles() {
         </Tile>
         <Tile
           icon={<LineChart className="size-[17px]" aria-hidden />}
-          title="Usage log"
-          text="Writes down how Kobble is used, for a study. Kept on each person’s computer."
+          title={t.setup.team.usage}
+          text={t.setup.team.usageText}
           end={
             <Switch
               checked={now.usage}
-              aria-label="Usage log"
+              aria-label={t.setup.team.usage}
               onCheckedChange={(on) => {
                 save({ usage: on });
               }}

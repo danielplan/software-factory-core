@@ -29,6 +29,7 @@ import type { PartView } from "@/api";
 import { arrange } from "@/explorations/board/layout";
 import { type Line, linesOf, nearOf } from "@/lib/system-map";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n/use-t";
 
 import { PartCard } from "./part-card";
 import { TypeTag } from "./type-tag";
@@ -111,6 +112,7 @@ function PartsMap({
   parts,
   onPress,
 }: Readonly<{ parts: PartView[]; onPress: (path: string) => void }>) {
+  const t = useT().system;
   const [pointed, setPointed] = useState<string | null>(null);
   const [frame, down] = useNarrow();
   const lines = useMemo(() => linesOf(parts), [parts]);
@@ -149,14 +151,11 @@ function PartsMap({
           panOnDrag
           minZoom={0.4}
           maxZoom={1}
-          aria-label="How the parts connect"
+          aria-label={t.mapLabel}
           style={COLOURS}
         />
       </div>
-      <p className="px-1 text-xs text-muted-foreground">
-        Each line joins a part to a part that needs it, its arrow at the one
-        that needs it. Point at a part to see only its lines.
-      </p>
+      <p className="px-1 text-xs text-muted-foreground">{t.mapLegend}</p>
     </div>
   );
 }

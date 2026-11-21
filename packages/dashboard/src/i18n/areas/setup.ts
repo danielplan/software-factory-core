@@ -1,0 +1,163 @@
+// Setting up Kobble with the kobold: the steps, what the kobold says, the
+// cards it found, and setting up at the end.
+
+const en = {
+  hi: "Hi, I’m your kobold.",
+  tellMe: "Tell me what you want to build, and I’ll set up Kobble with you.",
+  reading: "I’m reading your project…",
+  read: "I read your project, so you only have to confirm what I found. Let’s go through it.",
+  stepOf: (n: number, of: number) => `Step ${String(n)} of ${String(of)}`,
+  whereStart: "Where shall we start?",
+  steps: {
+    hello: { name: "Welcome", hint: "The kobold reads" },
+    product: { name: "Your product", hint: "What it is, how far" },
+    people: { name: "Who it’s for", hint: "The people you build for" },
+    team: { name: "Team and board", hint: "Who works on it, where" },
+    how: { name: "How Kobble works", hint: "Add-ons, the look" },
+    bring: { name: "Bring over", hint: "What you have already" },
+    setup: { name: "Set up", hint: "Kobble writes it all" },
+    start: { name: "First exploration", hint: "Start with real work" },
+  },
+  leads: {
+    hello:
+      "I read your project so you only have to confirm what I found. Go through the steps; you can always come back.",
+    product: "What your product is, its parts, and how far it has come.",
+    people:
+      "The people you build for. Kobble tests ideas against them, so they should be real. Add your own.",
+    team: "Who works on it, and where the work is tracked. Everyone can do everything.",
+    how: "The parts of Kobble that fit how you work. You can change them later in Settings.",
+    bring: "What you have already, and what happens to it.",
+    start:
+      "Pick one and Kobble opens it with the canvas already started. Or look around first.",
+  },
+  says: {
+    product:
+      "Here is your product as I read it. Click a card to correct it, or take it off.",
+    people:
+      "These are the people I think you build for. Add the real ones you know.",
+    team: "I found who works on it in the history, and where the work is tracked.",
+    how: "These fit how you’ve worked so far. Change anything you like.",
+    bring: "This is what you have already, and what happens to it.",
+    setup: "When you press Set up Kobble, I write it all into your repository.",
+    start: "From what I read, these are worth starting with.",
+    changing: "One moment, I’m changing the cards…",
+    answerOn: (title: string) => `Answer: ${title}`,
+    yourAnswer: "Your answer",
+    answer: "Answer",
+  },
+  rail: {
+    label: "Setup steps",
+    settingUp: "Setting up",
+    minutes:
+      "About 7 minutes. You can change all of it later in Settings and Personas.",
+    working: "Working…",
+    help: "Here to help",
+    back: "Back",
+    nextWrites: "Next, Kobble writes all of this into your repository.",
+    canChange: "You can change this later.",
+  },
+  bar: {
+    continue: "Continue",
+    go: "Let’s go",
+    pickStart: "Pick where to start",
+    setUp: "Set up Kobble",
+    open: "Open it",
+    look: "Look around first",
+  },
+  found: {
+    reading: "Reading…",
+    nothing: "Nothing found",
+    cards: (n: number) => `${String(n)} ${n === 1 ? "card" : "cards"}`,
+    questions: (found: string, n: number) =>
+      found +
+      ", " +
+      (n === 1 ? "1 question" : String(n) + " questions") +
+      " for you",
+  },
+  guess: {
+    from: (source: string) => `from ${source}`,
+    agreed: "agreed",
+    guessFrom: (source: string) => `my guess, from ${source}`,
+    guess: "my guess",
+  },
+  cards: {
+    forEveryone: "For everyone",
+    addOns: "Add-ons",
+    look: "The look",
+    lookNote: "for everyone",
+    apps: "Apps I found",
+    appsNote: (n: number) => `${String(n)} apps`,
+    alsoHere: "Also in your project",
+    everyone:
+      "Everyone can do everything. Kobble only uses this list to recognise who is at a computer.",
+    board: "Your board",
+    building:
+      "Every computer with Kobble can build. A card is built by one at a time: the one that starts it says so on the card, and the others leave it.",
+    takeOff: (title: string) => `Take off ${title}`,
+    title: "Title",
+    whatItSays: "What it says",
+    addCustomer: "Add a real customer",
+    who: "Who they are",
+    whoExample: "A first boat owner",
+    what: "What they do and want",
+    add: "Add",
+    cancel: "Cancel",
+  },
+  stages: {
+    "An idea": "An idea",
+    "Built, not live yet": "Built, not live yet",
+    "Live, a few customers": "Live, a few customers",
+    Live: "Live",
+  } as Record<string, string>,
+  howFar: "How far is it?",
+  myGuess: (text: string) => `My guess: ${text}`,
+  look: {
+    yours: "Your app’s look",
+    yoursText:
+      "Your app’s colours, fonts and corners, taken from its code when Kobble is set up, and your logo.",
+    own: "Kobble’s own",
+    ownText: "The kobold logo, calm grey and blue.",
+  },
+  team: {
+    cards: "Cards at once",
+    cardsText: "How many cards each computer builds at the same time.",
+    usage: "Usage log",
+    usageText:
+      "Writes down how Kobble is used, for a study. Kept on each person’s computer.",
+  },
+  done: {
+    title: "Kobble is set up",
+    lead: "Everything is in place. One last step: pick where to start.",
+  },
+  building: {
+    title: "Setting up Kobble",
+    lead: "The kobold writes everything we went through into your repository. This takes a few minutes.",
+  },
+  before: {
+    title: "Set up",
+    lead: "Kobble writes all of this into your repository, in a branch you can look at before you share it.",
+  },
+  plan: {
+    folder:
+      "Writing the factory folder, its settings and the rules each app keeps",
+    apps: (n: number) => `Describing ${String(n)} apps and their checks`,
+    people: (n: number) => `Adding ${String(n)} people as personas`,
+    board: "Connecting the board",
+    bring:
+      "Bringing over what you have: the knowledge base into docs/, Kobble’s skills",
+    start: (n: number) => `Starting ${String(n)} explorations`,
+  },
+  coach: {
+    answer: "Answer the coach…",
+    answerLabel: "Answer the coach",
+    talk: "Talk",
+    talkTitle: "Talk instead of typing",
+    send: "Send",
+    label: "The coach",
+    build: "What do you want to build?",
+    couldNot: "The coach could not answer",
+  },
+};
+
+export type SetupWords = typeof en;
+export const setupEnglish: SetupWords = en;

@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
 
 import { teamRoutes } from "../coach/setup-team.ts";
+import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
@@ -64,6 +65,7 @@ export function kobbleOf(
       ...kobble.routes,
       ...updates.routes,
       ...teamRoutes(session.options.project),
+      ...languageRoutes(session.options.project),
       ...factoryCardRoutes(
         join(session.options.project, FACTORY_FOLDER),
         more.cli,

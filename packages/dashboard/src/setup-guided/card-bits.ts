@@ -3,6 +3,7 @@
 // what kind of thing it is, and a person's initials.
 
 import type { Card } from "@/api";
+import { ENGLISH, type Messages } from "../i18n/messages.ts";
 
 // "… (AGENTS.md)" at the end of a card's text: the page it came from.
 function split(card: Card): { text: string; source: string | null } {
@@ -24,10 +25,13 @@ export function textOf(card: Card): string {
 }
 
 // The line under a card: where it came from, a guess until agreed.
-export function fromLine(card: Card): string {
+export function fromLine(
+  card: Card,
+  m: Messages["setup"]["guess"] = ENGLISH.setup.guess,
+): string {
   const source = sourceOf(card);
-  if (card.confirmed) return source ? `from ${source}` : "agreed";
-  return source ? `my guess, from ${source}` : "my guess";
+  if (card.confirmed) return source ? m.from(source) : m.agreed;
+  return source ? m.guessFrom(source) : m.guess;
 }
 
 // A program the factory builds: its card starts with its folder

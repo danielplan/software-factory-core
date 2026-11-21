@@ -3,35 +3,41 @@
 // checked on its own.
 
 import type { FactoryView } from "../../../server/src/kobble/factory-view.ts";
+import { ENGLISH, type Messages } from "../i18n/messages.ts";
 
 export type Stuck = FactoryView["stuck"][number];
 
 const LONGEST = 220;
 
 // Why the builder stopped, in one line: its question, or that it gave up.
-export function reasonOf(stuck: Stuck): string {
-  if (stuck.note === "checks-failed")
-    return "The checks stayed red after three tries.";
-  if (stuck.note === "failed") return "The builder could not finish it.";
-  if (stuck.ask) return `The builder asks: ${stuck.ask.question}`;
+export function reasonOf(
+  stuck: Stuck,
+  m: Messages["builder"]["why"] = ENGLISH.builder.why,
+): string {
+  if (stuck.note === "checks-failed") return m.checksFailed;
+  if (stuck.note === "failed") return m.failed;
+  if (stuck.ask) return m.asks(stuck.ask.question);
   const first =
     stuck.text
       .split(/\n\s*\n/)
       .map((part) => part.replace(/\s+/g, " ").trim())
       .find(Boolean) ?? "";
-  if (!first) return "The builder stopped and asks you.";
+  if (!first) return m.stopped;
   return first.length > LONGEST ? `${first.slice(0, LONGEST - 1)}…` : first;
 }
 
 const MINUTE = 60_000;
 
 // How long it has been stuck, in plain words.
-export function stuckFor(since: string, now: Date): string {
+export function stuckFor(
+  since: string,
+  now: Date,
+  m: Messages["builder"]["since"] = ENGLISH.builder.since,
+): string {
   const minutes = Math.floor((now.getTime() - Date.parse(since)) / MINUTE);
-  if (!Number.isFinite(minutes) || minutes < 1) return "Stuck just now";
-  if (minutes < 60) return `Stuck for ${String(minutes)} min`;
+  if (!Number.isFinite(minutes) || minutes < 1) return m.justNow;
+  if (minutes < 60) return m.minutes(minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Stuck for ${String(hours)} h`;
-  const days = Math.floor(hours / 24);
-  return `Stuck for ${String(days)} ${days === 1 ? "day" : "days"}`;
+  if (hours < 24) return m.hours(hours);
+  return m.days(Math.floor(hours / 24));
 }

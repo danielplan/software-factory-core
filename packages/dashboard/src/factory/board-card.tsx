@@ -14,6 +14,7 @@ import { createContext, use } from "react";
 import type { FactoryCard } from "@/api";
 
 import { TypeChip } from "./card-type";
+import { useT } from "@/i18n/use-t";
 
 // A card on the board: it rises in after the ones above it, lifts under the
 // pointer, and a click opens it beside the board (card-panel.tsx). While it
@@ -23,6 +24,7 @@ export function Card({
   at,
   now,
 }: Readonly<{ card: FactoryCard; at: number; now: string | null }>) {
+  const t = useT();
   const open = use(OpenCard);
   const building = now !== null;
   return (
@@ -54,7 +56,7 @@ export function Card({
         {building && (
           <span className="ml-auto inline-flex items-center gap-1 font-medium text-blue">
             <LoaderCircle aria-hidden className="size-3 animate-spin" />
-            Building
+            {t.factory.card.building}
           </span>
         )}
       </span>
@@ -68,7 +70,7 @@ export function Card({
             strokeWidth={2}
             className="size-3 flex-none"
           />
-          Your hint is with the builder
+          {t.factory.card.hintWithBuilder}
         </span>
       )}
       {now && (
@@ -84,7 +86,7 @@ export function Card({
           <TypeChip type={card.type ?? null} />
           {card.fix && (
             <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-              Fix
+              {t.factory.card.fix}
             </span>
           )}
         </span>
@@ -102,6 +104,7 @@ export const OpenCard = createContext<(number: number) => void>(
 
 // The card's pull request, a click away, without opening the card.
 function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
+  const t = useT();
   if (!url) return null;
   return (
     <a
@@ -114,7 +117,7 @@ function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
       className="inline-flex h-[24px] items-center gap-1.5 rounded-md border border-border bg-card px-2 text-xs font-medium text-foreground hover:bg-ground"
     >
       <GitPullRequest aria-hidden className="size-3.5" />
-      Pull request
+      {t.factory.panel.pullRequest}
       <ArrowUpRight aria-hidden className="size-3 text-muted-foreground" />
     </a>
   );
@@ -123,14 +126,17 @@ function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
 // The exploration a card was handed off from, as one quiet line; nothing
 // when the card has its title already.
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
+  const t = useT();
   if (!card.from || card.from.title === card.title) return null;
   return (
     <span
-      title={`From the exploration “${card.from.title}”`}
+      title={t.factory.card.from(card.from.title)}
       className="flex w-full min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
     >
       <FlaskConical aria-hidden strokeWidth={2} className="size-3 flex-none" />
-      <span className="truncate">From “{card.from.title}”</span>
+      <span className="truncate">
+        {t.factory.card.fromShort(card.from.title)}
+      </span>
     </span>
   );
 }

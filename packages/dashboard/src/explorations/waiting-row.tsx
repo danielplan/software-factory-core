@@ -9,15 +9,16 @@ import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ROW } from "@/signals/bits";
-import { countWords } from "@/signals/view";
 
 import { Faces } from "./bits";
 import { RemoveRow } from "./remove-row";
+import { useT } from "@/i18n/use-t";
 
 export const explorationHash = (id: string) =>
   `#explore/${encodeURIComponent(id)}`;
 
 export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
+  const t = useT();
   const [problem, setProblem] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
   if (gone) return null;
@@ -40,7 +41,7 @@ export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
       <Faces personas={row.personas} size={26} />
       {row.signals > 0 && (
         <span className="inline-flex h-6 items-center rounded-full bg-[#e8f0fe] px-2 text-xs font-medium text-[#2948bc]">
-          {countWords(row.signals, "signal", "signals")}
+          {t.words.signalCount(row.signals)}
         </span>
       )}
       <Button
@@ -57,12 +58,12 @@ export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
           );
         }}
       >
-        Start
+        {t.explore.start}
       </Button>
       <RemoveRow
         path="/api/kobble/explorations/drop"
         body={{ id: row.id }}
-        what="Drop it?"
+        what={t.explore.dropIt}
         onGone={setGone}
         onProblem={setProblem}
       />

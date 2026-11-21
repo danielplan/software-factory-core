@@ -8,19 +8,16 @@ import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { TypeChip } from "@/signals/bits";
 import { missionWords, stepWords } from "@/signals/view";
-
-const DAY = new Intl.DateTimeFormat(undefined, {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+import { useLocale, useT } from "@/i18n/use-t";
+import { momentIn } from "@/i18n/format";
 
 export function Mission({
   test,
   persona,
   found,
 }: Readonly<{ test: PersonaTest; persona: string; found: SignalRow[] }>) {
+  const locale = useLocale();
+  const t = useT();
   const going = test.status === "queued" || test.status === "running";
   return (
     <div
@@ -43,18 +40,26 @@ export function Mission({
           )}
         >
           {going
-            ? "On a mission"
-            : DAY.format(new Date(test.started ?? test.ended ?? 0))}
+            ? t.personas.onMission
+            : momentIn(
+                locale,
+                new Date(test.started ?? test.ended ?? 0).toISOString(),
+              )}
         </span>
       </span>
       {going && (
         <p aria-live="polite" className="text-[13px] text-foreground-2">
-          {missionWords({ status: test.status, doing: test.doing ?? null })}
+          {missionWords(
+            { status: test.status, doing: test.doing ?? null },
+            t.words,
+          )}
         </p>
       )}
       {test.status === "failed" && (
         <p className="text-[13px] text-muted-foreground">
-          It could not finish: {test.problem ?? "no reason given"}
+          {t.personas.missions.couldNotFinish(
+            test.problem ?? t.personas.missions.noReason,
+          )}
         </p>
       )}
       {test.status === "done" && <Found found={found} />}
@@ -63,9 +68,12 @@ export function Mission({
 }
 
 function Found({ found }: Readonly<{ found: SignalRow[] }>) {
+  const t = useT();
   if (found.length === 0)
     return (
-      <span className="text-[13px] text-muted-foreground">Nothing found.</span>
+      <span className="text-[13px] text-muted-foreground">
+        {t.personas.missions.nothingFound}
+      </span>
     );
   return (
     <ul className="grid gap-1.5">
@@ -84,7 +92,7 @@ function Found({ found }: Readonly<{ found: SignalRow[] }>) {
                 </span>
                 {signal.step && (
                   <span className="text-[12px] text-muted-foreground">
-                    {stepWords(signal)}
+                    {stepWords(signal, t.words)}
                   </span>
                 )}
               </span>
