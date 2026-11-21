@@ -212,7 +212,7 @@ function Header({
   onClose,
 }: Readonly<{ begun: boolean; onNew: () => void; onClose: () => void }>) {
   return (
-    <header className="flex flex-none items-center gap-2 px-3 pt-3 pb-1.5">
+    <header className="flex flex-none items-center gap-2 py-3 pr-2.5 pl-4">
       <KoboldHead size={22} />
       <span className="text-[13px] font-medium">Sprocket</span>
       <span className="flex-1" />
@@ -304,7 +304,7 @@ function Opening({ page, thread }: Readonly<{ page: Page; thread: Thread }>) {
         },
       ];
   return (
-    <div className="flex flex-none flex-col gap-4 px-4 pt-2 pb-3">
+    <div className="flex flex-none flex-col gap-3 px-4 pt-1 pb-4">
       <p className="text-[14px] leading-snug motion-safe:animate-rise">
         How can I help?
       </p>
@@ -361,7 +361,7 @@ function AskFeed({ thread, page }: Readonly<{ thread: Thread; page: Page }>) {
   const asked = (support?.messages.length ?? 0) > 0 || support?.writing != null;
   if (asked) return <Messages support={support} />;
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-end gap-2.5 px-4 pb-2 text-[13px]">
+    <div className="flex min-h-0 flex-1 flex-col justify-end gap-2.5 px-4 pt-3 pb-2 text-[13px]">
       {thread.thinking ? (
         <Thinking />
       ) : (
@@ -427,7 +427,7 @@ function Input({
   }[thread.step];
   return (
     <form
-      className="m-3 mt-2 flex flex-none items-end gap-2 rounded-xl border border-border bg-card p-1.5 transition-colors focus-within:border-[#c7cbfb]"
+      className="mx-4 mt-2 mb-4 flex flex-none items-end gap-2 rounded-xl border border-border bg-card p-1.5 transition-colors focus-within:border-[#c7cbfb]"
       onSubmit={(event) => {
         event.preventDefault();
         send();

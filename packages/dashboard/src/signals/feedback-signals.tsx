@@ -419,11 +419,10 @@ function PersonaLine({ one }: Readonly<{ one: FeedbackSignal }>) {
     : "Sprocket isn't sure who this is.";
   const open = picking || !one.persona;
   return (
-    <div className="mb-[22px] rounded-[12px] bg-surface px-3.5 py-2.5">
-      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] text-foreground-2">
-        <span className="min-w-0">{said}</span>
-        {one.persona && (
-          <span className="ml-auto flex gap-3">
+    <div className="mb-[22px] grid gap-3 rounded-[12px] bg-surface px-4 py-3.5">
+      <p className="text-[13px] leading-normal text-foreground-2">{said}</p>
+      {one.persona && (
+          <span className="flex gap-5">
             <button
               type="button"
               className={link}
@@ -444,10 +443,9 @@ function PersonaLine({ one }: Readonly<{ one: FeedbackSignal }>) {
               Remove
             </button>
           </span>
-        )}
-      </p>
+      )}
       {open && personas.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {personas
             .filter((persona) => persona.id !== one.persona?.id)
             .map((persona) => (

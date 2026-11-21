@@ -106,7 +106,7 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
   };
   const sentences = draft?.body.split(/\n\n+/).filter(Boolean) ?? [];
   return (
-    <div className="mx-3 mt-0.5 grid max-h-[46%] flex-none gap-2 overflow-auto rounded-xl border border-line-soft bg-surface/50 px-3.5 py-3 motion-safe:animate-rise">
+    <div className="mx-4 mt-1 grid max-h-[46%] flex-none gap-2.5 overflow-auto rounded-xl border border-line-soft bg-surface/50 p-3.5 motion-safe:animate-rise">
       <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground [&_svg]:size-3">
         {thread.kind === "bug" ? (
           <Bug aria-hidden />
@@ -159,7 +159,7 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
           <Placeholder className="h-3 w-4/5" />
         </div>
       )}
-      <div className="flex flex-wrap gap-1 pt-0.5">
+      <div className="flex flex-wrap gap-1.5">
         {(draft?.parts ?? []).map((part) => (
           <span
             key={part.id}
@@ -207,7 +207,7 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
         ))}
       </div>
       {ready && draft && (
-        <div className="flex items-center gap-2 pt-1 text-[11.5px] text-muted-foreground motion-safe:animate-rise [&_svg]:size-3.5">
+        <div className="flex items-center gap-2 border-t border-line-soft pt-2.5 text-[11.5px] text-muted-foreground motion-safe:animate-rise [&_svg]:size-3.5">
           <CircleUserRound aria-hidden />
           <span className="flex-1">
             {signedIn ? `as @${signedIn}` : "with your GitHub sign-in"}
@@ -252,7 +252,7 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
       href={issueUrl(post.number)}
       target="_blank"
       rel="noreferrer"
-      className="mx-3 mt-0.5 grid flex-none gap-2 rounded-xl border border-line-soft bg-surface/50 px-3.5 py-2.5 hover:bg-surface motion-safe:animate-rise"
+      className="mx-4 mt-1 grid flex-none gap-2.5 rounded-xl border border-line-soft bg-surface/50 px-3.5 py-3 hover:bg-surface motion-safe:animate-rise"
     >
       <span className="flex items-center gap-2 text-[12.5px] [&_svg]:size-3 [&_svg]:flex-none">
         <span className="text-faint">#{post.number}</span>
@@ -441,7 +441,7 @@ function KoboldLine({
     };
   }, [shown, text, line.id, onDone, onGrow]);
   return (
-    <div className="grid gap-2 self-stretch">
+    <div className="grid gap-2.5 self-stretch">
       <div className="max-w-[92%] self-start">
         <Markdown text={text.slice(0, shown)} />
       </div>
@@ -541,7 +541,7 @@ export function SimilarAsYouType({
   );
   if (posts.length === 0) return null;
   return (
-    <div className="grid gap-1.5 px-3 pt-1">
+    <div className="grid gap-1.5 px-4 pt-2">
       <span className="text-[11px] text-muted-foreground">
         Already on the board?
       </span>

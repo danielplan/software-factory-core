@@ -172,24 +172,24 @@ function ErrorNotice({
 }: Readonly<{ error: CaughtError; onReport: () => void }>) {
   const t = useT().feedback;
   return (
-    <div className="mb-1.5 grid gap-1.5 rounded-[10px] border border-destructive/30 bg-destructive/5 px-3 py-2">
-      <span className="flex items-center gap-2 text-[13px] font-medium text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none">
+    <div className="mb-2 grid gap-2 rounded-[10px] border border-destructive/30 bg-destructive/5 p-3">
+      <span className="flex items-start gap-2 text-[13px] leading-snug font-medium text-sidebar-strong [&_svg]:mt-0.5 [&_svg]:size-[14px] [&_svg]:flex-none">
         <TriangleAlert aria-hidden className="text-destructive" />
-        {t.hit}
+        <span className="flex-1">{t.hit}</span>
         <button
           type="button"
           aria-label={t.notNow}
           title={t.notNow}
           onClick={putAway}
-          className="ml-auto text-sidebar-muted hover:text-sidebar-strong"
+          className="text-sidebar-muted hover:text-sidebar-strong"
         >
           <X aria-hidden />
         </button>
       </span>
-      <span className="line-clamp-2 font-mono text-[11px] text-sidebar-muted">
+      <span className="line-clamp-2 pl-[22px] font-mono text-[11px] leading-relaxed text-sidebar-muted">
         {error.text}
       </span>
-      <Button size="sm" variant="outline" className="h-7" onClick={onReport}>
+      <Button size="sm" variant="outline" className="mt-0.5 h-7" onClick={onReport}>
         {t.report}
       </Button>
     </div>
