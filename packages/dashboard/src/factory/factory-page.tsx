@@ -23,6 +23,7 @@ import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { WaitingCards } from "./waiting-card";
+import { useWaysIn } from "./ways-in";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   const { data, problem } = useFactoryView(state);
@@ -52,6 +53,25 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   };
   const href = boardOf(state)?.href ?? null;
   const shown = problem ?? said ?? data?.problem ?? null;
+  // Prototype: without a GitHub board, a made-up one with the variant's
+  // way in.
+  const ways = useWaysIn();
+  if (data && !data.connected)
+    return (
+      <>
+        <PageHead
+          title="Factory"
+          actions={
+            <>
+              {ways.actions}
+              <Builder view={ways.view} press={() => undefined} href={null} />
+            </>
+          }
+        />
+        {ways.above}
+        <Board view={ways.view} />
+      </>
+    );
   return (
     <>
       <PageHead

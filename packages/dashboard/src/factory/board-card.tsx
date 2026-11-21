@@ -1,12 +1,27 @@
 // A card on the Factory board, opened beside it on a click; while the
 // builder is on it, what it is doing right now.
 
-import { FlaskConical, LoaderCircle } from "lucide-react";
+import {
+  Bug,
+  CircleDot,
+  FlaskConical,
+  LoaderCircle,
+  SquarePlus,
+} from "lucide-react";
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
 
 import { TypeChip } from "./card-type";
+import type { Came } from "./made-up";
+
+// Prototype: a card can say where it came from (a request, an error from
+// the live app, a GitHub issue) and, for an error, how often it was seen.
+export type ShownCard = FactoryCard & {
+  came?: Came;
+  times?: number;
+  by?: string;
+};
 
 // A card on the board: it rises in after the ones above it, lifts under the
 // pointer, and a click opens it beside the board (card-panel.tsx). While it
@@ -15,7 +30,7 @@ export function Card({
   card,
   at,
   now,
-}: Readonly<{ card: FactoryCard; at: number; now: string | null }>) {
+}: Readonly<{ card: ShownCard; at: number; now: string | null }>) {
   const open = use(OpenCard);
   const building = now !== null;
   return (
@@ -55,7 +70,7 @@ export function Card({
           {now}
         </span>
       )}
-      {(card.type ?? card.from ?? card.fix) && (
+      {(card.type ?? card.from ?? card.came ?? card.fix) && (
         <span className="flex flex-wrap gap-1.5">
           <TypeChip type={card.type ?? null} />
           <Origin card={card} />
@@ -72,7 +87,38 @@ export const OpenCard = createContext<(number: number) => void>(
 
 // Where a card came from: the exploration it was handed off from, by its
 // title (its id and prototype key mean nothing to people), or a fix.
-function Origin({ card }: Readonly<{ card: FactoryCard }>) {
+const CAME: Record<Came, { Icon: typeof Bug; tone: string }> = {
+  request: { Icon: SquarePlus, tone: "bg-source-app/10 text-source-app" },
+  error: { Icon: Bug, tone: "bg-type-bug/10 text-type-bug" },
+  issue: { Icon: CircleDot, tone: "bg-source-usage/10 text-source-usage" },
+};
+
+export function cameWords(card: Pick<ShownCard, "came" | "times" | "by">) {
+  if (card.came === "error")
+    return card.times && card.times > 1
+      ? `Error · seen ${String(card.times)}×`
+      : "Error from the live app";
+  if (card.came === "issue") return "GitHub issue";
+  return card.by ? `Request · ${card.by}` : "Request";
+}
+
+export function CameChip({
+  card,
+}: Readonly<{ card: Pick<ShownCard, "came" | "times" | "by"> }>) {
+  if (!card.came) return null;
+  const { Icon, tone } = CAME[card.came];
+  return (
+    <span
+      className={`inline-flex h-[22px] max-w-full min-w-0 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium ${tone}`}
+    >
+      <Icon aria-hidden strokeWidth={2} className="size-3 flex-none" />
+      <span className="truncate">{cameWords(card)}</span>
+    </span>
+  );
+}
+
+function Origin({ card }: Readonly<{ card: ShownCard }>) {
+  if (card.came) return <CameChip card={card} />;
   if (card.from)
     return (
       <span
