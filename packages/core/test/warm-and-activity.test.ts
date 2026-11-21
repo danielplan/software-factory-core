@@ -297,11 +297,26 @@ test("tool calls become short plain descriptions with paths relative to the work
     describeEvent(toolUse("mcp__board__add_note", {}), workspace),
     ["Using add note (board)"],
   );
-  // Without a description, the kind of command, never the command itself.
+  // Without a description, the kind of command and what it works on,
+  // never the command itself; a "cd" in front only says where it runs.
   for (const [command, words] of [
-    ["node --experimental-strip-types --test a.test.ts", "Running the tests"],
-    ["cd /tmp/copy && git status", "Working with git"],
-    ["npx eslint packages", "Checking the code's style"],
+    [
+      "node --experimental-strip-types --test packages/server/test/a.test.ts",
+      "Running the tests: a.test.ts",
+    ],
+    ["npm test", "Running the tests"],
+    ["cd /tmp/copy && git status", "Working with git: status"],
+    [
+      "cd /work/copies/build; git diff main...proto/X-5-e -- packages",
+      "Working with git: diff main...proto/X-5-e",
+    ],
+    [
+      "cd /work/copies/build; sed -n 1,80p packages/server/src/github.ts; grep -n x src/signals.ts",
+      "Looking through: github.ts, signals.ts",
+    ],
+    ["cd /work/copies/build; ls", "Looking through files"],
+    ["npx eslint src/a.tsx src/b.ts", "Checking the code's style: a.tsx, b.ts"],
+    ["npm run build -w @software-factory/dashboard", "Building: dashboard"],
     ["npm ci", "Installing packages"],
     ["make something", "Running a command"],
   ])
