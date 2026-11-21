@@ -182,6 +182,7 @@ export function pretendPullRequests() {
     thread: Message[];
   })[] = [];
   const pullRequests: PullRequests = {
+    repository: "o/r",
     baseBranch: () => Promise.resolve("main"),
     find: (branch) =>
       Promise.resolve(made.find((p) => p.branch === branch) ?? null),

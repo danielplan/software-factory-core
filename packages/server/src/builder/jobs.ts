@@ -207,7 +207,7 @@ export class Jobs {
       );
       return;
     }
-    const url = await this.pullRequest(card, text, false);
+    const url = await this.pullRequest(card, at, text, false);
     await this.say(
       card.number,
       `Built, and every check passes: ${url} is ready for your review.`,
@@ -231,7 +231,7 @@ export class Jobs {
     const changed = (await changedFiles(copy.path, base)).length > 0;
     const failed = report === null ? "" : `\n\n${failedChecksSection(report)}`;
     const url = changed
-      ? await this.pullRequest(card, `${text}${failed}`, true)
+      ? await this.pullRequest(card, at, `${text}${failed}`, true)
       : null;
     const draft = url
       ? `What it did so far is in a draft pull request, not to merge yet: ${url}`
@@ -334,9 +334,15 @@ export class Jobs {
     });
   }
 
-  // Opens the card's pull request, or updates the one there is; its address.
-  private async pullRequest(card: BoardCard, text: string, draft: boolean) {
-    return await openOrUpdate(this.options.pullRequests, card, text, draft);
+  // Opens the card's pull request, or updates the one there is, with the
+  // screenshots the branch adds; its address.
+  private async pullRequest(
+    card: BoardCard,
+    at: Place,
+    text: string,
+    draft: boolean,
+  ) {
+    return await openOrUpdate(this.options.pullRequests, card, text, draft, at);
   }
 
   private async say(number: number, text: string, note: Note) {

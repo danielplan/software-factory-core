@@ -43,6 +43,7 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
       return "Renamed it.\nSTATUS: done";
     }
     writeFileSync(join(options.cwd, "app", "HELLO.md"), "Hello");
+    writeFileSync(join(options.cwd, "app", "greeting.png"), "a picture");
     return "Added a greeting. ![it](app/HELLO.md)\nSTATUS: done";
   });
   const { work, board, prs, checks } = setUp(kept, claude, copy, [false, true]);
@@ -74,6 +75,11 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
   assert.equal(pr?.draft, false);
   assert.match(pr.body, /Closes #2\./);
   assert.match(pr.body, /blob\/factory\/issue-2\/app\/HELLO\.md/);
+  // The screenshots the branch adds are shown, not only named.
+  assert.match(
+    pr.body,
+    /## Screenshots\n\n!\[greeting\]\(https:\/\/github\.com\/o\/r\/blob\/factory\/issue-2\/app\/greeting\.png\?raw=true\)/,
+  );
   const pushed = await run("git", [
     "-C",
     source,
