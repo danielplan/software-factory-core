@@ -17,6 +17,7 @@ import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
 import { Making, MakingLine } from "./prototype-making";
+import { Starting } from "./prototype-starting";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 import { useT } from "@/i18n/use-t";
@@ -56,39 +57,39 @@ function Screen({
   at,
   title,
   start,
+  making = false,
 }: Readonly<{
   run: VersionRun | undefined;
   at: number;
   title: string;
   start: (() => void) | null;
+  making?: boolean;
 }>) {
   const t = useT();
   if (run?.state === "running" && run.url)
-    return <LiveScreen url={run.url} title={title} />;
+    return <LiveScreen url={run.url} title={title} making={making} />;
   const starting = run?.state === "starting";
   return (
     <div
       className="relative grid place-items-center rounded-[9px] bg-[#f3f4f7]"
       style={SCREEN}
     >
-      {(start ?? starting) && (
+      {run?.state === "starting" && <Starting run={run} />}
+      {start && !starting && (
         <Button
           size="pill"
           className="nodrag absolute z-10 gap-2 shadow-[0_8px_24px_-10px_rgb(20_24_36/0.45)]"
-          disabled={starting}
-          onClick={start ?? undefined}
+          onClick={start}
         >
-          {starting ? (
-            t.explore.starting
-          ) : (
-            <>
-              <Play aria-hidden className="size-4 fill-current" />{" "}
-              {t.explore.start}
-            </>
-          )}
+          <Play aria-hidden className="size-4 fill-current" /> {t.explore.start}
         </Button>
       )}
-      <div className="flex h-36 w-[300px] flex-col gap-2.5 rounded-lg bg-card p-3.5 opacity-60 shadow-[0_1px_4px_rgb(0_0_0/0.1)]">
+      <div
+        className={cn(
+          "flex h-36 w-[300px] flex-col gap-2.5 rounded-lg bg-card p-3.5 opacity-60 shadow-[0_1px_4px_rgb(0_0_0/0.1)]",
+          starting && "motion-safe:animate-pulse",
+        )}
+      >
         <div
           className="h-[6px] w-1/2 rounded-[3px]"
           style={{ background: TINTS[at % TINTS.length] }}
@@ -141,7 +142,13 @@ function Shown({
   return (
     <>
       {run?.making && <MakingLine run={run} />}
-      <Screen run={shown} at={at} title={title} start={start} />
+      <Screen
+        run={shown}
+        at={at}
+        title={title}
+        start={start}
+        making={run?.making === true}
+      />
     </>
   );
 }

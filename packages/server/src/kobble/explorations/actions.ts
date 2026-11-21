@@ -268,3 +268,17 @@ function choicesAgreed(board: Board): string[] {
     return [`- ${one.title} ${answer}`];
   });
 }
+
+// The exploration's title or problem, as the kobold renames it.
+export function renameExploration(
+  store: KobbleStore,
+  id: string,
+  { title, problem }: { title?: string; problem?: string },
+): void {
+  const exploration = open(store, id);
+  store.put("explorations", {
+    ...exploration,
+    title: title?.trim() || exploration.title,
+    problem: problem?.trim() || exploration.problem,
+  });
+}

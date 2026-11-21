@@ -37,6 +37,7 @@ import {
 } from "./versions.ts";
 import type { Browser } from "../persona-tests.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
+import { deeperIn, type Way } from "./deeper.ts";
 
 // How a change asked for starts: now (a new run), told (to the maker at
 // work, in its run) or waits (for the run after it).
@@ -152,6 +153,16 @@ export class ExplorationPrototypes {
       `Add variant ${added.key} (“${way.name}”): ${way.difference}. Keep the other variants as they are.`,
     );
     return added.key;
+  }
+
+  // Dig deeper: the kept variant as the base, new variants refining it.
+  deeper(exploration: Exploration, key: string, keep: string, ways: Way[]) {
+    const store = this.options.store();
+    const board = store.board(exploration.id);
+    const dug = deeperIn(this.unbusy(board, exploration.id, key), keep, ways);
+    const saved = store.saveBoard(exploration.id, withThing(board, dug.made));
+    this.begin(exploration, saved, key, dug.request);
+    return dug.keys;
   }
 
   // A prototype that is not being made, or why it cannot be changed now.

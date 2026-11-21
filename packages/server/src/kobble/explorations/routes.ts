@@ -123,6 +123,16 @@ function makersFor(
       options.onChange();
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
     },
+    deeper: (id, prototype, keep, ways) => {
+      const keys = prototypes.deeper(
+        explorationOf(store(), id),
+        prototype,
+        keep,
+        ways,
+      );
+      options.onChange();
+      return keys;
+    },
     another: (id, prototype, way) => {
       const made = prototypes.another(
         explorationOf(store(), id),

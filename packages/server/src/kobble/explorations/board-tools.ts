@@ -19,6 +19,7 @@ import type { Act } from "./board-acts.ts";
 import type { Option } from "./board-things.ts";
 import { addWorldTools } from "./world-tools.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
+import { addDeeperTool, type Way } from "./deeper.ts";
 
 export type BoardTools = {
   token: string;
@@ -34,6 +35,7 @@ export type BoardTools = {
     way: { name: string; difference: string },
   ) => string;
   handOff: () => Promise<string>;
+  deeper: (prototype: string, keep: string, ways: Way[]) => string[];
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
@@ -205,6 +207,7 @@ function serverFor(on: BoardTools): McpServer {
     (args) => toolAnswer(() => on.rename(args)),
   );
   addPrototypeTools(server, on);
+  addDeeperTool(server, on.deeper);
   server.registerTool(
     "hand_off",
     {

@@ -7,6 +7,7 @@
 // stopped with the version). What runs is known only while the factory is
 // open; nothing of it is stored.
 
+import { stripVTControlCharacters } from "node:util";
 import { type ChildProcess, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
@@ -40,6 +41,13 @@ export type VersionRun = {
   steps: string[];
   // Why it stopped or could not start, or what is odd about it.
   problem: string | null;
+  // While it starts: the step it is on (its copy of the code made, then its
+  // start command running), the start command's latest line, and since when.
+  start: {
+    step: "copy" | "command";
+    line: string | null;
+    since: string;
+  } | null;
 };
 
 export type ModeOptions = {
@@ -81,6 +89,7 @@ export class PrototypeMode {
         since: null,
         steps: [],
         problem: null,
+        start: null,
       }
     );
   }
@@ -89,6 +98,7 @@ export class PrototypeMode {
   set(idea: string, version: string, change: Partial<VersionRun>): void {
     const now = this.runOf(idea, version);
     const run = { ...now, ...change };
+    if (run.state !== "starting") run.start = null;
     if (run.making && !now.making) run.since = new Date().toISOString();
     this.runs.set(keyOf(idea, version), run);
     this.options.onChange();
@@ -109,7 +119,13 @@ export class PrototypeMode {
       );
     const now = this.runOf(idea, version);
     if (now.state === "running" || now.state === "starting") return now;
-    this.set(idea, version, { state: "starting", url: null, problem: null });
+    const since = new Date().toISOString();
+    this.set(idea, version, {
+      state: "starting",
+      url: null,
+      problem: null,
+      start: { step: "copy", line: null, since },
+    });
     try {
       await versionWorkspace(this.options.project, copy);
     } catch (error) {
@@ -152,9 +168,18 @@ export class PrototypeMode {
     const key = keyOf(idea, version);
     const child = spawnIn(copy, command);
     this.children.set(key, child);
+    const since = this.runOf(idea, version).start?.since;
+    const step = (line: string | null) => ({
+      step: "command" as const,
+      line,
+      since: since ?? new Date().toISOString(),
+    });
+    this.set(idea, version, { start: step(null) });
     const heard = (line: string) => {
       const url = urlIn(line);
       if (url) this.set(idea, version, { state: "running", url });
+      else if (this.runOf(idea, version).state === "starting" && line.trim())
+        this.set(idea, version, { start: step(shortLine(line)) });
     };
     void this.finished(child, heard).then(({ code, lines }) => {
       if (this.children.get(key) !== child) return;
@@ -231,4 +256,10 @@ function messageOf(error: unknown): string {
 
 function keyOf(idea: string, version: string): string {
   return `${idea}/${version}`;
+}
+
+// A start command's line as the page shows it: without colours, cut short.
+function shortLine(line: string): string {
+  const plain = stripVTControlCharacters(line).trim();
+  return plain.length > 90 ? `${plain.slice(0, 89)}…` : plain;
 }

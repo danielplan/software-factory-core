@@ -6,6 +6,9 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- New: **dig deeper** into one variant of a prototype. When the team picks a direction, the explorer keeps that variant as the base, takes the other variants off (their code too) and adds one to three new variants that each refine the kept one, in one maker run (`dig_deeper`). Nothing to do.
+- Changed: a prototype that is starting shows what it is doing (preparing its copy of the code, then its start command with its latest line) and for how long, instead of a grey "Starting…" button; a prototype still being made stays usable, with a blue ring and a note at its foot that it changes as the kobold works (also in the bigger view). `start` on a prototype's run. Nothing to do.
+
 - Changed: the explorer adds a note, diagram or choice together with its arrow (`from` and `label` on `add_note`, `add_diagram` and `add_choice`), so the board shows the new thing already joined instead of loose for a moment. Nothing to do.
 
 - Changed: an exploration whose idea changes no screen (how the builder works, a rule, a background job) is handed off without a prototype: its agreed choices, notes and diagrams become the card (**Agreed, without a prototype**), and the spec is written from the board and the conversation. Hand off is enabled once anything on the board is agreed; the explorer hands off such an idea itself instead of asking the team to make the card by hand. `branch` in the spec writer's input is optional. Nothing to do.
