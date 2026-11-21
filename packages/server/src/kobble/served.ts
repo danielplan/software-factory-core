@@ -9,11 +9,13 @@ import { join } from "node:path";
 import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
 
 import { teamRoutes } from "../coach/setup-team.ts";
+import { feedbackRoutes } from "../feedback/routes.ts";
 import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
 import { connectedCards, servedKobble } from "./routes.ts";
+import { storeOf } from "./usage-routes.ts";
 import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
@@ -50,6 +52,7 @@ export function kobbleOf(
   },
 ) {
   const kobble = kobbleAlone(session, tell, more);
+  const feedback = feedbackOf(session, tell, more.cli);
   const updates = updatesOf(
     session,
     () => {
@@ -66,6 +69,7 @@ export function kobbleOf(
       ...updates.routes,
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
+      ...feedback.routes,
       ...factoryCardRoutes(
         join(session.options.project, FACTORY_FOLDER),
         more.cli,
@@ -80,12 +84,36 @@ export function kobbleOf(
     start: () => {
       kobble.start();
       updates.start();
+      feedback.arrivals.start();
     },
     close: () => {
       kobble.close();
       updates.close();
+      feedback.arrivals.close();
     },
   };
+}
+
+// The public feedback board: sending to it, and its posts arriving as
+// signals.
+function feedbackOf(session: Session, tell: (event: string) => void, cli: Cli) {
+  const { project } = session.options;
+  const factory = join(project, FACTORY_FOLDER);
+  const told = (what: string) => {
+    tell(`event: kobble-changed\ndata: {"what":"${what}"}\n\n`);
+  };
+  return feedbackRoutes({
+    project,
+    cli,
+    claude: session.options.coach.claude,
+    store: () => storeOf(factory, project),
+    changed: () => {
+      told("feedback");
+    },
+    onSignals: () => {
+      told("signals");
+    },
+  });
 }
 
 // The company's name, for the start file; the project's folder without one.

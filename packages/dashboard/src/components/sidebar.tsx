@@ -27,6 +27,7 @@ import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
 import { UpdateRow } from "@/updates/update-row";
+import { FeedbackRow } from "@/feedback/feedback-row";
 
 import { type Item, PageLink, ProductState } from "./sidebar-links";
 
@@ -171,6 +172,7 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
       <Pages current={current} counts={counts} doing={doing} onGo={onGo} />
       <div className="mt-auto grid gap-0.5 pt-4">
         <UpdateRow />
+        <FeedbackRow current={current} />
         <nav aria-label="The factory" className="grid gap-0.5">
           {QUIET.map((item) => (
             <PageLink
