@@ -61,6 +61,26 @@ test("an agent's tools, model, board tools and conversation are passed on", () =
   assert.equal(args[args.indexOf("--model") + 1], "sonnet");
   assert.equal(args[args.indexOf("--resume") + 1], "s-1");
   assert.equal(args[args.indexOf("--allowedTools") + 1], "mcp__board");
+  const two = claudeArgs({
+    ...base,
+    readOnly: false,
+    mcp: { name: "prototype", url: "http://127.0.0.1:1/mcp", headers: {} },
+    alsoMcp: [{ name: "browser", url: "http://127.0.0.1:2/mcp", headers: {} }],
+  });
+  assert.equal(
+    two[two.indexOf("--allowedTools") + 1],
+    "mcp__prototype,mcp__browser",
+  );
+  assert.deepEqual(
+    Object.keys(
+      (
+        JSON.parse(two[two.indexOf("--mcp-config") + 1] ?? "{}") as {
+          mcpServers: object;
+        }
+      ).mcpServers,
+    ),
+    ["prototype", "browser"],
+  );
   const fresh = claudeArgs({
     ...base,
     readOnly: false,

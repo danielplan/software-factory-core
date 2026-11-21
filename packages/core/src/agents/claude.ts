@@ -15,6 +15,12 @@ const DISALLOWED = [
 ];
 const READ_ONLY = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
 
+export type Mcp = {
+  name: string;
+  url: string;
+  headers: Record<string, string>;
+};
+
 export type RunOptions = {
   cwd: string;
   prompt: string;
@@ -32,7 +38,9 @@ export type RunOptions = {
   model?: string;
   // One MCP server over HTTP and no other (not even the account's own), whose
   // tools are allowed without asking.
-  mcp?: { name: string; url: string; headers: Record<string, string> };
+  mcp?: Mcp;
+  // More MCP servers beside `mcp`, allowed the same way (a browser).
+  alsoMcp?: Mcp[];
   // With readOnly: the one folder, outside the working copy, where Edit and
   // Write are allowed (an agent that reads one copy and changes another).
   editFolder?: string;
@@ -60,7 +68,8 @@ export function claudeArgs(options: RunOptions, input = false): string[] {
   if (options.tools) args.push("--tools", options.tools.join(","));
   if (options.tools && !options.mcp) args.push("--strict-mcp-config");
   if (options.model) args.push("--model", options.model);
-  if (options.mcp) args.push(...mcpArgs(options.mcp));
+  if (options.mcp)
+    args.push(...mcpArgs([options.mcp, ...(options.alsoMcp ?? [])]));
   if (options.editFolder) args.push("--add-dir", options.editFolder);
   args.push(...conversationArgs(options));
   // The prompt arrives on standard input, so the tool list can come last.
@@ -83,13 +92,19 @@ function conversationArgs(options: RunOptions): string[] {
 }
 
 // The one MCP server, with its tools allowed without asking.
-function mcpArgs({ name, url, headers }: NonNullable<RunOptions["mcp"]>) {
+function mcpArgs(servers: Mcp[]) {
+  const mcpServers = Object.fromEntries(
+    servers.map(({ name, url, headers }) => [
+      name,
+      { type: "http", url, headers },
+    ]),
+  );
   return [
     "--mcp-config",
-    JSON.stringify({ mcpServers: { [name]: { type: "http", url, headers } } }),
+    JSON.stringify({ mcpServers }),
     "--strict-mcp-config",
     "--allowedTools",
-    `mcp__${name}`,
+    servers.map(({ name }) => `mcp__${name}`).join(","),
   ];
 }
 

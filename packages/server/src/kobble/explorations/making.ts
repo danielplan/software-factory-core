@@ -1,7 +1,9 @@
 // Making one prototype: its copy of the code (it runs meanwhile, so the
-// team watches it change), the maker asked with the explore skill and its own
-// tool to look, then started again so the newest runs, made to look once
-// when it did not, and what it made committed, pushed and told (made.ts).
+// team watches it change), the maker asked with the explore skill, its own
+// tool to look and a browser to click through it, in the conversation it
+// keeps for that prototype; then started again so the newest runs, made to
+// look once when it did not, and what it made committed, pushed and told
+// (made.ts).
 
 import {
   type Board,
@@ -12,6 +14,7 @@ import {
 
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import type { PrototypeMode } from "../../prototypes/mode.ts";
+import type { Browser } from "../persona-tests.ts";
 import type { Photograph } from "../usage-pictures.ts";
 import { lookAndFix, type Looks } from "./looks.ts";
 import { finishMaking, type Ready } from "./made.ts";
@@ -20,10 +23,11 @@ import { askFor } from "./making-words.ts";
 import { codeMaps } from "./product-picture.ts";
 import type { Made } from "./versions.ts";
 
-export async function makeOne(on: {
+type MakeOn = {
   project: string;
   root: string;
   claude: Claude;
+  browser?: () => Promise<Browser>;
   photograph?: Photograph;
   mode: PrototypeMode;
   desk: MakerDesk;
@@ -34,7 +38,20 @@ export async function makeOne(on: {
   change: string | undefined;
   mark: (now: { opens?: string }) => void;
   look: () => Promise<Looks>;
-}): Promise<void> {
+};
+
+// The maker's browser, open while it makes the prototype; without one (none
+// could start) it still makes it, and only looks at pictures.
+export async function makeOne(on: MakeOn): Promise<void> {
+  const browser = on.browser ? await on.browser().catch(() => null) : null;
+  try {
+    await makeWith(on, browser);
+  } finally {
+    browser?.close();
+  }
+}
+
+async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
   const { mode, desk, exploration, made, change } = on;
   const { key } = made;
   const copy = versionCopy(on.project, exploration.id, key, made.branch);
@@ -47,7 +64,13 @@ export async function makeOne(on: {
     model: makerModel(on.root),
     session: desk.sessionFor(exploration.id, key),
     mcp: desk.mcpFor(exploration.id, key),
+    browser: browser
+      ? { name: "browser", url: browser.url, headers: {} }
+      : undefined,
     onStep: stepsInto(mode, exploration.id, key),
+    onFresh: (session) => {
+      desk.use(exploration.id, key, session);
+    },
   });
   const asked = askFor(exploration, on.board, made, {
     change,

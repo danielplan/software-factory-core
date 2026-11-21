@@ -5,6 +5,8 @@
 
 import type { Board, Exploration } from "@software-factory/core";
 
+import type { ChangeStart } from "./prototypes.ts";
+
 type Made = Extract<Board["things"][number], { kind: "prototype" }>;
 
 // Why the kobold stopped making it, and where its work is.
@@ -91,3 +93,13 @@ export function commitWords(
     : `Prototype ${made.key} of ${exploration}: ${made.name}`;
   return [title, lastWords(answer)].filter(Boolean).join("\n\n");
 }
+
+// What the kobold is told of a change it asked for.
+export const CHANGE_WORDS: Record<ChangeStart, (prototype: string) => string> =
+  {
+    now: (p) => `Changing prototype ${p}; the board shows it being made.`,
+    told: (p) =>
+      `The maker at work on prototype ${p} takes the change in now, in the same run.`,
+    waits: (p) =>
+      `Prototype ${p} is still being made: the change waits and starts by itself once it is ready. Say so.`,
+  };

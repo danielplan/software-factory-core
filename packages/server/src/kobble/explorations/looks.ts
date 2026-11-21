@@ -16,7 +16,12 @@ import { type Made, opensIn, shownAddress } from "./versions.ts";
 
 const START_WITHIN_MS = 3 * 60_000;
 
-export type Looks = { pictures: string[]; problem: string | null };
+export type Looks = {
+  pictures: string[];
+  problem: string | null;
+  // Where it runs, each variant looked at, for the maker's browser.
+  addresses?: string[];
+};
 
 export async function lookAt(on: {
   mode: PrototypeMode;
@@ -40,16 +45,16 @@ export async function lookAt(on: {
   // Pictures of this computer's run: not kept in git.
   addToGitignore(on.root, "kobble/explorations/*/looks/");
   const take = on.photograph ?? playwrightPhotograph;
-  const variants =
-    (made.variants?.length ?? 0) > 1 ? (made.variants ?? []) : [];
-  const each = variants.length > 0 ? variants.map((one) => one.key) : [""];
-  const shown = on.only && variants.length > 0 ? [on.only] : each;
+  const shown = variantsShown(made, on.only);
   const pictures: string[] = [];
-  for (const variant of shown) {
+  const addresses = shown.map((variant) =>
+    shownAddress(url, { ...made, variant }),
+  );
+  for (const [n, variant] of shown.entries()) {
     const name = [made.key, variant].filter(Boolean).join("-");
     const file = join(folder, `${name}.png`);
     try {
-      await take(shownAddress(url, { ...made, variant }), file, "1440,900");
+      await take(addresses[n] ?? url, file, "1440,900");
       pictures.push(file);
     } catch (error) {
       return {
@@ -58,7 +63,16 @@ export async function lookAt(on: {
       };
     }
   }
-  return { pictures, problem: null };
+  return { pictures, problem: null, addresses };
+}
+
+// The variants looked at: the one asked for, else each; "" when the
+// prototype has no variants to switch between.
+function variantsShown(made: Made, only?: string): string[] {
+  const variants =
+    (made.variants?.length ?? 0) > 1 ? (made.variants ?? []) : [];
+  if (variants.length === 0) return [""];
+  return only ? [only] : variants.map((one) => one.key);
 }
 
 // Started and waited for, without stopping what else runs; where it runs.

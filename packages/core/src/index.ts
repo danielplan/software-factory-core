@@ -90,7 +90,12 @@ export {
   type SettingGroup,
   type SettingView,
 } from "./settings/setting-groups.ts";
-export { claudeArgs, type Claude, type RunOptions } from "./agents/claude.ts";
+export {
+  claudeArgs,
+  type Claude,
+  type Mcp,
+  type RunOptions,
+} from "./agents/claude.ts";
 export { describeEvent, formatDuration } from "./agents/activity.ts";
 export { makerModel, withChosenModel } from "./agents/model-setting.ts";
 export {

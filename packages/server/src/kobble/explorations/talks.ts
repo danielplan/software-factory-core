@@ -21,6 +21,8 @@ import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
 import { type MadeReport, reviewWords } from "./made.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
+import { CHANGE_WORDS } from "./making-words.ts";
+import type { ChangeStart } from "./prototypes.ts";
 import { inLanguage } from "../../language.ts";
 
 const RIGHTS = {
@@ -56,7 +58,7 @@ type Makers = {
   make: (id: string, choice: string, options: string[], opens?: string) => void;
   // A prototype changed in its copy (now, or once its maker is done);
   // another way added as a variant (its letter).
-  change: (id: string, prototype: string, change: string) => "now" | "waits";
+  change: (id: string, prototype: string, change: string) => ChangeStart;
   another: (
     id: string,
     prototype: string,
@@ -226,9 +228,9 @@ export class ExplorationTalks {
         return `Making the prototype of ${choice}, ${which} as variants the team switches between; it is on the board now.\n\n${this.look(id)}`;
       },
       change: (prototype, change) => {
-        return this.makers().change(id, prototype, change) === "now"
-          ? `Changing prototype ${prototype}; the board shows it being made.`
-          : `Prototype ${prototype} is still being made: the change waits and starts by itself once it is ready. Say so.`;
+        return CHANGE_WORDS[this.makers().change(id, prototype, change)](
+          prototype,
+        );
       },
       handOff: () => this.makers().handOff(id),
       another: (prototype, way) => {

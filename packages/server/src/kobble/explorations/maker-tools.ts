@@ -19,13 +19,20 @@ export type MakerTools = {
 };
 
 // What the maker is told of what it looked at.
-export function lookedWords({ pictures, problem }: Looks): string {
+export function lookedWords({
+  pictures,
+  problem,
+  addresses = [],
+}: Looks): string {
   if (pictures.length === 0)
     return `It could not be looked at: ${problem ?? "no picture was taken"}.`;
   return [
     "Pictures of your prototype as it runs now (read each one):",
     ...pictures.map((file) => `- ${file}`),
     problem ? `Not every picture could be taken: ${problem}` : "",
+    addresses.length > 0
+      ? `It runs at ${addresses.join(" and ")}. With your browser tools, open it there and go through what people will do (click, type, wait for answers): what jumps, repeats or gets stuck shows only that way.`
+      : "",
   ]
     .filter(Boolean)
     .join("\n");

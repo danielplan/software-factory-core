@@ -205,6 +205,7 @@ function explorationsAndTests(
     project: options.project,
     root: factory,
     claude: options.claude,
+    browser: options.testsRunOn.browser,
     store,
     cards: () => connectedCards(factory, options.cli),
     ideas: () => boardIdeas(options.work()),

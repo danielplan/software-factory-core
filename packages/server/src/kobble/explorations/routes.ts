@@ -28,12 +28,15 @@ import { ExplorationPrototypes } from "./prototypes.ts";
 import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
+import type { Browser } from "../persona-tests.ts";
 import { ExplorationWorlds } from "./worlds.ts";
 
 type Options = {
   project: string;
   root: string;
   claude: Claude;
+  // A browser the maker clicks through its prototype with.
+  browser?: () => Promise<Browser>;
   store: () => KobbleStore;
   cards: () => Cards;
   // The board's ideas (its Backlog), as the builder last read them.

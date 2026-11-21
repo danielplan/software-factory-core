@@ -35,7 +35,12 @@ import {
   freeVariant,
   withVariant,
 } from "./versions.ts";
+import type { Browser } from "../persona-tests.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
+
+// How a change asked for starts: now (a new run), told (to the maker at
+// work, in its run) or waits (for the run after it).
+export type ChangeStart = "now" | "told" | "waits";
 
 type PrototypesOptions = {
   // How a made prototype is photographed (Playwright, unless a test says).
@@ -43,6 +48,8 @@ type PrototypesOptions = {
   project: string;
   root: string;
   claude: Claude;
+  // A browser for the maker to click through its prototype (Playwright's).
+  browser?: () => Promise<Browser>;
   store: () => KobbleStore;
   worlds: ExplorationWorlds;
   onChange: () => void;
@@ -288,11 +295,7 @@ export class ExplorationPrototypes {
   // Change: the kobold changes a prototype as asked, in its copy, a new
   // commit on its branch; it keeps running, and its page reloads as the
   // kobold changes it.
-  change(
-    exploration: Exploration,
-    key: string,
-    request: string,
-  ): "now" | "waits" {
+  change(exploration: Exploration, key: string, request: string): ChangeStart {
     const store = this.options.store();
     const made = prototypeOf(store.board(exploration.id), key);
     if (!made) throw new Refused(`There is no prototype ${key} on the board.`);
@@ -307,7 +310,7 @@ export class ExplorationPrototypes {
     // the maker is done.
     if (this.mode.runOf(exploration.id, key).making) {
       if (this.desk.tell(this.options.claude, exploration.id, key, request))
-        return "now";
+        return "told";
       this.desk.wait(exploration.id, key, request);
       return "waits";
     }

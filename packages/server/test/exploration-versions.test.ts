@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
-import { MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
+import type { Claude, RunOptions } from "@software-factory/core";
+
+import { askerFor, MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
+import { lookedWords } from "../src/kobble/explorations/maker-tools.ts";
 import { lookAndFix, notWhileMade } from "../src/kobble/explorations/looks.ts";
 import {
   cutOffIn,
@@ -274,5 +277,87 @@ test("changes asked while the maker works wait, and come as one request once it 
   assert.throws(
     () => desk.tools("X-1", "B", () => Promise.reject(new Error())),
     /Nobody makes/,
+  );
+});
+
+test("a prototype's makers go on in one conversation, and a change asked mid-run is told to the maker at work", () => {
+  const desk = new MakerDesk();
+  const told: string[] = [];
+  const claude: Claude = {
+    run: () => Promise.resolve({ ok: true, text: "" }),
+    tell: (session, message) => {
+      told.push(`${session}|${message}`);
+      return true;
+    },
+  };
+  const first = desk.sessionFor("X-1", "A");
+  assert.equal(first.resume, false);
+  assert.equal(desk.tell(claude, "X-1", "A", "Bigger tabs"), true);
+  assert.match(told[0] ?? "", new RegExp(`^${first.id}\\|.*Bigger tabs$`));
+  assert.equal(desk.tell(claude, "X-1", "B", "Bigger tabs"), false);
+  assert.equal(
+    desk.tell(
+      { run: () => Promise.resolve({ ok: true, text: "" }) },
+      "X-1",
+      "A",
+      "Bigger tabs",
+    ),
+    false,
+  );
+  desk.done("X-1", "A");
+  assert.equal(desk.tell(claude, "X-1", "A", "Bold"), false);
+  assert.deepEqual(desk.sessionFor("X-1", "A"), { id: first.id, resume: true });
+  desk.use("X-1", "A", "fresh");
+  desk.done("X-1", "A");
+  assert.deepEqual(desk.sessionFor("X-1", "A"), { id: "fresh", resume: true });
+});
+
+test("the maker continues its conversation with a browser beside its own tool, and starts anew when it cannot", async () => {
+  const runs: RunOptions[] = [];
+  const fresh: string[] = [];
+  const claude: Claude = {
+    run: (options) => {
+      runs.push(options);
+      return Promise.resolve(
+        options.session?.resume
+          ? { ok: false, text: "", error: "No conversation found" }
+          : { ok: true, text: "Made it." },
+      );
+    },
+  };
+  const ask = askerFor({
+    claude,
+    folder: "/copy",
+    model: "sonnet",
+    session: { id: "old", resume: true },
+    mcp: { name: "prototype", url: "https://x/mcp", headers: {} },
+    browser: { name: "browser", url: "https://b/mcp", headers: {} },
+    onStep: () => undefined,
+    onFresh: (session) => fresh.push(session),
+  });
+  const answer = await ask("Make it", false);
+  assert.equal(answer.text, "Made it.");
+  const [tried, again] = runs;
+  assert.ok(tried && again);
+  assert.equal(tried.session?.id, "old");
+  assert.equal(tried.model, "sonnet");
+  assert.equal(tried.alsoMcp?.[0]?.name, "browser");
+  assert.notEqual(again.session?.id, "old");
+  assert.equal(again.session?.resume, false);
+  assert.deepEqual(fresh, [again.session.id]);
+});
+
+test("what the maker is told it looked at: the pictures, and where to use it in its browser", () => {
+  const words = lookedWords({
+    pictures: ["/looks/A-A.png"],
+    problem: null,
+    addresses: ["http://localhost:5200/?variant=A"],
+  });
+  assert.match(words, /\/looks\/A-A\.png/);
+  assert.match(words, /runs at http:\/\/localhost:5200\/\?variant=A/);
+  assert.match(words, /click, type/);
+  assert.doesNotMatch(
+    lookedWords({ pictures: ["/a.png"], problem: null }),
+    /runs at/,
   );
 });

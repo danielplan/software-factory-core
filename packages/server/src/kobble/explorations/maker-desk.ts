@@ -6,7 +6,9 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { Claude, RunOptions } from "@software-factory/core";
+import type { Claude, Mcp, RunOptions } from "@software-factory/core";
+
+export type MakerSession = { id: string; resume: boolean };
 import { skillsFolder } from "@software-factory/skills";
 
 import { COACH_HEADER } from "../../coach/setup-tools.ts";
@@ -23,14 +25,27 @@ export class MakerDesk {
   // Changes asked while the maker was on the prototype, oldest first.
   private readonly asked = new Map<string, string[]>();
 
-  // The conversation of each prototype's maker, while it makes it.
+  // The conversation of each prototype's maker, while it makes it, and the
+  // one kept from its last maker.
   private readonly sessions = new Map<string, string>();
+  private readonly kept = new Map<string, string>();
 
-  // A new maker's conversation for the prototype.
-  sessionFor(exploration: string, key: string): string {
-    const session = randomUUID();
-    this.sessions.set(keyOf(exploration, key), session);
+  // The maker's conversation for the prototype: the one its makers had
+  // before (continued, so it knows what was made and asked), or a new one.
+  sessionFor(exploration: string, key: string): MakerSession {
+    const at = keyOf(exploration, key);
+    const before = this.kept.get(at);
+    const session = before
+      ? { id: before, resume: true }
+      : { id: randomUUID(), resume: false };
+    this.sessions.set(at, session.id);
     return session;
+  }
+
+  // The maker went on in a new conversation (the old one could not be
+  // continued): changes are told to it, and it is the one kept.
+  use(exploration: string, key: string, session: string): void {
+    this.sessions.set(keyOf(exploration, key), session);
   }
 
   // A change asked while the maker is on the prototype goes into what it does
@@ -50,8 +65,12 @@ export class MakerDesk {
     );
   }
 
+  // The maker is done: its conversation is kept for the next change.
   done(exploration: string, key: string): void {
-    this.sessions.delete(keyOf(exploration, key));
+    const at = keyOf(exploration, key);
+    const session = this.sessions.get(at);
+    if (session) this.kept.set(at, session);
+    this.sessions.delete(at);
   }
 
   wait(exploration: string, key: string, request: string): void {
@@ -111,19 +130,23 @@ export class MakerDesk {
 
 const TIME_LIMIT_MS = 60 * 60_000;
 
-// How a maker is asked, in one conversation: first to make the prototype,
-// then (resumed) to look and fix; in the prototype's copy, with the explore
-// skill and its own tool, every step told.
+// How a maker is asked, in one conversation: first to make the prototype
+// (or change it, continuing its makers' conversation), then (resumed) to look
+// and fix; in the prototype's copy, with the explore skill, its own tool and
+// a browser, every step told. A conversation that cannot be continued
+// starts anew.
 export function askerFor(on: {
   claude: Claude;
   folder: string;
   model: string;
-  session: string;
+  session: MakerSession;
   mcp: RunOptions["mcp"];
+  browser: Mcp | undefined;
   onStep: (line: string) => void;
+  onFresh?: (session: string) => void;
 }) {
-  const { session } = on;
-  return (prompt: string, resume: boolean) =>
+  let session = on.session;
+  const run = (prompt: string, resume: boolean) =>
     on.claude.run({
       model: on.model,
       cwd: on.folder,
@@ -134,9 +157,17 @@ export function askerFor(on: {
         join(skillsFolder, "explore", "SKILL.md"),
         "utf8",
       ),
-      session: { id: session, resume },
+      session: { id: session.id, resume },
       ...(on.mcp ? { mcp: on.mcp } : {}),
+      ...(on.mcp && on.browser ? { alsoMcp: [on.browser] } : {}),
       timeLimitMs: TIME_LIMIT_MS,
       onActivity: on.onStep,
     });
+  return async (prompt: string, resume: boolean) => {
+    const answer = await run(prompt, resume || session.resume);
+    if (answer.ok || resume || !session.resume) return answer;
+    session = { id: randomUUID(), resume: false };
+    on.onFresh?.(session.id);
+    return await run(prompt, false);
+  };
 }

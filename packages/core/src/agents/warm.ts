@@ -78,6 +78,7 @@ export class WarmClaude {
       options.tools,
       options.readOnly,
       options.mcp,
+      options.alsoMcp,
     ]);
     let open = this.open.get(id);
     if (open && (open.closed || open.key !== key || open.turn)) {
