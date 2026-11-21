@@ -11,7 +11,8 @@ import { Refused } from "../src/refused.ts";
 import { releasesRoutes, type ReleasesView } from "../src/releases/routes.ts";
 
 // The Releases page's routes with a stand-in GitHub CLI and a stand-in
-// kobold: the coming release, the past ones, and making a release.
+// kobold: the coming release (no kobold asked until the team prepares it),
+// the past ones, preparing a release and making one.
 
 const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
 const made: string[] = [];
@@ -161,12 +162,29 @@ function routesOf(
       { number },
       url,
     );
-  return { get, post, asked, told, seen };
+  const prepare = () =>
+    (
+      routes["POST /api/releases/prepare"] as (
+        b: unknown,
+        u: URL,
+      ) => Promise<{ next: string | null; why: string | null }>
+    )({}, url);
+  return { get, post, prepare, asked, told, seen };
 }
 
-test("the first time everything merged so far is listed, with the starting number", async () => {
+test("reading the page asks no kobold; Prepare does, and the page then shows its number", async () => {
   const world = { ...empty(), requests: [request(2), request(1)] };
-  const { get, seen } = routesOf(world, { act: true, why: "Because." });
+  const { get, prepare, seen, told } = routesOf(world, {
+    act: true,
+    why: "Because.",
+  });
+  const before = await get();
+  assert.ok(before.connected);
+  assert.equal(before.coming.next, null);
+  assert.equal(before.coming.why, null);
+  assert.equal(seen.length, 0, "no kobold before Prepare");
+  assert.deepEqual(await prepare(), { next: "0.1.0", why: "Because." });
+  assert.deepEqual(told, ["releases"]);
   const view = await get();
   assert.ok(view.connected);
   assert.equal(view.last, null);
@@ -210,10 +228,11 @@ test("only pull requests merged after the last tag are listed, typed by their ca
     after: ["sha2", "sha3"],
     issues: [{ number: 102, labels: [{ name: "type: feature" }] }],
   };
-  const { get, seen, asked } = routesOf(world, {
+  const { get, prepare, seen, asked } = routesOf(world, {
     act: false,
     why: "Only fixes and improvements since 1.4.2",
   });
+  await prepare();
   const view = await get();
   assert.ok(view.connected);
   assert.equal(view.last, "1.4.2");
@@ -240,6 +259,7 @@ test("only pull requests merged after the last tag are listed, typed by their ca
     ),
   );
   assert.equal(seen.length, 1);
+  await prepare();
   await get();
   assert.equal(seen.length, 1, "the same work is judged once");
 });
@@ -251,10 +271,11 @@ test("something to act on raises the middle number", async () => {
     requests: [request(5)],
     after: ["sha5"],
   };
-  const { get } = routesOf(world, {
+  const { get, prepare } = routesOf(world, {
     act: true,
     why: "Something changes for people: x",
   });
+  await prepare();
   const view = await get();
   assert.ok(view.connected);
   assert.equal(view.coming.next, "1.5.0");
@@ -267,27 +288,25 @@ test("nothing new since the last release: an empty list, no kobold asked, nothin
     requests: [request(1)],
     after: [],
   };
-  const { get, post, seen } = routesOf(world, "fails");
+  const { get, post, prepare, seen } = routesOf(world, "fails");
   const view = await get();
   assert.ok(view.connected);
   assert.deepEqual(view.coming.merged, []);
   assert.equal(view.coming.why, null);
+  await assert.rejects(prepare(), /Nothing was merged since 1.4.3/);
   assert.equal(seen.length, 0);
   await assert.rejects(post("1.4.4"), /Nothing was merged since 1.4.3/);
 });
 
-test("when the kobold cannot judge, the last number is suggested without a reason", async () => {
+test("when the kobold cannot judge, Prepare suggests the next patch without a reason", async () => {
   const world = {
     ...empty(),
     tags: ["v1.4.3"],
     requests: [request(5)],
     after: ["sha5"],
   };
-  const { get } = routesOf(world, "fails");
-  const view = await get();
-  assert.ok(view.connected);
-  assert.equal(view.coming.next, "1.4.4");
-  assert.equal(view.coming.why, null);
+  const { prepare } = routesOf(world, "fails");
+  assert.deepEqual(await prepare(), { next: "1.4.4", why: null });
 });
 
 test("Release now makes the tag on the main branch and the release with its notes, and tells the page", async () => {
@@ -302,11 +321,13 @@ test("Release now makes the tag on the main branch and the release with its note
     ],
     after: ["sha5"],
   };
-  const { post, asked, told } = routesOf(world, {
+  const { post, prepare, asked, told, seen } = routesOf(world, {
     act: false,
     why: "Only fixes",
   });
+  await prepare();
   assert.deepEqual(await post(" 1.4.4 "), { number: "1.4.4" });
+  assert.equal(seen.length, 1, "Release now asks no kobold again");
   const create = asked.find((args) => args[0] === "release");
   assert.ok(create);
   assert.deepEqual(create.slice(0, 8), [
@@ -325,7 +346,7 @@ test("Release now makes the tag on the main branch and the release with its note
     String(create[10]),
     /^<!-- software-factory:why "Only fixes" -->\nOnly fixes\n\n## Fixes\n\n- Crash on empty cart \(\[#5\]\(https:\/\/github.com\/acme\/shop\/pull\/5\)\)\n$/,
   );
-  assert.deepEqual(told, ["releases"]);
+  assert.deepEqual(told, ["releases", "releases"]);
 });
 
 test("a number that is wrong, not higher or already a tag is refused before anything is made", async () => {

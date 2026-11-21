@@ -1,8 +1,9 @@
-// The coming release: its title with Release now at the top right, the
-// number suggested (Change turns it into a field) and why, and the work
-// merged since the last release.
+// The coming release: the work merged since the last release and, until
+// the team prepares it, Prepare the release (the kobold is asked nothing
+// before); once prepared, Release now at the top right, the number
+// suggested (Change turns it into a field) and why.
 
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type ReleasesView } from "@/api";
@@ -22,23 +23,63 @@ type Words = Messages["releases"];
 
 type Connected = Extract<ReleasesView, { connected: true }>;
 
+type Suggested = { next: string | null; why: string | null };
+
 export function ComingRelease({ view }: Readonly<{ view: Connected }>) {
   const t = useT().releases;
   const { coming, last } = view;
-  // The number the team typed instead of the suggested one, while it does.
+  const at = useComingRelease(view);
+  const nothing = coming.merged.length === 0;
+  return (
+    <section className="grid gap-3" aria-labelledby="coming-release">
+      {at.said && <ProblemBox title={t.didNotWork} text={at.said} />}
+      <div className={cn(CARD, "grid gap-4 p-5")}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h2 id="coming-release" className="text-[15px] font-semibold">
+            {t.coming}
+          </h2>
+          <ReleaseButton at={at} nothing={nothing} />
+        </div>
+        {nothing && (
+          <p className="text-[13px] text-muted-foreground">{t.nothing(last)}</p>
+        )}
+        {!nothing && at.suggested === null && (
+          <p className="text-[13px] text-muted-foreground">{t.prepareAbout}</p>
+        )}
+        {!nothing && at.suggested !== null && (
+          <NumberLine
+            suggested={at.suggested}
+            typed={at.typed}
+            onType={at.setTyped}
+            problem={at.problem}
+            last={last}
+            view={at.shownView}
+          />
+        )}
+        {!nothing && <Merged merged={coming.merged} last={last} />}
+      </div>
+    </section>
+  );
+}
+
+// The coming release's state: the suggestion (from the server, or from
+// Prepare until the page reads it), the number typed instead, and the two
+// buttons' work.
+function useComingRelease(view: Connected) {
+  const { coming, last } = view;
   const [typed, setTyped] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [said, say] = useState<string | null>(null);
-  const number = (typed ?? coming.next).trim();
-  const problem = problemWith(number, last);
-  const nothing = coming.merged.length === 0;
-  const release = () => {
+  const [prepared, setPrepared] = useState<Suggested | null>(null);
+  const suggested = coming.next ?? prepared?.next ?? null;
+  const number = (typed ?? suggested ?? "").trim();
+  const ask = (path: string, body: object, done: (answer: unknown) => void) => {
     setWorking(true);
     say(null);
-    post("/api/releases", { number }).then(
-      () => {
+    post(path, body).then(
+      (answer) => {
         setWorking(false);
-        setTyped(null);
+        done(answer);
       },
       (error: unknown) => {
         setWorking(false);
@@ -46,39 +87,62 @@ export function ComingRelease({ view }: Readonly<{ view: Connected }>) {
       },
     );
   };
+  const shownView =
+    prepared && coming.next === null
+      ? { ...view, coming: { ...coming, why: prepared.why } }
+      : view;
+  return {
+    typed,
+    setTyped,
+    working,
+    said,
+    suggested,
+    number,
+    shownView,
+    problem: problemWith(number, last),
+    prepare: () => {
+      ask("/api/releases/prepare", {}, (answer) => {
+        setPrepared(answer as Suggested);
+      });
+    },
+    release: () => {
+      ask("/api/releases", { number }, () => {
+        setTyped(null);
+      });
+    },
+  };
+}
+
+// Prepare the release until the kobold suggested a number; Release now
+// after.
+function ReleaseButton({
+  at,
+  nothing,
+}: Readonly<{ at: ReturnType<typeof useComingRelease>; nothing: boolean }>) {
+  const t = useT().releases;
+  const spinner = <LoaderCircle aria-hidden className="animate-spin" />;
+  if (at.suggested === null)
+    return (
+      <Button
+        variant="default"
+        size="pill"
+        disabled={at.working || nothing}
+        onClick={at.prepare}
+      >
+        {at.working ? spinner : <Sparkles aria-hidden />}
+        {at.working ? t.preparing : t.prepare}
+      </Button>
+    );
   return (
-    <section className="grid gap-3" aria-labelledby="coming-release">
-      {said && <ProblemBox title={t.didNotWork} text={said} />}
-      <div className={cn(CARD, "grid gap-4 p-5")}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <h2 id="coming-release" className="text-[15px] font-semibold">
-            {t.coming}
-          </h2>
-          <Button
-            variant="default"
-            size="pill"
-            disabled={working || nothing || problem !== null}
-            onClick={release}
-          >
-            {working && <LoaderCircle aria-hidden className="animate-spin" />}
-            {working ? t.releasing : t.releaseNow(number)}
-          </Button>
-        </div>
-        {nothing ? (
-          <p className="text-[13px] text-muted-foreground">{t.nothing(last)}</p>
-        ) : (
-          <NumberLine
-            suggested={coming.next}
-            typed={typed}
-            onType={setTyped}
-            problem={problem}
-            last={last}
-            view={view}
-          />
-        )}
-        {!nothing && <Merged merged={coming.merged} last={last} />}
-      </div>
-    </section>
+    <Button
+      variant="default"
+      size="pill"
+      disabled={at.working || nothing || at.problem !== null}
+      onClick={at.release}
+    >
+      {at.working && spinner}
+      {at.working ? t.releasing : t.releaseNow(at.number)}
+    </Button>
   );
 }
 

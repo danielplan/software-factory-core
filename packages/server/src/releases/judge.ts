@@ -1,7 +1,8 @@
 // The kobold's judgement of what was merged: do people have to do something
 // (or does something they relied on change or go away)? Yes raises the
 // middle number. It answers with the reason in one line, in the team's
-// language. Asked once for the same work: the answer is kept until the
+// language. Asked only when the team prepares a release (never when the
+// page is read), and once for the same work: the answer is kept until the
 // merged pull requests change.
 
 import { randomUUID } from "node:crypto";
@@ -36,15 +37,22 @@ export class Judge {
   private readonly claude: Claude;
   private readonly cwd: string;
   private readonly kept = new Map<string, Promise<Judgement | null>>();
+  // The answers given, for reading without asking again.
+  private readonly given = new Map<string, Judgement>();
 
   constructor(claude: Claude, cwd: string) {
     this.claude = claude;
     this.cwd = cwd;
   }
 
+  // The judgement already given for this work, without asking for one.
+  known(last: string | null, merged: Merged[]): Judgement | null {
+    return this.given.get(keyOf(last, merged)) ?? null;
+  }
+
   // The kobold's judgement, or none when it could not give one.
   judge(last: string | null, merged: Merged[]): Promise<Judgement | null> {
-    const key = JSON.stringify([last, merged.map((one) => one.number)]);
+    const key = keyOf(last, merged);
     let found = this.kept.get(key);
     if (!found) {
       found = this.ask(last, merged);
@@ -52,7 +60,10 @@ export class Judge {
       this.kept.set(key, found);
       // A failed try is asked again next time.
       void found.then((answer) => {
-        if (!answer && this.kept.get(key) === found) this.kept.delete(key);
+        if (answer) {
+          this.given.clear();
+          this.given.set(key, answer);
+        } else if (this.kept.get(key) === found) this.kept.delete(key);
       });
     }
     return found;
@@ -94,4 +105,8 @@ export class Judge {
       return null;
     }
   }
+}
+
+function keyOf(last: string | null, merged: Merged[]): string {
+  return JSON.stringify([last, merged.map((one) => one.number)]);
 }

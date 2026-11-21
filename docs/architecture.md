@@ -326,9 +326,12 @@ release for the whole repository.
 
 The server side is `packages/server/src/releases/`: `GET /api/releases` (the
 coming release: the pull requests merged since the last tag, the suggested
-number and why, and the past releases) and `POST /api/releases` (a number: tag
-and release; answered only from the factory's page, and it sends a change event
-so the page reads again). It reads GitHub through the GitHub CLI
+number and why once the team prepared it, and the past releases),
+`POST /api/releases/prepare` (the kobold judges what was merged and suggests
+the number) and `POST /api/releases` (a number: tag and release). Both POSTs
+are answered only from the factory's page and send a change event so the page
+reads again. **The kobold is asked only on Prepare the release**: reading the
+page uses no AI, and Release now uses the answer Prepare gave. It reads GitHub through the GitHub CLI
 (`github-releases.ts`).
 
 - **The last release** is the highest `vX.Y.Z` tag; tags of other shapes are
@@ -338,8 +341,9 @@ so the page reads again). It reads GitHub through the GitHub CLI
   (`numbers.ts`): the last number goes up, the middle one only when people have
   to do something or something they relied on changes or goes away, the first
   one never by itself. The kobold gives that yes or no and the reason line from
-  the merged titles and descriptions (`judge.ts`); when it cannot, the last
-  number is suggested without a reason. The first release is `0.1.0`. The team
+  the merged titles and descriptions (`judge.ts`), when the team presses
+  Prepare the release; when it cannot, the next patch is suggested without a
+  reason. The first release is `0.1.0`. The team
   can change the number: it must be `x.y.z`, higher than the last, and not a
   tag that exists; the server refuses anything else, before tagging.
 - **The notes** (`notes.ts`) are written from the merged pull requests, grouped

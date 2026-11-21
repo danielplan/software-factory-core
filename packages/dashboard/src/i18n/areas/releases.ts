@@ -8,6 +8,10 @@ const en = {
   coming: "The coming release",
   releaseNow: (number: string) => `Release ${number}`,
   releasing: "Releasing…",
+  prepare: "Prepare the release",
+  preparing: "Reading what was merged…",
+  prepareAbout:
+    "The kobold reads what was merged and suggests the number, only when you press Prepare.",
   next: "Next:",
   change: "Change",
   numberLabel: "The number of the release",
@@ -47,6 +51,10 @@ export const releases = area(
     coming: "La prossima release",
     releaseNow: (number) => `Rilascia ${number}`,
     releasing: "Rilascio in corso…",
+    prepare: "Prepara il rilascio",
+    preparing: "Leggo ciò che è stato unito…",
+    prepareAbout:
+      "Il kobold legge ciò che è stato unito e suggerisce il numero, solo quando premi Prepara.",
     next: "Prossima:",
     change: "Cambia",
     numberLabel: "Il numero della release",
@@ -83,6 +91,10 @@ export const releases = area(
     coming: "Das kommende Release",
     releaseNow: (number) => `Release ${number}`,
     releasing: "Wird veröffentlicht…",
+    prepare: "Release vorbereiten",
+    preparing: "Lese, was zusammengeführt wurde…",
+    prepareAbout:
+      "Der Kobold liest, was zusammengeführt wurde, und schlägt die Nummer vor, erst wenn du auf Vorbereiten drückst.",
     next: "Nächste:",
     change: "Ändern",
     numberLabel: "Die Nummer des Releases",
