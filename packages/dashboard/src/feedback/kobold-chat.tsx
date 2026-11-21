@@ -106,7 +106,7 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
   };
   const sentences = draft?.body.split(/\n\n+/).filter(Boolean) ?? [];
   return (
-    <div className="mx-4 mt-1 grid max-h-[46%] flex-none gap-2.5 overflow-auto rounded-xl border border-line-soft bg-surface/50 p-3.5 motion-safe:animate-rise">
+    <div className="mx-4 mt-1 grid max-h-[min(18rem,37vh)] flex-none gap-2.5 overflow-auto rounded-xl border border-line-soft bg-surface/50 p-3.5 motion-safe:animate-rise">
       <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground [&_svg]:size-3">
         {thread.kind === "bug" ? (
           <Bug aria-hidden />

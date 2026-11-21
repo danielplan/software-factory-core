@@ -13,7 +13,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
@@ -119,49 +119,24 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
     if (followed) moved(followed.number, followed.state);
   }, [followed]);
   const working = support?.writing != null;
-  // The opening is as tall as what it shows (more when posts slide in
-  // while typing); a conversation gets the room.
-  const fits = open && thread?.step === "choose";
-  const inner = useRef<HTMLDivElement>(null);
-  const [natural, setNatural] = useState<number | null>(null);
-  useLayoutEffect(() => {
-    const el = inner.current;
-    if (!fits || !el) return;
-    const measure = () => {
-      setNatural(el.offsetHeight + 2);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-    };
-  }, [fits]);
+  // As tall as what it shows, opening or conversation: it grows as lines
+  // come in, up to a maximum, then the conversation scrolls inside.
   const roomy = Math.min(window.innerHeight * 0.8, 620);
-  const height = !open
-    ? 40
-    : fits && natural
-      ? Math.min(natural, roomy)
-      : roomy;
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
       <section
         aria-label="Sprocket"
         className={cn(
-          "pointer-events-auto flex max-w-full flex-col overflow-hidden border border-border bg-card/95 backdrop-blur transition-[width,height,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.9,0.3,1)]",
+          "pointer-events-auto flex max-w-full flex-col overflow-hidden border [interpolate-size:allow-keywords] border-border bg-card/95 backdrop-blur transition-[width,height,border-radius,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.9,0.3,1)]",
           open
             ? "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]"
             : "w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
-        style={{ height }}
+        style={{ height: open ? "auto" : 40, maxHeight: roomy }}
       >
         {open && thread ? (
           <div
-            ref={inner}
-            className={cn(
-              "flex min-h-0 flex-col motion-safe:animate-rise",
-              fits ? "flex-none" : "flex-1",
-            )}
+            className="flex min-h-0 flex-1 flex-col motion-safe:animate-rise"
             style={{ animationDelay: "120ms" }}
           >
             <Header

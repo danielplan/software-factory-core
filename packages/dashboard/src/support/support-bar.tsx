@@ -162,7 +162,7 @@ export function Messages({ support }: Readonly<{ support: SupportView | null }>)
     end.current?.scrollIntoView({ block: "end" });
   }, [count, writing]);
   return (
-    <div className="flex flex-1 flex-col gap-3 overflow-auto px-4 py-3 text-[13px] leading-relaxed">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-4 py-3 text-[13px] leading-relaxed">
       {support?.messages.map((message, at) =>
         message.from === "kobold" ? (
           <div key={at} className="self-start">
