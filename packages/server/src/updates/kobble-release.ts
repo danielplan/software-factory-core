@@ -6,7 +6,7 @@
 // request; once that is merged, every computer takes it with its next
 // update (project-updates.ts).
 
-import { compareVersions } from "@software-factory/core";
+import { compareVersions, RELEASE_SOURCE } from "@software-factory/core";
 
 export type ReleaseView = {
   // The newest release, when it is newer than this factory's; else null.
@@ -39,7 +39,8 @@ export function upgradeBody(from: string, to: string): string {
     "Use the upgrade-factory skill: pin the core at release " +
       `${to} in package.json, run npm install, then \`npx software-factory upgrade\`, ` +
       "and do what it leaves to the owner. Open the pull request with what " +
-      "the upgrade did and what changed for the team (the core's CHANGELOG).",
+      "the upgrade did and what changed for the team (the core's commits " +
+      `between the two releases: ${compareUrl(from, to)}).`,
     "",
     "Once it is merged, every computer takes it with its next update.",
   ].join("\n");
@@ -98,4 +99,10 @@ export class KobbleReleases {
       this.timer = null;
     };
   }
+}
+
+// The core's commits between two releases, on GitHub.
+function compareUrl(from: string, to: string): string {
+  const repository = RELEASE_SOURCE.replace(/^github:/, "");
+  return `https://github.com/${repository}/compare/v${from}...v${to}`;
 }

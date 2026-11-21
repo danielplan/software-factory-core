@@ -24,7 +24,7 @@ When you are asked to build or change something, use the factory skills to plan,
 
 ## How every product is built
 
-These defaults hold for every product, whatever its kind. Each kind's kit adds its own layout and tools; the company's own conventions pages add to both.
+These defaults hold for every product, whatever its kind. Each kind's kit adds its own layout and its libraries, one per job: read a product's kit rules with `npx software-factory rules <product>` before building in it. A job the kit's libraries table does not have gets a row in the product's `BLUEPRINT.md` (under `## Libraries`, with why), never home-made code; the factory's checks refuse a package no table names. The company's own conventions pages add to both.
 
 - **Each product is independent:** its own folder, packages, tests, `README.md`, `BLUEPRINT.md` and `product.json`. Products do not share code until the contracts between them are stable enough to share.
 - **One command checks everything:** each product's `verify` command (named in its `product.json`) runs its format, code-quality, type and test checks, and must pass before a run is done.

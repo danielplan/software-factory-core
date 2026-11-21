@@ -29,8 +29,12 @@ export type FactoryCard = {
   pullRequest: string | null;
   // That pull request's state, for the colour of its button.
   pullRequestState: CardView["pullRequestState"];
-  // That pull request clashes with main: Resolve asks the builder to settle it.
+  // That pull request clashes with main while the card is in Review:
+  // Resolve asks the builder to settle it.
   conflict: boolean;
+  // It clashes, and the card is back in To do or Building: the builder is
+  // settling it, nothing to press.
+  resolving: boolean;
   // Handed back from Stuck with the owner's hint: first in To do.
   hint: boolean;
 };
@@ -106,6 +110,8 @@ export function factoryView(
       .map((signal) => signal.to),
   );
   const cards = (work?.cards ?? []).map((card) => {
+    const column = columnOfCard(card);
+    const clashes = card.conflict ?? false;
     const from = explorations.find((one) => one.work === card.number);
     const agreed = from
       ? store
@@ -113,7 +119,7 @@ export function factoryView(
           .things.find((one) => one.kind === "prototype" && one.agreed)
       : undefined;
     return {
-      column: columnOfCard(card),
+      column,
       card: {
         number: card.number,
         title: card.title,
@@ -129,7 +135,8 @@ export function factoryView(
         type: card.type ?? null,
         pullRequest: card.pullRequest,
         pullRequestState: card.pullRequestState ?? null,
-        conflict: card.conflict ?? false,
+        conflict: clashes && column === "review",
+        resolving: clashes && (column === "todo" || column === "building"),
         hint: card.hint ?? false,
       },
     };

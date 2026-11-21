@@ -15,6 +15,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { rulesOf } from "./libraries.ts";
 
 const PORT = 5173;
 
@@ -24,10 +25,7 @@ export const sveltekitApp = defineKit({
   about: "A web app made with SvelteKit.",
   kind: "sveltekit-app",
   commands: { start: "npm run dev" },
-  rules: [
-    "rules/sveltekit-app/conventions.md",
-    "rules/sveltekit-app/lessons.md",
-  ],
+  rules: rulesOf("sveltekit-app"),
   port: PORT,
   // Svelte's own MCP server: its documentation, and the autofixer that
   // checks each component the agents write.

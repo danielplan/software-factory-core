@@ -5,6 +5,8 @@
 // look once when it did not, and what it made committed, pushed and told
 // (made.ts).
 
+import { readFileSync, writeFileSync } from "node:fs";
+
 import {
   type Board,
   type Claude,
@@ -58,11 +60,14 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
   const workspace = await versionWorkspace(on.project, copy);
   // It runs while it is made: the team watches it change.
   mode.start(exploration.id, key).catch(() => undefined);
+  // The conversation is saved beside the copy, so a maker after a restart
+  // of the server continues it instead of starting over.
+  const savedAt = `${copy.folder}.maker-session`;
   const ask = askerFor({
     claude: on.claude,
     folder: copy.folder,
     model: makerModel(on.root),
-    session: desk.sessionFor(exploration.id, key),
+    session: desk.sessionFor(exploration.id, key, savedSession(savedAt)),
     mcp: desk.mcpFor(exploration.id, key),
     browser: browser
       ? { name: "browser", url: browser.url, headers: {} }
@@ -76,22 +81,26 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
     change,
     maps: codeMaps(on.root),
   });
-  const first = await ask(asked, false);
-  // Started again, so what runs is the newest, server and all (a page
-  // reloads by itself as files change, a server does not).
-  await mode.stop(exploration.id, key);
-  const result = await lookAndFix(first, {
-    ask: (prompt) => ask(prompt, true),
-    look: on.look,
-    looked: () => desk.hasLooked(exploration.id, key),
-    opens: (page) => {
-      on.mark({ opens: page });
-    },
-    states: (states) => {
-      on.mark({ states });
-    },
-  });
-  desk.done(exploration.id, key);
+  let result: Awaited<ReturnType<typeof lookAndFix>>;
+  try {
+    const first = await ask(asked, false);
+    // Started again, so what runs is the newest, server and all (a page
+    // reloads by itself as files change, a server does not).
+    await mode.stop(exploration.id, key);
+    result = await lookAndFix(first, {
+      ask: (prompt) => ask(prompt, true),
+      look: on.look,
+      looked: () => desk.hasLooked(exploration.id, key),
+      opens: (page) => {
+        on.mark({ opens: page });
+      },
+      states: (states) => {
+        on.mark({ states });
+      },
+    });
+  } finally {
+    saveSession(savedAt, desk.done(exploration.id, key));
+  }
   on.mark({});
   await finishMaking({
     mode,
@@ -114,4 +123,22 @@ function stepsInto(mode: PrototypeMode, exploration: string, key: string) {
       steps: [...steps, line.slice(0, 200)].slice(-60),
     });
   };
+}
+
+function savedSession(file: string): string | null {
+  try {
+    const id = readFileSync(file, "utf8").trim();
+    return /^[\w-]+$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(file: string, session: string | null): void {
+  if (!session) return;
+  try {
+    writeFileSync(file, session);
+  } catch {
+    // Not saved: the next maker after a restart starts a new conversation.
+  }
 }

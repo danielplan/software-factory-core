@@ -1,7 +1,8 @@
 // The checks before a pull request: the factory itself runs the verify
 // command of every product the branch changed, in the working copy (with
 // `npm ci` first where packages are missing), instead of taking the agent's
-// word for it. A failure is written down for the agent's one round of
+// word for it, and checks that each such product uses only the libraries
+// its kit's rules and its blueprint name. A failure is written down for the agent's one round of
 // fixing and, if it stays, for the pull request.
 
 import { spawn } from "node:child_process";
@@ -14,6 +15,7 @@ import {
   loadFactory,
   run,
 } from "@software-factory/core";
+import { unlistedPackagesOf } from "@software-factory/kits";
 
 export type Check = { name: string; folder: string; command: string };
 export type CheckResult = Check & { ok: boolean; output: string };
@@ -41,15 +43,18 @@ export async function checkWithFixes(options: {
   ) => Promise<{ status: string; text: string }>;
 }): Promise<CheckOutcome & { blocked: string | null }> {
   const { copy, available, base, onActivity } = options;
-  const check = async () =>
-    await runChecks(
+  const check = async () => {
+    const changed = await changedFiles(copy, base);
+    const ran = await runChecks(
       copy,
-      checksFor(copy, available, await changedFiles(copy, base)),
+      checksFor(copy, available, changed),
       options.shell,
       (c) => {
         onActivity(`Checking ${c.name}: ${c.command}`);
       },
     );
+    return withLibraries(ran, libraryReport(copy, available, changed));
+  };
   let checked = await check();
   for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
     const answer = await options.fix(checked.report, round);
@@ -76,15 +81,48 @@ export function checksFor(
   const loaded = loadFactory(join(copy, FACTORY_FOLDER), available);
   if ("problem" in loaded) return [];
   return loaded.products.flatMap((product) => {
-    const inside = relative(copy, product.folder).split(sep).join("/");
-    const touched = changed.some(
-      (file) => inside === "" || file.startsWith(`${inside}/`),
-    );
     const command = product.commands.verify;
-    return touched && command
+    return touches(copy, product.folder, changed) && command
       ? [{ name: product.name, folder: product.folder, command }]
       : [];
   });
+}
+
+// The touched products that depend on a package neither their kit's
+// libraries table nor their blueprint's names, said as a failed check; ""
+// when there is none.
+export function libraryReport(
+  copy: string,
+  available: Available,
+  changed: string[],
+): string {
+  const loaded = loadFactory(join(copy, FACTORY_FOLDER), available);
+  if ("problem" in loaded) return "";
+  return loaded.products
+    .filter((product) => touches(copy, product.folder, changed))
+    .flatMap((product) => {
+      const kit = loaded.kits.find((one) => one.id === product.kit);
+      const missing = unlistedPackagesOf(product.folder, kit?.rules ?? []);
+      if (missing.length === 0) return [];
+      const list = missing.map((name) => "- `" + name + "`").join("\n");
+      return [
+        `### ${product.name}: libraries no table names\n\n${list}\n\nEach job has one library, named in the libraries table of the kit's conventions (\`npx software-factory rules ${product.id}\`). Use the library the table names for that job instead; when the job is not there, add a row with the job, the library and why to the product's \`BLUEPRINT.md\` under \`## Libraries\` (the same columns).`,
+      ];
+    })
+    .join("\n\n");
+}
+
+function withLibraries(ran: CheckOutcome, libraries: string): CheckOutcome {
+  if (libraries === "") return ran;
+  return {
+    passed: false,
+    report: [ran.report, libraries].filter((part) => part !== "").join("\n\n"),
+  };
+}
+
+function touches(copy: string, folder: string, changed: string[]): boolean {
+  const inside = relative(copy, folder).split(sep).join("/");
+  return changed.some((file) => inside === "" || file.startsWith(`${inside}/`));
 }
 
 export async function changedFiles(

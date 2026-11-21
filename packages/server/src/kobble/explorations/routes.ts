@@ -32,6 +32,7 @@ import { type SpecWriter, specWriter } from "./spec-writer.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import type { Browser } from "../persona-tests.ts";
 import { ExplorationWorlds } from "./worlds.ts";
+import { HandOffs } from "./handing-off.ts";
 
 type Options = {
   project: string;
@@ -55,7 +56,22 @@ export function servedExplorations(options: Options) {
   prototypes.whenReady((id, key, made) => {
     talks.review(id, key, made);
   });
-  talks.makeWith(makersFor(store, prototypes, options));
+  // Handed off, by the button or the kobold: the spec written (each step
+  // shown on the page), the card made, the prototypes stopped.
+  const handOffs = new HandOffs(options.onChange);
+  const handOffNow = (id: string) =>
+    handOffs.run(id, async ({ stage, step }) => {
+      const write = writerOf(options, step);
+      const handed = await handOff(store(), id, options.cards, async (on) => {
+        const spec = await write(on);
+        stage("card");
+        return spec;
+      });
+      stage("prototypes");
+      await prototypes.removeAll(id);
+      return handed;
+    });
+  talks.makeWith(makersFor(store, prototypes, options, handOffNow));
   // A button: done, then the page is told.
   const button =
     (act: (body: unknown) => unknown): Route =>
@@ -65,13 +81,8 @@ export function servedExplorations(options: Options) {
       return answer ?? {};
     };
   const routes = {
-    ...readRoutes(store, talks, prototypes, options.ideas),
-    ...buttonRoutes(store, button, {
-      talks,
-      prototypes,
-      cards: options.cards,
-      write: writerOf(options),
-    }),
+    ...readRoutes(store, talks, prototypes, options.ideas, handOffs),
+    ...buttonRoutes(store, button, { talks, prototypes, handOffNow }),
     ...talkRoutes(store, talks, button),
   };
   return {
@@ -95,6 +106,7 @@ function makersFor(
   store: () => KobbleStore,
   prototypes: ExplorationPrototypes,
   options: Options,
+  handOffNow: HandOffNow,
 ): Parameters<ExplorationTalks["makeWith"]>[0] {
   return {
     making: (id) => prototypes.beingMade(id),
@@ -113,14 +125,7 @@ function makersFor(
     },
     // Handed off by the kobold, on the team's yes: as the button does.
     handOff: async (id) => {
-      const handed = await handOff(
-        store(),
-        id,
-        options.cards,
-        writerOf(options),
-      );
-      await prototypes.removeAll(id);
-      options.onChange();
+      const handed = await handOffNow(id);
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
     },
     deeper: (id, prototype, keep, ways) => {
@@ -177,6 +182,7 @@ function readRoutes(
   talks: ExplorationTalks,
   prototypes: ExplorationPrototypes,
   ideas: (() => BoardIdea[]) | undefined,
+  handOffs: HandOffs,
 ): Record<string, Route> {
   return {
     "GET /api/kobble/explorations/picture": (_body, url) => {
@@ -202,6 +208,7 @@ function readRoutes(
       return explorationPage(store(), exploration, {
         runs: prototypes.runs(exploration.id),
         talk: talks.view(exploration.id),
+        handingOff: handOffs.of(exploration.id),
       });
     },
   };
@@ -213,8 +220,7 @@ function buttonRoutes(
   on: {
     talks: ExplorationTalks;
     prototypes: ExplorationPrototypes;
-    cards: () => Cards;
-    write: SpecWriter;
+    handOffNow: HandOffNow;
   },
 ): Record<string, Route> {
   const { talks, prototypes } = on;
@@ -252,11 +258,9 @@ function buttonRoutes(
       thing: addPicture(store(), talks, id(body), body),
     })),
     // Handed off, the exploration is done: its prototypes stop.
-    "POST /api/kobble/explorations/hand-off": button(async (body) => {
-      const handed = await handOff(store(), id(body), on.cards, on.write);
-      await prototypes.removeAll(field(body, "id"));
-      return handed;
-    }),
+    "POST /api/kobble/explorations/hand-off": button(
+      async (body) => await on.handOffNow(id(body)),
+    ),
   };
 }
 
@@ -277,11 +281,17 @@ function persona(body: unknown): string | undefined {
 }
 
 // The spec written at hand-off, by Claude Code reading the project.
-function writerOf(options: Options): SpecWriter {
+function writerOf(
+  options: Options,
+  onActivity: (line: string) => void,
+): SpecWriter {
   return specWriter({
     claude: options.claude,
     project: options.project,
     root: options.root,
     store: options.store,
+    onActivity,
   });
 }
+
+type HandOffNow = (id: string) => Promise<{ issue: number; url: string }>;

@@ -3,6 +3,7 @@
 // dropped) and one exploration with its board, its prototypes as they run,
 // their tests, and the conversation.
 
+import type { HandingOff } from "./handing-off.ts";
 import {
   type Board,
   type Exploration,
@@ -67,6 +68,8 @@ export type ExplorationPage = {
   runs: VersionRun[];
   tests: Record<string, TestResult | null>;
   talk: TalkView;
+  // Being handed off: since when, and what the spec writer does now.
+  handingOff: HandingOff | null;
 };
 
 function tagsOf(store: KobbleStore, ids: string[]): PersonaTag[] {
@@ -138,7 +141,7 @@ export function explorationsView(
 export function explorationPage(
   store: KobbleStore,
   exploration: Exploration,
-  more: { runs: VersionRun[]; talk: TalkView },
+  more: { runs: VersionRun[]; talk: TalkView; handingOff: HandingOff | null },
 ): ExplorationPage {
   const board = completed(exploration, store.board(exploration.id));
   const tests = store.all("tests");
@@ -164,6 +167,7 @@ export function explorationPage(
       }),
     ),
     talk: more.talk,
+    handingOff: more.handingOff,
   };
 }
 

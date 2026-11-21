@@ -12,6 +12,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { rulesOf } from "./libraries.ts";
 import { installIn, starterFolder } from "./starters.ts";
 
 const PORT = 8081;
@@ -22,7 +23,7 @@ export const expoApp = defineKit({
   about: "A phone app made with Expo and React Native.",
   kind: "expo-app",
   commands: { start: "npx expo start" },
-  rules: ["rules/expo-app/conventions.md", "rules/expo-app/lessons.md"],
+  rules: rulesOf("expo-app"),
   port: PORT,
   detect: (folder) => {
     const file = readPackageJson(folder);

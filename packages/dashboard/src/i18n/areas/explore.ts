@@ -36,7 +36,13 @@ const en = {
   dropping: "Dropping…",
   handOff: (key: string) => `Hand off ${key}`,
   handOffBoard: "Hand off",
-  handingOff: "Writing the spec…",
+  handingOff: "Handing off…",
+  handOffStep: (n: number, of: number) => `Step ${String(n)} of ${String(of)}`,
+  handOffStages: {
+    spec: "Writing the spec",
+    card: "Making the card on the board",
+    prototypes: "Stopping the prototypes",
+  },
   handedOffAs: (number: number) => `Handed off as #${String(number)}`,
   where: {
     handedOff: "Handed off to the Factory",

@@ -63,3 +63,14 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
     </span>
   );
 }
+
+// A card whose clash the builder was asked to settle: what happens now.
+export function ResolvingLine() {
+  const t = useT().factory.conflict;
+  return (
+    <span className="flex w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1.5 text-xs leading-snug text-muted-foreground">
+      <GitMerge aria-hidden strokeWidth={2} className="size-3 flex-none" />
+      {t.resolving}
+    </span>
+  );
+}

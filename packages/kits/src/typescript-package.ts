@@ -16,6 +16,7 @@ import {
   readPackageJson,
   verifyCommand,
 } from "./package-json.ts";
+import { rulesOf } from "./libraries.ts";
 
 // The packages that make code an app of a kind another kit knows, or a
 // framework app no kit knows yet: then it is not a plain package.
@@ -43,10 +44,7 @@ export const typescriptPackage = defineKit({
     "Shared code other products use (types, schemas, rules), given out as a package.",
   kind: "typescript-package",
   commands: {},
-  rules: [
-    "rules/typescript-package/conventions.md",
-    "rules/typescript-package/lessons.md",
-  ],
+  rules: rulesOf("typescript-package"),
   detect: (folder) => {
     const file = readPackageJson(folder);
     if (!file || !isPackage(file)) return null;

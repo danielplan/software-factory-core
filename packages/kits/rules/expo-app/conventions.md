@@ -4,18 +4,29 @@ The usual way for a phone app made with Expo, React Native and TypeScript. A
 product may do something its own way: then its own rule, written in its
 blueprint, wins over this one.
 
-## The tools
+## The libraries
 
-- **Expo** and **React Native** with **Expo Router** file routes. Add Expo
-  packages with `npx expo install`, so their versions match the Expo release.
-- **TanStack Query** for server data, **zod** to check every answer,
-  **react-hook-form** with zod for forms.
-- **i18next** with expo-localization for texts when the app speaks more than
-  one language; Intl for dates, numbers and money.
-- Widely used Expo or React Native Community packages before anything
-  hand-built.
-- **Jest** (jest-expo) with React Native Testing Library and **MSW**;
-  **Maestro** for taps on a real simulator.
+One library per job. Use the one named here. A job this table does not
+have is never written by hand: take what the platform gives first, then a
+widely used, maintained library, and add its row, with why, in the same
+change: in this kit when other products would need it too, in the
+product's blueprint (`## Libraries`, the same table) when only it does. Code
+of your own is allowed only as a row that says why no library fits. Every
+package in the product's `dependencies` is named in one of the two tables;
+the core's checks refuse one that is not.
+
+| Job                        | Library                                                                                                                                      | Why                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Screens                    | **Expo** and **React Native** with TypeScript (`expo`, `react`, `react-native`, `react-native-web`, `@expo/metro-runtime`)                   | one code base for iOS, Android and the web         |
+| Device features            | Expo and React Native Community packages, added with `npx expo install` (`expo-*`, `@expo/*`, `react-native-*`, `@react-native-community/*`) | versions that match the Expo release               |
+| Pages and addresses        | **Expo Router** (`expo-router`)                                                                                                              | file routes and deep links                         |
+| Data from the server       | **TanStack Query** (`@tanstack/react-query`)                                                                                                 | caching, refreshing, loading and error states      |
+| Checking data from outside | **zod** (`zod`)                                                                                                                              | one schema is both the check and the type          |
+| Forms                      | **react-hook-form** with zod (`react-hook-form`, `@hookform/resolvers`)                                                                      | fields, errors and sending without hand-kept state |
+| Texts and languages        | **i18next** with **expo-localization** (`i18next`, `react-i18next`, `expo-localization`)                                                     | keys, plurals and the phone's language             |
+| Dates, numbers and money   | **Intl**                                                                                                                                     | the platform has it                                |
+| Pretend backend            | **MSW** (development only)                                                                                                                   | the same pretend server for tests and prototypes   |
+| Tests                      | **Jest** (jest-expo), **React Native Testing Library**, **Maestro** (development only)                                                       | see How we test                                    |
 
 ## The folder layout
 

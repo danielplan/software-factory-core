@@ -4,16 +4,38 @@ The usual way for a web app made with React, TypeScript and Vite. A product
 may do something its own way: then its own rule, written in its blueprint,
 wins over this one.
 
-## The tools
+## The libraries
 
-- **React**, **TypeScript** and **Vite**.
-- **shadcn/ui** components on **Tailwind** before hand-built ones (tables,
-  sidebars, sheets, charts).
-- **React Router** for pages, **TanStack Query** for data from the server,
-  **TanStack Table** for tables.
-- **react-hook-form** with **zod** for forms.
-- **i18next** for texts when the app speaks more than one language; the
-  browser's **Intl** for dates, numbers, money and sorting.
+One library per job. Use the one named here. A job this table does not
+have is never written by hand: take what the platform gives first, then a
+widely used, maintained library, and add its row, with why, in the same
+change: in this kit when other products would need it too, in the
+product's blueprint (`## Libraries`, the same table) when only it does. Code
+of your own is allowed only as a row that says why no library fits. Every
+package in the product's `dependencies` is named in one of the two tables;
+the core's checks refuse one that is not.
+
+| Job                               | Library                                                                                          | Why                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| Screens                           | **React** with **TypeScript** on **Vite** (`react`, `react-dom`)                                 | the most widely known way to build screens                    |
+| Components and styling            | **shadcn/ui** on **Tailwind** (`radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`) | accessible pieces, styled with the product's tokens           |
+| Icons                             | **Lucide** (`lucide-react`)                                                                      | shadcn's own icons                                            |
+| Logos of other products           | **Simple Icons** (`simple-icons`)                                                                | brand logos, kept up to date by others                        |
+| Fonts                             | **Fontsource** (`@fontsource/*`, `@fontsource-variable/*`)                                       | fonts bundled with the app, no request to a font server       |
+| Pages and addresses               | **React Router** (`react-router`, `react-router-dom`)                                            | addresses people can share, the back button, links            |
+| Data from the server              | **TanStack Query** (`@tanstack/react-query`)                                                     | caching, refreshing, loading and error states                 |
+| Live updates from the server      | the browser's **EventSource**, refreshing TanStack Query                                         | the platform has it                                           |
+| Checking data from outside        | **zod** (`zod`)                                                                                  | one schema is both the check and the type                     |
+| Forms                             | **react-hook-form** with zod (`react-hook-form`, `@hookform/resolvers`)                          | fields, errors and sending without hand-kept state            |
+| Tables                            | **TanStack Table** (`@tanstack/react-table`)                                                     | sorting, filtering and paging                                 |
+| Charts                            | **Recharts**, through shadcn's charts (`recharts`)                                               | shadcn's own charts                                           |
+| Texts and languages               | **i18next** (`i18next`, `react-i18next`)                                                         | keys, plurals and languages, checked by eslint-plugin-i18next |
+| Dates, numbers, money and sorting | the browser's **Intl**                                                                           | the platform has it                                           |
+| Markdown                          | **react-markdown** with **remark-gfm** (`react-markdown`, `remark-gfm`)                          | Markdown as React elements, never as raw HTML                 |
+| Diagrams written as text          | **Mermaid** (`mermaid`)                                                                          | flowcharts and sequences from text                            |
+| Boxes and arrows people move      | **React Flow**, laid out by **ELK** (`@xyflow/react`, `elkjs`)                                   | panning, zoom and dragging; a layout without overlaps         |
+| Pretend backend                   | **MSW** (development only)                                                                       | the same pretend server for tests and prototypes              |
+| Tests                             | **Vitest**, **Testing Library**, **Playwright** (development only)                               | see How we test                                               |
 
 ## The folder layout
 

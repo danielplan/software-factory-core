@@ -4,16 +4,27 @@ The usual way for a web app made with SvelteKit, Svelte 5 and TypeScript. A
 product may do something its own way: then its own rule, written in its
 blueprint, wins over this one.
 
-## The tools
+## The libraries
 
-- **SvelteKit** with **Svelte 5** (runes) and **TypeScript**, on **Vite**.
-- **shadcn-svelte** components on **Tailwind** before hand-built ones
-  (tables, sidebars, sheets, dialogs).
-- **SvelteKit's own routing, load functions and form actions** for pages,
-  data and forms; **zod** to check data from outside, with
-  **Superforms** for larger forms.
-- **Paraglide** or **i18next** for texts when the app speaks more than one
-  language; the browser's **Intl** for dates, numbers, money and sorting.
+One library per job. Use the one named here. A job this table does not
+have is never written by hand: take what the platform gives first, then a
+widely used, maintained library, and add its row, with why, in the same
+change: in this kit when other products would need it too, in the
+product's blueprint (`## Libraries`, the same table) when only it does. Code
+of your own is allowed only as a row that says why no library fits. Every
+package in the product's `dependencies` is named in one of the two tables;
+the core's checks refuse one that is not.
+
+| Job                               | Library                                                                                             | Why                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Screens, pages, data and forms    | **SvelteKit** with **Svelte 5** (runes) and **TypeScript**, on **Vite** (`@sveltejs/kit`, `svelte`) | its own routing, load functions and form actions                                       |
+| Components and styling            | **shadcn-svelte** on **Tailwind** (`bits-ui`, `tailwind-variants`, `clsx`, `tailwind-merge`)        | accessible pieces, styled with the product's tokens                                    |
+| Icons                             | **Lucide** (`@lucide/svelte`)                                                                       | shadcn-svelte's own icons                                                              |
+| Checking data from outside        | **zod** (`zod`)                                                                                     | one schema is both the check and the type                                              |
+| Larger forms                      | **Superforms** (`sveltekit-superforms`)                                                             | form actions with zod, errors at their fields                                          |
+| Texts and languages               | **Paraglide** (`@inlang/paraglide-js`)                                                              | SvelteKit's own add-on (`sv add paraglide`): typed messages, only the ones a page uses |
+| Dates, numbers, money and sorting | the browser's **Intl**                                                                              | the platform has it                                                                    |
+| Tests                             | **Vitest**, **Testing Library**, **Playwright** (development only)                                  | see How we test                                                                        |
 
 ## The folder layout
 

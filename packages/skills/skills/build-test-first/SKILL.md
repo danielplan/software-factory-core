@@ -7,7 +7,7 @@ Work in the selected product's folder (the one its `product.json` names, for the
 
 This skill guides the agent's implementation. Keep test commands, file organisation and debugging mechanics internal unless they help explain a result or the person asks.
 
-Build into the structure in the product's `BLUEPRINT.md` and the conventions for its kind (its kit's rules and the company's own), keeping the blueprint's promises. Choose routine files and modules within those parts yourself. If a new responsibility, user-visible behavior or technology is needed, return to `plan` for that choice before building it.
+Build into the structure in the product's `BLUEPRINT.md` and the conventions for its kind (its kit's rules, printed by `npx software-factory rules <product>`, and the company's own), keeping the blueprint's promises. Use the library the kit's libraries table names for each job. When a job has no row (in the kit's table or the blueprint's `## Libraries`), choose what the platform gives, then a widely used, maintained library, and add the row with why to the blueprint in the same change; never write your own for it without a row that says why no library fits. The factory's checks refuse a package no table names. Choose routine files and modules within those parts yourself. If a new responsibility, user-visible behavior or technology is needed, return to `plan` for that choice before building it.
 
 Build the checks in the run's check plan. For a new feature, start with the journey's end-to-end check, then the lower levels. A check that cannot run yet (no device, no database) stays written down as unverified; never report it as passed.
 

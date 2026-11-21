@@ -16,7 +16,7 @@ import type { FactoryCard } from "@/api";
 import { cn } from "@/lib/utils";
 
 import { TypeChip } from "./card-type";
-import { ConflictBox } from "./conflict-box";
+import { ConflictBox, ResolvingLine } from "./conflict-box";
 import { useT } from "@/i18n/use-t";
 
 // A card on the board: it rises in after the ones above it, lifts under the
@@ -106,7 +106,8 @@ export const OpenCard = createContext<(number: number) => void>(
 );
 
 // The card's pull request, in the colour of its state, and Resolve when it
-// clashes with main (not while the builder is on the card).
+// clashes with main in Review; once asked (back in To do or Building), a
+// quiet line that the builder is settling it.
 function PullRequest({
   card,
   building,
@@ -118,6 +119,7 @@ function PullRequest({
         state={card.conflict ? "conflict" : (card.pullRequestState ?? null)}
       />
       {card.conflict && !building && <ConflictBox number={card.number} />}
+      {card.resolving && <ResolvingLine />}
     </>
   );
 }

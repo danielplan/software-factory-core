@@ -45,7 +45,9 @@ and its icon in colour; the others are plain grey text with a grey icon.
 
 ## Languages
 
-Every word the dashboard shows is in one typed catalogue,
+Kobble's page is to use i18next like the React web app kit; until that
+move (listed in `packages/dashboard/BLUEPRINT.md`), every word it shows is
+in its own typed catalogue,
 `packages/dashboard/src/i18n/`, an area per part of Kobble
 (`areas/<area>.ts`: the frame, Home, System, Signals, …). Each area is
 `area(en, it, de)` (`define.ts`): English is the source, and Italian and

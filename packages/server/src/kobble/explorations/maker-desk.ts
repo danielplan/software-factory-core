@@ -31,10 +31,15 @@ export class MakerDesk {
   private readonly kept = new Map<string, string>();
 
   // The maker's conversation for the prototype: the one its makers had
-  // before (continued, so it knows what was made and asked), or a new one.
-  sessionFor(exploration: string, key: string): MakerSession {
+  // before (continued, so it knows what was made and asked), also the one
+  // saved with its copy before the server started again, or a new one.
+  sessionFor(
+    exploration: string,
+    key: string,
+    saved: string | null = null,
+  ): MakerSession {
     const at = keyOf(exploration, key);
-    const before = this.kept.get(at);
+    const before = this.kept.get(at) ?? saved;
     const session = before
       ? { id: before, resume: true }
       : { id: randomUUID(), resume: false };
@@ -65,12 +70,14 @@ export class MakerDesk {
     );
   }
 
-  // The maker is done: its conversation is kept for the next change.
-  done(exploration: string, key: string): void {
+  // The maker is done, or stopped: its conversation is kept for the next
+  // change; the conversation, to save with the copy.
+  done(exploration: string, key: string): string | null {
     const at = keyOf(exploration, key);
-    const session = this.sessions.get(at);
+    const session = this.sessions.get(at) ?? null;
     if (session) this.kept.set(at, session);
     this.sessions.delete(at);
+    return session;
   }
 
   wait(exploration: string, key: string, request: string): void {
