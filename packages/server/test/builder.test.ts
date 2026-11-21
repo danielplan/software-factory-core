@@ -267,6 +267,45 @@ test("a card moved to In progress by a person is left to them; so is one whose b
   work.switch("build", false);
 });
 
+test("each of the builder's turns gets a browser of its own, its only MCP server, closed after the turn", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      2,
+      {
+        title: "A greeting",
+        stage: "todo",
+        body: withPlan("Say hello.", "Add HELLO.md."),
+        comments: [],
+      },
+    ],
+  ]);
+  const servers: (string | undefined)[] = [];
+  const { claude } = pretendClaude((options) => {
+    servers.push(options.mcp?.url);
+    writeFileSync(join(options.cwd, "app", "HELLO.md"), "Hello");
+    return "Added a greeting.\nSTATUS: done";
+  });
+  let opened = 0;
+  let closed = 0;
+  const { work } = setUp(kept, claude, copy, [true], 1, {
+    browser: () => {
+      opened++;
+      return Promise.resolve({
+        url: `http://localhost:9${String(opened)}/mcp`,
+        close: () => {
+          closed++;
+        },
+      });
+    },
+  });
+  work.switch("build", true);
+  await settled(work);
+  assert.ok(servers.length > 0);
+  assert.equal(servers[0], "http://localhost:91/mcp");
+  assert.equal(closed, opened);
+});
+
 test("a board that cannot be read says why", async () => {
   const { copy } = await project();
   const kept = new Map<number, Kept>();

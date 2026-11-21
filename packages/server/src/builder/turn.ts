@@ -6,7 +6,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import type { Claude } from "@software-factory/core";
+import type { Claude, Mcp } from "@software-factory/core";
 
 import { branchOf, commitAndPush, originProblem } from "./branches.ts";
 import type { BoardCard } from "./decide.ts";
@@ -36,6 +36,9 @@ export type TurnOptions = {
   timeLimitMs: number;
   repository: string;
   now: Date;
+  // Its own browser, its only MCP server, so it never gets the person's
+  // (their Claude Code's plugins and their browser profile).
+  browser?: Mcp | null;
 };
 
 // Times a turn that stopped halfway is told to carry on.
@@ -68,6 +71,7 @@ export async function builderTurn(
       timeLimitMs: options.timeLimitMs,
       onActivity,
       ...(model ? { model } : {}),
+      ...(options.browser ? { mcp: options.browser } : {}),
     });
   let result = await turn(prompt, false);
   // A turn that ends without its status line stopped halfway (waiting for

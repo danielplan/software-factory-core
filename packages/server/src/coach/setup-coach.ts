@@ -7,6 +7,7 @@
 // anything. One turn at a time; the owner sees the reply while it is
 // written and what the coach is doing.
 
+import type { Browser } from "../kobble/persona-tests.ts";
 import { readdirSync } from "node:fs";
 
 import type { Claude, Kit } from "@software-factory/core";
@@ -59,7 +60,12 @@ export type SetupCoachOptions = {
 export type CoachOptions = Pick<
   SetupCoachOptions,
   "claude" | "guide" | "trackers"
-> & { ideaGuide: string };
+> & {
+  ideaGuide: string;
+  // The builder's own headless browser for its turns (Playwright's); the
+  // builder takes its Claude Code from here too. None in the tests.
+  builderBrowser?: () => Promise<Browser>;
+};
 
 export class SetupCoach {
   readonly kits: Kit[];

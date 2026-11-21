@@ -87,8 +87,9 @@ own working copy; it has its own settings files, made from the examples.
 - Screenshots: save them in the run's folder, commit them, and show them as
   `![what it shows](path/in/the/repository.png)`; the factory links them.
   To take them, start the product with its own start command (its
-  `product.json`, or its kit's) on your copy's ports, open it with the
-  browser tools you have (the Playwright MCP), and stop what you started.
+  `product.json`, or its kit's) on your copy's ports, open it with your own
+  browser (the `browser` tools: headless, nobody sees it), and stop what you
+  started.
   Never search for a browser program or write your own browser scripts; if
   the browser tools are missing or the product does not start within a
   minute or two, say what you could not look at and carry on.
