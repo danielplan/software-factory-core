@@ -103,6 +103,10 @@ test("a new factory folder: the company file, the knowledge base, the history an
   );
   for (const file of ["runs/README.md", ".gitignore"])
     assert.ok(existsSync(join(root, file)), file);
+  assert.match(
+    readFileSync(join(root, "runs", "README.md"), "utf8"),
+    /One file per card, `issue-<card number>-short-name\.md`/,
+  );
   // What is never shared: secrets and working copies.
   assert.equal(
     readFileSync(join(root, ".gitignore"), "utf8"),

@@ -9,7 +9,7 @@ Factory sets the scene and routes the next move through the skills. It is the en
 
 Read the company's instructions (`AGENTS.md`), the relevant knowledge (start at `docs/index.md`) and the current state of the products involved. Each product describes itself in its own folder (`factory/factory.json` lists them): its `product.json` (name, kind, who uses it, its commands) and its `BLUEPRINT.md` (kind, structure, promises, checks). If the request could change more than one product, ask which one before planning.
 
-Start a new run in runs/NNN-short-name.md, numbered after the last one, with the following sections:
+Every run belongs to a card, and only the factory writes runs. Open the run as `runs/issue-<card number>-short-name.md`, named after its card (card 12: `issue-12-list`), so two cards built at the same time never share a name. When the card already has a run, continue in it instead of opening a new one. Older runs numbered `001-…` stay as they are. No card, no run: a request without a card becomes a card first (`npx software-factory card new …`, see "Work from the board"), or it is not done in the factory. Without a board, ask for one to be connected before opening a run. The run has the following sections:
 
 - **Request**: the request and any relevant context, including the current state of the products.
 - **Plan and checks**: the agreed scope, the plan to implement it, and the checks to verify it, as they stand now: short enough to read in one go. Include the relevant trade-offs and decisions. What was tried and dropped on the way goes under a heading **Tried** at the end of this section, each with why, so the agreed plan stays readable.
@@ -31,7 +31,7 @@ Read each skill when you need to use it. Each skill has its own instructions and
 
 ## What you notice along the way
 
-When you notice something outside the current work (a bug, a missing check, a rough edge, an idea), don't fix it silently and don't let it go. Say it to the person in a line and propose a card. With their yes, look on the board for a card that already covers it (`npx software-factory card list`), then make one: `npx software-factory card new "<title>" --body-file <file> --found-while <number>` (the card you are working on, when there is one; it links both ways). Without a board, it goes under the run's **Later**.
+When you notice something outside the current work (a bug, a missing check, a rough edge, an idea), don't fix it silently and don't let it go. Say it to the person in a line and propose a card. With their yes, look on the board for a card that already covers it (`npx software-factory card list`), then make one: `npx software-factory card new "<title>" --body-file <file> --found-while <number>` (the card you are working on, when there is one; it links both ways). Without a board, there is no run to put it in: tell the person and leave it there.
 
 When the person asks to update the factory itself to a newer core, use [`upgrade-factory`](../upgrade-factory/SKILL.md) instead of a run.
 
