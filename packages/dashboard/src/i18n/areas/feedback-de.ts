@@ -142,6 +142,10 @@ export const feedbackGerman: typeof feedbackEnglish = {
         text: "Der Baumeister hat angehalten? Melde es",
         said: "Der Baumeister hat angehalten",
       },
+      releases: {
+        text: "Ein Release ging schief? Melde es",
+        said: "Das Release hat nicht geklappt",
+      },
       personas: { text: "Sollen Personas mehr können? Sag es mir" },
       settings: { text: "Findest du eine Einstellung nicht? Frag mich" },
     },

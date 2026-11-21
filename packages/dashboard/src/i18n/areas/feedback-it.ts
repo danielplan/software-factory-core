@@ -142,6 +142,10 @@ export const feedbackItalian: typeof feedbackEnglish = {
         text: "Il costruttore si è fermato? Segnalalo",
         said: "Il costruttore si è fermato",
       },
+      releases: {
+        text: "La release è andata storta? Segnalalo",
+        said: "La release non è riuscita",
+      },
       personas: { text: "Vorresti che le personas facessero di più? Dimmelo" },
       settings: { text: "Non trovi un'impostazione? Chiedimelo" },
     },

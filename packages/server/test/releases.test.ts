@@ -322,7 +322,7 @@ test("Release now makes the tag on the main branch and the release with its note
   assert.equal(create[8], "1.4.4");
   assert.equal(create[9], "--notes");
   assert.match(
-    create[10],
+    String(create[10]),
     /^<!-- software-factory:why "Only fixes" -->\nOnly fixes\n\n## Fixes\n\n- Crash on empty cart \(\[#5\]\(https:\/\/github.com\/acme\/shop\/pull\/5\)\)\n$/,
   );
   assert.deepEqual(told, ["releases"]);

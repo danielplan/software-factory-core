@@ -142,6 +142,10 @@ export const feedbackEnglish = {
         text: "Builder stopped? Report it",
         said: "The builder stopped",
       },
+      releases: {
+        text: "Release went wrong? Report it",
+        said: "The release did not work",
+      },
       personas: { text: "Wish personas did more? Tell me" },
       settings: { text: "Can't find a setting? Ask me" },
     },
