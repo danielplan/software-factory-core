@@ -226,15 +226,26 @@ test("the board remembers each card's pull request, and whether an open one clas
   seen.note([card(3, pr("OPEN", true)), card(4, pr("MERGED", true))]);
   assert.deepEqual(seen.of(3), {
     pullRequest: "https://x/pull/1",
+    pullRequestState: "open",
     conflict: true,
   });
   assert.equal(seen.of(4).conflict, false);
-  assert.deepEqual(seen.of(5), { pullRequest: null, conflict: false });
+  assert.equal(seen.of(4).pullRequestState, "merged");
+  assert.deepEqual(seen.of(5), {
+    pullRequest: null,
+    pullRequestState: null,
+    conflict: false,
+  });
   seen.note([card(3, null)]);
   assert.deepEqual(seen.of(3), {
     pullRequest: "https://x/pull/1",
+    pullRequestState: "open",
     conflict: false,
   });
+  seen.note([card(6, { ...pr("OPEN", false), draft: true })]);
+  seen.note([card(7, pr("CLOSED", false))]);
+  assert.equal(seen.of(6).pullRequestState, "draft");
+  assert.equal(seen.of(7).pullRequestState, "closed");
 });
 
 test("Resolve asks the builder to bring in main and settle the clash", () => {

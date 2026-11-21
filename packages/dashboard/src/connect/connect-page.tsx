@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type AddOnView, type Board } from "@/api";
@@ -30,6 +31,7 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
               window.location.hash = "build";
             }}
           >
+            <ArrowRight aria-hidden />
             {t.connect.page.goToBoard}
           </Button>
         </section>

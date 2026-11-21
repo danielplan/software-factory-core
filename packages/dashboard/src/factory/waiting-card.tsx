@@ -5,7 +5,7 @@
 // and sends it, which posts it on the card as if written on GitHub. "Talk
 // it through" opens the question as an exploration with the kobold.
 
-import { ArrowUpRight, Check, MessagesSquare } from "lucide-react";
+import { ArrowUpRight, Check, MessagesSquare, Send } from "lucide-react";
 import { useState } from "react";
 
 import { FIELD_AREA } from "@/lib/field-style";
@@ -77,6 +77,7 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
       <div className="flex flex-wrap gap-2">
         <Button size="pill" disabled={!said || sending} onClick={send}>
+          <Send aria-hidden />
           {sending ? t.factory.waiting.sending : t.factory.waiting.send}
         </Button>
         <Button

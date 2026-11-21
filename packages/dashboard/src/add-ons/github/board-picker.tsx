@@ -2,6 +2,7 @@
 // lists, which column each stage is, and which work the factory takes in,
 // then the check; starting from the board connected now, if there is one.
 
+import { KeyRound, Plug } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { type Board, get, messageOf, post, type StageMap } from "@/api";
@@ -79,6 +80,7 @@ export function BoardPicker({
       {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
       {problem?.includes("allow it") && (
         <Button variant="outline" className={SMALL} onClick={onAllow}>
+          <KeyRound aria-hidden />
           {t.connect.github.allow}
         </Button>
       )}
@@ -87,6 +89,7 @@ export function BoardPicker({
         disabled={!repository || !board || checking}
         onClick={() => void connect()}
       >
+        <Plug aria-hidden />
         {checking ? t.connect.checking : t.connect.connect}
       </Button>
     </div>

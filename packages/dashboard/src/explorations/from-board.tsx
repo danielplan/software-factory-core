@@ -1,7 +1,7 @@
 // An idea in the board's Backlog, in Explorations › Waiting (the Factory
 // page shows agreed work only).
 
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Play } from "lucide-react";
 import { useState } from "react";
 
 import { type ExplorationsView, messageOf, post } from "@/api";
@@ -69,6 +69,7 @@ export function FromBoard({
         busy={busy}
         onClick={() => void start()}
       >
+        <Play aria-hidden />
         {busy ? t.explore.starting : t.explore.start}
       </Button>
       <RemoveRow

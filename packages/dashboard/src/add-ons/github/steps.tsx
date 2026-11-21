@@ -1,3 +1,4 @@
+import { Download, LogIn } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { type Board, get, type GitHubStatus, messageOf, post } from "@/api";
@@ -34,6 +35,7 @@ export function GitHubSteps({
                 act("/api/add-ons/github/install");
               }}
             >
+              <Download aria-hidden />
               {t.connect.github.install}
             </Button>
           )}
@@ -114,6 +116,7 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
             act("/api/add-ons/github/sign-in");
           }}
         >
+          <LogIn aria-hidden />
           {t.connect.github.signInWith}
         </Button>
       )}

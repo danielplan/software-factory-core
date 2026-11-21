@@ -4,6 +4,7 @@
 // what will come; once connected, "All quiet" with when the kobold looks
 // again, and the signals already handled.
 
+import { Eye, Plug } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -140,6 +141,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
           size="pill"
           disabled={busy || !url.trim() || !token.trim()}
         >
+          <Plug aria-hidden />
           {busy ? t.checking : t.connect}
         </Button>
         <span className="text-[12.5px] text-muted-foreground">{t.saved}</span>
@@ -234,6 +236,7 @@ export function AllQuiet({
             setHandled(!handled);
           }}
         >
+          <Eye aria-hidden />
           {handled ? t.signals.quiet.hide : t.signals.quiet.see}
         </Button>
       </div>

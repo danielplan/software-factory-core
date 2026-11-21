@@ -2,6 +2,7 @@
 // export's address, never the token), and Disconnect, which takes both out
 // of the project's .env. Connecting is on the Signals page.
 
+import { Unplug } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -36,6 +37,7 @@ export function LiveAppCard() {
               });
             }}
           >
+            <Unplug aria-hidden />
             {t.settings.liveApp.disconnect}
           </Button>
         </div>

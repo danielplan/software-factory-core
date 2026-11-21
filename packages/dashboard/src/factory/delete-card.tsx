@@ -3,7 +3,7 @@
 // GitHub and taken off the board; not while the builder is on it. The
 // board deletes it (and leaves it at once).
 
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ export function DeleteCard({
               setAsking(false);
             }}
           >
+            <X aria-hidden />
             {t.factory.remove.cancel}
           </Button>
           <Button
@@ -42,6 +43,7 @@ export function DeleteCard({
 
             onClick={onDelete}
           >
+            <Trash2 aria-hidden />
             {t.factory.remove.delete}
           </Button>
         </>

@@ -4,7 +4,7 @@
 // it, and its prototype runs on the board by itself. Handed off or dropped,
 // it closes.
 
-import { ChevronLeft } from "lucide-react";
+import { Archive, ChevronLeft, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage as Page, messageOf, post } from "@/api";
@@ -149,6 +149,7 @@ function TopBar({
               press("drop", {});
             }}
           >
+            <Archive aria-hidden />
             {pending === "drop" ? t.explore.dropping : t.explore.drop}
           </Button>
           <Button
@@ -159,6 +160,7 @@ function TopBar({
               press("hand-off", {});
             }}
           >
+            <Send aria-hidden />
             {pending === "hand-off"
               ? t.explore.handingOff
               : t.explore.handOff(key)}

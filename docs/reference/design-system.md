@@ -176,7 +176,22 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 
 - **Buttons** (`packages/dashboard/src/components/ui/button.tsx`): `default` is dark, `outline` white
   with a ring, `blue` for an action that changes the app, `ghost` for a quiet
-  one; `size="sm"` for a small one.
+  one; `size="sm"` for a small one. **Every button has an icon** before its
+  words (from `lucide-react`, `aria-hidden`), the same icon for the same
+  action everywhere: Play to start, Square to stop, RotateCw to restart,
+  Send to send or hand off, Trash2 to delete, X to cancel, Plug to connect,
+  Download to install or update, Check to save. A link button (`asChild`)
+  puts its icon inside the link. While a button works, its spinner shows
+  beside the icon.
+- **A pull request's button** on a Factory card has the colour of its state:
+  green when it is ready for review (`--success`, `--solved-foreground`),
+  grey as a draft or closed (closed is struck through), purple once merged
+  (`--merged`), red when it clashes with main (`--type-bug`), with
+  **Resolve** under it.
+- **Every state holds.** A piece shows each state it can be in without
+  breaking: empty, loading or starting, running, stopped, a problem with its
+  message, long names and long words (a folder's path wraps anywhere, inside
+  its box), many items. Nothing spills out of its box or overlaps.
 - **Cards** (`packages/dashboard/src/components/ui/card.tsx`): white, 20px corners, `--shadow-card`.
 - **The kobold** (`KoboldHead` in `packages/dashboard/src/components/kobold-face.tsx`): wherever the
   kobold speaks or works, never a generic icon.

@@ -1,3 +1,4 @@
+import { Check, RotateCw } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { type GroupView, messageOf, post } from "@/api";
@@ -124,6 +125,7 @@ function Saving({
           onClick={() => void form.save()}
           disabled={!changed}
         >
+          <Check aria-hidden />
           {t.save}
         </Button>
         {form.saved && (
@@ -142,6 +144,7 @@ function Saving({
                 void post(`/api/parts/${encodeURIComponent(part.id)}/restart`)
               }
             >
+              <RotateCw aria-hidden />
               {t.restart(part.name)}
             </Button>
           ))}

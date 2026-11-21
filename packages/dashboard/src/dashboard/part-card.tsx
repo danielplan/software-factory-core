@@ -1,4 +1,10 @@
-import { ChevronDown, ExternalLink } from "lucide-react";
+import {
+  ChevronDown,
+  ExternalLink,
+  Play,
+  RotateCw,
+  Square,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { PartView } from "@/api";
@@ -48,7 +54,8 @@ export function PartCard({
       data-light={part.light}
       title={part.does}
       className={cn(
-        "grid gap-1.5 rounded-xl border bg-surface px-3 py-2.5",
+        // min-w-0: a long word (a folder's path) wraps instead of widening it.
+        "grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1.5 rounded-xl border bg-surface px-3 py-2.5",
         FRAME[part.light],
       )}
     >
@@ -101,7 +108,7 @@ function PartProblem({
 }: Readonly<{ problem: NonNullable<PartView["problem"]> }>) {
   const t = useT().system;
   return (
-    <div className="grid gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-xs">
+    <div className="grid min-w-0 gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-xs [overflow-wrap:anywhere]">
       <p className="font-medium text-destructive">
         {problemTitle(problem.title, t.problems)}
       </p>
@@ -138,15 +145,18 @@ function PartButtons({
     <div className="flex flex-wrap gap-1.5">
       {part.canStart && (
         <Button variant="outline" className={look} onClick={press("start")}>
+          <Play aria-hidden />
           {part.light === "problem" ? t.tryAgain : t.start}
         </Button>
       )}
       {part.canStop && (
         <>
           <Button variant="outline" className={look} onClick={press("restart")}>
+            <RotateCw aria-hidden />
             {t.restart}
           </Button>
           <Button variant="outline" className={look} onClick={press("stop")}>
+            <Square aria-hidden />
             {t.stop}
           </Button>
         </>

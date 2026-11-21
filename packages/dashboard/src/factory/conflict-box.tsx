@@ -2,7 +2,7 @@
 // Resolve, which puts the card back in To do with the ask; the builder takes
 // it into In progress, brings in main and settles the clash.
 
-import { GitMerge, LoaderCircle } from "lucide-react";
+import { GitMerge, LoaderCircle, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -37,7 +37,11 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
       }}
     >
       <span className="flex items-center gap-1.5 font-medium">
-        <GitMerge aria-hidden strokeWidth={2} className="size-3 flex-none" />
+        <TriangleAlert
+          aria-hidden
+          strokeWidth={2}
+          className="size-3 flex-none"
+        />
         {state === "asked" ? t.asked : t.clashes}
         {state !== "asked" && (
           <button
@@ -46,8 +50,10 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
             onClick={resolve}
             className="ml-auto inline-flex h-[22px] items-center gap-1 rounded-md border border-type-bug/30 bg-card px-2 font-medium text-type-bug hover:bg-type-bug/10 disabled:opacity-60"
           >
-            {state === "asking" && (
+            {state === "asking" ? (
               <LoaderCircle aria-hidden className="size-3 animate-spin" />
+            ) : (
+              <GitMerge aria-hidden strokeWidth={2} className="size-3" />
             )}
             {t.resolve}
           </button>

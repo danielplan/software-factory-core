@@ -1,3 +1,4 @@
+import { Play, Square } from "lucide-react";
 import { Fragment, useState } from "react";
 
 import { messageOf, type PartView, post } from "@/api";
@@ -48,6 +49,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                   press("/api/start-all");
                 }}
               >
+                <Play aria-hidden />
                 {s.startAll}
               </Button>
               <Button
@@ -57,6 +59,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                   press("/api/stop-all");
                 }}
               >
+                <Square aria-hidden />
                 {s.stopAll}
               </Button>
             </>

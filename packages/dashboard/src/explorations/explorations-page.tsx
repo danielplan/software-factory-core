@@ -4,7 +4,7 @@
 // dropped, which opens. New exploration opens a fresh canvas at once, where
 // the team says its idea to the kobold.
 
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Lightbulb, Plus, Radar } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -134,9 +134,13 @@ function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
         </p>
         <div className="mt-1.5 flex flex-wrap gap-2.5">
           <Button asChild size="pill">
-            <a href="#signals">{t.explore.exploreSignal}</a>
+            <a href="#signals">
+              <Radar aria-hidden />
+              {t.explore.exploreSignal}
+            </a>
           </Button>
           <Button variant="ring" size="pill" onClick={onOwn}>
+            <Lightbulb aria-hidden />
             {t.explore.ownIdea}
           </Button>
         </div>

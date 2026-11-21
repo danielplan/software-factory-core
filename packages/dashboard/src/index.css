@@ -68,6 +68,8 @@
   --link: #171a26;
   --hover: #efeff2;
   --success: #12a594;
+  /* A merged pull request (as on GitHub, and the Review column). */
+  --merged: #6e44c4;
   --warning: #e9a23b;
   --stopped: #a3aabb;
   --arrow: #a7afc0;
@@ -197,6 +199,7 @@
   --color-ring: var(--ring);
   --color-link: var(--link);
   --color-success: var(--success);
+  --color-merged: var(--merged);
   --color-warning: var(--warning);
   --color-stopped: var(--stopped);
   --color-arrow: var(--arrow);

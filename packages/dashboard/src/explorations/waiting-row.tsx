@@ -1,7 +1,7 @@
 // An exploration waiting in Explorations › Waiting: what it is about, its
 // personas and signals, Start, and a bin that drops it.
 
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, Play } from "lucide-react";
 import { useState } from "react";
 
 import { type ExplorationRow, messageOf, post } from "@/api";
@@ -58,6 +58,7 @@ export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
           );
         }}
       >
+        <Play aria-hidden />
         {t.explore.start}
       </Button>
       <RemoveRow

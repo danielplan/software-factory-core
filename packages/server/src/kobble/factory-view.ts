@@ -27,6 +27,8 @@ export type FactoryCard = {
   type: CardView["type"];
   // The pull request the builder opened for it, once it has.
   pullRequest: string | null;
+  // That pull request's state, for the colour of its button.
+  pullRequestState: CardView["pullRequestState"];
   // That pull request clashes with main: Resolve asks the builder to settle it.
   conflict: boolean;
   // Handed back from Stuck with the owner's hint: first in To do.
@@ -126,6 +128,7 @@ export function factoryView(
         fix: fixes.has(`#${String(card.number)}`),
         type: card.type ?? null,
         pullRequest: card.pullRequest,
+        pullRequestState: card.pullRequestState ?? null,
         conflict: card.conflict ?? false,
         hint: card.hint ?? false,
       },

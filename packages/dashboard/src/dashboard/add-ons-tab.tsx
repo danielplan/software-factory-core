@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Plus } from "lucide-react";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { type AddOnView, type KitView, messageOf, post } from "@/api";
@@ -193,6 +193,7 @@ function Action({
         turn(false);
       }}
     >
+      <Trash2 aria-hidden />
       {t.connect.addOns.remove}
     </Button>
   ) : (

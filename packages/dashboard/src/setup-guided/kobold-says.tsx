@@ -2,6 +2,7 @@
 // step, or its open questions about it, each with a small field to answer
 // it. There is no chat: the owner corrects cards in place.
 
+import { Send } from "lucide-react";
 import { useState } from "react";
 
 import { type Card, type CoachView, messageOf, post } from "@/api";
@@ -82,6 +83,7 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
           }}
         />
         <Button type="submit" size="pill-sm" disabled={!answer.trim()}>
+          <Send aria-hidden />
           {t.setup.says.answer}
         </Button>
       </div>

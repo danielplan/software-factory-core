@@ -2,7 +2,7 @@
 // Update to take it (only when nothing here can be lost), Look again, and
 // the "Update by itself" switch. What is in the way is named in plain words.
 
-import { RefreshCw } from "lucide-react";
+import { Download, Monitor, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -43,6 +43,7 @@ export function UpdatesCard() {
               press("/api/updates/update");
             }}
           >
+            <Download aria-hidden />
             {m.update}
           </Button>
         )}
@@ -114,6 +115,7 @@ export function DesktopStart() {
           );
         }}
       >
+        <Monitor aria-hidden />
         {m.button}
       </Button>
     </div>

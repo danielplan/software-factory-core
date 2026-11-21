@@ -2,7 +2,7 @@
 // Cancel, so nothing goes on one click. The row leaves at once; when the
 // factory refuses, it stays and says why.
 
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -50,6 +50,7 @@ export function RemoveRow({
           setAsking(false);
         }}
       >
+        <X aria-hidden />
         {t.explore.cancel}
       </Button>
       <Button
@@ -64,6 +65,7 @@ export function RemoveRow({
           });
         }}
       >
+        <Trash2 aria-hidden />
         {t.explore.delete}
       </Button>
     </span>

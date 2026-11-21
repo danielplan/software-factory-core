@@ -1,4 +1,4 @@
-import { ExternalLink, KeyRound } from "lucide-react";
+import { ExternalLink, KeyRound, Plug, Search } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type StageMap } from "@/api";
@@ -55,6 +55,7 @@ export function JiraSteps({
                 })
               }
             >
+              <Search aria-hidden />
               {busy ? t.connect.checking : t.connect.jira.check}
             </Button>
           )}
@@ -140,6 +141,7 @@ function ProjectStep({
           })
         }
       >
+        <Plug aria-hidden />
         {t.connect.connect}
       </Button>
     </div>

@@ -298,9 +298,11 @@ function PersonaForm({
       </label>
       <div className="flex gap-2">
         <Button type="submit" size="pill-sm" disabled={!title.trim()}>
+          <Plus aria-hidden />
           {t.setup.cards.add}
         </Button>
         <Button type="button" size="pill-sm" variant="ring" onClick={onDone}>
+          <X aria-hidden />
           {t.setup.cards.cancel}
         </Button>
       </div>

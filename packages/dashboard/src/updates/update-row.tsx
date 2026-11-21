@@ -8,7 +8,9 @@
 import {
   ArrowDownToLine,
   CircleCheck,
+  Download,
   ExternalLink,
+  PackagePlus,
   RefreshCw,
   Sparkles,
   TriangleAlert,
@@ -149,6 +151,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
             press("/api/updates/look");
           }}
         >
+          <RefreshCw aria-hidden />
           {m.lookAgain}
         </Button>
         {summary.canUpdate && (
@@ -158,6 +161,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
               press("/api/updates/update");
             }}
           >
+            <Download aria-hidden />
             {m.updateNow}
           </Button>
         )}
@@ -195,6 +199,7 @@ function ReleaseBox({
           className="h-8 justify-self-start px-3 text-[13px]"
           onClick={onPrepare}
         >
+          <PackagePlus aria-hidden />
           {m.prepare}
         </Button>
       )}

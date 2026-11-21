@@ -57,6 +57,13 @@ const en = {
     draft: "Draft",
     open: "Open",
   },
+  prStates: {
+    open: "Ready for your review",
+    draft: "A draft, not ready yet",
+    merged: "Merged",
+    closed: "Closed without merging",
+    conflict: "Clashes with main",
+  },
   conflict: {
     clashes: "Clashes with main",
     resolve: "Resolve",
@@ -140,6 +147,13 @@ export const factory = area(
       draft: "Bozza",
       open: "Aperta",
     },
+    prStates: {
+      open: "Pronta per la tua revisione",
+      draft: "Una bozza, non ancora pronta",
+      merged: "Unita",
+      closed: "Chiusa senza unire",
+      conflict: "In conflitto con main",
+    },
     conflict: {
       clashes: "In conflitto con main",
       resolve: "Risolvi",
@@ -219,6 +233,13 @@ export const factory = area(
       closed: "Geschlossen",
       draft: "Entwurf",
       open: "Offen",
+    },
+    prStates: {
+      open: "Bereit für deine Prüfung",
+      draft: "Ein Entwurf, noch nicht fertig",
+      merged: "Zusammengeführt",
+      closed: "Ohne Zusammenführen geschlossen",
+      conflict: "Konflikt mit main",
     },
     conflict: {
       clashes: "Konflikt mit main",

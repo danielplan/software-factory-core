@@ -46,6 +46,8 @@ export type CardView = {
   url: string;
   // The pull request the builder opened for it, once it has.
   pullRequest: string | null;
+  // Its pull request's state, once it has one.
+  pullRequestState?: "open" | "draft" | "merged" | "closed" | null;
   // Its open pull request clashes with main.
   conflict?: boolean;
   closed: boolean;

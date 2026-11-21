@@ -13,6 +13,7 @@ import {
 import { createContext, use } from "react";
 
 import type { FactoryCard } from "@/api";
+import { cn } from "@/lib/utils";
 
 import { TypeChip } from "./card-type";
 import { ConflictBox } from "./conflict-box";
@@ -94,8 +95,7 @@ export function Card({
         </span>
       )}
       <Origin card={card} />
-      <PullRequestLink url={card.pullRequest} />
-      {card.conflict && !building && <ConflictBox number={card.number} />}
+      <PullRequest card={card} building={building} />
     </div>
   );
 }
@@ -105,8 +105,41 @@ export const OpenCard = createContext<(number: number) => void>(
   () => undefined,
 );
 
-// The card's pull request, a click away, without opening the card.
-function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
+// The card's pull request, in the colour of its state, and Resolve when it
+// clashes with main (not while the builder is on the card).
+function PullRequest({
+  card,
+  building,
+}: Readonly<{ card: FactoryCard; building: boolean }>) {
+  return (
+    <>
+      <PullRequestLink
+        url={card.pullRequest}
+        state={card.conflict ? "conflict" : (card.pullRequestState ?? null)}
+      />
+      {card.conflict && !building && <ConflictBox number={card.number} />}
+    </>
+  );
+}
+
+// How a pull request's button looks in each state: green when it is ready
+// for review, grey as a draft or closed, purple once merged, red when it
+// clashes with main.
+const PR_LOOKS: Record<PrLook, string> = {
+  open: "border-success/30 bg-success/8 text-solved-foreground",
+  draft: "border-border bg-card text-muted-foreground",
+  merged: "border-merged/30 bg-merged/8 text-merged",
+  closed: "border-border bg-card text-muted-foreground line-through",
+  conflict: "border-type-bug/30 bg-type-bug/8 text-type-bug",
+};
+type PrLook = "open" | "draft" | "merged" | "closed" | "conflict";
+
+// The card's pull request, a click away, without opening the card, in the
+// colour of its state.
+function PullRequestLink({
+  url,
+  state,
+}: Readonly<{ url: string | null; state: PrLook | null }>) {
   const t = useT();
   if (!url) return null;
   return (
@@ -114,14 +147,18 @@ function PullRequestLink({ url }: Readonly<{ url: string | null }>) {
       href={url}
       target="_blank"
       rel="noreferrer"
+      title={state ? t.factory.prStates[state] : undefined}
       onClick={(event) => {
         event.stopPropagation();
       }}
-      className="inline-flex h-[24px] items-center gap-1.5 rounded-md border border-border bg-card px-2 text-xs font-medium text-foreground hover:bg-ground"
+      className={cn(
+        "inline-flex h-[24px] items-center gap-1.5 rounded-md border px-2 text-xs font-medium hover:brightness-95",
+        PR_LOOKS[state ?? "draft"],
+      )}
     >
       <GitPullRequest aria-hidden className="size-3.5" />
       {t.factory.panel.pullRequest}
-      <ArrowUpRight aria-hidden className="size-3 text-muted-foreground" />
+      <ArrowUpRight aria-hidden className="size-3 opacity-60" />
     </a>
   );
 }
