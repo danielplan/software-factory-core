@@ -9,6 +9,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
+import { recordsNamedReport, recordsNotNamed } from "./record-named.ts";
 import {
   type Available,
   FACTORY_FOLDER,
@@ -35,6 +36,8 @@ export async function checkWithFixes(options: {
   copy: string;
   available: Available;
   base: string;
+  // The card's number: the records the branch adds are named after it.
+  card?: number;
   shell?: Shell;
   onActivity: (line: string) => void;
   fix: (
@@ -53,7 +56,15 @@ export async function checkWithFixes(options: {
         onActivity(`Checking ${c.name}: ${c.command}`);
       },
     );
-    return withLibraries(ran, libraryReport(copy, available, changed));
+    const outcome = withReport(ran, libraryReport(copy, available, changed));
+    if (options.card === undefined) return outcome;
+    return withReport(
+      outcome,
+      recordsNamedReport(
+        options.card,
+        recordsNotNamed(options.card, await changedFiles(copy, base, "added")),
+      ),
+    );
   };
   let checked = await check();
   for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
@@ -112,11 +123,12 @@ export function libraryReport(
     .join("\n\n");
 }
 
-function withLibraries(ran: CheckOutcome, libraries: string): CheckOutcome {
-  if (libraries === "") return ran;
+// The outcome with one more failed check's report, when it has one.
+function withReport(ran: CheckOutcome, more: string): CheckOutcome {
+  if (more === "") return ran;
   return {
     passed: false,
-    report: [ran.report, libraries].filter((part) => part !== "").join("\n\n"),
+    report: [ran.report, more].filter((part) => part !== "").join("\n\n"),
   };
 }
 
@@ -128,12 +140,14 @@ function touches(copy: string, folder: string, changed: string[]): boolean {
 export async function changedFiles(
   copy: string,
   base: string,
+  only: "added" | "all" = "all",
 ): Promise<string[]> {
   const out = await run("git", [
     "-C",
     copy,
     "diff",
     "--name-only",
+    ...(only === "added" ? ["--diff-filter=A"] : []),
     `origin/${base}...HEAD`,
   ]);
   return out.split("\n").filter((line) => line.trim() !== "");

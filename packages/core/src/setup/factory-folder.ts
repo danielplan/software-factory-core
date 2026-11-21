@@ -93,7 +93,7 @@ export function createFactoryFolder(
   mkdirSync(join(root, "runs"), { recursive: true });
   writeFileSync(
     join(root, "runs", "README.md"),
-    "# Runs\n\nOne file per piece of work, `NNN-short-name.md`, numbered in order.\n",
+    "# Runs\n\nOne file per card, `issue-<card number>-short-name.md`, written by the factory.\n",
   );
   writeFileSync(
     join(root, "AGENTS.md"),

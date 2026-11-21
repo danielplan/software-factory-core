@@ -308,6 +308,7 @@ export class Jobs {
       copy: (await at.build()).path,
       available: this.options.available,
       base: await this.options.pullRequests.baseBranch(),
+      card: card.number,
       ...(this.options.shell ? { shell: this.options.shell } : {}),
       onActivity,
       fix: (report, round) =>
