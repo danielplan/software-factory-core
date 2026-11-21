@@ -21,6 +21,10 @@ export const templateFolder = join(import.meta.dirname, "..", "template");
 export type CheckOptions = {
   // Folder names never looked into (default: node_modules, .git, coverage).
   skipped?: string[];
+  // Folders from the root left out as if they were not there (the core's
+  // own factory/: its data, and the paths its guides write about a
+  // company's factory folder are not about it).
+  leftOut?: string[];
   // Pages that are history, whose paths are not checked (default: runs,
   // CHANGES.md, CHANGELOG.md, context/sources/).
   history?: RegExp[];
@@ -34,7 +38,10 @@ export async function checkDocs(
   options: CheckOptions = {},
 ): Promise<Problem[]> {
   const folder = resolve(root);
-  const files = filesUnder(folder, options.skipped ?? SKIPPED_FOLDERS);
+  const files = filesUnder(folder, options.skipped ?? SKIPPED_FOLDERS).filter(
+    (file) =>
+      !(options.leftOut ?? []).some((out) => file.startsWith(`${out}/`)),
+  );
   const markdown = files.filter(isMarkdown);
   const pages = new Map(
     markdown.map((file) => [file, readFileSync(join(folder, file), "utf8")]),

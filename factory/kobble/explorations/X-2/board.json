@@ -1,0 +1,150 @@
+{
+  "things": [
+    {
+      "id": "problem",
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "kind": "problem"
+    },
+    {
+      "id": "choice-1",
+      "agreed": true,
+      "place": null,
+      "by": "kobold",
+      "kind": "choice",
+      "title": "How should the System page show how parts connect?",
+      "options": [
+        {
+          "key": "A",
+          "name": "Real map with lines",
+          "difference": "Parts as boxes on a canvas, a line from each part to exactly the parts it needs"
+        },
+        {
+          "key": "B",
+          "name": "Layers top to bottom",
+          "difference": "Rows like 'what people open', 'what works behind', 'where data lives', with lines between them"
+        },
+        {
+          "key": "C",
+          "name": "Cards that say their links",
+          "difference": "Keep the cards, each one says 'needs' and 'used by', and hovering lights up its partners"
+        }
+      ],
+      "chosen": "A"
+    },
+    {
+      "id": "prototype-a",
+      "agreed": false,
+      "place": null,
+      "by": "person",
+      "kind": "prototype",
+      "key": "A",
+      "name": "Real map with lines",
+      "difference": "Parts as boxes on a canvas, a line from each part to exactly the parts it needs",
+      "branch": "proto/X-2-a",
+      "tests": []
+    },
+    {
+      "id": "prototype-b",
+      "agreed": false,
+      "place": null,
+      "by": "person",
+      "kind": "prototype",
+      "key": "B",
+      "name": "Layers top to bottom",
+      "difference": "Rows like 'what people open', 'what works behind', 'where data lives', with lines between them",
+      "branch": "proto/X-2-b",
+      "tests": []
+    },
+    {
+      "id": "prototype-c",
+      "agreed": false,
+      "place": null,
+      "by": "person",
+      "kind": "prototype",
+      "key": "C",
+      "name": "Cards that say their links",
+      "difference": "Keep the cards, each one says 'needs' and 'used by', and hovering lights up its partners",
+      "branch": "proto/X-2-c",
+      "tests": []
+    },
+    {
+      "id": "prototype-a2",
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "kind": "prototype",
+      "key": "A2",
+      "name": "Real map with lines",
+      "difference": "Give every part box on the map a small coloured type tag so it's clear what kind of part it is: \"Screen\" (what people open, a web page or app), \"Backend\" (works behind the screens), \"Data\" (where data is stored), or \"Outside service\" (something run by someone else, like payments). Each type gets its own colour and small icon, and a small key under the map says what each tag means. Parts don't record their type yet, so for now guess it from the Open link and the name, and set it clearly in one place so the build can add a real type to each part later.",
+      "branch": "proto/X-2-a2",
+      "tests": []
+    },
+    {
+      "id": "note-1",
+      "agreed": true,
+      "place": null,
+      "by": "kobold",
+      "kind": "note",
+      "text": "Each part shows a type tag just above its name: Screen, Backend, Data or Outside service. Pointing at the tag explains it. Parts don't say their type yet, so the build has to add it."
+    },
+    {
+      "id": "prototype-a3",
+      "agreed": true,
+      "place": null,
+      "by": "kobold",
+      "kind": "prototype",
+      "key": "A3",
+      "name": "Real map with lines",
+      "difference": "Remove the key under the map. Instead, each type tag shows a tooltip when you point at it (or focus it with the keyboard / tap it on a phone) that says what this part's type means: Screen: \"what people open, a web page or app\"; Backend: \"works behind the screens\"; Data: \"where data is stored\"; Outside service: \"run by someone else, like payments\". Only the current tag's explanation is shown. Also move the tag: it sits awkwardly on the top edge of the box now. Put it inside the box, in the header row next to the part's name (aligned on the same line, small and tidy), so it reads as part of the card.",
+      "branch": "proto/X-2-a3",
+      "tests": [],
+      "opens": "#system"
+    }
+  ],
+  "links": [
+    {
+      "id": "link-1",
+      "from": "problem",
+      "to": "choice-1",
+      "label": "ways"
+    },
+    {
+      "id": "link-2",
+      "from": "choice-1",
+      "to": "prototype-a",
+      "label": "A"
+    },
+    {
+      "id": "link-3",
+      "from": "note-1",
+      "to": "prototype-a",
+      "label": "A2"
+    },
+    {
+      "id": "link-prototype-b",
+      "from": "choice-1",
+      "to": "prototype-b",
+      "label": "B"
+    },
+    {
+      "id": "link-prototype-c",
+      "from": "choice-1",
+      "to": "prototype-c",
+      "label": "C"
+    },
+    {
+      "id": "link-prototype-a2",
+      "from": "prototype-a",
+      "to": "prototype-a2",
+      "label": "changed"
+    },
+    {
+      "id": "link-prototype-a3",
+      "from": "prototype-a2",
+      "to": "prototype-a3",
+      "label": "changed"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Kobble",
+  "about": "Kobble, the software factory: a page on the team's own computer where signals come in, explorations are thought through with the kobold and prototyped, and the factory builds the agreed cards. Built in this repository (the factory core).",
+  "tracker": "github",
+  "extensions": [],
+  "without": ["jira"],
+  "kits": ["react-web-app", "other-code"],
+  "core": "0.11.1",
+  "products": ["packages/dashboard", "packages/server"],
+  "prototype": {
+    "start": "node \"$FACTORY_PROJECT/scripts/kobble-prototype.mjs\""
+  }
+}

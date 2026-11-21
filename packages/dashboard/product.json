@@ -1,0 +1,13 @@
+{
+  "id": "dashboard",
+  "name": "Kobble's page",
+  "kind": "react-web-app",
+  "about": "The page a product team uses on its own computer: Signals (what was learned), Explorations (a board and a conversation with the kobold, with live prototypes), Factory (the board the builder works) and Personas (the people the product is for, and their tests).",
+  "users": [
+    {
+      "who": "a small product team (an owner who is not a developer, and developers)",
+      "does": "collect signals, explore them with the kobold, agree on prototypes and follow the builds"
+    }
+  ],
+  "dependsOn": ["server"]
+}

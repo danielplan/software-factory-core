@@ -1,0 +1,11 @@
+{
+  "id": "X-2",
+  "title": "A clearer System map",
+  "status": "handed-off",
+  "personas": [],
+  "signals": [],
+  "heard": [],
+  "problem": "The System page shows the product's parts in columns with one arrow between columns, so the team can't see which part actually needs which. It should show clearly how each part connects to the others, well structured.",
+  "created": "2026-11-20T10:10:53.145Z",
+  "work": 12
+}

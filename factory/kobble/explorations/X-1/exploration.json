@@ -1,0 +1,11 @@
+{
+  "id": "X-1",
+  "title": "Signals from AI testers",
+  "status": "handed-off",
+  "personas": [],
+  "signals": [],
+  "heard": [],
+  "problem": "Before launch there are no customers, so the Signals page is empty: the live export has nothing to send and no persona test has run. Before launch, a signal is something learned while building that might change what we build. The first version should let the team send AI testers (the personas) into the apps: each persona tries its own app (a customer the shop app, a shop owner the orders page), with a task the kobold suggests from that persona's journey, and what they run into comes back as signals (bug, idea, open question), each linked to the step where it happened. Several can run at once; later they run again after each merge. Connecting the live app moves to a small line for later.",
+  "created": "2026-11-18T17:11:16.798Z",
+  "work": 10
+}

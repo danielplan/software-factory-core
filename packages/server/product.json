@@ -1,0 +1,17 @@
+{
+  "id": "server",
+  "name": "Kobble's server",
+  "kind": "other-code",
+  "type": "backend",
+  "port": 4300,
+  "about": "The factory's local server and the software-factory command: it reads the factory's files, runs the kobolds (support, explorer, maker, builder, tester) and the products, and answers the page's /api requests.",
+  "users": [
+    {
+      "who": "Kobble's page",
+      "does": "reads and changes signals, explorations, the board and personas through /api"
+    }
+  ],
+  "commands": {
+    "start": "node ../../scripts/kobble-demo-server.mjs"
+  }
+}

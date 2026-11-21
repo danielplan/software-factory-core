@@ -1,0 +1,103 @@
+{
+  "things": [
+    {
+      "id": "problem",
+      "agreed": false,
+      "place": null,
+      "by": "kobold",
+      "kind": "problem"
+    },
+    {
+      "id": "choice-1",
+      "agreed": true,
+      "place": null,
+      "by": "kobold",
+      "kind": "choice",
+      "title": "How should Settings be arranged?",
+      "options": [
+        {
+          "key": "A",
+          "name": "Tabs, one page each",
+          "difference": "The side list becomes tabs; only the chosen section shows, with its own address."
+        },
+        {
+          "key": "B",
+          "name": "A few themes",
+          "difference": "Sections grouped in 3–4 themes (Connections, Updates, Add-ons, This computer & advanced), one shown at a time."
+        },
+        {
+          "key": "C",
+          "name": "Short summaries that open",
+          "difference": "Same single page, but each card is a one-line summary of what is set now; click to open and change it."
+        }
+      ],
+      "chosen": "A",
+      "recommended": "B"
+    },
+    {
+      "id": "prototype-a",
+      "agreed": true,
+      "place": null,
+      "by": "person",
+      "kind": "prototype",
+      "key": "A",
+      "name": "How should Settings be arranged?",
+      "difference": "",
+      "branch": "proto/X-3-a",
+      "tests": [],
+      "variants": [
+        {
+          "key": "A",
+          "name": "Tabs, one page each",
+          "difference": "The side list becomes tabs; only the chosen section shows, with its own address."
+        },
+        {
+          "key": "B",
+          "name": "A few themes",
+          "difference": "Sections grouped in 3–4 themes (Connections, Updates, Add-ons, This computer & advanced), one shown at a time."
+        },
+        {
+          "key": "C",
+          "name": "Short summaries that open",
+          "difference": "Same single page, but each card is a one-line summary of what is set now; click to open and change it."
+        }
+      ],
+      "variant": "A",
+      "opens": "#settings",
+      "changes": [
+        "In variant A (tabs): use fewer tabs, grouped into 4 themes: Connections (where work is tracked, the live app), Updates, Add-ons (add-ons, kits and each part's own settings), This computer & advanced (this computer, the factory's programs). Make the selected tab much clearer: filled background and bold text, clearly different from the others.",
+        "In variant A: the selected tab looks weird. Style it like the selected page in the left sidebar (same text colour, weight and icon treatment), just without the background. Also: each part's own settings go under the \"This computer & advanced\" tab, not under Add-ons.",
+        "In variant A: (1) the selected tab gets a white background (like a card on the grey page), with dark text styled like the selected page in the left sidebar; the other tabs stay plain grey text, no background. (2) Split \"This computer & advanced\" into two tabs: \"This computer\" (this computer) and \"Advanced\" (the factory's programs and each part's own settings). So 5 tabs: Connections, Updates, Add-ons, This computer, Advanced.",
+        "The team still sees only 4 tabs in variant A on the board, although your screenshots show 5. Make sure the running prototype of variant A shows the latest version (5 tabs: Connections, Updates, Add-ons, This computer, Advanced; white selected tab), restarting it if needed, and check it in the running prototype."
+      ]
+    },
+    {
+      "id": "note-1",
+      "agreed": true,
+      "place": null,
+      "by": "kobold",
+      "kind": "note",
+      "text": "5 themed tabs: Connections, Updates, Add-ons, This computer, Advanced (the factory's programs and each part's own settings). The selected tab has a white background, with text like the selected page in the left sidebar."
+    }
+  ],
+  "links": [
+    {
+      "id": "link-1",
+      "from": "problem",
+      "to": "choice-1",
+      "label": "ways"
+    },
+    {
+      "id": "link-2",
+      "from": "choice-1",
+      "to": "prototype-a",
+      "label": "A · B · C"
+    },
+    {
+      "id": "link-3",
+      "from": "note-1",
+      "to": "prototype-a",
+      "label": "change A"
+    }
+  ]
+}
