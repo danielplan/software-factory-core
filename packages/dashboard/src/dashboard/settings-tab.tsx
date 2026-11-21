@@ -1,4 +1,5 @@
 import {
+  Bot,
   ChevronDown,
   Laptop,
   Plug,
@@ -31,6 +32,7 @@ import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 import {
+  GROUP_TABS,
   type SettingsTabName,
   shownTab,
   tabHash,
@@ -38,9 +40,10 @@ import {
 } from "./settings-tabs";
 import { FactoryPrograms } from "./system-page";
 
-// The factory's settings, in five tabs at the side; only the chosen one
+// The factory's settings, in six tabs at the side; only the chosen one
 // shows, at its own address (#settings/updates). Connections: where work
-// is tracked, the live app. Updates. Add-ons: the add-ons and kits. This
+// is tracked, the live app. AI models: which model each kind of work uses,
+// and the builder's group. Updates. Add-ons: the add-ons and kits. This
 // computer: the start on the desktop. Advanced: the factory's own programs,
 // then each settings group that no add-on has (an add-on's are in its card
 // on Add-ons). Each card shows what is set now and saves on its own; the
@@ -86,6 +89,11 @@ const LOOKS: Record<
     icon: <Plug aria-hidden />,
     color: "var(--source-app)",
     word: "connections",
+  },
+  "AI models": {
+    icon: <Bot aria-hidden />,
+    color: "var(--explore)",
+    word: "models",
   },
   Updates: {
     icon: <RefreshCw aria-hidden />,
@@ -192,7 +200,7 @@ function sectionsOf(
     ...groups.map((group) =>
       section(
         group.name,
-        "Advanced",
+        GROUP_TABS[group.id] ?? "Advanced",
         <GroupCard group={group} state={state} />,
       ),
     ),

@@ -1,8 +1,9 @@
-// Settings' tabs (settings-tab.tsx): the sections grouped in five themes,
+// Settings' tabs (settings-tab.tsx): the sections grouped in six themes,
 // one tab shown at a time, at its own address (#settings/this-computer).
 
 export const SETTINGS_TABS = [
   "Connections",
+  "AI models",
   "Updates",
   "Add-ons",
   "This computer",
@@ -35,3 +36,9 @@ export function shownTab<T>(
 ): SettingsTabOf<T> | undefined {
   return tabs.find((tab) => slugOf(tab.name) === open) ?? tabs[0];
 }
+
+// The setting groups with a tab of their own; the others go in Advanced.
+export const GROUP_TABS: Record<string, SettingsTabName> = {
+  "ai-model": "AI models",
+  builder: "AI models",
+};

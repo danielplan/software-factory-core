@@ -2,15 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  GROUP_TABS,
   SETTINGS_TABS,
   shownTab,
   tabHash,
   tabsOf,
 } from "../src/dashboard/settings-tabs.ts";
 
-test("Settings has five tabs, in order", () => {
+test("Settings has six tabs, in order", () => {
   assert.deepEqual(SETTINGS_TABS, [
     "Connections",
+    "AI models",
     "Updates",
     "Add-ons",
     "This computer",
@@ -21,6 +23,7 @@ test("Settings has five tabs, in order", () => {
 test("each tab has its own address", () => {
   assert.equal(tabHash("Connections"), "#settings/connections");
   assert.equal(tabHash("Add-ons"), "#settings/add-ons");
+  assert.equal(tabHash("AI models"), "#settings/ai-models");
   assert.equal(tabHash("This computer"), "#settings/this-computer");
 });
 
@@ -29,14 +32,16 @@ test("the sections go in their tabs, in the tabs' order; empty tabs are left out
     { name: "Updates", tab: "Updates" },
     { name: "Where work is tracked", tab: "Connections" },
     { name: "The live app", tab: "Connections" },
-    { name: "Builder", tab: "Advanced" },
+    { name: "Builder", tab: "AI models" },
+    { name: "Usage log", tab: "Advanced" },
   ]);
   assert.deepEqual(
     tabs.map((tab) => [tab.name, tab.sections.map((one) => one.name)]),
     [
       ["Connections", ["Where work is tracked", "The live app"]],
+      ["AI models", ["Builder"]],
       ["Updates", ["Updates"]],
-      ["Advanced", ["Builder"]],
+      ["Advanced", ["Usage log"]],
     ],
   );
 });
@@ -50,4 +55,9 @@ test("the address opens its tab; no address or an unknown one opens the first", 
   assert.equal(shownTab(tabs, null)?.name, "Connections");
   assert.equal(shownTab(tabs, "advanced")?.name, "Connections");
   assert.equal(shownTab([], null), undefined);
+});
+
+test("the AI models and the builder's group have their own tab", () => {
+  assert.equal(GROUP_TABS["ai-model"], "AI models");
+  assert.equal(GROUP_TABS.builder, "AI models");
 });

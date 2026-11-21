@@ -7,6 +7,7 @@ const en = {
     "How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts.",
   tabs: {
     connections: "Connections",
+    models: "AI models",
     updates: "Updates",
     addOns: "Add-ons",
     computer: "This computer",
@@ -58,6 +59,7 @@ export const settings = area(
       "Come lavora qui la fabbrica: dove si traccia il lavoro, aggiornamenti, componenti aggiuntivi e le impostazioni delle sue parti.",
     tabs: {
       connections: "Collegamenti",
+      models: "Modelli AI",
       updates: "Aggiornamenti",
       addOns: "Componenti aggiuntivi",
       computer: "Questo computer",
@@ -106,6 +108,7 @@ export const settings = area(
       "Wie die Fabrik hier arbeitet: wo die Arbeit verfolgt wird, Updates, Erweiterungen und die Einstellungen ihrer Teile.",
     tabs: {
       connections: "Verbindungen",
+      models: "KI-Modelle",
       updates: "Updates",
       addOns: "Erweiterungen",
       computer: "Dieser Computer",
