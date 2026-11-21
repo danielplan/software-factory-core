@@ -13,7 +13,6 @@ export const PAGES = [
   "build",
   "personas",
   "settings",
-  "feedback",
 ] as const;
 export type Page = (typeof PAGES)[number];
 
@@ -35,6 +34,7 @@ const MOVED = new Map([
   ["workshop", "system"],
   ["add-ons", "settings/add-ons"],
   ["today", "signals"],
+  ["feedback", "signals"],
   ["customers", "personas"],
   ["products", "system"],
   ["understand", "personas"],

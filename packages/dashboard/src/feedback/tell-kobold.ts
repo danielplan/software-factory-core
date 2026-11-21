@@ -211,8 +211,7 @@ export function askMode(page: string, greet = true) {
 export function thumbFor(number: number) {
   const there = ON_BOARD.find((one) => one.number === number);
   if (!there) return;
-  if (!thread || thread.step === "sent")
-    thread = empty(thread?.page ?? "");
+  if (!thread || thread.step === "sent") thread = empty(thread?.page ?? "");
   thread = { ...thread, kind: there.kind, similar: number };
   thumb();
 }

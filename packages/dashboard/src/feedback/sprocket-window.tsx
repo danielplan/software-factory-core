@@ -3,14 +3,13 @@
 // too. Its opening fits the page you are on and offers a waiting error
 // first; a question goes to the support kobold, a wish or something wrong
 // builds a post live (kobold-chat.tsx, the script in tell-kobold.ts).
-// What was sent lives on the Feedback page. PROTOTYPE: English only.
+// What was sent lives on the Signals page (Feedback). PROTOTYPE: English only.
 
 import {
   ArrowUp,
   Bug,
   CircleHelp,
   Lightbulb,
-  Plus,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -52,31 +51,28 @@ import {
 } from "./tell-kobold";
 
 // What the opening offers on each page.
-const HERE: Record<
-  Page,
-  { text: string; kind: Kind | "ask"; said?: string }
-> = {
-  home: { text: "Missing something on Home? Tell me", kind: "wish" },
-  system: {
-    text: "A product looks wrong? Report it",
-    kind: "bug",
-    said: "A product on the System page looks wrong",
-  },
-  signals: { text: "Missing a kind of signal? Tell me", kind: "wish" },
-  explore: {
-    text: "Prototype not what you asked? Report it",
-    kind: "bug",
-    said: "A prototype doesn't show what I asked for",
-  },
-  build: {
-    text: "Builder stopped? Report it",
-    kind: "bug",
-    said: "The builder stopped",
-  },
-  personas: { text: "Wish personas did more? Tell me", kind: "wish" },
-  settings: { text: "Can't find a setting? Ask me", kind: "ask" },
-  feedback: { text: "Missing something? Tell me", kind: "wish" },
-};
+const HERE: Record<Page, { text: string; kind: Kind | "ask"; said?: string }> =
+  {
+    home: { text: "Missing something on Home? Tell me", kind: "wish" },
+    system: {
+      text: "A product looks wrong? Report it",
+      kind: "bug",
+      said: "A product on the System page looks wrong",
+    },
+    signals: { text: "Missing a kind of signal? Tell me", kind: "wish" },
+    explore: {
+      text: "Prototype not what you asked? Report it",
+      kind: "bug",
+      said: "A prototype doesn't show what I asked for",
+    },
+    build: {
+      text: "Builder stopped? Report it",
+      kind: "bug",
+      said: "The builder stopped",
+    },
+    personas: { text: "Wish personas did more? Tell me", kind: "wish" },
+    settings: { text: "Can't find a setting? Ask me", kind: "ask" },
+  };
 
 const CHOICES = [
   { choice: "bug", icon: Bug, label: "Something is wrong" },
@@ -133,9 +129,7 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
             ? cn(
                 "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]",
                 // The opening is small; a conversation gets room.
-                thread?.step === "choose"
-                  ? "h-[372px]"
-                  : "h-[min(80vh,620px)]",
+                thread?.step === "choose" ? "h-[372px]" : "h-[min(80vh,620px)]",
               )
             : "h-10 w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
@@ -146,6 +140,7 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
             style={{ animationDelay: "120ms" }}
           >
             <Header
+              begun={thread.step !== "choose"}
               onNew={() => {
                 back();
                 void post("/api/kobble/support/new").catch(() => undefined);
@@ -165,7 +160,10 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
             }}
             className="flex h-full w-full flex-none items-center gap-2.5 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground"
           >
-            <KoboldHead size={22} className={cn(working && "animate-breathe")} />
+            <KoboldHead
+              size={22}
+              className={cn(working && "animate-breathe")}
+            />
             <span className="flex-1 truncate">
               {working
                 ? all.support.answering("Sprocket")
@@ -181,35 +179,40 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
   );
 }
 
+// Sprocket's face and name, once. "Start over" only once a conversation
+// has begun.
 function Header({
+  begun,
   onNew,
   onClose,
-}: Readonly<{ onNew: () => void; onClose: () => void }>) {
+}: Readonly<{ begun: boolean; onNew: () => void; onClose: () => void }>) {
   return (
     <header className="flex flex-none items-center gap-2 px-3 pt-3 pb-1.5">
       <KoboldHead size={22} />
       <span className="text-[13px] font-medium">Sprocket</span>
       <span className="flex-1" />
+      {begun && (
+        <button
+          type="button"
+          onClick={onNew}
+          className="px-1.5 text-[12px] text-muted-foreground hover:text-foreground hover:underline"
+        >
+          Start over
+        </button>
+      )}
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="New conversation"
-        title="New conversation"
-        onClick={onNew}
+        aria-label="Close"
+        onClick={onClose}
       >
-        <Plus aria-hidden className="size-4" />
-      </Button>
-      <Button variant="ghost" size="icon-sm" aria-label="Close" onClick={onClose}>
         <X aria-hidden className="size-4" />
       </Button>
     </header>
   );
 }
 
-function Chat({
-  thread,
-  page,
-}: Readonly<{ thread: Thread; page: Page }>) {
+function Chat({ thread, page }: Readonly<{ thread: Thread; page: Page }>) {
   const [text, setText] = useState("");
   return (
     <>
@@ -235,58 +238,51 @@ function Chat({
   );
 }
 
-// Before any talk: what fits this page, a waiting error first, and the
-// three starting choices.
+// Before any talk: one short line, one suggestion (a waiting error, else
+// what fits this page) and the three starting choices.
 function Opening({ page, thread }: Readonly<{ page: Page; thread: Thread }>) {
   const t = useT();
   const fresh = useFreshError();
   const errors = useCaughtErrors();
   const here = HERE[page];
-  const suggestions = [
-    ...(fresh
-      ? [
-          {
-            key: "error",
-            icon: <TriangleAlert aria-hidden className="text-warning" />,
-            text: (
-              <>
-                <span className="truncate">
-                  {short(fresh.text.replace(/^Made up: /, ""))}
-                </span>
-                <span className="flex-none text-muted-foreground">
-                  · Report it
-                </span>
-              </>
-            ),
-            go: () => {
-              reportError(fresh, thread.page, t.feedback.report);
-            },
+  const suggestions = fresh
+    ? [
+        {
+          key: "error",
+          icon: <TriangleAlert aria-hidden className="text-warning" />,
+          text: (
+            <>
+              <span className="truncate">
+                {short(fresh.text.replace(/^Made up: /, ""))}
+              </span>
+              <span className="flex-none text-muted-foreground">
+                · Report it
+              </span>
+            </>
+          ),
+          go: () => {
+            reportError(fresh, thread.page, t.feedback.report);
           },
-        ]
-      : []),
-    {
-      key: "here",
-      icon: <span className="size-1.5 rounded-full bg-[#8b8ff0]" />,
-      text: <span className="truncate">{here.text}</span>,
-      go: () => {
-        if (here.kind === "ask") askMode(thread.page);
-        else if (here.said)
-          startWith(here.kind, here.said, thread.page, errors);
-        else start(here.kind);
-      },
-    },
-  ];
+        },
+      ]
+    : [
+        {
+          key: "here",
+          icon: <span className="size-1.5 rounded-full bg-[#8b8ff0]" />,
+          text: <span className="truncate">{here.text}</span>,
+          go: () => {
+            if (here.kind === "ask") askMode(thread.page);
+            else if (here.said)
+              startWith(here.kind, here.said, thread.page, errors);
+            else start(here.kind);
+          },
+        },
+      ];
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-end gap-4 overflow-auto px-4 pb-3">
-      <div className="flex items-center gap-2.5 motion-safe:animate-rise">
-        <KoboldHead size={30} />
-        <p className="text-[14px] leading-snug">
-          Hi, I'm Sprocket.
-          <span className="block text-[12.5px] text-muted-foreground">
-            You're on {t.shell.pages[page]}. How can I help?
-          </span>
-        </p>
-      </div>
+      <p className="text-[14px] leading-snug motion-safe:animate-rise">
+        How can I help?
+      </p>
       <ul className="grid gap-1.5">
         {suggestions.map((one, at) => (
           <li

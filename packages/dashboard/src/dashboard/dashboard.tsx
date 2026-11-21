@@ -5,7 +5,6 @@ import { trackersOf } from "@/add-ons/trackers";
 import { ProblemBox } from "@/components/problem-box";
 import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
-import { FeedbackPage } from "@/feedback/feedback-page";
 import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
 import { FactoryPage } from "@/factory/factory-page";
@@ -100,7 +99,5 @@ function PageBody({
       return <SystemPage state={state} />;
     case "settings":
       return <SettingsTab state={state} open={open} />;
-    case "feedback":
-      return <FeedbackPage />;
   }
 }

@@ -109,7 +109,11 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
   return (
     <div className="mx-3 mt-0.5 grid max-h-[46%] flex-none gap-2 overflow-auto rounded-xl border border-line-soft bg-surface/50 px-3.5 py-3 motion-safe:animate-rise">
       <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground [&_svg]:size-3">
-        {thread.kind === "bug" ? <Bug aria-hidden /> : <Lightbulb aria-hidden />}
+        {thread.kind === "bug" ? (
+          <Bug aria-hidden />
+        ) : (
+          <Lightbulb aria-hidden />
+        )}
         {thread.kind === "bug" ? "Bug" : "Wish"} · new post
         <span className="ml-auto flex items-center gap-1.5">
           {!ready && (
@@ -142,7 +146,10 @@ function BuildingCard({ thread }: Readonly<{ thread: Thread }>) {
       {sentences.length > 0 ? (
         <div className="grid gap-1 text-[12.5px] leading-snug text-foreground-2">
           {sentences.map((one, at) => (
-            <p key={`${String(at)}-${one}`} className="motion-safe:animate-rise">
+            <p
+              key={`${String(at)}-${one}`}
+              className="motion-safe:animate-rise"
+            >
               {one}
             </p>
           ))}
@@ -286,9 +293,7 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
 // The kobold's lines already typed in, so they do not type again.
 const typed = new Set<number>();
 
-export function Feed({
-  thread,
-}: Readonly<{ thread: Thread }>) {
+export function Feed({ thread }: Readonly<{ thread: Thread }>) {
   const end = useRef<HTMLDivElement>(null);
   const [, setDone] = useState(0);
   const scroll = () => {
@@ -420,9 +425,7 @@ function KoboldLine({
   );
 }
 
-function SimilarOffer({
-  post,
-}: Readonly<{ post: (typeof ON_BOARD)[number] }>) {
+function SimilarOffer({ post }: Readonly<{ post: (typeof ON_BOARD)[number] }>) {
   return (
     <div className="grid gap-2 motion-safe:animate-slide-in">
       <SimilarRow post={post} onThumb={thumb} />

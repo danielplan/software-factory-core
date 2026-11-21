@@ -56,7 +56,7 @@ import {
   useMine,
   useSignedIn,
 } from "./feedback-board";
-import { reportError } from "./tell-kobold";
+import { invite, reportError } from "./tell-kobold";
 
 // How the form starts: empty, or reporting one error.
 type Start = { kind: Kind; title: string; errors: number[]; n: number };
@@ -69,8 +69,8 @@ export function FeedbackRow({ current }: Readonly<{ current: Page }>) {
   );
 }
 
-// Variant F: no form; the row leads to the Feedback page (what was sent,
-// and a button to send more); the error notice opens Sprocket's chat.
+// Variant F: no form; the row and the error notice open Sprocket's chat.
+// What was sent shows on the Signals page, under Feedback.
 function TellKoboldRow({ current }: Readonly<{ current: Page }>) {
   const all = useT();
   const t = all.feedback;
@@ -86,20 +86,11 @@ function TellKoboldRow({ current }: Readonly<{ current: Page }>) {
           }}
         />
       )}
-      <a
-        href="#feedback"
-        aria-current={current === "feedback" ? "page" : undefined}
-        className={cn(
-          "group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13px] text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
-          current === "feedback" &&
-            "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
-        )}
-      >
-        <Tile color="#667085">
-          <MessageSquareHeart aria-hidden />
-        </Tile>
-        {t.row}
-      </a>
+      <SendRow
+        onClick={() => {
+          invite(page);
+        }}
+      />
     </>
   );
 }

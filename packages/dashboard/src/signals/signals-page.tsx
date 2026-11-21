@@ -1,7 +1,9 @@
 // Signals: what the live app reported, typed by where it came from (bug,
 // feature request, feedback). The new ones in a list, the one picked beside
 // it (#signals/<id>) with Fix, Explore (or Add to an exploration it is
-// already about) and Dismiss. A handled signal leaves the list; it stays on
+// already about) and Dismiss. In variant F, feedback is there too: what
+// this person sent to the public feedback board and what arrives from it,
+// with a Feedback filter at the top (feedback-signals.tsx). A handled signal leaves the list; it stays on
 // its persona and, once explored, on its exploration. The header says when
 // the live app was last read, with Sync now. On a phone the list and the
 // picked signal are two screens, with a link back to the list.
@@ -15,10 +17,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
+import { VARIANT } from "@/lib/variant";
+
 import { Already } from "./already";
 import { AllQuiet } from "./empty";
 import { BeforeLaunch } from "./before-launch";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
+import {
+  FeedbackDetail,
+  FeedbackItem,
+  type FeedbackSignal,
+  Filter,
+  useFeedbackSignals,
+} from "./feedback-signals";
 import { StepOf } from "./step";
 import { SyncNow } from "./sync-now";
 import { useSignals } from "./use-signals";
@@ -96,6 +107,9 @@ function Shown({
   now: Date;
   onSaid: (said: string) => void;
 }>) {
+  const feedback = useFeedbackSignals();
+  const [only, setOnly] = useState(false);
+  const shownFeedback = VARIANT === "F" ? feedback : [];
   const before = !data.sync.connected && (
     <BeforeLaunch
       app={app}
@@ -103,10 +117,23 @@ function Shown({
       empty={data.signals.length === 0}
     />
   );
-  if (data.signals.length > 0)
+  if (data.signals.length > 0 || shownFeedback.length > 0)
     return (
       <div className="grid gap-4">
-        <Board signals={data.signals} open={open} now={now} onSaid={onSaid} />
+        {shownFeedback.length > 0 && (
+          <Filter
+            feedback={only}
+            count={shownFeedback.length}
+            onPick={setOnly}
+          />
+        )}
+        <Board
+          signals={only ? [] : data.signals}
+          feedback={shownFeedback}
+          open={open}
+          now={now}
+          onSaid={onSaid}
+        />
         {before}
       </div>
     );
@@ -117,22 +144,29 @@ function Shown({
 // them).
 function Board({
   signals,
+  feedback,
   open,
   now,
   onSaid,
 }: Readonly<{
   signals: SignalRow[];
+  feedback: FeedbackSignal[];
   open: string | null;
   now: Date;
   onSaid: (said: string) => void;
 }>) {
   const t = useT();
-  const shown = shownOf(signals, open);
+  const all = [...feedback, ...signals];
+  const shown = shownOf(all, open);
   const picked = open !== null && shown?.id === open;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[430px_minmax(0,1fr)]">
       <div className={cn(picked && "max-lg:hidden")}>
-        <SignalList signals={signals} shown={shown?.id ?? null} />
+        <SignalList
+          signals={signals}
+          feedback={feedback}
+          shown={shown?.id ?? null}
+        />
       </div>
       <div className={cn("grid gap-3.5", !picked && "max-lg:hidden")}>
         <a
@@ -142,13 +176,22 @@ function Board({
           <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
           {t.shell.pages.signals}
         </a>
-        {shown ? (
+        {shown && "from" in shown ? (
+          <FeedbackDetail
+            key={shown.id}
+            one={shown}
+            onDone={(text) => {
+              window.location.hash = signalHash(nextAfter(all, shown.id));
+              onSaid(text);
+            }}
+          />
+        ) : shown ? (
           <SignalDetail
             key={shown.id}
             signal={shown}
             now={now}
             onDone={(text) => {
-              window.location.hash = signalHash(nextAfter(signals, shown.id));
+              window.location.hash = signalHash(nextAfter(all, shown.id));
               onSaid(text);
             }}
             onFailed={onSaid}
@@ -170,12 +213,25 @@ function Board({
 
 function SignalList({
   signals,
+  feedback,
   shown,
-}: Readonly<{ signals: SignalRow[]; shown: string | null }>) {
+}: Readonly<{
+  signals: SignalRow[];
+  feedback: FeedbackSignal[];
+  shown: string | null;
+}>) {
   const t = useT();
   return (
     <nav aria-label={t.signals.newSignals} className={cn(CARD, "grid")}>
-      {signals.length === 0 && (
+      {feedback.map((one) => (
+        <FeedbackItem
+          key={one.id}
+          one={one}
+          picked={one.id === shown}
+          href={signalHash(one.id)}
+        />
+      ))}
+      {signals.length + feedback.length === 0 && (
         <p className="p-[50px] text-center text-[13px] text-muted-foreground">
           {t.signals.noneNew}
         </p>
