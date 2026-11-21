@@ -4,13 +4,16 @@ Cosa ha cambiato ogni versione di Kobble per te, in parole semplici. Le
 nuove versioni arrivano da sole. Scritto dai creatori di Kobble a ogni
 rilascio.
 
-## 0.14.0
+## 0.14.0 (2026-11-22)
 
-- New: **Rilasci dei tuoi prodotti.** Una pagina Rilasci trasforma ciò che è stato unito in un rilascio numerato, con un numero suggerito e note scritte per te.
+- New: **Rilasci dei tuoi prodotti.** Una pagina Rilasci trasforma ciò che è stato unito in un rilascio numerato, con note scritte per te; il kobold suggerisce il numero solo quando premi Prepara.
 - New: **Novità in Kobble.** Impostazioni › Aggiornamenti dice cosa ha cambiato ogni versione, nella tua lingua.
+- New: **Prototipi in ogni stato, e approfondisci.** Ogni variante si può mostrare vuota, in caricamento, con un problema o con molti elementi, con i pulsanti sotto di essa. Scegli una variante per affinarla con nuove varianti.
 - Changed: **Costruito dal prototipo concordato.** Un prototipo sulla lavagna si consegna solo dopo che vi siete accordati su di esso e sulla sua variante, e la fabbrica costruisce dalle sue schermate, mantenendone l'aspetto.
 - Changed: **Una consegna più breve.** La scheda dice ciò che avete pianificato e deciso, niente di più; Doodle mostra a che passo è mentre la scrive.
 - Changed: **Una libreria per ogni compito.** Ogni tipo di prodotto indica la libreria da usare per ogni compito, e la fabbrica controlla che il nuovo lavoro la rispetti.
+- Changed: **Il costruttore chiede invece di andare avanti all'infinito.** Dopo tre sessioni su una scheda si ferma con una pull request in bozza e ti chiede di dividere la scheda o di lasciarlo continuare.
+- Fixed: **Il costruttore ripara la sua copia di lavoro** quando il collegamento a git si rompe, tenendo la vecchia cartella.
 - Fixed: **Risolvi resta risolto.** Una scheda rimandata indietro per un conflitto con main non chiede più Risolvi mentre il costruttore ci lavora.
 - Fixed: **Chi crea i prototipi ricorda.** Continua la stessa conversazione su un prototipo, anche dopo un riavvio di Kobble.
 
