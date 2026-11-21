@@ -116,6 +116,11 @@ own working copy; it has its own settings files, made from the examples.
   session on the same branch, which reads the run file and carries on. Do not
   open a pull request for part of the scope, and do not ask the owner whether
   to go on. Each session must add at least one commit, or the factory stops.
+  The factory gives a card at most 3 sessions in a row: when the third still
+  ends with `continue`, it opens a draft pull request and asks the owner how
+  to go on. So build the most important parts first. Your answer on each
+  `continue` becomes a short note on the card, so say what is done and what
+  is next, and nothing else.
 - When the agreed scope is built and checked, write the pull request's
   description, and only that: your whole answer becomes it. It is about the
   whole card, every session and every change asked (the run file has them),

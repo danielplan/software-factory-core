@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Changed: a card gets at most 3 build sessions in a row instead of 12. After each session that ends with `continue` the builder leaves a short note on the card (`Session 2 of 3 done:`, what is done and what is next). If the third still has not finished, it stops with a draft pull request and the card waits in Backlog, marked stuck, for a person to move it to To do or split it. Nothing to do.
+
 - New: **states for every variant.** The maker builds the states that matter for the idea (empty, loading, a problem, many items, long words) into each variant's made-up data, switched from outside the app by the address (`?state=empty`, next to `?variant=`), and names them in its last words (`States: …`). The prototype on the board shows them as chips under its variants ("usual" first). `states` on a prototype in the board file. Nothing to do.
 
 - New: **dig deeper** into one variant of a prototype. When the team picks a direction, the explorer keeps that variant as the base, takes the other variants off (their code too) and adds one to three new variants that each refine the kept one, in one maker run (`dig_deeper`). Nothing to do.
