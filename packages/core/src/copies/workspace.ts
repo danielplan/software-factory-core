@@ -16,6 +16,7 @@ import { dirname, join } from "node:path";
 
 import { run } from "../processes.ts";
 import { freeBranch, heldElsewhere } from "./free-branch.ts";
+import { keepsFiles, linkedToGit, setAside, tellRemade } from "./set-aside.ts";
 import {
   EXAMPLE_END,
   isExample,
@@ -36,6 +37,9 @@ export type CopySettings = {
   // them holds is freed for this copy. A branch checked out anywhere else
   // (but in `workspaces`) is a person's, and is never taken.
   ownCopies?: string[];
+  // Said when a copy that lost its link to git was remade: the copy, and
+  // where its old folder was kept. By default a line on the server's log.
+  onRemade?: (copy: string, kept: string) => void;
 };
 
 // All copies share one git store. Downloading into
@@ -267,7 +271,15 @@ export class Workspace {
     if ((await this.git("branch", "--list", branch)).trim() === "")
       return false;
     const current = (await this.git("branch", "--show-current")).trim();
-    if (!onGitHub) return current === branch;
+    if (!onGitHub) {
+      // Commits only this computer has are never reset to main: a copy
+      // made again (or on another branch) takes the branch up where it was.
+      if (current !== branch) {
+        await this.git("checkout", "--quiet", "--force", branch);
+        await this.git("clean", "--quiet", "-fd");
+      }
+      return true;
+    }
     const tip = (await this.git("rev-parse", branch)).trim();
     const github = `origin/${branch}`;
     if (!(await this.succeeds("merge-base", "--is-ancestor", github, tip))) {
@@ -307,8 +319,16 @@ export class Workspace {
   }
 
   private async ensure(): Promise<void> {
-    if (existsSync(join(this.path, ".git"))) return;
+    if (await linkedToGit(this.path)) return;
     mkdirSync(this.settings.workspaces, { recursive: true });
+    // A copy that lost its link to git is set aside, never deleted: it may
+    // hold work that was not committed. Then git forgets it and it is made
+    // again as a first copy is.
+    if (keepsFiles(this.path)) {
+      const kept = setAside(this.path, this.settings.workspaces);
+      await run("git", ["-C", this.settings.source, "worktree", "prune"]);
+      (this.settings.onRemade ?? tellRemade)(this.path, kept);
+    }
     await run("git", [
       "-C",
       this.settings.source,

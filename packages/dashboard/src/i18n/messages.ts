@@ -15,6 +15,7 @@ import { settings } from "./areas/settings.ts";
 import { signals } from "./areas/signals.ts";
 import { system } from "./areas/system.ts";
 import { updates } from "./areas/updates.ts";
+import { whatsNew } from "./areas/whats-new.ts";
 import { words } from "./areas/words.ts";
 import { builder } from "./areas/builder.ts";
 import { feedback } from "./areas/feedback.ts";
@@ -26,6 +27,7 @@ const AREAS = {
   home,
   system,
   updates,
+  whatsNew,
   settings,
   words,
   signals,
