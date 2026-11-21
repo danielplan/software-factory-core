@@ -13,6 +13,7 @@ import { PersonasPage } from "@/personas/personas-page";
 import { GuidedSetup } from "@/setup-guided/guided-setup";
 import { SignalsPage } from "@/signals/signals-page";
 
+import { UpdatesPage } from "@/updates/updates-page";
 import { HomePage } from "./home-page";
 import { SettingsTab } from "./settings-tab";
 import { SystemPage } from "./system-page";
@@ -92,11 +93,13 @@ function PageBody({
     case "explore":
       return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
     case "build":
-      return <FactoryPage state={state} />;
+      return <FactoryPage state={state} open={open} />;
     case "home":
       return <HomePage state={state} />;
     case "system":
       return <SystemPage state={state} />;
+    case "updates":
+      return <UpdatesPage />;
     case "settings":
       return <SettingsTab state={state} open={open} />;
   }

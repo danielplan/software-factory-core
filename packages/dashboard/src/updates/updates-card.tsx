@@ -15,6 +15,8 @@ import type { UpdatesView } from "../../../server/src/updates/served.ts";
 import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
+import { variant } from "@/lib/variant";
+import { CalmUpdates, ItselfRow } from "./calm-updates";
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
@@ -30,6 +32,14 @@ export function UpdatesCard() {
       setProblem(messageOf(error));
     });
   };
+  // Variant B: calm when there is nothing to take, GitHub reachable or not.
+  if (variant() === "B" && summary.tone === "quiet")
+    return (
+      <>
+        <CalmUpdates data={data} press={press} />
+        {problem && <p className="text-[13px] text-destructive">{problem}</p>}
+      </>
+    );
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap items-center gap-3">
@@ -57,15 +67,17 @@ export function UpdatesCard() {
         >
           <RefreshCw aria-hidden className="size-4" /> {m.lookAgain}
         </Button>
-        <label className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-          <Switch
-            checked={data.byItself}
-            onCheckedChange={(on) => {
-              press("/api/updates/by-itself", { on });
-            }}
-          />
-          {m.byItself}
-        </label>
+        {variant() !== "B" && (
+          <label className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+            <Switch
+              checked={data.byItself}
+              onCheckedChange={(on) => {
+                press("/api/updates/by-itself", { on });
+              }}
+            />
+            {m.byItself}
+          </label>
+        )}
       </div>
       {summary.text && (
         <div className="text-[13px] text-muted-foreground">
@@ -88,6 +100,7 @@ export function UpdatesCard() {
           ))}
         </ul>
       )}
+      {variant() === "B" && <ItselfRow data={data} press={press} />}
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </div>
   );

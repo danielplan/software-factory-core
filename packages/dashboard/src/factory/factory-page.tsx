@@ -26,10 +26,16 @@ import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { StuckList } from "./stuck-cards";
 import { WaitingCards } from "./waiting-card";
+import { variant } from "@/lib/variant";
+import { ShippedList } from "@/updates/changelog";
 import { useT } from "@/i18n/use-t";
 import type { Messages } from "@/i18n/messages";
 
-export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
+export function FactoryPage({
+  state,
+  open: tab,
+}: Readonly<{ state: FactoryState; open?: string | null }>) {
+  const shipped = variant() === "A" && tab === "shipped";
   const t = useT();
   const { data, problem } = useFactoryView(state);
   const [said, say] = useState<string | null>(null);
@@ -62,16 +68,26 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
     <>
       <PageHead
         title={t.shell.pages.build}
+        tabs={variant() === "A" ? <ShippedTabs shipped={shipped} /> : undefined}
         actions={
           data?.connected ? (
             <Builder view={data} press={press} href={href} />
           ) : undefined
         }
       />
-      {shown && <ProblemBox title={t.factory.didNotWork} text={shown} />}
-      <OpenCard value={setOpen}>
-        {data && <Board view={without(data, gone)} />}
-      </OpenCard>
+      {shipped && (
+        <div className="mt-4 max-w-3xl">
+          <ShippedList />
+        </div>
+      )}
+      {shown && !shipped && (
+        <ProblemBox title={t.factory.didNotWork} text={shown} />
+      )}
+      {!shipped && (
+        <OpenCard value={setOpen}>
+          {data && <Board view={without(data, gone)} />}
+        </OpenCard>
+      )}
       {open !== null && (
         <CardPanel
           number={open}
@@ -311,4 +327,23 @@ function NotConnected() {
 function useFactoryView(state: FactoryState): Read<FactoryView> {
   const read = state.work?.read ?? "";
   return useRead(`/api/kobble/factory?read=${read}`) as Read<FactoryView>;
+}
+
+// Variant A: the board and what we shipped, as two links of the page.
+function ShippedTabs({ shipped }: Readonly<{ shipped: boolean }>) {
+  const link = (on: boolean) =>
+    cn(
+      "rounded-lg px-3 py-1 text-[13px]",
+      on ? "bg-sidebar-active font-medium" : "text-muted-foreground",
+    );
+  return (
+    <nav className="flex gap-1">
+      <a href="#build" className={link(!shipped)}>
+        Board
+      </a>
+      <a href="#build/shipped" className={link(shipped)}>
+        What we shipped
+      </a>
+    </nav>
+  );
 }

@@ -12,6 +12,7 @@ export const PAGES = [
   "explore",
   "build",
   "personas",
+  "updates",
   "settings",
 ] as const;
 export type Page = (typeof PAGES)[number];

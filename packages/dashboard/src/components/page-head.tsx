@@ -9,12 +9,14 @@ export function PageHead({
   about,
   actions,
   children,
+  tabs,
 }: Readonly<{
   title: string;
   about?: ReactNode;
   actions?: ReactNode;
   // Beside the title, such as a page's own tabs.
   children?: ReactNode;
+  tabs?: ReactNode;
 }>) {
   return (
     <header className="mb-1.5 grid gap-1.5">
@@ -24,6 +26,7 @@ export function PageHead({
             {title}
           </h1>
           {children}
+          {tabs}
         </div>
         {actions && (
           <div className="flex flex-wrap items-center gap-2.5">{actions}</div>

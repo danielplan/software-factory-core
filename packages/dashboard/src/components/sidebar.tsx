@@ -6,6 +6,7 @@ import {
   Menu,
   Settings,
   Columns3,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -26,6 +27,7 @@ import { useFactoryName, useLogo } from "@/lib/brand";
 import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
+import { variant } from "@/lib/variant";
 import { UpdateRow } from "@/updates/update-row";
 import { FeedbackRow } from "@/feedback/feedback-row";
 
@@ -82,6 +84,13 @@ const GROUPS: { label: "work" | "customers"; items: Item[] }[] = [
     ],
   },
 ];
+
+// Variant C only: one Updates page, after the work pages.
+const UPDATES_ITEM: Item = {
+  page: "updates",
+  icon: <Sparkles aria-hidden />,
+  color: "var(--source-app)",
+};
 
 function GroupLabel({ children }: Readonly<{ children: ReactNode }>) {
   return (
@@ -261,7 +270,12 @@ function Pages({
       {GROUPS.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{t.groups[group.label]}</GroupLabel>
-          {group.items.map((item) => (
+          {[
+            ...group.items,
+            ...(group.label === "work" && variant() === "C"
+              ? [UPDATES_ITEM]
+              : []),
+          ].map((item) => (
             <PageLink key={item.page} item={item} current={current} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">
                 <PageKobold page={item.page} doing={doing} />

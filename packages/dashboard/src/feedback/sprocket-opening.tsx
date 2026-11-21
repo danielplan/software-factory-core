@@ -32,6 +32,7 @@ const HERE: Record<Page, Kind | "ask"> = {
   build: "bug",
   personas: "wish",
   settings: "ask",
+  updates: "ask",
 };
 
 const CHOICES = [
@@ -80,7 +81,7 @@ function suggestionFor(
       },
     };
   const kind = HERE[page];
-  const here = w.here[page];
+  const here = w.here[page === "updates" ? "settings" : page];
   return {
     key: "here",
     icon: <span className="size-1.5 rounded-full bg-[#8b8ff0]" />,

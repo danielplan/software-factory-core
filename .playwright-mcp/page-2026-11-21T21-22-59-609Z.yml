@@ -1,0 +1,65 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]: Acme
+    - navigation "Overview" [ref=e18]:
+      - link "Home" [ref=e19] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e24] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e36]:
+          - text: Stopped
+          - img "Stopped" [ref=e37]
+    - navigation "Pages" [ref=e38]:
+      - generic [ref=e39]:
+        - generic [ref=e40]: Work
+        - link "Signals Sieve" [ref=e41] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e47]': Sieve
+        - link "Explorations Doodle" [ref=e60] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e65]': Doodle
+        - link "Factory Bolt" [ref=e77] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e82]': Bolt
+      - generic [ref=e96]:
+        - generic [ref=e97]: Customers
+        - link "Personas Mimic" [ref=e98] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e106]': Mimic
+    - generic [ref=e117]:
+      - button "Send feedback" [ref=e118] [cursor=pointer]
+      - navigation "The factory" [ref=e123]:
+        - link "Settings" [ref=e124] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e129]:
+    - generic [ref=e131]:
+      - generic [ref=e132]:
+        - heading "Settings" [level=1] [ref=e135]
+        - paragraph [ref=e136]: "How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts."
+      - generic [ref=e137]:
+        - navigation "Settings" [ref=e138]:
+          - link "Connections" [ref=e139] [cursor=pointer]:
+            - /url: "#settings/connections"
+          - link "AI models" [ref=e143] [cursor=pointer]:
+            - /url: "#settings/ai-models"
+          - link "Updates" [ref=e148] [cursor=pointer]:
+            - /url: "#settings/updates"
+          - link "Add-ons" [ref=e155] [cursor=pointer]:
+            - /url: "#settings/add-ons"
+          - link "This computer" [ref=e159] [cursor=pointer]:
+            - /url: "#settings/this-computer"
+          - link "Advanced" [ref=e163] [cursor=pointer]:
+            - /url: "#settings/advanced"
+        - generic "Updates" [ref=e167]:
+          - generic [ref=e168]:
+            - generic [ref=e169]: Updates
+            - generic [ref=e170]: Merged work comes to this computer from GitHub; new versions of Kobble come as a card for the builder.
+  - region "Sprocket" [ref=e171]:
+    - button "Ask Sprocket anything ⌘J" [ref=e172] [cursor=pointer]:
+      - generic [ref=e182]: Ask Sprocket anything
+      - generic [ref=e183]: ⌘J

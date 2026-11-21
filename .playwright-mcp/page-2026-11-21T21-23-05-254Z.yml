@@ -1,0 +1,160 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - generic [ref=f1e6]: Acme
+    - navigation "Overview" [ref=f1e18]:
+      - link "Home" [ref=f1e19] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e24] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e36]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e37]
+    - navigation "Pages" [ref=f1e38]:
+      - generic [ref=f1e39]:
+        - generic [ref=f1e40]: Work
+        - link "Signals Sieve" [ref=f1e41] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e47]': Sieve
+        - link "Explorations Doodle" [ref=f1e60] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e65]': Doodle
+        - link "Factory Bolt" [ref=f1e77] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e82]': Bolt
+        - link "Updates" [ref=f1e96] [cursor=pointer]:
+          - /url: "#updates"
+      - generic [ref=f1e101]:
+        - generic [ref=f1e102]: Customers
+        - link "Personas Mimic" [ref=f1e103] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e111]': Mimic
+    - generic [ref=f1e122]:
+      - button "Send feedback" [ref=f1e123] [cursor=pointer]
+      - navigation "The factory" [ref=f1e128]:
+        - link "Settings" [ref=f1e129] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e134]:
+    - generic [ref=f1e135]:
+      - generic [ref=f1e136]:
+        - heading "Updates" [level=1] [ref=f1e139]
+        - paragraph [ref=f1e140]: "What changed: the work we shipped, and what new Kobble releases bring."
+      - generic [ref=f1e141]:
+        - generic [ref=f1e142]:
+          - heading "What we shipped" [level=2] [ref=f1e143]
+          - generic [ref=f1e144]:
+            - generic [ref=f1e145]:
+              - heading "This week" [level=3] [ref=f1e146]
+              - list [ref=f1e147]:
+                - listitem [ref=f1e148]:
+                  - generic [ref=f1e152]: Searching the shop now finds products by colour.
+                  - generic [ref=f1e153]: "#42"
+                - listitem [ref=f1e154]:
+                  - generic [ref=f1e158]: The basket remembers what you added after you sign in again.
+                  - generic [ref=f1e159]: "#40"
+            - generic [ref=f1e160]:
+              - heading "Last week" [level=3] [ref=f1e161]
+              - list [ref=f1e162]:
+                - listitem [ref=f1e163]:
+                  - generic [ref=f1e167]: Checkout shows the delivery date before you pay.
+                  - generic [ref=f1e168]: "#37"
+                - listitem [ref=f1e169]:
+                  - generic [ref=f1e173]: "Fixed: the order list jumped to the top after cancelling an order, with a very long product name such as /Users/someone/Documents/very-long-folder-name."
+                  - generic [ref=f1e174]: "#35"
+                - listitem [ref=f1e175]:
+                  - generic [ref=f1e179]: Product pictures load faster on a phone.
+                  - generic [ref=f1e180]: "#33"
+            - generic [ref=f1e181]:
+              - heading "2 weeks ago" [level=3] [ref=f1e182]
+              - list [ref=f1e183]:
+                - listitem [ref=f1e184]:
+                  - generic [ref=f1e188]: "New: a wish list, from any product page."
+                  - generic [ref=f1e189]: "#29"
+            - paragraph [ref=f1e190]: Made-up example entries.
+        - generic [ref=f1e191]:
+          - heading "What's new in Kobble" [level=2] [ref=f1e192]
+          - generic [ref=f1e194]:
+            - generic [ref=f1e195]:
+              - button "Kobble 0.13.2 You're on this one Nov 21, 2026" [expanded] [ref=f1e196] [cursor=pointer]:
+                - text: Kobble 0.13.2
+                - generic [ref=f1e199]: You're on this one
+                - generic [ref=f1e200]: Nov 21, 2026
+              - generic [ref=f1e201]:
+                - generic [ref=f1e202]:
+                  - generic [ref=f1e203]: "To upgrade:"
+                  - generic [ref=f1e204]:
+                    - text: pin
+                    - code [ref=f1e205]: release-0.13.2
+                    - text: ","
+                    - code [ref=f1e206]: npm install
+                    - text: ","
+                    - code [ref=f1e207]: npx software-factory upgrade
+                    - text: . Nothing else to do; a team that reads the public feedback board (
+                    - code [ref=f1e208]: FACTORY_FEEDBACK_READS=yes
+                    - text: ) upgrades all its computers together.
+                - list [ref=f1e209]:
+                  - listitem [ref=f1e210]:
+                    - generic [ref=f1e211]: New
+                    - generic [ref=f1e212]:
+                      - generic [ref=f1e213]:
+                        - strong [ref=f1e214]: send feedback from anywhere in a factory
+                        - text: ", with nothing to host. Everything opens in Sprocket's one window: clicking \"Ask Sprocket anything\", \"Send feedback\" (sidebar) or \"Report this error\" (a notice in the sidebar when the factory hits an error) makes the bar grow into it."
+                      - button "More" [ref=f1e215] [cursor=pointer]
+                  - listitem [ref=f1e216]:
+                    - generic [ref=f1e217]: New
+                    - generic [ref=f1e218]:
+                      - generic [ref=f1e219]:
+                        - strong [ref=f1e220]: posts from the feedback board arrive as signals
+                        - text: "in a factory that reads it (the makers' own): set"
+                        - code [ref=f1e221]: FACTORY_FEEDBACK_READS=yes
+                        - text: in
+                        - code [ref=f1e222]: factory/team.env
+                        - text: .
+                      - button "More" [ref=f1e223] [cursor=pointer]
+                  - listitem [ref=f1e224]:
+                    - generic [ref=f1e225]: Changed
+                    - generic [ref=f1e226]:
+                      - generic [ref=f1e227]:
+                        - text: the core's own factory keeps its explorations out of git (
+                        - code [ref=f1e228]: factory/kobble/explorations/
+                        - text: in its
+                        - code [ref=f1e229]: .gitignore
+                        - text: ), since this repository is public; they stay on the computer they were made on.
+                      - button "More" [ref=f1e230] [cursor=pointer]
+                  - listitem [ref=f1e231]:
+                    - generic [ref=f1e232]: Changed
+                    - generic [ref=f1e233]:
+                      - generic [ref=f1e234]: the knowledge base is kept with the code.
+                      - button "More" [ref=f1e235] [cursor=pointer]
+                  - listitem [ref=f1e236]:
+                    - generic [ref=f1e237]: Changed
+                    - generic [ref=f1e238]:
+                      - generic [ref=f1e239]: every button has an icon before its words, the same icon for the same action; a Factory card's pull request button has the colour of its state (green ready for review, grey draft or closed, purple merged, red when it clashes with main).
+                      - button "More" [ref=f1e240] [cursor=pointer]
+                  - listitem [ref=f1e241]:
+                    - generic [ref=f1e242]: Fixed
+                    - generic [ref=f1e243]:
+                      - generic [ref=f1e244]: "the words still written in English only are in Italian and German too: Sprocket's feedback window (its opening, suggestions, quick replies, the post building itself, the sign-in code, its placeholders), \"All quiet\" on Signals, the voice's quiet note, the explorations' small board, the setup's \"Connected\" and \"Now:\", and the labels screen readers hear in the sidebar, the tracker choice and the cards waiting for you."
+                      - button "More" [ref=f1e245] [cursor=pointer]
+                  - listitem [ref=f1e246]:
+                    - generic [ref=f1e247]: Fixed
+                    - generic [ref=f1e248]:
+                      - generic [ref=f1e249]:
+                        - text: a Kobble page left open while the dashboard was built again (each
+                        - code [ref=f1e250]: npm run verify
+                        - text: in the core does) loads itself again once, instead of showing a blank canvas.
+                      - generic [ref=f1e251]: Nothing to do.
+            - button "Kobble 0.13.1 Nov 21, 2026" [ref=f1e253] [cursor=pointer]:
+              - text: Kobble 0.13.1
+              - generic [ref=f1e256]: Nov 21, 2026
+            - button "Kobble 0.13.0 Nov 14, 2026" [ref=f1e258] [cursor=pointer]:
+              - text: Kobble 0.13.0
+              - generic [ref=f1e261]: Nov 14, 2026
+  - region "Sprocket" [ref=f1e262]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e263] [cursor=pointer]:
+      - generic [ref=f1e273]: Ask Sprocket anything
+      - generic [ref=f1e274]: ⌘J
