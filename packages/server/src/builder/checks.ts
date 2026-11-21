@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
+import { recordsNamedReport, recordsNotNamed } from "./record-named.ts";
 import {
   type Available,
   FACTORY_FOLDER,
@@ -33,6 +34,8 @@ export async function checkWithFixes(options: {
   copy: string;
   available: Available;
   base: string;
+  // The card's number: the records the branch adds are named after it.
+  card?: number;
   shell?: Shell;
   onActivity: (line: string) => void;
   fix: (
@@ -41,8 +44,8 @@ export async function checkWithFixes(options: {
   ) => Promise<{ status: string; text: string }>;
 }): Promise<CheckOutcome & { blocked: string | null }> {
   const { copy, available, base, onActivity } = options;
-  const check = async () =>
-    await runChecks(
+  const check = async () => {
+    const outcome = await runChecks(
       copy,
       checksFor(copy, available, await changedFiles(copy, base)),
       options.shell,
@@ -50,6 +53,18 @@ export async function checkWithFixes(options: {
         onActivity(`Checking ${c.name}: ${c.command}`);
       },
     );
+    if (options.card === undefined) return outcome;
+    const named = recordsNamedReport(
+      options.card,
+      recordsNotNamed(options.card, await changedFiles(copy, base, "added")),
+    );
+    return named === ""
+      ? outcome
+      : {
+          passed: false,
+          report: [outcome.report, named].filter((r) => r !== "").join("\n\n"),
+        };
+  };
   let checked = await check();
   for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
     const answer = await options.fix(checked.report, round);
@@ -90,12 +105,14 @@ export function checksFor(
 export async function changedFiles(
   copy: string,
   base: string,
+  only: "added" | "all" = "all",
 ): Promise<string[]> {
   const out = await run("git", [
     "-C",
     copy,
     "diff",
     "--name-only",
+    ...(only === "added" ? ["--diff-filter=A"] : []),
     `origin/${base}...HEAD`,
   ]);
   return out.split("\n").filter((line) => line.trim() !== "");

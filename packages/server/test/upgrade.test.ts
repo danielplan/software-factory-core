@@ -78,7 +78,7 @@ function oldFactory(kindLine = "- **Kind:** other-code (SvelteKit app).") {
   );
   write(
     join(root, "AGENTS.md"),
-    "Start with the `factory` skill: plan → build → `update-context`.\n",
+    "Start with the `factory` skill. It opens a run file in `runs/NNN-short-name.md` and routes plan → build → `update-context`.\n",
   );
   return { project, root };
 }
@@ -354,4 +354,48 @@ test("0.11.1 keeps signal files out of git, and says when some are tracked alrea
   assert.deepEqual(result.left, [
     "Signal files are tracked in git; remove them from git with `git rm -r --cached factory/kobble/signals` (the files stay on this computer).",
   ]);
+});
+
+test("0.14.0 names runs after their card in the rules and the runs' README, and says when the words are not there", async () => {
+  const { project, root } = oldFactory();
+  write(
+    join(root, "runs", "README.md"),
+    "# Runs\n\nOne file per piece of work, `NNN-short-name.md`, numbered in order.\n",
+  );
+  const result = await upgradeFactory({
+    project,
+    root,
+    kits: allKits,
+    extensions,
+  });
+  assert.ok(
+    result.done.includes("The agents' ground rules name a run after its card."),
+  );
+  assert.ok(
+    result.done.includes(
+      "The runs' README says a run is named after its card.",
+    ),
+  );
+  assert.match(
+    readFileSync(join(root, "AGENTS.md"), "utf8"),
+    /opens a run file named after its card, `runs\/issue-<card number>-short-name\.md`/,
+  );
+  assert.match(
+    readFileSync(join(root, "runs", "README.md"), "utf8"),
+    /One file per card, `issue-<card number>-short-name\.md`/,
+  );
+
+  // The owner's own words: left to them, said in a line each.
+  const own = oldFactory();
+  write(join(own.root, "AGENTS.md"), "Our own rules, `update-context`.\n");
+  write(join(own.root, "runs", "README.md"), "# Runs\n\nOurs.\n");
+  const left = await upgradeFactory({
+    project: own.project,
+    root: own.root,
+    kits: allKits,
+    extensions,
+  });
+  assert.equal(left.left.length, 2);
+  assert.match(left.left[0] ?? "", /factory\/AGENTS\.md/);
+  assert.match(left.left[1] ?? "", /factory\/runs\/README\.md/);
 });

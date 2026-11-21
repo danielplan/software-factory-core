@@ -73,7 +73,7 @@ signal to fix. You are on the card's branch in the factory's
 own working copy; it has its own settings files, made from the examples.
 
 - Follow the factory's workflow: open the run file with the agreed plan
-  (linking the card), then `build-test-first`, `review-structure`,
+  (`runs/issue-<card number>-short-name.md`, linking the card), then `build-test-first`, `review-structure`,
   `show-result` as far as it can go without a person (screenshots, what you
   tried) and `update-context`. When the prompt says earlier work exists, read
   the run file first and continue from it.
@@ -141,9 +141,10 @@ factory merges the latest main into it. When that clashes, your prompt
 names the files: settle them first.
 
 - Keep both sides' intent: main's change and the card's change both stay.
-- Numbered things (runs, decisions, migrations) that both sides added keep
+- Numbered things (decisions, migrations) that both sides added keep
   main's number; the card's side moves to the next free number, and every
-  link to it is updated.
+  link to it is updated. Runs are named after their card and are never
+  renumbered.
 - Lists both sides added to (a change log, an index) keep every row.
 - Then `git commit` to finish the merge, and carry on with the task.
 - When the two sides cannot both stay, say how they clash and ask.

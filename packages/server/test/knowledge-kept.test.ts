@@ -11,7 +11,7 @@ const none = () => "";
 
 test("code changed and no knowledge file: the knowledge base is owed", () => {
   assert.equal(
-    knowledgeOwed(["packages/app/src/list.tsx", "runs/004-list.md"], none),
+    knowledgeOwed(["packages/app/src/list.tsx", "runs/issue-4-list.md"], none),
     true,
   );
 });
@@ -32,7 +32,7 @@ test("a docs page, a context page, a blueprint or AGENTS.md kept with it: nothin
 test("only the run, pictures or the changelog changed: nothing owed", () => {
   assert.equal(
     knowledgeOwed(
-      ["runs/004-list.md", "runs/004-list/shot.png", "CHANGELOG.md"],
+      ["runs/issue-4-list.md", "runs/issue-4-list/shot.png", "CHANGELOG.md"],
       none,
     ),
     false,
@@ -41,8 +41,8 @@ test("only the run, pictures or the changelog changed: nothing owed", () => {
 
 test("the run file says why nothing changes: nothing owed", () => {
   assert.equal(
-    knowledgeOwed(["src/fix.ts", "runs/005-fix.md"], (file) =>
-      file === "runs/005-fix.md"
+    knowledgeOwed(["src/fix.ts", "runs/issue-5-fix.md"], (file) =>
+      file === "runs/issue-5-fix.md"
         ? `## Result\n\n${NOTHING_TO_KEEP} a typo in a log line.`
         : "",
     ),

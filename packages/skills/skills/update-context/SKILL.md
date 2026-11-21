@@ -1,6 +1,6 @@
 ---
 name: update-context
-description: Update the knowledge base. Use whenever you learn something worth keeping for later (what exists, how to run it, a trap, a convention), when the person says to remember something, and at the end of a factory run.
+description: Update the knowledge base. Use whenever you learn something worth keeping for later (what exists, how to run it, a trap, a convention), when the person says to remember something, and at the end of a factory run. It updates the knowledge base; it never opens a run, and only adds to the run of the card being worked on.
 ---
 
 This skill guides the agent's record keeping. Keep durable facts and decisions accurate without making the person manage the files. Report meaningful updates briefly as part of the result; routine maintenance does not need another conversation or approval step.
@@ -9,7 +9,7 @@ Follow the knowledge base's page on maintaining it (docs/how-to/maintain-the-kno
 
 0. **Feature pages (docs/reference/features/):** bring the page of each feature you changed in line with what was built: what it does, its rules, where it lives in each product, what was checked and what was not.
    0b. **Design guide:** when the run added or changed something people see that others will repeat (a kind of button, a colour for a state, how a piece looks when it fails), write the rule in the product's design guide (the knowledge base's design page; in the core, docs/reference/design-system.md).
-1. **Conventions and lessons (docs/reference/conventions/, docs/reference/lessons/):** when the run set a better pattern for a kind of product, update its conventions page and its "example to copy"; add a trap you hit to the lessons for that kind, with the run number.
+1. **Conventions and lessons (docs/reference/conventions/, docs/reference/lessons/):** when the run set a better pattern for a kind of product, update its conventions page and its "example to copy"; add a trap you hit to the lessons for that kind, linking its run (`runs/issue-<card number>-…`).
 2. **Blueprint:** add a new promise (something that must stay true) to the product's `BLUEPRINT.md`, and fix any promise or structure line the build changed. If the build departed from it, say so and fix it, or note the difference under Open. No history in the blueprint. Keep the product's `product.json` true too (its users, commands and start page).
 3. **Decisions, reference, product:** a newly accepted choice gets a numbered MADR record in docs/decisions/, as the page on recording a decision says; changes to the products or the factory go to docs/reference/, how to run them to the how-to pages; approved product intent to docs/explanation/. Never edit docs/sources/: add a newly dated source instead.
 4. **One fact, one place, present tense.** Replace older text instead of adding to it; link the run instead of telling its story. Add a new page to its section's `index.md`.

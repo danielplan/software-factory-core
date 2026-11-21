@@ -36,7 +36,7 @@ explain at length. Link to the other kind instead.
 | A choice that was accepted, with the options and why                    | `decisions/NNNN-<choice>.md`                     |
 | Original material as it was given                                       | `sources/`, never edited; add a newly dated file |
 | What must stay true in one product (ask before changing it)             | that product's `BLUEPRINT.md`                    |
-| What happened in a piece of work, and when                              | a run, `runs/NNN-name.md`                        |
+| What happened in a piece of work, and when                              | a run, `runs/issue-N-name.md`                    |
 
 When a fact seems to belong in two places, put it in the more specific page
 and link to it from the other.
