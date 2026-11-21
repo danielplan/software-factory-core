@@ -9,6 +9,7 @@
 import { ExternalLink, MessageSquareHeart } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 
+import type { PersonaRow } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown";
 import {
@@ -20,9 +21,10 @@ import {
   useMine,
 } from "@/feedback/feedback-board";
 import { StatePill } from "@/feedback/feedback-row";
+import { type Read, useRead } from "@/lib/use-read";
 import { cn } from "@/lib/utils";
 
-import { CARD, TypeChip } from "./bits";
+import { CARD, FaceOf, TypeChip } from "./bits";
 
 export type FeedbackSignal = {
   id: string;
@@ -36,7 +38,75 @@ export type FeedbackSignal = {
   thumbs: number;
   // When it was sent or arrived, as in a signal (made up for the older ones).
   at: string;
+  // For a post arriving from the board: the persona it fits, matched by the
+  // kobold (with its reason) or picked by a person; null when nobody is sure.
+  persona: PersonaRow | null;
+  why: string | null;
+  pickedBy: "kobold" | "you" | null;
 };
+
+// PROTOTYPE: the kobold's matches, made up. Which persona (its id, or the
+// nth persona when the product has no such id) and why, in a few words.
+// #35 is the one it is not sure about.
+const MATCHES: Record<number, { id: string; nth: number; why: string }> = {
+  41: {
+    id: "bruno",
+    nth: 0,
+    why: "they lose a morning when something stops halfway and nobody says why",
+  },
+  38: {
+    id: "mia",
+    nth: 1,
+    why: "they want things done while they get on with the rest",
+  },
+  29: {
+    id: "noah",
+    nth: 2,
+    why: "they say what they think elsewhere, not in the app",
+  },
+};
+
+// A person's corrections, for the visit: a persona's id, or null for none.
+let corrected = new Map<number, string | null>();
+const correctionListeners = new Set<() => void>();
+
+export function correct(number: number, persona: string | null) {
+  corrected = new Map(corrected).set(number, persona);
+  for (const listener of correctionListeners) listener();
+}
+
+const subscribeCorrections = (listener: () => void) => {
+  correctionListeners.add(listener);
+  return () => correctionListeners.delete(listener);
+};
+
+export function usePersonas(): PersonaRow[] {
+  const { data } = useRead("/api/kobble/personas") as Read<{
+    personas: PersonaRow[];
+  }>;
+  return data?.personas ?? [];
+}
+
+function personaOf(
+  number: number,
+  personas: PersonaRow[],
+  fixes: Map<number, string | null>,
+): Pick<FeedbackSignal, "persona" | "why" | "pickedBy"> {
+  if (fixes.has(number)) {
+    const id = fixes.get(number);
+    const persona = personas.find((one) => one.id === id) ?? null;
+    return { persona, why: null, pickedBy: persona ? "you" : null };
+  }
+  const match = MATCHES[number];
+  const persona = match
+    ? (personas.find((one) => one.id === match.id) ??
+      personas[match.nth] ??
+      null)
+    : null;
+  return persona
+    ? { persona, why: match?.why ?? null, pickedBy: "kobold" }
+    : { persona: null, why: null, pickedBy: null };
+}
 
 // Made-up times for the posts nobody sent in this visit: hours ago.
 const LOADED = Date.now();
@@ -80,6 +150,8 @@ export function handle(id: string) {
 export function useFeedbackSignals(): FeedbackSignal[] {
   const mine = useMine();
   const done = useSyncExternalStore(subscribe, () => handled);
+  const fixes = useSyncExternalStore(subscribeCorrections, () => corrected);
+  const personas = usePersonas();
   const sent = mine.map((one): FeedbackSignal => ({
     id: `board-${String(one.number)}`,
     number: one.number,
@@ -90,6 +162,9 @@ export function useFeedbackSignals(): FeedbackSignal[] {
     who: "You",
     thumbs: ON_BOARD.find((there) => there.number === one.number)?.thumbs ?? 1,
     at: atOf(one.number, one.sent),
+    persona: null,
+    why: null,
+    pickedBy: null,
   }));
   const arriving = ON_BOARD.filter(
     (one) =>
@@ -105,8 +180,9 @@ export function useFeedbackSignals(): FeedbackSignal[] {
     who: SENDERS[one.number] ?? "A team",
     thumbs: one.thumbs,
     at: atOf(one.number),
+    ...personaOf(one.number, personas, fixes),
   }));
-  return [...arriving.slice(0, 3), ...sent];
+  return [...arriving.slice(0, 4), ...sent];
 }
 
 // The filter at the top: every signal, or only the feedback.
@@ -166,6 +242,32 @@ function BoardIcon({ size = 34 }: Readonly<{ size?: number }>) {
 const sourceLine = (one: FeedbackSignal) =>
   one.from === "you" ? "Sent to the feedback board" : "From the feedback board";
 
+// Its face: the board's icon for what this person sent; for a post from
+// the board, the persona it fits, or an empty tile.
+function FaceFor({
+  one,
+  size,
+}: Readonly<{ one: FeedbackSignal; size: number }>) {
+  if (one.from === "you") return <BoardIcon size={size} />;
+  if (one.persona)
+    return (
+      <span title={one.persona.name} className="flex-none">
+        <FaceOf face={one.persona.face} size={size} />
+      </span>
+    );
+  return (
+    <span
+      title="No persona yet"
+      style={{ width: size, height: size, borderRadius: size * 0.28 }}
+      className="flex-none border border-dashed border-border bg-surface"
+    />
+  );
+}
+
+// Its name in the list: the persona, or that there is none yet.
+const nameOf = (one: FeedbackSignal) =>
+  one.from === "you" ? one.who : (one.persona?.name ?? "No persona yet");
+
 // A feedback signal in the list.
 export function FeedbackItem({
   one,
@@ -181,10 +283,17 @@ export function FeedbackItem({
         picked && "bg-picked hover:bg-picked",
       )}
     >
-      <BoardIcon />
+      <FaceFor one={one} size={34} />
       <span className="grid min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="truncate font-semibold">{one.who}</span>
+          <span
+            className={cn(
+              "truncate font-semibold",
+              one.from === "board" && !one.persona && "text-muted-foreground",
+            )}
+          >
+            {nameOf(one)}
+          </span>
           <span className="ml-auto">
             <TypeChip type={typeOf(one.kind)} />
           </span>
@@ -224,13 +333,13 @@ export function FeedbackDetail({
       className={cn(CARD, "px-7 py-[26px] max-sm:px-5")}
     >
       <header className="flex items-center gap-2.5">
-        <BoardIcon size={36} />
+        <FaceFor one={one} size={36} />
         <span className="grid min-w-0 flex-1">
-          <span className="truncate font-semibold">{one.who}</span>
+          <span className="truncate font-semibold">{nameOf(one)}</span>
           <span className="text-[12.5px] text-muted-foreground">
             {one.from === "you"
               ? "Feedback board · sent by you"
-              : "Feedback board"}
+              : `Feedback board · ${one.who}`}
           </span>
         </span>
         <TypeChip type={typeOf(one.kind)} />
@@ -241,6 +350,7 @@ export function FeedbackDetail({
           👍 {one.thumbs} {one.thumbs === 1 ? "team wants" : "teams want"} this
         </p>
       </div>
+      {one.from === "board" && <PersonaLine one={one} />}
       <div className="mb-[22px] flex items-center gap-3">
         <span className="flex gap-1" aria-hidden>
           {STEPS.map((step, index) => (
@@ -292,5 +402,70 @@ export function FeedbackDetail({
       </div>
       <p className="mt-4 text-[11px] text-faint">Made up for this prototype.</p>
     </article>
+  );
+}
+
+// Who the kobold thinks sent it, and why; Change picks another persona,
+// Remove leaves it with none. With none, the personas to pick from.
+function PersonaLine({ one }: Readonly<{ one: FeedbackSignal }>) {
+  const personas = usePersonas();
+  const [picking, setPicking] = useState(false);
+  const link =
+    "text-[12.5px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline";
+  const said = one.persona
+    ? one.pickedBy === "kobold"
+      ? `Sprocket thinks this is ${one.persona.name}: ${one.why ?? ""}.`
+      : `You said this is ${one.persona.name}.`
+    : "Sprocket isn't sure who this is.";
+  const open = picking || !one.persona;
+  return (
+    <div className="mb-[22px] rounded-[12px] bg-surface px-3.5 py-2.5">
+      <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] text-foreground-2">
+        <span className="min-w-0">{said}</span>
+        {one.persona && (
+          <span className="ml-auto flex gap-3">
+            <button
+              type="button"
+              className={link}
+              onClick={() => {
+                setPicking(!picking);
+              }}
+            >
+              Change
+            </button>
+            <button
+              type="button"
+              className={link}
+              onClick={() => {
+                correct(one.number, null);
+                setPicking(false);
+              }}
+            >
+              Remove
+            </button>
+          </span>
+        )}
+      </p>
+      {open && personas.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {personas
+            .filter((persona) => persona.id !== one.persona?.id)
+            .map((persona) => (
+              <button
+                key={persona.id}
+                type="button"
+                onClick={() => {
+                  correct(one.number, persona.id);
+                  setPicking(false);
+                }}
+                className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-card pr-3 pl-1 text-[12.5px] hover:bg-surface-2"
+              >
+                <FaceOf face={persona.face} size={20} />
+                {persona.name}
+              </button>
+            ))}
+        </div>
+      )}
+    </div>
   );
 }
