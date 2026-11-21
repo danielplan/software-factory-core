@@ -3,7 +3,6 @@
 // on its way when GitHub says so. Each release opens and closes; each
 // change has its tag, its bold title, the first sentence and More.
 
-import { compareVersions } from "@software-factory/core";
 import { ChevronDown, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -18,6 +17,7 @@ import { messagesIn } from "@/i18n/messages";
 import { useLanguage } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
+import { compareVersions } from "../../../core/src/version.ts";
 import type { WhatsNewView } from "../../../server/src/updates/whats-new.ts";
 import { ago, shownChange, showsNewer } from "./whats-new-model";
 

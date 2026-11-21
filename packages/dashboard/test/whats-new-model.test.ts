@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { compareVersions } from "@software-factory/core";
+import { compareVersions } from "../../core/src/version.ts";
 
 import { messagesIn } from "../src/i18n/messages.ts";
 import {
@@ -55,7 +55,7 @@ test("a time is said as a distance from now, in the language", () => {
 
 test("the words are the same keys in every language, and say nothing to do", () => {
   const keys = (locale: "en" | "it" | "de") =>
-    Object.keys(messagesIn(locale).whatsNew).sort();
+    Object.keys(messagesIn(locale).whatsNew).sort((a, b) => a.localeCompare(b));
   assert.deepEqual(keys("it"), keys("en"));
   assert.deepEqual(keys("de"), keys("en"));
   assert.equal(

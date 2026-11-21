@@ -83,8 +83,16 @@ export class KobbleReleases {
 
   // Whether GitHub could not be reached the last time it was asked, and
   // when that was (an ISO time; null before the first look).
-  status(): { offline: boolean; checkedAt: string | null } {
-    return { offline: this.offline, checkedAt: this.checkedAt };
+  status(): {
+    newest: string | null;
+    offline: boolean;
+    checkedAt: string | null;
+  } {
+    return {
+      newest: this.newest,
+      offline: this.offline,
+      checkedAt: this.checkedAt,
+    };
   }
 
   async look(): Promise<void> {

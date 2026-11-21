@@ -233,9 +233,11 @@ test("what's new adds the newer release from GitHub, in the language, once", asy
   await call("POST /api/updates/look");
   const view = await call("GET /api/updates/whats-new", "?language=it");
   assert.equal(view.offline, false);
-  assert.equal(view.newest?.version, "0.12.0");
-  assert.equal(view.newest?.release?.changes[0]?.title, "Sparito.");
+  const { newest } = view;
+  assert.ok(newest);
+  assert.equal(newest.version, "0.12.0");
+  assert.equal(newest.release?.changes.at(0)?.title, "Sparito.");
   const german = await call("GET /api/updates/whats-new", "?language=de");
-  assert.equal(german.newest?.release?.changes[0]?.title, "Gone.");
+  assert.equal(german.newest?.release?.changes.at(0)?.title, "Gone.");
   assert.equal(asked(), 1);
 });

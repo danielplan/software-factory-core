@@ -24,7 +24,7 @@ import {
   upgradeBody,
   upgradeTitle,
 } from "./kobble-release.ts";
-import { WhatsNew, type WhatsNewFiles } from "./whats-new.ts";
+import { WhatsNew, type WhatsNewOptions } from "./whats-new.ts";
 import {
   type AfterUpdate,
   type Git,
@@ -46,12 +46,8 @@ export type UpdatesOptions = {
   // The factory starting again on the Kobble now installed; none where the
   // factory cannot.
   restartFactory?: () => Promise<void>;
-  releases: {
-    current: string;
+  releases: WhatsNewOptions & {
     tags: () => Promise<string[] | null>;
-    // What's new: this computer's files, and a newer release's from GitHub.
-    local: () => WhatsNewFiles;
-    files: (version: string) => Promise<WhatsNewFiles | null>;
     cards: () => {
       number: number;
       title: string;
@@ -90,9 +86,9 @@ export function afterUpdate(
   };
 }
 
-export function servedUpdates(options: UpdatesOptions) {
-  const factory = join(options.project, FACTORY_FOLDER);
-  const updates = new ProjectUpdates({
+// The folder following GitHub's main, with the switch kept in the factory.
+function projectUpdates(options: UpdatesOptions, factory: string) {
+  return new ProjectUpdates({
     root: options.project,
     choice: {
       read: () => hasFactory(factory) && updatesByItself(factory),
@@ -103,6 +99,11 @@ export function servedUpdates(options: UpdatesOptions) {
     after: afterUpdate(options),
     ...(options.git ? { git: options.git } : {}),
   });
+}
+
+export function servedUpdates(options: UpdatesOptions) {
+  const factory = join(options.project, FACTORY_FOLDER);
+  const updates = projectUpdates(options, factory);
   const releases = new KobbleReleases({
     ...options.releases,
     onChange: options.onChange,
@@ -110,11 +111,7 @@ export function servedUpdates(options: UpdatesOptions) {
   updates.subscribe(() => {
     options.onChange();
   });
-  const whatsNew = new WhatsNew({
-    current: options.releases.current,
-    local: options.releases.local,
-    files: options.releases.files,
-  });
+  const whatsNew = new WhatsNew(options.releases);
   const view = (): UpdatesView => ({
     ...updates.state,
     release: releases.view(),
@@ -124,10 +121,10 @@ export function servedUpdates(options: UpdatesOptions) {
     "GET /api/updates": view,
     // What each Kobble release changed, in the page's language.
     "GET /api/updates/whats-new": (_body, url) =>
-      whatsNew.view(url.searchParams.get("language") ?? "en", {
-        newest: releases.view().newest,
-        ...releases.status(),
-      }),
+      whatsNew.view(
+        url.searchParams.get("language") ?? "en",
+        releases.status(),
+      ),
     "POST /api/updates/look": async () => {
       await Promise.all([updates.look(), releases.look()]);
     },

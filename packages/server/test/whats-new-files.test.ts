@@ -41,11 +41,10 @@ test("a release's files come from GitHub, or null when it cannot be reached", as
       en: "words of release-0.12.0",
       it: "words of release-0.12.0",
     });
-    globalThis.fetch = (() =>
-      Promise.reject(new Error("offline"))) as typeof fetch;
+    globalThis.fetch = () => Promise.reject(new Error("offline"));
     assert.equal(await remoteWhatsNew("0.12.0"), null);
-    globalThis.fetch = (() =>
-      Promise.resolve(new Response("x", { status: 500 }))) as typeof fetch;
+    globalThis.fetch = () =>
+      Promise.resolve(new Response("x", { status: 500 }));
     assert.equal(await remoteWhatsNew("0.12.0"), null);
   } finally {
     globalThis.fetch = real;

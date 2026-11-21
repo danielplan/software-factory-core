@@ -37,19 +37,17 @@ export type WhatsNewView = {
 // repository's root; found by walking up from where the server is.
 export function localWhatsNew(from: string): WhatsNewFiles {
   let folder = from;
-  for (;;) {
-    if (existsSync(join(folder, whatsNewFile("en")))) {
-      const files: WhatsNewFiles = {};
-      for (const language of WHATS_NEW_LANGUAGES) {
-        const path = join(folder, whatsNewFile(language));
-        if (existsSync(path)) files[language] = readFileSync(path, "utf8");
-      }
-      return files;
-    }
+  while (!existsSync(join(folder, whatsNewFile("en")))) {
     const up = dirname(folder);
     if (up === folder) return {};
     folder = up;
   }
+  const files: WhatsNewFiles = {};
+  for (const language of WHATS_NEW_LANGUAGES) {
+    const path = join(folder, whatsNewFile(language));
+    if (existsSync(path)) files[language] = readFileSync(path, "utf8");
+  }
+  return files;
 }
 
 // The files of a release on GitHub, at its tag; null when they cannot be

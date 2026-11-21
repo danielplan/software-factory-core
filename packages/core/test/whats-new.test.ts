@@ -23,16 +23,19 @@ Not a change line either.
 `;
 
 test("a file becomes releases with their changes", () => {
-  const [one, two] = parseWhatsNew(EN);
-  assert.equal(one?.version, "0.13.2");
-  assert.equal(one?.date, "2026-11-21");
-  assert.deepEqual(one?.changes[0], {
+  const releases = parseWhatsNew(EN);
+  const one = releases.at(0);
+  const two = releases.at(1);
+  assert.ok(one);
+  assert.equal(one.version, "0.13.2");
+  assert.equal(one.date, "2026-11-21");
+  assert.deepEqual(one.changes[0], {
     kind: "New",
     title: "Send feedback.",
     text: "Say it in one window, with a [link](https://x.y) and `code`.",
   });
-  assert.equal(one?.changes[1]?.kind, "Fixed");
-  assert.equal(one?.changes.length, 2);
+  assert.equal(one.changes.at(1)?.kind, "Fixed");
+  assert.equal(one.changes.length, 2);
   assert.deepEqual(two, {
     version: "0.13.1",
     date: null,
