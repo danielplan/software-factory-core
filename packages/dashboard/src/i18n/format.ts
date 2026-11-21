@@ -19,3 +19,12 @@ export function momentIn(locale: Locale, iso: string): string {
     minute: "2-digit",
   });
 }
+
+// A day, as people in the language shown write it.
+export function dayIn(locale: Locale, iso: string): string {
+  return new Date(iso).toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}

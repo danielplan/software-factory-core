@@ -37,6 +37,13 @@ row is `--picked`; the current page in the sidebar `--wash` with
 its type a tinted pill (`--type-bug`, `--type-request`, `--type-feedback`);
 "Found in usage" is `--usage`.
 
+A page that makes something with one click (Releases) puts the button at the
+top right of its box, beside the title, with what it makes in its label
+("Release 1.4.3"); while it works the button shows its spinner and cannot be
+pressed again, and when there is nothing to make it is greyed out with the
+reason beside it. A number the kobold suggests shows its reason next to it, in
+grey, and a small **Change** link turns it into a field.
+
 A page with several sections that do not belong together (Settings) shows
 them as tabs at the side, one at a time, each at its own address
 (`#settings/updates`); on a phone the tabs wrap above it. The chosen tab is

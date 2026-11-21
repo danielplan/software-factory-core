@@ -35,6 +35,7 @@ export type {
   TestPage,
 } from "../../server/src/kobble/views.ts";
 export type { PersonaTest } from "../../core/src/index.ts";
+export type { ReleasesView } from "../../server/src/releases/routes.ts";
 export type { FeedbackView } from "../../server/src/feedback/routes.ts";
 export type {
   Kind as FeedbackKind,

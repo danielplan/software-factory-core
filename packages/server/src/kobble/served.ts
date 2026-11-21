@@ -14,7 +14,8 @@ import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
-import { connectedCards, servedKobble } from "./routes.ts";
+import { connectedCards, servedKobble, tellerOf } from "./routes.ts";
+import { releasesRoutes } from "../releases/routes.ts";
 import { storeOf } from "./usage-routes.ts";
 import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
@@ -70,6 +71,12 @@ export function kobbleOf(
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
       ...feedback.routes,
+      ...releasesRoutes({
+        project: session.options.project,
+        cli: more.cli,
+        claude: session.options.coach.claude,
+        changed: tellerOf(tell),
+      }),
       ...factoryCardRoutes(
         join(session.options.project, FACTORY_FOLDER),
         more.cli,

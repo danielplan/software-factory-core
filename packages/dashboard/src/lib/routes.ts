@@ -11,6 +11,7 @@ export const PAGES = [
   "signals",
   "explore",
   "build",
+  "releases",
   "personas",
   "settings",
 ] as const;

@@ -6,6 +6,7 @@ import {
   Menu,
   Settings,
   Columns3,
+  Tag,
   Users,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -33,7 +34,7 @@ import { type Item, PageLink, ProductState } from "./sidebar-links";
 
 // Home and System at the top (System with the product's light, or Open when
 // it runs), then the pages in labelled groups: the work, from what came in
-// to what is built (Signals, Explorations, the Factory board), then the
+// to what is built (Signals, Explorations, the Factory board, Releases), then the
 // customers (the personas). Explorations is still the page "explore" and
 // the Factory board the page "build". At the bottom, updates when they need
 // the owner (UpdateRow), and Settings.
@@ -67,6 +68,11 @@ const GROUPS: { label: "work" | "customers"; items: Item[] }[] = [
       {
         page: "build",
         icon: <Columns3 aria-hidden />,
+        color: "var(--build)",
+      },
+      {
+        page: "releases",
+        icon: <Tag aria-hidden />,
         color: "var(--build)",
       },
     ],
