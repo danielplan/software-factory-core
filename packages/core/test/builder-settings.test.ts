@@ -28,8 +28,9 @@ test("cards at once: from the file, kept between 1 and 5, else 1", () => {
   assert.equal(parallelCards(root("FACTORY_PARALLEL_CARDS=zero\n")), 1);
 });
 
-test("the builder's model: the file's, or none", () => {
-  assert.equal(builderModel(null), undefined);
+test("the builder's model: the file's, Sonnet when it says nothing, none for talking's", () => {
+  assert.equal(builderModel(null), "sonnet");
+  assert.equal(builderModel(root("")), "sonnet");
   assert.equal(builderModel(root("FACTORY_BUILDER_MODEL=sonnet\n")), "sonnet");
   assert.equal(builderModel(root("FACTORY_BUILDER_MODEL=\n")), undefined);
 });

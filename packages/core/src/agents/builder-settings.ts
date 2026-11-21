@@ -1,6 +1,6 @@
 // The builder's own settings, in the factory's Settings tab: how many cards
-// each lane works on at once, and the model the builder uses (empty: the
-// factory's Claude model). Read again for each job, so a change counts from
+// each lane works on at once, and the model the builder uses (Sonnet unless
+// the team picks another, or none for the model for talking). Read again for each job, so a change counts from
 // the next one. The same for the whole team, so they are kept in the
 // factory's team.env, which git shares (team-file.ts).
 
@@ -11,6 +11,10 @@ import { MODEL_CHOICES } from "./model-setting.ts";
 export const PARALLEL_KEY = "FACTORY_PARALLEL_CARDS";
 export const BUILDER_MODEL_KEY = "FACTORY_BUILDER_MODEL";
 const MOST_CARDS = 5;
+// Most of a card's time goes to checks and looking at the result; Sonnet
+// writes the code about twice as fast as Opus, and the checks catch what it
+// gets wrong.
+const BUILDER_DEFAULT = "sonnet";
 
 export const builderSettings: SettingGroup = {
   id: "builder",
@@ -32,9 +36,9 @@ export const builderSettings: SettingGroup = {
     {
       key: BUILDER_MODEL_KEY,
       label: "Builder's model",
-      help: "The model for building and fixing cards, the work that reaches the product.",
+      help: "The model for building and fixing cards, the work that reaches the product. Sonnet builds about twice as fast as Opus; the checks catch what it gets wrong.",
       kind: "choice",
-      default: "",
+      default: BUILDER_DEFAULT,
       choices: [
         { value: "", label: "As for talking (AI models)" },
         ...MODEL_CHOICES,
@@ -52,9 +56,11 @@ export function parallelCards(root: string | null): number {
     : 1;
 }
 
-// The builder's model; none means the factory's own choice.
+// The builder's model: Sonnet unless the team picked another; none (the
+// model for talking) when the team picked "As for talking".
 export function builderModel(root: string | null): string | undefined {
-  if (!root) return undefined;
+  if (!root) return BUILDER_DEFAULT;
   const value = readGroup(builderSettings, root)[BUILDER_MODEL_KEY];
-  return value?.trim() || undefined;
+  if (value === undefined) return BUILDER_DEFAULT;
+  return value.trim() || undefined;
 }

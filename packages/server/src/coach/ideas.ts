@@ -159,6 +159,7 @@ export class Ideas {
   async say(id: string, text: string, spokenIn?: string): Promise<void> {
     const idea = this.idea(id);
     const said = idea.talk.heard(text);
+    if (said === null) return;
     await idea.talk.answer(said, spokenIn?.trim().slice(0, 40), {
       ...RIGHTS,
       instructions: inLanguage(this.options.guide),

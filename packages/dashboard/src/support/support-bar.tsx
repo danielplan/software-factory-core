@@ -4,10 +4,11 @@
 // project, and adds the personas and explorations people describe to it
 // (server kobble/support.ts); New persona and New exploration open it.
 
-import { ArrowUp, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { messageOf, post } from "@/api";
+import { ChatSend } from "@/components/chat-send";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
@@ -192,7 +193,7 @@ function Ask({
   const [text, setText] = useState("");
   const send = () => {
     const said = text.trim();
-    if (!said || busy) return;
+    if (!said) return;
     setText("");
     onRefused(null);
     post("/api/kobble/support", { text: said, page }).catch(
@@ -226,14 +227,16 @@ function Ask({
         }}
         className="max-h-32 min-h-8 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-[13px] outline-none placeholder:text-muted-foreground"
       />
-      <Button
-        type="submit"
+      <ChatSend
+        busy={busy}
+        typed={text.trim() !== ""}
+        onStop={() => {
+          post("/api/kobble/support/stop", {}).catch((error: unknown) => {
+            onRefused(messageOf(error));
+          });
+        }}
         size="icon-sm"
-        aria-label={t.support.send}
-        disabled={busy || !text.trim()}
-      >
-        <ArrowUp aria-hidden className="size-4" />
-      </Button>
+      />
     </form>
   );
 }

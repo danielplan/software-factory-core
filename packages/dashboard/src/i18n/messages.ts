@@ -17,6 +17,7 @@ import { system } from "./areas/system.ts";
 import { updates } from "./areas/updates.ts";
 import { words } from "./areas/words.ts";
 import { builder } from "./areas/builder.ts";
+import { chat } from "./areas/chat.ts";
 
 const AREAS = {
   shell,
@@ -32,6 +33,7 @@ const AREAS = {
   builder,
   connect,
   support,
+  chat,
   setup,
   voice,
 };

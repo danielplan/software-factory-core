@@ -13,7 +13,7 @@ Build the checks in the run's check plan. For a new feature, start with the jour
 
 1. **Find how tests run.** Look in the product for its existing test setup and its full check (the `verify` command in its `product.json`). If there is none, use the tool agreed in `plan`; return there if a material tool choice is still open.
 2. **Write one failing test** for the first thing the request needs. Run it and see it fail for the right reason (the feature is missing, not a typo). Commit the test.
-3. **Write the least code that makes it pass.** Run the test. Run the whole suite.
+3. **Write the least code that makes it pass.** Run the test, then the tests near what you changed and the type check. Run the full check (the product's `verify`) once, when the agreed scope is built, not after every slice: it is the slowest step.
 4. **Commit** with a message that says what changed and why.
 5. **Repeat** for the next check until everything in the run file's "Plan and checks" passes.
 
