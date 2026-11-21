@@ -22,6 +22,7 @@ import { ConnectedBoard } from "@/connect/connected-board";
 import { cn } from "@/lib/utils";
 
 import { DesktopStart, UpdatesCard } from "@/updates/updates-card";
+import { WhatsNew } from "@/updates/whats-new";
 
 import { useT } from "@/i18n/use-t";
 import type { Messages } from "@/i18n/messages";
@@ -53,7 +54,7 @@ export function SettingsTab({
   open,
 }: Readonly<{ state: FactoryState; open: string | null }>) {
   const t = useT();
-  const tabs = tabsOf(sectionsOf(state, t.settings));
+  const tabs = tabsOf(sectionsOf(state, t.settings, t.whatsNew.about));
   const shown = shownTab(tabs, open);
   return (
     <div className="grid gap-5">
@@ -148,6 +149,7 @@ type SettingsSection = { name: string; tab: SettingsTabName; body: ReactNode };
 function sectionsOf(
   state: FactoryState,
   t: Messages["settings"],
+  whatsNewAbout: string,
 ): SettingsSection[] {
   const n = t.sections;
   const owned = new Set(state.addOns.flatMap((addOn) => addOn.settings));
@@ -169,6 +171,13 @@ function sectionsOf(
       "Updates",
       <Topic title={n.updates} about={t.updatesAbout}>
         <UpdatesCard />
+      </Topic>,
+    ),
+    section(
+      n.whatsNew,
+      "Updates",
+      <Topic title={n.whatsNew} about={whatsNewAbout}>
+        <WhatsNew />
       </Topic>,
     ),
     section(

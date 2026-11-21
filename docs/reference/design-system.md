@@ -172,6 +172,21 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 | `--shadow-panel`   | the kobold's card                              |
 | `--shadow-big`     | a dialog or a panel over the page              |
 
+## Motion
+
+Motion helps a person see what changed; it never makes them wait.
+
+- **Quick and gentle:** 150–250 ms, an ease-out curve. Nothing bounces or
+  loops without a reason.
+- **What may move:** something opening or closing (a release in Settings ›
+  Updates, a **More**), something coming in (changes fading in one after
+  another, 40 ms apart, the first eight), a spinner while the product works
+  (**Try again** while it checks), and a soft light on something that happens
+  by itself ("Arriving by itself").
+- **Nothing moves under `prefers-reduced-motion`:** `index.css` turns every
+  animation off and shortens every transition, so each piece must read well
+  standing still.
+
 ## Pieces
 
 - **Buttons** (`packages/dashboard/src/components/ui/button.tsx`): `default` is dark, `outline` white
