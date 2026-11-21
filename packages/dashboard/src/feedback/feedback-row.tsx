@@ -3,7 +3,7 @@
 // notice above it that offers to report it with the details filled in. What
 // was sent shows on the Signals page, under Feedback.
 
-import { MessageSquareHeart, TriangleAlert, X } from "lucide-react";
+import { Flag, MessageSquareHeart, TriangleAlert, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tile } from "@/components/sidebar-links";
@@ -85,6 +85,7 @@ function ErrorNotice({
         className="mt-0.5 h-7"
         onClick={onReport}
       >
+        <Flag aria-hidden />
         {t.report}
       </Button>
     </div>

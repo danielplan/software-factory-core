@@ -6,7 +6,7 @@
 // the live app was last read, with Sync now. On a phone the list and the
 // picked signal are two screens, with a link back to the list.
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FlaskConical, Wrench, X } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
@@ -231,6 +231,9 @@ function SignalDetail({
         act(what);
       }}
     >
+      {what === "fix" && <Wrench aria-hidden />}
+      {what === "explore" && <FlaskConical aria-hidden />}
+      {what === "dismiss" && <X aria-hidden />}
       {words}
     </Button>
   );

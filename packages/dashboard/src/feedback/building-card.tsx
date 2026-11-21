@@ -3,7 +3,14 @@
 // it can be taken out). When the draft is ready the title can be changed,
 // each part removed, and the post sent with the person's GitHub sign-in.
 
-import { Bug, CircleUserRound, Lightbulb, RotateCcw, X } from "lucide-react";
+import {
+  Bug,
+  CircleUserRound,
+  Lightbulb,
+  RotateCcw,
+  Send,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useT } from "@/i18n/use-t";
@@ -180,6 +187,7 @@ function SendBar({
           withSignIn(sendDraft);
         }}
       >
+        <Send aria-hidden />
         Send
       </Button>
     </div>
