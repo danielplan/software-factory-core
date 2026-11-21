@@ -19,6 +19,9 @@ patches.
   setup. The changelog says what to do.
 - **1.0.0**: when a company runs its factory without us helping.
 
+The products a factory builds follow the same rule, with the first number
+too: see [releases of the products](architecture.md#releases-of-the-products).
+
 A batch of features is not a reason for a minor. The changelog keeps the
 overview with its plain headings, not with the number.
 

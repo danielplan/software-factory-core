@@ -314,6 +314,45 @@ changes or removes the match. On the Signals page, feedback is part of the one
 list, with a Feedback filter, a "Feedback board" source label and the state of
 the post.
 
+## Releases of the products
+
+The **Releases** page turns everything merged so far into a numbered release
+of the product, in one click. A release is GitHub's own: a tag `v<x.y.z>` on
+the main branch's latest commit and a GitHub release on it with the notes, so
+nothing is stored in the factory's files and past releases are read back from
+GitHub. It needs a connected GitHub repository (the page says so otherwise,
+with a link to Settings) whose account may create tags and releases. It is one
+release for the whole repository.
+
+The server side is `packages/server/src/releases/`: `GET /api/releases` (the
+coming release: the pull requests merged since the last tag, the suggested
+number and why, and the past releases) and `POST /api/releases` (a number: tag
+and release; answered only from the factory's page, and it sends a change event
+so the page reads again). It reads GitHub through the GitHub CLI
+(`github-releases.ts`).
+
+- **The last release** is the highest `vX.Y.Z` tag; tags of other shapes are
+  ignored. A pull request is merged since then when its merge commit is among
+  the commits `compare/v<last>...<main>` lists.
+- **The number** follows [the rule the core uses for itself](releasing.md#which-number-to-raise)
+  (`numbers.ts`): the last number goes up, the middle one only when people have
+  to do something or something they relied on changes or goes away, the first
+  one never by itself. The kobold gives that yes or no and the reason line from
+  the merged titles and descriptions (`judge.ts`); when it cannot, the last
+  number is suggested without a reason. The first release is `0.1.0`. The team
+  can change the number: it must be `x.y.z`, higher than the last, and not a
+  tag that exists; the server refuses anything else, before tagging.
+- **The notes** (`notes.ts`) are written from the merged pull requests, grouped
+  by each card's type label (never by the title), each entry linking its pull
+  request. The reason is kept in them as a hidden comment, so past releases show
+  it. The card's type comes from the pull request's label, else from the card
+  whose number is in the branch name `factory/issue-<n>`.
+- With nothing merged since the last release, **Release now** is greyed out and
+  the server refuses too.
+
+What is not checked: the kobold's judgement on real merged work, and a real
+release on a team's repository.
+
 ## Extension points
 
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of

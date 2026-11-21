@@ -40,3 +40,5 @@ done: server, page, words (en, it, de), changelog. Not checked: the kobold's jud
 
 ![The coming release and past releases](issue-22-releases/ready.png)
 ![Changing the number, with a wrong one](issue-22-releases/change-invalid.png)
+
+Knowledge base: `docs/architecture.md` (new section "Releases of the products"), `docs/reference/design-system.md` (the one-click button and the suggested number) and `docs/releasing.md` (a pointer) say what was built.
