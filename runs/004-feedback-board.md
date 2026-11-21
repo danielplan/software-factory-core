@@ -50,3 +50,28 @@ Not done, said plainly: the board repository does not exist yet (the makers
 create `<owner>/software-factory-feedback` with the labels `bug`, `wish`,
 `seen`, `planned`); a send before then says so in the card. Sprocket's
 thinking is still the script, not a model.
+
+## Click-through (change 10)
+
+Run in a browser against the real server (the example company, GitHub
+stood in only for the final Send, so nothing reached the real board):
+
+- Nothing opens by itself; "Ask Sprocket anything" and "Send feedback" open
+  the window, which is only as tall as what it shows (165 px at first), and
+  grows with the conversation. Escape closes it; it opens again with the
+  opening.
+- "I wish Kobble could…" → typed wish → quick reply → the card fills in
+  live (title, text, version, page) → Send → "Sent as #91" → Start over →
+  the opening again.
+
+![The draft, ready to send](runs/004-feedback-board/draft.png)
+![After Send](runs/004-feedback-board/sent.png)
+
+Found and fixed: after Send, the status card at the top disappeared until the
+board listed the post again; the server now keeps the post as sent and shows
+it meanwhile.
+
+Not clicked: "Something is wrong" and "Ask a question" paths, "Report this
+error" and removing team data in the browser (covered by unit tests for the
+draft only), the signed-out sign-in with its one-time code, and a real send
+to GitHub (the board does not exist yet).

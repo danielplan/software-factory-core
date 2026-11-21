@@ -106,7 +106,8 @@ function boardRoutes(
     "GET /api/feedback": async (): Promise<FeedbackView> => {
       const [login, posts] = await Promise.all([board.login(), board.posts()]);
       const mine = board.sent().flatMap((one) => {
-        const post = posts.find((there) => there.number === one.number);
+        const post =
+          posts.find((there) => there.number === one.number) ?? one.post;
         return post ? [{ ...post, own: one.own }] : [];
       });
       return {

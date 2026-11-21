@@ -186,7 +186,7 @@ test("sending puts a post on the board and remembers it, then follows it", async
     mine: { number: number; own: boolean }[];
   };
   assert.equal(view.login, "me");
-  // Only what the board still has is shown: #90 (read back), not #7.
+  // What it sent shows, with a 👍 on a post the board does not list left out.
   assert.deepEqual(
     view.mine.map((one) => [one.number, one.own]),
     [[90, true]],

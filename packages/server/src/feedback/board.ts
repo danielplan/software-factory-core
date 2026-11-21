@@ -35,7 +35,8 @@ export type Post = {
 };
 
 // What this person sent, or gave a 👍 to, and when.
-export type Sent = { number: number; at: string; own: boolean };
+// With the post as it was then, shown until the board lists it again.
+export type Sent = { number: number; at: string; own: boolean; post?: Post };
 
 // The board's repository for a core's release source.
 export function boardOf(source: string): string {
@@ -160,7 +161,7 @@ export class FeedbackBoard {
     ]);
     if (ran.code !== 0) throw new Refused(problemOf(ran.err));
     const post = postOf(JSON.parse(ran.out) as Issue);
-    this.remember({ number: post.number, at: post.at, own: true });
+    this.remember({ number: post.number, at: post.at, own: true, post });
     this.read = null;
     return post;
   }
