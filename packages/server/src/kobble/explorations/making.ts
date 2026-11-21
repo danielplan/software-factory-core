@@ -36,7 +36,7 @@ type MakeOn = {
   board: Board;
   made: Made;
   change: string | undefined;
-  mark: (now: { opens?: string }) => void;
+  mark: (now: { opens?: string; states?: string[] }) => void;
   look: () => Promise<Looks>;
 };
 
@@ -86,6 +86,9 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
     looked: () => desk.hasLooked(exploration.id, key),
     opens: (page) => {
       on.mark({ opens: page });
+    },
+    states: (states) => {
+      on.mark({ states });
     },
   });
   desk.done(exploration.id, key);

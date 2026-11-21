@@ -92,6 +92,8 @@ export const exploreGerman: ExploreWords = {
     recommended: "Empfohlen",
     recommendsThis: "Der Kobold empfiehlt diese",
     variants: "Varianten",
+    states: "Zustände",
+    usualState: "normal",
     beingMade: "Wird gebaut, live:",
     atWork: "der Kobold ist bei der Arbeit",
     stillMade:

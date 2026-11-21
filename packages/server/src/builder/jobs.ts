@@ -136,10 +136,10 @@ export class Jobs {
       session: (earlier) =>
         this.agent(card, at, buildPrompt(card, earlier, at.name), onActivity),
       head: async () => headOf((await at.build()).path),
-      progress: (n, text) =>
+      progress: (n, of, text) =>
         this.say(
           card.number,
-          `Session ${String(n)} done:\n\n${text}`,
+          `Session ${String(n)} of ${String(of)} done:\n\n${text}`,
           "progress",
         ),
     });
@@ -308,6 +308,7 @@ export class Jobs {
       copy: (await at.build()).path,
       available: this.options.available,
       base: await this.options.pullRequests.baseBranch(),
+      card: card.number,
       ...(this.options.shell ? { shell: this.options.shell } : {}),
       onActivity,
       fix: (report, round) =>

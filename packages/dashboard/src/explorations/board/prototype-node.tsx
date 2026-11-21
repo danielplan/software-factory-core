@@ -18,6 +18,7 @@ import { Markdown } from "@/components/markdown";
 import { Frame, useBoardDo } from "./frame";
 import { Making, MakingLine } from "./prototype-making";
 import { Starting } from "./prototype-starting";
+import { States } from "./prototype-states";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 import { useT } from "@/i18n/use-t";
@@ -106,11 +107,14 @@ type Made = Extract<ThingNode["data"]["thing"], { kind: "prototype" }>;
 
 // Where the prototype shows: on the page the change is on, with the variant
 // picked (?variant=), chosen outside the app.
-function shownUrl(url: string, opens: string | undefined, variant: string) {
+function shownUrl(url: string, opens: string | undefined, picked: Picked) {
   const address = new URL(opens ?? "", url);
-  if (variant) address.searchParams.set("variant", variant);
+  if (picked.variant) address.searchParams.set("variant", picked.variant);
+  if (picked.state) address.searchParams.set("state", picked.state);
   return address.toString();
 }
+
+type Picked = { variant: string; state: string };
 
 // A prototype's variants (none when it is one way only) and the one shown:
 // the one picked here, at once, else the one the board keeps.
@@ -156,9 +160,9 @@ function Shown({
 function shownOf(
   run: VersionRun | undefined,
   opens: string | undefined,
-  variant: string,
+  picked: Picked,
 ): VersionRun | undefined {
-  return run?.url ? { ...run, url: shownUrl(run.url, opens, variant) } : run;
+  return run?.url ? { ...run, url: shownUrl(run.url, opens, picked) } : run;
 }
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
@@ -166,11 +170,12 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   const [picked, pick] = useState<string | null>(null);
+  const [state, setState] = useState("");
   if (thing.kind !== "prototype") return null;
   const { variants, variant } = variantsOf(thing, picked);
   const run = page.runs.find((one) => one.version === thing.key);
   const open = ["waiting", "exploring"].includes(page.exploration.status);
-  const shownRun = shownOf(run, thing.opens, variant);
+  const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);
   return (
     <Frame
@@ -189,6 +194,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
           }}
         />
       )}
+      <States states={thing.states ?? []} shown={state} onPick={setState} />
       <Shown
         run={run}
         shown={shownRun}
