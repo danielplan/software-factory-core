@@ -21,6 +21,9 @@ same: the [factory](SKILL.md) skill and the skills it routes to.
 - Your turn is the whole job: when it ends, the factory reads your last line,
   and nothing you started keeps running. Run long checks in the foreground
   and wait for them; never end with "I'll do it when this finishes".
+- A command that runs past its time limit is stuck, not slow: stop it and
+  find out why (a server left running, a test waiting for input) instead of
+  running it again or leaving it in the background.
 - Helpers (subagents) run in the foreground only. To split a large job,
   start several helpers in one message (they still work at the same time)
   and write your answer only after every one has reported back.
@@ -76,8 +79,19 @@ own working copy; it has its own settings files, made from the examples.
   the run file first and continue from it.
 - Commit as you go (`git commit` only); leave nothing uncommitted.
 - Install packages where they are missing before running anything.
+- Check lightly while you build, fully once. While building, run the tests
+  for what you changed and the type check; run the product's full verify
+  command (its `product.json`) once, when the scope is built. The factory
+  runs it again before the pull request, so never run it twice for the same
+  code, and in a round of fixing run only the check that failed.
 - Screenshots: save them in the run's folder, commit them, and show them as
   `![what it shows](path/in/the/repository.png)`; the factory links them.
+  To take them, start the product with its own start command (its
+  `product.json`, or its kit's) on your copy's ports, open it with the
+  browser tools you have (the Playwright MCP), and stop what you started.
+  Never search for a browser program or write your own browser scripts; if
+  the browser tools are missing or the product does not start within a
+  minute or two, say what you could not look at and carry on.
 - Stop only for a real problem, one that only the owner can solve: an
   account, a credential, a purchase, a decision that changes scope, data or
   what people see in a way the plan did not cover, or something in the plan
@@ -141,7 +155,8 @@ fails, and the card waits for the owner:
 - Every red check is yours to fix, also one that already failed before your
   change: a broken or out-of-date test is fixed like any other code.
 - Fix the cause. Never loosen a check, skip a test or lower a threshold.
-- Run the checks again yourself, and say what you changed. `STATUS: done`.
+- Run the checks that failed again yourself (the factory then runs them
+  all), and say what you changed. `STATUS: done`.
 - Only when a check cannot pass in code (it needs an account, a setting only
   the owner has, a decision that is theirs): say what is needed.
   `STATUS: blocked`.
