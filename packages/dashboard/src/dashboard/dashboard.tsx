@@ -7,6 +7,7 @@ import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
 import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
+import { ReleasesPage } from "@/factory/releases-page";
 import { FactoryPage } from "@/factory/factory-page";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { PersonasPage } from "@/personas/personas-page";
@@ -61,7 +62,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <Shell
       state={state}
-      current={page === "connect" ? "settings" : page}
+      current={page === "connect" ? "settings" : page === "releases" ? "build" : page}
       // An exploration fills the whole window.
       fill={page === "explore" && open !== null}
     >
@@ -91,6 +92,8 @@ function PageBody({
       return <PersonasPage open={open} />;
     case "explore":
       return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
+    case "releases":
+      return <ReleasesPage state={state} />;
     case "build":
       return <FactoryPage state={state} />;
     case "home":

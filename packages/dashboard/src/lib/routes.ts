@@ -19,7 +19,7 @@ export type Page = (typeof PAGES)[number];
 // The page, and what is open in it: an exploration, a persona. Connecting a board (#connect) is a page of its own,
 // outside the sidebar.
 export type Place = {
-  page: Page | "connect";
+  page: Page | "connect" | "releases";
   open: string | null;
 };
 
@@ -62,7 +62,7 @@ export function movedHash(hash: string): string | null {
 export function placeOf(hash: string): Place {
   const moved = movedHash(hash);
   const { asked, rest } = partsOf(moved ?? hash);
-  if (asked === "connect") return { page: asked, open: rest };
+  if (asked === "connect" || asked === "releases") return { page: asked, open: rest };
   const page = PAGES.find((one) => one === asked);
   return page ? { page, open: rest } : { page: FIRST, open: null };
 }

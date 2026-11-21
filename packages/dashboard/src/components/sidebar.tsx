@@ -6,6 +6,7 @@ import {
   Menu,
   Settings,
   Columns3,
+  Tag,
   Users,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -29,7 +30,9 @@ import { useT } from "@/i18n/use-t";
 import { UpdateRow } from "@/updates/update-row";
 import { FeedbackRow } from "@/feedback/feedback-row";
 
-import { type Item, PageLink, ProductState } from "./sidebar-links";
+import { releaseVariant } from "@/lib/release-variant";
+
+import { type Item, PageLink, ProductState, Tile } from "./sidebar-links";
 
 // Home and System at the top (System with the product's light, or Open when
 // it runs), then the pages in labelled groups: the work, from what came in
@@ -256,19 +259,40 @@ function Pages({
   onGo?: () => void;
 }>) {
   const t = useT().shell;
+  // Prototype: variant B has a Releases page of its own, under the Factory.
+  const releases = releaseVariant() === "B";
+  const onReleases = window.location.hash.startsWith("#releases");
+  const here = onReleases ? "home" : current;
   return (
     <nav aria-label={t.nav.pages} className="grid gap-px">
       {GROUPS.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{t.groups[group.label]}</GroupLabel>
           {group.items.map((item) => (
-            <PageLink key={item.page} item={item} current={current} onGo={onGo}>
+            <PageLink key={item.page} item={item} current={here} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">
                 <PageKobold page={item.page} doing={doing} />
                 <Count page={item.page} n={counts[item.page]} />
               </span>
             </PageLink>
           ))}
+          {releases && group.label === "work" && (
+            <a
+              href="#releases"
+              onClick={onGo}
+              aria-current={onReleases ? "page" : undefined}
+              className={cn(
+                "flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal text-sidebar-foreground hover:bg-sidebar-hover [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
+                onReleases &&
+                  "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
+              )}
+            >
+              <Tile color="var(--build)">
+                <Tag aria-hidden />
+              </Tile>
+              Releases
+            </a>
+          )}
         </div>
       ))}
     </nav>

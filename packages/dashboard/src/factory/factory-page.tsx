@@ -24,6 +24,16 @@ import { CARD } from "@/signals/bits";
 import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
+import { releaseVariant } from "@/lib/release-variant";
+import {
+  ConfirmRelease,
+  madeUpBoard,
+  MadeUpNote,
+  PastReleases,
+  ReleaseNow,
+  WritingNotes,
+  useReleases,
+} from "./releases";
 import { StuckList } from "./stuck-cards";
 import { WaitingCards } from "./waiting-card";
 import { useT } from "@/i18n/use-t";
@@ -31,7 +41,8 @@ import type { Messages } from "@/i18n/messages";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   const t = useT();
-  const { data, problem } = useFactoryView(state);
+  const { data: real, problem } = useFactoryView(state);
+  const data = real && madeUpBoard(real);
   const [said, say] = useState<string | null>(null);
   const [open, setOpen] = useState<number | null>(null);
   // Deleted cards leave the board at once; one GitHub refuses comes back.
@@ -158,8 +169,11 @@ function Column({
   const t = useT();
   const [all, setAll] = useState(false);
   const colour = COLUMN_COLOURS[column.id];
-  const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
-  const cards = cut ? column.cards.slice(0, DONE_SHOWN) : column.cards;
+  const release = column.id === "done" && releaseVariant() === "A";
+  const releases = useReleases(column.cards, release);
+  const base = release ? releases.waiting : column.cards;
+  const cut = column.id === "done" && !all && base.length > DONE_SHOWN;
+  const cards = (cut ? base.slice(0, DONE_SHOWN) : base) as typeof column.cards;
   return (
     <section
       aria-label={t.factory.columns[column.id]}
@@ -172,7 +186,9 @@ function Column({
       <header className="grid gap-0.5 px-3.5 pt-3 pb-2.5">
         <h2 className="flex items-center gap-2 text-[13px] font-semibold">
           <ColumnIcon column={column.id} />
-          <span style={{ color: colour }}>{t.factory.columns[column.id]}</span>
+          <span style={{ color: colour }}>
+            {release ? "Since the last release" : t.factory.columns[column.id]}
+          </span>
           <span
             className="ml-auto grid h-5 min-w-5 place-items-center rounded-md px-1.5 text-[11px] font-semibold"
             style={{
@@ -180,14 +196,28 @@ function Column({
               backgroundColor: `color-mix(in srgb, ${colour} 14%, transparent)`,
             }}
           >
-            {column.cards.length}
+            {base.length}
           </span>
         </h2>
         <p className="pl-[23px] text-xs text-muted-foreground">
-          {t.factory.means[column.id]}
+          {release
+            ? "Merged, not in a release yet"
+            : t.factory.means[column.id]}
         </p>
       </header>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
+        {release && !releases.confirming && !releases.writing && (
+          <ReleaseNow count={base.length} onAsk={releases.ask} />
+        )}
+        {release && releases.writing && <WritingNotes />}
+        {release && releases.confirming && (
+          <ConfirmRelease
+            version={releases.version}
+            count={base.length}
+            onMake={releases.make}
+            onCancel={releases.cancel}
+          />
+        )}
         {cards.map((card, at) => (
           <Card
             key={card.number}
@@ -196,7 +226,7 @@ function Column({
             now={now[card.number] ?? null}
           />
         ))}
-        {column.cards.length === 0 && (
+        {base.length === 0 && (
           <p className="rounded-lg border border-dashed border-current/15 px-3 py-4 text-center text-xs text-faint">
             {t.factory.nothingHere}
           </p>
@@ -209,8 +239,17 @@ function Column({
             }}
             className="rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-card hover:text-foreground"
           >
-            {t.factory.showAll(column.cards.length)}
+            {t.factory.showAll(base.length)}
           </button>
+        )}
+        {release && (
+          <div className="grid gap-1.5 pt-2">
+            <h3 className="px-1 text-xs font-semibold text-muted-foreground">
+              Past releases
+            </h3>
+            <PastReleases releases={releases.releases} />
+            <MadeUpNote />
+          </div>
         )}
       </div>
     </section>
@@ -308,7 +347,7 @@ function NotConnected() {
 // The board as the page shows it, read again each time the factory read
 // its board on GitHub (the state's stream says when), not only when
 // Kobble's files change.
-function useFactoryView(state: FactoryState): Read<FactoryView> {
+export function useFactoryView(state: FactoryState): Read<FactoryView> {
   const read = state.work?.read ?? "";
   return useRead(`/api/kobble/factory?read=${read}`) as Read<FactoryView>;
 }

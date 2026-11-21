@@ -1,0 +1,83 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Settings" [ref=e131] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e136]:
+    - generic [ref=e137]:
+      - generic [ref=e138]:
+        - heading "Releases" [level=1] [ref=e141]
+        - paragraph [ref=e142]: Which changes went out together, under which version.
+      - generic [ref=e143]:
+        - generic [ref=e144]:
+          - generic [ref=e146]:
+            - heading "Since the last release" [level=2] [ref=e147]
+            - paragraph [ref=e148]: 3 merged cards. A release is everything on main now.
+          - status [ref=e149]: The kobold is writing the release notes…
+        - generic [ref=e152]:
+          - heading "Past versions" [level=2] [ref=e153]
+          - generic [ref=e154]:
+            - group [ref=e155]:
+              - generic "v0.3.0 12 Nov 2026" [ref=e156] [cursor=pointer]:
+                - text: v0.3.0
+                - generic [ref=e162]: 12 Nov 2026
+              - generic [ref=e163]:
+                - generic [ref=e164]:
+                  - heading "New" [level=4] [ref=e165]
+                  - list [ref=e166]:
+                    - listitem [ref=e167]: You can see where your order is on the confirmation page.
+                    - listitem [ref=e168]: You can change the delivery address after you have paid.
+                - generic [ref=e169]:
+                  - heading "Fixed" [level=4] [ref=e170]
+                  - list [ref=e171]:
+                    - listitem [ref=e172]: The total is right when a voucher and a discount meet.
+            - group [ref=e173]:
+              - generic "v0.2.0 29 Oct 2026" [ref=e174] [cursor=pointer]:
+                - text: v0.2.0
+                - generic [ref=e180]: 29 Oct 2026
+            - group [ref=e181]:
+              - generic "v0.1.0 8 Oct 2026" [ref=e182] [cursor=pointer]:
+                - text: v0.1.0
+                - generic [ref=e188]: 8 Oct 2026
+          - paragraph [ref=e189]: "Prototype: the releases here are made up."
+  - region "Sprocket" [ref=e190]:
+    - button "Ask Sprocket anything ⌘J" [ref=e191] [cursor=pointer]:
+      - generic [ref=e201]: Ask Sprocket anything
+      - generic [ref=e202]: ⌘J
