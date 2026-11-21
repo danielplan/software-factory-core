@@ -53,81 +53,83 @@ export function ReleasesPage({ state }: Readonly<{ state: FactoryState }>) {
       />
       <div className="grid max-w-3xl gap-6 pt-3">
         <section className={`${CARD} grid gap-3 px-5 py-4`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div className="grid min-w-0 gap-1">
               <h2 className="text-[15px] font-semibold">
                 Since the last release
               </h2>
-              <p className="text-xs text-muted-foreground">
-                {waiting.length === 0
-                  ? "Nothing new on main since the last release."
-                  : `${String(waiting.length)} merged ${waiting.length === 1 ? "card" : "cards"}. A release is everything on main now.`}
-              </p>
-            </div>
-          </div>
-          {!r.writing && waiting.length > 0 && (
-            <div className="grid justify-items-start gap-2">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
-                {editing ? (
-                  <>
-                    <label className="font-medium" htmlFor="next-number">
-                      Next:
-                    </label>
-                    <Input
-                      id="next-number"
-                      aria-invalid={bad}
-                      value={typed ?? r.version}
-                      onChange={(event) => {
-                        setTyped(event.target.value);
-                      }}
-                      className="w-28"
-                    />
-                    <Button
-                      variant="ring"
-                      size="pill-sm"
-                      onClick={() => {
-                        setTyped(null);
-                        setEditing(false);
-                      }}
-                    >
-                      <X aria-hidden />
-                      Use {r.version}
-                    </Button>
-                    {!bad && typed !== null && (
-                      <Check aria-hidden className="size-4 text-blue" />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <span className="font-medium">Next: {shown}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditing(true);
-                      }}
-                      className="text-xs text-blue underline-offset-2 hover:underline"
-                    >
-                      Change
-                    </button>
-                  </>
-                )}
-                <span className="text-muted-foreground">
-                  {typed === null ? `· ${r.why}` : "· Chosen by the team"}
-                </span>
-              </div>
-              {bad && editing && (
+              {waiting.length === 0 && !r.writing && (
+                <p className="text-xs text-muted-foreground">
+                  Nothing new on main since the last release.
+                </p>
+              )}
+              {!r.writing && waiting.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  {editing ? (
+                    <>
+                      <label htmlFor="next-number">Next:</label>
+                      <Input
+                        id="next-number"
+                        aria-invalid={bad}
+                        value={typed ?? r.version}
+                        onChange={(event) => {
+                          setTyped(event.target.value);
+                        }}
+                        className="w-28"
+                      />
+                      <Button
+                        variant="ring"
+                        size="pill-sm"
+                        onClick={() => {
+                          setTyped(null);
+                          setEditing(false);
+                        }}
+                      >
+                        <X aria-hidden />
+                        Use {r.version}
+                      </Button>
+                      {!bad && typed !== null && (
+                        <Check aria-hidden className="size-4 text-blue" />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span>Next: {shown}</span>
+                      <span aria-hidden>·</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditing(true);
+                        }}
+                        className="text-blue underline-offset-2 hover:underline"
+                      >
+                        Change
+                      </button>
+                    </>
+                  )}
+                  <span aria-hidden>·</span>
+                  <span>{typed === null ? r.why : "Chosen by the team"}</span>
+                </div>
+              )}
+              {bad && editing && !r.writing && (
                 <p role="alert" className="text-xs text-destructive">
                   {r.last === undefined
                     ? "Write the number as 1.2.3."
                     : `The number must be higher than the last release, ${r.last}, and written as 1.2.3.`}
                 </p>
               )}
-              <ReleaseNow count={waiting.length} onAsk={release} />
             </div>
-          )}
+            {!r.writing && waiting.length > 0 && (
+              <ReleaseNow
+                count={waiting.length}
+                onAsk={release}
+                label={`Release ${shown}`}
+              />
+            )}
+          </div>
           {r.writing ? (
             <WritingNotes />
-                    ) : (
+          ) : (
             <MergedList cards={waiting} />
           )}
         </section>

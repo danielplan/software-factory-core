@@ -197,11 +197,12 @@ export function useReleases(done: Waiting[], sample = true) {
 export function ReleaseNow({
   count,
   onAsk,
-}: Readonly<{ count: number; onAsk: () => void }>) {
+  label = "Release now",
+}: Readonly<{ count: number; onAsk: () => void; label?: string }>) {
   return (
     <Button size="pill" disabled={count === 0} onClick={onAsk}>
       <PackageCheck aria-hidden />
-      Release now
+      {label}
     </Button>
   );
 }
