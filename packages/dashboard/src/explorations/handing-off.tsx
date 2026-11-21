@@ -1,10 +1,10 @@
 // While an exploration is handed off: a small card over the page with
 // Doodle, the explorer, writing it up, and the step it is at (the spec,
-// the card, the prototypes stopped) with for how long. Closed, a line in
-// the bar opens it again.
+// the card, the prototypes stopped) with for how long. It cannot be
+// closed: the exploration is done, and the card goes when the hand-off
+// does.
 
-import { LoaderCircle, Pencil } from "lucide-react";
-import { useState } from "react";
+import { Pencil } from "lucide-react";
 
 import type { ExplorationPage } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
@@ -20,39 +20,34 @@ const STAGES: Handing["stage"][] = ["spec", "card", "prototypes"];
 
 export function HandingOff({ handing }: Readonly<{ handing: Handing }>) {
   const t = useT().explore;
-  const [open, setOpen] = useState(true);
   const clock = clockOf(handing.since, useNow());
   const step = t.handOffStages[handing.stage];
   const at = STAGES.indexOf(handing.stage) + 1;
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setOpen(true);
+    <Dialog open>
+      <DialogContent
+        showCloseButton={false}
+        onEscapeKeyDown={(event) => {
+          event.preventDefault();
         }}
-        className="flex w-full items-center gap-2 text-left text-xs text-muted-foreground hover:text-foreground"
+        onPointerDownOutside={(event) => {
+          event.preventDefault();
+        }}
+        className="grid w-[300px] max-w-none justify-items-center gap-3 px-6 pt-8 pb-6 text-center sm:max-w-none"
       >
-        <LoaderCircle aria-hidden className="size-3.5 animate-spin text-blue" />
-        <span className="min-w-0 flex-1 truncate">{step}</span>
-        {clock && <span className="tabular-nums">{clock}</span>}
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="grid w-[300px] max-w-none justify-items-center gap-3 px-6 pt-8 pb-6 text-center sm:max-w-none">
-          <DoodleWriting />
-          <DialogTitle
-            key={step}
-            className="text-[15px] leading-snug motion-safe:animate-pop"
-          >
-            {step}
-          </DialogTitle>
-          <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
-            {t.handOffStep(at, STAGES.length)}
-            {clock && <span>· {clock}</span>}
-          </span>
-        </DialogContent>
-      </Dialog>
-    </>
+        <DoodleWriting />
+        <DialogTitle
+          key={step}
+          className="text-[15px] leading-snug motion-safe:animate-pop"
+        >
+          {step}
+        </DialogTitle>
+        <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
+          {t.handOffStep(at, STAGES.length)}
+          {clock && <span>· {clock}</span>}
+        </span>
+      </DialogContent>
+    </Dialog>
   );
 }
 
