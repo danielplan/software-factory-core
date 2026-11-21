@@ -77,5 +77,6 @@ export function withChosenModel(claude: Claude, root: () => string | null) {
       );
     },
     ...(claude.tell ? { tell: claude.tell.bind(claude) } : {}),
+    ...(claude.interrupt ? { interrupt: claude.interrupt.bind(claude) } : {}),
   } satisfies Claude;
 }

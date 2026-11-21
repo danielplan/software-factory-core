@@ -71,6 +71,7 @@ export class SupportTalk {
   say(text: string, page: string | null): void {
     const said = this.talk.heard(text);
     this.options.onChange();
+    if (said === null) return;
     const where = page ? `\n\n(They are on the ${page} page.)` : "";
     void this.talk.answer(`${said}${where}`, undefined, {
       ...RIGHTS,
@@ -78,6 +79,11 @@ export class SupportTalk {
         readFileSync(join(guidesFolder, "support-kobold.md"), "utf8"),
       ),
     });
+  }
+
+  // The person pressed Stop while the kobold answered.
+  stop(): void {
+    this.talk.stop();
   }
 
   // Where the server answers its tools, once it listens.
@@ -118,6 +124,10 @@ export function supportRoutes(support: SupportTalk): Record<string, Route> {
     "GET /api/kobble/support": () => support.view(),
     "POST /api/kobble/support": (body) => {
       support.say(field(body, "text"), optionalText(body, "page") ?? null);
+      return support.view();
+    },
+    "POST /api/kobble/support/stop": () => {
+      support.stop();
       return support.view();
     },
     "POST /api/kobble/support/new": () => {

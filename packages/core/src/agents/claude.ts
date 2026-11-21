@@ -111,4 +111,8 @@ export interface Claude {
   // at its next step instead of after it ends; false when that conversation
   // is in no turn (or this Claude Code cannot).
   tell?(session: string, message: string): boolean;
+  // Stops the turn a conversation is in now (the person pressed Stop); the
+  // conversation goes on with the next turn. False when it is in no turn
+  // (or this Claude Code cannot).
+  interrupt?(session: string): boolean;
 }

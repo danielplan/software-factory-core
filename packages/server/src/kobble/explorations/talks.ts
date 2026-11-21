@@ -169,7 +169,6 @@ export class ExplorationTalks {
     spokenIn?: string,
   ): Promise<void> {
     const talk = this.talk(id);
-    const said = talk.heard(text);
     const board = this.options.store().board(id);
     const named = attached.flatMap((thing) => {
       const found = board.things.find((one) => one.id === thing);
@@ -179,6 +178,8 @@ export class ExplorationTalks {
       named.length > 0
         ? `\n\n(They attached, from the board: ${named.join(", ")}.)`
         : "";
+    const said = talk.heard(text, more);
+    if (said === null) return; // it joined the answer being written
     await this.answer(id, talk, `${said}${more}`, spokenIn);
   }
 
@@ -312,7 +313,8 @@ export class ExplorationTalks {
     });
   }
 
-  private talk(id: string): Talk {
+  // The conversation about an exploration (its Stop, for one).
+  talk(id: string): Talk {
     const known = this.talks.get(id);
     if (known) return known;
     const store = this.options.store();

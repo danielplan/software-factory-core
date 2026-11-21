@@ -14,7 +14,7 @@ import { Refused } from "../../refused.ts";
 import type { PersonaTests } from "../persona-tests.ts";
 import { FileAnswer } from "../../http.ts";
 import { PICTURE_TYPES } from "../../coach/pictures.ts";
-import { addPicture, attachedIn, personActs } from "./person-acts.ts";
+import { addPicture, personActs } from "./person-acts.ts";
 import {
   dropExploration,
   explorationOf,
@@ -27,6 +27,7 @@ import { withThing } from "./board-things.ts";
 import { ExplorationPrototypes } from "./prototypes.ts";
 import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
+import { talkRoutes } from "./talk-routes.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import { ExplorationWorlds } from "./worlds.ts";
 
@@ -62,6 +63,7 @@ export function servedExplorations(options: Options) {
   const routes = {
     ...readRoutes(store, talks, prototypes, options.ideas),
     ...buttonRoutes(store, button, { talks, prototypes, cards: options.cards }),
+    ...talkRoutes(store, talks, button),
   };
   return {
     routes,
@@ -208,14 +210,6 @@ function buttonRoutes(
       const dropped = dropExploration(store(), field(body, "id"));
       await prototypes.stopAll(dropped.id);
     }),
-    "POST /api/kobble/explorations/say": button((body) => {
-      void talks.say(
-        id(body),
-        field(body, "text"),
-        attachedIn(body),
-        spokenIn(body),
-      );
-    }),
     "POST /api/kobble/explorations/make": button((body) => ({
       board: prototypes.make(
         explorationOf(store(), id(body)),
@@ -255,10 +249,4 @@ export function branchParts(
 function persona(body: unknown): string | undefined {
   const value = (body as { persona?: unknown } | null)?.persona;
   return typeof value === "string" && value ? value : undefined;
-}
-
-// The language the person spoke in, when they talked instead of typing.
-function spokenIn(body: unknown): string | undefined {
-  const value = (body as { spokenIn?: unknown } | null)?.spokenIn;
-  return typeof value === "string" && value.trim() ? value : undefined;
 }

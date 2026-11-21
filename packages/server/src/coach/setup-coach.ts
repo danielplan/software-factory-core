@@ -184,6 +184,7 @@ export class SetupCoach {
   // out loud, so the answer is in it and is read aloud.
   async say(text: string, spokenIn?: string): Promise<void> {
     const said = this.talk.heard(text);
+    if (said === null) return;
     await this.answer(said, spokenIn?.trim().slice(0, 40));
   }
 

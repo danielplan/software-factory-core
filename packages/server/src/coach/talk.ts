@@ -6,7 +6,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import type { Claude, RunOptions } from "@software-factory/core";
+import type { Claude, ClaudeResult, RunOptions } from "@software-factory/core";
 
 import type { ChangeDraft, CoachMessage, Draft } from "../api.ts";
 import { Refused } from "../refused.ts";
@@ -50,7 +50,15 @@ export class Talk {
   problem: string | null = null;
   private conversation: string;
   private started: boolean;
+  // Words said while the coach answered that could not go into its turn:
+  // answered right after it, with the turn's rights.
+  private waiting: string[] = [];
+  private stopping = false;
+  private last: { spokenIn: string | undefined; rights: TurnRights } | null =
+    null;
   private ownerChanged = false;
+  // The owner stopped the last answer: the coach hears of it next turn.
+  private wasStopped = false;
   private toolsUrl = "";
   private claude: Claude;
   private cwd: string;
@@ -118,12 +126,30 @@ export class Talk {
     this.changed();
   }
 
-  // The owner's words, shown as said; refused while the coach answers.
-  heard(text: string): string {
-    if (!text.trim()) throw new Refused("Say something first.");
-    if (this.working) throw new Refused("The coach is still answering.");
-    this.messages = [...this.messages, { from: "owner", text: text.trim() }];
-    return text.trim();
+  // The owner's words, shown as said. While the coach answers they steer
+  // it: they go into its turn (or, when that cannot be, are answered right
+  // after it), and null says there is no new turn to start. `more` is added
+  // for the coach only (what they attached).
+  heard(text: string, more = ""): string | null {
+    const said = text.trim();
+    if (!said) throw new Refused("Say something first.");
+    this.messages = [...this.messages, { from: "owner", text: said }];
+    if (!this.working) return said;
+    const steer = `${said}${more}`;
+    if (!this.claude.tell?.(this.conversation, steer)) this.waiting.push(steer);
+    this.changed();
+    return null;
+  }
+
+  // The owner pressed Stop: the turn ends, what the coach had written so far
+  // stays, and nothing said meanwhile is answered. False with no turn.
+  stop(): boolean {
+    if (!this.working) return false;
+    this.stopping = true;
+    this.waiting = [];
+    if (this.claude.interrupt?.(this.conversation)) return true;
+    this.stopping = false;
+    return false;
   }
 
   // One turn: the prompt, with what the owner changed and the language they
@@ -136,21 +162,52 @@ export class Talk {
     this.writing = "";
     this.activity = null;
     this.problem = null;
+    this.last = { spokenIn, rights };
     this.changed();
     const result = await this.claude.run(this.turn(text, spokenIn, rights));
-    this.started = this.started || result.ok;
-    // A first turn that failed starts a fresh conversation next time.
-    if (!this.started) this.conversation = randomUUID();
-    if (result.ok && result.text.trim())
-      this.messages = [
-        ...this.messages,
-        { from: "coach", text: result.text.trim() },
-      ];
-    if (!result.ok) this.problem = problemOf(result.error ?? "");
+    this.ended(result);
+    this.answerWaiting();
+    return result.ok;
+  }
+
+  // A turn over: its answer kept (or, stopped, what it wrote so far), or
+  // why it failed.
+  private ended(result: ClaudeResult): void {
+    const stopped = this.stopping;
+    this.stopping = false;
+    this.wasStopped = stopped;
+    const soFar = this.soFar();
+    this.keepConversation(result.ok, stopped);
+    const reply = stopped ? soFar.trim() : result.text.trim();
+    if ((result.ok || stopped) && reply)
+      this.messages = [...this.messages, { from: "coach", text: reply }];
+    if (!result.ok && !stopped) this.problem = problemOf(result.error ?? "");
     this.writing = null;
     this.activity = null;
     this.changed();
-    return result.ok;
+  }
+
+  // Whether Claude Code has the conversation to go on with: once a turn
+  // answered, or was stopped after it got going (it wrote or worked); a
+  // first turn that failed, or was stopped at once, starts afresh next time.
+  private keepConversation(ok: boolean, stopped: boolean): void {
+    const going = this.soFar() !== "" || this.activity !== null;
+    this.started = this.started || ok || (stopped && going);
+    if (!this.started) this.conversation = randomUUID();
+  }
+
+  // What the coach has written of its answer so far.
+  private soFar(): string {
+    return this.writing ?? "";
+  }
+
+  // What was said during the turn and could not join it: answered now, as
+  // one message.
+  private answerWaiting(): void {
+    if (this.waiting.length === 0 || !this.last) return;
+    const said = this.waiting.join("\n\n");
+    this.waiting = [];
+    void this.answer(said, this.last.spokenIn, this.last.rights);
   }
 
   private turn(
@@ -159,6 +216,11 @@ export class Talk {
     rights: TurnRights,
   ): RunOptions {
     const notes = [
+      ...(this.wasStopped
+        ? [
+            "I stopped your last answer partway; it ends where you were cut off.",
+          ]
+        : []),
       ...(this.ownerChanged
         ? ["I changed the canvas myself; look at it."]
         : []),
@@ -170,6 +232,7 @@ export class Talk {
     ];
     const prompt = notes.length > 0 ? `${text}\n\n(${notes.join(" ")})` : text;
     this.ownerChanged = false;
+    this.wasStopped = false;
     return {
       cwd: this.cwd,
       prompt,

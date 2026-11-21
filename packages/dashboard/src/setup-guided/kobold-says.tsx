@@ -32,14 +32,7 @@ export function KoboldSays({
                   string | undefined) ?? "")}
           </p>
         ) : (
-          open.map((card) => (
-            <Question
-              key={card.id}
-              card={card}
-              step={step}
-              busy={coach.working}
-            />
-          ))
+          open.map((card) => <Question key={card.id} card={card} step={step} />)
         )}
       </div>
     </div>
@@ -47,11 +40,7 @@ export function KoboldSays({
 }
 
 // One of the kobold's questions, answered in place.
-function Question({
-  card,
-  step,
-  busy,
-}: Readonly<{ card: Card; step: Step; busy: boolean }>) {
+function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
   const t = useT();
   const [answer, setAnswer] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
@@ -92,8 +81,8 @@ function Question({
             setAnswer(event.target.value);
           }}
         />
-        <Button type="submit" size="pill-sm" disabled={busy || !answer.trim()}>
-          {busy ? "…" : t.setup.says.answer}
+        <Button type="submit" size="pill-sm" disabled={!answer.trim()}>
+          {t.setup.says.answer}
         </Button>
       </div>
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}

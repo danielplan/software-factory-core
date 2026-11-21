@@ -9,7 +9,7 @@ export type ClaudeResult = {
   session?: string;
 };
 
-type ClaudeEvent = {
+export type ClaudeEvent = {
   type?: string;
   subtype?: string;
   is_error?: boolean;
