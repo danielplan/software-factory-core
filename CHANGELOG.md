@@ -6,6 +6,10 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+## 0.13.2 (2026-11-21)
+
+**To upgrade:** pin `release-0.13.2`, `npm install`, `npx software-factory upgrade`. Nothing else to do; a team that reads the public feedback board (`FACTORY_FEEDBACK_READS=yes`) upgrades all its computers together.
+
 - Changed: the core's own factory keeps its explorations out of git (`factory/kobble/explorations/` in its `.gitignore`), since this repository is public; they stay on the computer they were made on. A company's factory still shares its explorations through git. Nothing to do.
 
 - Changed: the knowledge base is kept with the code. Before a card's pull request, a branch that changes code but none of the knowledge files (`docs/`, a `context/` folder, a `BLUEPRINT.md`, `AGENTS.md`) gets one more round of the `update-context` skill, while the card is still In progress; a run file that says "Knowledge base: nothing to change, because …" lets it through. Nothing to do.
