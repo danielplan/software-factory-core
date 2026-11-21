@@ -10,6 +10,21 @@ A package holds what several products must agree on: the shape of the data
 they exchange, the rules that must hold the same everywhere, the words they
 share. It has no screens, no server and no settings of its own.
 
+## The libraries
+
+One library per job. Use the one named here. A job this table does not
+have is never written by hand: take what the platform gives first, then a
+widely used, maintained library, and add its row, with why, in the same
+change: in this kit when other products would need it too, in the
+product's blueprint (`## Libraries`, the same table) when only it does. Code
+of your own is allowed only as a row that says why no library fits. Every
+package in the product's `dependencies` is named in one of the two tables;
+the core's checks refuse one that is not.
+
+| Job                     | Library         | Why                                       |
+| ----------------------- | --------------- | ----------------------------------------- |
+| Schemas and their types | **zod** (`zod`) | one schema is both the check and the type |
+
 ## The rules and why
 
 - **One way in:** the package says in its package.json what it gives
