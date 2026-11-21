@@ -49,7 +49,7 @@ release:
 
 ```json
 "devDependencies": {
-  "software-factory": "github:danielplan/software-factory-core#release-0.13.0"
+  "software-factory": "github:danielplan/software-factory-core#release-0.13.1"
 }
 ```
 
