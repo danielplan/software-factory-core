@@ -2,6 +2,11 @@
 // release with the Done cards waiting for it; below, the past versions with
 // their notes.
 
+import { Check, X } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PageHead } from "@/components/page-head";
 import type { FactoryState } from "@/dashboard/dashboard";
 import { CARD } from "@/signals/bits";
@@ -9,6 +14,7 @@ import { CARD } from "@/signals/bits";
 import { useFactoryView } from "./factory-page";
 import {
   madeUpBoard,
+  isHigher,
   MadeUpNote,
   MergedList,
   PastReleases,
@@ -23,6 +29,22 @@ export function ReleasesPage({ state }: Readonly<{ state: FactoryState }>) {
     (data && madeUpBoard(data))?.columns.find((column) => column.id === "done")?.cards ?? [];
   const r = useReleases(done);
   const { waiting, releases } = r;
+  // The number the team typed; without one, the kobold's.
+  const [typed, setTyped] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const shown = (typed ?? r.version).trim();
+  const bad =
+    r.last !== undefined &&
+    (!/^\d+\.\d+\.\d+$/.test(shown) || !isHigher(shown, r.last));
+  const release = () => {
+    if (bad) {
+      setEditing(true);
+      return;
+    }
+    r.make(shown);
+    setTyped(null);
+    setEditing(false);
+  };
   return (
     <>
       <PageHead
@@ -42,12 +64,67 @@ export function ReleasesPage({ state }: Readonly<{ state: FactoryState }>) {
                   : `${String(waiting.length)} merged ${waiting.length === 1 ? "card" : "cards"}. A release is everything on main now.`}
               </p>
             </div>
-            {!r.writing && (
-              <ReleaseNow count={waiting.length} onAsk={() => {
-                  r.make(r.version);
-                }} />
-            )}
           </div>
+          {!r.writing && waiting.length > 0 && (
+            <div className="grid justify-items-start gap-2">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
+                {editing ? (
+                  <>
+                    <label className="font-medium" htmlFor="next-number">
+                      Next:
+                    </label>
+                    <Input
+                      id="next-number"
+                      aria-invalid={bad}
+                      value={typed ?? r.version}
+                      onChange={(event) => {
+                        setTyped(event.target.value);
+                      }}
+                      className="w-28"
+                    />
+                    <Button
+                      variant="ring"
+                      size="pill-sm"
+                      onClick={() => {
+                        setTyped(null);
+                        setEditing(false);
+                      }}
+                    >
+                      <X aria-hidden />
+                      Use {r.version}
+                    </Button>
+                    {!bad && typed !== null && (
+                      <Check aria-hidden className="size-4 text-blue" />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium">Next: {shown}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(true);
+                      }}
+                      className="text-xs text-blue underline-offset-2 hover:underline"
+                    >
+                      Change
+                    </button>
+                  </>
+                )}
+                <span className="text-muted-foreground">
+                  {typed === null ? `· ${r.why}` : "· Chosen by the team"}
+                </span>
+              </div>
+              {bad && editing && (
+                <p role="alert" className="text-xs text-destructive">
+                  {r.last === undefined
+                    ? "Write the number as 1.2.3."
+                    : `The number must be higher than the last release, ${r.last}, and written as 1.2.3.`}
+                </p>
+              )}
+              <ReleaseNow count={waiting.length} onAsk={release} />
+            </div>
+          )}
           {r.writing ? (
             <WritingNotes />
                     ) : (

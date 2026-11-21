@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 export type Waiting = { number: number; title: string };
 type Release = {
   version: string;
+  // Why this number: new things raise the middle one, only fixes the last.
+  why: string;
   date: string;
   cards: Waiting[];
   notes: Group[];
@@ -20,58 +22,45 @@ type Release = {
 type Group = { heading: string; items: string[] };
 
 // Made up, and said so where they show.
+function rel(
+  version: string,
+  date: string,
+  why: string,
+  cards: Waiting[],
+): Release {
+  return { version, why, date, cards, notes: notesOf(cards) };
+}
+
 const PAST: Release[] = [
-  {
-    version: "v0.3.0",
-    date: "12 Nov 2026",
-    cards: [
-      { number: 88, title: "Show the order's status on the confirmation page" },
-      { number: 85, title: "Let customers change their delivery address" },
-      { number: 81, title: "Fix the total when a voucher and a discount meet" },
+  rel("1.4.2", "17 Nov 2026", "Changes people can take as they are", [
+    { number: 91, title: "Fix the delivery date shown on small screens" },
+    { number: 90, title: "Show the order's status on the confirmation page" },
+  ]),
+  rel("1.4.1", "12 Nov 2026", "Changes people can take as they are", [
+    { number: 88, title: "Fix the total when a voucher and a discount meet" },
+  ]),
+  rel(
+    "1.4.0",
+    "5 Nov 2026",
+    "Something people relied on changed: the basket now empties after 30 days",
+    [
+      { number: 85, title: "Empty a basket after 30 days without a visit" },
+      { number: 84, title: "Let customers change their delivery address" },
     ],
-    notes: [
-      {
-        heading: "New",
-        items: [
-          "You can see where your order is on the confirmation page.",
-          "You can change the delivery address after you have paid.",
-        ],
-      },
-      {
-        heading: "Fixed",
-        items: ["The total is right when a voucher and a discount meet."],
-      },
-    ],
-  },
-  {
-    version: "v0.2.0",
-    date: "29 Oct 2026",
-    cards: [
-      { number: 74, title: "Search the shop by product name" },
-      { number: 71, title: "Remember the basket after signing in" },
-    ],
-    notes: [
-      {
-        heading: "New",
-        items: ["You can search the shop by product name."],
-      },
-      {
-        heading: "Improved",
-        items: ["Your basket is still there after you sign in."],
-      },
-    ],
-  },
-  {
-    version: "v0.1.0",
-    date: "8 Oct 2026",
-    cards: [{ number: 60, title: "The first shop: products, basket, checkout" }],
-    notes: [
-      {
-        heading: "New",
-        items: ["The first shop: browse products, fill a basket, check out."],
-      },
-    ],
-  },
+  ),
+  rel("1.3.2", "29 Oct 2026", "Changes people can take as they are", [
+    { number: 76, title: "Fix the search when a name has a capital letter" },
+  ]),
+  rel("1.3.1", "22 Oct 2026", "Changes people can take as they are", [
+    { number: 74, title: "Search the shop by product name" },
+    { number: 71, title: "Remember the basket after signing in" },
+  ]),
+  rel(
+    "1.3.0",
+    "8 Oct 2026",
+    "Something people relied on changed: sign-in now needs an email, not a username",
+    [{ number: 60, title: "Sign in with an email instead of a username" }],
+  ),
 ];
 
 const SAMPLE: Waiting[] = [
@@ -89,15 +78,54 @@ const subscribe = (listener: () => void) => {
 };
 const snapshot = () => store;
 
-function nextVersion(latest: string | undefined): string {
-  const parts = (latest ?? "v0.0.0").slice(1).split(".").map(Number);
-  return `v${String(parts[0] ?? 0)}.${String((parts[1] ?? 0) + 1)}.0`;
+// Whether version a is higher than b (1.4.3 is higher than 1.4.2).
+export function isHigher(a: string, b: string): boolean {
+  const x = a.split(".").map(Number);
+  const y = b.split(".").map(Number);
+  for (let at = 0; at < 3; at++) {
+    const d = (x[at] ?? 0) - (y[at] ?? 0);
+    if (d !== 0) return d > 0;
+  }
+  return false;
+}
+
+function isFix(card: Waiting): boolean {
+  return /^fix/i.test(card.title);
+}
+
+// What people relied on changes or goes away, or they have to do something.
+function breaks(card: Waiting): boolean {
+  return /\b(remov\w*|no longer|replac\w*|renam\w*|instead of|must|now needs?)\b/i.test(
+    card.title,
+  );
+}
+
+// The rule: most releases raise only the last number (1.4.2 to 1.4.3), fixes
+// and new things alike; the middle one goes up (1.4.3 to 1.5.0) only when
+// something people relied on changes or goes away.
+export function nextVersion(
+  latest: string | undefined,
+  cards: Waiting[],
+): { version: string; why: string } {
+  const [major = 0, minor = 0, patch = 0] = (latest ?? "0.0.0")
+    .split(".")
+    .map(Number);
+  const change = cards.find(breaks);
+  if (change)
+    return {
+      version: `${String(major)}.${String(minor + 1)}.0`,
+      why: `Something people relied on changes: ${change.title.charAt(0).toLowerCase()}${change.title.slice(1)}`,
+    };
+  return {
+    version: `${String(major)}.${String(minor)}.${String(patch + 1)}`,
+    why: "Changes people can take as they are",
+  };
 }
 
 // The notes the kobold writes: plain sentences, grouped by what changed.
 function notesOf(cards: Waiting[]): Group[] {
-  const fixed = cards.filter((card) => /^fix/i.test(card.title));
-  const rest = cards.filter((card) => !/^fix/i.test(card.title));
+  const fixed = cards.filter(isFix);
+  const rest = cards.filter((card) => !isFix(card));
   const plain = (title: string) => {
     const text = title.replace(/^fix\s+/i, "");
     return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
@@ -119,7 +147,7 @@ export function useReleases(done: Waiting[], sample = true) {
   const base = done.length > 0 || !sample ? done : SAMPLE;
   // Everything merged since the last release: no picking.
   const waiting = base.filter((card) => !now.taken.includes(card.number));
-  const version = nextVersion(now.releases[0]?.version);
+  const { version, why } = nextVersion(now.releases[0]?.version, waiting);
   // The kobold writes the notes for a moment, then the release appears.
   const make = (name: string) => {
     if (waiting.length === 0) return;
@@ -129,6 +157,7 @@ export function useReleases(done: Waiting[], sample = true) {
     timer.current = setTimeout(() => {
       const release: Release = {
         version: name.trim() || version,
+        why,
         date: new Date().toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
@@ -148,6 +177,8 @@ export function useReleases(done: Waiting[], sample = true) {
     }, 2200);
   };
   return {
+    last: now.releases[0]?.version,
+    why,
     waiting,
     releases: now.releases,
     version,
@@ -276,6 +307,9 @@ export function PastReleases({
             />
             <Tag aria-hidden className="size-3.5 flex-none text-blue" />
             {release.version}
+            <span className="min-w-0 truncate text-xs font-normal text-muted-foreground">
+              {release.why}
+            </span>
             <span className="ml-auto text-xs font-normal whitespace-nowrap text-muted-foreground">
               {release.date}
             </span>

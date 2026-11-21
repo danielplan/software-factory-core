@@ -1,0 +1,113 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - generic [ref=f1e6]: Acme
+    - navigation "Overview" [ref=f1e18]:
+      - link "Home" [ref=f1e19] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e24] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e36]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e37]
+    - navigation "Pages" [ref=f1e38]:
+      - generic [ref=f1e39]:
+        - generic [ref=f1e40]: Work
+        - link "Signals Sieve" [ref=f1e41] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e47]': Sieve
+        - link "Explorations Doodle" [ref=f1e60] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e65]': Doodle
+        - link "Factory Bolt" [ref=f1e77] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e82]': Bolt
+        - link "Releases" [ref=f1e96] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=f1e101]:
+        - generic [ref=f1e102]: Customers
+        - link "Personas Mimic" [ref=f1e103] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e111]': Mimic
+    - generic [ref=f1e122]:
+      - button "Send feedback" [ref=f1e123] [cursor=pointer]
+      - navigation "The factory" [ref=f1e128]:
+        - link "Settings" [ref=f1e129] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e134]:
+    - generic [ref=f1e135]:
+      - generic [ref=f1e136]:
+        - heading "Releases" [level=1] [ref=f1e139]
+        - paragraph [ref=f1e140]: Which changes went out together, under which version.
+      - generic [ref=f1e141]:
+        - generic [ref=f1e142]:
+          - generic [ref=f1e144]:
+            - heading "Since the last release" [level=2] [ref=f1e145]
+            - paragraph [ref=f1e146]: 3 merged cards. A release is everything on main now.
+          - generic [ref=f1e147]:
+            - generic [ref=f1e148]:
+              - generic [ref=f1e149]: "Next: 1.4.3"
+              - button "Change" [ref=f1e150] [cursor=pointer]
+              - generic [ref=f1e151]: · Changes people can take as they are
+            - button "Release now" [ref=f1e152] [cursor=pointer]
+          - list [ref=f1e153]:
+            - listitem [ref=f1e154]:
+              - generic [ref=f1e155]: "#101"
+              - text: Send a receipt by email after checkout
+            - listitem [ref=f1e156]:
+              - generic [ref=f1e157]: "#99"
+              - text: Fix the basket count when an item sells out
+            - listitem [ref=f1e158]:
+              - generic [ref=f1e159]: "#97"
+              - text: Show delivery dates on the product page
+        - generic [ref=f1e160]:
+          - heading "Past versions" [level=2] [ref=f1e161]
+          - generic [ref=f1e162]:
+            - group [ref=f1e163]:
+              - generic "1.4.2 Changes people can take as they are 17 Nov 2026" [ref=f1e164] [cursor=pointer]:
+                - text: 1.4.2
+                - generic [ref=f1e170]: Changes people can take as they are
+                - generic [ref=f1e171]: 17 Nov 2026
+              - generic [ref=f1e172]:
+                - generic [ref=f1e173]:
+                  - heading "New" [level=4] [ref=f1e174]
+                  - list [ref=f1e175]:
+                    - listitem [ref=f1e176]: Show the order's status on the confirmation page.
+                - generic [ref=f1e177]:
+                  - heading "Fixed" [level=4] [ref=f1e178]
+                  - list [ref=f1e179]:
+                    - listitem [ref=f1e180]: The delivery date shown on small screens.
+            - group [ref=f1e181]:
+              - generic "1.4.1 Changes people can take as they are 12 Nov 2026" [ref=f1e182] [cursor=pointer]:
+                - text: 1.4.1
+                - generic [ref=f1e188]: Changes people can take as they are
+                - generic [ref=f1e189]: 12 Nov 2026
+            - group [ref=f1e190]:
+              - 'generic "1.4.0 Something people relied on changed: the basket now empties after 30 days 5 Nov 2026" [ref=f1e191] [cursor=pointer]':
+                - text: 1.4.0
+                - generic [ref=f1e197]: "Something people relied on changed: the basket now empties after 30 days"
+                - generic [ref=f1e198]: 5 Nov 2026
+            - group [ref=f1e199]:
+              - generic "1.3.2 Changes people can take as they are 29 Oct 2026" [ref=f1e200] [cursor=pointer]:
+                - text: 1.3.2
+                - generic [ref=f1e206]: Changes people can take as they are
+                - generic [ref=f1e207]: 29 Oct 2026
+            - group [ref=f1e208]:
+              - generic "1.3.1 Changes people can take as they are 22 Oct 2026" [ref=f1e209] [cursor=pointer]:
+                - text: 1.3.1
+                - generic [ref=f1e215]: Changes people can take as they are
+                - generic [ref=f1e216]: 22 Oct 2026
+            - group [ref=f1e217]:
+              - 'generic "1.3.0 Something people relied on changed: sign-in now needs an email, not a username 8 Oct 2026" [ref=f1e218] [cursor=pointer]':
+                - text: 1.3.0
+                - generic [ref=f1e224]: "Something people relied on changed: sign-in now needs an email, not a username"
+                - generic [ref=f1e225]: 8 Oct 2026
+          - paragraph [ref=f1e226]: "Prototype: the releases here are made up."
+  - region "Sprocket" [ref=f1e227]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e228] [cursor=pointer]:
+      - generic [ref=f1e238]: Ask Sprocket anything
+      - generic [ref=f1e239]: ⌘J
