@@ -10,6 +10,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
+import { whatsNewProblems } from "./whats-new-files.mjs";
+
 const here = resolve(import.meta.dirname, "..");
 const copy = join(here, ".release");
 const push = process.argv.includes("--push");
@@ -19,6 +21,13 @@ const version = /CORE_VERSION = "([^"]+)"/.exec(
 if (!version)
   throw new Error("No CORE_VERSION in packages/core/src/version.ts");
 const tag = `release-${version}`;
+
+// The plain words of the release come first: no release without them.
+const missing = whatsNewProblems(here, version);
+if (missing.length > 0)
+  throw new Error(
+    `Write what's new for ${version} first (docs/releasing.md):\n${missing.join("\n")}`,
+  );
 
 const git = (args, cwd = here) =>
   execFileSync("git", args, { cwd, encoding: "utf8" }).trim();

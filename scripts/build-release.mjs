@@ -19,6 +19,8 @@ import {
 } from "node:fs";
 import { join, resolve } from "node:path";
 
+import { whatsNewFiles } from "./whats-new-files.mjs";
+
 const here = resolve(import.meta.dirname, "..");
 const out = resolve(process.argv[2] ?? join(here, "release"));
 const PACKAGES = [
@@ -47,7 +49,13 @@ const run = (command, args) =>
 
 // Everything in the folder but its git data goes; the build starts clean.
 mkdirSync(out, { recursive: true });
-for (const name of ["bin", "node_modules", "package.json", "README.md"])
+for (const name of [
+  "bin",
+  "node_modules",
+  "package.json",
+  "README.md",
+  ...whatsNewFiles,
+])
   rmSync(join(out, name), { recursive: true, force: true });
 
 run("npm", ["run", "build", "-w", "@software-factory/dashboard"]);
@@ -161,6 +169,9 @@ writeFileSync(
   join(out, "README.md"),
   `# Software factory ${version}\n\nThe core, built to install from this repository: in a project,\n\n    npm install -D github:<owner>/software-factory-core#release-${version}\n\nthen \`npx software-factory\`. Built from the main branch by scripts/build-release.mjs.\n`,
 );
+// What's new, next to the README, so an installed Kobble reads it offline.
+for (const file of whatsNewFiles)
+  if (existsSync(join(here, file))) cpSync(join(here, file), join(out, file));
 if (!existsSync(join(out, "bin", "software-factory.js")))
   throw new Error("The release has no command.");
 process.stdout.write(`Built release ${version} in ${out}\n`);
