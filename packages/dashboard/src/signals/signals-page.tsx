@@ -114,7 +114,7 @@ function Shown({
     <BeforeLaunch
       app={app}
       missions={data.missions}
-      empty={data.signals.length === 0}
+      empty={data.signals.length + shownFeedback.length === 0}
     />
   );
   if (data.signals.length > 0 || shownFeedback.length > 0)
@@ -156,17 +156,16 @@ function Board({
   onSaid: (said: string) => void;
 }>) {
   const t = useT();
-  const all = [...feedback, ...signals];
+  // One list, newest first: the signals and the feedback mixed by time.
+  const all: (SignalRow | FeedbackSignal)[] = [...feedback, ...signals].sort(
+    (a, b) => Date.parse(b.at) - Date.parse(a.at),
+  );
   const shown = shownOf(all, open);
   const picked = open !== null && shown?.id === open;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[430px_minmax(0,1fr)]">
       <div className={cn(picked && "max-lg:hidden")}>
-        <SignalList
-          signals={signals}
-          feedback={feedback}
-          shown={shown?.id ?? null}
-        />
+        <SignalList all={all} shown={shown?.id ?? null} />
       </div>
       <div className={cn("grid gap-3.5", !picked && "max-lg:hidden")}>
         <a
@@ -212,61 +211,60 @@ function Board({
 }
 
 function SignalList({
-  signals,
-  feedback,
+  all,
   shown,
 }: Readonly<{
-  signals: SignalRow[];
-  feedback: FeedbackSignal[];
+  all: (SignalRow | FeedbackSignal)[];
   shown: string | null;
 }>) {
   const t = useT();
   return (
     <nav aria-label={t.signals.newSignals} className={cn(CARD, "grid")}>
-      {feedback.map((one) => (
-        <FeedbackItem
-          key={one.id}
-          one={one}
-          picked={one.id === shown}
-          href={signalHash(one.id)}
-        />
-      ))}
-      {signals.length + feedback.length === 0 && (
+      {all.length === 0 && (
         <p className="p-[50px] text-center text-[13px] text-muted-foreground">
           {t.signals.noneNew}
         </p>
       )}
-      {signals.map((signal) => (
-        <a
-          key={signal.id}
-          href={signalHash(signal.id)}
-          aria-current={signal.id === shown ? "true" : undefined}
-          className={cn(
-            "flex items-start gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface",
-            signal.id === shown && "bg-picked hover:bg-picked",
-          )}
-        >
-          {signal.personaFace ? (
-            <FaceOf face={signal.personaFace} size={34} />
-          ) : (
-            <SourceIcon source={signal.source} />
-          )}
-          <span className="grid min-w-0 flex-1">
-            <span className="flex items-center gap-2">
-              <span className="truncate font-semibold">
-                {whoOf(signal, t.words)}
+      {all.map((signal) =>
+        "from" in signal ? (
+          <FeedbackItem
+            key={signal.id}
+            one={signal}
+            picked={signal.id === shown}
+            href={signalHash(signal.id)}
+          />
+        ) : (
+          <a
+            key={signal.id}
+            href={signalHash(signal.id)}
+            aria-current={signal.id === shown ? "true" : undefined}
+            className={cn(
+              "flex items-start gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface",
+              signal.id === shown && "bg-picked hover:bg-picked",
+            )}
+          >
+            {signal.personaFace ? (
+              <FaceOf face={signal.personaFace} size={34} />
+            ) : (
+              <SourceIcon source={signal.source} />
+            )}
+            <span className="grid min-w-0 flex-1">
+              <span className="flex items-center gap-2">
+                <span className="truncate font-semibold">
+                  {whoOf(signal, t.words)}
+                </span>
+                <span className="ml-auto">
+                  <TypeChip type={signal.type} />
+                </span>
               </span>
-              <span className="ml-auto">
-                <TypeChip type={signal.type} />
+              <span className="mt-0.5 line-clamp-2 text-foreground-2">
+                <Markdown text={signal.text} inline />
               </span>
+              <StepOf signal={signal} />
             </span>
-            <span className="mt-0.5 line-clamp-2 text-foreground-2">
-              <Markdown text={signal.text} inline />
-            </span>
-            <StepOf signal={signal} />
-          </span>
-        </a>
-      ))}
+          </a>
+        ),
+      )}
     </nav>
   );
 }

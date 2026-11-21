@@ -34,7 +34,26 @@ export type FeedbackSignal = {
   from: "you" | "board";
   who: string;
   thumbs: number;
+  // When it was sent or arrived, as in a signal (made up for the older ones).
+  at: string;
 };
+
+// Made-up times for the posts nobody sent in this visit: hours ago.
+const LOADED = Date.now();
+const HOURS_AGO: Record<number, number> = {
+  44: 30,
+  41: 2,
+  38: 9,
+  35: 20,
+  33: 75,
+  29: 50,
+  27: 120,
+  22: 100,
+};
+const atOf = (number: number, sent = 0) =>
+  new Date(
+    sent > 0 ? sent : LOADED - (HOURS_AGO[number] ?? 48) * 3_600_000,
+  ).toISOString();
 
 // Who sent the posts arriving from the board (made up).
 const SENDERS: Record<number, string> = {
@@ -70,6 +89,7 @@ export function useFeedbackSignals(): FeedbackSignal[] {
     from: "you",
     who: "You",
     thumbs: ON_BOARD.find((there) => there.number === one.number)?.thumbs ?? 1,
+    at: atOf(one.number, one.sent),
   }));
   const arriving = ON_BOARD.filter(
     (one) =>
@@ -84,6 +104,7 @@ export function useFeedbackSignals(): FeedbackSignal[] {
     from: "board",
     who: SENDERS[one.number] ?? "A team",
     thumbs: one.thumbs,
+    at: atOf(one.number),
   }));
   return [...arriving.slice(0, 3), ...sent];
 }
