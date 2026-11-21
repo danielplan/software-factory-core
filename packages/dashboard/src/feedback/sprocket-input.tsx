@@ -1,9 +1,7 @@
 // The bottom of Sprocket's window: a question's feed and the input.
 
-import { ArrowUp } from "lucide-react";
-
 import { post } from "@/api";
-import { Button } from "@/components/ui/button";
+import { ChatSend } from "@/components/chat-send";
 import { useT } from "@/i18n/use-t";
 import type { Page } from "@/lib/routes";
 import { useSupport } from "@/support/use-support";
@@ -60,6 +58,7 @@ export function Input({
   const t = useT();
   const errors = useCaughtErrors();
   const where = t.shell.pages[page];
+  const support = useSupport();
   const send = () => {
     const said = text.trim();
     if (!said) return;
@@ -111,14 +110,14 @@ export function Input({
         }}
         className="max-h-32 min-h-8 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-[13px] outline-none placeholder:text-muted-foreground"
       />
-      <Button
-        type="submit"
+      <ChatSend
+        busy={support?.writing != null}
+        typed={text.trim() !== ""}
+        onStop={() => {
+          void post("/api/kobble/support/stop", {}).catch(() => undefined);
+        }}
         size="icon-sm"
-        aria-label="Send"
-        disabled={!text.trim()}
-      >
-        <ArrowUp aria-hidden className="size-4" />
-      </Button>
+      />
     </form>
   );
 }

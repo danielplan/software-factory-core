@@ -4,10 +4,11 @@
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
-import { ArrowUp, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type ExplorationPage, messageOf, post } from "@/api";
+import { ChatSend } from "@/components/chat-send";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 
@@ -82,6 +83,13 @@ function TalkBox({
         />
       </div>
     );
+  const stop = () => {
+    post("/api/kobble/explorations/stop", { id: page.exploration.id }).catch(
+      (error: unknown) => {
+        onRefused(messageOf(error));
+      },
+    );
+  };
   const send = () => {
     onRefused(null);
     post("/api/kobble/explorations/say", {
@@ -105,6 +113,7 @@ function TalkBox({
       onText={setText}
       busy={busy}
       onSend={send}
+      onStop={stop}
       onTalk={() => {
         call.start();
       }}
@@ -113,13 +122,15 @@ function TalkBox({
 }
 
 // The box to type in, roomy: two lines to start, growing with the words, Enter sends and
-// Shift+Enter starts a new line; Talk and Send (an arrow) below.
+// Shift+Enter starts a new line; Talk and Send (an arrow) below. While the
+// kobold answers, what is sent joins its answer, and Stop ends it.
 function TypeBox({
   fresh,
   text,
   onText,
   busy,
   onSend,
+  onStop,
   onTalk,
 }: Readonly<{
   // A new exploration, waiting for the team's idea.
@@ -128,6 +139,7 @@ function TypeBox({
   onText: (text: string) => void;
   busy: boolean;
   onSend: () => void;
+  onStop: () => void;
   onTalk: () => void;
 }>) {
   const t = useT();
@@ -161,7 +173,7 @@ function TypeBox({
           // Enter sends; Shift+Enter starts a new line.
           if (event.key !== "Enter" || event.shiftKey) return;
           event.preventDefault();
-          if (!busy && text.trim()) onSend();
+          if (text.trim()) onSend();
         }}
         ref={grow}
         className="max-h-48 min-h-11 resize-none overflow-y-auto bg-transparent px-1 text-[13px] leading-relaxed outline-none placeholder:text-muted-foreground"
@@ -176,15 +188,13 @@ function TypeBox({
         >
           <Mic aria-hidden className="size-4" />
         </Button>
-        <Button
-          type="submit"
+        <ChatSend
+          busy={busy}
+          typed={text.trim() !== ""}
+          onStop={onStop}
           size="pill-sm"
-          aria-label={t.explore.talk.send}
           className="ml-auto"
-          disabled={busy || !text.trim()}
-        >
-          <ArrowUp aria-hidden className="size-4" />
-        </Button>
+        />
       </div>
     </form>
   );

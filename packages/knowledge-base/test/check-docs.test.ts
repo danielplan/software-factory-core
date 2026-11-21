@@ -135,3 +135,13 @@ test("installed packages and coverage reports are never looked into", async () =
   });
   assert.deepEqual(await checkDocs(root), []);
 });
+
+test("a folder left out is as if it were not there: its pages and the paths into it are not checked", async () => {
+  const root = repository({
+    "README.md": "A company's `factory/theme.css` sets its colours.\n",
+    "factory/notes.md": "[gone](missing.md)\n",
+    "factory/factory.json": "{}\n",
+  });
+  assert.equal((await checkDocs(root)).length, 2);
+  assert.deepEqual(await checkDocs(root, { leftOut: ["factory"] }), []);
+});

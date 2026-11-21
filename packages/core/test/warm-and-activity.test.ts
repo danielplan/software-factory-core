@@ -108,7 +108,7 @@ test("one Claude Code process answers every turn of a conversation, streaming th
 
 test("a message told in the middle of a turn joins that turn; with no turn it is not taken", async () => {
   const pretend = pretendClaude();
-  const warm = new WarmClaude("claude", { start: pretend.start });
+  const warm = new WarmClaude("claude", { start: pretend.start, followMs: 5 });
   assert.equal(warm.tell("s-1", "also blue"), false);
   const turn = warm.run({
     ...base,
@@ -119,6 +119,99 @@ test("a message told in the middle of a turn joins that turn; with no turn it is
   assert.equal((await turn).text, "Sure, number 2");
   assert.deepEqual(pretend.started[0]?.turns, ["Make it (hold)", "also blue"]);
   assert.equal(warm.tell("s-1", "and green"), false);
+  warm.stop();
+});
+
+// A pretend Claude Code that answers each message in a turn of its own,
+// as the real one does when its answer has only words: an "init", the
+// words, a result.
+function apartClaude() {
+  const start = () => {
+    const stdin = new PassThrough();
+    const stdout = new PassThrough();
+    const child = Object.assign(new EventEmitter(), {
+      stdin,
+      stdout,
+      stderr: new PassThrough(),
+      kill() {
+        stdout.end();
+        setImmediate(() => child.emit("close", null));
+        return true;
+      },
+    });
+    const send = (event: object) => stdout.write(`${JSON.stringify(event)}\n`);
+    let buffer = "";
+    const queue: string[] = [];
+    let answering = false;
+    const answerNext = () => {
+      const next = queue.shift();
+      if (next === undefined) {
+        answering = false;
+        return;
+      }
+      answering = true;
+      send({ type: "system", subtype: "init" });
+      setTimeout(() => {
+        send({ type: "result", result: `About ${next}.` });
+        answerNext();
+      }, 20);
+    };
+    stdin.on("data", (chunk: Buffer) => {
+      buffer += chunk.toString();
+      for (let at; (at = buffer.indexOf("\n")) !== -1;) {
+        const turn = JSON.parse(buffer.slice(0, at)) as {
+          message: { content: string };
+        };
+        buffer = buffer.slice(at + 1);
+        queue.push(turn.message.content);
+        if (!answering) answerNext();
+      }
+    });
+    return child;
+  };
+  return { start };
+}
+
+test("a message Claude Code answers in a turn of its own is still part of this turn's answer", async () => {
+  const warm = new WarmClaude("claude", {
+    start: apartClaude().start,
+    followMs: 200,
+  });
+  const turn = warm.run({
+    ...base,
+    prompt: "the sea",
+    session: { id: "s-1", resume: false },
+  });
+  assert.equal(warm.tell("s-1", "the sky"), true);
+  assert.equal((await turn).text, "About the sea.\n\nAbout the sky.");
+  const alone = await warm.run({
+    ...base,
+    prompt: "the moon",
+    session: { id: "s-1", resume: true },
+  });
+  assert.equal(alone.text, "About the moon.");
+  warm.stop();
+});
+
+test("a stopped turn ends without an answer; the next turn goes on with the conversation", async () => {
+  const pretend = pretendClaude();
+  const warm = new WarmClaude("claude", { start: pretend.start });
+  assert.equal(warm.interrupt("s-1"), false);
+  const turn = warm.run({
+    ...base,
+    prompt: "Make it (hold)",
+    session: { id: "s-1", resume: false },
+  });
+  assert.equal(warm.interrupt("s-1"), true);
+  assert.equal((await turn).ok, false);
+  assert.equal(warm.interrupt("s-1"), false);
+  const next = await warm.run({
+    ...base,
+    prompt: "Another way",
+    session: { id: "s-1", resume: true },
+  });
+  assert.equal(next.ok, true);
+  assert.equal(pretend.started.length, 2);
   warm.stop();
 });
 
@@ -204,11 +297,26 @@ test("tool calls become short plain descriptions with paths relative to the work
     describeEvent(toolUse("mcp__board__add_note", {}), workspace),
     ["Using add note (board)"],
   );
-  // Without a description, the kind of command, never the command itself.
+  // Without a description, the kind of command and what it works on,
+  // never the command itself; a "cd" in front only says where it runs.
   for (const [command, words] of [
-    ["node --experimental-strip-types --test a.test.ts", "Running the tests"],
-    ["cd /tmp/copy && git status", "Working with git"],
-    ["npx eslint packages", "Checking the code's style"],
+    [
+      "node --experimental-strip-types --test packages/server/test/a.test.ts",
+      "Running the tests: a.test.ts",
+    ],
+    ["npm test", "Running the tests"],
+    ["cd /tmp/copy && git status", "Working with git: status"],
+    [
+      "cd /work/copies/build; git diff main...proto/X-5-e -- packages",
+      "Working with git: diff main...proto/X-5-e",
+    ],
+    [
+      "cd /work/copies/build; sed -n 1,80p packages/server/src/github.ts; grep -n x src/signals.ts",
+      "Looking through: github.ts, signals.ts",
+    ],
+    ["cd /work/copies/build; ls", "Looking through files"],
+    ["npx eslint src/a.tsx src/b.ts", "Checking the code's style: a.tsx, b.ts"],
+    ["npm run build -w @software-factory/dashboard", "Building: dashboard"],
     ["npm ci", "Installing packages"],
     ["make something", "Running a command"],
   ])

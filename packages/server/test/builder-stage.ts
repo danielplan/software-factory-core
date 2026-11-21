@@ -12,7 +12,7 @@ import {
 
 import type { Stage } from "../src/api.ts";
 import { BoardWork } from "../src/builder/board-work.ts";
-import { copyName, Jobs } from "../src/builder/jobs.ts";
+import { copyName, Jobs, type JobsOptions } from "../src/builder/jobs.ts";
 import type { Message } from "../src/builder/decide.ts";
 import type {
   PullRequest,
@@ -182,6 +182,7 @@ export function pretendPullRequests() {
     thread: Message[];
   })[] = [];
   const pullRequests: PullRequests = {
+    repository: "o/r",
     baseBranch: () => Promise.resolve("main"),
     find: (branch) =>
       Promise.resolve(made.find((p) => p.branch === branch) ?? null),
@@ -257,6 +258,7 @@ export function setUp(
   copy: (n: string) => Promise<Workspace>,
   shellOk: boolean[],
   places = 1,
+  more: Partial<JobsOptions> = {},
 ) {
   const board = pretendBoard(kept);
   const prs = pretendPullRequests();
@@ -280,6 +282,7 @@ export function setUp(
         output: "1 test failed\nexpected 2",
       });
     },
+    ...more,
   });
   const work = new BoardWork({
     cards: board.cards,

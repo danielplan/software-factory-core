@@ -14,7 +14,7 @@ import { Refused } from "../../refused.ts";
 import type { PersonaTests } from "../persona-tests.ts";
 import { FileAnswer } from "../../http.ts";
 import { PICTURE_TYPES } from "../../coach/pictures.ts";
-import { addPicture, attachedIn, personActs } from "./person-acts.ts";
+import { addPicture, personActs } from "./person-acts.ts";
 import {
   dropExploration,
   explorationOf,
@@ -27,6 +27,8 @@ import { withThing } from "./board-things.ts";
 import { ExplorationPrototypes } from "./prototypes.ts";
 import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
+import { talkRoutes } from "./talk-routes.ts";
+import { type SpecWriter, specWriter } from "./spec-writer.ts";
 import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
 import type { Browser } from "../persona-tests.ts";
 import { ExplorationWorlds } from "./worlds.ts";
@@ -64,7 +66,13 @@ export function servedExplorations(options: Options) {
     };
   const routes = {
     ...readRoutes(store, talks, prototypes, options.ideas),
-    ...buttonRoutes(store, button, { talks, prototypes, cards: options.cards }),
+    ...buttonRoutes(store, button, {
+      talks,
+      prototypes,
+      cards: options.cards,
+      write: writerOf(options),
+    }),
+    ...talkRoutes(store, talks, button),
   };
   return {
     routes,
@@ -105,8 +113,13 @@ function makersFor(
     },
     // Handed off by the kobold, on the team's yes: as the button does.
     handOff: async (id) => {
-      const handed = await handOff(store(), id, options.cards);
-      await prototypes.stopAll(id);
+      const handed = await handOff(
+        store(),
+        id,
+        options.cards,
+        writerOf(options),
+      );
+      await prototypes.removeAll(id);
       options.onChange();
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
     },
@@ -191,6 +204,7 @@ function buttonRoutes(
     talks: ExplorationTalks;
     prototypes: ExplorationPrototypes;
     cards: () => Cards;
+    write: SpecWriter;
   },
 ): Record<string, Route> {
   const { talks, prototypes } = on;
@@ -209,15 +223,7 @@ function buttonRoutes(
     }),
     "POST /api/kobble/explorations/drop": button(async (body) => {
       const dropped = dropExploration(store(), field(body, "id"));
-      await prototypes.stopAll(dropped.id);
-    }),
-    "POST /api/kobble/explorations/say": button((body) => {
-      void talks.say(
-        id(body),
-        field(body, "text"),
-        attachedIn(body),
-        spokenIn(body),
-      );
+      await prototypes.removeAll(dropped.id);
     }),
     "POST /api/kobble/explorations/make": button((body) => ({
       board: prototypes.make(
@@ -237,8 +243,8 @@ function buttonRoutes(
     })),
     // Handed off, the exploration is done: its prototypes stop.
     "POST /api/kobble/explorations/hand-off": button(async (body) => {
-      const handed = await handOff(store(), id(body), on.cards);
-      await prototypes.stopAll(field(body, "id"));
+      const handed = await handOff(store(), id(body), on.cards, on.write);
+      await prototypes.removeAll(field(body, "id"));
       return handed;
     }),
   };
@@ -260,8 +266,12 @@ function persona(body: unknown): string | undefined {
   return typeof value === "string" && value ? value : undefined;
 }
 
-// The language the person spoke in, when they talked instead of typing.
-function spokenIn(body: unknown): string | undefined {
-  const value = (body as { spokenIn?: unknown } | null)?.spokenIn;
-  return typeof value === "string" && value.trim() ? value : undefined;
+// The spec written at hand-off, by Claude Code reading the project.
+function writerOf(options: Options): SpecWriter {
+  return specWriter({
+    claude: options.claude,
+    project: options.project,
+    root: options.root,
+    store: options.store,
+  });
 }

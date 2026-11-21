@@ -1,0 +1,14 @@
+{
+  "github": {
+    "label": "*",
+    "stages": {
+      "backlog": "Backlog",
+      "todo": "Ready",
+      "doing": "In progress",
+      "review": "In review",
+      "done": "Done"
+    },
+    "repository": "danielplan/software-factory-core",
+    "board": 4
+  }
+}

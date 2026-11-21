@@ -5,6 +5,7 @@
 // board. Which issues Kobble waits for "did it work?" about comes from the
 // records, once the server serves them.
 
+import type { Browser } from "../kobble/persona-tests.ts";
 import { basename, dirname, join } from "node:path";
 
 import {
@@ -42,12 +43,14 @@ export type WorkSettings = {
   available: Available;
   onChange: () => void;
   waiting?: () => ReadonlySet<number>;
+  browser?: () => Promise<Browser>;
 };
 
 export function workFor(
   settings: WorkSettings,
 ): { work: BoardWork; repository: string } | null {
-  const { root, project, cli, claude, available, onChange, waiting } = settings;
+  const { root, project, cli, claude, available, onChange, waiting, browser } =
+    settings;
   const found = cardsFor(root, cli);
   if ("problem" in found) return null;
   const copies = join(dirname(project), `${basename(project)}-factory-copies`);
@@ -75,6 +78,7 @@ export function workFor(
       build: (place) => copyOf(copyName("build", place)),
     },
     model: () => builderModel(root),
+    ...(browser ? { browser } : {}),
   });
   const work = new BoardWork({
     cards: found.cards,
@@ -109,7 +113,7 @@ export class ConnectedWork {
   constructor(options: {
     project: string;
     cli?: Cli;
-    coach: { claude: Claude };
+    coach: { claude: Claude; builderBrowser?: () => Promise<Browser> };
     available: Available;
     onChange: () => void;
   }) {
@@ -120,6 +124,9 @@ export class ConnectedWork {
       available: options.available,
       onChange: options.onChange,
       waiting: () => this.waiting(),
+      ...(options.coach.builderBrowser
+        ? { browser: options.coach.builderBrowser }
+        : {}),
     };
   }
 

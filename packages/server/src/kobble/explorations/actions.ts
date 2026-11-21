@@ -14,6 +14,7 @@ import {
 import { z } from "zod";
 
 import type { Cards } from "../../cards/cards.ts";
+import type { SpecWriter } from "./spec-writer.ts";
 import { Refused } from "../../refused.ts";
 
 export function explorationOf(store: KobbleStore, id: string): Exploration {
@@ -119,6 +120,9 @@ export async function handOff(
   store: KobbleStore,
   id: string,
   cards: () => Cards,
+  // Writes the spec the card gets; the short summary when there is none or
+  // it cannot.
+  write?: SpecWriter,
 ): Promise<{ issue: number; url: string }> {
   const exploration = open(store, id);
   const board = store.board(id);
@@ -131,7 +135,9 @@ export async function handOff(
   const tests = store
     .all("tests")
     .filter((test) => agreed.tests.includes(test.id));
-  const text = handoffText(exploration, board, agreed, tests);
+  const summary = handoffText(exploration, board, agreed, tests);
+  const spec = await write?.({ exploration, summary, branch: agreed.branch });
+  const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed.key} -->`;
   // Handed off agreed: straight to To do, the go-ahead to build it. An
   // exploration of a Backlog issue fills in that issue instead.
   const card = await handedOffCard(connected, exploration, text);
@@ -174,13 +180,26 @@ function changeLines(agreed: Made): string[] {
 }
 
 // The agreed variant, when the prototype has several: build only that one.
+// The variant agreed, when the prototype holds several: it is what was
+// agreed (the prototype itself is named after the question).
+function chosenVariant(agreed: Made) {
+  const variants = agreed.variants ?? [];
+  if (variants.length < 2) return null;
+  return variants.find((one) => one.key === agreed.variant) ?? null;
+}
+
+function agreedLine(agreed: Made): string {
+  const chosen = chosenVariant(agreed) ?? agreed;
+  return [`${chosen.key} · ${chosen.name}.`, chosen.difference]
+    .filter(Boolean)
+    .join(" ");
+}
+
 function variantLines(agreed: Made): string[] {
   const variants = agreed.variants ?? [];
-  const chosen = variants.find((one) => one.key === agreed.variant);
-  if (variants.length < 2 || !chosen) return [];
+  const chosen = chosenVariant(agreed);
+  if (!chosen) return [];
   return [
-    "",
-    `**Variant:** ${chosen.key} · ${chosen.name}. ${chosen.difference}`,
     "",
     `The prototype holds the variants ${variants.map((one) => one.key).join(", ")}, shown by the page address (\`?variant=${chosen.key}\`). Build only ${chosen.key}: leave out the others and the variant switch.`,
   ];
@@ -215,13 +234,11 @@ function handoffText(
     "",
     `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
     "",
-    `**Agreed:** ${agreed.key} · ${agreed.name}. ${agreed.difference}`,
+    `**Agreed:** ${agreedLine(agreed)}`,
     ...variantLines(agreed),
     ...changeLines(agreed),
     "",
     `**The prototype:** on the branch \`${agreed.branch}\`.`,
     ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),
-    "",
-    `<!-- factory:kobble exploration=${exploration.id} prototype=${agreed.key} -->`,
   ].join("\n");
 }

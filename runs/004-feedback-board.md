@@ -64,8 +64,8 @@ stood in only for the final Send, so nothing reached the real board):
   live (title, text, version, page) → Send → "Sent as #91" → Start over →
   the opening again.
 
-![The draft, ready to send](runs/004-feedback-board/draft.png)
-![After Send](runs/004-feedback-board/sent.png)
+![The draft, ready to send](004-feedback-board/draft.png)
+![After Send](004-feedback-board/sent.png)
 
 Found and fixed: after Send, the status card at the top disappeared until the
 board listed the post again; the server now keeps the post as sent and shows

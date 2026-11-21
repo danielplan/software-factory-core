@@ -12,7 +12,6 @@ const en = {
     "Ask how Kobble works, where something is, or anything about your product.",
   thinking: "Thinking…",
   question: "Ask a question",
-  send: "Send",
 };
 
 export const support = area(
@@ -27,7 +26,6 @@ export const support = area(
       "Chiedi come funziona Kobble, dove si trova qualcosa, o qualsiasi cosa sul tuo prodotto.",
     thinking: "Ci penso…",
     question: "Fai una domanda",
-    send: "Invia",
   },
   {
     answering: (name) => `${name} antwortet…`,
@@ -39,6 +37,5 @@ export const support = area(
       "Frag, wie Kobble funktioniert, wo etwas ist, oder alles über dein Produkt.",
     thinking: "Denkt nach…",
     question: "Stell eine Frage",
-    send: "Senden",
   },
 );

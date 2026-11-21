@@ -4,3 +4,6 @@ package-lock.json
 packages/dashboard/dist/
 # The kits' starters: whole products with their own Prettier settings.
 packages/kits/starters/
+# Kobble's own factory: files Kobble writes itself (conversations, boards).
+factory/kobble/
+factory/board.json

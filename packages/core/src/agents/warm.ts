@@ -14,6 +14,7 @@ import { describeEvent } from "./activity.ts";
 import { claudeArgs, type RunOptions } from "./claude.ts";
 import {
   addsText,
+  type ClaudeEvent,
   type ClaudeResult,
   readEvent,
   replySoFar,
@@ -22,6 +23,9 @@ import {
 
 export const IDLE_MS = 15 * 60_000;
 const TIME_LIMIT_MS = 15 * 60_000;
+// After an answer, how long a turn told something in the middle waits for
+// Claude Code to start answering it (it does at once, with a new "init").
+export const FOLLOW_MS = 2_000;
 
 // The part of a child process used here, so checks can pretend.
 export type Child = {
@@ -42,6 +46,12 @@ type Turn = {
   writing: string;
   resolve(result: ClaudeResult): void;
   timer: NodeJS.Timeout;
+  // Told something since Claude Code last started answering: an answer
+  // with only words cannot take it in, so Claude Code answers it after, in
+  // a turn of its own, and both answers make this turn's.
+  told: boolean;
+  answered: string[];
+  follow: NodeJS.Timeout | null;
 };
 
 type Open = {
@@ -58,15 +68,17 @@ export class WarmClaude {
   private executable: string;
   private start: Start;
   private idleMs: number;
+  private followMs: number;
   private open = new Map<string, Open>();
 
   constructor(
     executable: string,
-    options: { start?: Start; idleMs?: number } = {},
+    options: { start?: Start; idleMs?: number; followMs?: number } = {},
   ) {
     this.executable = executable;
     this.start = options.start ?? startClaude;
     this.idleMs = options.idleMs ?? IDLE_MS;
+    this.followMs = options.followMs ?? FOLLOW_MS;
   }
 
   async run(options: RunOptions): Promise<ClaudeResult> {
@@ -94,7 +106,18 @@ export class WarmClaude {
   tell(session: string, message: string): boolean {
     const open = this.open.get(session);
     if (!open || open.closed || !open.turn) return false;
+    open.turn.told = true;
     open.child.stdin.write(userLine(message));
+    return true;
+  }
+
+  // Stops a conversation's turn: its Claude Code is closed, the turn ends
+  // without an answer, and the next turn starts it again on the same
+  // conversation (what was said so far is kept by Claude Code).
+  interrupt(session: string): boolean {
+    const open = this.open.get(session);
+    if (!open || open.closed || !open.turn) return false;
+    this.close(session);
     return true;
   }
 
@@ -155,7 +178,15 @@ export class WarmClaude {
         options.onActivity("Time limit reached, stopping Claude");
         this.close(id);
       }, options.timeLimitMs ?? TIME_LIMIT_MS);
-      open.turn = { options, writing: "", resolve, timer };
+      open.turn = {
+        options,
+        writing: "",
+        resolve,
+        timer,
+        told: false,
+        answered: [],
+        follow: null,
+      };
       open.child.stdin.write(userLine(options.prompt));
     }).then((result) => {
       const done = result as ClaudeResult;
@@ -174,14 +205,39 @@ export class WarmClaude {
     if (!turn) return;
     const event = readEvent(line);
     if (!event) return;
+    if (isStart(event)) {
+      // Claude Code starts answering what was told: the turn goes on.
+      if (turn.follow) clearTimeout(turn.follow);
+      turn.follow = null;
+      turn.told = false;
+    }
     if (event.type === "stream_event") {
       turn.writing = replySoFar(event, turn.writing);
-      if (addsText(event)) turn.options.onText?.(turn.writing);
+      // The answers so far stay shown while the next one is written.
+      if (addsText(event))
+        turn.options.onText?.([...turn.answered, turn.writing].join("\n\n"));
       return;
     }
     for (const text of describeEvent(event, turn.options.cwd))
       turn.options.onActivity(text);
-    if (event.type === "result") this.finish(open, resultOf(event));
+    if (event.type === "result") this.answered(open, turn, resultOf(event));
+  }
+
+  // An answer: the turn's, or the first of several when something was told
+  // that Claude Code answers next.
+  private answered(open: Open, turn: Turn, result: ClaudeResult): void {
+    const all = {
+      ...result,
+      text: [...turn.answered, result.text].join("\n\n"),
+    };
+    if (!result.ok || !turn.told) {
+      this.finish(open, all);
+      return;
+    }
+    turn.answered.push(result.text);
+    turn.follow = setTimeout(() => {
+      this.finish(open, all);
+    }, this.followMs);
   }
 
   private finish(open: Open, result: ClaudeResult): void {
@@ -189,6 +245,7 @@ export class WarmClaude {
     if (!turn) return;
     open.turn = null;
     clearTimeout(turn.timer);
+    if (turn.follow) clearTimeout(turn.follow);
     turn.resolve(result);
   }
 
@@ -211,4 +268,9 @@ export class WarmClaude {
 // One message from the user, as Claude Code reads it over standard input.
 function userLine(content: string): string {
   return `${JSON.stringify({ type: "user", message: { role: "user", content } })}\n`;
+}
+
+// Claude Code starting to answer a message (its "init", before each turn).
+function isStart(event: ClaudeEvent): boolean {
+  return event.type === "system" && event.subtype === "init";
 }

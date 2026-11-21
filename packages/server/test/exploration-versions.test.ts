@@ -14,6 +14,7 @@ import {
   opensIn,
   shownAddress,
 } from "../src/kobble/explorations/versions.ts";
+import { choicePrototype } from "../src/kobble/explorations/versions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 import { inGit } from "./git-project.ts";
 
@@ -359,5 +360,49 @@ test("what the maker is told it looked at: the pictures, and where to use it in 
   assert.doesNotMatch(
     lookedWords({ pictures: ["/a.png"], problem: null }),
     /runs at/,
+  );
+});
+
+test("a new question in an exploration with a prototype becomes its variants, in the same copy, on the variant shown so far", () => {
+  const two = (title: string) => ({
+    act: "choice" as const,
+    title,
+    options: [{ name: "One way" }, { name: "Another way" }],
+  });
+  let board = applyAct(
+    { things: [], links: [] },
+    two("Where?"),
+    "kobold",
+  ).board;
+  const first = choicePrototype(board, "X-9", "choice-1", []);
+  board = first.board;
+  const made = board.things.find((t) => t.kind === "prototype");
+  assert.ok(made?.kind === "prototype");
+  board = {
+    ...board,
+    things: board.things.map((t) =>
+      t.id === made.id ? { ...t, variant: "B" } : t,
+    ),
+  };
+  board = applyAct(board, two("What does it say?"), "kobold").board;
+  const second = choicePrototype(board, "X-9", "choice-2", []);
+  assert.equal(second.key, first.key);
+  const prototypes = second.board.things.filter((t) => t.kind === "prototype");
+  assert.equal(prototypes.length, 1);
+  const now = prototypes[0];
+  assert.ok(now?.kind === "prototype");
+  assert.deepEqual(
+    now.variants?.map((one) => one.key),
+    ["A", "B"],
+  );
+  assert.equal(now.variant, "A");
+  assert.equal(now.name, "What does it say?");
+  assert.match(second.change ?? "", /new question: “What does it say\?”/);
+  assert.match(
+    second.change ?? "",
+    /variant B \(“Another way”\) shows as the prototype's base/,
+  );
+  assert.ok(
+    second.board.links.some((l) => l.from === "choice-2" && l.to === made.id),
   );
 });

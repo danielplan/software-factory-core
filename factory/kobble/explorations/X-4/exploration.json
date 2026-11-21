@@ -1,0 +1,12 @@
+{
+  "id": "X-4",
+  "title": "Builder keeps off people's cards",
+  "status": "handed-off",
+  "personas": [],
+  "signals": [],
+  "heard": [],
+  "problem": "When a developer moves a card to In progress to do it themselves, the builder sees it there and starts building it too. Two people's work collide on one card, and the developer's effort is wasted or overwritten.",
+  "created": "2026-11-20T10:32:46.409Z",
+  "work": 6,
+  "issue": 6
+}

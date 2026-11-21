@@ -10,6 +10,7 @@
 
 import { type Available, type Claude } from "@software-factory/core";
 
+import type { Browser } from "../kobble/persona-tests.ts";
 import type { Cards } from "../cards/cards.ts";
 import { branchOf, copyName, headOf } from "./branches.ts";
 import {
@@ -47,6 +48,10 @@ export type JobsOptions = {
   timeLimitMs?: number;
   // The builder's model, read for each job; none: the factory's own.
   model?: () => string | undefined;
+  // A browser of its own for each turn, headless and without a saved
+  // profile (Playwright's), to look at what it built; without one it gets
+  // none, never the person's own browser.
+  browser?: () => Promise<Browser>;
   now?: () => Date;
 };
 
@@ -202,7 +207,7 @@ export class Jobs {
       );
       return;
     }
-    const url = await this.pullRequest(card, text, false);
+    const url = await this.pullRequest(card, at, text, false);
     await this.say(
       card.number,
       `Built, and every check passes: ${url} is ready for your review.`,
@@ -226,7 +231,7 @@ export class Jobs {
     const changed = (await changedFiles(copy.path, base)).length > 0;
     const failed = report === null ? "" : `\n\n${failedChecksSection(report)}`;
     const url = changed
-      ? await this.pullRequest(card, `${text}${failed}`, true)
+      ? await this.pullRequest(card, at, `${text}${failed}`, true)
       : null;
     const draft = url
       ? `What it did so far is in a draft pull request, not to merge yet: ${url}`
@@ -284,17 +289,27 @@ export class Jobs {
     prompt: string,
     onActivity: (line: string) => void,
   ) {
-    return await builderTurn({
-      claude: this.options.claude,
-      copy: await at.build(),
-      card,
-      prompt,
-      onActivity,
-      model: this.options.model?.(),
-      timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,
-      repository: this.options.repository,
-      now: this.now(),
-    });
+    const browser = this.options.browser
+      ? await this.options.browser().catch(() => null)
+      : null;
+    try {
+      return await builderTurn({
+        claude: this.options.claude,
+        copy: await at.build(),
+        card,
+        prompt,
+        onActivity,
+        model: this.options.model?.(),
+        timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,
+        repository: this.options.repository,
+        now: this.now(),
+        browser: browser
+          ? { name: "browser", url: browser.url, headers: {} }
+          : null,
+      });
+    } finally {
+      browser?.close();
+    }
   }
 
   // The checks, with rounds of fixing while any is red (checks.ts).
@@ -319,9 +334,15 @@ export class Jobs {
     });
   }
 
-  // Opens the card's pull request, or updates the one there is; its address.
-  private async pullRequest(card: BoardCard, text: string, draft: boolean) {
-    return await openOrUpdate(this.options.pullRequests, card, text, draft);
+  // Opens the card's pull request, or updates the one there is, with the
+  // screenshots the branch adds; its address.
+  private async pullRequest(
+    card: BoardCard,
+    at: Place,
+    text: string,
+    draft: boolean,
+  ) {
+    return await openOrUpdate(this.options.pullRequests, card, text, draft, at);
   }
 
   private async say(number: number, text: string, note: Note) {

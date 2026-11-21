@@ -102,3 +102,17 @@ test("the chosen model keeps telling a conversation in the middle of a turn", ()
   assert.equal(chosen.tell?.("s1", "also blue"), true);
   assert.deepEqual(told, ["s1: also blue"]);
 });
+
+test("the chosen model keeps stopping a conversation's turn", () => {
+  const stopped: string[] = [];
+  const claude: Claude = {
+    run: () => Promise.resolve({ ok: true, text: "" }),
+    interrupt: (session) => {
+      stopped.push(session);
+      return true;
+    },
+  };
+  const chosen = withChosenModel(claude, () => null);
+  assert.equal(chosen.interrupt?.("s1"), true);
+  assert.deepEqual(stopped, ["s1"]);
+});

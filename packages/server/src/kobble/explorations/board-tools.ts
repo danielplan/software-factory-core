@@ -207,7 +207,7 @@ function addPrototypeTools(server: McpServer, on: BoardTools): void {
     "make_prototype",
     {
       description:
-        "Start making a choice's prototype: one prototype with its options as variants (all of them unless you name some), made at once in one copy of the code in a few minutes. It appears on the board at once; the team switches between the variants on the board. Calling it again for options not made yet adds them as variants. Say in one line what you started.",
+        "Start making a choice's prototype: one prototype with its options as variants (all of them unless you name some), made at once in one copy of the code in a few minutes. It appears on the board at once; the team switches between the variants on the board. Calling it again for options not made yet adds them as variants. An exploration has one prototype: for a new choice, its options replace the variants, on top of the variant shown so far. Say in one line what you started.",
       inputSchema: {
         choice: z.string().describe("The choice's id (choice-1)."),
         options: z

@@ -2,6 +2,7 @@
 // starts it): the commands that answer and end, or the project's factory
 // on this computer.
 
+import { playwrightBrowser } from "../src/kobble/test-setup.ts";
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -89,6 +90,7 @@ const session = new Session({
     guide: readFileSync(join(guidesFolder, "setup-coach.md"), "utf8"),
     ideaGuide: readFileSync(join(guidesFolder, "idea-coach.md"), "utf8"),
     trackers: [githubSetup()],
+    builderBrowser: playwrightBrowser,
   },
   tools: computerTools(),
 });

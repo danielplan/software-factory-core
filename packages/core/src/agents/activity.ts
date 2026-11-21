@@ -16,19 +16,71 @@ export type ActivityEvent = {
 };
 
 // A command in plain words: what it is for when Claude said so, otherwise
-// what kind of command it is; never the raw command line.
-const KINDS_OF_COMMAND: [RegExp, string][] = [
-  [/\b(test|vitest|jest|playwright)\b|--test\b/, "Running the tests"],
-  [/\b(eslint|lint|prettier)\b/, "Checking the code's style"],
-  [/\b(tsc|typecheck)\b/, "Checking the types"],
-  [/\b(npm|pnpm|yarn) (ci|install|i)\b/, "Installing packages"],
-  [/\bbuild\b/, "Building"],
-  [/^\s*(cd [^&]*&&\s*)?git\b/, "Working with git"],
+// what kind of command it is and what it works on (the files, the tests, the
+// package, git's own command); never the raw command line.
+const KINDS_OF_COMMAND: [RegExp, string, (command: string) => string[]][] = [
   [
-    /^\s*(cd [^&]*&&\s*)?(ls|cat|head|tail|grep|rg|find|sed)\b/,
-    "Looking through files",
+    /\b(test|vitest|jest|playwright)\b|--test\b/,
+    "Running the tests",
+    (command) =>
+      pathsIn(command).filter((path) => /\.(test|spec)\./.test(path)),
+  ],
+  [/\b(eslint|lint|prettier)\b/, "Checking the code's style", pathsIn],
+  [/\b(tsc|typecheck)\b/, "Checking the types", () => []],
+  [/\b(npm|pnpm|yarn) (ci|install|i)\b/, "Installing packages", () => []],
+  [/\brun build\b|\bvite build\b/, "Building", packagesIn],
+  [/^\s*git\b/, "Working with git", gitWords],
+  [
+    /^\s*(ls|cat|head|tail|grep|rg|find|sed|wc|diff)\b/,
+    "Looking through",
+    pathsIn,
   ],
 ];
+
+// "cd <folder>" in front of a command only says where it runs.
+function withoutCd(command: string): string {
+  let rest = command.trimStart();
+  for (;;) {
+    const cd = /^cd\s+[^\s;&]+\s*(?:&&|;)/.exec(rest);
+    if (!cd) return rest;
+    rest = rest.slice(cd[0].length).trimStart();
+  }
+}
+
+// The files and folders a command names, by their last part, at most three.
+function pathsIn(command: string): string[] {
+  const paths = command
+    .split(/[\s;|&<>()]+/)
+    .map(
+      (word) =>
+        word.replaceAll('"', "").replaceAll("'", "").split(":")[0] ?? "",
+    )
+    .filter(
+      (word) =>
+        !word.startsWith("-") &&
+        !word.includes("node_modules") &&
+        !word.startsWith("/dev/") &&
+        !word.includes("*") &&
+        (word.includes("/") || /\.[a-z]{1,5}$/i.test(word)) &&
+        /[a-z]/i.test(word),
+    )
+    .map((word) => word.replace(/\/$/, "").split("/").at(-1) ?? word)
+    .filter((word) => word && word !== "." && word !== "..");
+  return [...new Set(paths)];
+}
+
+// The packages a build names (npm run build -w @scope/name: "name").
+function packagesIn(command: string): string[] {
+  return [...command.matchAll(/(?:-w|--workspace)[= ]\s*(\S+)/g)].map((found) =>
+    (found[1] ?? "").replace(/^@[^/]+\//, ""),
+  );
+}
+
+// Git's own command and what it is on: "diff main...proto/X-5-e".
+function gitWords(command: string): string[] {
+  const found = /^\s*git\s+([\w-]+)((?:\s+[^-\s;&|][^\s;&|]*)?)/.exec(command);
+  return found ? [`${found[1] ?? ""}${found[2] ?? ""}`] : [];
+}
 
 // A tool of an MCP server (mcp__<server>__<tool>) in words: the browser's
 // as what it does there ("In the browser: click"), any other by its name.
@@ -47,8 +99,15 @@ function otherTool(name: string): string {
 
 function commandWords(description: string, command: string): string {
   if (description) return `Running: ${shorten(description, 120)}`;
-  const kind = KINDS_OF_COMMAND.find(([pattern]) => pattern.test(command));
-  return kind ? kind[1] : "Running a command";
+  const plain = withoutCd(command);
+  const kind = KINDS_OF_COMMAND.find(([pattern]) => pattern.test(plain));
+  if (!kind) return "Running a command";
+  const [, words, what] = kind;
+  const on = what(plain);
+  const named = on.slice(0, 3).join(", ") + (on.length > 3 ? ", …" : "");
+  if (!named)
+    return words === "Looking through" ? "Looking through files" : words;
+  return shorten(`${words}: ${named}`, 120);
 }
 
 export function describeEvent(

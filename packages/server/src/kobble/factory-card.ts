@@ -8,7 +8,7 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { field } from "../asked.ts";
 import { branchOf } from "../builder/branches.ts";
 import { type Note, readNote, stripMarker } from "../builder/protocol.ts";
-import { githubPullRequests } from "../builder/pull-requests.ts";
+import { githubPullRequests, RESOLVE_ASK } from "../builder/pull-requests.ts";
 import {
   aboutOf,
   CARD_TYPES,
@@ -87,6 +87,18 @@ export function factoryCardRoutes(
       if (!cards.setType) throw new Refused("This board cannot keep types.");
       await cards.setType(number, type);
       return { type };
+    },
+    // Resolve: the owner asks on the pull request, the builder settles it.
+    "POST /api/kobble/factory/resolve": async (body) => {
+      const number = Number((body as { number?: unknown } | null)?.number);
+      if (!Number.isInteger(number)) throw new Refused("Say which card.");
+      const { repository } = connected();
+      const prs = githubPullRequests(cli, repository);
+      const pr = await prs.find(branchOf(number));
+      if (pr?.state !== "OPEN")
+        throw new Refused(`#${String(number)} has no open pull request.`);
+      await prs.comment(pr.number, RESOLVE_ASK);
+      return { asked: pr.number };
     },
     "POST /api/kobble/factory/delete": async (body) => {
       const number = Number((body as { number?: unknown } | null)?.number);

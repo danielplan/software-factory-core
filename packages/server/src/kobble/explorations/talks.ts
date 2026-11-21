@@ -170,8 +170,6 @@ export class ExplorationTalks {
     attached: string[] = [],
     spokenIn?: string,
   ): Promise<void> {
-    const talk = this.talk(id);
-    const said = talk.heard(text);
     const board = this.options.store().board(id);
     const named = attached.flatMap((thing) => {
       const found = board.things.find((one) => one.id === thing);
@@ -181,7 +179,9 @@ export class ExplorationTalks {
       named.length > 0
         ? `\n\n(They attached, from the board: ${named.join(", ")}.)`
         : "";
-    await this.answer(id, talk, `${said}${more}`, spokenIn);
+    const said = this.talk(id).heard(text, more);
+    if (said === null) return; // it joined the answer being written
+    await this.answer(id, this.talk(id), `${said}${more}`, spokenIn);
   }
 
   // The kobold's first look, when the exploration starts.
@@ -314,7 +314,8 @@ export class ExplorationTalks {
     });
   }
 
-  private talk(id: string): Talk {
+  // The conversation about an exploration (its Stop, for one).
+  talk(id: string): Talk {
     const known = this.talks.get(id);
     if (known) return known;
     const store = this.options.store();

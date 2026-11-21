@@ -1,19 +1,35 @@
 // The builder's pull requests on GitHub, through the GitHub CLI: found by
 // their branch (open, merged or closed), opened (as a draft when the checks
 // fail), changed, and everything said on one (its comments, its reviews
-// and the comments on its lines), oldest first.
+// and the comments on its lines), oldest first. The description shows the
+// screenshots the branch adds.
+
+import { existsSync } from "node:fs";
+import { basename, extname, join } from "node:path";
 
 import { answer } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { branchOf } from "./branches.ts";
+import { changedFiles } from "./checks.ts";
 import type { BoardCard, Message } from "./decide.ts";
+
+const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
+const MOST_PICTURES = 12;
 
 export type PullRequest = {
   number: number;
   url: string;
   state: "OPEN" | "MERGED" | "CLOSED";
   draft: boolean;
+  // GitHub says it clashes with the main branch (unknown counts as no).
+  conflicting?: boolean;
 };
+
+// What the owner says on a clashing pull request (Resolve on its card): the
+// builder answers it like any review, bringing in main and settling the
+// clash in its next round.
+export const RESOLVE_ASK =
+  "Please bring in the latest main and resolve the merge conflicts, keeping what both sides meant.";
 
 export type Opening = {
   branch: string;
@@ -24,6 +40,8 @@ export type Opening = {
 };
 
 export type PullRequests = {
+  // owner/name on GitHub, where the description's pictures are shown from.
+  repository?: string;
   baseBranch: () => Promise<string>;
   find: (branch: string) => Promise<PullRequest | null>;
   open: (opening: Opening) => Promise<PullRequest>;
@@ -48,7 +66,9 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
     JSON.parse(await gh(args)) as T;
   const repo = ["--repo", repository];
   const find = async (branch: string) => {
-    const found = await json<(PullRequest & { isDraft: boolean })[]>([
+    const found = await json<
+      (PullRequest & { isDraft: boolean; mergeable?: string })[]
+    >([
       "pr",
       "list",
       ...repo,
@@ -57,7 +77,7 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
       "--state",
       "all",
       "--json",
-      "number,url,state,isDraft",
+      "number,url,state,isDraft,mergeable",
     ]);
     const first = found[0];
     return first
@@ -66,10 +86,12 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
           url: first.url,
           state: first.state,
           draft: first.isDraft,
+          conflicting: first.mergeable === "CONFLICTING",
         }
       : null;
   };
   return {
+    repository,
     baseBranch: () => defaultBranch(gh, repository),
     find,
     open: async (opening) => {
@@ -167,15 +189,46 @@ async function saidOn(
   ].sort((a, b) => a.at.localeCompare(b.at));
 }
 
+// The pictures the branch adds (the screenshots of its run), at most a
+// dozen: shown in the description, since a picture only named in it is one
+// nobody opens.
+async function picturesIn(copy: string, base: string): Promise<string[]> {
+  return (await changedFiles(copy, base))
+    .filter((file) => PICTURE.test(file) && existsSync(join(copy, file)))
+    .slice(0, MOST_PICTURES);
+}
+
+// The description's pictures, each shown from the branch on GitHub.
+export function picturesSection(
+  pictures: string[],
+  repository: string,
+  branch: string,
+): string {
+  if (pictures.length === 0 || repository === "") return "";
+  const shown = pictures.map(
+    (file) =>
+      `![${basename(file, extname(file))}](https://github.com/${repository}/blob/${branch}/${file}?raw=true)`,
+  );
+  return `\n\n## Screenshots\n\n${shown.join("\n\n")}`;
+}
+
 // Opens the card's pull request, or updates the one there is; its address.
 export async function openOrUpdate(
   pullRequests: PullRequests,
   card: Pick<BoardCard, "number" | "title">,
   text: string,
   draft: boolean,
+  at?: { build: () => Promise<{ path: string }> },
 ): Promise<string> {
   const branch = branchOf(card.number);
-  const body = `${text}\n\nCloses #${String(card.number)}.`;
+  const base = await pullRequests.baseBranch();
+  const pictures = at ? await picturesIn((await at.build()).path, base) : [];
+  const shown = picturesSection(
+    pictures,
+    pullRequests.repository ?? "",
+    branch,
+  );
+  const body = `${text}${shown}\n\nCloses #${String(card.number)}.`;
   const found = await pullRequests.find(branch);
   if (found?.state === "OPEN") {
     await pullRequests.update(found.number, body, draft);
@@ -183,7 +236,7 @@ export async function openOrUpdate(
   }
   const made = await pullRequests.open({
     branch,
-    base: await pullRequests.baseBranch(),
+    base,
     title: card.title,
     body,
     draft,
