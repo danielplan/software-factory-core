@@ -4,6 +4,7 @@
 // list below comes from this computer's copy, so needs no GitHub.
 
 import { RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { useLanguage } from "@/i18n/use-t";
 import type { Locale } from "@/i18n/locale";
@@ -21,6 +22,7 @@ const WORDS = {
     checking: "Checking for newer versions…",
     checked: (when: string) => ` · checked ${when}`,
     again: "Try again",
+    arriving: "Arriving by itself",
   },
   it: {
     on: (v: string) => `Stai usando Kobble ${v}`,
@@ -30,6 +32,7 @@ const WORDS = {
     checking: "Cerco versioni più nuove…",
     checked: (when: string) => ` · controllato ${when}`,
     again: "Riprova",
+    arriving: "Arriva da solo",
   },
   de: {
     on: (v: string) => `Du nutzt Kobble ${v}`,
@@ -39,6 +42,7 @@ const WORDS = {
     checking: "Suche nach neueren Versionen…",
     checked: (when: string) => ` · geprüft ${when}`,
     again: "Erneut versuchen",
+    arriving: "Kommt von selbst",
   },
 };
 
@@ -64,6 +68,18 @@ export function CalmUpdates({
   const { locale } = useLanguage();
   const w = WORDS[locale];
   const { newest } = data.release;
+  // The spin shows for a moment at least, even when the look is quick.
+  const [pressed, setPressed] = useState(false);
+  useEffect(() => {
+    if (!pressed) return;
+    const id = setTimeout(() => {
+      setPressed(false);
+    }, 800);
+    return () => {
+      clearTimeout(id);
+    };
+  }, [pressed]);
+  const spinning = data.looking || pressed;
   const when = data.lastLookAt ? w.checked(ago(locale, data.lastLookAt)) : "";
   let note = `${w.ok}${when}`;
   if (data.looking) note = w.checking;
@@ -77,22 +93,24 @@ export function CalmUpdates({
           </span>
         </div>
         <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-          <span className="[overflow-wrap:anywhere]">{note}</span>
+          <CrossFade text={note} />
           <button
             type="button"
             disabled={data.looking || data.updating}
             onClick={() => {
+              setPressed(true);
               press("/api/updates/look");
             }}
             className="inline-flex items-center gap-1 text-blue hover:underline disabled:opacity-50"
           >
             <RefreshCw
               aria-hidden
-              className={`size-3 ${data.looking ? "animate-spin" : ""}`}
+              className={`size-3 ${spinning ? "animate-spin" : ""}`}
             />
             {w.again}
           </button>
         </p>
+        {newest && <Arriving />}
       </div>
       <ReleaseList newest={newest} />
     </div>
@@ -105,3 +123,53 @@ export const ABOUT: Record<Locale, string> = {
   it: "Kobble si aggiorna da solo. Ecco cosa è cambiato.",
   de: "Kobble hält sich selbst aktuell. Hier steht, was sich geändert hat.",
 };
+
+// A line that changes its words: the old ones fade out as the new ones fade
+// in, in the same place. With reduced motion, only the new ones.
+function CrossFade({ text }: Readonly<{ text: string }>) {
+  const [now, setNow] = useState(text);
+  const [was, setWas] = useState<string | null>(null);
+  useEffect(() => {
+    if (text === now) return;
+    setWas(now);
+    setNow(text);
+    const id = setTimeout(() => {
+      setWas(null);
+    }, 200);
+    return () => {
+      clearTimeout(id);
+    };
+  }, [text, now]);
+  return (
+    <span className="grid [overflow-wrap:anywhere]">
+      {was !== null && (
+        <span
+          aria-hidden
+          className="col-start-1 row-start-1 animate-fade-out motion-reduce:hidden"
+        >
+          {was}
+        </span>
+      )}
+      <span
+        key={now}
+        className={`col-start-1 row-start-1 ${was === null ? "" : "animate-fade-in"}`}
+      >
+        {now}
+      </span>
+    </span>
+  );
+}
+
+// Upgrading is automatic: a calm line, with a soft shimmer, instead of a
+// button.
+export function Arriving() {
+  const w = WORDS[useLanguage().locale];
+  return (
+    <div role="status" className="mt-1.5 grid max-w-[220px] gap-1.5">
+      <span className="text-xs font-medium text-blue">{w.arriving}</span>
+      <span className="relative h-1 overflow-hidden rounded-full bg-blue/10">
+        <span className="absolute inset-y-0 left-0 w-1/3 animate-run-light rounded-full bg-blue/40" />
+      </span>
+    </div>
+  );
+}

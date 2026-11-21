@@ -16,7 +16,7 @@ import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
 import { variant } from "@/lib/variant";
-import { CalmUpdates } from "./calm-updates";
+import { Arriving, CalmUpdates } from "./calm-updates";
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
@@ -46,17 +46,20 @@ export function UpdatesCard() {
         <span className="min-w-0 flex-1 text-[15px] font-medium">
           {summary.title}
         </span>
-        {summary.canUpdate && (
-          <Button
-            size="pill"
-            onClick={() => {
-              press("/api/updates/update");
-            }}
-          >
-            <Download aria-hidden />
-            {m.update}
-          </Button>
-        )}
+        {summary.canUpdate &&
+          (variant() === "B" ? (
+            <Arriving />
+          ) : (
+            <Button
+              size="pill"
+              onClick={() => {
+                press("/api/updates/update");
+              }}
+            >
+              <Download aria-hidden />
+              {m.update}
+            </Button>
+          ))}
         <Button
           size="pill"
           variant="ring"

@@ -4,7 +4,7 @@
 // then Changed, then Fixed), long entries cut after a sentence or two.
 
 import { ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Collapsible,
@@ -91,6 +91,18 @@ function ReleaseSection({
   const { locale } = useLanguage();
   const w = WORDS[locale];
   const [open, setOpen] = useState(first);
+  // The changes of the release open on first view fade in one after another,
+  // once.
+  const [fresh, setFresh] = useState(first);
+  useEffect(() => {
+    if (!first) return;
+    const id = setTimeout(() => {
+      setFresh(false);
+    }, 900);
+    return () => {
+      clearTimeout(id);
+    };
+  }, [first]);
   const date = release.date
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
         new Date(release.date),
@@ -106,7 +118,7 @@ function ReleaseSection({
         <ChevronRight
           aria-hidden
           className={cn(
-            "size-3.5 flex-none text-muted-foreground transition-transform",
+            "size-3.5 flex-none text-muted-foreground transition-transform duration-200 motion-reduce:transition-none",
             open && "rotate-90",
           )}
         />
@@ -125,10 +137,14 @@ function ReleaseSection({
           {date}
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="grid gap-3 px-4 pb-4">
-        <ul className="grid gap-3">
-          {byKind(release.entries).map((entry) => (
-            <EntryRow key={entry.title.en} entry={entry} />
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapse-close data-[state=open]:animate-collapse-open">
+        <ul className="grid gap-3 px-4 pb-4">
+          {byKind(release.entries).map((entry, at) => (
+            <EntryRow
+              key={entry.title.en}
+              entry={entry}
+              delay={fresh ? at * 60 : null}
+            />
           ))}
         </ul>
       </CollapsibleContent>
@@ -141,12 +157,21 @@ function byKind(entries: Entry[]): Entry[] {
   return KINDS.flatMap((kind) => entries.filter((e) => e.kind === kind));
 }
 
-function EntryRow({ entry }: Readonly<{ entry: Entry }>) {
+function EntryRow({
+  entry,
+  delay,
+}: Readonly<{ entry: Entry; delay: number | null }>) {
   const { locale } = useLanguage();
   const w = WORDS[locale];
   const [more, setMore] = useState(false);
   return (
-    <li className="flex items-start gap-3 text-[13px]">
+    <li
+      className={cn(
+        "flex items-start gap-3 text-[13px]",
+        delay !== null && "animate-fade-in",
+      )}
+      style={delay === null ? undefined : { animationDelay: `${delay}ms` }}
+    >
       <span
         className={cn(
           "mt-0.5 min-w-[68px] flex-none rounded-md px-1.5 py-0.5 text-center text-[11px] font-medium",
@@ -160,11 +185,24 @@ function EntryRow({ entry }: Readonly<{ entry: Entry }>) {
           <strong className="font-semibold">{entry.title[locale]}</strong>
           {": "}
           {entry.text[locale]}
-          {more && entry.more && ` ${entry.more[locale]}`}
         </span>
+        {entry.more && (
+          <div
+            aria-hidden={!more}
+            className={cn(
+              "grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+              more
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0",
+            )}
+          >
+            <span className="overflow-hidden">{entry.more[locale]}</span>
+          </div>
+        )}
         {entry.more && (
           <button
             type="button"
+            aria-expanded={more}
             onClick={() => {
               setMore(!more);
             }}
