@@ -107,4 +107,8 @@ function disallowedFor(options: RunOptions): string[] {
 // Claude Code, or a pretend one in the tests).
 export interface Claude {
   run(options: RunOptions): Promise<ClaudeResult>;
+  // Adds a message to the turn a conversation is in now, which takes it in
+  // at its next step instead of after it ends; false when that conversation
+  // is in no turn (or this Claude Code cannot).
+  tell?(session: string, message: string): boolean;
 }

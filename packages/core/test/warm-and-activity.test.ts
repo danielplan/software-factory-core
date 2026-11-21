@@ -8,7 +8,8 @@ import { claudeArgs, describeEvent, WarmClaude } from "../src/index.ts";
 // Claude Code kept open between turns, and its events as plain lines.
 
 // A pretend Claude Code process: reads turns from stdin, answers each with a
-// few words streamed, then a result. "(stop)" in a turn makes it exit.
+// few words streamed, then a result. "(stop)" in a turn makes it exit;
+// "(hold)" makes it wait for the next message, then answer both at once.
 function pretendClaude() {
   const started: { args: string[]; cwd: string; turns: string[] }[] = [];
   const start = (_executable: string, args: string[], cwd: string) => {
@@ -39,6 +40,7 @@ function pretendClaude() {
           child.kill();
           continue;
         }
+        if (turn.message.content.includes("(hold)")) continue;
         const words = ["Sure,", "number", String(record.turns.length)];
         const send = (event: object) =>
           stdout.write(`${JSON.stringify(event)}\n`);
@@ -101,6 +103,22 @@ test("one Claude Code process answers every turn of a conversation, streaming th
   ])
     assert.ok(args.includes(option), `missing ${option}`);
   assert.ok(args.includes("Edit"), "read-only: Edit is not allowed");
+  warm.stop();
+});
+
+test("a message told in the middle of a turn joins that turn; with no turn it is not taken", async () => {
+  const pretend = pretendClaude();
+  const warm = new WarmClaude("claude", { start: pretend.start });
+  assert.equal(warm.tell("s-1", "also blue"), false);
+  const turn = warm.run({
+    ...base,
+    prompt: "Make it (hold)",
+    session: { id: "s-1", resume: false },
+  });
+  assert.equal(warm.tell("s-1", "also blue"), true);
+  assert.equal((await turn).text, "Sure, number 2");
+  assert.deepEqual(pretend.started[0]?.turns, ["Make it (hold)", "also blue"]);
+  assert.equal(warm.tell("s-1", "and green"), false);
   warm.stop();
 });
 

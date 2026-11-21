@@ -78,7 +78,7 @@ at once and model, whether the usage log is kept) are in `factory/team.env`,
 which git keeps (the factory's `.gitignore` says `!team.env`, for projects
 that ignore `*.env`). What must not be shared stays out of git
 (`factory/.gitignore`): each person's own settings with their secrets
-(`settings/`: tokens, the AI model, where the usage log is kept, Updates by
+(`settings/`: tokens, the AI models, where the usage log is kept, Updates by
 itself) and the agents' working copies (`copies/`). Settings saved in
 `settings/factory.env` before 0.12.0 that are the team's are still read from
 there, and move to `team.env` when the factory opens or the group is saved

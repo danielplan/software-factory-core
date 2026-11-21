@@ -23,6 +23,37 @@ export class MakerDesk {
   // Changes asked while the maker was on the prototype, oldest first.
   private readonly asked = new Map<string, string[]>();
 
+  // The conversation of each prototype's maker, while it makes it.
+  private readonly sessions = new Map<string, string>();
+
+  // A new maker's conversation for the prototype.
+  sessionFor(exploration: string, key: string): string {
+    const session = randomUUID();
+    this.sessions.set(keyOf(exploration, key), session);
+    return session;
+  }
+
+  // A change asked while the maker is on the prototype goes into what it does
+  // now, so it is made in the same run instead of a new one after it; false
+  // when it could not (then it waits).
+  tell(
+    claude: Claude,
+    exploration: string,
+    key: string,
+    request: string,
+  ): boolean {
+    const session = this.sessions.get(keyOf(exploration, key));
+    if (!session || !claude.tell) return false;
+    return claude.tell(
+      session,
+      `The team asks for a change while you make this prototype; make it too, in this same run: ${request.trim()}`,
+    );
+  }
+
+  done(exploration: string, key: string): void {
+    this.sessions.delete(keyOf(exploration, key));
+  }
+
   wait(exploration: string, key: string, request: string): void {
     const at = keyOf(exploration, key);
     this.asked.set(at, [...(this.asked.get(at) ?? []), request.trim()]);
@@ -86,12 +117,15 @@ const TIME_LIMIT_MS = 60 * 60_000;
 export function askerFor(on: {
   claude: Claude;
   folder: string;
+  model: string;
+  session: string;
   mcp: RunOptions["mcp"];
   onStep: (line: string) => void;
 }) {
-  const session = randomUUID();
+  const { session } = on;
   return (prompt: string, resume: boolean) =>
     on.claude.run({
+      model: on.model,
       cwd: on.folder,
       prompt,
       readOnly: false,

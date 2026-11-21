@@ -6,6 +6,7 @@
 
 import { readGroup, type SettingGroup } from "../settings/setting-groups.ts";
 import { PERSONAL_FILE, TEAM_FILE } from "../settings/team-file.ts";
+import { MODEL_CHOICES } from "./model-setting.ts";
 
 export const PARALLEL_KEY = "FACTORY_PARALLEL_CARDS";
 export const BUILDER_MODEL_KEY = "FACTORY_BUILDER_MODEL";
@@ -31,9 +32,13 @@ export const builderSettings: SettingGroup = {
     {
       key: BUILDER_MODEL_KEY,
       label: "Builder's model",
-      help: "A name such as sonnet or opus for building and fixing cards. Empty means the factory's Claude model.",
-      kind: "text",
-      pattern: "^[\\w.\\[\\]-]+$",
+      help: "The model for building and fixing cards, the work that reaches the product.",
+      kind: "choice",
+      default: "",
+      choices: [
+        { value: "", label: "As for talking (AI models)" },
+        ...MODEL_CHOICES,
+      ],
     },
   ],
 };

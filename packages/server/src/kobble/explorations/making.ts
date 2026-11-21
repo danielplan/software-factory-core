@@ -3,7 +3,12 @@
 // tool to look, then started again so the newest runs, made to look once
 // when it did not, and what it made committed, pushed and told (made.ts).
 
-import type { Board, Claude, Exploration } from "@software-factory/core";
+import {
+  type Board,
+  type Claude,
+  type Exploration,
+  makerModel,
+} from "@software-factory/core";
 
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import type { PrototypeMode } from "../../prototypes/mode.ts";
@@ -39,14 +44,10 @@ export async function makeOne(on: {
   const ask = askerFor({
     claude: on.claude,
     folder: copy.folder,
+    model: makerModel(on.root),
+    session: desk.sessionFor(exploration.id, key),
     mcp: desk.mcpFor(exploration.id, key),
-    onStep: (line) => {
-      const { steps } = mode.runOf(exploration.id, key);
-      mode.set(exploration.id, key, {
-        activity: line.slice(0, 80),
-        steps: [...steps, line.slice(0, 200)].slice(-60),
-      });
-    },
+    onStep: stepsInto(mode, exploration.id, key),
   });
   const asked = askFor(exploration, on.board, made, {
     change,
@@ -64,6 +65,7 @@ export async function makeOne(on: {
       on.mark({ opens: page });
     },
   });
+  desk.done(exploration.id, key);
   on.mark({});
   await finishMaking({
     mode,
@@ -75,4 +77,15 @@ export async function makeOne(on: {
     ready: on.ready,
     look: on.look,
   });
+}
+
+// Each step the maker takes, kept with the prototype's run (the last 60).
+function stepsInto(mode: PrototypeMode, exploration: string, key: string) {
+  return (line: string) => {
+    const { steps } = mode.runOf(exploration, key);
+    mode.set(exploration, key, {
+      activity: line.slice(0, 80),
+      steps: [...steps, line.slice(0, 200)].slice(-60),
+    });
+  };
 }

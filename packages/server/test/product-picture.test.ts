@@ -39,6 +39,11 @@ function project() {
   );
   write("web/src/routes/orders/+page.svelte", "<p>Orders</p>");
   write("web/src/lib/components/table.svelte", "<table></table>");
+  write(
+    "web/src/orders/order-list.tsx",
+    "// The orders a customer made, newest first.\nexport {};",
+  );
+  write("web/src/orders/order-list.test.tsx", "// A test.");
   write("web/node_modules/x/routes/skip.ts", "");
   write("docs/journeys/ordering.md", "Intro\n# Ordering a basket\n");
   write("docs/notes.md", "no heading");
@@ -54,12 +59,17 @@ test("the kobold's picture of the product: products, their people, the pages kep
   assert.match(picture, /- docs\/notes\.md$/m);
 });
 
-test("the maker's map: screens and shared pieces, never installed packages", () => {
+test("the maker's map: every code file with what its first comment says, screens first, never tests or installed packages", () => {
   const map = codeMaps(join(project(), "factory"));
   assert.match(map, /## A map of Shop/);
   assert.match(map, /src\/routes\/orders\/\+page\.svelte/);
   assert.match(map, /src\/lib\/components\/table\.svelte/);
-  assert.doesNotMatch(map, /node_modules/);
+  assert.match(
+    map,
+    /- src\/orders\/order-list\.tsx: The orders a customer made, newest first\./,
+  );
+  assert.ok(map.indexOf("+page.svelte") < map.indexOf("order-list.tsx"));
+  assert.doesNotMatch(map, /node_modules|order-list\.test/);
 });
 
 test("no products: the picture says so", () => {

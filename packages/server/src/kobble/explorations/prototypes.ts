@@ -306,6 +306,8 @@ export class ExplorationPrototypes {
     // Asked while the maker is on it: it waits, and starts by itself once
     // the maker is done.
     if (this.mode.runOf(exploration.id, key).making) {
+      if (this.desk.tell(this.options.claude, exploration.id, key, request))
+        return "now";
       this.desk.wait(exploration.id, key, request);
       return "waits";
     }

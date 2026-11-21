@@ -7,6 +7,7 @@ import { test } from "node:test";
 import {
   checkChanges,
   type Claude,
+  makerModel,
   type RunOptions,
   withChosenModel,
 } from "../src/index.ts";
@@ -68,10 +69,36 @@ test("with no model chosen, no factory yet, or a model the run names, nothing is
   );
 });
 
-test("the model field takes a name or empty, and refuses anything with spaces", () => {
-  const ask = (value: string) =>
-    checkChanges(modelSettings, { FACTORY_CLAUDE_MODEL: value });
-  assert.deepEqual(ask("").refused, {});
-  assert.deepEqual(ask("claude-opus-5-5").refused, {});
-  assert.notDeepEqual(ask("two words").refused, {});
+test("the models are picked from a list: the account's default, Opus, Sonnet or Haiku", () => {
+  const ask = (key: string, value: string) =>
+    checkChanges(modelSettings, { [key]: value });
+  assert.deepEqual(ask("FACTORY_CLAUDE_MODEL", "").refused, {});
+  assert.deepEqual(ask("FACTORY_CLAUDE_MODEL", "opus").refused, {});
+  assert.deepEqual(ask("FACTORY_MAKER_MODEL", "sonnet").refused, {});
+  assert.notDeepEqual(ask("FACTORY_CLAUDE_MODEL", "two words").refused, {});
+});
+
+test("prototypes are made with Sonnet unless someone picked another model", () => {
+  assert.equal(makerModel(null), "sonnet");
+  assert.equal(makerModel(factoryWith()), "sonnet");
+  const root = factoryWith("opus");
+  writeFileSync(
+    join(root, "settings", "factory.env"),
+    "FACTORY_CLAUDE_MODEL=opus\nFACTORY_MAKER_MODEL=haiku\n",
+  );
+  assert.equal(makerModel(root), "haiku");
+});
+
+test("the chosen model keeps telling a conversation in the middle of a turn", () => {
+  const told: string[] = [];
+  const claude: Claude = {
+    run: () => Promise.resolve({ ok: true, text: "" }),
+    tell: (session, message) => {
+      told.push(`${session}: ${message}`);
+      return true;
+    },
+  };
+  const chosen = withChosenModel(claude, () => null);
+  assert.equal(chosen.tell?.("s1", "also blue"), true);
+  assert.deepEqual(told, ["s1: also blue"]);
 });

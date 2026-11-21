@@ -10,7 +10,8 @@ import { join, relative } from "node:path";
 import { findProducts, type Product } from "@software-factory/core";
 
 const MOST_PAGES = 40;
-const MOST_FILES = 60;
+const MOST_FILES = 250;
+const MOST_WORDS = 100;
 const SKIPPED = new Set([
   "node_modules",
   ".git",
@@ -23,8 +24,9 @@ const SKIPPED = new Set([
 // Files that are screens, in the usual frameworks' words.
 const SCREEN =
   /(^|\/)(routes|pages|app|screens|views)\/.*\.(tsx|jsx|svelte|vue|ts)$/;
-// Folders of shared pieces.
-const SHARED = /(^|\/)(components|ui|lib)\//;
+// Code, not tests, styles or pictures.
+const CODE = /\.(tsx|jsx|ts|js|svelte|vue)$/;
+const TESTS = /(^|\/)(tests?|__tests__)\/|\.(test|spec)\./;
 
 export function productPicture(root: string, project: string): string {
   const { products } = findProducts(root);
@@ -63,26 +65,39 @@ function docsPages(project: string): string[] {
     });
 }
 
-// The product's screens and shared pieces, as paths in the product's folder.
+// The product's code files, each with what its first comment says it is
+// for, so the maker opens only the files it needs. Screens first, in the
+// usual frameworks' words, then the rest by folder.
 export function codeMap(product: Pick<Product, "name" | "folder">): string {
   if (!existsSync(product.folder)) return "";
-  const files = filesIn(product.folder);
-  const screens = files
-    .filter((file) => SCREEN.test(file))
-    .slice(0, MOST_FILES);
-  const shared = files
-    .filter((file) => SHARED.test(file) && !SCREEN.test(file))
-    .slice(0, MOST_FILES);
-  if (screens.length === 0 && shared.length === 0) return "";
+  const files = filesIn(product.folder).filter(
+    (file) => CODE.test(file) && !TESTS.test(file),
+  );
+  if (files.length === 0) return "";
+  const screens = files.filter((file) => SCREEN.test(file));
+  const rest = files.filter((file) => !SCREEN.test(file));
+  const line = (file: string) => {
+    const about = firstComment(join(product.folder, file));
+    return about ? `- ${file}: ${about}` : `- ${file}`;
+  };
+  const listed = [...screens, ...rest].slice(0, MOST_FILES);
   return [
     `## A map of ${product.name}`,
-    ...(screens.length > 0
-      ? ["Screens:", ...screens.map((f) => `- ${f}`)]
-      : []),
-    ...(shared.length > 0
-      ? ["Shared pieces:", ...shared.map((f) => `- ${f}`)]
+    "Its code files, with what each says it is for:",
+    ...listed.map(line),
+    ...(files.length > listed.length
+      ? [`- and ${String(files.length - listed.length)} more`]
       : []),
   ].join("\n");
+}
+
+// The first line of a file's opening comment, shortened.
+function firstComment(path: string): string {
+  const head = readFileSync(path, "utf8").slice(0, 600).split("\n");
+  const first = head.find((text) => /^\s*(\/\/|\/\*|\*|#)/.test(text));
+  if (!first) return "";
+  const words = first.replace(/^\s*(\/\/+|\/\*+|\*+|#+)\s*/, "").trim();
+  return words.length > MOST_WORDS ? `${words.slice(0, MOST_WORDS)}…` : words;
 }
 
 // Every product's map, for the prototype maker's prompt.

@@ -88,6 +88,15 @@ export class WarmClaude {
     return await this.ask(id, open, options);
   }
 
+  // A message for a conversation in the middle of a turn: Claude Code takes
+  // it in at its next step and answers both in the one result.
+  tell(session: string, message: string): boolean {
+    const open = this.open.get(session);
+    if (!open || open.closed || !open.turn) return false;
+    open.child.stdin.write(userLine(message));
+    return true;
+  }
+
   // Closes every open conversation (the factory is stopping).
   stop(): void {
     for (const id of [...this.open.keys()]) this.close(id);
@@ -146,12 +155,7 @@ export class WarmClaude {
         this.close(id);
       }, options.timeLimitMs ?? TIME_LIMIT_MS);
       open.turn = { options, writing: "", resolve, timer };
-      open.child.stdin.write(
-        `${JSON.stringify({
-          type: "user",
-          message: { role: "user", content: options.prompt },
-        })}\n`,
-      );
+      open.child.stdin.write(userLine(options.prompt));
     }).then((result) => {
       const done = result as ClaudeResult;
       // A failed turn (for example a lost conversation) starts afresh next time.
@@ -201,4 +205,9 @@ export class WarmClaude {
       error: "The conversation was closed.",
     });
   }
+}
+
+// One message from the user, as Claude Code reads it over standard input.
+function userLine(content: string): string {
+  return `${JSON.stringify({ type: "user", message: { role: "user", content } })}\n`;
 }
