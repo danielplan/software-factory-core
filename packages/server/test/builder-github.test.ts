@@ -10,8 +10,11 @@ import type { Cli } from "../src/add-ons/github/github.ts";
 import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
 import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
 import type { BoardCard } from "../src/builder/decide.ts";
+import { readNote } from "../src/builder/protocol.ts";
 import {
   githubPullRequests,
+  openOrUpdate,
+  type PullRequests,
   RESOLVE_ASK,
 } from "../src/builder/pull-requests.ts";
 import { SeenPullRequests } from "../src/builder/seen-pull-requests.ts";
@@ -237,4 +240,39 @@ test("the board remembers each card's pull request, and whether an open one clas
 test("Resolve asks the builder to bring in main and settle the clash", () => {
   assert.match(RESOLVE_ASK, /bring in the latest main/);
   assert.match(RESOLVE_ASK, /merge conflicts/);
+});
+
+test("built again with its pull request open, the description stays and what the run did is a comment from the factory", async () => {
+  const said: string[] = [];
+  const updated: (string | null)[] = [];
+  const prs: PullRequests = {
+    baseBranch: () => Promise.resolve("main"),
+    find: () =>
+      Promise.resolve({
+        number: 9,
+        url: "https://x/pull/9",
+        state: "OPEN",
+        draft: false,
+      }),
+    open: () => Promise.reject(new Error("not opened again")),
+    update: (_number, body) => {
+      updated.push(body);
+      return Promise.resolve();
+    },
+    comment: (_number, text) => {
+      said.push(text);
+      return Promise.resolve();
+    },
+    said: () => Promise.resolve([]),
+  };
+  const url = await openOrUpdate(
+    prs,
+    { number: 4, title: "A card" },
+    "Brought in main and resolved the clash in a.ts.",
+    false,
+  );
+  assert.equal(url, "https://x/pull/9");
+  assert.deepEqual(updated, [null]);
+  assert.match(said[0] ?? "", /resolved the clash/);
+  assert.equal(readNote(said[0] ?? ""), "fixed");
 });

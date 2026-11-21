@@ -11,6 +11,7 @@ import { answer } from "../add-ons/github/board-setup.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { branchOf } from "./branches.ts";
 import { changedFiles } from "./checks.ts";
+import { markComment } from "./protocol.ts";
 import type { BoardCard, Message } from "./decide.ts";
 
 const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
@@ -25,9 +26,9 @@ export type PullRequest = {
   conflicting?: boolean;
 };
 
-// What the owner says on a clashing pull request (Resolve on its card): the
-// builder answers it like any review, bringing in main and settling the
-// clash in its next round.
+// What the owner says on a card whose pull request clashes (Resolve), as
+// the card goes back to To do: the builder takes it into In progress, brings
+// in main and settles the clash on the same branch and pull request.
 export const RESOLVE_ASK =
   "Please bring in the latest main and resolve the merge conflicts, keeping what both sides meant.";
 
@@ -230,8 +231,14 @@ export async function openOrUpdate(
   );
   const body = `${text}${shown}\n\nCloses #${String(card.number)}.`;
   const found = await pullRequests.find(branch);
+  // Built again (a clash resolved): the description stays about the card,
+  // and what this run did is said on the pull request.
   if (found?.state === "OPEN") {
-    await pullRequests.update(found.number, body, draft);
+    await pullRequests.update(found.number, null, draft);
+    await pullRequests.comment(
+      found.number,
+      markComment(`${text}${shown}`, draft ? "checks-failed" : "fixed"),
+    );
     return found.url;
   }
   const made = await pullRequests.open({

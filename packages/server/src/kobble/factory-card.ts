@@ -88,17 +88,21 @@ export function factoryCardRoutes(
       await cards.setType(number, type);
       return { type };
     },
-    // Resolve: the owner asks on the pull request, the builder settles it.
+    // Resolve: the owner's ask on the card, and the card back in To do;
+    // the builder takes it into In progress, where it works, brings in main
+    // and settles the clash, then puts it in Review again.
     "POST /api/kobble/factory/resolve": async (body) => {
       const number = Number((body as { number?: unknown } | null)?.number);
       if (!Number.isInteger(number)) throw new Refused("Say which card.");
-      const { repository } = connected();
-      const prs = githubPullRequests(cli, repository);
-      const pr = await prs.find(branchOf(number));
+      const { cards, repository } = connected();
+      const pr = await githubPullRequests(cli, repository).find(
+        branchOf(number),
+      );
       if (pr?.state !== "OPEN")
         throw new Refused(`#${String(number)} has no open pull request.`);
-      await prs.comment(pr.number, RESOLVE_ASK);
-      return { asked: pr.number };
+      await cards.comment(number, RESOLVE_ASK);
+      await cards.move(number, "todo");
+      return { moved: "todo" };
     },
     "POST /api/kobble/factory/delete": async (body) => {
       const number = Number((body as { number?: unknown } | null)?.number);

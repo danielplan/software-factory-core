@@ -1,6 +1,6 @@
 // A card whose pull request clashes with main: one line that says so, and
-// Resolve, which asks the builder on the pull request to bring in main and
-// settle the clash (it does in its next round, like any review).
+// Resolve, which puts the card back in To do with the ask; the builder takes
+// it into In progress, brings in main and settles the clash.
 
 import { GitMerge, LoaderCircle } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +18,7 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
     post("/api/kobble/factory/resolve", { number }).then(
       () => {
         setState("asked");
+        post("/api/work/refresh").catch(() => undefined);
       },
       (error: unknown) => {
         setState("idle");
