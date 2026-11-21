@@ -66,7 +66,7 @@ type KobbleOptions = {
 };
 
 // Tells the page what of Kobble changed ("signals", "explorations" …).
-function tellerOf(tell: (event: string) => void) {
+export function tellerOf(tell: (event: string) => void) {
   return (what: string) => {
     tell(`event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`);
   };
