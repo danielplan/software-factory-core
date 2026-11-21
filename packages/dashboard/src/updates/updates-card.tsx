@@ -16,7 +16,7 @@ import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
 import { variant } from "@/lib/variant";
-import { CalmUpdates, ItselfRow } from "./calm-updates";
+import { CalmUpdates } from "./calm-updates";
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
@@ -100,7 +100,6 @@ export function UpdatesCard() {
           ))}
         </ul>
       )}
-      {variant() === "B" && <ItselfRow data={data} press={press} />}
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
     </div>
   );

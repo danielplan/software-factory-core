@@ -7,7 +7,6 @@ import { RefreshCw } from "lucide-react";
 
 import { useLanguage } from "@/i18n/use-t";
 import type { Locale } from "@/i18n/locale";
-import { Switch } from "@/components/ui/switch";
 
 import type { UpdatesView } from "../../../server/src/updates/served.ts";
 import { CURRENT } from "./changelog-data";
@@ -22,8 +21,6 @@ const WORDS = {
     checking: "Checking for newer versions…",
     checked: (when: string) => ` · checked ${when}`,
     again: "Try again",
-    byItself: "Update by itself",
-    byItselfAbout: "Takes new versions when nothing here can be lost",
   },
   it: {
     on: (v: string) => `Stai usando Kobble ${v}`,
@@ -33,9 +30,6 @@ const WORDS = {
     checking: "Cerco versioni più nuove…",
     checked: (when: string) => ` · controllato ${when}`,
     again: "Riprova",
-    byItself: "Aggiorna da solo",
-    byItselfAbout:
-      "Prende le nuove versioni quando qui non si può perdere nulla",
   },
   de: {
     on: (v: string) => `Du nutzt Kobble ${v}`,
@@ -45,9 +39,6 @@ const WORDS = {
     checking: "Suche nach neueren Versionen…",
     checked: (when: string) => ` · geprüft ${when}`,
     again: "Erneut versuchen",
-    byItself: "Von selbst aktualisieren",
-    byItselfAbout:
-      "Übernimmt neue Versionen, wenn hier nichts verloren gehen kann",
   },
 };
 
@@ -103,38 +94,14 @@ export function CalmUpdates({
           </button>
         </p>
       </div>
-      <ItselfRow data={data} press={press} />
       <ReleaseList newest={newest} />
     </div>
   );
 }
 
-// Its own settings row, set apart by a thin line: the label and a grey
-// line about it on the left, the switch at the right edge.
-export function ItselfRow({
-  data,
-  press,
-}: Readonly<{
-  data: UpdatesView;
-  press: (path: string, body?: object) => void;
-}>) {
-  const w = WORDS[useLanguage().locale];
-  return (
-    <div className="flex items-center justify-between gap-4 border-t border-line-soft pt-3">
-      <div className="grid min-w-0 gap-0.5">
-        <span id="by-itself" className="text-[13px] font-medium">
-          {w.byItself}
-        </span>
-        <span className="text-xs text-muted-foreground">{w.byItselfAbout}</span>
-      </div>
-      <Switch
-        aria-labelledby="by-itself"
-        className="flex-none"
-        checked={data.byItself}
-        onCheckedChange={(on) => {
-          press("/api/updates/by-itself", { on });
-        }}
-      />
-    </div>
-  );
-}
+// Variant B's line under the card's title.
+export const ABOUT: Record<Locale, string> = {
+  en: "Kobble keeps itself up to date. Here is what changed.",
+  it: "Kobble si aggiorna da solo. Ecco cosa è cambiato.",
+  de: "Kobble hält sich selbst aktuell. Hier steht, was sich geändert hat.",
+};

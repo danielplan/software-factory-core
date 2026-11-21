@@ -7,6 +7,10 @@ import {
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
+import { useLanguage } from "@/i18n/use-t";
+import type { Locale } from "@/i18n/locale";
+import { variant } from "@/lib/variant";
+import { ABOUT } from "@/updates/calm-updates";
 import { Fragment, type ReactNode, useState } from "react";
 
 import { trackersOf } from "@/add-ons/trackers";
@@ -53,7 +57,8 @@ export function SettingsTab({
   open,
 }: Readonly<{ state: FactoryState; open: string | null }>) {
   const t = useT();
-  const tabs = tabsOf(sectionsOf(state, t.settings));
+  const { locale } = useLanguage();
+  const tabs = tabsOf(sectionsOf(state, t.settings, locale));
   const shown = shownTab(tabs, open);
   return (
     <div className="grid gap-5">
@@ -148,6 +153,7 @@ type SettingsSection = { name: string; tab: SettingsTabName; body: ReactNode };
 function sectionsOf(
   state: FactoryState,
   t: Messages["settings"],
+  locale: Locale,
 ): SettingsSection[] {
   const n = t.sections;
   const owned = new Set(state.addOns.flatMap((addOn) => addOn.settings));
@@ -167,7 +173,10 @@ function sectionsOf(
     section(
       n.updates,
       "Updates",
-      <Topic title={n.updates} about={t.updatesAbout}>
+      <Topic
+        title={n.updates}
+        about={variant() === "B" ? ABOUT[locale] : t.updatesAbout}
+      >
         <UpdatesCard />
       </Topic>,
     ),
