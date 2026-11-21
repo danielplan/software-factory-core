@@ -6,6 +6,7 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Fixed: a builder's working copy that lost its link to git (its folder in the project's git store was pruned or removed, so every card stopped with "gitfile does not point to a valid repository") is remade when the next turn starts, with nothing shown. The old folder is never deleted: it is moved to `<project>-factory-copies/kept/<copy>-<date>-<time>`, uncommitted work included, and the server's log says where. A branch with commits only this computer has is taken up again in the new copy instead of being reset to main. Nothing to do.
 - New: **dig deeper** into one variant of a prototype. When the team picks a direction, the explorer keeps that variant as the base, takes the other variants off (their code too) and adds one to three new variants that each refine the kept one, in one maker run (`dig_deeper`). Nothing to do.
 - Changed: a prototype that is starting shows what it is doing (preparing its copy of the code, then its start command with its latest line) and for how long, instead of a grey "Starting…" button; a prototype still being made stays usable, with a blue ring and a note at its foot that it changes as the kobold works (also in the bigger view). `start` on a prototype's run. Nothing to do.
 

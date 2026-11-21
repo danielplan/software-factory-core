@@ -272,6 +272,10 @@ from the factory's own copies (`<project>-factory-copies/` and
 `<project>-prototypes/`, `CopySettings.ownCopies`); open in any other copy,
 the builder leaves the card to the person working there, with the note
 `by-hand`.
+A copy that lost its link to git (git's own folder for it is gone) is remade
+at the start of the next turn: its folder is moved to `kept/` beside the
+copies, uncommitted work included, never deleted, and the project forgets it
+(`git worktree prune`) before a new copy is added.
 
 ## The feedback board
 
