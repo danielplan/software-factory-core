@@ -28,7 +28,8 @@ export type SpecInput = {
   exploration: Exploration;
   // The fixed summary: problem, question, agreed prototype, what was learned.
   summary: string;
-  branch: string;
+  // The agreed prototype's branch; none when the idea changes no screen.
+  branch?: string;
 };
 
 export type SpecWriter = (input: SpecInput) => Promise<string | null>;
@@ -59,8 +60,15 @@ export function specWriter(options: {
       "## The conversation",
       ...(said.length > 0 ? said : ["(none)"]),
       "",
-      `## What the prototype's branch \`${branch}\` changes`,
-      changesOf(options.project, branch),
+      ...(branch
+        ? [
+            `## What the prototype's branch \`${branch}\` changes`,
+            changesOf(options.project, branch),
+          ]
+        : [
+            "## No prototype",
+            "It changes no screen: the board says what to build.",
+          ]),
       "",
       "## The products",
       productPicture(options.root, options.project),

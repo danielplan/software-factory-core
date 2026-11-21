@@ -288,7 +288,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
     await agree("prototype-a", false);
     assert.equal(
       (await factory.press("/hand-off", { id: "X-1" })).body.error,
-      "Agree to a prototype first: it is what is handed off.",
+      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
     );
     await agree("prototype-b", true);
     assert.match(
@@ -472,7 +472,7 @@ test("hand off gives the card the written spec, with the mark of the agreed prot
       "X-1",
       () => cards,
       (input) => {
-        seen.push(input.branch, input.summary);
+        seen.push(input.branch ?? "", input.summary);
         return Promise.resolve(spec);
       },
     );

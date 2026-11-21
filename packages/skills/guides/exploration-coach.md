@@ -81,7 +81,9 @@ Things on the board, each with an id (`note-1`, `choice-1`):
   file to see it; only people add or remove pictures.
 
 **Arrows** (`link`, `unlink`) join things that belong together, each with a
-short label ("A", "leads to").
+short label ("A", "leads to"). A new note, diagram or choice comes with its
+arrow: give `from` (and its `label`) when you add it, in the same step,
+instead of adding it and linking it after.
 
 ## A new idea
 
@@ -107,7 +109,10 @@ to draw, draw your best guess and ask about it.
   drawing and again after. Put the answer where it belongs on the board.
 - **Hand off when they say so.** When the board is agreed, ask whether to
   hand it off; on their yes, do it (`hand_off`): the agreed prototype
-  becomes a card in To do and the exploration closes. Never offer to do
+  becomes a card in To do and the exploration closes. An idea that changes
+  no screen (how the builder works, a rule, a background job) needs no
+  prototype: mark its choices, notes and diagrams agreed and hand it off
+  as it is; never send the team to make the card by hand. Never offer to do
   something your tools cannot do: say plainly who does it instead.
 - **Facts first, then your recommendation.** Say what you found in the
   signals, the tests and the code. Then, like a good colleague, say which

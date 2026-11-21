@@ -47,6 +47,19 @@ const option = z.object({
   difference: z.string().optional().describe("How it differs, in one line."),
 });
 
+// The arrow a new thing comes with: from the thing it follows on the board.
+const FROM = {
+  from: z
+    .string()
+    .optional()
+    .describe("The thing this one follows: its arrow comes in the same step."),
+  label: z.string().optional().describe("The arrow's label, a word or two."),
+};
+const fromOf = (a: Record<string, unknown>) => ({
+  ...(typeof a.from === "string" ? { from: a.from } : {}),
+  ...(typeof a.label === "string" ? { label: a.label } : {}),
+});
+
 const TOOLS: {
   name: string;
   description: string;
@@ -57,18 +70,19 @@ const TOOLS: {
     name: "add_note",
     description:
       "A short note: something the team said or decided, a line or two.",
-    input: { text: z.string().min(1) },
-    act: (a) => ({ act: "note", text: String(a.text) }),
+    input: { text: z.string().min(1), ...FROM },
+    act: (a) => ({ act: "note", text: String(a.text), ...fromOf(a) }),
   },
   {
     name: "add_diagram",
     description:
       "A simple Mermaid flowchart in plain words (the steps of a journey, who talks to whom, the stages something goes through); at most a dozen boxes, no developer words.",
-    input: { title: z.string().min(1), diagram: z.string().min(1) },
+    input: { title: z.string().min(1), diagram: z.string().min(1), ...FROM },
     act: (a) => ({
       act: "diagram",
       title: String(a.title),
       diagram: String(a.diagram),
+      ...fromOf(a),
     }),
   },
   {
@@ -82,6 +96,7 @@ const TOOLS: {
         .string()
         .optional()
         .describe("The option you recommend (A, B …)."),
+      ...FROM,
     },
     act: (a) => ({
       act: "choice",
@@ -90,6 +105,7 @@ const TOOLS: {
       ...(typeof a.recommended === "string"
         ? { recommended: a.recommended }
         : {}),
+      ...fromOf(a),
     }),
   },
   {
@@ -116,7 +132,7 @@ const TOOLS: {
   {
     name: "link",
     description:
-      "An arrow from one thing to another, with a short label (a word or two).",
+      "An arrow from one thing to another, with a short label (a word or two). For a new thing, give `from` when you add it instead: it comes with its arrow.",
     input: { from: z.string(), to: z.string(), label: z.string().optional() },
     act: (a) => ({
       act: "link",
@@ -193,7 +209,7 @@ function serverFor(on: BoardTools): McpServer {
     "hand_off",
     {
       description:
-        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off, and only with an agreed prototype.",
+        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off. With an agreed prototype, that prototype is handed off; an idea that changes no screen (how something works, a rule) is handed off without one, from the board's agreed choices, notes and diagrams.",
     },
     () => toolAnswer(() => on.handOff()),
   );

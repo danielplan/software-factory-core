@@ -125,6 +125,10 @@ function TopBar({
     (one) => one.kind === "prototype" && one.agreed,
   );
   const key = agreed?.kind === "prototype" ? agreed.key : "";
+  // Without a prototype (an idea that changes no screen), the board's agreed
+  // choices and notes are handed off.
+  const ready = agreed !== undefined || board.things.some((one) => one.agreed);
+  const handOffWords = key ? t.explore.handOff(key) : t.explore.handOffBoard;
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border bg-card px-6 py-4">
       <a
@@ -155,15 +159,13 @@ function TopBar({
           <Button
             size="pill-sm"
             busy={pending === "hand-off"}
-            disabled={!agreed || pending !== null}
+            disabled={!ready || pending !== null}
             onClick={() => {
               press("hand-off", {});
             }}
           >
             <Send aria-hidden />
-            {pending === "hand-off"
-              ? t.explore.handingOff
-              : t.explore.handOff(key)}
+            {pending === "hand-off" ? t.explore.handingOff : handOffWords}
           </Button>
         </>
       ) : (

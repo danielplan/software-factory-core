@@ -115,7 +115,9 @@ export function dropExploration(store: KobbleStore, id: string): Exploration {
 }
 
 // Hand off: the agreed prototype becomes a GitHub issue on the connected
-// board, its first column; handoff.md says the same.
+// board, its first column; handoff.md says the same. An idea that changes no
+// screen (how the builder works, a rule) needs no prototype: then the
+// board's agreed choices, notes and diagrams are what is handed off.
 export async function handOff(
   store: KobbleStore,
   id: string,
@@ -129,15 +131,21 @@ export async function handOff(
   const agreed = board.things.find(
     (one): one is Made => one.kind === "prototype" && one.agreed,
   );
-  if (!agreed)
-    throw new Refused("Agree to a prototype first: it is what is handed off.");
+  if (!agreed && !board.things.some((one) => one.agreed))
+    throw new Refused(
+      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
+    );
   const connected = cards();
   const tests = store
     .all("tests")
-    .filter((test) => agreed.tests.includes(test.id));
+    .filter((test) => agreed?.tests.includes(test.id) ?? false);
   const summary = handoffText(exploration, board, agreed, tests);
-  const spec = await write?.({ exploration, summary, branch: agreed.branch });
-  const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed.key} -->`;
+  const spec = await write?.({
+    exploration,
+    summary,
+    ...(agreed ? { branch: agreed.branch } : {}),
+  });
+  const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed?.key ?? "none"} -->`;
   // Handed off agreed: straight to To do, the go-ahead to build it. An
   // exploration of a Backlog issue fills in that issue instead.
   const card = await handedOffCard(connected, exploration, text);
@@ -208,12 +216,12 @@ function variantLines(agreed: Made): string[] {
 function handoffText(
   exploration: Exploration,
   board: Board,
-  agreed: Made,
+  agreed: Made | undefined,
   tests: PersonaTest[],
 ): string {
   const question = board.things.find(
     (one) =>
-      one.kind === "choice" && one.options.some((o) => o.key === agreed.key),
+      one.kind === "choice" && one.options.some((o) => o.key === agreed?.key),
   );
   const learned = [
     ...board.things.flatMap((one) =>
@@ -229,16 +237,34 @@ function handoffText(
       return `- Persona test ${test.id}: ${String(fine)} of ${String(test.steps.length)} steps as expected.`;
     }),
   ];
+  const what = agreed
+    ? [
+        `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
+        "",
+        `**Agreed:** ${agreedLine(agreed)}`,
+        ...variantLines(agreed),
+        ...changeLines(agreed),
+        "",
+        `**The prototype:** on the branch \`${agreed.branch}\`.`,
+      ]
+    : [
+        "**Agreed, without a prototype** (it changes no screen):",
+        ...choicesAgreed(board),
+      ];
   return [
     `**The problem:** ${exploration.problem}`,
     "",
-    `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
-    "",
-    `**Agreed:** ${agreedLine(agreed)}`,
-    ...variantLines(agreed),
-    ...changeLines(agreed),
-    "",
-    `**The prototype:** on the branch \`${agreed.branch}\`.`,
+    ...what,
     ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),
   ].join("\n");
+}
+
+// The board's agreed choices, each with the option picked.
+function choicesAgreed(board: Board): string[] {
+  return board.things.flatMap((one) => {
+    if (one.kind !== "choice" || !one.agreed) return [];
+    const picked = one.options.find((o) => o.key === one.chosen);
+    const answer = picked ? picked.name + "." : "(no option picked)";
+    return [`- ${one.title} ${answer}`];
+  });
 }

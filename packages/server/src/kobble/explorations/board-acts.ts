@@ -17,15 +17,18 @@ import {
   withThing,
 } from "./board-things.ts";
 
+// A new thing, arrowed from one on the board in the same step.
+type From = { from?: string; label?: string };
+
 export type Act =
-  | { act: "note"; text: string }
-  | { act: "diagram"; title: string; diagram: string }
-  | {
+  | ({ act: "note"; text: string } & From)
+  | ({ act: "diagram"; title: string; diagram: string } & From)
+  | ({
       act: "choice";
       title: string;
       options: Partial<Option>[];
       recommended?: string;
-    }
+    } & From)
   | {
       act: "change";
       id: string;
@@ -49,8 +52,20 @@ type Done = { board: Board; said: string };
 
 const fresh = (by: By) => ({ agreed: false, place: null, by });
 
-function added(board: Board, thing: Thing): Done {
-  return { board: withThing(board, thing), said: `Added ${thing.id}.` };
+// A thing added, with its arrow from the thing it follows when one is named
+// (an unknown one is said, and the thing is still added).
+function added(board: Board, thing: Thing, from: From = {}): Done {
+  const next = withThing(board, thing);
+  if (!from.from) return { board: next, said: `Added ${thing.id}.` };
+  if (!board.things.some((one) => one.id === from.from))
+    return {
+      board: next,
+      said: `Added ${thing.id}; there is no ${from.from} to link it from.`,
+    };
+  return {
+    board: linked(next, from.from, thing.id, from.label?.trim() ?? ""),
+    said: `Added ${thing.id}, linked from ${from.from}.`,
+  };
 }
 
 // The change to a thing's words, its diagram, or a choice's options.
@@ -127,22 +142,30 @@ function recommendedOf(
 export function applyAct(board: Board, act: Act, by: By): Done {
   switch (act.act) {
     case "note":
-      return added(board, {
-        id: newId(board, "note"),
-        kind: "note",
-        ...fresh(by),
-        text: act.text.trim(),
-      });
+      return added(
+        board,
+        {
+          id: newId(board, "note"),
+          kind: "note",
+          ...fresh(by),
+          text: act.text.trim(),
+        },
+        act,
+      );
     case "diagram":
-      return added(board, {
-        id: newId(board, "diagram"),
-        kind: "diagram",
-        ...fresh(by),
-        title: act.title.trim(),
-        diagram: act.diagram,
-      });
+      return added(
+        board,
+        {
+          id: newId(board, "diagram"),
+          kind: "diagram",
+          ...fresh(by),
+          title: act.title.trim(),
+          diagram: act.diagram,
+        },
+        act,
+      );
     case "choice":
-      return added(board, newChoice(board, act, by));
+      return added(board, newChoice(board, act, by), act);
     case "change":
       return changed(board, act);
     case "remove":
