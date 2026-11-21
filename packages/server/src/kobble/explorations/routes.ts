@@ -119,7 +119,7 @@ function makersFor(
         options.cards,
         writerOf(options),
       );
-      await prototypes.stopAll(id);
+      await prototypes.removeAll(id);
       options.onChange();
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
     },
@@ -223,7 +223,7 @@ function buttonRoutes(
     }),
     "POST /api/kobble/explorations/drop": button(async (body) => {
       const dropped = dropExploration(store(), field(body, "id"));
-      await prototypes.stopAll(dropped.id);
+      await prototypes.removeAll(dropped.id);
     }),
     "POST /api/kobble/explorations/make": button((body) => ({
       board: prototypes.make(
@@ -244,7 +244,7 @@ function buttonRoutes(
     // Handed off, the exploration is done: its prototypes stop.
     "POST /api/kobble/explorations/hand-off": button(async (body) => {
       const handed = await handOff(store(), id(body), on.cards, on.write);
-      await prototypes.stopAll(field(body, "id"));
+      await prototypes.removeAll(field(body, "id"));
       return handed;
     }),
   };

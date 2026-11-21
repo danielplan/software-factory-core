@@ -127,6 +127,14 @@ export function choicePrototype(
         : "Those options have a prototype already.",
     );
   const letters = options.map((one) => one.key);
+  const ongoing = explorationPrototype(board);
+  if (!prototypeFor(board, choice) && ongoing)
+    return newQuestion(board, ongoing, {
+      choice,
+      question: card.title,
+      options,
+      opens,
+    });
   // On older boards each option has a prototype of its own: so does a new one.
   const had = prototypeFor(board, choice);
   if (had?.variants) {
@@ -160,6 +168,56 @@ export function choicePrototype(
   return {
     board: linked(withThing(board, made), choice, id, letters.join(" · ")),
     key,
+  };
+}
+
+// The exploration's one prototype (one copy of the code): the newest with
+// variants; older boards may have prototypes without.
+function explorationPrototype(board: Board): Made | null {
+  const all = board.things.filter(
+    (one): one is Made => one.kind === "prototype" && Boolean(one.variants),
+  );
+  return all.at(-1) ?? null;
+}
+
+// A new question on the board, in an exploration that has its prototype:
+// the variant shown so far becomes the prototype's base, and the new
+// question's options are its variants now, in the same copy.
+function newQuestion(
+  board: Board,
+  ongoing: Made,
+  asked: {
+    choice: string;
+    question: string;
+    options: Option[];
+    opens?: string;
+  },
+): { board: Board; key: string; change: string } {
+  const { choice, question, options, opens } = asked;
+  const base = ongoing.variants?.find((one) => one.key === ongoing.variant);
+  const [first] = options;
+  const letters = options.map((one) => one.key);
+  const made: Made = {
+    ...ongoing,
+    agreed: false,
+    name: options.length > 1 ? question : (first?.name ?? question),
+    difference: options.length > 1 ? "" : (first?.difference ?? ""),
+    variants: options,
+    variant: first?.key ?? ongoing.variant,
+    ...(opens ? { opens } : {}),
+  };
+  const kept = base
+    ? `Keep what variant ${base.key} (“${base.name}”) shows as the prototype's base, without the other variants or their switch`
+    : "Keep what the prototype shows as its base";
+  return {
+    board: linked(
+      withThing(board, made),
+      choice,
+      ongoing.id,
+      letters.join(" · "),
+    ),
+    key: ongoing.key,
+    change: `The team moved on to a new question: “${question}”. ${kept}, and make the variants ${letters.join(", ")} for it on top of that.`,
   };
 }
 

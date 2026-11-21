@@ -6,6 +6,7 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Changed: an exploration has one prototype, so one copy of the code. A new question on its board no longer starts a second prototype: its options become the prototype's variants, on top of the variant shown so far (the earlier variants and their switch go). At hand-off and drop, the exploration's copies are removed, with what the project's commands left beside them (a demo copy); their branches stay. New: `removeIdeaCopies` (prototypes/copies.ts); the explorations' `stopAll` is `removeAll`. Nothing to do; copies of explorations handed off before stay until removed by hand (`<project>-prototypes/<exploration>`).
 - Changed: a pull request's description shows the screenshots its branch adds (for example in `runs/<run>/`), at most twelve, under **Screenshots**, each from the branch on GitHub, instead of only naming the folder they are in. `PullRequests` has an optional `repository`. Nothing to do.
 - Changed: the README says what Kobble is and what you can do with it, with pictures (`docs/images/`), then how to start, how it fits together, versions and working on it. Nothing to do.
 

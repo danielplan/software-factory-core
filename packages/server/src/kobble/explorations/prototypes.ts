@@ -14,7 +14,7 @@ import type {
   KobbleStore,
 } from "@software-factory/core";
 
-import { versionCopy } from "../../prototypes/copies.ts";
+import { removeIdeaCopies, versionCopy } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import type { Photograph } from "../usage-pictures.ts";
 import { Refused } from "../../refused.ts";
@@ -224,10 +224,13 @@ export class ExplorationPrototypes {
     );
   }
 
-  async stopAll(exploration: string): Promise<void> {
+  // Handed off or dropped: its prototypes stop and their copies go; the
+  // branches stay (the builder builds from the agreed one).
+  async removeAll(exploration: string): Promise<void> {
     for (const run of this.mode.view(exploration))
       if (["running", "starting"].includes(run.state))
         await this.mode.stop(run.idea, run.version);
+    removeIdeaCopies(this.options.project, exploration);
   }
 
   close(): void {

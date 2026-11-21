@@ -9,7 +9,7 @@
 // in FACTORY_* variables.
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 
 import { type Company, readCompany, Workspace } from "@software-factory/core";
@@ -86,6 +86,31 @@ function envOf(project: string, branch: string, folder: string) {
     FACTORY_PROJECT: project,
     FACTORY_COPY: folder,
   };
+}
+
+// An idea's copies, once it is handed off or dropped: each copy taken off
+// git's list of worktrees (its branch stays, on this computer and on
+// origin), then the idea's folder with what the project's commands left
+// beside them (a demo project, say).
+export function removeIdeaCopies(project: string, idea: string): void {
+  if (!/^[A-Za-z0-9][\w-]*$/.test(idea)) return;
+  const folder = join(homeOf(project), idea);
+  if (!existsSync(folder)) return;
+  for (const entry of readdirSync(folder)) {
+    const copy = join(folder, entry);
+    if (!existsSync(join(copy, ".git"))) continue;
+    try {
+      git(project, ["worktree", "remove", "--force", copy]);
+    } catch {
+      // Removed with the folder below; prune forgets it.
+    }
+  }
+  rmSync(folder, { recursive: true, force: true });
+  try {
+    git(project, ["worktree", "prune"]);
+  } catch {
+    // Nothing to forget.
+  }
 }
 
 // A version's copy as a working copy (core's Workspace): made when it is not
