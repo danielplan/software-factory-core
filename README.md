@@ -110,7 +110,10 @@ something from you, such as a migration or a new setting, is a minor
 ## Working on Kobble
 
 Kobble is built with Kobble: this repository has its own factory in
-`factory/`, where the dashboard and the server are the products. To run it
+`factory/`, where the dashboard and the server are the products. Because this
+repository is public, its explorations (`factory/kobble/explorations/`) stay on
+the computer they were made on and are not in git; in a company's own private
+repository they are shared through git like the rest of the factory. To run it
 here:
 
 ```sh

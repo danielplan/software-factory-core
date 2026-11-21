@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- Changed: the core's own factory keeps its explorations out of git (`factory/kobble/explorations/` in its `.gitignore`), since this repository is public; they stay on the computer they were made on. A company's factory still shares its explorations through git. Nothing to do.
+
 - Changed: the knowledge base is kept with the code. Before a card's pull request, a branch that changes code but none of the knowledge files (`docs/`, a `context/` folder, a `BLUEPRINT.md`, `AGENTS.md`) gets one more round of the `update-context` skill, while the card is still In progress; a run file that says "Knowledge base: nothing to change, because …" lets it through. Nothing to do.
 - Fixed: the words still written in English only are in Italian and German too: Sprocket's feedback window (its opening, suggestions, quick replies, the post building itself, the sign-in code, its placeholders), "All quiet" on Signals, the voice's quiet note, the explorations' small board, the setup's "Connected" and "Now:", and the labels screen readers hear in the sidebar, the tracker choice and the cards waiting for you. The post's Send and the chat's arrow have different names ("Send the post", "Send your message"). A new test, `words-in-catalogue`, reads every screen and fails on words written straight into it. Nothing to do.
 - Fixed: a Kobble page left open while the dashboard was built again (each `npm run verify` in the core does) loads itself again once, instead of showing a blank canvas. Nothing to do.
