@@ -288,8 +288,7 @@ const typed = new Set<number>();
 
 export function Feed({
   thread,
-  onPosts,
-}: Readonly<{ thread: Thread; onPosts: () => void }>) {
+}: Readonly<{ thread: Thread }>) {
   const end = useRef<HTMLDivElement>(null);
   const [, setDone] = useState(0);
   const scroll = () => {
@@ -323,7 +322,7 @@ export function Feed({
       )}
       {thread.thinking && <Thinking />}
       {!thread.thinking && lastTyped && (
-        <QuickReplies thread={thread} say={last.say} onPosts={onPosts} />
+        <QuickReplies thread={thread} say={last.say} />
       )}
       <div ref={end} />
     </div>
@@ -508,8 +507,7 @@ export function SimilarAsYouType({
 function QuickReplies({
   thread,
   say: line,
-  onPosts,
-}: Readonly<{ thread: Thread; say: string; onPosts: () => void }>) {
+}: Readonly<{ thread: Thread; say: string }>) {
   const t = useT().feedback.chat;
   const errors = useCaughtErrors();
   const draft = liveDraft(thread);
@@ -555,10 +553,9 @@ function QuickReplies({
   if (thread.step === "sent")
     return (
       <Chips
-        choices={["Something else", "Your posts"]}
-        onPick={(choice) => {
-          if (choice === "Your posts") onPosts();
-          else back();
+        choices={["Something else"]}
+        onPick={() => {
+          back();
         }}
       />
     );

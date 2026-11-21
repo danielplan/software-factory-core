@@ -82,6 +82,13 @@ const SEEN_AFTER = 20_000;
 
 const BEFORE: Mine[] = [
   {
+    number: 44,
+    kind: "wish",
+    title: "Show which prototype a card came from",
+    state: "seen",
+    sent: 0,
+  },
+  {
     number: 33,
     kind: "wish",
     title: "Say in the card when the builder waits for me",

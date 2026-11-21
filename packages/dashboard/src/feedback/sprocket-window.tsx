@@ -3,13 +3,12 @@
 // too. Its opening fits the page you are on and offers a waiting error
 // first; a question goes to the support kobold, a wish or something wrong
 // builds a post live (kobold-chat.tsx, the script in tell-kobold.ts).
-// "Your posts" is a tab in its header. PROTOTYPE: English only.
+// What was sent lives on the Feedback page. PROTOTYPE: English only.
 
 import {
   ArrowUp,
   Bug,
   CircleHelp,
-  ExternalLink,
   Lightbulb,
   Plus,
   TriangleAlert,
@@ -28,8 +27,7 @@ import { Messages } from "@/support/support-bar";
 import { useSupport } from "@/support/use-support";
 
 import { useCaughtErrors, useFreshError } from "./factory-errors";
-import { issueUrl, type Kind, useMine } from "./feedback-board";
-import { StatePill } from "./feedback-row";
+import { type Kind, useMine } from "./feedback-board";
 import {
   Chips,
   Feed,
@@ -77,6 +75,7 @@ const HERE: Record<
   },
   personas: { text: "Wish personas did more? Tell me", kind: "wish" },
   settings: { text: "Can't find a setting? Ask me", kind: "ask" },
+  feedback: { text: "Missing something? Tell me", kind: "wish" },
 };
 
 const CHOICES = [
@@ -89,14 +88,12 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
   const all = useT();
   const where = all.shell.pages[page];
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"chat" | "posts">("chat");
   const thread = useThread();
   const support = useSupport();
   const started = useRef(thread != null);
   started.current = thread != null;
   useEffect(() => {
     const opened = onOpen(() => {
-      setTab("chat");
       setOpen(true);
     });
     const key = (event: KeyboardEvent) => {
@@ -110,7 +107,6 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
     window.addEventListener("keydown", key);
     const asked = onAskSupport((text) => {
       askMode(where, false);
-      setTab("chat");
       setOpen(true);
       void post("/api/kobble/support", { text, page }).catch(() => undefined);
     });
@@ -137,11 +133,9 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
             ? cn(
                 "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]",
                 // The opening is small; a conversation gets room.
-                tab === "chat" && thread?.step === "choose"
+                thread?.step === "choose"
                   ? "h-[372px]"
-                  : tab === "posts"
-                    ? "h-[400px]"
-                    : "h-[min(80vh,620px)]",
+                  : "h-[min(80vh,620px)]",
               )
             : "h-10 w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
@@ -152,10 +146,7 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
             style={{ animationDelay: "120ms" }}
           >
             <Header
-              tab={tab}
-              onTab={setTab}
               onNew={() => {
-                setTab("chat");
                 back();
                 void post("/api/kobble/support/new").catch(() => undefined);
               }}
@@ -163,17 +154,7 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
                 setOpen(false);
               }}
             />
-            {tab === "posts" ? (
-              <Posts />
-            ) : (
-              <Chat
-                thread={thread}
-                page={page}
-                onPosts={() => {
-                  setTab("posts");
-                }}
-              />
-            )}
+            <Chat thread={thread} page={page} />
           </div>
         ) : (
           <button
@@ -201,43 +182,13 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
 }
 
 function Header({
-  tab,
-  onTab,
   onNew,
   onClose,
-}: Readonly<{
-  tab: "chat" | "posts";
-  onTab: (tab: "chat" | "posts") => void;
-  onNew: () => void;
-  onClose: () => void;
-}>) {
-  const mine = useMine();
-  const tabs = [
-    { key: "chat", label: "Sprocket" },
-    { key: "posts", label: `Your posts · ${String(mine.length)}` },
-  ] as const;
+}: Readonly<{ onNew: () => void; onClose: () => void }>) {
   return (
-    <header className="flex flex-none items-center gap-1 px-3 pt-3 pb-1.5">
-      <KoboldHead size={22} className="mr-1" />
-      <nav className="flex gap-0.5 rounded-lg bg-surface p-0.5 text-[12px]">
-        {tabs.map((one) => (
-          <button
-            key={one.key}
-            type="button"
-            onClick={() => {
-              onTab(one.key);
-            }}
-            className={cn(
-              "rounded-md px-2.5 py-1 transition-colors",
-              tab === one.key
-                ? "bg-card font-medium text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {one.label}
-          </button>
-        ))}
-      </nav>
+    <header className="flex flex-none items-center gap-2 px-3 pt-3 pb-1.5">
+      <KoboldHead size={22} />
+      <span className="text-[13px] font-medium">Sprocket</span>
       <span className="flex-1" />
       <Button
         variant="ghost"
@@ -258,8 +209,7 @@ function Header({
 function Chat({
   thread,
   page,
-  onPosts,
-}: Readonly<{ thread: Thread; page: Page; onPosts: () => void }>) {
+}: Readonly<{ thread: Thread; page: Page }>) {
   const [text, setText] = useState("");
   return (
     <>
@@ -270,7 +220,7 @@ function Chat({
       ) : (
         <>
           <LiveCard thread={thread} />
-          <Feed thread={thread} onPosts={onPosts} />
+          <Feed thread={thread} />
         </>
       )}
       <SimilarAsYouType
@@ -488,36 +438,5 @@ function Input({
         <ArrowUp aria-hidden className="size-4" />
       </Button>
     </form>
-  );
-}
-
-function Posts() {
-  const mine = useMine();
-  return (
-    <ul className="grid min-h-0 flex-1 content-start gap-0.5 overflow-auto px-3 pt-2 pb-3">
-      {mine.map((one, at) => (
-        <li
-          key={one.number}
-          className="motion-safe:animate-rise"
-          style={{ animationDelay: `${String(at * 50)}ms` }}
-        >
-          <a
-            href={issueUrl(one.number)}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2.5 rounded-lg px-2 py-2.5 text-[13px] hover:bg-surface [&_svg]:size-3.5 [&_svg]:flex-none"
-          >
-            {one.kind === "bug" ? (
-              <Bug aria-hidden className="text-muted-foreground" />
-            ) : (
-              <Lightbulb aria-hidden className="text-muted-foreground" />
-            )}
-            <span className="flex-1 truncate">{one.title}</span>
-            <StatePill state={one.state} />
-            <ExternalLink aria-hidden className="text-faint" />
-          </a>
-        </li>
-      ))}
-    </ul>
   );
 }

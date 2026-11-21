@@ -13,6 +13,7 @@ export const PAGES = [
   "build",
   "personas",
   "settings",
+  "feedback",
 ] as const;
 export type Page = (typeof PAGES)[number];
 
