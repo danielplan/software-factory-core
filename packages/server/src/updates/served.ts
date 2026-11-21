@@ -24,6 +24,7 @@ import {
   upgradeBody,
   upgradeTitle,
 } from "./kobble-release.ts";
+import { WhatsNew, type WhatsNewFiles } from "./whats-new.ts";
 import {
   type AfterUpdate,
   type Git,
@@ -47,7 +48,10 @@ export type UpdatesOptions = {
   restartFactory?: () => Promise<void>;
   releases: {
     current: string;
-    tags: () => Promise<string[]>;
+    tags: () => Promise<string[] | null>;
+    // What's new: this computer's files, and a newer release's from GitHub.
+    local: () => WhatsNewFiles;
+    files: (version: string) => Promise<WhatsNewFiles | null>;
     cards: () => {
       number: number;
       title: string;
@@ -106,6 +110,11 @@ export function servedUpdates(options: UpdatesOptions) {
   updates.subscribe(() => {
     options.onChange();
   });
+  const whatsNew = new WhatsNew({
+    current: options.releases.current,
+    local: options.releases.local,
+    files: options.releases.files,
+  });
   const view = (): UpdatesView => ({
     ...updates.state,
     release: releases.view(),
@@ -113,6 +122,12 @@ export function servedUpdates(options: UpdatesOptions) {
   let stops: (() => void)[] = [];
   const routes: Record<string, Route> = {
     "GET /api/updates": view,
+    // What each Kobble release changed, in the page's language.
+    "GET /api/updates/whats-new": (_body, url) =>
+      whatsNew.view(url.searchParams.get("language") ?? "en", {
+        newest: releases.view().newest,
+        ...releases.status(),
+      }),
     "POST /api/updates/look": async () => {
       await Promise.all([updates.look(), releases.look()]);
     },

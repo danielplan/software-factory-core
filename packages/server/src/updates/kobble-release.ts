@@ -49,9 +49,9 @@ type Card = { number: number; title: string; url: string; closed: boolean };
 
 type ReleasesOptions = {
   current: string;
-  // The core's tags, as `git ls-remote --tags` lists them; none when GitHub
+  // The core's tags, as `git ls-remote --tags` lists them; null when GitHub
   // cannot be reached.
-  tags: () => Promise<string[]>;
+  tags: () => Promise<string[] | null>;
   // The board's cards, as last read.
   cards: () => Card[];
   onChange: () => void;
@@ -59,6 +59,8 @@ type ReleasesOptions = {
 
 export class KobbleReleases {
   private newest: string | null = null;
+  private offline = false;
+  private checkedAt: string | null = null;
   private timer: NodeJS.Timeout | null = null;
 
   private readonly options: ReleasesOptions;
@@ -79,14 +81,23 @@ export class KobbleReleases {
     };
   }
 
+  // Whether GitHub could not be reached the last time it was asked, and
+  // when that was (an ISO time; null before the first look).
+  status(): { offline: boolean; checkedAt: string | null } {
+    return { offline: this.offline, checkedAt: this.checkedAt };
+  }
+
   async look(): Promise<void> {
-    const newest = newerRelease(
-      await this.options.tags(),
-      this.options.current,
-    );
-    if (newest === this.newest) return;
+    const tags = await this.options.tags();
+    const offline = tags === null;
+    const newest = tags
+      ? newerRelease(tags, this.options.current)
+      : this.newest;
+    const changed = newest !== this.newest || offline !== this.offline;
     this.newest = newest;
-    this.options.onChange();
+    this.offline = offline;
+    this.checkedAt = new Date().toISOString();
+    if (changed) this.options.onChange();
   }
 
   follow(everyMs = 24 * 60 * 60_000): () => void {
