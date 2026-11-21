@@ -92,6 +92,8 @@ const en = {
     recommended: "Recommended",
     recommendsThis: "The kobold recommends this one",
     variants: "Variants",
+    states: "States",
+    usualState: "usual",
     beingMade: "Being made, live:",
     atWork: "the kobold is at work",
     stillMade:

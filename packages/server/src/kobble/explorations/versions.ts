@@ -93,6 +93,20 @@ export function opensIn(said: string): string | undefined {
   return /^[/#?]/.test(page) ? page : undefined;
 }
 
+// The states the maker said each variant can be shown in: its line
+// "States: empty, loading, problem" (none when it said none).
+export function statesIn(said: string): string[] | undefined {
+  const line = said.split("\n").findLast((one) => one.includes("States:"));
+  if (!line) return undefined;
+  const names = line
+    .slice(line.indexOf("States:") + 7)
+    .replaceAll(/[`*_.]/g, "")
+    .split(",")
+    .map((one) => one.trim().toLowerCase())
+    .filter((one) => /^[a-z0-9][a-z0-9-]{0,29}$/.test(one));
+  return names.length > 0 ? [...new Set(names)].slice(0, 8) : undefined;
+}
+
 // A new variant's letter: after every option and variant the board has, so
 // it is never taken for one of a choice's options.
 export function freeVariant(board: Board, made: Made): string {
@@ -242,7 +256,7 @@ function optionsToMake(board: Board, choice: string, keys: string[]) {
 export function markedIn(
   board: Board,
   key: string,
-  now: { making?: boolean; opens?: string },
+  now: { making?: boolean; opens?: string; states?: string[] },
 ): Board | null {
   const made = prototypeOf(board, key);
   if (!made) return null;
@@ -251,6 +265,7 @@ export function markedIn(
   return withThing(board, {
     ...rest,
     ...(now.opens ? { opens: now.opens } : {}),
+    ...(now.states ? { states: now.states } : {}),
     ...(now.making ? { making: true } : {}),
   });
 }

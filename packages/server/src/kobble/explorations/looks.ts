@@ -12,7 +12,7 @@ import { addToGitignore, type Claude } from "@software-factory/core";
 import type { PrototypeMode, VersionRun } from "../../prototypes/mode.ts";
 import { Refused } from "../../refused.ts";
 import { type Photograph, playwrightPhotograph } from "../usage-pictures.ts";
-import { type Made, opensIn, shownAddress } from "./versions.ts";
+import { type Made, opensIn, statesIn, shownAddress } from "./versions.ts";
 
 const START_WITHIN_MS = 3 * 60_000;
 
@@ -109,21 +109,32 @@ export async function lookAndFix(
     ask: (prompt: string) => Promise<Result>;
     look: () => Promise<Looks>;
     opens: (page: string) => void;
+    // The states it said each variant can be shown in.
+    states?: (states: string[]) => void;
     // It looked by itself with its tool: then it is not made to again.
     looked?: () => boolean;
   },
 ): Promise<Result> {
   if (!made.ok) return made;
-  const page = opensIn(made.text);
-  if (page) on.opens(page);
+  heard(made.text, on);
   if (on.looked?.()) return made;
   const { pictures, problem } = await on.look();
   if (pictures.length === 0) return made;
   const fixed = await on.ask(lookWords(pictures, problem));
   if (!fixed.ok) return made;
-  const again = opensIn(fixed.text);
-  if (again) on.opens(again);
+  heard(fixed.text, on);
   return fixed;
+}
+
+// The page and the states the maker's last words name.
+function heard(
+  said: string,
+  on: { opens: (page: string) => void; states?: (states: string[]) => void },
+): void {
+  const page = opensIn(said);
+  if (page) on.opens(page);
+  const states = statesIn(said);
+  if (states) on.states?.(states);
 }
 
 function lookWords(pictures: string[], problem: string | null): string {

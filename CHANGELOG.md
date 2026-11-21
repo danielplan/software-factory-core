@@ -6,6 +6,8 @@ a major version may need a company to change something, and says what.
 
 ## Unreleased
 
+- New: **states for every variant.** The maker builds the states that matter for the idea (empty, loading, a problem, many items, long words) into each variant's made-up data, switched from outside the app by the address (`?state=empty`, next to `?variant=`), and names them in its last words (`States: …`). The prototype on the board shows them as chips under its variants ("usual" first). `states` on a prototype in the board file. Nothing to do.
+
 - New: **dig deeper** into one variant of a prototype. When the team picks a direction, the explorer keeps that variant as the base, takes the other variants off (their code too) and adds one to three new variants that each refine the kept one, in one maker run (`dig_deeper`). Nothing to do.
 - Changed: a prototype that is starting shows what it is doing (preparing its copy of the code, then its start command with its latest line) and for how long, instead of a grey "Starting…" button; a prototype still being made stays usable, with a blue ring and a note at its foot that it changes as the kobold works (also in the bigger view). `start` on a prototype's run. Nothing to do.
 

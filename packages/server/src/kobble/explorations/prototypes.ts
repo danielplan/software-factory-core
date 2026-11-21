@@ -299,7 +299,7 @@ export class ExplorationPrototypes {
   private mark(
     exploration: string,
     key: string,
-    now: { making?: boolean; opens?: string },
+    now: { making?: boolean; opens?: string; states?: string[] },
   ): void {
     const store = this.options.store();
     const marked = markedIn(store.board(exploration), key, now);
