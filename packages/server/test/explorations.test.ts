@@ -7,7 +7,10 @@ import { test } from "node:test";
 import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
+import type { Claude } from "@software-factory/core";
+
 import { handOff } from "../src/kobble/explorations/actions.ts";
+import { specWriter } from "../src/kobble/explorations/spec-writer.ts";
 import { applyAct } from "../src/kobble/explorations/board-acts.ts";
 import type { ExplorationsView } from "../src/kobble/explorations/views.ts";
 import { inGit } from "./git-project.ts";
@@ -447,6 +450,76 @@ test("hand off writes handoff.md and the issue, with what was learned", async ()
       ),
       /Handed off as #51\./,
     );
+  } finally {
+    factory.close();
+  }
+});
+
+test("hand off gives the card the written spec, with the mark of the agreed prototype", async () => {
+  const factory = await explorationsFactory();
+  try {
+    const made: string[] = [];
+    const cards = {
+      create: (_title: string, body: string) => {
+        made.push(body);
+        return Promise.resolve({ number: 52, url: "https://example.com/52" });
+      },
+    } as unknown as Cards;
+    const seen: string[] = [];
+    const spec = `Mia pays later.\n\n## The agreed plan\n\n${"The basket waits. ".repeat(30)}`;
+    await handOff(
+      factory.store,
+      "X-1",
+      () => cards,
+      (input) => {
+        seen.push(input.branch, input.summary);
+        return Promise.resolve(spec);
+      },
+    );
+    assert.equal(seen[0], "proto/X-1-b");
+    assert.match(seen[1] ?? "", /\*\*The question:\*\*/);
+    assert.ok(made[0]?.startsWith(spec));
+    assert.match(
+      made[0] ?? "",
+      /<!-- factory:kobble exploration=X-1 prototype=B -->$/,
+    );
+  } finally {
+    factory.close();
+  }
+});
+
+test("the spec writer reads the branch's changes and the conversation, and gives up on a short answer", async () => {
+  const factory = await explorationsFactory();
+  try {
+    const prompts: string[] = [];
+    const answers = [
+      "Too short.",
+      `## The agreed plan\n\n${"Built so. ".repeat(60)}`,
+    ];
+    const claude = {
+      run: (options: { prompt: string; readOnly?: boolean }) => {
+        prompts.push(options.prompt);
+        assert.equal(options.readOnly, true);
+        return Promise.resolve({ ok: true, text: answers.shift() ?? "" });
+      },
+    } as unknown as Claude;
+    const write = specWriter({
+      claude,
+      project: factory.project,
+      root: factory.root,
+      store: () => factory.store,
+    });
+    const exploration = factory.store.get("explorations", "X-1");
+    assert.ok(exploration);
+    const input = { exploration, summary: "In short.", branch: "proto/X-1-b" };
+    assert.equal(await write(input), null);
+    assert.match((await write(input)) ?? "", /^## The agreed plan/);
+    assert.match(
+      prompts[0] ?? "",
+      /## What the prototype's branch `proto\/X-1-b` changes/,
+    );
+    assert.match(prompts[0] ?? "", /## The conversation/);
+    assert.match(prompts[0] ?? "", /In short\./);
   } finally {
     factory.close();
   }

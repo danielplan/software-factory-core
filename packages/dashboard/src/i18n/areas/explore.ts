@@ -35,7 +35,7 @@ const en = {
   drop: "Drop",
   dropping: "Dropping…",
   handOff: (key: string) => `Hand off ${key}`,
-  handingOff: "Handing off…",
+  handingOff: "Writing the spec…",
   handedOffAs: (number: number) => `Handed off as #${String(number)}`,
   where: {
     handedOff: "Handed off to the Factory",
@@ -127,7 +127,7 @@ export const explore = area(
     drop: "Lascia",
     dropping: "Lascio…",
     handOff: (key) => `Consegna ${key}`,
-    handingOff: "Consegno…",
+    handingOff: "Scrivo la specifica…",
     handedOffAs: (number) => `Consegnata come #${String(number)}`,
     where: {
       handedOff: "Consegnata alla Fabbrica",
@@ -216,7 +216,7 @@ export const explore = area(
     drop: "Verwerfen",
     dropping: "Verwerfe…",
     handOff: (key) => `${key} übergeben`,
-    handingOff: "Übergebe…",
+    handingOff: "Schreibe die Spezifikation…",
     handedOffAs: (number) => `Übergeben als #${String(number)}`,
     where: {
       handedOff: "An die Fabrik übergeben",
