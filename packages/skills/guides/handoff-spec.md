@@ -20,9 +20,13 @@ decided, not how the builder should find its way.
   beyond the screens (an architectural decision, a data rule, a limit, a
   library, what must not change), it goes in, with its reason as they said
   it. Nothing more detailed than they went.
-- **The prototype is the reference, not the product.** Say which variant is
-  agreed and what in it is final (the screens, the words, the behaviour);
-  its made-up data, shortcuts and variant switch are not.
+- **The prototype is what gets built.** Its agreed variant's screens,
+  layout, components, styles, words and behaviour are final: the builder
+  starts from its code on the branch and keeps its look. Never call it a
+  sketch, a picture of the idea or "not the reference". Only its stand-ins
+  are replaced: made-up data, the variant switch, shortcuts, words written
+  straight into the screen (they become translations). When the team
+  asked for changes to it, list them: they were made on the branch.
 - **Short.** Usually 150 to 400 words; a big change a little more, never a
   full plan. Leave out a part that has nothing to say.
 - English, Markdown, no greeting and nothing after the spec.
@@ -33,7 +37,8 @@ decided, not how the builder should find its way.
 One or two sentences: what is built and why.
 
 Explored and agreed in Kobble (exploration <id>, <date>). Products: <which>.
-Prototype: `<branch>`, variant <key> (build only that one).
+Prototype: `<branch>`, variant <key>. Build from its code and keep its
+look; leave out the other variants and the variant switch.
 
 ### What it does
 

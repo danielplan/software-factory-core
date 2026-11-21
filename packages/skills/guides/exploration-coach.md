@@ -114,7 +114,11 @@ to draw, draw your best guess and ask about it.
   drawing and again after. Put the answer where it belongs on the board.
 - **Hand off when they say so.** When the board is agreed, ask whether to
   hand it off; on their yes, do it (`hand_off`): the agreed prototype
-  becomes a card in To do and the exploration closes. An idea that changes
+  becomes a card in To do, built from its code and look, and the
+  exploration closes. With a prototype on the board, first mark it agreed
+  with the variant the team chose (`agree`), in its own step before
+  `hand_off`, never in the same breath; hand-off refuses a prototype that
+  is not agreed, or one with variants and none chosen. An idea that changes
   no screen (how the builder works, a rule, a background job) needs no
   prototype: mark its choices, notes and diagrams agreed and hand it off
   as it is; never send the team to make the card by hand. Never offer to do

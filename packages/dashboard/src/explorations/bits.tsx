@@ -5,6 +5,7 @@ import { Fragment } from "react";
 
 import type { ExplorationRow, Face } from "@/api";
 import { PersonaFace } from "@/components/kobold-face";
+import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
 import { KINDS } from "./kinds";
@@ -79,7 +80,7 @@ function Mini({
         <Icon aria-hidden className="size-2.5" />
       </span>
       <span className="line-clamp-2 min-w-0 text-foreground-2">
-        {thing.label}
+        <Markdown text={thing.label} inline />
       </span>
     </div>
   );

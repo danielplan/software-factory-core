@@ -212,7 +212,7 @@ function serverFor(on: BoardTools): McpServer {
     "hand_off",
     {
       description:
-        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off. With an agreed prototype, that prototype is handed off; an idea that changes no screen (how something works, a rule) is handed off without one, from the board's agreed choices, notes and diagrams.",
+        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off. With a prototype on the board, it must be agreed first (agree, with the variant chosen, in an earlier step): the builder builds from its code and look, and a prototype that is not agreed is refused. An idea that changes no screen (how something works, a rule) and has no prototype is handed off from the board's agreed choices, notes and diagrams.",
     },
     () => toolAnswer(() => on.handOff()),
   );

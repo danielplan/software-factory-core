@@ -36,6 +36,8 @@ const en = {
   dropping: "Dropping…",
   handOff: (key: string) => `Hand off ${key}`,
   handOffBoard: "Hand off",
+  agreePrototypeFirst:
+    "Agree on the prototype and its variant first: the factory builds from it",
   handingOff: "Handing off…",
   handOffStep: (n: number, of: number) => `Step ${String(n)} of ${String(of)}`,
   handOffStages: {

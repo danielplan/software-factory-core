@@ -77,6 +77,20 @@ own working copy; it has its own settings files, made from the examples.
   `show-result` as far as it can go without a person (screenshots, what you
   tried) and `update-context`. When the prompt says earlier work exists, read
   the run file first and continue from it.
+- **A card with a prototype is built from the prototype.** When the card
+  names a prototype branch (`proto/…`) and its variant, the team agreed
+  that screen: start from its code, not from the card's words. Fetch the
+  branch (`git fetch origin <branch>`), read what it changed
+  (`git diff origin/main...origin/<branch>`) and bring the agreed variant's
+  files into the product, keeping its layout, components, styles, words and
+  behaviour. Replace only its stand-ins: the made-up data (the real data
+  instead), the variant switch and the other variants, words written into
+  the screen (into the catalogue), shortcuts; then add the states, tests
+  and checks. Open the prototype and your build side by side
+  (`?variant=<key>`) and make them look the same before you call it done;
+  say any difference you had to make in the run, with why. A card that says
+  the prototype is "not the reference" or "only a sketch" while naming one
+  is wrong: ask on the card instead of guessing.
 - Commit as you go (`git commit` only); leave nothing uncommitted.
 - Install packages where they are missing before running anything.
 - Check lightly while you build, fully once. While building, run the tests

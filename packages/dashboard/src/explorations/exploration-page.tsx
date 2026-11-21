@@ -127,7 +127,12 @@ function HandOffButton({
     (one) => one.kind === "prototype" && one.agreed,
   );
   const key = agreed?.kind === "prototype" ? agreed.key : "";
-  const ready = agreed !== undefined || board.things.some((one) => one.agreed);
+  // A prototype on the board is handed off agreed, or not at all; without
+  // one, the board's agreed choices and notes are.
+  const prototypes = board.things.some((one) => one.kind === "prototype");
+  const ready =
+    agreed !== undefined ||
+    (!prototypes && board.things.some((one) => one.agreed));
   const busy = pending === "hand-off" || page.handingOff !== null;
   const handOffWords = key ? t.handOff(key) : t.handOffBoard;
   return (
@@ -135,6 +140,7 @@ function HandOffButton({
       size="pill-sm"
       busy={busy}
       disabled={!ready || pending !== null || page.handingOff !== null}
+      title={prototypes && !agreed ? t.agreePrototypeFirst : undefined}
       onClick={() => {
         press("hand-off", {});
       }}

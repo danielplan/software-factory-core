@@ -286,7 +286,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
     await agree("prototype-a", false);
     assert.equal(
       (await factory.press("/hand-off", { id: "X-1" })).body.error,
-      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
+      "Agree on the prototype to build first (A, B), with its variant: the builder builds from it.",
     );
     await agree("prototype-b", true);
     assert.match(

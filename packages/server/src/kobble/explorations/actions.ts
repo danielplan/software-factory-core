@@ -117,7 +117,11 @@ export function dropExploration(store: KobbleStore, id: string): Exploration {
 // Hand off: the agreed prototype becomes a GitHub issue on the connected
 // board, its first column; handoff.md says the same. An idea that changes no
 // screen (how the builder works, a rule) needs no prototype: then the
-// board's agreed choices, notes and diagrams are what is handed off.
+// board's agreed choices, notes and diagrams are what is handed off. A
+// board with a prototype on it hands off that prototype, agreed and with
+// its variant, or nothing: a prototype the team worked on is never dropped
+// on the way to the builder. The board is read again before the card is
+// made, so an agreement that changed meanwhile is never lost.
 export async function handOff(
   store: KobbleStore,
   id: string,
@@ -128,13 +132,7 @@ export async function handOff(
 ): Promise<{ issue: number; url: string }> {
   const exploration = open(store, id);
   const board = store.board(id);
-  const agreed = board.things.find(
-    (one): one is Made => one.kind === "prototype" && one.agreed,
-  );
-  if (!agreed && !board.things.some((one) => one.agreed))
-    throw new Refused(
-      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
-    );
+  const agreed = prototypeToHandOff(board);
   const connected = cards();
   const tests = store
     .all("tests")
@@ -145,6 +143,10 @@ export async function handOff(
     summary,
     ...(agreed ? { branch: agreed.branch } : {}),
   });
+  if (agreedOf(prototypeToHandOff(store.board(id))) !== agreedOf(agreed))
+    throw new Refused(
+      "What is agreed on the board changed while the spec was written: hand it off again.",
+    );
   const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed?.key ?? "none"} -->`;
   // Handed off agreed: straight to To do, the go-ahead to build it. An
   // exploration of a Backlog issue fills in that issue instead.
@@ -162,6 +164,33 @@ export async function handOff(
 }
 
 type Made = Extract<Board["things"][number], { kind: "prototype" }>;
+
+// The prototype handed off: the agreed one, with its variant when it has
+// several; none only for a board without a prototype that has agreed
+// choices or notes. Anything else is refused, saying what to agree.
+export function prototypeToHandOff(board: Board): Made | undefined {
+  const made = board.things.filter(
+    (one): one is Made => one.kind === "prototype",
+  );
+  const agreed = made.find((one) => one.agreed);
+  if (made.length > 0 && !agreed)
+    throw new Refused(
+      `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it.`,
+    );
+  if (agreed && (agreed.variants?.length ?? 0) > 1 && !chosenVariant(agreed))
+    throw new Refused(
+      `Say which variant of prototype ${agreed.key} is to be built first.`,
+    );
+  if (!agreed && !board.things.some((one) => one.agreed))
+    throw new Refused(
+      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
+    );
+  return agreed;
+}
+
+function agreedOf(made: Made | undefined): string {
+  return made ? `${made.key}/${chosenVariant(made)?.key ?? ""}` : "";
+}
 
 async function handedOffCard(
   cards: Cards,

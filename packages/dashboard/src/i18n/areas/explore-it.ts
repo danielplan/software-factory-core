@@ -36,6 +36,8 @@ export const exploreItalian: ExploreWords = {
   dropping: "Lascio…",
   handOff: (key) => `Consegna ${key}`,
   handOffBoard: "Consegna",
+  agreePrototypeFirst:
+    "Prima accordatevi sul prototipo e la sua variante: la fabbrica costruisce da quello",
   handingOff: "Consegno…",
   handOffStep: (n: number, of: number) => `Passo ${String(n)} di ${String(of)}`,
   handOffStages: {
