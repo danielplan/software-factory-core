@@ -20,8 +20,7 @@ const OWNER = RELEASE_SOURCE.replace(/^github:/, "").split("/")[0] ?? "";
 export const BOARD = `${OWNER}/software-factory-feedback`;
 export const BOARD_URL = `https://github.com/${BOARD}/issues`;
 
-export const issueUrl = (number: number) =>
-  `${BOARD_URL}/${String(number)}`;
+export const issueUrl = (number: number) => `${BOARD_URL}/${String(number)}`;
 
 // What is already on the board, to add a 👍 instead of a new one.
 export const ON_BOARD: {
@@ -31,11 +30,41 @@ export const ON_BOARD: {
   thumbs: number;
   state: State;
 }[] = [
-  { number: 41, kind: "bug", title: "The builder stops when git push is refused", thumbs: 7, state: "seen" },
-  { number: 38, kind: "wish", title: "Let the builder work on two cards at once", thumbs: 12, state: "planned" },
-  { number: 35, kind: "bug", title: "Board card crashes when a column was renamed", thumbs: 3, state: "seen" },
-  { number: 29, kind: "wish", title: "Show signals from Slack on the Signals page", thumbs: 9, state: "sent" },
-  { number: 22, kind: "wish", title: "A dark look for the dashboard", thumbs: 15, state: "planned" },
+  {
+    number: 41,
+    kind: "bug",
+    title: "The builder stops when git push is refused",
+    thumbs: 7,
+    state: "seen",
+  },
+  {
+    number: 38,
+    kind: "wish",
+    title: "Let the builder work on two cards at once",
+    thumbs: 12,
+    state: "planned",
+  },
+  {
+    number: 35,
+    kind: "bug",
+    title: "Board card crashes when a column was renamed",
+    thumbs: 3,
+    state: "seen",
+  },
+  {
+    number: 29,
+    kind: "wish",
+    title: "Show signals from Slack on the Signals page",
+    thumbs: 9,
+    state: "sent",
+  },
+  {
+    number: 22,
+    kind: "wish",
+    title: "A dark look for the dashboard",
+    thumbs: 15,
+    state: "planned",
+  },
 ];
 
 export type Mine = {
@@ -52,8 +81,20 @@ const SIGNED_KEY = "feedback-github";
 const SEEN_AFTER = 20_000;
 
 const BEFORE: Mine[] = [
-  { number: 33, kind: "wish", title: "Say in the card when the builder waits for me", state: "done", sent: 0 },
-  { number: 27, kind: "bug", title: "Signals page is empty after a restart", state: "planned", sent: 0 },
+  {
+    number: 33,
+    kind: "wish",
+    title: "Say in the card when the builder waits for me",
+    state: "done",
+    sent: 0,
+  },
+  {
+    number: 27,
+    kind: "bug",
+    title: "Signals page is empty after a restart",
+    state: "planned",
+    sent: 0,
+  },
 ];
 
 function read<T>(key: string, fallback: T): T {

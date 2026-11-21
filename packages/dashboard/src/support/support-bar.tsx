@@ -12,14 +12,12 @@ import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { useCaughtErrors } from "@/feedback/factory-errors";
-import { FeedbackThread } from "@/feedback/kobold-chat";
+import { HelpPanel } from "@/feedback/help-panel";
 import {
   clear,
   looksLikeFeedback,
-  onOpen,
+  open as openHelp,
   say,
-  type Thread,
-  useThread,
 } from "@/feedback/tell-kobold";
 import { useKoboldName } from "@/lib/brand";
 import type { Page } from "@/lib/routes";
@@ -48,46 +46,48 @@ export function SupportBar({ page }: Readonly<{ page: Page }>) {
       setOpen(true);
       void post("/api/kobble/support", { text, page }).catch(() => undefined);
     });
-    // Variant F: Send feedback and Report this error open the chat.
-    const opened = onOpen(() => {
-      setOpen(true);
-    });
     return () => {
       window.removeEventListener("keydown", key);
       asked();
-      opened();
     };
   }, [page]);
   const working = support?.writing != null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
-      {open ? (
-        <Conversation
-          name={name}
-          page={page}
-          support={support}
-          onClose={() => {
-            setOpen(false);
-          }}
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="pointer-events-auto flex h-10 w-full max-w-sm items-center gap-2.5 rounded-xl border border-border bg-card/95 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] backdrop-blur transition-colors hover:border-[#d4d4da] motion-safe:animate-rise"
-        >
-          <KoboldHead size={22} className={cn(working && "animate-breathe")} />
-          <span className="flex-1 truncate">
-            {working ? t.support.answering(name) : t.support.ask(name)}
-          </span>
-          <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
-            ⌘J
-          </kbd>
-        </button>
-      )}
-    </div>
+    <>
+      {/* Variant F: Send feedback and Report this error open the help window. */}
+      {VARIANT === "F" && <HelpPanel page={page} />}
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
+        {open ? (
+          <Conversation
+            name={name}
+            page={page}
+            support={support}
+            onClose={() => {
+              setOpen(false);
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true);
+            }}
+            className="pointer-events-auto flex h-10 w-full max-w-sm items-center gap-2.5 rounded-xl border border-border bg-card/95 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] backdrop-blur transition-colors hover:border-[#d4d4da] motion-safe:animate-rise"
+          >
+            <KoboldHead
+              size={22}
+              className={cn(working && "animate-breathe")}
+            />
+            <span className="flex-1 truncate">
+              {working ? t.support.answering(name) : t.support.ask(name)}
+            </span>
+            <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
+              ⌘J
+            </kbd>
+          </button>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -104,10 +104,7 @@ function Conversation({
 }>) {
   const t = useT();
   const [refused, setRefused] = useState<string | null>(null);
-  const thread = useThread();
-  const feedback = VARIANT === "F" ? thread : null;
-  const empty =
-    !feedback && (support?.messages.length ?? 0) === 0 && !support?.writing;
+  const empty = (support?.messages.length ?? 0) === 0 && !support?.writing;
   return (
     <section
       aria-label={`${name}, support`}
@@ -147,12 +144,7 @@ function Conversation({
       {empty ? (
         <p className="px-4 py-5 text-[13px] text-muted-foreground">
           {t.support.empty}
-          {VARIANT === "F" && (
-            <span className="mt-2 block">{t.feedback.chat.hint}</span>
-          )}
         </p>
-      ) : feedback ? (
-        <FeedbackThread thread={feedback} />
       ) : (
         <Messages support={support} />
       )}
@@ -161,17 +153,14 @@ function Conversation({
           {refused ?? support?.problem}
         </p>
       )}
-      <Ask
-        page={page}
-        busy={support?.writing != null}
-        feedback={feedback}
-        onRefused={setRefused}
-      />
+      <Ask page={page} busy={support?.writing != null} onRefused={setRefused} />
     </section>
   );
 }
 
-function Messages({ support }: Readonly<{ support: SupportView | null }>) {
+export function Messages({
+  support,
+}: Readonly<{ support: SupportView | null }>) {
   const t = useT();
   const end = useRef<HTMLDivElement>(null);
   const count = support?.messages.length ?? 0;
@@ -212,12 +201,10 @@ function Messages({ support }: Readonly<{ support: SupportView | null }>) {
 function Ask({
   page,
   busy,
-  feedback,
   onRefused,
 }: Readonly<{
   page: Page;
   busy: boolean;
-  feedback: Thread | null;
   onRefused: (problem: string | null) => void;
 }>) {
   const t = useT();
@@ -226,18 +213,14 @@ function Ask({
   const send = () => {
     const said = text.trim();
     if (!said) return;
-    // Variant F: a wish or something wrong goes to the feedback chat.
-    if (
-      VARIANT === "F" &&
-      ((feedback && feedback.step !== "sent") || looksLikeFeedback(said))
-    ) {
+    // Variant F: a wish or something wrong goes to the help window.
+    if (VARIANT === "F" && looksLikeFeedback(said)) {
       setText("");
       say(said, t.shell.pages[page], errors);
+      openHelp();
       return;
     }
     if (busy) return;
-    // A question after the feedback was sent: back to the conversation.
-    if (VARIANT === "F" && feedback) clear();
     setText("");
     onRefused(null);
     post("/api/kobble/support", { text: said, page }).catch(
@@ -259,11 +242,7 @@ function Ask({
         autoFocus
         rows={1}
         value={text}
-        placeholder={
-          feedback && feedback.step !== "sent"
-            ? t.feedback.chat.placeholder
-            : t.support.question
-        }
+        placeholder={t.support.question}
         onChange={(event) => {
           setText(event.target.value);
         }}

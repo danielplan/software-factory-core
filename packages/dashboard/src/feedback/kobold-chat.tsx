@@ -22,6 +22,7 @@ import { FIELD_AREA } from "@/lib/field-style";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
 
+import { useCaughtErrors } from "./factory-errors";
 import {
   BOARD,
   issueUrl,
@@ -40,6 +41,7 @@ import {
   moved,
   type Part,
   reply,
+  say,
   sendDraft,
   teamBits,
   type Thread,
@@ -76,7 +78,9 @@ export function FeedbackThread({ thread }: Readonly<{ thread: Thread }>) {
       {thread.thinking ? (
         <div className="self-start text-muted-foreground">{t.thinking}</div>
       ) : (
-        last?.from === "kobold" && <QuickAnswers say={last.say} />
+        last?.from === "kobold" && (
+          <QuickAnswers say={last.say} page={thread.page} />
+        )
       )}
       <div ref={end} />
     </div>
@@ -104,6 +108,10 @@ function KoboldLine({
         return t.posted(n);
       case "moved":
         return t.moved[line.state ?? "sent"](n);
+      case "startBug":
+      case "startWish":
+      case "startAsk":
+        return START[line.say].line;
       default:
         return t[line.say];
     }
@@ -130,16 +138,71 @@ function KoboldLine({
   );
 }
 
+// PROTOTYPE: the help window's first lines, in one language.
+export const START = {
+  startBug: {
+    line: "Sorry about that. What went wrong? Say it in a few words.",
+    examples: [
+      "The builder stopped halfway",
+      "The board doesn't show my cards",
+      "A page shows an error",
+    ],
+  },
+  startWish: {
+    line: "Tell me what you wish Kobble could do.",
+    examples: [
+      "Work on two cards at once",
+      "See signals from Slack",
+      "Export the board",
+    ],
+  },
+  startAsk: {
+    line: "What would you like to know?",
+    examples: [
+      "How do I start a build?",
+      "What is a persona?",
+      "Where do signals come from?",
+    ],
+  },
+};
+
 // The quick answers under the kobold's last question.
-function QuickAnswers({ say }: Readonly<{ say: string }>) {
+function QuickAnswers({
+  say: line,
+  page,
+}: Readonly<{ say: string; page: string }>) {
   const t = useT().feedback.chat;
+  const errors = useCaughtErrors();
+  if (line === "startBug" || line === "startWish")
+    return (
+      <Chips
+        choices={START[line].examples}
+        onPick={(choice) => {
+          say(choice, page, errors);
+        }}
+      />
+    );
   const choices =
-    say === "askAgain"
+    line === "askAgain"
       ? t.again
-      : say === "askWish" || say === "askBug" || say === "askError"
+      : line === "askWish" || line === "askBug" || line === "askError"
         ? [t.skip]
         : [];
   if (choices.length === 0) return null;
+  return (
+    <Chips
+      choices={choices}
+      onPick={(choice) => {
+        reply(choice, choice === t.skip ? "" : choice);
+      }}
+    />
+  );
+}
+
+export function Chips({
+  choices,
+  onPick,
+}: Readonly<{ choices: string[]; onPick: (choice: string) => void }>) {
   return (
     <div className="flex flex-wrap justify-end gap-1.5">
       {choices.map((choice) => (
@@ -147,7 +210,7 @@ function QuickAnswers({ say }: Readonly<{ say: string }>) {
           key={choice}
           type="button"
           onClick={() => {
-            reply(choice, choice === t.skip ? "" : choice);
+            onPick(choice);
           }}
           className="rounded-full border border-border px-2.5 py-1 text-[12px] text-foreground-2 hover:border-[#d4d4da] hover:bg-surface"
         >
@@ -335,7 +398,11 @@ function DraftCard({
             <span className="flex-1 text-foreground-2">{t.signInFirst}</span>
           )}
           {signedIn ? (
-            <Button size="sm" disabled={!draft.title.trim()} onClick={sendDraft}>
+            <Button
+              size="sm"
+              disabled={!draft.title.trim()}
+              onClick={sendDraft}
+            >
               {t.chat.send}
             </Button>
           ) : (

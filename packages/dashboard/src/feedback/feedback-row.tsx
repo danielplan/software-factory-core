@@ -406,7 +406,9 @@ function Check({
   const t = useT().feedback;
   const signedIn = useSignedIn();
   const change = (id: string, edit: Partial<Part>) => {
-    onParts(parts.map((part) => (part.id === id ? { ...part, ...edit } : part)));
+    onParts(
+      parts.map((part) => (part.id === id ? { ...part, ...edit } : part)),
+    );
   };
   const hasErrors = parts.some(
     (part) => part.id.startsWith("error-") && !part.removed,
@@ -464,7 +466,10 @@ function Check({
             {!part.removed && (
               <textarea
                 aria-label={part.label}
-                rows={Math.min(5, Math.max(1, Math.ceil(part.text.length / 60)))}
+                rows={Math.min(
+                  5,
+                  Math.max(1, Math.ceil(part.text.length / 60)),
+                )}
                 value={part.text}
                 className={cn(
                   FIELD_AREA,
@@ -498,7 +503,12 @@ function Check({
         ) : (
           <>
             <span className="text-foreground-2">{t.signInFirst}</span>
-            <Button size="sm" variant="outline" className="ml-auto" onClick={signIn}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto"
+              onClick={signIn}
+            >
               {t.signIn}
             </Button>
           </>
@@ -526,7 +536,9 @@ function Sent({
   return (
     <>
       <div className="grid gap-1.5 pr-6">
-        <DialogTitle className="text-base font-semibold">{t.thanks}</DialogTitle>
+        <DialogTitle className="text-base font-semibold">
+          {t.thanks}
+        </DialogTitle>
         <DialogDescription className="text-[13px] text-muted-foreground">
           {t.onBoard}
         </DialogDescription>
@@ -603,7 +615,11 @@ function MineList({ skip }: Readonly<{ skip?: number }>) {
               rel="noreferrer"
               className="flex items-center gap-2 rounded-md px-1 py-1.5 hover:bg-surface [&_svg]:size-3.5 [&_svg]:flex-none [&_svg]:text-faint"
             >
-              {one.kind === "bug" ? <Bug aria-hidden /> : <Lightbulb aria-hidden />}
+              {one.kind === "bug" ? (
+                <Bug aria-hidden />
+              ) : (
+                <Lightbulb aria-hidden />
+              )}
               <span className="text-faint">#{one.number}</span>
               <span className="flex-1 truncate">{one.title}</span>
               <StatePill state={one.state} />

@@ -26,6 +26,9 @@ import {
 // What the kobold says, by name (the words are in i18n/areas/feedback.ts).
 export type Say =
   | "invite"
+  | "startBug"
+  | "startWish"
+  | "startAsk"
   | "askWish"
   | "askBug"
   | "askError"
@@ -53,7 +56,18 @@ export type Part = {
 
 export type Draft = { title: string; body: string; parts: Part[] };
 
-type Step = "listen" | "question" | "again" | "similar" | "draft" | "sent";
+// "choose", "posts" and "ask" are the help window's: its three starting
+// choices, the person's posts, and a question to the support kobold.
+type Step =
+  | "choose"
+  | "posts"
+  | "ask"
+  | "listen"
+  | "question"
+  | "again"
+  | "similar"
+  | "draft"
+  | "sent";
 
 export type Thread = {
   kind: Kind;
@@ -68,6 +82,8 @@ export type Thread = {
   draft: Draft | null;
   // Opened from an error the factory caught: no second question.
   fromError: boolean;
+  // Started from "Something is wrong" or "I wish…": the kind is known.
+  chosen: boolean;
   // The post this chat follows (the one sent, or the one given a 👍), and
   // the state it last said.
   follows: number | null;
@@ -121,7 +137,7 @@ export function onOpen(listener: () => void): () => void {
     window.removeEventListener(OPEN, listener);
   };
 }
-function open() {
+export function open() {
   window.dispatchEvent(new Event(OPEN));
 }
 
@@ -137,6 +153,7 @@ const empty = (page: string): Thread => ({
   similar: null,
   draft: null,
   fromError: false,
+  chosen: false,
   follows: null,
   followsState: null,
 });
@@ -151,11 +168,37 @@ export function looksLikeFeedback(text: string): boolean {
   return FEEDBACK.test(text);
 }
 
-// The person starts from the sidebar: the kobold asks them to tell it.
+// The person starts from the sidebar: the help window shows its three
+// starting choices.
 export function invite(page: string) {
-  thread = { ...empty(page), lines: [kobold("invite")] };
+  thread = { ...empty(page), step: "choose" };
   tell();
   open();
+}
+
+// One of the three starting choices: the chat starts with a matching line.
+export function start(choice: Kind | "ask") {
+  if (!thread) return;
+  if (choice === "ask") {
+    change({ step: "ask", lines: [kobold("startAsk")] });
+    return;
+  }
+  change({
+    kind: choice,
+    chosen: true,
+    step: "listen",
+    lines: [kobold(choice === "bug" ? "startBug" : "startWish")],
+  });
+}
+
+export function showPosts() {
+  change({ step: "posts" });
+}
+
+// Back to the three starting choices.
+export function back() {
+  if (thread) thread = { ...empty(thread.page), step: "choose" };
+  tell();
 }
 
 // The factory hit an error: the chat opens with it filled in.
@@ -178,11 +221,16 @@ export function reportError(error: CaughtError, page: string, report: string) {
 export function say(text: string, page: string, errors: CaughtError[]) {
   const said = text.trim();
   if (!said) return;
-  if (!thread || thread.step === "sent") thread = empty(page);
+  if (!thread || ["sent", "choose", "posts", "ask"].includes(thread.step))
+    thread = empty(page);
   const lines = [...thread.lines, you(said)];
   switch (thread.step) {
     case "listen": {
-      const kind: Kind = BUG.test(said) ? "bug" : "wish";
+      const kind: Kind = thread.chosen
+        ? thread.kind
+        : BUG.test(said)
+          ? "bug"
+          : "wish";
       change({
         kind,
         said,
@@ -212,6 +260,9 @@ export function say(text: string, page: string, errors: CaughtError[]) {
       answer([kobold("added")]);
       return;
     case "sent":
+    case "choose":
+    case "posts":
+    case "ask":
       return;
   }
 }
@@ -222,15 +273,24 @@ export function reply(shown: string, text = shown) {
   if (!thread) return;
   const answers = text ? [...thread.answers, text] : thread.answers;
   const lines =
-    thread.lines.at(-1)?.from === "you" ? thread.lines : [...thread.lines, you(shown)];
+    thread.lines.at(-1)?.from === "you"
+      ? thread.lines
+      : [...thread.lines, you(shown)];
   // A bug told in words gets one more question.
-  if (thread.step === "question" && thread.kind === "bug" && !thread.fromError) {
+  if (
+    thread.step === "question" &&
+    thread.kind === "bug" &&
+    !thread.fromError
+  ) {
     change({ answers, lines, step: "again" });
     answer([kobold("askAgain")]);
     return;
   }
   change({ answers, lines });
-  const similar = findSimilar(`${thread.said} ${answers.join(" ")}`, thread.kind);
+  const similar = findSimilar(
+    `${thread.said} ${answers.join(" ")}`,
+    thread.kind,
+  );
   if (similar) {
     change({ step: "similar", similar: similar.number });
     answer([kobold("similar", { number: similar.number })], {}, 1100);
@@ -273,7 +333,12 @@ export function writeDraft() {
       ...answers.map(sentence),
     ].join("\n\n"),
     parts: [
-      { id: "version", label: "version", text: `Kobble ${CORE_VERSION}`, removed: false },
+      {
+        id: "version",
+        label: "version",
+        text: `Kobble ${CORE_VERSION}`,
+        removed: false,
+      },
       { id: "page", label: "page", text: page, removed: false },
       ...errors.map((error) => ({
         id: `error-${String(error.id)}`,
@@ -328,7 +393,10 @@ function titleOf(said: string, kind: Kind): string {
     .replace(/^i wish i could\s+/i, "Let me ")
     .replace(/^i wish (kobble|it|the factory) (would|could)\s+/i, "")
     .replace(/^i wish there (was|were) (an? )?/i, "Add ")
-    .replace(/^(it would be (nice|great|good) if|would be (nice|great) if)\s+/i, "")
+    .replace(
+      /^(it would be (nice|great|good) if|would be (nice|great) if)\s+/i,
+      "",
+    )
     .trim();
   if (kind === "bug") title = title.replace(/^error:\s*/i, "");
   title = title.charAt(0).toUpperCase() + title.slice(1);
@@ -358,7 +426,8 @@ export function teamBits(text: string): { text: string; team: boolean }[] {
   const bits: { text: string; team: boolean }[] = [];
   let at = 0;
   for (const match of text.matchAll(TEAM)) {
-    if (match.index > at) bits.push({ text: text.slice(at, match.index), team: false });
+    if (match.index > at)
+      bits.push({ text: text.slice(at, match.index), team: false });
     bits.push({ text: match[0], team: true });
     at = match.index + match[0].length;
   }
