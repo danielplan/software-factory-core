@@ -5,11 +5,29 @@ installs the core straight from this repository, at the tag of a release,
 and pins it in its `package.json`; `software-factory upgrade` brings its
 factory to that version.
 
+## Which number to raise
+
+Until 1.0.0 the version is `0.<minor>.<patch>`, and most releases are
+patches.
+
+- **Patch** (0.13.0 → 0.13.1): everything a project can take without doing
+  anything: fixes, improvements, and new features too. When the changelog
+  entry would end in "Nothing to do", it is a patch.
+- **Minor** (0.13.x → 0.14.0): only when a project has to do something to
+  upgrade: a migration in `migrations.ts`, a settings or data format that
+  an older core cannot read, a removed command or endpoint, a new step in
+  setup. The changelog says what to do.
+- **1.0.0**: when a company runs its factory without us helping.
+
+A batch of features is not a reason for a minor. The changelog keeps the
+overview with its plain headings, not with the number.
+
 ## Making a release
 
 1. Every change a company would have to make by hand has its migration in
    `packages/server/src/upgrade/migrations.ts`, for this version.
-2. Raise `CORE_VERSION` in `packages/core/src/version.ts`.
+2. Raise `CORE_VERSION` in `packages/core/src/version.ts`, by the rule in
+   [Which number to raise](#which-number-to-raise).
 3. In `CHANGELOG.md`, turn "Unreleased" into the version's section, with
    the date and how to upgrade.
 4. `npm run verify`, commit, and tag the commit on main `v<version>`.
