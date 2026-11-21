@@ -21,7 +21,15 @@ export type PullRequest = {
   url: string;
   state: "OPEN" | "MERGED" | "CLOSED";
   draft: boolean;
+  // GitHub says it clashes with the main branch (unknown counts as no).
+  conflicting?: boolean;
 };
+
+// What the owner says on a clashing pull request (Resolve on its card): the
+// builder answers it like any review, bringing in main and settling the
+// clash in its next round.
+export const RESOLVE_ASK =
+  "Please bring in the latest main and resolve the merge conflicts, keeping what both sides meant.";
 
 export type Opening = {
   branch: string;
@@ -58,7 +66,9 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
     JSON.parse(await gh(args)) as T;
   const repo = ["--repo", repository];
   const find = async (branch: string) => {
-    const found = await json<(PullRequest & { isDraft: boolean })[]>([
+    const found = await json<
+      (PullRequest & { isDraft: boolean; mergeable?: string })[]
+    >([
       "pr",
       "list",
       ...repo,
@@ -67,7 +77,7 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
       "--state",
       "all",
       "--json",
-      "number,url,state,isDraft",
+      "number,url,state,isDraft,mergeable",
     ]);
     const first = found[0];
     return first
@@ -76,6 +86,7 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
           url: first.url,
           state: first.state,
           draft: first.isDraft,
+          conflicting: first.mergeable === "CONFLICTING",
         }
       : null;
   };

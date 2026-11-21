@@ -1,6 +1,7 @@
 // A card on the Factory board, opened beside it on a click; while the
 // builder is on it, what it is doing right now; handed back from Stuck, that
-// the owner's hint is with the builder.
+// the owner's hint is with the builder; when its pull request clashes with
+// main, Resolve.
 
 import {
   ArrowUpRight,
@@ -14,6 +15,7 @@ import { createContext, use } from "react";
 import type { FactoryCard } from "@/api";
 
 import { TypeChip } from "./card-type";
+import { ConflictBox } from "./conflict-box";
 import { useT } from "@/i18n/use-t";
 
 // A card on the board: it rises in after the ones above it, lifts under the
@@ -93,6 +95,7 @@ export function Card({
       )}
       <Origin card={card} />
       <PullRequestLink url={card.pullRequest} />
+      {card.conflict && !building && <ConflictBox number={card.number} />}
     </div>
   );
 }

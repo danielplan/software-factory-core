@@ -57,6 +57,11 @@ const en = {
     draft: "Draft",
     open: "Open",
   },
+  conflict: {
+    clashes: "Clashes with main",
+    resolve: "Resolve",
+    asked: "Asked: the builder resolves it next",
+  },
   remove: {
     ask: (number: number) =>
       `Delete #${String(number)}? It is closed as not planned and leaves the board.`,
@@ -135,6 +140,11 @@ export const factory = area(
       draft: "Bozza",
       open: "Aperta",
     },
+    conflict: {
+      clashes: "In conflitto con main",
+      resolve: "Risolvi",
+      asked: "Chiesto: il costruttore lo risolve al prossimo giro",
+    },
     remove: {
       ask: (number) =>
         `Eliminare #${String(number)}? Viene chiusa come non pianificata e lascia la bacheca.`,
@@ -209,6 +219,11 @@ export const factory = area(
       closed: "Geschlossen",
       draft: "Entwurf",
       open: "Offen",
+    },
+    conflict: {
+      clashes: "Konflikt mit main",
+      resolve: "Lösen",
+      asked: "Gebeten: der Baumeister löst ihn als Nächstes",
     },
     remove: {
       ask: (number) =>

@@ -33,6 +33,7 @@ import { markComment } from "./protocol.ts";
 import type { PullRequests } from "./pull-requests.ts";
 import { snapshotOf } from "./snapshot.ts";
 import { clockOf } from "./usage-limit.ts";
+import { SeenPullRequests } from "./seen-pull-requests.ts";
 
 export const EVERY_MS = 60_000;
 
@@ -64,7 +65,7 @@ export class BoardWork {
   private readonly options: BoardWorkOptions;
   private cards: CardView[] = [];
   // The pull requests the builder opened, by card, from the last reading.
-  private pullRequests = new Map<number, string>();
+  private seen = new SeenPullRequests();
   // The cards that ask "did it work?": closed or in Done at the last
   // reading, and finished by the rules' last decision (a merged pull
   // request may leave its card open).
@@ -253,7 +254,7 @@ export class BoardWork {
         stage,
         column,
         url,
-        pullRequest: this.pullRequests.get(number) ?? null,
+        ...this.seen.of(number),
         closed,
         asks: false,
         type: typeOf(labels),
@@ -305,13 +306,8 @@ export class BoardWork {
 
   // The pull requests the cards have, shown on them from now on.
   private notePullRequests(board: BoardCard[]): void {
-    for (const card of board)
-      if (card.pullRequest)
-        this.pullRequests.set(card.number, card.pullRequest.url);
-    this.cards = this.cards.map((c) => ({
-      ...c,
-      pullRequest: this.pullRequests.get(c.number) ?? null,
-    }));
+    this.seen.note(board);
+    this.cards = this.cards.map((c) => ({ ...c, ...this.seen.of(c.number) }));
   }
 
   private async move(move: { number: number; stage: Stage }) {

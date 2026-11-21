@@ -46,6 +46,8 @@ export type CardView = {
   url: string;
   // The pull request the builder opened for it, once it has.
   pullRequest: string | null;
+  // Its open pull request clashes with main.
+  conflict?: boolean;
   closed: boolean;
   // It waits in Done for a person to say whether it worked (Kobble).
   asks: boolean;

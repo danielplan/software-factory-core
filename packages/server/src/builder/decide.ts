@@ -47,6 +47,7 @@ export type BoardCard = {
     url: string;
     state: "OPEN" | "MERGED" | "CLOSED";
     draft: boolean;
+    conflicting?: boolean;
     thread: Message[];
   } | null;
   // Kobble knows its issue as an idea's version, and nobody has said yet

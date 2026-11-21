@@ -9,7 +9,12 @@ import type { Claude } from "@software-factory/core";
 import type { Cli } from "../src/add-ons/github/github.ts";
 import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
 import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
-import { githubPullRequests } from "../src/builder/pull-requests.ts";
+import type { BoardCard } from "../src/builder/decide.ts";
+import {
+  githubPullRequests,
+  RESOLVE_ASK,
+} from "../src/builder/pull-requests.ts";
+import { SeenPullRequests } from "../src/builder/seen-pull-requests.ts";
 
 // The builder's pull requests through the GitHub CLI (a stand-in that
 // answers what GitHub would and remembers what it was asked), the checks
@@ -42,7 +47,13 @@ test("pull requests: found by branch, opened as a draft, updated, commented, and
   const { cli, asked } = pretendCli({
     "repo view": "trunk\n",
     "pr list": [
-      { number: 7, url: "https://x/pull/7", state: "OPEN", isDraft: true },
+      {
+        number: 7,
+        url: "https://x/pull/7",
+        state: "OPEN",
+        isDraft: true,
+        mergeable: "CONFLICTING",
+      },
     ],
     "pr view": {
       comments: [
@@ -75,6 +86,7 @@ test("pull requests: found by branch, opened as a draft, updated, commented, and
     url: "https://x/pull/7",
     state: "OPEN",
     draft: true,
+    conflicting: true,
   });
   const made = await prs.open({
     branch: "factory/card-7",
@@ -194,4 +206,35 @@ test("a failed check's report shows the lines that name what failed, then its su
   assert.equal(shown.at(-1), "84 passed, 1 failed");
   assert.equal(shown.length, 32);
   assert.equal(shownOutput("short\nfailed"), "short\nfailed");
+});
+
+test("the board remembers each card's pull request, and whether an open one clashes with main", () => {
+  const seen = new SeenPullRequests();
+  const card = (number: number, pullRequest: object | null) =>
+    ({ number, pullRequest }) as unknown as BoardCard;
+  const pr = (state: string, conflicting: boolean) => ({
+    number: 1,
+    url: "https://x/pull/1",
+    state,
+    draft: false,
+    conflicting,
+    thread: [],
+  });
+  seen.note([card(3, pr("OPEN", true)), card(4, pr("MERGED", true))]);
+  assert.deepEqual(seen.of(3), {
+    pullRequest: "https://x/pull/1",
+    conflict: true,
+  });
+  assert.equal(seen.of(4).conflict, false);
+  assert.deepEqual(seen.of(5), { pullRequest: null, conflict: false });
+  seen.note([card(3, null)]);
+  assert.deepEqual(seen.of(3), {
+    pullRequest: "https://x/pull/1",
+    conflict: false,
+  });
+});
+
+test("Resolve asks the builder to bring in main and settle the clash", () => {
+  assert.match(RESOLVE_ASK, /bring in the latest main/);
+  assert.match(RESOLVE_ASK, /merge conflicts/);
 });
