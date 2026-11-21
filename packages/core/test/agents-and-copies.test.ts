@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import {
   existsSync,
   lstatSync,
+  readdirSync,
+  rmSync,
   readFileSync,
   mkdirSync,
   mkdtempSync,
@@ -353,4 +355,83 @@ test("settings files are never staged, whether the project ignores them or not",
       .sort((a, b) => a.localeCompare(b)),
     [".gitignore", "app/.env.example", "app/README.md"],
   );
+});
+
+test("a copy that lost its link to git is remade, its old folder kept, and a healthy one is left alone", async () => {
+  const folder = mkdtempSync(join(tmpdir(), "copies-"));
+  const git = (...args: string[]) => run("git", args);
+  const origin = join(folder, "origin.git");
+  const source = join(folder, "source");
+  await git("init", "--quiet", "--bare", "-b", "main", origin);
+  await git("clone", "--quiet", origin, source);
+  writeFileSync(join(source, "README.md"), "An app");
+  await git("-C", source, "add", ".");
+  await git(
+    "-C",
+    source,
+    "-c",
+    "user.name=t",
+    "-c",
+    "user.email=t@t",
+    "commit",
+    "-qm",
+    "x",
+  );
+  await git("-C", source, "push", "--quiet", "origin", "HEAD:main");
+  const settings = {
+    source,
+    workspaces: join(folder, "copies"),
+    baseBranch: "main",
+  };
+  const builds = new Workspace(settings, "builds");
+  const kept = () => {
+    const place = join(folder, "copies", "kept");
+    return existsSync(place) ? readdirSync(place) : [];
+  };
+
+  // Not there yet: made as before.
+  await builds.prepareSharedBranch("factory/card-1");
+  const copyIsListedOnce = async () =>
+    (await git("-C", source, "worktree", "list")).split(builds.path).length ===
+    2;
+
+  // A committed change on the branch, and an uncommitted file.
+  writeFileSync(join(builds.path, "DONE.md"), "Committed");
+  const tip = await builds.commitAll("Work");
+  writeFileSync(join(builds.path, "HALF.md"), "Not committed");
+
+  // Healthy: untouched.
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(existsSync(join(builds.path, "HALF.md")), true);
+  assert.deepEqual(kept(), []);
+
+  // Git's own folder for the copy is gone.
+  rmSync(join(source, ".git", "worktrees", "builds"), { recursive: true });
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(
+    (await git("-C", builds.path, "branch", "--show-current")).trim(),
+    "factory/card-1",
+  );
+  assert.equal(await copyIsListedOnce(), true);
+  assert.equal(existsSync(join(builds.path, "HALF.md")), false);
+  assert.equal(
+    (await git("-C", source, "rev-parse", "factory/card-1")).trim(),
+    tip,
+  );
+  assert.equal(kept().length, 1);
+  assert.equal(
+    readFileSync(
+      join(folder, "copies", "kept", kept()[0] ?? "", "HALF.md"),
+      "utf8",
+    ),
+    "Not committed",
+  );
+
+  // The .git file points nowhere.
+  writeFileSync(join(builds.path, "LOST.md"), "Also kept");
+  writeFileSync(join(builds.path, ".git"), "gitdir: /nowhere\n");
+  await builds.prepareSharedBranch("factory/card-1");
+  assert.equal(await copyIsListedOnce(), true);
+  assert.equal(existsSync(join(builds.path, "LOST.md")), false);
+  assert.equal(kept().length, 2);
 });
