@@ -132,6 +132,8 @@ test("the routes show the updates with the release, and prepare it once as a car
     releases: {
       current: "0.11.1",
       tags: () => Promise.resolve(["x\trefs/tags/release-0.12.0"]),
+      local: () => ({}),
+      files: () => Promise.resolve(null),
       cards: () => cards,
       create: (title) => {
         created.push(title);
@@ -162,4 +164,80 @@ test("the routes show the updates with the release, and prepare it once as a car
   assert.deepEqual(created, ["Upgrade Kobble to 0.12.0"]);
   served.start();
   served.close();
+});
+
+const EN = "## 0.11.1\n\n- New: **Here.** Now.\n";
+const NEWER = {
+  en: "## 0.12.0\n\n- Fixed: **Gone.** It works.\n",
+  it: "## 0.12.0\n\n- Fixed: **Sparito.** Funziona.\n",
+};
+
+function whatsNewRoute(github: { up: boolean }) {
+  const project = mkdtempSync(join(tmpdir(), "updates-served-"));
+  made.push(project);
+  let asked = 0;
+  const served = servedUpdates({
+    project,
+    restartRunning: () => Promise.resolve(),
+    install: () => Promise.resolve(),
+    newKobble: () => false,
+    releases: {
+      current: "0.11.1",
+      tags: () =>
+        Promise.resolve(github.up ? ["x\trefs/tags/release-0.12.0"] : null),
+      local: () => ({ en: EN }),
+      files: () => {
+        asked += 1;
+        return Promise.resolve(github.up ? NEWER : null);
+      },
+      cards: () => [],
+      create: () => Promise.resolve(),
+    },
+    onChange: () => {},
+    git: () => Promise.resolve({ ok: false, log: [] }),
+  });
+  const call = async (name: string, query = "") => {
+    const found = served.routes[name];
+    assert.ok(found, name);
+    return (await found({}, new URL(`http://localhost/${query}`))) as {
+      current: string;
+      newest: {
+        version: string;
+        release: { changes: { title: string }[] } | null;
+      } | null;
+      offline: boolean;
+      checkedAt: string | null;
+      releases: { version: string }[];
+    };
+  };
+  return { call, asked: () => asked };
+}
+
+test("what's new lists the local releases when GitHub fails", async () => {
+  const { call, asked } = whatsNewRoute({ up: false });
+  await call("POST /api/updates/look");
+  const view = await call("GET /api/updates/whats-new", "?language=it");
+  assert.equal(view.offline, true);
+  assert.ok(view.checkedAt);
+  assert.equal(view.newest, null);
+  assert.equal(view.current, "0.11.1");
+  assert.deepEqual(
+    view.releases.map((one) => one.version),
+    ["0.11.1"],
+  );
+  assert.equal(asked(), 0);
+});
+
+test("what's new adds the newer release from GitHub, in the language, once", async () => {
+  const { call, asked } = whatsNewRoute({ up: true });
+  await call("POST /api/updates/look");
+  const view = await call("GET /api/updates/whats-new", "?language=it");
+  assert.equal(view.offline, false);
+  const { newest } = view;
+  assert.ok(newest);
+  assert.equal(newest.version, "0.12.0");
+  assert.equal(newest.release?.changes.at(0)?.title, "Sparito.");
+  const german = await call("GET /api/updates/whats-new", "?language=de");
+  assert.equal(german.newest?.release?.changes.at(0)?.title, "Gone.");
+  assert.equal(asked(), 1);
 });

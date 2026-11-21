@@ -15,6 +15,7 @@ import type { Cards } from "../cards/cards.ts";
 import { CORE_PACKAGE } from "../pin-core.ts";
 import type { Session } from "../session.ts";
 import { servedUpdates } from "./served.ts";
+import { localWhatsNew, remoteWhatsNew } from "./whats-new.ts";
 
 export function updatesOf(
   session: Session,
@@ -63,9 +64,11 @@ export function updatesOf(
           );
           return out.split("\n");
         } catch {
-          return [];
+          return null;
         }
       },
+      files: remoteWhatsNew,
+      local: () => localWhatsNew(import.meta.dirname),
       cards: () => session.work.view()?.cards ?? [],
       create: (title, body) => cards().create(title, body, "todo"),
     },

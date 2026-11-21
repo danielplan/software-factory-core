@@ -11,13 +11,16 @@ Until 1.0.0 the version is `0.<minor>.<patch>`, and most releases are
 patches.
 
 - **Patch** (0.13.0 → 0.13.1): everything a project can take without doing
-  anything: fixes, improvements, and new features too. When the changelog
-  entry would end in "Nothing to do", it is a patch.
+  anything: fixes, improvements, and new features too. When the upgrade
+  has nothing to leave to the owner, it is a patch.
 - **Minor** (0.13.x → 0.14.0): only when a project has to do something to
   upgrade: a migration in `migrations.ts`, a settings or data format that
   an older core cannot read, a removed command or endpoint, a new step in
-  setup. The changelog says what to do.
+  setup. `npx software-factory upgrade` says what to do.
 - **1.0.0**: when a company runs its factory without us helping.
+
+The products a factory builds follow the same rule, with the first number
+too: see [releases of the products](architecture.md#releases-of-the-products).
 
 A batch of features is not a reason for a minor.
 
@@ -27,9 +30,17 @@ A batch of features is not a reason for a minor.
    `packages/server/src/upgrade/migrations.ts`, for this version.
 2. Raise `CORE_VERSION` in `packages/core/src/version.ts`, by the rule in
    [Which number to raise](#which-number-to-raise).
-3. `npm run verify`, commit, and tag the commit on main `v<version>`.
-4. `npm run release -- --push`: builds the core as one package (compiled to
-   JavaScript, its own packages bundled in it, the dashboard built), commits
+3. Write what the release changes for the team, in plain words, in
+   `WHATS-NEW.md`, `WHATS-NEW.it.md` and `WHATS-NEW.de.md` at the root: a
+   `## <version>` section (`## 0.13.2 (2026-11-21)` also works), and one line
+   per change, `- New: **Title.** One or two sentences.` (`New`, `Changed` or
+   `Fixed`; Markdown is fine inside). No instructions: upgrading is automatic.
+   Settings › Updates › What's new in Kobble shows them; `npm run release`
+   refuses to publish while a language has no section for the version.
+4. `npm run verify`, commit, and tag the commit on main `v<version>`.
+5. `npm run release -- --push`: builds the core as one package (compiled to
+   JavaScript, its own packages bundled in it, the dashboard built, the three
+   what's-new files beside the README), commits
    it to the `release` branch and tags it `release-<version>`, then pushes
    the branch and the tag. Without `--push` it stops before pushing.
 

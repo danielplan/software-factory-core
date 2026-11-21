@@ -15,22 +15,26 @@ import { settings } from "./areas/settings.ts";
 import { signals } from "./areas/signals.ts";
 import { system } from "./areas/system.ts";
 import { updates } from "./areas/updates.ts";
+import { whatsNew } from "./areas/whats-new.ts";
 import { words } from "./areas/words.ts";
 import { builder } from "./areas/builder.ts";
 import { feedback } from "./areas/feedback.ts";
 import { chat } from "./areas/chat.ts";
+import { releases } from "./areas/releases.ts";
 
 const AREAS = {
   shell,
   home,
   system,
   updates,
+  whatsNew,
   settings,
   words,
   signals,
   personas,
   explore,
   factory,
+  releases,
   builder,
   feedback,
   connect,

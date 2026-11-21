@@ -12,7 +12,7 @@ import { knowledgePrompt, NOTHING_TO_KEEP } from "./prompts.ts";
 
 const KNOWLEDGE = /(?:^|\/)(?:(?:docs|context)\/|(?:BLUEPRINT|AGENTS)\.md$)/;
 const RUN = /^runs\/[^/]+\.md$/;
-// Not code: the run's own files, pictures, the changelog.
+// Not code: the run's own files, pictures, Markdown such as WHATS-NEW.md.
 const NOT_CODE = /^runs\/|\.(md|png|jpe?g|gif|webp)$/i;
 
 // Whether the branch's changes still owe the knowledge base an update.

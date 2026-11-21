@@ -37,6 +37,13 @@ row is `--picked`; the current page in the sidebar `--wash` with
 its type a tinted pill (`--type-bug`, `--type-request`, `--type-feedback`);
 "Found in usage" is `--usage`.
 
+A page that makes something with one click (Releases) puts the button at the
+top right of its box, beside the title, with what it makes in its label
+("Release 1.4.3"); while it works the button shows its spinner and cannot be
+pressed again, and when there is nothing to make it is greyed out with the
+reason beside it. A number the kobold suggests shows its reason next to it, in
+grey, and a small **Change** link turns it into a field.
+
 A page with several sections that do not belong together (Settings) shows
 them as tabs at the side, one at a time, each at its own address
 (`#settings/updates`); on a phone the tabs wrap above it. The chosen tab is
@@ -173,6 +180,21 @@ Parts of a page are 16px apart, cards in a list 8 to 14px.
 | `--shadow-card`    | a card: a 1px ring and a breath of shadow      |
 | `--shadow-panel`   | the kobold's card                              |
 | `--shadow-big`     | a dialog or a panel over the page              |
+
+## Motion
+
+Motion helps a person see what changed; it never makes them wait.
+
+- **Quick and gentle:** 150–250 ms, an ease-out curve. Nothing bounces or
+  loops without a reason.
+- **What may move:** something opening or closing (a release in Settings ›
+  Updates, a **More**), something coming in (changes fading in one after
+  another, 40 ms apart, the first eight), a spinner while the product works
+  (**Try again** while it checks), and a soft light on something that happens
+  by itself ("Arriving by itself").
+- **Nothing moves under `prefers-reduced-motion`:** `index.css` turns every
+  animation off and shortens every transition, so each piece must read well
+  standing still.
 
 ## Pieces
 

@@ -9,6 +9,7 @@ import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
 import { FactoryPage } from "@/factory/factory-page";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
+import { ReleasesPage } from "@/releases/releases-page";
 import { PersonasPage } from "@/personas/personas-page";
 import { GuidedSetup } from "@/setup-guided/guided-setup";
 import { SignalsPage } from "@/signals/signals-page";
@@ -93,6 +94,8 @@ function PageBody({
       return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
     case "build":
       return <FactoryPage state={state} />;
+    case "releases":
+      return <ReleasesPage />;
     case "home":
       return <HomePage state={state} />;
     case "system":

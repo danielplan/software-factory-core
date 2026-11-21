@@ -213,3 +213,14 @@ export {
   RELEASE_SOURCE,
   releaseOf,
 } from "./version.ts";
+
+export {
+  hasWhatsNewFor,
+  parseWhatsNew,
+  WHATS_NEW_LANGUAGES,
+  type WhatsNewChange,
+  type WhatsNewKind,
+  type WhatsNewRelease,
+  whatsNewFile,
+  whatsNewIn,
+} from "./whats-new.ts";

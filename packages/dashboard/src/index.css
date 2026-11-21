@@ -274,6 +274,16 @@
       transform: translate(-3px, -1px) rotate(-8deg);
     }
   }
+  /* What's new: a change fades in, a release opens and closes, and
+     "Arriving by itself" has a soft light moving across it. All quick and
+     gentle (docs/reference/design-system.md, Motion). */
+  --animate-fade-in: fade-in 0.2s ease-out backwards;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
   /* A card being built: a light running along its top edge. */
   --animate-run-light: run-light 1.6s ease-in-out infinite;
   @keyframes run-light {
@@ -452,6 +462,48 @@
   @media (prefers-reduced-motion: reduce) {
     * {
       animation: none !important;
+      transition-duration: 0.01ms !important;
     }
   }
+}
+
+@keyframes collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.collapsible-content[data-state="open"] {
+  animation: collapsible-down 0.2s ease-out;
+}
+.collapsible-content[data-state="closed"] {
+  animation: collapsible-up 0.2s ease-out;
+}
+.shimmer {
+  background-image: linear-gradient(
+    100deg,
+    var(--muted) 30%,
+    #e6e9f3 50%,
+    var(--muted) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.2s ease-in-out infinite;
 }

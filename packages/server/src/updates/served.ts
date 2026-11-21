@@ -24,6 +24,7 @@ import {
   upgradeBody,
   upgradeTitle,
 } from "./kobble-release.ts";
+import { WhatsNew, type WhatsNewOptions } from "./whats-new.ts";
 import {
   type AfterUpdate,
   type Git,
@@ -45,9 +46,8 @@ export type UpdatesOptions = {
   // The factory starting again on the Kobble now installed; none where the
   // factory cannot.
   restartFactory?: () => Promise<void>;
-  releases: {
-    current: string;
-    tags: () => Promise<string[]>;
+  releases: WhatsNewOptions & {
+    tags: () => Promise<string[] | null>;
     cards: () => {
       number: number;
       title: string;
@@ -86,9 +86,9 @@ export function afterUpdate(
   };
 }
 
-export function servedUpdates(options: UpdatesOptions) {
-  const factory = join(options.project, FACTORY_FOLDER);
-  const updates = new ProjectUpdates({
+// The folder following GitHub's main, with the switch kept in the factory.
+function projectUpdates(options: UpdatesOptions, factory: string) {
+  return new ProjectUpdates({
     root: options.project,
     choice: {
       read: () => hasFactory(factory) && updatesByItself(factory),
@@ -99,6 +99,11 @@ export function servedUpdates(options: UpdatesOptions) {
     after: afterUpdate(options),
     ...(options.git ? { git: options.git } : {}),
   });
+}
+
+export function servedUpdates(options: UpdatesOptions) {
+  const factory = join(options.project, FACTORY_FOLDER);
+  const updates = projectUpdates(options, factory);
   const releases = new KobbleReleases({
     ...options.releases,
     onChange: options.onChange,
@@ -106,6 +111,7 @@ export function servedUpdates(options: UpdatesOptions) {
   updates.subscribe(() => {
     options.onChange();
   });
+  const whatsNew = new WhatsNew(options.releases);
   const view = (): UpdatesView => ({
     ...updates.state,
     release: releases.view(),
@@ -113,6 +119,12 @@ export function servedUpdates(options: UpdatesOptions) {
   let stops: (() => void)[] = [];
   const routes: Record<string, Route> = {
     "GET /api/updates": view,
+    // What each Kobble release changed, in the page's language.
+    "GET /api/updates/whats-new": (_body, url) =>
+      whatsNew.view(
+        url.searchParams.get("language") ?? "en",
+        releases.status(),
+      ),
     "POST /api/updates/look": async () => {
       await Promise.all([updates.look(), releases.look()]);
     },
