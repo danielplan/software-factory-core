@@ -38,5 +38,5 @@ Decisions (the plan left them open or cheap to change):
 
 done: server, page, words (en, it, de), changelog. Not checked: the kobold's judgement on real work; a real release on GitHub.
 
-![The coming release and past releases](runs/issue-22-releases/ready.png)
-![Changing the number, with a wrong one](runs/issue-22-releases/change-invalid.png)
+![The coming release and past releases](issue-22-releases/ready.png)
+![Changing the number, with a wrong one](issue-22-releases/change-invalid.png)
