@@ -21,6 +21,11 @@ Knowledge base: nothing to change, because the new section, route and files are 
 3. Page: `packages/dashboard/src/updates/whats-new.tsx` and `whats-new-model.ts`, words in `i18n/areas/whats-new.ts`.
 4. Motion rules, animations, docs, changelog.
 
-## Next
+## Checked
 
-Full `npm run verify`, then look at it in the browser.
+`npm run verify` passes (format, lint, types, unused code, copy-paste, tests with coverage, docs). On the running product, Settings › Updates in English, wide and in a 420 px window, with More open:
+
+![What's new, English](006-whats-new-in-kobble/english.png)
+![A narrow window, More open](006-whats-new-in-kobble/offline-narrow.png)
+
+Not looked at in the browser: the offline and newer-release states (the browser's request faking did not take; they are covered by the server and model tests), Italian and German on screen, reduced motion, and whether the motion feels gentle.
