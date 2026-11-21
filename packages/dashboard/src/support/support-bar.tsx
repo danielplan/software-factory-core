@@ -11,14 +11,7 @@ import { messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
-import { useCaughtErrors } from "@/feedback/factory-errors";
-import { HelpPanel } from "@/feedback/help-panel";
-import {
-  clear,
-  looksLikeFeedback,
-  open as openHelp,
-  say,
-} from "@/feedback/tell-kobold";
+import { SprocketWindow } from "@/feedback/sprocket-window";
 import { useKoboldName } from "@/lib/brand";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
@@ -28,7 +21,17 @@ import { onAskSupport } from "./ask-support";
 import { type SupportView, useSupport } from "./use-support";
 import { useT } from "@/i18n/use-t";
 
+// Variant F: the bar grows into Sprocket's one window, which also takes
+// feedback (feedback/sprocket-window.tsx).
 export function SupportBar({ page }: Readonly<{ page: Page }>) {
+  return VARIANT === "F" ? (
+    <SprocketWindow page={page} />
+  ) : (
+    <SupportBarE page={page} />
+  );
+}
+
+function SupportBarE({ page }: Readonly<{ page: Page }>) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const name = useKoboldName();
@@ -53,41 +56,34 @@ export function SupportBar({ page }: Readonly<{ page: Page }>) {
   }, [page]);
   const working = support?.writing != null;
   return (
-    <>
-      {/* Variant F: Send feedback and Report this error open the help window. */}
-      {VARIANT === "F" && <HelpPanel page={page} />}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
-        {open ? (
-          <Conversation
-            name={name}
-            page={page}
-            support={support}
-            onClose={() => {
-              setOpen(false);
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(true);
-            }}
-            className="pointer-events-auto flex h-10 w-full max-w-sm items-center gap-2.5 rounded-xl border border-border bg-card/95 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] backdrop-blur transition-colors hover:border-[#d4d4da] motion-safe:animate-rise"
-          >
-            <KoboldHead
-              size={22}
-              className={cn(working && "animate-breathe")}
-            />
-            <span className="flex-1 truncate">
-              {working ? t.support.answering(name) : t.support.ask(name)}
-            </span>
-            <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
-              ⌘J
-            </kbd>
-          </button>
-        )}
-      </div>
-    </>
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 md:left-56">
+      {open ? (
+        <Conversation
+          name={name}
+          page={page}
+          support={support}
+          onClose={() => {
+            setOpen(false);
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(true);
+          }}
+          className="pointer-events-auto flex h-10 w-full max-w-sm items-center gap-2.5 rounded-xl border border-border bg-card/95 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] backdrop-blur transition-colors hover:border-[#d4d4da] motion-safe:animate-rise"
+        >
+          <KoboldHead size={22} className={cn(working && "animate-breathe")} />
+          <span className="flex-1 truncate">
+            {working ? t.support.answering(name) : t.support.ask(name)}
+          </span>
+          <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
+            ⌘J
+          </kbd>
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -124,7 +120,6 @@ function Conversation({
           aria-label={t.support.newConversation}
           title={t.support.newConversation}
           onClick={() => {
-            clear();
             post("/api/kobble/support/new").catch((error: unknown) => {
               setRefused(messageOf(error));
             });
@@ -158,9 +153,7 @@ function Conversation({
   );
 }
 
-export function Messages({
-  support,
-}: Readonly<{ support: SupportView | null }>) {
+export function Messages({ support }: Readonly<{ support: SupportView | null }>) {
   const t = useT();
   const end = useRef<HTMLDivElement>(null);
   const count = support?.messages.length ?? 0;
@@ -208,19 +201,10 @@ function Ask({
   onRefused: (problem: string | null) => void;
 }>) {
   const t = useT();
-  const errors = useCaughtErrors();
   const [text, setText] = useState("");
   const send = () => {
     const said = text.trim();
-    if (!said) return;
-    // Variant F: a wish or something wrong goes to the help window.
-    if (VARIANT === "F" && looksLikeFeedback(said)) {
-      setText("");
-      say(said, t.shell.pages[page], errors);
-      openHelp();
-      return;
-    }
-    if (busy) return;
+    if (!said || busy) return;
     setText("");
     onRefused(null);
     post("/api/kobble/support", { text: said, page }).catch(

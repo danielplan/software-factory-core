@@ -38,7 +38,8 @@ export type Say =
   | "added"
   | "thumbed"
   | "posted"
-  | "moved";
+  | "moved"
+  | "cleaned";
 
 type Extra = { number?: number; state?: State; error?: string };
 
@@ -56,11 +57,10 @@ export type Part = {
 
 export type Draft = { title: string; body: string; parts: Part[] };
 
-// "choose", "posts" and "ask" are the help window's: its three starting
-// choices, the person's posts, and a question to the support kobold.
+// "choose" is the window's opening (its suggestions and three starting
+// choices), "ask" a question to the support kobold.
 type Step =
   | "choose"
-  | "posts"
   | "ask"
   | "listen"
   | "question"
@@ -180,19 +180,59 @@ export function invite(page: string) {
 export function start(choice: Kind | "ask") {
   if (!thread) return;
   if (choice === "ask") {
-    change({ step: "ask", lines: [kobold("startAsk")] });
+    askMode(thread.page);
     return;
   }
-  change({
-    kind: choice,
-    chosen: true,
-    step: "listen",
-    lines: [kobold(choice === "bug" ? "startBug" : "startWish")],
-  });
+  change({ kind: choice, chosen: true, step: "listen", lines: [] });
+  answer([kobold(choice === "bug" ? "startBug" : "startWish")], {}, 450);
 }
 
-export function showPosts() {
-  change({ step: "posts" });
+// A suggestion of the opening, already in words ("Builder stopped?"):
+// the post starts with them.
+export function startWith(
+  kind: Kind,
+  said: string,
+  page: string,
+  errors: CaughtError[],
+) {
+  thread = { ...empty(page), kind, chosen: true };
+  say(said, page, errors);
+  open();
+}
+
+// A question for the support kobold, in the same window.
+export function askMode(page: string, greet = true) {
+  thread = { ...empty(page), step: "ask" };
+  tell();
+  if (greet) answer([kobold("startAsk")], {}, 450);
+}
+
+// A 👍 on a post that slid in while the person typed.
+export function thumbFor(number: number) {
+  const there = ON_BOARD.find((one) => one.number === number);
+  if (!there) return;
+  if (!thread || thread.step === "sent")
+    thread = empty(thread?.page ?? "");
+  thread = { ...thread, kind: there.kind, similar: number };
+  thumb();
+}
+
+// Takes out all that looks like the team's data, in one go.
+export function removeTeamData(taken: string) {
+  const draft = thread?.draft;
+  if (!draft) return;
+  editDraft({
+    parts: draft.parts.map((part) => ({
+      ...part,
+      text: part.text.replaceAll(TEAM, taken),
+    })),
+  });
+  answer([kobold("cleaned")], {}, 400);
+}
+
+// The post as it is so far, building itself while the person talks.
+export function liveDraft(at: Thread): Draft | null {
+  return at.draft ?? (at.said ? draftOf(at) : null);
 }
 
 // Back to the three starting choices.
@@ -221,7 +261,7 @@ export function reportError(error: CaughtError, page: string, report: string) {
 export function say(text: string, page: string, errors: CaughtError[]) {
   const said = text.trim();
   if (!said) return;
-  if (!thread || ["sent", "choose", "posts", "ask"].includes(thread.step))
+  if (!thread || ["sent", "choose", "ask"].includes(thread.step))
     thread = empty(page);
   const lines = [...thread.lines, you(said)];
   switch (thread.step) {
@@ -261,7 +301,6 @@ export function say(text: string, page: string, errors: CaughtError[]) {
       return;
     case "sent":
     case "choose":
-    case "posts":
     case "ask":
       return;
   }
@@ -300,15 +339,22 @@ export function reply(shown: string, text = shown) {
 }
 
 function findSimilar(text: string, kind: Kind) {
+  return findSimilarPosts(text, kind)[0];
+}
+
+// The posts on the board that sound like the text, the closest first.
+export function findSimilarPosts(text: string, kind: Kind | null, most = 2) {
   const words = text
     .toLowerCase()
     .split(/\W+/)
     .filter((word) => word.length > 3);
   const score = (one: (typeof ON_BOARD)[number]) =>
     words.filter((word) => one.title.toLowerCase().includes(word)).length;
-  return ON_BOARD.filter((one) => one.kind === kind && score(one) > 0).sort(
-    (a, b) => score(b) - score(a) || b.thumbs - a.thumbs,
-  )[0];
+  return ON_BOARD.filter(
+    (one) => (kind == null || one.kind === kind) && score(one) > 0,
+  )
+    .sort((a, b) => score(b) - score(a) || b.thumbs - a.thumbs)
+    .slice(0, most);
 }
 
 // The person adds a 👍 to the similar post instead of a new one.
@@ -324,12 +370,17 @@ export function thumb() {
 // Theirs is different: the kobold writes the draft.
 export function writeDraft() {
   if (!thread) return;
-  const { kind, said, answers, page, errors } = thread;
-  const draft: Draft = {
+  change({ step: "draft", draft: draftOf(thread) });
+  answer([kobold("draft")], {}, 1000);
+}
+
+function draftOf(at: Thread): Draft {
+  const { kind, said, answers, page, errors } = at;
+  return {
     title: titleOf(said, kind),
     // An error goes along below, where its team data can be taken out.
     body: [
-      thread.fromError ? "The factory hit the error below." : sentence(said),
+      at.fromError ? "The factory hit the error below." : sentence(said),
       ...answers.map(sentence),
     ].join("\n\n"),
     parts: [
@@ -349,8 +400,6 @@ export function writeDraft() {
       })),
     ],
   };
-  change({ step: "draft", draft });
-  answer([kobold("draft")], {}, 1200);
 }
 
 export function editDraft(edit: Partial<Draft>) {
