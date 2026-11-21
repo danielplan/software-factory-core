@@ -1,0 +1,121 @@
+- generic [ref=f1e5]:
+  - complementary [ref=f1e6]:
+    - generic [ref=f1e7]: Acme
+    - navigation "Overview" [ref=f1e19]:
+      - link "Home" [ref=f1e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e37]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e38]
+    - navigation "Pages" [ref=f1e39]:
+      - generic [ref=f1e40]:
+        - generic [ref=f1e41]: Work
+        - link "Signals Sieve" [ref=f1e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e48]': Sieve
+        - link "Explorations Doodle 2" [ref=f1e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=f1e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e66]': Doodle
+            - generic [ref=f1e78]: "2"
+        - link "Factory Bolt" [ref=f1e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e84]': Bolt
+      - generic [ref=f1e98]:
+        - generic [ref=f1e99]: Customers
+        - link "Personas Mimic" [ref=f1e100] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e108]': Mimic
+    - generic [ref=f1e119]:
+      - button "Send feedback" [ref=f1e120] [cursor=pointer]
+      - navigation "The factory" [ref=f1e125]:
+        - link "Settings" [ref=f1e126] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e131]:
+    - generic [ref=f1e133]:
+      - generic [ref=f1e134]:
+        - heading "Settings" [level=1] [ref=f1e137]
+        - paragraph [ref=f1e138]: "How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts."
+      - generic [ref=f1e139]:
+        - navigation "Settings" [ref=f1e140]:
+          - link "Connections" [ref=f1e141] [cursor=pointer]:
+            - /url: "#settings/connections"
+          - link "AI models" [ref=f1e145] [cursor=pointer]:
+            - /url: "#settings/ai-models"
+          - link "Updates" [ref=f1e150] [cursor=pointer]:
+            - /url: "#settings/updates"
+          - link "Add-ons" [ref=f1e157] [cursor=pointer]:
+            - /url: "#settings/add-ons"
+          - link "This computer" [ref=f1e161] [cursor=pointer]:
+            - /url: "#settings/this-computer"
+          - link "Advanced" [ref=f1e165] [cursor=pointer]:
+            - /url: "#settings/advanced"
+        - generic "Updates" [ref=f1e169]:
+          - generic [ref=f1e170]:
+            - generic [ref=f1e171]: Updates
+            - generic [ref=f1e172]: Merged work comes to this computer from GitHub; new versions of Kobble come as a card for the builder.
+          - generic [ref=f1e174]:
+            - generic [ref=f1e175]:
+              - generic [ref=f1e176]: You're on Kobble 0.13.2
+              - paragraph [ref=f1e178]:
+                - generic [ref=f1e179]: Couldn't check for newer versions just now · checked 1 minute ago
+                - button "Try again" [ref=f1e180] [cursor=pointer]
+            - generic [ref=f1e186]:
+              - generic [ref=f1e187]:
+                - generic [ref=f1e188]: Update by itself
+                - generic [ref=f1e189]: Takes new versions when nothing here can be lost
+              - switch "Update by itself" [checked] [ref=f1e190] [cursor=pointer]
+            - generic [ref=f1e191]:
+              - heading "What's new in Kobble" [level=3] [ref=f1e192]
+              - generic [ref=f1e193]:
+                - button "Kobble 0.13.2 You're on this one Nov 21, 2026" [expanded] [ref=f1e194] [cursor=pointer]:
+                  - text: Kobble 0.13.2
+                  - generic [ref=f1e197]: You're on this one
+                  - generic [ref=f1e198]: Nov 21, 2026
+                - list [ref=f1e200]:
+                  - listitem [ref=f1e201]:
+                    - generic [ref=f1e202]: New
+                    - generic [ref=f1e203]:
+                      - generic [ref=f1e204]:
+                        - strong [ref=f1e205]: Send feedback from anywhere
+                        - text: ": Sprocket's window opens from the sidebar and the post builds itself while you talk. When you send it, it goes to the people who make Kobble, and you can follow it here: sent, seen, planned, done. Anything that looks like your team's data is marked, so you can take it out first."
+                      - button "Less" [active] [ref=f1e206] [cursor=pointer]
+                  - listitem [ref=f1e207]:
+                    - generic [ref=f1e208]: New
+                    - generic [ref=f1e210]:
+                      - strong [ref=f1e211]: Feedback from other teams becomes signals
+                      - text: ": Open posts from the public feedback board show up on Signals, matched to the persona they fit best."
+                  - listitem [ref=f1e212]:
+                    - generic [ref=f1e213]: Changed
+                    - generic [ref=f1e214]:
+                      - generic [ref=f1e215]:
+                        - strong [ref=f1e216]: Buttons have icons
+                        - text: ": Every button has a small picture before its words, the same one for the same action."
+                      - button "More" [ref=f1e217] [cursor=pointer]
+                  - listitem [ref=f1e218]:
+                    - generic [ref=f1e219]: Fixed
+                    - generic [ref=f1e221]:
+                      - strong [ref=f1e222]: Every word in three languages
+                      - text: ": Sprocket's window, All quiet on Signals and the labels screen readers hear are now in Italian and German too."
+                  - listitem [ref=f1e223]:
+                    - generic [ref=f1e224]: Fixed
+                    - generic [ref=f1e226]:
+                      - strong [ref=f1e227]: No more blank page
+                      - text: ": A Kobble page left open while Kobble updated loads itself again instead of showing a blank canvas."
+              - button "Kobble 0.13.1 Nov 14, 2026" [ref=f1e229] [cursor=pointer]:
+                - text: Kobble 0.13.1
+                - generic [ref=f1e232]: Nov 14, 2026
+              - button "Kobble 0.13.0 Nov 7, 2026" [ref=f1e234] [cursor=pointer]:
+                - text: Kobble 0.13.0
+                - generic [ref=f1e237]: Nov 7, 2026
+  - region "Sprocket" [ref=f1e238]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e239] [cursor=pointer]:
+      - generic [ref=f1e249]: Ask Sprocket anything
+      - generic [ref=f1e250]: ⌘J

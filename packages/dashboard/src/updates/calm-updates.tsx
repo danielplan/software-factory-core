@@ -16,7 +16,7 @@ import { ReleaseList } from "./release-list";
 const WORDS = {
   en: {
     on: (v: string) => `You're on Kobble ${v}`,
-    ready: (v: string) => `Kobble ${v} is ready`,
+    ready: (v: string) => `Kobble ${v} is on its way: it arrives by itself`,
     failed: "Couldn't check for newer versions just now",
     ok: "Up to date",
     checking: "Checking for newer versions…",
@@ -27,7 +27,7 @@ const WORDS = {
   },
   it: {
     on: (v: string) => `Stai usando Kobble ${v}`,
-    ready: (v: string) => `Kobble ${v} è pronto`,
+    ready: (v: string) => `Kobble ${v} sta arrivando: arriva da solo`,
     failed: "Non è stato possibile cercare versioni più nuove",
     ok: "Aggiornato",
     checking: "Cerco versioni più nuove…",
@@ -39,7 +39,7 @@ const WORDS = {
   },
   de: {
     on: (v: string) => `Du nutzt Kobble ${v}`,
-    ready: (v: string) => `Kobble ${v} ist bereit`,
+    ready: (v: string) => `Kobble ${v} ist unterwegs: es kommt von selbst`,
     failed: "Neuere Versionen konnten gerade nicht geprüft werden",
     ok: "Auf dem neuesten Stand",
     checking: "Suche nach neueren Versionen…",

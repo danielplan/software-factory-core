@@ -6,7 +6,6 @@
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import { Markdown } from "@/components/markdown";
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,11 +19,10 @@ import {
   CHANGELOG,
   CURRENT,
   type Entry,
-  FOUND,
+  KINDS,
   type Kind,
-  parseChangelog,
+  ON_ITS_WAY,
   type Release,
-  splitEntry,
 } from "./changelog-data";
 
 const WORDS = {
@@ -32,30 +30,24 @@ const WORDS = {
     title: "What's new in Kobble",
     isNew: "New",
     yours: "You're on this one",
-    upgrade: "To upgrade",
     more: "More",
     less: "Less",
-    nothing: "Nothing to do.",
     kinds: { New: "New", Changed: "Changed", Fixed: "Fixed" },
   },
   it: {
     title: "Novità di Kobble",
     isNew: "Nuovo",
     yours: "Usi questa",
-    upgrade: "Per aggiornare",
     more: "Altro",
     less: "Meno",
-    nothing: "Niente da fare.",
     kinds: { New: "Nuovo", Changed: "Cambiato", Fixed: "Corretto" },
   },
   de: {
     title: "Neu in Kobble",
     isNew: "Neu",
     yours: "Du nutzt diese",
-    upgrade: "Zum Aktualisieren",
     more: "Mehr",
     less: "Weniger",
-    nothing: "Nichts zu tun.",
     kinds: { New: "Neu", Changed: "Geändert", Fixed: "Behoben" },
   },
 } satisfies Record<Locale, object>;
@@ -72,9 +64,9 @@ export function ReleaseList({
 }: Readonly<{ newest?: string | null; titled?: boolean }>) {
   const { locale } = useLanguage();
   const w = WORDS[locale];
-  const releases = [
-    ...(newest ? parseChangelog(FOUND, newest) : []),
-    ...parseChangelog(CHANGELOG),
+  const releases: Release[] = [
+    ...(newest ? [{ version: newest, ...ON_ITS_WAY }] : []),
+    ...CHANGELOG,
   ];
   return (
     <div className="grid gap-3">
@@ -134,15 +126,9 @@ function ReleaseSection({
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent className="grid gap-3 px-4 pb-4">
-        {release.upgrade && (
-          <div className="rounded-[10px] bg-blue/10 px-3 py-2.5 text-[13px] [overflow-wrap:anywhere]">
-            <span className="font-semibold">{w.upgrade}: </span>
-            <Markdown inline text={release.upgrade} />
-          </div>
-        )}
         <ul className="grid gap-3">
-          {release.entries.map((entry) => (
-            <EntryRow key={entry.text} entry={entry} />
+          {byKind(release.entries).map((entry) => (
+            <EntryRow key={entry.title.en} entry={entry} />
           ))}
         </ul>
       </CollapsibleContent>
@@ -150,11 +136,15 @@ function ReleaseSection({
   );
 }
 
+// New first, then Changed, then Fixed.
+function byKind(entries: Entry[]): Entry[] {
+  return KINDS.flatMap((kind) => entries.filter((e) => e.kind === kind));
+}
+
 function EntryRow({ entry }: Readonly<{ entry: Entry }>) {
   const { locale } = useLanguage();
   const w = WORDS[locale];
   const [more, setMore] = useState(false);
-  const { head, rest } = splitEntry(entry.text);
   return (
     <li className="flex items-start gap-3 text-[13px]">
       <span
@@ -166,14 +156,13 @@ function EntryRow({ entry }: Readonly<{ entry: Entry }>) {
         {w.kinds[entry.kind]}
       </span>
       <div className="grid min-w-0 flex-1 gap-1 [overflow-wrap:anywhere]">
-        <Markdown inline text={more ? entry.text : head} />
-        {more && entry.nothingToDo && (
-          <span className="text-xs text-muted-foreground">{w.nothing}</span>
-        )}
-        {!more && !rest && entry.nothingToDo && (
-          <span className="text-xs text-muted-foreground">{w.nothing}</span>
-        )}
-        {rest && (
+        <span>
+          <strong className="font-semibold">{entry.title[locale]}</strong>
+          {": "}
+          {entry.text[locale]}
+          {more && entry.more && ` ${entry.more[locale]}`}
+        </span>
+        {entry.more && (
           <button
             type="button"
             onClick={() => {
