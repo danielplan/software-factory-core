@@ -29,12 +29,13 @@ export const ON_BOARD: {
   kind: Kind;
   title: string;
   thumbs: number;
+  state: State;
 }[] = [
-  { number: 41, kind: "bug", title: "The builder stops when git push is refused", thumbs: 7 },
-  { number: 38, kind: "wish", title: "Let the builder work on two cards at once", thumbs: 12 },
-  { number: 35, kind: "bug", title: "Board card crashes when a column was renamed", thumbs: 3 },
-  { number: 29, kind: "wish", title: "Show signals from Slack on the Signals page", thumbs: 9 },
-  { number: 22, kind: "wish", title: "A dark look for the dashboard", thumbs: 15 },
+  { number: 41, kind: "bug", title: "The builder stops when git push is refused", thumbs: 7, state: "seen" },
+  { number: 38, kind: "wish", title: "Let the builder work on two cards at once", thumbs: 12, state: "planned" },
+  { number: 35, kind: "bug", title: "Board card crashes when a column was renamed", thumbs: 3, state: "seen" },
+  { number: 29, kind: "wish", title: "Show signals from Slack on the Signals page", thumbs: 9, state: "sent" },
+  { number: 22, kind: "wish", title: "A dark look for the dashboard", thumbs: 15, state: "planned" },
 ];
 
 export type Mine = {
@@ -127,4 +128,20 @@ export function send(kind: Kind, title: string): Mine {
   localStorage.setItem(MINE_KEY, JSON.stringify(mine));
   tell();
   return one;
+}
+
+// Adds a 👍 to a post already on the board, and follows it (made up).
+export function addThumb(number: number): void {
+  const there = ON_BOARD.find((one) => one.number === number);
+  if (!there || mine.some((one) => one.number === number)) return;
+  mine = [{ ...there, sent: 0 }, ...mine];
+  localStorage.setItem(MINE_KEY, JSON.stringify(mine));
+  tell();
+}
+
+// PROTOTYPE: the makers move a post on (made up, to show it followed).
+export function moveOn(number: number, state: State): void {
+  mine = mine.map((one) => (one.number === number ? { ...one, state } : one));
+  localStorage.setItem(MINE_KEY, JSON.stringify(mine));
+  tell();
 }

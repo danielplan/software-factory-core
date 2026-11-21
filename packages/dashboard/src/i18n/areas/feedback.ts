@@ -64,6 +64,47 @@ const en = {
   similar: "Already on the board",
   similarHelp: "If one is yours, add a 👍 instead of a new one.",
   thumbs: (n: number) => `👍 ${String(n)}`,
+  chat: {
+    placeholder: "I wish I could…, or: it stops when…",
+    hint: "A wish, or something wrong? Just tell me in your own words: I write it up for the makers of Kobble.",
+    invite:
+      "Tell me in your own words: something you wish Kobble did, or something that went wrong. I write it up for its makers, on their public board.",
+    askWish:
+      "Good one. What would you do with it? A moment from your work helps the makers most.",
+    askBug: "Sorry about that. What were you doing when it happened, and what did you expect?",
+    askError: (error: string) =>
+      `The factory hit this error:\n\n\`${error}\`\n\nWhat were you doing when it happened?`,
+    askAgain: "Does it happen every time?",
+    again: ["Every time", "Only once", "Not sure"],
+    skip: "Skip",
+    similar: (teams: number) => `${String(teams)} teams want this too. Add your 👍 instead of a new post?`,
+    similarBug: (teams: number) =>
+      `${String(teams)} teams ran into this too. Add your 👍 instead of a new post?`,
+    addThumb: "Add my 👍",
+    different: "Mine is different",
+    thumbed: (n: number) => `Your 👍 is on #${String(n)}. I tell you here when it moves.`,
+    draft:
+      "Here is what I would send. Change anything, or tell me what to add.",
+    draftTeam:
+      "I marked what looks like your team's data (names, repositories, card titles). The board is public: click a mark to take it out.",
+    added: "Added that to the description.",
+    kindWord: { bug: "Bug", wish: "Wish" },
+    description: "Description",
+    goesAlong: "Goes along",
+    version: "Version",
+    page: "Page",
+    taken: "[taken out]",
+    send: "Send",
+    posted: (n: number) =>
+      `Sent as #${String(n)} on the public board. I follow it here: seen, planned, done.`,
+    moved: {
+      sent: (n: number) => `#${String(n)} is on the board.`,
+      seen: (n: number) => `The makers have read #${String(n)}.`,
+      planned: (n: number) => `#${String(n)} is planned: the makers will do it.`,
+      done: (n: number) => `#${String(n)} is done: it is in a new Kobble.`,
+    },
+    madeUp: "The board and how its posts move are made up for this prototype.",
+  },
 };
 
 export const feedback = area(
@@ -128,6 +169,46 @@ export const feedback = area(
     similar: "Già sulla bacheca",
     similarHelp: "Se uno è il tuo, aggiungi un 👍 invece di uno nuovo.",
     thumbs: (n) => `👍 ${String(n)}`,
+    chat: {
+      placeholder: "Vorrei poter…, oppure: si blocca quando…",
+      hint: "Un desiderio, o qualcosa che non va? Dimmelo con parole tue: lo scrivo io per chi fa Kobble.",
+      invite:
+        "Dimmelo con parole tue: qualcosa che vorresti da Kobble, o qualcosa che non è andato. Lo scrivo io per chi lo fa, sulla loro bacheca pubblica.",
+      askWish:
+        "Bella idea. Cosa ci faresti? Un momento del tuo lavoro aiuta di più.",
+      askBug: "Mi dispiace. Cosa stavi facendo quando è successo, e cosa ti aspettavi?",
+      askError: (error) =>
+        `La fabbrica ha avuto questo errore:\n\n\`${error}\`\n\nCosa stavi facendo quando è successo?`,
+      askAgain: "Succede ogni volta?",
+      again: ["Ogni volta", "Solo una volta", "Non so"],
+      skip: "Salta",
+      similar: (teams) => `Lo vogliono anche altri ${String(teams)} team. Aggiungi il tuo 👍 invece di un nuovo post?`,
+      similarBug: (teams) =>
+        `È successo anche ad altri ${String(teams)} team. Aggiungi il tuo 👍 invece di un nuovo post?`,
+      addThumb: "Aggiungi il mio 👍",
+      different: "Il mio è diverso",
+      thumbed: (n) => `Il tuo 👍 è su #${String(n)}. Ti dico qui quando si muove.`,
+      draft: "Ecco cosa invierei. Cambia quello che vuoi, o dimmi cosa aggiungere.",
+      draftTeam:
+        "Ho segnato ciò che sembra un dato del tuo team (nomi, repository, titoli di card). La bacheca è pubblica: clicca un segno per toglierlo.",
+      added: "L'ho aggiunto alla descrizione.",
+      kindWord: { bug: "Bug", wish: "Desiderio" },
+      description: "Descrizione",
+      goesAlong: "Va con il post",
+      version: "Versione",
+      page: "Pagina",
+      taken: "[tolto]",
+      send: "Invia",
+      posted: (n) =>
+        `Inviato come #${String(n)} sulla bacheca pubblica. Lo seguo qui: visto, previsto, fatto.`,
+      moved: {
+        sent: (n) => `#${String(n)} è sulla bacheca.`,
+        seen: (n) => `Chi fa Kobble ha letto #${String(n)}.`,
+        planned: (n) => `#${String(n)} è previsto: lo faranno.`,
+        done: (n) => `#${String(n)} è fatto: è in un nuovo Kobble.`,
+      },
+      madeUp: "La bacheca e come si muovono i post sono inventati per questo prototipo.",
+    },
   },
   {
     row: "Feedback senden",
@@ -189,5 +270,45 @@ export const feedback = area(
     similar: "Schon auf dem Board",
     similarHelp: "Ist eins davon deins, gib ein 👍 statt eines neuen.",
     thumbs: (n) => `👍 ${String(n)}`,
+    chat: {
+      placeholder: "Ich wünschte, ich könnte…, oder: es hängt, wenn…",
+      hint: "Ein Wunsch, oder stimmt etwas nicht? Sag es mir in deinen Worten: ich schreibe es für die Macher von Kobble auf.",
+      invite:
+        "Sag es mir in deinen Worten: etwas, das Kobble können sollte, oder etwas, das schiefging. Ich schreibe es für die Macher auf, auf ihr öffentliches Board.",
+      askWish:
+        "Gute Idee. Was würdest du damit tun? Ein Moment aus deiner Arbeit hilft den Machern am meisten.",
+      askBug: "Tut mir leid. Was hast du gerade gemacht, und was hast du erwartet?",
+      askError: (error) =>
+        `Die Fabrik ist auf diesen Fehler gestoßen:\n\n\`${error}\`\n\nWas hast du gerade gemacht?`,
+      askAgain: "Passiert es jedes Mal?",
+      again: ["Jedes Mal", "Nur einmal", "Weiß nicht"],
+      skip: "Überspringen",
+      similar: (teams) => `${String(teams)} Teams wollen das auch. Dein 👍 dazu statt eines neuen Posts?`,
+      similarBug: (teams) =>
+        `${String(teams)} Teams ist das auch passiert. Dein 👍 dazu statt eines neuen Posts?`,
+      addThumb: "Mein 👍 dazu",
+      different: "Meins ist anders",
+      thumbed: (n) => `Dein 👍 ist auf #${String(n)}. Ich sag dir hier, wenn sich etwas tut.`,
+      draft: "So würde ich es senden. Ändere, was du willst, oder sag mir, was dazu soll.",
+      draftTeam:
+        "Ich habe markiert, was nach Daten deines Teams aussieht (Namen, Repositories, Kartentitel). Das Board ist öffentlich: klick eine Markierung, um sie herauszunehmen.",
+      added: "Hab ich zur Beschreibung dazugeschrieben.",
+      kindWord: { bug: "Fehler", wish: "Wunsch" },
+      description: "Beschreibung",
+      goesAlong: "Geht mit",
+      version: "Version",
+      page: "Seite",
+      taken: "[entfernt]",
+      send: "Senden",
+      posted: (n) =>
+        `Gesendet als #${String(n)} auf das öffentliche Board. Ich verfolge es hier: gesehen, geplant, erledigt.`,
+      moved: {
+        sent: (n) => `#${String(n)} ist auf dem Board.`,
+        seen: (n) => `Die Macher haben #${String(n)} gelesen.`,
+        planned: (n) => `#${String(n)} ist geplant: die Macher machen es.`,
+        done: (n) => `#${String(n)} ist erledigt: es ist in einem neuen Kobble.`,
+      },
+      madeUp: "Das Board und wie sich seine Posts bewegen, sind für diesen Prototyp erfunden.",
+    },
   },
 );

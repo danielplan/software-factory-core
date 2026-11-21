@@ -11,9 +11,20 @@ import { messageOf, post } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
+import { useCaughtErrors } from "@/feedback/factory-errors";
+import { FeedbackThread } from "@/feedback/kobold-chat";
+import {
+  clear,
+  looksLikeFeedback,
+  onOpen,
+  say,
+  type Thread,
+  useThread,
+} from "@/feedback/tell-kobold";
 import { useKoboldName } from "@/lib/brand";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { VARIANT } from "@/lib/variant";
 
 import { onAskSupport } from "./ask-support";
 import { type SupportView, useSupport } from "./use-support";
@@ -37,9 +48,14 @@ export function SupportBar({ page }: Readonly<{ page: Page }>) {
       setOpen(true);
       void post("/api/kobble/support", { text, page }).catch(() => undefined);
     });
+    // Variant F: Send feedback and Report this error open the chat.
+    const opened = onOpen(() => {
+      setOpen(true);
+    });
     return () => {
       window.removeEventListener("keydown", key);
       asked();
+      opened();
     };
   }, [page]);
   const working = support?.writing != null;
@@ -88,7 +104,10 @@ function Conversation({
 }>) {
   const t = useT();
   const [refused, setRefused] = useState<string | null>(null);
-  const empty = (support?.messages.length ?? 0) === 0 && !support?.writing;
+  const thread = useThread();
+  const feedback = VARIANT === "F" ? thread : null;
+  const empty =
+    !feedback && (support?.messages.length ?? 0) === 0 && !support?.writing;
   return (
     <section
       aria-label={`${name}, support`}
@@ -108,6 +127,7 @@ function Conversation({
           aria-label={t.support.newConversation}
           title={t.support.newConversation}
           onClick={() => {
+            clear();
             post("/api/kobble/support/new").catch((error: unknown) => {
               setRefused(messageOf(error));
             });
@@ -127,7 +147,12 @@ function Conversation({
       {empty ? (
         <p className="px-4 py-5 text-[13px] text-muted-foreground">
           {t.support.empty}
+          {VARIANT === "F" && (
+            <span className="mt-2 block">{t.feedback.chat.hint}</span>
+          )}
         </p>
+      ) : feedback ? (
+        <FeedbackThread thread={feedback} />
       ) : (
         <Messages support={support} />
       )}
@@ -136,7 +161,12 @@ function Conversation({
           {refused ?? support?.problem}
         </p>
       )}
-      <Ask page={page} busy={support?.writing != null} onRefused={setRefused} />
+      <Ask
+        page={page}
+        busy={support?.writing != null}
+        feedback={feedback}
+        onRefused={setRefused}
+      />
     </section>
   );
 }
@@ -182,17 +212,32 @@ function Messages({ support }: Readonly<{ support: SupportView | null }>) {
 function Ask({
   page,
   busy,
+  feedback,
   onRefused,
 }: Readonly<{
   page: Page;
   busy: boolean;
+  feedback: Thread | null;
   onRefused: (problem: string | null) => void;
 }>) {
   const t = useT();
+  const errors = useCaughtErrors();
   const [text, setText] = useState("");
   const send = () => {
     const said = text.trim();
-    if (!said || busy) return;
+    if (!said) return;
+    // Variant F: a wish or something wrong goes to the feedback chat.
+    if (
+      VARIANT === "F" &&
+      ((feedback && feedback.step !== "sent") || looksLikeFeedback(said))
+    ) {
+      setText("");
+      say(said, t.shell.pages[page], errors);
+      return;
+    }
+    if (busy) return;
+    // A question after the feedback was sent: back to the conversation.
+    if (VARIANT === "F" && feedback) clear();
     setText("");
     onRefused(null);
     post("/api/kobble/support", { text: said, page }).catch(
@@ -214,7 +259,11 @@ function Ask({
         autoFocus
         rows={1}
         value={text}
-        placeholder={t.support.question}
+        placeholder={
+          feedback && feedback.step !== "sent"
+            ? t.feedback.chat.placeholder
+            : t.support.question
+        }
         onChange={(event) => {
           setText(event.target.value);
         }}

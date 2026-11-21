@@ -17,7 +17,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CORE_VERSION } from "@/api";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { Tile } from "@/components/sidebar-links";
 import { FIELD_AREA } from "@/lib/field-style";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { VARIANT } from "@/lib/variant";
 import { useT } from "@/i18n/use-t";
 
 import {
@@ -55,11 +56,71 @@ import {
   useMine,
   useSignedIn,
 } from "./feedback-board";
+import { invite, reportError } from "./tell-kobold";
 
 // How the form starts: empty, or reporting one error.
 type Start = { kind: Kind; title: string; errors: number[]; n: number };
 
 export function FeedbackRow({ current }: Readonly<{ current: Page }>) {
+  return VARIANT === "F" ? (
+    <TellKoboldRow current={current} />
+  ) : (
+    <FormRow current={current} />
+  );
+}
+
+// Variant F: no form; the row and the error notice open Sprocket's chat.
+function TellKoboldRow({ current }: Readonly<{ current: Page }>) {
+  const all = useT();
+  const t = all.feedback;
+  const fresh = useFreshError();
+  const page = all.shell.pages[current];
+  // PROTOTYPE: on the first page of a visit, the chat opens with the
+  // kobold's invitation, so the variant shows at once.
+  useEffect(() => {
+    if (sessionStorage.getItem("feedback-chat-shown")) return;
+    sessionStorage.setItem("feedback-chat-shown", "yes");
+    setTimeout(() => {
+      invite(page);
+    }, 300);
+  }, [page]);
+  return (
+    <>
+      {fresh && (
+        <ErrorNotice
+          error={fresh}
+          onReport={() => {
+            reportError(fresh, page, t.report);
+          }}
+        />
+      )}
+      <SendRow
+        onClick={() => {
+          invite(page);
+        }}
+      />
+    </>
+  );
+}
+
+function SendRow({ onClick }: Readonly<{ onClick: () => void }>) {
+  const t = useT().feedback;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]"
+    >
+      <Tile color="#667085">
+        <MessageSquareHeart aria-hidden />
+      </Tile>
+      {t.row}
+    </button>
+  );
+}
+
+// Variant E: the row opens the form.
+function FormRow({ current }: Readonly<{ current: Page }>) {
   const t = useT().feedback;
   const fresh = useFreshError();
   const [start, setStart] = useState<Start | null>(null);
@@ -81,18 +142,11 @@ export function FeedbackRow({ current }: Readonly<{ current: Page }>) {
           }}
         />
       )}
-      <button
-        type="button"
+      <SendRow
         onClick={() => {
           open({ kind: "wish", title: "", errors: [] });
         }}
-        className="group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]"
-      >
-        <Tile color="#667085">
-          <MessageSquareHeart aria-hidden />
-        </Tile>
-        {t.row}
-      </button>
+      />
       <Dialog
         open={start != null}
         onOpenChange={(now) => {
@@ -507,7 +561,7 @@ const PILL: Record<State, string> = {
   done: "bg-success/10 text-success",
 };
 
-function StatePill({ state }: Readonly<{ state: State }>) {
+export function StatePill({ state }: Readonly<{ state: State }>) {
   const t = useT().feedback;
   return (
     <span
