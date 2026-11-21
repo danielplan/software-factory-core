@@ -1,7 +1,8 @@
 // Prototype: the ways something new gets into the factory, one per variant,
 // on a made-up board (no GitHub board needed to try them).
 // A: a form on the Factory page; a request lands in To do as a card.
-// B: one inbox, any source; the small ones can go straight to To do.
+// B: one inbox, any source, on the Signals page (signals/any-source.tsx);
+//    the Factory shows just the board, with what was sent to To do.
 // C: every error from the live app becomes a card in To do at once;
 //    requests are added by hand.
 
@@ -13,15 +14,13 @@ import { variant } from "@/lib/variant";
 import { Toast } from "@/signals/bits";
 
 import type { ShownCard } from "./board-card";
-import { Inbox } from "./inbox";
 import { useLiveErrors } from "./live-errors";
 import {
-  type Arrival,
-  FIRST_ARRIVALS,
   FIRST_ERRORS,
   madeCard,
   madeUpBoard,
   nextNumber,
+  withSent,
   withToDo,
 } from "./made-up";
 import { NewRequest, type Request } from "./new-request";
@@ -42,10 +41,11 @@ const MADE_UP_NOTE = (
 
 export function useWaysIn(): WaysIn {
   const shown = variant();
-  const [view, setView] = useState<FactoryView>(() =>
-    shown === "C" ? withErrors(madeUpBoard()) : madeUpBoard(),
-  );
-  const [arrivals, setArrivals] = useState<Arrival[]>(FIRST_ARRIVALS);
+  const [view, setView] = useState<FactoryView>(() => {
+    if (shown === "C") return withErrors(madeUpBoard());
+    if (shown === "B") return withSent(madeUpBoard());
+    return madeUpBoard();
+  });
   const [said, say] = useState<string | null>(null);
 
   const addCard = (title: string, more: Partial<ShownCard>) => {
@@ -61,24 +61,8 @@ export function useWaysIn(): WaysIn {
       setView((was) => errorOnBoard(was, title));
       say("An error from the live app landed on the board");
     }
-    if (shown === "B") {
-      setArrivals((was) => [
-        {
-          id: `in-${String(Date.now())}`,
-          came: "error",
-          title,
-          from: "Shop, live",
-          small: true,
-          times: 1,
-        },
-        ...was.filter((one) => one.title !== title),
-      ]);
-    }
   });
 
-  const gone = (arrival: Arrival) => {
-    setArrivals((was) => was.filter((one) => one.id !== arrival.id));
-  };
   const toast = said && (
     <Toast
       text={said}
@@ -88,50 +72,7 @@ export function useWaysIn(): WaysIn {
     />
   );
 
-  if (shown === "B")
-    return {
-      view,
-      actions: MADE_UP_NOTE,
-      above: (
-        <>
-          <Inbox
-            arrivals={arrivals}
-            onAdd={(title) => {
-              setArrivals((was) => [
-                {
-                  id: `in-${String(Date.now())}`,
-                  came: "request",
-                  title,
-                  from: "you",
-                  small: title.split(/\s+/).length <= 12,
-                },
-                ...was,
-              ]);
-            }}
-            onToDo={(arrival) => {
-              gone(arrival);
-              addCard(arrival.title, {
-                came: arrival.came,
-                times: arrival.times,
-                by: arrival.from,
-                type: arrival.came === "error" ? "bug" : "feature",
-                fix: arrival.came === "error",
-              });
-              say(`“${arrival.title}” is in To do`);
-            }}
-            onExplore={(arrival) => {
-              gone(arrival);
-              say(`“${arrival.title}” waits in Explorations`);
-            }}
-            onDismiss={(arrival) => {
-              gone(arrival);
-              say("Dismissed");
-            }}
-          />
-          {toast}
-        </>
-      ),
-    };
+  if (shown === "B") return { view, actions: MADE_UP_NOTE, above: null };
 
   return {
     view,

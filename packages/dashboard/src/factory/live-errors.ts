@@ -7,13 +7,17 @@ import { LATER_ERRORS } from "./made-up";
 
 const EVERY = 8000;
 
-export function useLiveErrors(onError: (title: string) => void): void {
+export function useLiveErrors(
+  onError: (title: string) => void,
+  errors: readonly { title: string }[] = LATER_ERRORS,
+): void {
   const heard = useRef(onError);
   heard.current = onError;
+  const list = useRef(errors);
   useEffect(() => {
     let at = 0;
     const timer = setInterval(() => {
-      const next = LATER_ERRORS[at];
+      const next = list.current[at];
       at += 1;
       if (next) heard.current(next.title);
       else clearInterval(timer);

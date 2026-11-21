@@ -7,19 +7,7 @@ import type { FactoryView } from "@/api";
 import type { ShownCard } from "./board-card";
 
 // Where something new came from.
-export type Came = "request" | "error" | "issue";
-
-// Something that arrived and waits in the inbox (variant B).
-export type Arrival = {
-  id: string;
-  came: Came;
-  title: string;
-  // Who sent it, or where it was seen.
-  from: string;
-  // Small enough to go straight to To do, as the kobold reads it.
-  small: boolean;
-  times?: number;
-};
+export type Came = "request" | "error" | "board" | "issue";
 
 const card = (
   number: number,
@@ -103,31 +91,20 @@ export function madeUpBoard(): FactoryView {
   };
 }
 
-// Variant B: what waits in the one inbox when the page opens.
-export const FIRST_ARRIVALS: Arrival[] = [
-  {
-    id: "in-1",
-    came: "request",
-    title: "Let customers download their invoice as a PDF",
-    from: "Mira (support)",
-    small: true,
-  },
-  {
-    id: "in-2",
-    came: "error",
-    title: "Checkout fails when the basket is empty: “total is undefined”",
-    from: "Shop, live",
-    small: true,
-    times: 14,
-  },
-  {
-    id: "in-3",
-    came: "issue",
-    title: "#212 Offer a monthly subscription for regular orders",
-    from: "GitHub · a customer",
-    small: false,
-  },
-];
+// Variant B: the signals sent straight to To do, kept while the app is
+// open, so the Factory board shows them on top of To do.
+const sent: { title: string; more: Partial<ShownCard> }[] = [];
+
+export function sendToDo(title: string, more: Partial<ShownCard>): void {
+  sent.push({ title, more });
+}
+
+export function withSent(view: FactoryView): FactoryView {
+  return sent.reduce(
+    (board, one) => withToDo(board, card(nextNumber(board), one.title, one.more)),
+    view,
+  );
+}
 
 // Variant C: the errors on the board when the page opens.
 export const FIRST_ERRORS: ShownCard[] = [

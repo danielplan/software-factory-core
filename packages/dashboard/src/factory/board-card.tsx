@@ -6,6 +6,7 @@ import {
   CircleDot,
   FlaskConical,
   LoaderCircle,
+  MessagesSquare,
   SquarePlus,
 } from "lucide-react";
 import { createContext, use } from "react";
@@ -87,9 +88,13 @@ export const OpenCard = createContext<(number: number) => void>(
 
 // Where a card came from: the exploration it was handed off from, by its
 // title (its id and prototype key mean nothing to people), or a fix.
-const CAME: Record<Came, { Icon: typeof Bug; tone: string }> = {
+export const CAME: Record<Came, { Icon: typeof Bug; tone: string }> = {
   request: { Icon: SquarePlus, tone: "bg-source-app/10 text-source-app" },
   error: { Icon: Bug, tone: "bg-type-bug/10 text-type-bug" },
+  board: {
+    Icon: MessagesSquare,
+    tone: "bg-type-feedback/10 text-type-feedback",
+  },
   issue: { Icon: CircleDot, tone: "bg-source-usage/10 text-source-usage" },
 };
 
@@ -99,6 +104,7 @@ export function cameWords(card: Pick<ShownCard, "came" | "times" | "by">) {
       ? `Error · seen ${String(card.times)}×`
       : "Error from the live app";
   if (card.came === "issue") return "GitHub issue";
+  if (card.came === "board") return "Feedback board";
   return card.by ? `Request · ${card.by}` : "Request";
 }
 

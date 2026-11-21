@@ -13,9 +13,11 @@ import { messageOf, post, type SignalRow, type SignalsView } from "@/api";
 import { ProblemBox } from "@/components/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { variant } from "@/lib/variant";
 import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
+import { AnySource } from "./any-source";
 import { AllQuiet, ConnectSignals } from "./empty";
 import { CARD, FaceOf, Head, SourceIcon, Toast, TypeChip } from "./bits";
 import { useSignals } from "./use-signals";
@@ -40,6 +42,21 @@ export function SignalsPage({
   const { data, problem } = useSignals();
   const [said, say] = useState<string | null>(null);
   const now = new Date();
+  // Prototype (variant B): one inbox, any source, made up.
+  if (variant() === "B")
+    return (
+      <>
+        <Head
+          title="Signals"
+          right={
+            <span className="rounded-md bg-wash px-2 py-1 text-[11.5px] font-medium text-wash-foreground">
+              Made-up signals
+            </span>
+          }
+        />
+        <AnySource open={open} />
+      </>
+    );
   return (
     <>
       <Head
