@@ -81,11 +81,10 @@ const BACKEND_SETTING = "BACKEND_URL";
 
 // Each part that needs a backend (a part of type backend that answers on a
 // port, in its dependsOn) gets that backend's address in BACKEND_URL, so it
-// reaches the server it depends on; a part that sets BACKEND_URL itself
-// keeps its own.
+// reaches the server it depends on. The core always sets it this way, in
+// every factory (decision 0015).
 export function withBackendAddress(parts: Part[]): Part[] {
   return parts.map((part) => {
-    if (part.env?.[BACKEND_SETTING] !== undefined) return part;
     const backend = part.dependsOn
       .map((id) => parts.find((p) => p.id === id))
       .find((p) => p?.type === "backend" && p.port !== undefined);

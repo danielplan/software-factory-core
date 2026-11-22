@@ -120,8 +120,8 @@ test("a part that needs a backend gets its address as BACKEND_URL", () => {
   };
   // The first backend it needs that answers on a port.
   assert.deepEqual(env("app"), { BACKEND_URL: "http://127.0.0.1:3000" });
-  // Its own setting wins; nothing for a part that needs no backend.
-  assert.deepEqual(env("own"), { BACKEND_URL: "https://example.com" });
+  // Always the backend it depends on; nothing for a part that needs none.
+  assert.deepEqual(env("own"), { BACKEND_URL: "http://127.0.0.1:3000" });
   assert.equal(env("alone"), undefined);
   assert.equal(env("server"), undefined);
   // An address of a part that is not there, or answers nowhere, is empty.
