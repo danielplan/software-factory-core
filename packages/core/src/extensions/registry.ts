@@ -14,6 +14,7 @@ import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
 import { checkGroups, type SettingGroup } from "../settings/setting-groups.ts";
 import type { Extension, Guide, Kit } from "./extension.ts";
+import { slotsOf } from "./slots.ts";
 import { ownExtensionsSettings } from "./team.ts";
 
 // What the core knows about: every extension and kit installed.
@@ -114,6 +115,11 @@ function chosenExtensions(
   return chosen;
 }
 
+const SLOT_WORDS = {
+  code: "where the code lives",
+  tasks: "where the tasks are kept",
+};
+
 // An extension whose needs are not installed, or that is always needed and
 // was removed: the factory does not start, and says why.
 function extensionProblems(
@@ -122,10 +128,19 @@ function extensionProblems(
   company: Company,
 ): string[] {
   const nameOf = (id: string) => all.find((e) => e.id === id)?.name ?? id;
+  const unfilled = slotsOf(all, company).filter((s) => s.fillers.length === 0);
   return [
     ...all
       .filter((e) => e.always && company.without.includes(e.id))
       .map((e) => `${e.name} is always needed, so it cannot be removed`),
+    ...chosen.flatMap((extension) =>
+      unfilled
+        .filter((one) => extension.slots.includes(one.slot))
+        .map(
+          (one) =>
+            `${extension.name} uses ${SLOT_WORDS[one.slot]}, but nothing fills it`,
+        ),
+    ),
     ...chosen.flatMap((extension) =>
       extension.needs
         .filter((id) => !chosen.some((e) => e.id === id))

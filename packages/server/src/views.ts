@@ -6,6 +6,7 @@ import {
   groupView,
   type Kit,
   shownView,
+  slotsOf,
 } from "@software-factory/core";
 
 import type { KitView, ProductView, State } from "./api.ts";
@@ -27,6 +28,7 @@ export function factoryView(
   | "board"
   | "addOns"
   | "stages"
+  | "slots"
 > {
   return {
     root,
@@ -54,6 +56,7 @@ export function factoryView(
       settings: extension.settings.map((group) => group.id),
     })),
     stages: stagesOf(factory, root),
+    slots: slotsOf(extensions, factory.company),
   };
 }
 

@@ -47,6 +47,7 @@ export function MarketPage({
   const { addOns, products, kits } = state;
   const boards = addOns.filter((addOn) => addOn.tracker);
   const tracker = state.company.tracker;
+  const codeBy = state.slots.find((one) => one.slot === "code")?.inUse;
   const [openKey, setOpenKey] = useState<string | null>(null);
   const market = useMarket(addOns);
   const page = useRef<HTMLDivElement>(null);
@@ -54,7 +55,7 @@ export function MarketPage({
   const opened = thingOf(
     t.market,
     t.shell,
-    { addOns, kits, products, tracker },
+    { addOns, kits, products, tracker, ...(codeBy ? { codeBy } : {}) },
     openKey,
   );
   const openedAddOn =
@@ -227,6 +228,7 @@ function Panel({
         addOns={addOns}
         boards={addOns.filter((addOn) => addOn.tracker)}
         tracker={state.company.tracker}
+        codeBy={state.slots.find((one) => one.slot === "code")?.inUse}
         onOpen={onOpen}
         onSwitch={onSwitch}
       />

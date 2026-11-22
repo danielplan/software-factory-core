@@ -234,14 +234,22 @@ export function extensionThing(
 
 export type Slot = "code" | "tasks";
 
-// Where the code lives: GitHub, the only one today, always in use.
-export function codeThing(words: Words, addOns: AddOnView[]): Thing {
+// Where the code lives: the extension that fills the slot (GitHub, the only
+// one today), always in use.
+export function codeThing(
+  words: Words,
+  addOns: AddOnView[],
+  filler = "github",
+): Thing {
+  const by =
+    filler === "github" ? undefined : addOns.find((a) => a.id === filler);
+  const own = words.connections.code;
   return {
-    key: "code:github",
+    key: `code:${filler}`,
     kind: "connection",
-    look: "github",
-    name: words.connections.code.name,
-    about: words.connections.code.line,
+    look: filler,
+    name: by ? nameOf(words, by) : own.name,
+    about: by ? lineOf(words, by) : own.line,
     maker: "kobble",
     state: "inUse",
     brings: [],
@@ -347,6 +355,8 @@ export function thingOf(
     kits: KitView[];
     products: ProductView[];
     tracker: string;
+    // The extension that fills the slot Your code.
+    codeBy?: string;
   },
   key: string | null,
 ): Thing | null {
@@ -355,7 +365,7 @@ export function thingOf(
   const id = (key ?? "").slice(at + 1);
   const addOn = from.addOns.find((one) => one.id === id);
   const kit = from.kits.find((one) => one.id === id);
-  if (kind === "code") return codeThing(words, from.addOns);
+  if (kind === "code") return codeThing(words, from.addOns, from.codeBy);
   if (kind === "extension" && addOn)
     return extensionThing(words, shell, from.addOns, addOn);
   if (kind === "tasks" && addOn)

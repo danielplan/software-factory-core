@@ -35,7 +35,7 @@ export const TEAM_EXTENSIONS_FOLDER = "extensions";
 export const TEAM_EXTENSION_FILE = "extension.json";
 
 // What only Kobble's own extensions have.
-const NOT_FOR_A_TEAM = ["core", "always", "tracker", "parts"] as const;
+const NOT_FOR_A_TEAM = ["core", "always", "tracker", "fills", "parts"] as const;
 
 // The shape of a team's extension: Kobble's, with a typo refused instead of
 // ignored and nothing that only Kobble's own have.

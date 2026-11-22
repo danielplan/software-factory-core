@@ -94,6 +94,7 @@ const stageSchema = z.object({
 // The jobs the factory itself fills once, for every extension: where the
 // code lives and where the tasks are kept. Only the core defines them.
 export const SLOTS = ["code", "tasks"] as const;
+export type Slot = (typeof SLOTS)[number];
 
 export const extensionSchema = z.object({
   id,
@@ -104,6 +105,9 @@ export const extensionSchema = z.object({
   // A place where work is tracked (a GitHub board, Jira): the company's
   // tracker names one.
   tracker: z.boolean().default(false),
+  // The slots it can fill (a tracker fills "tasks" without saying so). Only
+  // Kobble's own extensions fill one.
+  fills: z.array(z.enum(SLOTS)).default([]),
   // Needed in every factory: it cannot be removed (Factory builds everything).
   always: z.boolean().default(false),
   // The other extensions it needs, by id: installing it brings them,

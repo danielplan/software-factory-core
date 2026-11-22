@@ -17,6 +17,8 @@ export {
   type ExtensionFile,
   type Guide,
   type McpServer,
+  type Slot,
+  SLOTS,
   type StageSpec,
   type View,
   type ViewItem,
@@ -30,6 +32,7 @@ export {
   type ShownView,
   shownView,
 } from "./extensions/views.ts";
+export { fillsOf, type SlotState, slotsOf } from "./extensions/slots.ts";
 export {
   type Clash,
   orderStages,

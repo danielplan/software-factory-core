@@ -108,6 +108,11 @@ const refused: [string, Record<string, unknown>, RegExp][] = [
     { standup: { ...standup, always: true } },
     /says "always"/,
   ],
+  [
+    "a slot it fills",
+    { standup: { ...standup, fills: ["tasks"] } },
+    /says "fills"/,
+  ],
   ["starting programs", { standup: { ...standup, parts: [] } }, /says "parts"/],
   [
     "a word it does not know",

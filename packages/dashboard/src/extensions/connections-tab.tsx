@@ -21,6 +21,7 @@ export function ConnectionsTab({
   addOns,
   boards,
   tracker,
+  codeBy,
   onOpen,
   onSwitch,
 }: Readonly<{
@@ -29,11 +30,13 @@ export function ConnectionsTab({
   boards: AddOnView[];
   // The one in use ("none" while none is connected).
   tracker: string;
+  // The extension that fills Your code, from the factory's slots.
+  codeBy: string | null | undefined;
   onOpen: (key: string) => void;
   onSwitch: (from: AddOnView, to: AddOnView) => void;
 }>) {
   const t = useT().market;
-  const code = codeThing(t, addOns);
+  const code = codeThing(t, addOns, codeBy ?? undefined);
   return (
     <div className="grid gap-8">
       <Group title={t.connections.code.title} about={t.connections.code.about}>

@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { companySchema, assembleFactory } from "@software-factory/core";
 
+import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
 import { switched, toInstall } from "../src/add-ons/switch.ts";
 import { Refused } from "../src/refused.ts";
@@ -11,15 +12,17 @@ import { Refused } from "../src/refused.ts";
 // needs, and what others need or what is always needed stays.
 
 const company = companySchema.parse({ name: "Beta" });
+// With GitHub, which fills the slot Your code that Factory and Releases use.
+const WITH_GITHUB = [...KOBBLE_EXTENSIONS, githubAddOn().extension];
 const ids = (list: { id: string }[]) => list.map((e) => e.id);
 
 test("Kobble's own extensions are installed until the company removes one", () => {
   const factory = assembleFactory(company, [], {
-    extensions: KOBBLE_EXTENSIONS,
+    extensions: WITH_GITHUB,
     kits: [],
   });
   assert.deepEqual(factory.problems, []);
-  assert.deepEqual(ids(factory.extensions), ids(KOBBLE_EXTENSIONS));
+  assert.deepEqual(ids(factory.extensions), ids(WITH_GITHUB));
 });
 
 test("removing one takes it out, and installing it again brings it back with what it needs", () => {
@@ -64,7 +67,7 @@ test("a factory where something is missing does not start, and says why", () => 
     without: ["signals", "factory"],
   });
   const factory = assembleFactory(broken, [], {
-    extensions: KOBBLE_EXTENSIONS,
+    extensions: WITH_GITHUB,
     kits: [],
   });
   assert.deepEqual(factory.problems, [
