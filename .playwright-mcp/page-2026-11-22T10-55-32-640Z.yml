@@ -1,0 +1,142 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab: Extensions
+                - tab: Connections
+                - tab [selected]: Product kits
+              - region:
+                - paragraph: Kobble comes with these kits. Each teaches the kobolds one kind of product.
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: React web app
+                      - paragraph: How a React web app is built, checked and run.
+                    - generic:
+                      - generic:
+                        - generic: Used by
+                        - generic:
+                          - generic [aria-hidden]: A
+                          - text: Acme Shop
+                        - generic:
+                          - generic [aria-hidden]: A
+                          - text: Acme Admin
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Expo app
+                      - paragraph: How a phone app with Expo is built, checked and run.
+                    - generic:
+                      - generic:
+                        - generic: Used by
+                        - generic:
+                          - generic [aria-hidden]: A
+                          - text: Acme Shop app
+                  - article:
+                    - button
+                    - generic:
+                      - generic: NestJS backend
+                      - paragraph: How a NestJS server is built, checked and run.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: SvelteKit web app
+                      - paragraph: How a SvelteKit web app is built, checked and run.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: TypeScript package
+                      - paragraph: How a TypeScript library is built, checked and published.
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Shopify theme
+                          - generic: Made by your team
+                      - paragraph: How a Shopify theme is built, checked and previewed.
+        - region [ref=e425]:
+          - button [ref=e426] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "React web app" [ref=e428]:
+    - generic [ref=e429]:
+      - generic [ref=e430]:
+        - generic [ref=e434]:
+          - heading "React web app" [level=2] [ref=e435]
+          - generic [ref=e436]: Made by Kobble
+          - paragraph [ref=e437]: How a React web app is built, checked and run.
+        - generic [ref=e438]: Pre-installed
+      - generic [ref=e443]:
+        - heading "What it brings" [level=3] [ref=e444]
+        - generic [ref=e445]:
+          - generic [ref=e446]: Rules
+          - generic [ref=e447]: A starter
+          - generic [ref=e448]: Checks
+          - generic [ref=e449]: Tools for the kobolds
+      - generic [ref=e450]:
+        - heading "Used by" [level=3] [ref=e451]
+        - generic [ref=e452]:
+          - generic [ref=e453]: Used by
+          - generic [ref=e454]:
+            - generic [aria-hidden] [ref=e455]: A
+            - text: Acme Shop
+          - generic [ref=e456]:
+            - generic [aria-hidden] [ref=e457]: A
+            - text: Acme Admin
+    - button "Close" [active] [ref=e458] [cursor=pointer]

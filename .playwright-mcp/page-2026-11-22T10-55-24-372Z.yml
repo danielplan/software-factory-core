@@ -1,0 +1,169 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab [selected]: Extensions
+                - tab: Connections
+                - tab: Product kits
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Made by your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=e5]:
+          - button [ref=e6] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "Explorations" [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e25]:
+          - heading "Explorations" [level=2] [ref=e26]
+          - generic [ref=e27]: Made by Kobble
+          - paragraph [ref=e28]: Explore an idea with the kobold before anything is built.
+        - generic [ref=e29]: Installed
+      - generic [ref=e34]:
+        - heading "What it brings" [level=3] [ref=e35]
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]: Page
+            - generic [ref=e39]: Explorations
+          - generic [ref=e41]:
+            - generic [ref=e42]: Home blocks
+            - generic [ref=e43]: Being explored
+          - generic [ref=e45]:
+            - generic [ref=e46]: Stage
+            - generic [ref=e47]: Explorations
+          - generic [ref=e49]:
+            - generic [ref=e50]: Kobold
+            - generic [ref=e51]: Doodle
+      - generic [ref=e53]:
+        - heading "Needs" [level=3] [ref=e54]
+        - generic [ref=e55]:
+          - button "Factory" [active] [ref=e56] [cursor=pointer]
+          - button "Your code" [ref=e57] [cursor=pointer]
+          - button "Your tasks" [ref=e58] [cursor=pointer]
+      - generic [ref=e59]:
+        - heading "Needed by" [level=3] [ref=e60]
+        - generic [ref=e61]: Nothing installed needs it.
+      - button "Remove" [ref=e63] [cursor=pointer]
+    - button "Close" [ref=e64] [cursor=pointer]

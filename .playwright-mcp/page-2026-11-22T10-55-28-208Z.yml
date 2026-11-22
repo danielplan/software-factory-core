@@ -1,0 +1,120 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab: Extensions
+                - tab [selected]: Connections
+                - tab: Product kits
+              - generic:
+                - region:
+                  - generic:
+                    - heading [level=2]: Your code
+                    - paragraph: Branches and pull requests. Pick one.
+                  - generic:
+                    - article:
+                      - button
+                      - generic:
+                        - generic:
+                          - generic: GitHub
+                          - generic: In use
+                        - paragraph: Your code and its pull requests, through the GitHub CLI.
+                        - paragraph: Branches and pull requests
+                - region:
+                  - generic:
+                    - heading [level=2]: Your tasks
+                    - paragraph: Where the Factory's cards are kept. Pick one.
+                  - generic:
+                    - article:
+                      - button
+                      - generic:
+                        - generic:
+                          - generic: GitHub board
+                          - generic: In use
+                        - paragraph: Work tracked on a GitHub board, through the GitHub CLI.
+                    - article:
+                      - button
+                      - generic:
+                        - generic: Jira Cloud
+                        - paragraph: Work tracked in a Jira Cloud project, with an API token.
+                      - generic:
+                        - button: Switch to Jira
+        - region [ref=e278]:
+          - button [ref=e279] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "Jira Cloud" [ref=e281]:
+    - generic [ref=e282]:
+      - generic [ref=e283]:
+        - generic [ref=e287]:
+          - heading "Jira Cloud" [level=2] [ref=e288]
+          - generic [ref=e289]: Made by Kobble
+          - paragraph [ref=e290]: Work tracked in a Jira Cloud project, with an API token.
+        - button "Switch to Jira" [active] [ref=e292] [cursor=pointer]
+      - generic [ref=e293]:
+        - heading "What it brings" [level=3] [ref=e294]
+        - generic [ref=e296]:
+          - generic [ref=e297]: Stage
+          - generic [ref=e298]: Factory
+      - generic [ref=e300]:
+        - heading "Needs" [level=3] [ref=e301]
+        - generic [ref=e302]:
+          - button "Factory" [ref=e303] [cursor=pointer]
+          - generic [ref=e304]: A Jira API token
+      - generic [ref=e305]:
+        - heading "Used by" [level=3] [ref=e306]
+        - button "Factory" [ref=e308] [cursor=pointer]
+    - button "Close" [ref=e309] [cursor=pointer]
