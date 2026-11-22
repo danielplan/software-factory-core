@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
+import i18next from "eslint-plugin-i18next";
 import sonarjs from "eslint-plugin-sonarjs";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -118,6 +119,36 @@ export default tseslint.config(
       "max-lines-per-function": [
         "error",
         { max: 80, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
+    // Every word a screen shows goes through i18next, in each language: a
+    // screen's own JSX text, or a label for a screen reader, a tooltip, a
+    // field's hint or a picture's text written straight in, is English
+    // only. Names that are the same in every language, addresses, paths
+    // and keyboard shortcuts are left out. shadcn's pieces have no words.
+    files: ["packages/dashboard/src/**/*.tsx"],
+    ignores: ["packages/dashboard/src/components/ui/**"],
+    plugins: { i18next },
+    rules: {
+      "i18next/no-literal-string": [
+        "error",
+        {
+          mode: "jsx-only",
+          "jsx-attributes": {
+            include: ["title", "aria-label", "placeholder", "alt", "label"],
+          },
+          words: {
+            exclude: [
+              // Only signs and digits.
+              /^[^\p{L}]*$/u,
+              /^(Kobble|kobble|Sprocket|GitHub|Jira|Claude Code)$/,
+              // An address or a path, or a keyboard shortcut (⌘J).
+              /^(https?:\/\/|\/|#|\.|⌘)/,
+            ],
+          },
+        },
       ],
     },
   },

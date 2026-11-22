@@ -1,0 +1,58 @@
+{
+  "about": "What your product is made of and how its parts connect. Start, stop and open them here.",
+  "startAll": "Start all",
+  "stopAll": "Stop all",
+  "didNotWork": "That did not work",
+  "yourProduct": "Your product",
+  "noPartsBefore": "No parts to run yet: they come with your first idea, on the",
+  "noPartsAfter": " page.",
+  "programs": "The factory's own programs",
+  "mapLabel": "How the parts connect",
+  "mapLegend": "Each line joins a part to a part that needs it, its arrow at the one that needs it. Point at a part to see only its lines.",
+  "types": {
+    "screen": {
+      "label": "Screen",
+      "means": "what people open, a web page or app"
+    },
+    "backend": {
+      "label": "Backend",
+      "means": "works behind the screens"
+    },
+    "data": {
+      "label": "Data",
+      "means": "where data is stored"
+    },
+    "outside": {
+      "label": "Outside service",
+      "means": "run by someone else, like payments"
+    }
+  },
+  "headline": {
+    "none": "No parts to run yet: they come with your first idea.",
+    "problem_one": "One part could not start: the card says why and what to do.",
+    "problem_other": "{{count}} parts could not start: the card says why and what to do.",
+    "starting": "Starting your product…",
+    "running": "Everything is running: open it to try it.",
+    "some": "Some parts are running: start the others to try everything.",
+    "stopped": "Your product is not running. Start it to try it on this computer."
+  },
+  "part": {
+    "starting": "Starting · {{step}}",
+    "outside": "Running, started outside the factory",
+    "withOthers": "Runs with the products that use it",
+    "open": "Open",
+    "details": "Technical details",
+    "tryAgain": "Try again",
+    "start": "Start",
+    "restart": "Restart",
+    "stop": "Stop"
+  },
+  "problems": {
+    "portElsewhere": "Address {{port}} is used by a program from another folder",
+    "waiting": "{{part}} is waiting for {{missing}}",
+    "settingsMissing": "The settings file {{file}} is missing",
+    "portUsed": "Address {{port}} is used by another program",
+    "stepFailed": "\"{{step}}\" didn't work for {{part}}",
+    "noAnswer": "{{part}} did not answer within {{seconds}} seconds"
+  }
+}

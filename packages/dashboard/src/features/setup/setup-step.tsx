@@ -3,14 +3,14 @@
 // kobold says when something is still open, but the owner decides), then
 // Open Kobble.
 
+import type { TFunction } from "i18next";
 import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { State } from "@/api/client";
 
 import { isApp, isPerson } from "./card-bits";
 import { cardsIn, setUpDone } from "./steps";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 type Coach = SetupState["coach"];
@@ -24,9 +24,9 @@ export function SetupStep({
   says: React.ReactNode;
   eyebrow: React.ReactNode;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { coach } = state;
-  const words = wordsOf(coach, t.setup);
+  const words = wordsOf(coach, t);
   return (
     <>
       <header className="grid gap-1.5">
@@ -38,7 +38,7 @@ export function SetupStep({
       </header>
       {says}
       <ul className="grid rounded-xl bg-card shadow-card">
-        {plan(coach, t.setup.plan).map((line) => (
+        {plan(coach, t).map((line) => (
           <li
             key={line}
             className="flex items-center gap-3 border-t border-border-soft px-[18px] py-3 first:border-t-0"
@@ -52,7 +52,7 @@ export function SetupStep({
       </ul>
       {coach.phase === "build" && !setUpDone(coach) && coach.activity && (
         <p className="text-[13px] text-muted-foreground">
-          {t.setup.now(coach.activity)}
+          {t("setup.now", { activity: coach.activity })}
         </p>
       )}
     </>
@@ -77,7 +77,7 @@ function Mark({ coach }: Readonly<{ coach: Coach }>) {
 }
 
 // What setting up writes, from what the owner went through.
-function plan(coach: Coach, m: Messages["setup"]["plan"]): string[] {
+function plan(coach: Coach, m: TFunction): string[] {
   const { draft } = coach;
   const count = (area: string) =>
     cardsIn(draft, area).filter((c) => c.tone !== "question");
@@ -87,20 +87,18 @@ function plan(coach: Coach, m: Messages["setup"]["plan"]): string[] {
   const bring = count("Bring over").length > 0;
   const start = count("Where to start").length;
   return [
-    m.folder,
-    m.apps(apps),
-    m.people(people),
-    ...(board ? [m.board] : []),
-    ...(bring ? [m.bring] : []),
-    m.start(start),
+    m("setup.plan.folder"),
+    m("setup.plan.apps", { n: apps }),
+    m("setup.plan.people", { n: people }),
+    ...(board ? [m("setup.plan.board")] : []),
+    ...(bring ? [m("setup.plan.bring")] : []),
+    m("setup.plan.start", { n: start }),
   ];
 }
 
-function wordsOf(
-  coach: Coach,
-  m: Messages["setup"],
-): { title: string; lead: string } {
-  if (setUpDone(coach)) return m.done;
-  if (coach.phase === "build") return m.building;
-  return m.before;
+function wordsOf(coach: Coach, m: TFunction): { title: string; lead: string } {
+  if (setUpDone(coach)) return m("setup.done", { returnObjects: true });
+  if (coach.phase === "build")
+    return m("setup.building", { returnObjects: true });
+  return m("setup.before", { returnObjects: true });
 }

@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { movedHash, PAGES, placeOf, personaHash } from "../src/lib/routes.ts";
+import {
+  movedHash,
+  PAGES,
+  personaHash,
+  placeOf,
+  placeShown,
+} from "../src/lib/routes.ts";
 
 test("a persona has its own address", () => {
   assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
@@ -65,4 +71,22 @@ test("the new addresses have not moved", () => {
   for (const page of PAGES) assert.equal(movedHash(`#${page}`), null);
   assert.equal(movedHash(""), null);
   assert.equal(movedHash("#connect"), null);
+});
+
+test("the router's path says the same place as the hash", () => {
+  assert.deepEqual(placeOf("/explore/X-1"), { page: "explore", open: "X-1" });
+  assert.deepEqual(placeOf("/"), { page: "home", open: null });
+  assert.equal(movedHash("board/12"), "#build/12");
+});
+
+test("the page of an extension that is not installed is not there: Home is", () => {
+  const pages = [{ id: "explore" }];
+  const shown = (hash: string) => placeShown(placeOf(hash), pages, []);
+  assert.deepEqual(shown("#explore/X-1"), { page: "explore", open: "X-1" });
+  assert.deepEqual(shown("#personas/mia"), { page: "home", open: null });
+  assert.deepEqual(shown("#settings/updates"), {
+    page: "settings",
+    open: "updates",
+  });
+  assert.deepEqual(shown("#team/board"), { page: "home", open: null });
 });

@@ -2,11 +2,11 @@
 // Kobble's own.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { ShownView } from "@/api/client";
 import { iconOf } from "@/components/screen-view";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { Tile } from "./sidebar-links";
 
@@ -28,11 +28,11 @@ export function TeamPages({
   current: string | null;
   onGo?: () => void;
 }>) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   if (pages.length === 0) return null;
   return (
-    <nav aria-label={t.groups.team} className="grid gap-px pt-4">
-      <GroupLabel>{t.groups.team}</GroupLabel>
+    <nav aria-label={t("shell.groups.team")} className="grid gap-px pt-4">
+      <GroupLabel>{t("shell.groups.team")}</GroupLabel>
       {pages.map((page) => (
         <a
           key={page.id}

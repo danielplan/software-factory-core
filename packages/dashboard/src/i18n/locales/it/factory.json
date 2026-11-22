@@ -1,0 +1,87 @@
+{
+  "didNotWork": "Non ha funzionato",
+  "reading": "Leggo la bacheca su GitHub…",
+  "columns": {
+    "todo": "Da fare",
+    "building": "In costruzione",
+    "review": "Da rivedere",
+    "done": "Fatto"
+  },
+  "means": {
+    "todo": "Aspetta di essere costruita",
+    "building": "Ci sta lavorando il costruttore",
+    "review": "Aspetta la tua revisione",
+    "done": "Unita o chiusa"
+  },
+  "nothingHere": "Niente qui",
+  "showAll": "Mostra tutte e {{n}}",
+  "readAgain": "Rileggi",
+  "openOnGitHub": "Apri su GitHub",
+  "builder": {
+    "building": "Costruisce {{what}}",
+    "on": "Il costruttore prende le schede da Da fare",
+    "off": "Il costruttore è spento"
+  },
+  "notConnected": {
+    "title": "Ancora nessuna bacheca GitHub collegata.",
+    "text": "Il lavoro della fabbrica vive su una bacheca GitHub: correzioni e prototipi consegnati vanno nella colonna Da fare, e il costruttore li prende da lì.",
+    "connect": "Collega una bacheca"
+  },
+  "card": {
+    "building": "In costruzione",
+    "from": "Dall'esplorazione “{{title}}”",
+    "fromShort": "Da “{{title}}”",
+    "hintWithBuilder": "Il tuo suggerimento è col costruttore",
+    "fix": "Correzione"
+  },
+  "types": {
+    "label": "Tipo",
+    "bug": "Bug",
+    "feature": "Funzione",
+    "improvement": "Miglioria"
+  },
+  "panel": {
+    "close": "Chiudi",
+    "cardLabel": "Scheda #{{number}}",
+    "asksFor": "Cosa chiede",
+    "plan": "Il piano concordato",
+    "conversation": "Conversazione",
+    "pullRequest": "Pull request",
+    "merged": "Unita",
+    "closed": "Chiusa",
+    "draft": "Bozza",
+    "open": "Aperta"
+  },
+  "prStates": {
+    "open": "Pronta per la tua revisione",
+    "draft": "Una bozza, non ancora pronta",
+    "merged": "Unita",
+    "closed": "Chiusa senza unire",
+    "conflict": "In conflitto con main"
+  },
+  "conflict": {
+    "clashes": "In conflitto con main",
+    "resolve": "Risolvi",
+    "asked": "Di nuovo in Da fare: il costruttore lo risolve",
+    "resolving": "Il costruttore sta risolvendo il conflitto con main"
+  },
+  "remove": {
+    "ask": "Eliminare #{{number}}? Viene chiusa come non pianificata e lascia la bacheca.",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "builderOnIt": "Ci sta lavorando il costruttore",
+    "deleteCard": "Elimina la scheda"
+  },
+  "waitingForYou": "Ti aspettano",
+  "waiting": {
+    "own": "Scrivi la tua risposta",
+    "sending": "Invio…",
+    "send": "Invia la risposta",
+    "talk": "Parliamone",
+    "head": "Kobble ti aspetta · Scheda #{{number}} · {{title}}",
+    "whole": "Vedi tutta la scheda",
+    "pick": "Scegli una risposta",
+    "suggestion": "Il suggerimento della fabbrica",
+    "or": "oppure"
+  }
+}

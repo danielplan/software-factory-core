@@ -13,13 +13,13 @@ import {
   kitThing,
   matching,
   neededBy,
-  pagesLeftOut,
   refusal,
   removing,
 } from "../src/lib/market-view.ts";
+import { installedModules, type PageModule } from "../src/lib/page-module.ts";
 
-const words = messagesIn("en").market;
-const shell = messagesIn("en").shell;
+const words = messagesIn("en");
+const shell = messagesIn("en");
 const list = (items: string[]) => items.join(" and ");
 
 const none = { pages: [], blocks: [], kobolds: [], stages: [] };
@@ -196,12 +196,13 @@ test("an extension's settings show while it is installed", () => {
   assert.deepEqual(extensionThing(words, shell, [off], off).settings, []);
 });
 
-test("the pages of extensions that are removed leave the sidebar", () => {
-  assert.deepEqual(pagesLeftOut(all), []);
-  assert.deepEqual(pagesLeftOut(without("personas")), ["personas"]);
-  // Two extensions may bring one page: it stays while one is installed.
-  const twin = addOn("twin", { brings: { ...none, pages: ["personas"] } });
-  assert.deepEqual(pagesLeftOut([...without("personas"), twin]), []);
+test("only the installed extensions' page modules are mounted", () => {
+  const module = (id: string): PageModule => ({ id, pages: [] });
+  const modules = ["factory", "personas", "unknown"].map(module);
+  const ids = (addOns: AddOnView[]) =>
+    installedModules(modules, addOns).map((one) => one.id);
+  assert.deepEqual(ids(all), ["factory", "personas"]);
+  assert.deepEqual(ids(without("personas")), ["factory"]);
 });
 
 test("the connections: GitHub for the code, the boards for the tasks", () => {

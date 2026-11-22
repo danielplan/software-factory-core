@@ -28,8 +28,7 @@ board, and who makes the prototype?
 Chosen: a whiteboard. Doodle thinks before it answers (what is asked, what
 it checked, the ways, what is missing, where it goes), then keeps one living
 picture changed in place, with decisions folded into it, open points marked
-"?", and rare one-line notes: pictures over text. Things have no set order;
-the board spreads them around what people placed. **Tinker** is the maker:
+"?", and rare one-line notes: pictures over text. **Tinker** is the maker:
 Doodle asks it for the prototype, and Tinker builds it from the product's
 design system.
 
@@ -39,6 +38,16 @@ design system.
 - Good, because thinking and making are two jobs, each with its own kobold.
 - Bad, because the history of the thinking is in the conversation, not on
   the board.
+
+### Update, 2026-11-22: laid out left to right again
+
+The board was first laid out as a whiteboard too, spread in every direction
+(ELK stress) around what people placed. Its things join right side out,
+left side in, so arrows bowed out and looped. The board is still a
+whiteboard in what it holds (one living picture, pictures over text), but
+it is laid out left to right again, in columns along its arrows (ELK
+layered). A thing a person moved stays where they put it, but the others
+are no longer laid out around it.
 
 ## More Information
 

@@ -7,7 +7,7 @@ import type {
   PartView,
   WorkView,
 } from "../src/api/client.ts";
-import { countsOf, koboldStatus, overallOf } from "../src/lib/shell-view.ts";
+import { koboldStatus, openCardsOf, overallOf } from "../src/lib/shell-view.ts";
 import { lightOnly, type RuleLike } from "../src/lib/light-only.ts";
 
 // The frame around every page: the sidebar's counts, the kobold's card,
@@ -40,11 +40,10 @@ const work = (more: Partial<WorkView> = {}): WorkView => ({
 });
 const part = (light: PartView["light"]) => ({ light }) as PartView;
 
-test("the sidebar counts only what there is: explorations, tickets not in the app", () => {
-  assert.deepEqual(countsOf(0, null), {});
-  assert.deepEqual(
-    countsOf(
-      2,
+test("the Factory board counts only agreed work not done yet", () => {
+  assert.equal(openCardsOf(null), 0);
+  assert.equal(
+    openCardsOf(
       work({
         cards: [
           card(1, "todo"),
@@ -56,9 +55,9 @@ test("the sidebar counts only what there is: explorations, tickets not in the ap
       }),
     ),
     // Ideas (Backlog, no column) are not the factory's work.
-    { explore: 2, build: 2 },
+    2,
   );
-  assert.deepEqual(countsOf(0, work({ cards: [card(2, "done")] })), {});
+  assert.equal(openCardsOf(work({ cards: [card(2, "done")] })), 0);
 });
 
 test("the factory's light, in words", () => {
@@ -136,7 +135,8 @@ test("light only: every rule for a computer set to dark is switched off", () => 
 });
 
 test("the answer sent from a waiting card: the owner's words, else the picked answer", async () => {
-  const { answerText } = await import("../src/features/factory/answer-text.ts");
+  const { answerText } =
+    await import("../src/extensions/factory/answer-text.ts");
   const waiting = {
     number: 1,
     title: "T",

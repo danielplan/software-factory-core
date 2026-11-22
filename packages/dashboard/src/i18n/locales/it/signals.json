@@ -1,0 +1,48 @@
+{
+  "cannotRead": "Non riesco a leggere i segnali",
+  "syncFailed": "L'ultima sincronizzazione con l'app dal vivo non ha funzionato",
+  "noneNew": "Nessun nuovo segnale.",
+  "newSignals": "Nuovi segnali",
+  "syncedNothing": "Sincronizzato con l'app dal vivo · niente di nuovo",
+  "syncedNew": "Sincronizzato con l'app dal vivo · {{n}} nuovi",
+  "syncNow": "Sincronizza ora",
+  "signal": "Segnale {{id}}",
+  "fix": "Correggi",
+  "dismiss": "Scarta",
+  "ok": "OK",
+  "reads": {
+    "bug": "che le persone segnalano, ed errori e automazioni fallite",
+    "request": "che le persone mandano, e quando l'assistente non riesce a fare qualcosa",
+    "feedback": "dai test delle personas e tutto il resto"
+  },
+  "connect": {
+    "seeHere": "Cosa vedrai qui",
+    "title": "Collega la tua app",
+    "reads": "Kobble legge cosa succede in {{app}} ogni 30 minuti.",
+    "address": "Indirizzo dell'esportazione",
+    "token": "Token",
+    "tokenHint": "Incolla il token dalla tua app",
+    "checking": "Controllo…",
+    "connect": "Collega",
+    "saved": "Salvato solo su questo computer, in .env",
+    "privacy": "Da {{app}} escono solo eventi anonimi: niente nomi, niente contenuti.",
+    "how": "Come aggiungere l'esportazione alla tua app"
+  },
+  "quietTitle": "Tutto tranquillo",
+  "quiet": {
+    "none": "Nessun nuovo bug, richiesta o feedback da {{app}}.",
+    "hide": "Nascondi i segnali gestiti",
+    "see": "Vedi i segnali gestiti",
+    "nothingHandled": "Ancora niente di gestito"
+  },
+  "before": {
+    "sendMore": "Manda altre personas",
+    "toImprove": "per trovare cosa migliorare.",
+    "afterLaunch": "Dopo il lancio,",
+    "connectApp": "collega {{app}}",
+    "toHear": "per sentire i clienti.",
+    "onMission": "In missione",
+    "noCustomers": "Ancora nessun cliente. Manda le tue personas a provare l'app: quello che trovano compare qui.",
+    "send": "Manda una persona"
+  }
+}

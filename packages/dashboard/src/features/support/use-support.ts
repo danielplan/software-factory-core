@@ -3,19 +3,11 @@
 
 import { useEffect, useRef } from "react";
 
-import { useRead } from "@/api/use-read";
-
-export type SupportView = {
-  messages: { from: "kobold" | "you"; text: string }[];
-  writing: string | null;
-  activity: string | null;
-  problem: string | null;
-  // Where it took the person last, counted: the page moves there once.
-  went: { to: string; n: number } | null;
-};
+import { useRead } from "@/api/query";
+import { type SupportView, supportViewSchema } from "@/api/schemas/support";
 
 export function useSupport(): SupportView | null {
-  return useRead("/api/kobble/support").data as SupportView | null;
+  return useRead("/api/kobble/support", supportViewSchema).data;
 }
 
 // Moves the page where Sprocket takes the person (#explore/X-3): each new

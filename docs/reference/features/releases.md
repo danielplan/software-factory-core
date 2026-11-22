@@ -43,7 +43,7 @@ tags and releases.
 | Part          | Where                                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------------------------- |
 | The extension | `packages/server/src/extensions/releases/`: `numbers.ts`, `judge.ts`, `notes.ts`, `github-releases.ts`, `routes.ts` |
-| The page      | `packages/dashboard/src/features/releases/`                                                                         |
+| The page      | `packages/dashboard/src/extensions/releases/`                                                                       |
 
 The routes: `GET /api/releases`, `POST /api/releases/prepare`,
 `POST /api/releases`.

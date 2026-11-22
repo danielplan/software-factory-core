@@ -13,11 +13,11 @@ import {
   StickyNote,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { ShownPart, ShownView } from "@/api/client";
 import { PageHead } from "@/components/layout/page-head";
 import { Card } from "@/components/ui/card";
-import { useT } from "@/i18n/use-t";
 
 // The icons a description may name (the core's VIEW_ICONS); another is a puzzle piece.
 const ICONS: Record<string, ReactNode> = {
@@ -51,7 +51,7 @@ function Text({
 function Items({
   part,
 }: Readonly<{ part: Extract<ShownPart, { show: "list" }> }>) {
-  const t = useT().market.screen;
+  const t = useTranslation().t;
   return (
     <div>
       {part.title && (
@@ -61,7 +61,7 @@ function Items({
       )}
       {part.items.length === 0 ? (
         <p className="px-4 py-3.5 text-[13px] text-muted-foreground">
-          {part.empty ?? t.emptyList}
+          {part.empty ?? t("market.screen.emptyList")}
         </p>
       ) : (
         <ul>
@@ -127,10 +127,13 @@ export function TeamPage({
   view,
   by,
 }: Readonly<{ view: ShownView; by: string }>) {
-  const t = useT().market.screen;
+  const t = useTranslation().t;
   return (
     <>
-      <PageHead title={view.name} about={view.about ?? t.from(by)} />
+      <PageHead
+        title={view.name}
+        about={view.about ?? t("market.screen.from", { name: by })}
+      />
       <ScreenParts view={view} />
     </>
   );

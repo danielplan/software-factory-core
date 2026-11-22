@@ -2,9 +2,10 @@
 // the end, the block in hand and the line it would drop at.
 
 import { ArrowDown, ArrowUp, GripVertical, Plus, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
-import { useT } from "@/i18n/use-t";
+
 import { ownersOf } from "@/lib/home-layout";
 import { blockName } from "@/lib/screens";
 import { nameOf } from "@/lib/market-view";
@@ -36,25 +37,25 @@ export function ArrangeBar({
   onNudge: (by: -1 | 1) => void;
   onHide: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const owner = ownersOf(addOns).get(id);
   return (
     <div className="flex items-center gap-2 text-xs">
       <GripVertical
-        aria-label={t.home.arrange.drag}
+        aria-label={t("home.arrange.drag")}
         className="size-4 cursor-grab text-muted-foreground"
       />
       <span className="min-w-0 flex-1 truncate font-medium">
-        {blockName(t.market.blocks, addOns, id)}
+        {blockName(t("market.blocks", { returnObjects: true }), addOns, id)}
         {owner && (
           <span className="ml-2 font-normal text-muted-foreground">
-            {nameOf(t.market, owner)}
+            {nameOf(t, owner)}
           </span>
         )}
       </span>
       <button
         type="button"
-        aria-label={t.home.arrange.moveUp}
+        aria-label={t("home.arrange.moveUp")}
         disabled={first}
         className={smallButton + " disabled:opacity-40"}
         onClick={() => {
@@ -65,7 +66,7 @@ export function ArrangeBar({
       </button>
       <button
         type="button"
-        aria-label={t.home.arrange.moveDown}
+        aria-label={t("home.arrange.moveDown")}
         disabled={last}
         className={smallButton + " disabled:opacity-40"}
         onClick={() => {
@@ -76,7 +77,7 @@ export function ArrangeBar({
       </button>
       <button type="button" className={smallButton} onClick={onHide}>
         <X aria-hidden className="size-3" />
-        {t.home.arrange.hide}
+        {t("home.arrange.hide")}
       </button>
     </div>
   );
@@ -89,7 +90,7 @@ export function AddSlot({
   count,
   onClick,
 }: Readonly<{ state: Arranging; count: number; onClick: () => void }>) {
-  const t = useT().home.arrange;
+  const t = useTranslation().t;
   const { holding, dropAt } = state;
   return (
     <button
@@ -106,7 +107,7 @@ export function AddSlot({
       )}
     >
       <Plus aria-hidden className="size-4" />
-      {holding ? t.place : t.add}
+      {holding ? t("home.arrange.place") : t("home.arrange.add")}
     </button>
   );
 }
@@ -118,7 +119,7 @@ export function HeldBlock({
   y,
   addOns,
 }: Readonly<{ id: string; x: number; y: number; addOns: AddOnView[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       aria-hidden
@@ -126,10 +127,10 @@ export function HeldBlock({
       style={{ left: x + 14, top: y + 14, rotate: "1.5deg" }}
     >
       <span className="text-[13px] font-medium">
-        {blockName(t.market.blocks, addOns, id)}
+        {blockName(t("market.blocks", { returnObjects: true }), addOns, id)}
       </span>
       <span className="text-[11px] text-muted-foreground">
-        {t.home.arrange.holding}
+        {t("home.arrange.holding")}
       </span>
     </div>
   );

@@ -5,7 +5,7 @@ import type { Draft } from "./draft";
 import type { CaughtError } from "./factory-errors";
 import type { Kind, State } from "@/api/feedback-board";
 
-// What the kobold says, by name (the words are in i18n/areas/feedback.ts).
+// What the kobold says, by name (the words are in i18n/locales/<language>/feedback.json).
 export type Say =
   | "invite"
   | "startBug"

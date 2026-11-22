@@ -1,8 +1,10 @@
 // The bottom of Sprocket's window: a question's feed and the input.
 
+import { useTranslation } from "react-i18next";
+
 import { post } from "@/api/client";
 import { ChatSend } from "@/components/chat-send";
-import { useT } from "@/i18n/use-t";
+
 import type { Page } from "@/lib/routes";
 import { useSupport } from "./use-support";
 
@@ -17,7 +19,7 @@ export function AskFeed({
   page,
 }: Readonly<{ thread: Thread; page: Page }>) {
   const support = useSupport();
-  const { startAsk } = useT().feedback.window.starts;
+  const startAsk = useTranslation().t;
   const asked = (support?.messages.length ?? 0) > 0 || support?.writing != null;
   if (asked) return <Messages support={support} />;
   return (
@@ -28,10 +30,12 @@ export function AskFeed({
         thread.lines.length > 0 && (
           <>
             <p className="self-start motion-safe:animate-rise">
-              {startAsk.line}
+              {startAsk("feedback.window.starts.startAsk.line")}
             </p>
             <Chips
-              choices={startAsk.examples}
+              choices={startAsk("feedback.window.starts.startAsk.examples", {
+                returnObjects: true,
+              })}
               onPick={(text) => {
                 void post("/api/kobble/support", { text, page }).catch(
                   () => undefined,
@@ -56,9 +60,9 @@ export function Input({
   text: string;
   onText: (text: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const errors = useCaughtErrors();
-  const where = t.shell.pages[page];
+  const where = t(`shell.pages.${page}`);
   const support = useSupport();
   const send = () => {
     const said = text.trim();
@@ -76,7 +80,7 @@ export function Input({
     }
     say(said, where, errors);
   };
-  const placeholder = t.feedback.window.placeholders[thread.step];
+  const placeholder = t(`feedback.window.placeholders.${thread.step}`);
   return (
     <form
       className="mx-4 mt-2 mb-4 flex flex-none items-end gap-2 rounded-xl border border-border bg-card p-1.5 transition-colors focus-within:border-[#c7cbfb]"
@@ -109,7 +113,7 @@ export function Input({
           void post("/api/kobble/support/stop", {}).catch(() => undefined);
         }}
         size="icon-sm"
-        label={t.feedback.window.sendMessage}
+        label={t("feedback.window.sendMessage")}
       />
     </form>
   );

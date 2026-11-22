@@ -64,4 +64,5 @@ the team: changes ready on GitHub, an update running, or a newer Kobble.
 
 Checked by tests: updates and their safety (`project-updates.test.ts`,
 `updates-served.test.ts`), what's new, the desktop start, the usage log,
-the settings tabs (`packages/dashboard/test/settings-tabs.test.ts`).
+the settings tabs (`packages/dashboard/test/settings-tabs.test.ts`, on
+`packages/dashboard/src/lib/settings-tabs.ts`).

@@ -1,0 +1,87 @@
+{
+  "didNotWork": "That did not work",
+  "reading": "Reading the board on GitHub…",
+  "columns": {
+    "todo": "To do",
+    "building": "Building",
+    "review": "Review",
+    "done": "Done"
+  },
+  "means": {
+    "todo": "Waiting to be built",
+    "building": "The builder is on it",
+    "review": "Waiting for your review",
+    "done": "Merged or closed"
+  },
+  "nothingHere": "Nothing here",
+  "showAll": "Show all {{n}}",
+  "readAgain": "Read it again",
+  "openOnGitHub": "Open on GitHub",
+  "builder": {
+    "building": "Building {{what}}",
+    "on": "The builder takes cards from To do",
+    "off": "The builder is off"
+  },
+  "notConnected": {
+    "title": "No GitHub board is connected yet.",
+    "text": "The factory's work lives on a GitHub board: fixes and handed-off prototypes go to its To do column, and the builder takes them from there.",
+    "connect": "Connect a board"
+  },
+  "card": {
+    "building": "Building",
+    "from": "From the exploration “{{title}}”",
+    "fromShort": "From “{{title}}”",
+    "hintWithBuilder": "Your hint is with the builder",
+    "fix": "Fix"
+  },
+  "types": {
+    "label": "Type",
+    "bug": "Bug",
+    "feature": "Feature",
+    "improvement": "Improvement"
+  },
+  "panel": {
+    "close": "Close",
+    "cardLabel": "Card #{{number}}",
+    "asksFor": "What it asks for",
+    "plan": "The agreed plan",
+    "conversation": "Conversation",
+    "pullRequest": "Pull request",
+    "merged": "Merged",
+    "closed": "Closed",
+    "draft": "Draft",
+    "open": "Open"
+  },
+  "prStates": {
+    "open": "Ready for your review",
+    "draft": "A draft, not ready yet",
+    "merged": "Merged",
+    "closed": "Closed without merging",
+    "conflict": "Clashes with main"
+  },
+  "conflict": {
+    "clashes": "Clashes with main",
+    "resolve": "Resolve",
+    "asked": "Back in To do: the builder resolves it",
+    "resolving": "The builder is resolving the clash with main"
+  },
+  "remove": {
+    "ask": "Delete #{{number}}? It is closed as not planned and leaves the board.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "builderOnIt": "The builder is on it",
+    "deleteCard": "Delete card"
+  },
+  "waitingForYou": "Waiting for you",
+  "waiting": {
+    "own": "Write your own answer",
+    "sending": "Sending…",
+    "send": "Send answer",
+    "talk": "Talk it through",
+    "head": "Kobble is waiting for you · Card #{{number}} · {{title}}",
+    "whole": "See the whole card",
+    "pick": "Pick an answer",
+    "suggestion": "Factory's suggestion",
+    "or": "or"
+  }
+}

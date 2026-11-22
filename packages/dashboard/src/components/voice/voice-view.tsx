@@ -1,4 +1,5 @@
 import { PhoneOff, RotateCcw, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +12,6 @@ import { useVoiceCall } from "@/hooks/voice/use-voice-call";
 import type { VoiceCall } from "@/lib/voice/voice-call";
 import { VoiceStatus } from "./voice-status";
 import { type OrbMode, VoiceOrb } from "./voice-orb";
-import { useT } from "@/i18n/use-t";
 
 // During a call, in place of the box to type: the glow that shows what is
 // happening (voice-orb.tsx), a line saying it in words (with a thin bar
@@ -28,19 +28,24 @@ export function VoiceView({
   coachProblem: string | null;
   onEnd: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const state = useVoiceCall(call);
   const mode = modeOf(state);
   const [language, chooseLanguage] = useSpokenLanguage(call);
-  const status = statusLine(state, coachProblem, t.voice);
+  const status = statusLine(state, coachProblem, t);
   const ended = state.phase === "off";
   return (
     <div className="grid justify-items-center gap-4 rounded-xl bg-surface px-3 pt-6 pb-3">
       {!ended && <VoiceOrb call={call} mode={mode} />}
-      <VoiceStatus status={status} moment={ended ? "" : t.voice.orb[mode]} />
+      <VoiceStatus
+        status={status}
+        moment={ended ? "" : t(`voice.orb.${mode}`)}
+      />
       <HeardWords call={call} />
       {state.quietly && (
-        <p className="text-[11px] text-muted-foreground">{t.voice.quietly}</p>
+        <p className="text-[11px] text-muted-foreground">
+          {t("voice.quietly")}
+        </p>
       )}
       <div className="flex w-full flex-wrap items-center gap-2">
         <LanguageSwitch language={language} onChoose={chooseLanguage} />
@@ -54,7 +59,7 @@ export function VoiceView({
             }}
           >
             <RotateCcw aria-hidden />
-            {t.voice.tryAgain}
+            {t("voice.tryAgain")}
           </Button>
         )}
         <Button
@@ -68,7 +73,7 @@ export function VoiceView({
           onClick={onEnd}
         >
           {ended ? <X aria-hidden /> : <PhoneOff aria-hidden />}
-          {ended ? t.voice.close : t.voice.endCall}
+          {ended ? t("voice.close") : t("voice.endCall")}
         </Button>
       </div>
     </div>

@@ -1,0 +1,87 @@
+{
+  "didNotWork": "Das hat nicht geklappt",
+  "reading": "Lese das Board auf GitHub…",
+  "columns": {
+    "todo": "Zu erledigen",
+    "building": "Im Bau",
+    "review": "Prüfen",
+    "done": "Erledigt"
+  },
+  "means": {
+    "todo": "Wartet darauf, gebaut zu werden",
+    "building": "Der Baumeister ist dran",
+    "review": "Wartet auf deine Prüfung",
+    "done": "Zusammengeführt oder geschlossen"
+  },
+  "nothingHere": "Hier ist nichts",
+  "showAll": "Alle {{n}} zeigen",
+  "readAgain": "Neu lesen",
+  "openOnGitHub": "Auf GitHub öffnen",
+  "builder": {
+    "building": "Baut {{what}}",
+    "on": "Der Baumeister nimmt Karten aus Zu erledigen",
+    "off": "Der Baumeister ist aus"
+  },
+  "notConnected": {
+    "title": "Noch kein GitHub-Board verbunden.",
+    "text": "Die Arbeit der Fabrik lebt auf einem GitHub-Board: Behebungen und übergebene Prototypen kommen in die Spalte Zu erledigen, und der Baumeister nimmt sie von dort.",
+    "connect": "Ein Board verbinden"
+  },
+  "card": {
+    "building": "Im Bau",
+    "from": "Aus der Erkundung „{{title}}\"",
+    "fromShort": "Aus „{{title}}\"",
+    "hintWithBuilder": "Dein Hinweis ist beim Baumeister",
+    "fix": "Behebung"
+  },
+  "types": {
+    "label": "Art",
+    "bug": "Fehler",
+    "feature": "Funktion",
+    "improvement": "Verbesserung"
+  },
+  "panel": {
+    "close": "Schließen",
+    "cardLabel": "Karte #{{number}}",
+    "asksFor": "Worum sie bittet",
+    "plan": "Der vereinbarte Plan",
+    "conversation": "Gespräch",
+    "pullRequest": "Pull Request",
+    "merged": "Zusammengeführt",
+    "closed": "Geschlossen",
+    "draft": "Entwurf",
+    "open": "Offen"
+  },
+  "prStates": {
+    "open": "Bereit für deine Prüfung",
+    "draft": "Ein Entwurf, noch nicht fertig",
+    "merged": "Zusammengeführt",
+    "closed": "Ohne Zusammenführen geschlossen",
+    "conflict": "Konflikt mit main"
+  },
+  "conflict": {
+    "clashes": "Konflikt mit main",
+    "resolve": "Lösen",
+    "asked": "Zurück in Zu erledigen: der Baumeister löst ihn",
+    "resolving": "Der Baumeister löst den Konflikt mit main"
+  },
+  "remove": {
+    "ask": "#{{number}} löschen? Sie wird als nicht geplant geschlossen und verlässt das Board.",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "builderOnIt": "Der Baumeister ist dran",
+    "deleteCard": "Karte löschen"
+  },
+  "waitingForYou": "Warten auf dich",
+  "waiting": {
+    "own": "Schreib deine eigene Antwort",
+    "sending": "Sende…",
+    "send": "Antwort senden",
+    "talk": "Durchsprechen",
+    "head": "Kobble wartet auf dich · Karte #{{number}} · {{title}}",
+    "whole": "Die ganze Karte ansehen",
+    "pick": "Wähle eine Antwort",
+    "suggestion": "Vorschlag der Fabrik",
+    "or": "oder"
+  }
+}

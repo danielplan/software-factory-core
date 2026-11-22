@@ -1,0 +1,48 @@
+{
+  "cannotRead": "Die Signale können nicht gelesen werden",
+  "syncFailed": "Der letzte Abgleich mit der Live-App hat nicht geklappt",
+  "noneNew": "Keine neuen Signale.",
+  "newSignals": "Neue Signale",
+  "syncedNothing": "Mit der Live-App abgeglichen · nichts Neues",
+  "syncedNew": "Mit der Live-App abgeglichen · {{n}} neu",
+  "syncNow": "Jetzt abgleichen",
+  "signal": "Signal {{id}}",
+  "fix": "Beheben",
+  "dismiss": "Verwerfen",
+  "ok": "OK",
+  "reads": {
+    "bug": "die Leute melden, dazu Fehler und gescheiterte Automationen",
+    "request": "die Leute schicken, und wenn der Assistent etwas nicht kann",
+    "feedback": "aus Persona-Tests und alles andere"
+  },
+  "connect": {
+    "seeHere": "Was du hier sehen wirst",
+    "title": "Verbinde deine App",
+    "reads": "Kobble liest alle 30 Minuten, was in {{app}} passiert.",
+    "address": "Adresse des Exports",
+    "token": "Token",
+    "tokenHint": "Füge den Token aus deiner App ein",
+    "checking": "Prüfe…",
+    "connect": "Verbinden",
+    "saved": "Nur auf diesem Computer gespeichert, in .env",
+    "privacy": "Nur anonyme Ereignisse verlassen {{app}}: keine Namen, keine Einträge.",
+    "how": "So fügst du den Export zu deiner App hinzu"
+  },
+  "quietTitle": "Alles ruhig",
+  "quiet": {
+    "none": "Keine neuen Fehler, Wünsche oder Rückmeldungen aus {{app}}.",
+    "hide": "Erledigte Signale ausblenden",
+    "see": "Erledigte Signale ansehen",
+    "nothingHandled": "Noch nichts erledigt"
+  },
+  "before": {
+    "sendMore": "Schicke mehr Personas los,",
+    "toImprove": "um zu finden, was besser werden kann.",
+    "afterLaunch": "Nach dem Start:",
+    "connectApp": "verbinde {{app}},",
+    "toHear": "um von Kunden zu hören.",
+    "onMission": "Auf Mission",
+    "noCustomers": "Noch keine Kunden. Schicke deine Personas los, um die App auszuprobieren: Was sie finden, erscheint hier.",
+    "send": "Eine Persona losschicken"
+  }
+}

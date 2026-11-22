@@ -2,10 +2,11 @@
 // team's own app, or in its own; written on the setup's card "The look",
 // which the kobold follows when it writes the theme.
 
+import { useTranslation } from "react-i18next";
+
 import { messageOf, post, type Card } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { useT } from "@/i18n/use-t";
 
 const CHOICES = [
   {
@@ -30,7 +31,7 @@ export function TheLook({
   cards,
   area,
 }: Readonly<{ cards: Card[]; area: string }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const card = cards.find(isLook);
   const now = card?.text?.includes("Kobble’s own") ? "kobble" : "yours";
   const [problem, setProblem] = useState<string | null>(null);
@@ -74,12 +75,14 @@ export function TheLook({
               ))}
             </span>
             <span className="font-semibold">
-              {choice.id === "yours" ? t.setup.look.yours : t.setup.look.own}
+              {choice.id === "yours"
+                ? t("setup.look.yours")
+                : t("setup.look.own")}
             </span>
             <span className="text-[12.5px] text-muted-foreground">
               {choice.id === "yours"
-                ? t.setup.look.yoursText
-                : t.setup.look.ownText}
+                ? t("setup.look.yoursText")
+                : t("setup.look.ownText")}
             </span>
           </button>
         ))}

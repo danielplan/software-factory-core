@@ -13,20 +13,30 @@
 
 The kit's folders, after Bulletproof React: shared folders, one folder per
 area, and `app/` that puts them together. Code flows one way, shared
-folders → features → app, checked by dependency-cruiser
-(`.dependency-cruiser.cjs`, the kit's rules).
+folders → features and extensions → app, checked by dependency-cruiser
+(`.dependency-cruiser.cjs`, the kit's rules and Kobble's own).
+
+Kobble's own rule, beside the kit's: **its extensions are modules**, as on
+the server. Each one is a folder `src/extensions/<id>/` whose `index.tsx`
+exports its module (`PageModule`, `src/lib/page-module.ts`): its pages by
+address with their sidebar rows, its Home blocks and its settings sections.
+`app/extensions.ts` lists them and puts together only the installed ones,
+so a removed extension's page code is not mounted at all. The `index.tsx`
+is the module's declaration, not a barrel: it re-exports nothing.
 
 ```text
 src/main.tsx            the start: the company's theme, then the app
 src/app/                the app, the frame around the pages (shell.tsx),
-                        the pages by address (router.tsx), and what it puts
-                        together: the blocks each feature brings to Home
-                        (home-blocks.tsx), the cards each brings to
-                        Settings (settings-page.tsx), the sidebar's rows
-src/api/                talking to the server: the requests and the types
-                        of its answers (client.ts), reading what a page
-                        shows (use-read.ts and the hooks on it), the
-                        feedback board
+                        the pages by address (router.tsx, React Router
+                        on the address after the #), the installed
+                        extensions' modules (extensions.ts), and Settings
+                        put together (settings-page.tsx)
+src/api/                talking to the server: the requests (client.ts),
+                        reading through TanStack Query (query.ts), the
+                        factory's state and its stream of changes
+                        (live.ts), one zod schema per kind of record the
+                        server answers with, the source of its type
+                        (schemas/), the feedback board
 src/components/ui/      shadcn's pieces, as generated
 src/components/layout/  the sidebar, the page's head, a problem's box
 src/components/         pieces several areas share: the kobolds' faces,
@@ -34,19 +44,22 @@ src/components/         pieces several areas share: the kobolds' faces,
                         voice's screens (voice/) …
 src/hooks/              general hooks (the voice's in hooks/voice/)
 src/lib/                general logic without screens (the voice's calls,
-                        speech and hearing in lib/voice/)
-src/i18n/               the words, in three languages
-src/features/<area>/    one per extension: factory, explorations, signals,
-                        personas, releases; one per core area: home,
-                        system, settings, marketplace, setup, support
-                        (Sprocket and the feedback it takes), updates,
-                        connect (where work is tracked, with the GitHub
-                        and Jira steps)
+                        speech and hearing in lib/voice/); what an
+                        extension brings to the page (page-module.ts)
+src/i18n/               the words, in three languages, through i18next
+                        (locales/<language>/<area>.json)
+src/features/<area>/    one per core area: home, system, settings,
+                        marketplace, setup, support (Sprocket and the
+                        feedback it takes), updates, connect (where work
+                        is tracked, with the GitHub and Jira steps)
+src/extensions/<id>/    one per extension: factory, explorations, signals,
+                        personas, releases; index.tsx is its module
 ```
 
-A feature never imports another: Home gets the blocks the features bring
-from `app/home-blocks.tsx`, and Settings its cards from
-`app/settings-page.tsx`. What two areas share moves to a shared folder.
+A feature never imports another, the core never imports an extension, and
+an extension never imports another or a core feature: Home gets the blocks
+the installed extensions bring, Settings their sections and the sidebar
+their rows, all from `app/`. What two areas share moves to a shared folder.
 
 ## Libraries
 
@@ -65,17 +78,12 @@ kit's table instead.
 Code written before Kobble was held to its kit. Each line is to be moved to
 the kit's library, one card at a time; nothing new is added to it.
 
-- **Texts and languages:** a typed catalogue of its own
-  (`src/i18n/`, `area(en, it, de)` and `useT()`), not i18next with
-  react-i18next; its checks (`test/i18n.test.ts`,
-  `test/words-in-catalogue.test.ts`) move to i18next's resources and
-  eslint-plugin-i18next with it. First to move.
-- **Pages and addresses:** written by hand on `location.hash`
-  (`src/app/router.tsx`), not React Router.
-- **Data from the server:** fetched by hand (`src/api/client.ts`,
-  `src/api/use-read.ts`, effects in the components), not TanStack Query;
-  answers are not checked with zod.
-- **Forms:** fields kept in component state, not react-hook-form.
+- **Forms:** the forms with fields (the live app's address and token, a
+  persona added in setup, an answer to the coach's question) use
+  react-hook-form with zod; the chat boxes (Doodle's talk panel, the
+  coach's answer box, Sprocket's box, an answer on a stuck card) still keep
+  their text in component state, as voice, attachments and quick picks
+  write into it too.
 - **Tests:** the logic is tested with node's test runner (`test/`); there
   are no component tests with Testing Library and MSW, no click-throughs
   with Playwright, and no prototype mode.

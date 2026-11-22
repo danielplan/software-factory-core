@@ -4,8 +4,10 @@
 // personas, and at the end has Kobble set itself up. The same coach and map
 // as before; only the canvas became steps.
 
+import type { TFunction } from "i18next";
 import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { State } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
@@ -21,8 +23,6 @@ import { BarAction } from "./bar-action";
 import { SetupStep } from "./setup-step";
 import { StepCards } from "./step-cards";
 import { cardsIn, setUpDone, type Step, stepsOf } from "./steps";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -96,16 +96,18 @@ function Content({
   of: number;
   call: ReturnType<typeof useCoachCall>;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { coach } = state;
   if (!coach.started)
     return (
       <div className="grid justify-items-center gap-4 pt-16 text-center">
         <KoboldHead size={88} />
         <h1 className="text-2xl font-semibold tracking-[-0.015em]">
-          {t.setup.hi}
+          {t("setup.hi")}
         </h1>
-        <p className="max-w-[56ch] text-muted-foreground">{t.setup.tellMe}</p>
+        <p className="max-w-[56ch] text-muted-foreground">
+          {t("setup.tellMe")}
+        </p>
         <CoachStart coach={coach} call={call} />
       </div>
     );
@@ -114,7 +116,7 @@ function Content({
   const says = <KoboldSays coach={coach} step={step} />;
   const eyebrow = (
     <span className="text-[12.5px] text-muted-foreground">
-      {t.setup.stepOf(n, of)}
+      {t("setup.stepOf", { n, of })}
     </span>
   );
   if (step.id === "setup")
@@ -124,10 +126,15 @@ function Content({
       <header className="grid gap-1.5">
         {eyebrow}
         <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
-          {step.id === "start" ? t.setup.whereStart : shownStep.name}
+          {step.id === "start" ? t("setup.whereStart") : shownStep.name}
         </h1>
         <p className="text-muted-foreground">
-          {(t.setup.leads as Record<string, string | undefined>)[step.id] ?? ""}
+          {(
+            t("setup.leads", { returnObjects: true }) as Record<
+              string,
+              string | undefined
+            >
+          )[step.id] ?? ""}
         </p>
       </header>
       {says}
@@ -158,10 +165,10 @@ function Rail({
   reach: number;
   onGo: (n: number) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <nav
-      aria-label={t.setup.rail.label}
+      aria-label={t("setup.rail.label")}
       className="flex w-[280px] flex-none flex-col gap-1 border-r border-border bg-card px-4 py-5 max-md:w-auto max-md:flex-row max-md:overflow-x-auto max-md:border-r-0 max-md:border-b"
     >
       <div className="flex items-center gap-2.5 px-1.5 pb-5 font-wordmark text-[15px] font-semibold tracking-[-0.01em] max-md:pb-0">
@@ -169,7 +176,7 @@ function Rail({
         kobble
       </div>
       <p className="px-1.5 pb-4 text-[12.5px] text-muted-foreground max-md:hidden">
-        {t.setup.rail.settingUp}{" "}
+        {t("setup.rail.settingUp")}{" "}
         <b className="font-semibold text-foreground">
           {project.split(/[\\/]/).filter(Boolean).at(-1)}
         </b>
@@ -226,7 +233,7 @@ function Bar({
   at: number;
   onGo: (n: number) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { coach } = state;
   const building = coach.phase === "build" && !setUpDone(coach);
   return (
@@ -240,11 +247,11 @@ function Bar({
               onGo(at - 1);
             }}
           >
-            <ArrowLeft className="size-4" aria-hidden /> {t.setup.rail.back}
+            <ArrowLeft className="size-4" aria-hidden /> {t("setup.rail.back")}
           </Button>
         )}
         <span className="flex-1 text-[12.5px] text-faint">
-          {hintOf(step, coach, t.setup.rail)}
+          {hintOf(step, coach, t)}
         </span>
         <BarAction state={state} step={step} at={at} onGo={onGo} />
       </div>
@@ -252,25 +259,22 @@ function Bar({
   );
 }
 
-function hintOf(
-  step: Step,
-  coach: SetupState["coach"],
-  m: Messages["setup"]["rail"],
-): string {
+function hintOf(step: Step, coach: SetupState["coach"], m: TFunction): string {
   if (step.id === "hello") return "";
-  if (step.id === "setup") return coach.phase === "build" ? "" : m.nextWrites;
+  if (step.id === "setup")
+    return coach.phase === "build" ? "" : m("setup.rail.nextWrites");
   if (step.id === "start") return "";
-  return m.canChange;
+  return m("setup.rail.canChange");
 }
 
 // The rail's foot: how long it takes, and the kobold, at work or not.
 function RailEnd({ working }: Readonly<{ working: boolean }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const koboldName = useKoboldName();
   return (
     <div className="mt-auto grid gap-2.5 pt-4 max-md:hidden">
       <p className="px-1.5 text-xs text-muted-foreground">
-        {t.setup.rail.minutes}
+        {t("setup.rail.minutes")}
       </p>
       <div className="rounded-xl bg-[radial-gradient(#dfe5f5_1px,transparent_1px)] bg-[length:10px_10px] p-3 shadow-[0_0_0_1px_var(--border)]">
         <div className="flex items-center gap-2.5 rounded-xl bg-card p-2.5 shadow-[0_0_0_1px_var(--border-soft)]">
@@ -278,7 +282,7 @@ function RailEnd({ working }: Readonly<{ working: boolean }>) {
           <span className="grid">
             <b className="text-[13.5px]">{koboldName}</b>
             <small className="text-xs text-muted-foreground">
-              {working ? t.setup.rail.working : t.setup.rail.help}
+              {working ? t("setup.rail.working") : t("setup.rail.help")}
             </small>
           </span>
         </div>
@@ -288,8 +292,8 @@ function RailEnd({ working }: Readonly<{ working: boolean }>) {
 }
 
 // A step's name and hint in the language shown.
-function stepIn(t: Messages, step: Step): { name: string; hint: string } {
-  const words = t.setup.steps as Record<
+function stepIn(t: TFunction, step: Step): { name: string; hint: string } {
+  const words = t("setup.steps", { returnObjects: true }) as Record<
     string,
     { name: string; hint: string } | undefined
   >;

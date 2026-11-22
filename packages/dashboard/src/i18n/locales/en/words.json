@@ -1,0 +1,68 @@
+{
+  "types": {
+    "bug": "Bug",
+    "request": "Feature request",
+    "feedback": "Feedback",
+    "idea": "Idea",
+    "question": "Open question"
+  },
+  "sources": {
+    "app": "In the app",
+    "usage": "Usage",
+    "errors": "Errors",
+    "test": "Mission",
+    "feedback": "Feedback board"
+  },
+  "someone": "Someone",
+  "explore": "Explore",
+  "addTo": "Add to {{id}}",
+  "alreadyExplored": "Already explored in",
+  "alreadyFixed": "Already fixed in",
+  "ago": {
+    "now": "just now",
+    "minutes": "{{n}} min ago",
+    "hours": "{{n}} h ago",
+    "yesterday": "yesterday",
+    "days": "{{n}} days ago"
+  },
+  "sync": {
+    "notConnected": "Not connected to the live app",
+    "notYet": "Not synced with the live app yet · every 30 min",
+    "synced": "Synced with the live app {{ago}} · every 30 min"
+  },
+  "signalCount_one": "1 signal",
+  "signalCount_other": "{{count}} signals",
+  "origin": {
+    "usage": "Found in usage",
+    "developer": "Added by you"
+  },
+  "status": {
+    "explored": "Explored in {{to}}",
+    "fixed": "Fixed in {{to}}",
+    "sentToFix": "Sent to be fixed",
+    "new": "New",
+    "dismissed": "Dismissed"
+  },
+  "mission": {
+    "queued": "Waits for its turn",
+    "opening": "Opening the app…"
+  },
+  "step": "At step {{number}}: {{did}}",
+  "tests": {
+    "queued": "Waiting",
+    "running": "On a mission",
+    "done": "Done",
+    "failed": "Failed"
+  },
+  "lookAgain": {
+    "soon": "The kobold looks again soon.",
+    "minute": "The kobold looks again in a minute.",
+    "minutes": "The kobold looks again in {{n}} minutes."
+  },
+  "done": {
+    "fixed": "{{id}} is in the factory's To do",
+    "dismissed": "Dismissed",
+    "added": "Added to {{id}}",
+    "waiting": "{{id}} is waiting in Explorations"
+  }
+}

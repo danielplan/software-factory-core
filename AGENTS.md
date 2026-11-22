@@ -38,7 +38,7 @@ here reach every company with its next upgrade, so they are made with care.
   listed in the blueprint and only shrinks.
 - Simple, clear and consistent language in code, comments and docs. The people
   who use a factory are not developers, but are curious and capable.
-- **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
+- **Every word the dashboard shows goes through its words** (i18next, `packages/dashboard/src/i18n/locales/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The lint rule `i18next/no-literal-string` fails on words written straight into a screen.
 - Never loosen a check or add a lint-disabling comment without asking.
 - **What the core owns, it overwrites; customizations go through a declared
   place.** A file or value the core writes in a factory is written the same
@@ -70,7 +70,8 @@ here reach every company with its next upgrade, so they are made with care.
 - `packages/server/`: the local server and the `software-factory` command:
   core modules, `src/extensions/<id>/` and `src/app/` (its `BLUEPRINT.md`).
 - `packages/dashboard/`: Kobble's page, a React web app: shared folders,
-  `src/features/<area>/` and `src/app/` (its `BLUEPRINT.md`).
+  `src/features/<area>/` (the core's areas), `src/extensions/<id>/` (one
+  module per extension, as on the server) and `src/app/` (its `BLUEPRINT.md`).
 - `packages/kits/`: one kit per kind of product, with its rules and starter.
 - `packages/launcher/`: starts, watches and stops a product's parts.
 - `packages/skills/`: the skills, as the files agents read (`skills/`), their guides and templates.

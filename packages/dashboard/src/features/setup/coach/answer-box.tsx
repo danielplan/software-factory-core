@@ -1,5 +1,6 @@
 import { ArrowUp, Mic } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { CoachView } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,6 @@ import { showsVoice } from "@/lib/voice/call";
 import { useVoiceCall } from "@/hooks/voice/use-voice-call";
 import type { VoiceCall } from "@/lib/voice/voice-call";
 import { VoiceView } from "@/components/voice/voice-view";
-import { useT } from "@/i18n/use-t";
 
 // Where the owner answers: the box to type in, with Talk beside it (or, as
 // a big box, below it with Send); during a call, the voice in its place.
@@ -29,7 +29,7 @@ export function Answer({
   // The first box on a page: a few lines to write in, the buttons below.
   big?: boolean;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const talking = showsVoice(useVoiceCall(call));
   if (talking)
     return (
@@ -44,7 +44,7 @@ export function Answer({
   return (
     <Reply
       working={coach.working}
-      placeholder={placeholder ?? t.setup.coach.answer}
+      placeholder={placeholder ?? t("setup.coach.answer")}
       className={className}
       big={big}
       onSay={onSay}
@@ -70,7 +70,7 @@ function Reply({
   onSay: (text: string) => void;
   onTalk: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [text, setText] = useState("");
   const send = () => {
     if (!text.trim() || working) return;
@@ -91,7 +91,7 @@ function Reply({
       }}
     >
       <label htmlFor="coach-reply" className="sr-only">
-        {t.setup.coach.answerLabel}
+        {t("setup.coach.answerLabel")}
       </label>
       <textarea
         id="coach-reply"
@@ -127,12 +127,12 @@ function Buttons({
   canSend,
   onTalk,
 }: Readonly<{ big: boolean; canSend: boolean; onTalk: () => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <span className={cn("flex items-center gap-2", big && "justify-end")}>
       <IconAction
-        label={t.setup.coach.talk}
-        title={t.setup.coach.talkTitle}
+        label={t("setup.coach.talk")}
+        title={t("setup.coach.talkTitle")}
         onClick={onTalk}
       >
         <Mic aria-hidden />
@@ -140,7 +140,7 @@ function Buttons({
       <Button
         type="submit"
         size="icon"
-        aria-label={t.setup.coach.send}
+        aria-label={t("setup.coach.send")}
         className="size-10 rounded-full"
         disabled={!canSend}
       >

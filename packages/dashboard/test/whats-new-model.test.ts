@@ -55,11 +55,13 @@ test("a time is said as a distance from now, in the language", () => {
 
 test("the words are the same keys in every language, and say nothing to do", () => {
   const keys = (locale: "en" | "it" | "de") =>
-    Object.keys(messagesIn(locale).whatsNew).sort((a, b) => a.localeCompare(b));
+    Object.keys(messagesIn(locale)("whatsNew", { returnObjects: true })).sort(
+      (a, b) => a.localeCompare(b),
+    );
   assert.deepEqual(keys("it"), keys("en"));
   assert.deepEqual(keys("de"), keys("en"));
   assert.equal(
-    messagesIn("de").whatsNew.youAre("0.13.2"),
+    messagesIn("de")("whatsNew.youAre", { version: "0.13.2" }),
     "Du bist auf Kobble 0.13.2",
   );
 });

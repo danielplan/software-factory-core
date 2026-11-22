@@ -3,10 +3,14 @@
 // on its way when GitHub says so. Each release opens and closes; each
 // change has its tag, its bold title, the first sentence and More.
 
+import type { TFunction } from "i18next";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
-import { get, onKobbleChanged, post } from "@/api/client";
+import { post } from "@/api/client";
+import { readOf } from "@/api/query";
+import { type WhatsNewView, whatsNewViewSchema } from "@/api/schemas/updates";
 import { Markdown } from "@/components/markdown";
 import {
   Collapsible,
@@ -18,10 +22,9 @@ import { useLanguage } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 import { compareVersions } from "../../../../core/src/version.ts";
-import type { WhatsNewView } from "../../../../server/src/updates/whats-new.ts";
 import { ago, shownChange, showsNewer } from "./whats-new-model";
 
-type Words = ReturnType<typeof messagesIn>["whatsNew"];
+type Words = TFunction;
 type Release = WhatsNewView["releases"][number];
 
 const KIND_LOOK = {
@@ -32,37 +35,29 @@ const KIND_LOOK = {
 
 export function WhatsNew() {
   const { locale } = useLanguage();
-  const m = messagesIn(locale).whatsNew;
-  const [view, setView] = useState<WhatsNewView | null>(null);
+  const m = messagesIn(locale);
   const [trying, setTrying] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const path = `/api/updates/whats-new?language=${locale}`;
-  const load = useCallback(() => {
-    get<WhatsNewView>(path).then(
-      (next) => {
-        setView(next);
-        setFailed(false);
-      },
-      () => {
-        setFailed(true);
-      },
-    );
-  }, [path]);
-  useEffect(() => {
-    load();
-    return onKobbleChanged(load);
-  }, [load]);
+  // The last view read stays while a newer read fails: the problem shows
+  // above it.
+  const read = useQuery({
+    ...readOf(`/api/updates/whats-new?language=${locale}`, whatsNewViewSchema),
+    placeholderData: keepPreviousData,
+  });
+  const view = read.data ?? null;
+  const failed = read.isError;
   const tryAgain = () => {
     setTrying(true);
     post("/api/updates/look")
       .catch(() => undefined)
       .finally(() => {
         setTrying(false);
-        load();
+        void read.refetch();
       });
   };
-  if (failed && !view)
-    return <p className="text-[13px] text-muted-foreground">{m.problem}</p>;
+  const problem = (
+    <p className="text-[13px] text-muted-foreground">{m("whatsNew.problem")}</p>
+  );
+  if (failed && !view) return problem;
   if (!view) return null;
   const newer = showsNewer(view.newest, view.current, compareVersions)
     ? view.newest
@@ -70,10 +65,12 @@ export function WhatsNew() {
   return (
     <div className="grid gap-3">
       <Status view={view} m={m} trying={trying} onTryAgain={tryAgain} />
-      {view.problem && (
-        <p className="text-[13px] text-muted-foreground">{m.problem}</p>
-      )}
-      <div role="list" aria-label={m.releases} className="grid gap-2">
+      {view.problem && problem}
+      <div
+        role="list"
+        aria-label={m("whatsNew.releases")}
+        className="grid gap-2"
+      >
         {newer && (
           <div role="listitem">
             <Release
@@ -98,7 +95,9 @@ export function WhatsNew() {
         ))}
       </div>
       {view.releases.length === 0 && !view.problem && !newer && (
-        <p className="text-[13px] text-muted-foreground">{m.empty}</p>
+        <p className="text-[13px] text-muted-foreground">
+          {m("whatsNew.empty")}
+        </p>
       )}
     </div>
   );
@@ -124,13 +123,15 @@ function Status({
       aria-live="polite"
     >
       <span className="font-medium text-foreground">
-        {m.youAre(view.current)}
+        {m("whatsNew.youAre", { version: view.current })}
       </span>
       {view.offline && (
         <>
-          <span>· {m.offline}</span>
+          <span>· {m("whatsNew.offline")}</span>
           {view.checkedAt && (
-            <span>· {m.checked(ago(locale, view.checkedAt))}</span>
+            <span>
+              · {m("whatsNew.checked", { when: ago(locale, view.checkedAt) })}
+            </span>
           )}
         </>
       )}
@@ -145,7 +146,7 @@ function Status({
             aria-hidden
             className={cn("size-3.5", trying && "animate-spin")}
           />
-          {trying ? m.trying : m.tryAgain}
+          {trying ? m("whatsNew.trying") : m("whatsNew.tryAgain")}
         </button>
       )}
     </p>
@@ -174,7 +175,7 @@ function Release({
     >
       <CollapsibleTrigger className="group flex w-full items-center gap-2 px-3 py-2.5 text-left text-[14px] font-medium">
         <span className="min-w-0 flex-1">
-          {kind === "newer" ? m.onItsWay(version) : version}
+          {kind === "newer" ? m("whatsNew.onItsWay", { version }) : version}
           {release?.date && (
             <span className="ml-2 font-normal text-muted-foreground">
               {release.date}
@@ -183,12 +184,12 @@ function Release({
         </span>
         {kind === "newer" && (
           <span className="shimmer rounded-full px-2.5 py-0.5 text-[12px] font-medium text-muted-foreground">
-            {m.arrives}
+            {m("whatsNew.arrives")}
           </span>
         )}
         {kind === "yours" && (
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-[12px] font-medium text-muted-foreground">
-            {m.yours}
+            {m("whatsNew.yours")}
           </span>
         )}
         <ChevronDown
@@ -197,7 +198,7 @@ function Release({
         />
       </CollapsibleTrigger>
       <CollapsibleContent
-        aria-label={m.changesOf(version)}
+        aria-label={m("whatsNew.changesOf", { version })}
         className="collapsible-content overflow-hidden"
       >
         {release ? (
@@ -213,7 +214,7 @@ function Release({
           </ul>
         ) : (
           <p className="px-3 pb-3 text-[13px] text-muted-foreground">
-            {m.noWords}
+            {m("whatsNew.noWords")}
           </p>
         )}
       </CollapsibleContent>
@@ -243,7 +244,7 @@ function Change({
           KIND_LOOK[change.kind],
         )}
       >
-        {m.kinds[change.kind]}
+        {m(`whatsNew.kinds.${change.kind}`)}
       </span>
       <span className="font-semibold">
         <Markdown text={shown.title} inline />
@@ -260,7 +261,7 @@ function Change({
             }}
             className="font-medium text-primary underline underline-offset-2"
           >
-            {more ? m.less : m.more}
+            {more ? m("whatsNew.less") : m("whatsNew.more")}
           </button>
           <div
             className={cn(

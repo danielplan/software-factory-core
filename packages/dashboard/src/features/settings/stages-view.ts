@@ -1,7 +1,7 @@
 // The order of work in Settings: moving a stage, answering a clash, and a
 // stage's name (Kobble's own are words, a team's say theirs).
 
-import type { Messages } from "../../i18n/messages.ts";
+import type { TFunction } from "i18next";
 
 type Place = { id: string; name: string };
 
@@ -35,11 +35,11 @@ export function settle(
 
 // A stage's name: Kobble's own come from the words by id, a team's own say
 // theirs.
-export function stageName(
-  words: Messages["market"]["stages"],
-  place: Place,
-): string {
-  return Object.hasOwn(words, place.id)
-    ? ((words as Record<string, string>)[place.id] ?? place.name)
+export function stageName(words: TFunction, place: Place): string {
+  const names: Record<string, string> = words("market.stages", {
+    returnObjects: true,
+  });
+  return Object.hasOwn(names, place.id)
+    ? (names[place.id] ?? place.name)
     : place.name;
 }

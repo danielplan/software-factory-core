@@ -1,0 +1,75 @@
+{
+  "about": "Cosa ti aspetta, e a che punto è il lavoro.",
+  "nothingWaits": "Niente ti aspetta. Ci pensano i kobold.",
+  "kinds": {
+    "Review": "Rivedi",
+    "Answer": "Rispondi",
+    "Continue": "Continua",
+    "Sort": "Smista"
+  },
+  "openPullRequest": "Apri",
+  "review": {
+    "built": "Costruita, la sua pull request aspetta la tua revisione",
+    "waits": "Aspetta la tua revisione"
+  },
+  "asks": "Il costruttore si è fermato e ti chiede",
+  "newSignals_one": "1 nuovo segnale",
+  "newSignals_other": "{{count}} nuovi segnali",
+  "newSignals_many": "{{count}} nuovi segnali",
+  "stages": {
+    "newSignals": "nuovi",
+    "exploring": "in esplorazione",
+    "toBuild": "da costruire",
+    "toBuildAndReview": "da costruire · {{review}} da rivedere",
+    "done": "Fatto",
+    "merged": "unite",
+    "pieces_one": "lavoro",
+    "pieces_other": "lavori",
+    "pieces_many": "lavori"
+  },
+  "arrange": {
+    "arrange": "Organizza Home",
+    "done": "Fatto",
+    "reset": "Ripristina il layout",
+    "add": "Aggiungi un blocco",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "drag": "Trascina per spostare",
+    "hide": "Nascondi",
+    "place": "Mettilo qui",
+    "holding": "Clicca per metterlo · Esc per annullare · ↑ ↓ e Invio",
+    "resetTitle": "Ripristinare Home al layout di Kobble?",
+    "resetText": "La tua disposizione va persa per tutto il team.",
+    "resetYes": "Ripristina",
+    "addTitle": "Aggiungi un blocco a Home",
+    "offering": "Estensioni che offrono blocchi",
+    "addOne": "Aggiungi",
+    "onHome": "Su Home",
+    "nothingOffered": "Nessuna estensione installata offre un blocco.",
+    "preview": "Come appare {{name}}",
+    "notKept": "La tua disposizione non è stata salvata. La fabbrica è ancora aperta?"
+  },
+  "blockAbout": {
+    "status": "Come va il prodotto, in una riga",
+    "waiting": "Tutto ciò che ti aspetta, con un pulsante per ciascuno",
+    "loop": "Da ciò che è arrivato a ciò che è fatto, in quattro fasi",
+    "exploring": "Le idee in esplorazione, e il passo successivo di ciascuna",
+    "signals": "Cosa ha segnalato di nuovo l'app in funzione",
+    "reviews": "Le schede in revisione, su qualunque bacheca stiano"
+  },
+  "blockEmpty": {
+    "exploring": "Niente è in esplorazione.",
+    "signals": "Nessun nuovo segnale.",
+    "reviews": "Nessuna pull request aspetta la tua revisione."
+  },
+  "line": {
+    "building": "Bolt costruisce {{card}}",
+    "resting": "Bolt riposa",
+    "none": "Ancora nessun prodotto da avviare",
+    "problem": "Qualcosa ha bisogno di te su Sistema",
+    "starting": "Avvio il prodotto",
+    "running": "Il prodotto è in funzione",
+    "stopped": "Il prodotto è fermo",
+    "some": "{{running}} di {{shown}} parti in funzione"
+  }
+}

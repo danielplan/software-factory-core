@@ -2,11 +2,12 @@
 // in plain words; while getting ready, which speech model is on its way and
 // how far. Plain rules, so every message is checked.
 
+import type { TFunction } from "i18next";
 import type { CallState, ModelProgress, Problem } from "./call-state.ts";
 import { LANGUAGES } from "./languages.ts";
-import { ENGLISH, type Messages } from "../../i18n/messages.ts";
+import { ENGLISH } from "../../i18n/messages.ts";
 
-type Words = Messages["voice"];
+type Words = TFunction;
 
 export type Status = {
   text: string;
@@ -24,16 +25,16 @@ const CAN_RETRY: Problem[] = ["download", "stalled"];
 export function statusLine(
   call: CallState,
   coachProblem: string | null,
-  m: Words = ENGLISH.voice,
+  m: Words = ENGLISH,
 ): Status {
   if (call.problem === "no-voice")
     return {
-      text: m.noVoice(LANGUAGES[call.language].name),
+      text: m("voice.noVoice", { language: LANGUAGES[call.language].name }),
       problem: true,
     };
   if (call.problem)
     return {
-      text: m.problems[call.problem],
+      text: m(`voice.problems.${call.problem}`),
       problem: true,
       retry: CAN_RETRY.includes(call.problem),
     };
@@ -57,26 +58,26 @@ function modelNow(progress: CallState["progress"]): ModelProgress | null {
 function gettingLine(now: ModelProgress, m: Words): Status {
   const percent = `${String(Math.round(now.fraction * 100))}%`;
   const text = now.kept
-    ? m.loading(now.model, percent)
-    : m.downloading(
-        now.model,
+    ? m("voice.loading", { model: now.model, percent })
+    : m("voice.downloading", {
+        model: now.model,
         percent,
-        megabytes(now.loaded),
-        megabytes(now.total),
-      );
+        loaded: megabytes(now.loaded),
+        total: megabytes(now.total),
+      });
   return { text, problem: false, progress: now.fraction };
 }
 
 function callLine(call: CallState, m: Words): string {
   switch (call.phase) {
     case "preparing":
-      return m.preparing;
+      return m("voice.preparing");
     case "listening":
-      return call.writing ? m.writing : m.listening;
+      return call.writing ? m("voice.writing") : m("voice.listening");
     case "thinking":
-      return m.thinking;
+      return m("voice.thinking");
     case "speaking":
-      return m.speaking;
+      return m("voice.speaking");
     case "off":
       return "";
   }

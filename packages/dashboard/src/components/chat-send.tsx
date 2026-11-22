@@ -3,9 +3,9 @@
 // its place while it answers and nothing is typed.
 
 import { ArrowUp, Square } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
 
 export function ChatSend({
   busy,
@@ -25,15 +25,15 @@ export function ChatSend({
   // Its name, when the place has another Send (Sprocket's window).
   label?: string;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (busy && !typed)
     return (
       <Button
         type="button"
         size={size}
         variant="ring"
-        aria-label={t.chat.stop}
-        title={t.chat.stop}
+        aria-label={t("chat.stop")}
+        title={t("chat.stop")}
         className={className}
         onClick={onStop}
       >
@@ -44,8 +44,8 @@ export function ChatSend({
     <Button
       type="submit"
       size={size}
-      aria-label={label ?? t.chat.send}
-      title={busy ? t.chat.steer : (label ?? t.chat.send)}
+      aria-label={label ?? t("chat.send")}
+      title={busy ? t("chat.steer") : (label ?? t("chat.send"))}
       className={className}
       disabled={!typed}
     >

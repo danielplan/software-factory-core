@@ -3,8 +3,8 @@
 // is the post's live state.
 
 import { ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 import { BuildingCard } from "./building-card";
@@ -21,7 +21,7 @@ const STEPS: State[] = ["sent", "seen", "planned", "done"];
 
 // After Send: the post's state, live.
 function StatusCard({ number }: Readonly<{ number: number }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const post = useMine().find((one) => one.number === number);
   if (!post) return null;
   const reached = STEPS.indexOf(post.state);
@@ -39,7 +39,11 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
       </span>
       <ol className="grid grid-cols-4 gap-1 text-[10.5px]">
         {STEPS.map((step, at) => (
-          <li key={step} className="grid gap-1" title={t.stateHelp[step]}>
+          <li
+            key={step}
+            className="grid gap-1"
+            title={t(`feedback.stateHelp.${step}`)}
+          >
             <span
               className={cn(
                 "h-1 rounded-full transition-colors duration-700",
@@ -55,7 +59,7 @@ function StatusCard({ number }: Readonly<{ number: number }>) {
                 at <= reached ? "text-foreground-2" : "text-faint",
               )}
             >
-              {t.states[step]}
+              {t(`feedback.states.${step}`)}
             </span>
           </li>
         ))}

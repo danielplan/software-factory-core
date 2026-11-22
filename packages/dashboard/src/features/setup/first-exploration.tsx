@@ -3,13 +3,13 @@
 // with its canvas already started, or Kobble as it is.
 
 import { useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Card } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { fromLine, textOf } from "./card-bits";
 import { ICON } from "./icons";
-import { useT } from "@/i18n/use-t";
 
 // The picked starting point's title, shared with the bottom bar.
 let picked: string | null = null;
@@ -32,7 +32,7 @@ function usePicked(): string | null {
 }
 
 export function FirstExploration({ cards }: Readonly<{ cards: Card[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const chosen = usePicked();
   return (
     <div className="grid gap-3">
@@ -56,9 +56,7 @@ export function FirstExploration({ cards }: Readonly<{ cards: Card[] }>) {
               {Shown && <Shown className="size-[17px]" aria-hidden />}
             </span>
             <span className="grid min-w-0 flex-1 gap-1">
-              <span className="text-xs text-faint">
-                {fromLine(card, t.setup.guess)}
-              </span>
+              <span className="text-xs text-faint">{fromLine(card, t)}</span>
               <span className="text-base font-semibold">{card.title}</span>
               <span className="text-[13px] text-muted-foreground">
                 {textOf(card)}

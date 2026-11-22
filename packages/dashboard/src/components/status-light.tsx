@@ -1,5 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 import type { Light } from "@/api/client";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 
 // Each light's colour, with a soft ring of the same colour around the dot.
@@ -26,11 +28,11 @@ export function StatusLight({
   light,
   className,
 }: Readonly<{ light: Light; className?: string }>) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   return (
     <i
       role="img"
-      aria-label={light === "none" ? undefined : t.lights[light]}
+      aria-label={light === "none" ? undefined : t(`shell.lights.${light}`)}
       className={cn(
         "inline-block size-2 flex-none rounded-full",
         LOOK[light],

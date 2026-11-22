@@ -32,8 +32,8 @@ extension brings later starts off Home.
 
 ## Rules that must hold
 
-- Home never imports a feature: the page's app hands it the blocks each
-  installed feature brings (`packages/dashboard/src/app/home-blocks.tsx`).
+- Home never imports an extension: the page's app hands it the blocks each
+  installed extension's module brings (`packages/dashboard/src/app/extensions.ts`).
 
 ## Where it lives
 

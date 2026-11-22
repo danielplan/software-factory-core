@@ -1,7 +1,9 @@
 // The page's import rules, as the React web app kit sets them
 // (packages/kits/rules/react-web-app/conventions.md, and its starter's
 // .dependency-cruiser.cjs), after Bulletproof React's one-way flow:
-// shared folders -> features -> app. `npm run check:borders:dashboard` at
+// shared folders -> features -> app. Kobble's own extensions are modules of
+// their own (extensions/<id>/, as on the server): they sit beside the core's
+// features, and only app/ puts them together. `npm run check:borders:dashboard` at
 // the top of the repository runs it, and `npm run verify` with it.
 
 const SRC = "^packages/dashboard/src/";
@@ -19,10 +21,10 @@ module.exports = {
     {
       name: "shared-knows-no-feature",
       comment:
-        "The shared folders (api, components, hooks, lib, i18n) serve every area, so they know no feature and not the app.",
+        "The shared folders (api, components, hooks, lib, i18n) serve every area, so they know no feature, no extension and not the app.",
       severity: "error",
       from: { path: `${SRC}(api|components|hooks|lib|i18n)/` },
-      to: { path: `${SRC}(features|app)/` },
+      to: { path: `${SRC}(features|extensions|app)/` },
     },
     {
       name: "ui-stays-generic",
@@ -68,6 +70,41 @@ module.exports = {
         path: `${SRC}features/`,
         pathNot: `${SRC}features/$1/`,
       },
+    },
+    {
+      name: "core-knows-no-extension",
+      comment:
+        "The core's features never import an extension: an extension can be removed, so it plugs in (lib/page-module.ts) and app/ puts the installed ones together.",
+      severity: "error",
+      from: { path: `${SRC}features/` },
+      to: { path: `${SRC}extensions/` },
+    },
+    {
+      name: "extensions-do-not-meet",
+      comment:
+        "An extension never imports another extension: they meet only at the plugs the core defines.",
+      severity: "error",
+      from: { path: `${SRC}extensions/([^/]+)/` },
+      to: {
+        path: `${SRC}extensions/`,
+        pathNot: `${SRC}extensions/$1/`,
+      },
+    },
+    {
+      name: "extensions-know-no-feature",
+      comment:
+        "An extension never imports a core feature: it uses the shared folders only, and the core shows what it brings.",
+      severity: "error",
+      from: { path: `${SRC}extensions/` },
+      to: { path: `${SRC}features/` },
+    },
+    {
+      name: "only-app-imports-extensions",
+      comment:
+        "Only app/ imports the extensions, and only the installed ones are mounted.",
+      severity: "error",
+      from: { path: SRC, pathNot: [`${SRC}app/`, `${SRC}extensions/`] },
+      to: { path: `${SRC}extensions/` },
     },
     {
       name: "app-only-composes",

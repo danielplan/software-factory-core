@@ -88,7 +88,7 @@ branch in the factory's copy.
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | The extension       | `packages/server/src/extensions/factory/` (`index.ts`, `factory-view.ts`, `card-look.ts`)                                                                    |
 | The builder         | `packages/server/src/extensions/factory/builder/`: `decide.ts` (the rules), `sessions.ts`, `checks.ts`, `branches.ts` (`publishBranch`), `knowledge-kept.ts` |
-| The page            | `packages/dashboard/src/features/factory/` (`factory-page.tsx`, `stuck-cards.tsx`, `card-panel.tsx`)                                                         |
+| The page            | `packages/dashboard/src/extensions/factory/` (`factory-page.tsx`, `stuck-cards.tsx`, `card-panel.tsx`)                                                       |
 | The builder's guide | `packages/skills/skills/factory/board.md`                                                                                                                    |
 | The piece of work   | `packages/core/src/work/work.ts`: a card's stage, checks and history                                                                                         |
 

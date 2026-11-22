@@ -1,0 +1,73 @@
+{
+  "about": "Was auf dich wartet, und wo die Arbeit steht.",
+  "nothingWaits": "Nichts wartet auf dich. Die Kobolde kümmern sich darum.",
+  "kinds": {
+    "Review": "Prüfen",
+    "Answer": "Antworten",
+    "Continue": "Weiter",
+    "Sort": "Sortieren"
+  },
+  "openPullRequest": "Öffnen",
+  "review": {
+    "built": "Gebaut, der Pull Request wartet auf deine Prüfung",
+    "waits": "Wartet auf deine Prüfung"
+  },
+  "asks": "Der Baumeister hat angehalten und fragt dich",
+  "newSignals_one": "1 neues Signal",
+  "newSignals_other": "{{count}} neue Signale",
+  "stages": {
+    "newSignals": "neu",
+    "exploring": "in Erkundung",
+    "toBuild": "zu bauen",
+    "toBuildAndReview": "zu bauen · {{review}} zu prüfen",
+    "done": "Erledigt",
+    "merged": "zusammengeführt",
+    "pieces_one": "Arbeitsstück",
+    "pieces_other": "Arbeitsstücke"
+  },
+  "arrange": {
+    "arrange": "Home anordnen",
+    "done": "Fertig",
+    "reset": "Anordnung zurücksetzen",
+    "add": "Block hinzufügen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "drag": "Zum Verschieben ziehen",
+    "hide": "Ausblenden",
+    "place": "Hier ablegen",
+    "holding": "Klicken zum Ablegen · Esc zum Abbrechen · ↑ ↓ und Eingabe",
+    "resetTitle": "Home auf Kobbles Anordnung zurücksetzen?",
+    "resetText": "Deine Anordnung geht für das ganze Team verloren.",
+    "resetYes": "Zurücksetzen",
+    "addTitle": "Einen Block zu Home hinzufügen",
+    "offering": "Erweiterungen, die Blöcke anbieten",
+    "addOne": "Hinzufügen",
+    "onHome": "Auf Home",
+    "nothingOffered": "Keine installierte Erweiterung bietet einen Block an.",
+    "preview": "So sieht {{name}} aus",
+    "notKept": "Deine Anordnung konnte nicht gespeichert werden. Ist die Fabrik noch geöffnet?"
+  },
+  "blockAbout": {
+    "status": "Wie es dem Produkt geht, in einer Zeile",
+    "waiting": "Alles, was auf dich wartet, mit einem Knopf für jedes",
+    "loop": "Von dem, was hereinkam, bis zu dem, was erledigt ist, in vier Stufen",
+    "exploring": "Die Ideen, die erkundet werden, und was als Nächstes kommt",
+    "signals": "Was die laufende App Neues gemeldet hat",
+    "reviews": "Die Karten in der Prüfung, auf welchem Board sie auch liegen"
+  },
+  "blockEmpty": {
+    "exploring": "Nichts wird gerade erkundet.",
+    "signals": "Keine neuen Signale.",
+    "reviews": "Kein Pull Request wartet auf deine Prüfung."
+  },
+  "line": {
+    "building": "Bolt baut {{card}}",
+    "resting": "Bolt ruht",
+    "none": "Noch kein Produkt zum Starten",
+    "problem": "Etwas braucht dich im System",
+    "starting": "Das Produkt startet",
+    "running": "Das Produkt läuft",
+    "stopped": "Das Produkt ist gestoppt",
+    "some": "{{running}} von {{shown}} Teilen laufen"
+  }
+}

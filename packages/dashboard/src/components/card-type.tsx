@@ -2,9 +2,9 @@
 // kind of work it is, each with its colour and icon.
 
 import { Bug, Sparkles, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 export type CardType = "bug" | "feature" | "improvement";
 
@@ -27,7 +27,7 @@ export const TYPES: {
 ];
 
 export function TypeChip({ type }: Readonly<{ type: CardType | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const shown = TYPES.find((one) => one.id === type);
   if (!shown) return null;
   return (
@@ -38,7 +38,7 @@ export function TypeChip({ type }: Readonly<{ type: CardType | null }>) {
       )}
     >
       <shown.Icon className="size-3" aria-hidden />
-      {t.factory.types[shown.id]}
+      {t(`factory.types.${shown.id}`)}
     </span>
   );
 }
@@ -50,11 +50,11 @@ export function TypePicker({
   type: CardType | null;
   onPick: (type: CardType | null) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       role="radiogroup"
-      aria-label={t.factory.types.label}
+      aria-label={t("factory.types.label")}
       className="flex flex-wrap gap-2"
     >
       {TYPES.map(({ id, Icon, tint }) => {
@@ -76,7 +76,7 @@ export function TypePicker({
             }}
           >
             <Icon className="size-4" aria-hidden />
-            {t.factory.types[id]}
+            {t(`factory.types.${id}`)}
           </button>
         );
       })}

@@ -1,5 +1,6 @@
 import { Check, RotateCw } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   type FactoryState,
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/card";
 
 import { SettingInput } from "./setting-input";
-import { useT } from "@/i18n/use-t";
 
 // A settings group in its own card: what is set now, Save, and the parts
 // that read it, to restart once saved.
@@ -132,13 +132,15 @@ function Saving({
   usedBy: string[];
   state: FactoryState;
 }>) {
-  const t = useT().settings.form;
+  const t = useTranslation().t;
   const running = state.parts.filter(
     (part) => usedBy.includes(part.id) && part.canStop,
   );
   return (
     <>
-      {form.problem && <ProblemBox title={t.notSaved} text={form.problem} />}
+      {form.problem && (
+        <ProblemBox title={t("settings.form.notSaved")} text={form.problem} />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Button
           size="sm"
@@ -147,12 +149,12 @@ function Saving({
           disabled={!changed}
         >
           <Check aria-hidden />
-          {t.save}
+          {t("settings.form.save")}
         </Button>
         {form.saved && (
           <span className="text-[13px] text-success">
-            {t.saved}
-            {running.length > 0 && t.restartToCount}
+            {t("settings.form.saved")}
+            {running.length > 0 && t("settings.form.restartToCount")}
           </span>
         )}
         {form.saved &&
@@ -166,7 +168,7 @@ function Saving({
               }
             >
               <RotateCw aria-hidden />
-              {t.restart(part.name)}
+              {t("settings.form.restart", { name: part.name })}
             </Button>
           ))}
       </div>

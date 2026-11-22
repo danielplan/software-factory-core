@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import {
   ChevronDown,
   ExternalLink,
@@ -6,14 +7,14 @@ import {
   Square,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { PartView } from "@/api/client";
 import { StatusLight } from "@/components/status-light";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { problemTitle } from "@/i18n/server-texts";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
+
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,14 +42,14 @@ export function PartCard({
   onPress: (path: string) => void;
   tag?: ReactNode;
 }>) {
-  const t = useT().system;
+  const t = useTranslation().t;
   // Only what the light does not say: a step, or that it was started
   // elsewhere.
   const step =
     part.light === "starting" && part.step
-      ? t.part.starting(part.step)
+      ? t("system.part.starting", { step: part.step })
       : part.step;
-  const status = step ?? quietStatus(part, t.part);
+  const status = step ?? quietStatus(part, t);
   return (
     <div
       data-light={part.light}
@@ -74,7 +75,8 @@ export function PartCard({
             rel="noreferrer"
             className="ml-auto inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground hover:text-foreground hover:underline"
           >
-            {t.part.open} <ExternalLink className="size-3" aria-hidden />
+            {t("system.part.open")}{" "}
+            <ExternalLink className="size-3" aria-hidden />
           </a>
         )}
       </div>
@@ -94,29 +96,27 @@ export function PartCard({
 
 // What a part that is not starting says: started elsewhere, or that it
 // runs with what uses it.
-function quietStatus(
-  part: PartView,
-  says: Messages["system"]["part"],
-): string | null {
-  if (part.outside) return says.outside;
-  if (part.start === "with") return says.withOthers;
+function quietStatus(part: PartView, says: TFunction): string | null {
+  if (part.outside) return says("system.part.outside");
+  if (part.start === "with") return says("system.part.withOthers");
   return null;
 }
 
 function PartProblem({
   problem,
 }: Readonly<{ problem: NonNullable<PartView["problem"]> }>) {
-  const t = useT().system;
+  const t = useTranslation().t;
   return (
     <div className="grid min-w-0 gap-1 rounded-lg border border-destructive/20 bg-destructive/[0.07] p-2.5 text-xs [overflow-wrap:anywhere]">
       <p className="font-medium text-destructive">
-        {problemTitle(problem.title, t.problems)}
+        {problemTitle(problem.title, t)}
       </p>
       <p className="text-foreground/80">{problem.text}</p>
       {problem.details.length > 0 && (
         <Collapsible>
           <CollapsibleTrigger className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline">
-            {t.part.details} <ChevronDown className="size-3" aria-hidden />
+            {t("system.part.details")}{" "}
+            <ChevronDown className="size-3" aria-hidden />
           </CollapsibleTrigger>
           <CollapsibleContent>
             <pre className="mt-1 max-h-40 overflow-auto text-xs whitespace-pre-wrap">
@@ -138,7 +138,7 @@ function PartButtons({
   const press = (action: string) => () => {
     onPress(`/api/parts/${encodeURIComponent(part.id)}/${action}`);
   };
-  const t = useT().system.part;
+  const t = useTranslation().t;
   if (!part.canStart && !part.canStop) return null;
   const look = "h-7 rounded-lg px-2.5 text-xs font-normal";
   return (
@@ -146,18 +146,20 @@ function PartButtons({
       {part.canStart && (
         <Button variant="outline" className={look} onClick={press("start")}>
           <Play aria-hidden />
-          {part.light === "problem" ? t.tryAgain : t.start}
+          {part.light === "problem"
+            ? t("system.part.tryAgain")
+            : t("system.part.start")}
         </Button>
       )}
       {part.canStop && (
         <>
           <Button variant="outline" className={look} onClick={press("restart")}>
             <RotateCw aria-hidden />
-            {t.restart}
+            {t("system.part.restart")}
           </Button>
           <Button variant="outline" className={look} onClick={press("stop")}>
             <Square aria-hidden />
-            {t.stop}
+            {t("system.part.stop")}
           </Button>
         </>
       )}

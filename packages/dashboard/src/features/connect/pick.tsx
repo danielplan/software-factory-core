@@ -1,5 +1,6 @@
+import { useTranslation } from "react-i18next";
+
 import { Combobox } from "@/components/ui/combobox";
-import { useT } from "@/i18n/use-t";
 
 // A choice from a list, with "Choose the …" until one is chosen.
 export function Pick({
@@ -13,7 +14,7 @@ export function Pick({
   options: { value: string; label: string }[];
   onPick: (value: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <Combobox
       label={label}
@@ -21,7 +22,7 @@ export function Pick({
       options={options}
       onChange={onPick}
       disabled={options.length === 0}
-      placeholder={t.connect.pick.choose(label)}
+      placeholder={t("connect.pick.choose", { label })}
     />
   );
 }
@@ -37,14 +38,14 @@ export function WhichWork({
   onPick: (value: string) => void;
   noun: "cards" | "issues";
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <Pick
-      label={t.connect.pick.work}
+      label={t("connect.pick.work")}
       value={value}
       options={[
-        { value: "*", label: t.connect.pick.every[noun] },
-        { value: "factory", label: t.connect.pick.only[noun] },
+        { value: "*", label: t(`connect.pick.every.${noun}`) },
+        { value: "factory", label: t(`connect.pick.only.${noun}`) },
       ]}
       onPick={onPick}
     />

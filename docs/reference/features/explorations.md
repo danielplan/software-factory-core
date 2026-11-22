@@ -18,9 +18,12 @@ Each exploration has one board, a **whiteboard** to think on (React Flow, pan
 and zoom). On it: the problem, what was heard, choices with options A, B,
 C and Doodle's recommendation, one living diagram (Mermaid), rare notes, the
 prototype, and pictures a person pasted or dropped in. Arrows join things,
-with short labels. Each thing is a **sketch** or **agreed**. There is no
-order to follow: ELK spreads the things in two directions, around what a
-person placed.
+with short labels. Each thing is a **sketch** or **agreed**. The board is
+laid out left to right in columns along its arrows (ELK, layered): an arrow
+leaves a thing on its right and comes in on the left of the next, so arrows
+never loop. A thing a person moved stays where they put it; the layout of
+the others does not make room around it. The Explorations overview shows
+each board in small, laid out the same way.
 
 Doodle thinks before it answers, then keeps **one living picture** changed in
 place, with decisions folded into it, open points marked "?", and few notes
@@ -76,7 +79,7 @@ The page shows each step of the hand-off while it runs.
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | The extension   | `packages/server/src/extensions/explorations/`: `board-tools.ts`, `talks.ts`, `spec-writer.ts`, `handing-off.ts`, `ideas.ts` (its plug) |
 | The board shape | `packages/core/src/kobble/board-shape.ts`                                                                                               |
-| The page        | `packages/dashboard/src/features/explorations/` (the board in `board/`)                                                                 |
+| The page        | `packages/dashboard/src/extensions/explorations/` (the board in `board/`)                                                               |
 | The guides      | `packages/skills/guides/exploration-coach.md` (Doodle), `packages/skills/guides/handoff-spec.md` (the card)                             |
 | The files       | `factory/kobble/explorations/X-<n>/`: `exploration.json`, `board.json`, `conversation.md`, `pictures/`, `handoff.md`                    |
 

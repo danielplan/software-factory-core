@@ -1,6 +1,8 @@
 // A question before something that changes the factory: a title, a few
 // lines, and what to press instead of cancelling.
 
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +10,6 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useT } from "@/i18n/use-t";
 
 export type Question = {
   title: string;
@@ -21,7 +22,7 @@ export function Confirm({
   question,
   onClose,
 }: Readonly<{ question: Question | null; onClose: () => void }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <Dialog
       open={question !== null}
@@ -38,7 +39,7 @@ export function Confirm({
         </DialogDescription>
         <div className="flex justify-end gap-2">
           <Button variant="ring" size="pill" onClick={onClose}>
-            {t.cancel}
+            {t("market.cancel")}
           </Button>
           <Button
             size="pill"

@@ -9,15 +9,16 @@ import { type AddOnView, type FactoryState, post } from "@/api/client";
 import { useExplorations } from "@/api/use-explorations";
 import { type Layout, layoutFrom } from "@/lib/home-layout";
 import { type HomeInput } from "@/lib/home-view";
-import { useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { homeLayoutSchema } from "@/api/schemas/home";
 import { useSignals } from "@/api/use-signals";
 
 const keyOf = (layout: Layout | null): string =>
   layout ? `${layout.order.join(",")}|${layout.hidden.join(",")}` : "";
 
 export function useHomeLayout(addOns: AddOnView[]) {
-  const { data, problem } = useRead("/api/home-layout");
-  const kept = (data as { layout: Layout | null } | null)?.layout ?? null;
+  const { data, problem } = useRead("/api/home-layout", homeLayoutSchema);
+  const kept = data?.layout ?? null;
   const [mine, setMine] = useState<Layout | null>(null);
   // What the files said last, so only a change by somebody else replaces
   // what the person just did.

@@ -2,8 +2,10 @@
 // pre-installed, so none has Install or Remove; each shows the products that
 // use it.
 
+import { useTranslation } from "react-i18next";
+
 import type { KitView, ProductView } from "@/api/client";
-import { useT } from "@/i18n/use-t";
+
 import { kitThing } from "@/lib/market-view";
 
 import { Card } from "./card";
@@ -17,10 +19,12 @@ export function KitsTab({
   products: ProductView[];
   onOpen: (key: string) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
-    <section aria-label={t.tabs.kits} className="grid gap-4">
-      <p className="px-1 text-[13px] text-muted-foreground">{t.kits.about}</p>
+    <section aria-label={t("market.tabs.kits")} className="grid gap-4">
+      <p className="px-1 text-[13px] text-muted-foreground">
+        {t("market.kits.about")}
+      </p>
       <div className="m-stagger grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {kits.map((kit) => {
           const thing = kitThing(t, kit, products);

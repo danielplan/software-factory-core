@@ -30,14 +30,14 @@ To see Kobble run on its own factory:
    brought by the Releases extension, at `#releases`. Its
    [page](../reference/features/releases.md) names the folders: the server's
    `packages/server/src/extensions/releases/` and the page's
-   `packages/dashboard/src/features/releases/`.
+   `packages/dashboard/src/extensions/releases/`.
 2. The line under a page's title is a word on a screen, so it lives in the
-   page's catalogue. `packages/dashboard/src/features/releases/releases-page.tsx`
-   draws it with `PageHead` and `t.releases.about`; the words are in
-   `packages/dashboard/src/i18n/areas/releases.ts`.
+   page's words. `packages/dashboard/src/extensions/releases/releases-page.tsx`
+   draws it with `PageHead` and `t("releases.about")`; the words are in
+   `packages/dashboard/src/i18n/locales/<language>/releases.json`.
 3. Read [the page's conventions](../reference/conventions/page.md) and
    [languages](../reference/languages.md): every word in English, Italian
-   and German, through `useT()`.
+   and German, through `useTranslation()`.
 
 ## 3. Make the change and check it
 
@@ -46,7 +46,7 @@ To see Kobble run on its own factory:
 2. Run the page's tests on words:
 
    ```sh
-   node --experimental-strip-types --test-isolation=none --test packages/dashboard/test/i18n.test.ts packages/dashboard/test/words-in-catalogue.test.ts
+   node --experimental-strip-types --test-isolation=none --test packages/dashboard/test/i18n.test.ts
    ```
 
 3. Run the import rules: `npm run check:borders:dashboard`. Had you imported

@@ -26,12 +26,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { updatesViewSchema } from "@/api/schemas/updates";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
-import type { UpdatesView } from "../../../../server/src/updates/served.ts";
+import type { UpdatesView } from "@/api/schemas/updates";
 import {
   type UpdateRow as Row,
   updateRow,
@@ -55,12 +56,10 @@ const FRAME: Record<Row["tone"], string> = {
 };
 
 export function UpdateRow() {
-  const { data } = useRead("/api/updates") as Read<UpdatesView>;
+  const { data } = useRead("/api/updates", updatesViewSchema);
   const [open, setOpen] = useState(false);
   const { locale } = useLanguage();
-  const row = data
-    ? updateRow(data, undefined, messagesIn(locale).updates)
-    : null;
+  const row = data ? updateRow(data, undefined, messagesIn(locale)) : null;
   if (!data || !row) return null;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -93,7 +92,7 @@ export function UpdateRow() {
 function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const { locale } = useLanguage();
-  const m = messagesIn(locale).updates;
+  const m = messagesIn(locale);
   const summary = updatesSummary(data, { m, locale });
   const { release } = data;
   const press = (path: string) => {
@@ -152,7 +151,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
           }}
         >
           <RefreshCw aria-hidden />
-          {m.lookAgain}
+          {m("updates.lookAgain")}
         </Button>
         {summary.canUpdate && (
           <Button
@@ -162,7 +161,7 @@ function UpdateDetails({ data }: Readonly<{ data: UpdatesView }>) {
             }}
           >
             <Download aria-hidden />
-            {m.updateNow}
+            {m("updates.updateNow")}
           </Button>
         )}
       </div>
@@ -176,12 +175,16 @@ function ReleaseBox({
   release,
   onPrepare,
 }: Readonly<{ release: UpdatesView["release"]; onPrepare: () => void }>) {
-  const m = messagesIn(useLanguage().locale).updates.release;
+  const m = messagesIn(useLanguage().locale);
   return (
     <div className="grid gap-2 rounded-[10px] bg-surface px-3 py-2.5 text-[13px]">
-      <span className="font-medium">{m.out(release.newest ?? "")}</span>
+      <span className="font-medium">
+        {m("updates.release.out", { version: release.newest ?? "" })}
+      </span>
       <span className="text-foreground-2">
-        {release.card ? m.beingPrepared : m.canPrepare}
+        {release.card
+          ? m("updates.release.beingPrepared")
+          : m("updates.release.canPrepare")}
       </span>
       {release.card ? (
         <a
@@ -190,7 +193,7 @@ function ReleaseBox({
           rel="noreferrer"
           className="inline-flex items-center gap-1 justify-self-start text-blue hover:underline"
         >
-          {m.openCard(release.card.number)}
+          {m("updates.release.openCard", { number: release.card.number })}
           <ExternalLink aria-hidden className="size-3" />
         </a>
       ) : (
@@ -200,7 +203,7 @@ function ReleaseBox({
           onClick={onPrepare}
         >
           <PackagePlus aria-hidden />
-          {m.prepare}
+          {m("updates.release.prepare")}
         </Button>
       )}
     </div>

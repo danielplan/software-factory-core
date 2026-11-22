@@ -5,10 +5,11 @@
 
 import { Check, LayoutGrid } from "lucide-react";
 import { type ReactNode, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import { type Layout, nudge } from "@/lib/home-layout";
 import { useFlip } from "@/hooks/use-flip";
 import { cn } from "@/lib/utils";
@@ -28,11 +29,11 @@ export function ArrangeButton({
   editing,
   onClick,
 }: Readonly<{ editing: boolean; onClick: () => void }>) {
-  const t = useT().home.arrange;
+  const t = useTranslation().t;
   return (
     <Button variant="ring" size="pill" onClick={onClick}>
       {editing ? <Check aria-hidden /> : <LayoutGrid aria-hidden />}
-      {editing ? t.done : t.arrange}
+      {editing ? t("home.arrange.done") : t("home.arrange.arrange")}
     </Button>
   );
 }

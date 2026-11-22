@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import {
@@ -5,7 +7,6 @@ import {
   LANGUAGES,
   type Language,
 } from "@/lib/voice/languages";
-import { useT } from "@/i18n/use-t";
 
 // The language the owner speaks, beside End call: the speech model writes
 // their words down in it instead of guessing, and the coach answers in it.
@@ -13,11 +14,11 @@ export function LanguageSwitch({
   language,
   onChoose,
 }: Readonly<{ language: Language; onChoose: (language: Language) => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       role="radiogroup"
-      aria-label={t.voice.youSpeak}
+      aria-label={t("voice.youSpeak")}
       className="inline-flex shrink-0 rounded-full bg-surface-2 p-0.5 text-xs"
     >
       {LANGUAGE_CODES.map((code) => {

@@ -1,0 +1,58 @@
+{
+  "about": "Woraus dein Produkt besteht und wie seine Teile zusammenhängen. Starte, stoppe und öffne sie hier.",
+  "startAll": "Alle starten",
+  "stopAll": "Alle stoppen",
+  "didNotWork": "Das hat nicht geklappt",
+  "yourProduct": "Dein Produkt",
+  "noPartsBefore": "Noch keine Teile zum Starten: Sie kommen mit deiner ersten Idee, auf der Seite",
+  "noPartsAfter": ".",
+  "programs": "Die eigenen Programme der Fabrik",
+  "mapLabel": "Wie die Teile verbunden sind",
+  "mapLegend": "Jede Linie verbindet einen Teil mit einem Teil, der ihn braucht, der Pfeil zeigt auf den, der ihn braucht. Zeig auf einen Teil, um nur seine Linien zu sehen.",
+  "types": {
+    "screen": {
+      "label": "Bildschirm",
+      "means": "was Leute öffnen, eine Webseite oder App"
+    },
+    "backend": {
+      "label": "Backend",
+      "means": "arbeitet hinter den Bildschirmen"
+    },
+    "data": {
+      "label": "Daten",
+      "means": "wo Daten gespeichert sind"
+    },
+    "outside": {
+      "label": "Externer Dienst",
+      "means": "von jemand anderem betrieben, etwa Zahlungen"
+    }
+  },
+  "headline": {
+    "none": "Noch keine Teile zum Starten: Sie kommen mit deiner ersten Idee.",
+    "problem_one": "Ein Teil konnte nicht starten: Die Karte sagt, warum und was zu tun ist.",
+    "problem_other": "{{count}} Teile konnten nicht starten: Die Karte sagt, warum und was zu tun ist.",
+    "starting": "Dein Produkt startet…",
+    "running": "Alles läuft: Öffne es, um es auszuprobieren.",
+    "some": "Einige Teile laufen: Starte die anderen, um alles auszuprobieren.",
+    "stopped": "Dein Produkt läuft nicht. Starte es, um es auf diesem Computer auszuprobieren."
+  },
+  "part": {
+    "starting": "Startet · {{step}}",
+    "outside": "Läuft, außerhalb der Fabrik gestartet",
+    "withOthers": "Läuft mit den Produkten, die es nutzen",
+    "open": "Öffnen",
+    "details": "Technische Details",
+    "tryAgain": "Nochmal versuchen",
+    "start": "Starten",
+    "restart": "Neu starten",
+    "stop": "Stoppen"
+  },
+  "problems": {
+    "portElsewhere": "Die Adresse {{port}} wird von einem Programm aus einem anderen Ordner benutzt",
+    "waiting": "{{part}} wartet auf {{missing}}",
+    "settingsMissing": "Die Einstellungsdatei {{file}} fehlt",
+    "portUsed": "Die Adresse {{port}} wird von einem anderen Programm benutzt",
+    "stepFailed": "„{{step}}\" hat für {{part}} nicht geklappt",
+    "noAnswer": "{{part}} hat nicht innerhalb von {{seconds}} Sekunden geantwortet"
+  }
+}
