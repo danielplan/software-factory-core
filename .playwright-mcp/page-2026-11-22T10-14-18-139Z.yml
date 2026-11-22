@@ -1,0 +1,128 @@
+- generic [ref=f1e5]:
+  - complementary [ref=f1e6]:
+    - generic [ref=f1e7]: Acme
+    - navigation "Overview" [ref=f1e19]:
+      - link "Home" [ref=f1e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e37]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e38]
+    - navigation "Pages" [ref=f1e39]:
+      - generic [ref=f1e40]:
+        - generic [ref=f1e41]: Work
+        - link "Signals Sieve" [ref=f1e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e48]': Sieve
+        - link "Explorations Doodle 2" [ref=f1e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=f1e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e66]': Doodle
+            - generic [ref=f1e78]: "2"
+        - link "Factory Bolt" [ref=f1e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e84]': Bolt
+        - link "Releases" [ref=f1e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=f1e103]:
+        - generic [ref=f1e104]: Customers
+        - link "Personas Mimic" [ref=f1e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e113]': Mimic
+    - generic [ref=f1e124]:
+      - button "Send feedback" [ref=f1e125] [cursor=pointer]
+      - navigation "The factory" [ref=f1e130]:
+        - link "Settings" [ref=f1e131] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e136]:
+    - generic [ref=f1e137]:
+      - generic [ref=f1e138]:
+        - heading "Home" [level=1] [ref=f1e141]
+        - paragraph [ref=f1e142]: What waits for you, and where the work is.
+      - generic [ref=f1e143]:
+        - button "Start again" [ref=f1e144] [cursor=pointer]
+        - button "Done" [active] [ref=f1e145] [cursor=pointer]
+      - generic [ref=f1e146]:
+        - generic [ref=f1e147]:
+          - generic [ref=f1e155]: Product status
+          - button "Move up" [disabled] [ref=f1e156]
+          - button "Move down" [ref=f1e159] [cursor=pointer]
+          - button "Hide" [ref=f1e162] [cursor=pointer]
+        - generic [ref=f1e166]:
+          - img "Stopped" [ref=f1e167]
+          - generic [ref=f1e168]: The product is stopped · Bolt is resting
+          - link "System" [ref=f1e169] [cursor=pointer]:
+            - /url: "#system"
+      - generic [ref=f1e170]:
+        - generic [ref=f1e171]:
+          - generic [ref=f1e179]: Waiting for you
+          - button "Move up" [ref=f1e180] [cursor=pointer]
+          - button "Move down" [ref=f1e183] [cursor=pointer]
+          - button "Hide" [ref=f1e186] [cursor=pointer]
+        - generic [ref=f1e190]:
+          - generic [ref=f1e191]:
+            - generic [ref=f1e192]: Continue
+            - generic [ref=f1e193]:
+              - generic [ref=f1e194]: The basket is empty when people come back to pay
+              - generic [ref=f1e195]: B is agreed. You can hand it off.
+            - link "Continue" [ref=f1e196] [cursor=pointer]:
+              - /url: "#explore/X-1"
+          - generic [ref=f1e199]:
+            - generic [ref=f1e200]: Continue
+            - generic [ref=f1e201]:
+              - generic [ref=f1e202]: One invoice a month for businesses
+              - generic [ref=f1e203]: Does his accountant need one invoice, or is one payment enough?
+            - link "Continue" [ref=f1e204] [cursor=pointer]:
+              - /url: "#explore/X-2"
+      - generic [ref=f1e207]:
+        - generic [ref=f1e208]:
+          - generic [ref=f1e216]: The loop
+          - button "Move up" [ref=f1e217] [cursor=pointer]
+          - button "Move down" [disabled] [ref=f1e220]
+          - button "Hide" [ref=f1e223] [cursor=pointer]
+        - generic [ref=f1e227]:
+          - link "Signals 0 new" [ref=f1e228] [cursor=pointer]:
+            - /url: "#signals"
+            - generic [ref=f1e229]: Signals
+            - generic [ref=f1e234]: 0 new
+          - link "Explorations 2 being explored The basket is empty when people come back to pay One invoice a month for businesses" [ref=f1e235] [cursor=pointer]:
+            - /url: "#explore"
+            - generic [ref=f1e236]: Explorations
+            - generic [ref=f1e240]: 2 being explored
+            - generic [ref=f1e241]: The basket is empty when people come back to pay
+            - generic [ref=f1e242]: One invoice a month for businesses
+          - link "Factory 0 to build" [ref=f1e243] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=f1e244]: Factory
+            - generic [ref=f1e248]: 0 to build
+          - link "Done 0 merged" [ref=f1e249] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=f1e250]: Done
+            - generic [ref=f1e255]: 0 merged
+      - generic [ref=f1e256]:
+        - generic [ref=f1e257]: Blocks you can add
+        - generic [ref=f1e258]:
+          - generic [ref=f1e259]: GitHub board
+          - generic [ref=f1e260]:
+            - generic [ref=f1e261]:
+              - generic [ref=f1e262]: Open reviews
+              - generic [ref=f1e263]: Pull requests waiting for your review
+            - button "Add" [ref=f1e264] [cursor=pointer]
+        - generic [ref=f1e266]:
+          - generic [ref=f1e267]: Checks
+          - generic [ref=f1e268]:
+            - generic [ref=f1e269]:
+              - generic [ref=f1e270]: Failed check
+              - generic [ref=f1e271]: Checks that failed on a pull request
+            - button "Add" [ref=f1e272] [cursor=pointer]
+        - button "Make your own block…" [ref=f1e274] [cursor=pointer]
+  - region "Sprocket" [ref=f1e278]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e279] [cursor=pointer]:
+      - generic [ref=f1e289]: Ask Sprocket anything
+      - generic [ref=f1e290]: ⌘J

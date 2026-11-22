@@ -8,7 +8,6 @@ import {
   GripVertical,
   Plus,
   Send,
-  Sparkles,
   X,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
@@ -16,7 +15,6 @@ import { type ReactNode, useState } from "react";
 import { KoboldHead } from "@/components/kobold-face";
 import { FIELD } from "@/lib/field-style";
 import { VARIANT } from "@/lib/prototype-flags";
-import { askSupport } from "@/support/ask-support";
 
 export type BlockId = "status" | "waiting" | "loop" | "reviews" | "failed";
 
@@ -54,6 +52,9 @@ export const BLOCKS: BlockInfo[] = [
     about: "Checks that failed on a pull request",
   },
 ];
+
+const fromOf = (id: BlockId) =>
+  BLOCKS.find((b) => b.id === id)?.from ?? "Core";
 
 const nameOf = (id: BlockId) => BLOCKS.find((b) => b.id === id)?.name ?? id;
 
@@ -168,7 +169,7 @@ export function HomeBlocks({
           className={
             "grid gap-2" +
             (arranging
-              ? " rounded-xl border border-dashed border-border p-2" +
+              ? " rounded-xl border border-dashed border-border p-2 [&_[data-block-title]]:hidden" +
                 (over === id && dragging !== id ? " bg-surface" : "") +
                 (dragging === id ? " opacity-50" : "")
               : "")
@@ -182,6 +183,11 @@ export function HomeBlocks({
               />
               <span className="min-w-0 flex-1 truncate font-medium">
                 {nameOf(id)}
+                {fromOf(id) !== "Core" && (
+                  <span className="ml-2 font-normal text-muted-foreground">
+                    {fromOf(id)}
+                  </span>
+                )}
               </span>
               <button
                 type="button"
@@ -266,16 +272,6 @@ function Offers({
             ))}
         </div>
       ))}
-      <button
-        type="button"
-        className={button + " w-fit"}
-        onClick={() => {
-          askSupport("I want a Home block that…");
-        }}
-      >
-        <Sparkles aria-hidden className="size-3" />
-        Make your own block…
-      </button>
     </div>
   );
 }

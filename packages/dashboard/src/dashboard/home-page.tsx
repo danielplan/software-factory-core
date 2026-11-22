@@ -190,7 +190,10 @@ function BlockCard({
 }: Readonly<{ name: string; from: string; children: ReactNode }>) {
   return (
     <div className="grid gap-1.5">
-      <span className="flex items-center gap-2 text-[13px] font-medium">
+      <span
+        data-block-title
+        className="flex items-center gap-2 text-[13px] font-medium"
+      >
         {name}
         <span className="text-xs font-normal text-muted-foreground">
           {from}
