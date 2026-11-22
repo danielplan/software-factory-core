@@ -38,11 +38,19 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
   const [openId, setOpenId] = useState<string | null>(null);
   // Installing one that needs others not installed yet: asks first.
   const [asking, setAsking] = useState<{ ext: Ext; also: Ext[] } | null>(null);
-  const shown = all.filter(
+  // Switching where the cards live: asks first.
+  const [moving, setMoving] = useState<{ from: Ext; to: Ext } | null>(null);
+  const matches = all.filter(
     (e) =>
       fits(e, filter) &&
       `${e.name} ${e.about}`.toLowerCase().includes(query.trim().toLowerCase()),
   );
+  const shown = matches.filter((e) => !e.tracker);
+  const trackers = all.filter((e) => e.tracker);
+  const trackerShown =
+    filter !== "Your team's" &&
+    (filter !== "Installed" || trackers.some((e) => e.on)) &&
+    trackers.some((e) => matches.includes(e));
   const opened = all.find((e) => e.id === openId) ?? null;
   const install = (ext: Ext) => {
     const also = missingFor(ext, all);
@@ -93,7 +101,16 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         </div>
       </div>
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
-      {shown.length === 0 ? (
+      {trackerShown && (
+        <TrackerGroup
+          trackers={trackers}
+          onOpen={setOpenId}
+          onMove={(from, to) => {
+            setMoving({ from, to });
+          }}
+        />
+      )}
+      {shown.length === 0 && !trackerShown ? (
         <p className="px-1 py-8 text-center text-[13px] text-muted-foreground">
           No extension matches. Try other words, or ask Sprocket for one of your own.
         </p>
@@ -117,9 +134,16 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                     onOpen={() => {
                       setOpenId(ext.id);
                     }}
-                    onInstall={() => {
-                      install(ext);
-                    }}
+                    action={
+                      ext.on ? null : (
+                        <InstallButton
+                          ext={ext}
+                          onInstall={() => {
+                            install(ext);
+                          }}
+                        />
+                      )
+                    }
                   />
                 ))}
               </div>
@@ -135,10 +159,53 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
           setOpenId(null);
         }}
         onInstall={install}
+        onMove={(from, to) => {
+          setOpenId(null);
+          setMoving({ from, to });
+        }}
         onRemove={(e) => {
           turn(e.id, false);
         }}
       />
+      <Dialog
+        open={moving !== null}
+        onOpenChange={(open) => {
+          if (!open) setMoving(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogTitle>
+            {moving?.from
+              ? `Move from ${moving.from.name} to ${moving.to.name}?`
+              : `Connect ${moving?.to.name ?? ""}?`}
+          </DialogTitle>
+          <DialogDescription>
+            {moving?.from
+              ? "Your cards stay where they are."
+              : "The Factory works the cards there."}
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ring"
+              size="pill"
+              onClick={() => {
+                setMoving(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="pill"
+              onClick={() => {
+                setMoving(null);
+                window.location.hash = "#settings/connections";
+              }}
+            >
+              {moving?.from ? "Move" : "Connect"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog
         open={asking !== null}
         onOpenChange={(open) => {
@@ -182,8 +249,15 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
 function Card({
   ext,
   onOpen,
-  onInstall,
-}: Readonly<{ ext: Ext; onOpen: () => void; onInstall: () => void }>) {
+  action,
+  label = "Installed",
+}: Readonly<{
+  ext: Ext;
+  onOpen: () => void;
+  // What to press; none once it is in.
+  action: React.ReactNode;
+  label?: "Installed" | "In use";
+}>) {
   return (
     <article
       aria-label={ext.name}
@@ -208,23 +282,91 @@ function Card({
             {ext.maker === "team" && <Maker ext={ext} />}
           </div>
           {ext.on && (
-            <span
-              role="img"
-              aria-label="Installed"
-              className="ml-auto grid size-5 flex-none place-items-center rounded-full bg-success text-white"
-            >
-              <Check aria-hidden className="size-3" strokeWidth={3} />
+            <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-success">
+              {label === "In use" && label}
+              <span
+                role="img"
+                aria-label={label}
+                className="grid size-5 flex-none place-items-center rounded-full bg-success text-white"
+              >
+                <Check aria-hidden className="size-3" strokeWidth={3} />
+              </span>
             </span>
           )}
         </div>
         <p className="text-[13px] text-foreground/75">{ext.about}</p>
       </div>
-      {!ext.on && (
-        <div className="relative flex justify-end">
-          <InstallButton ext={ext} onInstall={onInstall} />
-        </div>
-      )}
+      {action && <div className="relative flex justify-end">{action}</div>}
     </article>
+  );
+}
+
+const SHORT: Record<string, string> = { github: "GitHub", jira: "Jira" };
+
+// What to press on a board: Connect while none is connected, otherwise the
+// way over to this one; the one in use has nothing to press.
+function TrackerAction({
+  ext,
+  trackers,
+  onMove,
+}: Readonly<{
+  ext: Ext;
+  trackers: Ext[];
+  onMove: (from: Ext, to: Ext) => void;
+}>) {
+  if (ext.on) return null;
+  const now = trackers.find((e) => e.on);
+  if (!now)
+    return (
+      <Button asChild size="pill">
+        <a href="#settings/connections">Connect</a>
+      </Button>
+    );
+  return (
+    <Button
+      variant="ring"
+      size="pill"
+      onClick={() => {
+        onMove(now, ext);
+      }}
+    >
+      Switch to {SHORT[ext.id] ?? ext.name}
+    </Button>
+  );
+}
+
+// The boards the Factory can work the cards on: pick one.
+function TrackerGroup({
+  trackers,
+  onOpen,
+  onMove,
+}: Readonly<{
+  trackers: Ext[];
+  onOpen: (id: string) => void;
+  onMove: (from: Ext, to: Ext) => void;
+}>) {
+  return (
+    <section aria-label="Where your cards live" className="grid gap-3">
+      <div className="grid gap-0.5 px-1">
+        <h2 className="text-[15px] font-semibold">Where your cards live</h2>
+        <p className="text-[13px] text-muted-foreground">
+          Pick one: the Factory works the cards there.
+        </p>
+      </div>
+      <div className="grid items-stretch gap-4 sm:grid-cols-2">
+        {trackers.map((ext) => (
+          <Card
+            key={ext.id}
+            ext={ext}
+            label="In use"
+            onOpen={() => {
+              onOpen(ext.id);
+            }}
+            action={<TrackerAction ext={ext} trackers={trackers} onMove={onMove} />}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -238,12 +380,6 @@ function InstallButton({
         <Check aria-hidden className="size-4" />
         Installed
       </span>
-    );
-  if (ext.tracker)
-    return (
-      <Button asChild variant="ring" size="pill">
-        <a href="#settings/connections">Use instead</a>
-      </Button>
     );
   return (
     <Button size="pill" onClick={onInstall}>
@@ -259,6 +395,7 @@ function Details({
   state,
   onClose,
   onInstall,
+  onMove,
   onRemove,
 }: Readonly<{
   ext: Ext | null;
@@ -266,6 +403,7 @@ function Details({
   state: FactoryState;
   onClose: () => void;
   onInstall: (e: Ext) => void;
+  onMove: (from: Ext, to: Ext) => void;
   onRemove: (e: Ext) => void;
 }>) {
   const [refused, setRefused] = useState<string | null>(null);
@@ -340,7 +478,20 @@ function Details({
               </p>
             )}
             <div className="flex justify-end gap-2">
-              {ext.on && !ext.tracker ? (
+              {ext.tracker ? (
+                ext.on ? (
+                  <span className="inline-flex h-8 items-center gap-1.5 px-2 text-[13px] text-success">
+                    <Check aria-hidden className="size-4" />
+                    In use
+                  </span>
+                ) : (
+                  <TrackerAction
+                    ext={ext}
+                    trackers={all.filter((e) => e.tracker)}
+                    onMove={onMove}
+                  />
+                )
+              ) : ext.on ? (
                 <Button
                   variant="ring"
                   size="pill"
