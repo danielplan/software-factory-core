@@ -1,5 +1,7 @@
 # The live export
 
+[Knowledge base](../index.md) · [Reference](index.md) · [Signals](features/signals.md)
+
 **Type:** Reference · Answers: what does Kobble read from the live app, and how is it set up?
 
 Kobble's signals come from the app as it runs for its customers. The app

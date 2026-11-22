@@ -1,21 +1,25 @@
 # Kobble's design system
 
-**Type:** Reference · Answers: how does a page of the dashboard look, and which variables and pieces does it use?
+[Knowledge base](../index.md) · [Reference](index.md)
 
-Every page of the dashboard (Kobble) uses the same frame, type, colours and
-pieces, so a new page looks like the others without new styles. The values
-live in one place, `packages/dashboard/src/index.css`, as CSS variables, each
-with its light value (the dashboard is light only for now). A company's theme (`factory/theme.css`,
-see [the theme](../add-ons.md#the-theme)) may change the same variables.
+**Type:** Reference · Answers: how does a page of Kobble look, and which pieces does it use?
+
+Every page of Kobble uses the same frame, type, colours and pieces, so a new
+page looks like the others without new styles. The values live in one place,
+`packages/dashboard/src/index.css`, as CSS variables, each with its light
+value; they are listed in [the design values](design-values.md). A company's
+theme (`factory/theme.css`, see [the theme](features/theme.md)) may change
+the same variables. Every word a page shows is in three languages: see
+[languages](languages.md).
 
 ## The frame
 
-| Part      | What it is                                                                                                                                                                                                                                                                                                                                                                   | Where                                             |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                                                                                                                                                                                                   | `packages/dashboard/src/components/shell.tsx`     |
-| Sidebar   | `--sidebar`, 224px wide, a line at its right, padding 16px 12px 12px: the kobold (or the company's logo) and the project's name, Home and System, then the work (Signals, Explorations, Factory, Releases), the customers (Personas) and the team's own pages, and at the bottom the update row (only when updates need the owner), Send feedback, Marketplace and Settings. | `packages/dashboard/src/components/sidebar.tsx`   |
-| Page      | On the ground beside the sidebar, at most 1120px wide, padding 34px 40px 112px (24px at the top and 16px at the sides on a phone); an exploration fills the whole space.                                                                                                                                                                                                     | `packages/dashboard/src/components/shell.tsx`     |
-| Page head | The title (22px, semibold, letter-spacing -0.015em) with the page's buttons on the right, and one line about the page (13px, `--muted-foreground`).                                                                                                                                                                                                                          | `packages/dashboard/src/components/page-head.tsx` |
+| Part      | What it is                                                                                                                                                                                                                                                                                                                                                                   | Where                                                    |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Ground    | The whole window, flat `--ground`. The sidebar sits on it.                                                                                                                                                                                                                                                                                                                   | `packages/dashboard/src/app/shell.tsx`                   |
+| Sidebar   | `--sidebar`, 224px wide, a line at its right, padding 16px 12px 12px: the kobold (or the company's logo) and the project's name, Home and System, then the work (Signals, Explorations, Factory, Releases), the customers (Personas) and the team's own pages, and at the bottom the update row (only when updates need the owner), Send feedback, Marketplace and Settings. | `packages/dashboard/src/components/layout/sidebar.tsx`   |
+| Page      | On the ground beside the sidebar, at most 1120px wide, padding 34px 40px 112px (24px at the top and 16px at the sides on a phone); an exploration fills the whole space.                                                                                                                                                                                                     | `packages/dashboard/src/app/shell.tsx`                   |
+| Page head | The title (22px, semibold, letter-spacing -0.015em) with the page's buttons on the right, and one line about the page (13px, `--muted-foreground`).                                                                                                                                                                                                                          | `packages/dashboard/src/components/layout/page-head.tsx` |
 
 A page draws its title with `PageHead` and gives its buttons as `actions`;
 they show on the right of the title. A button that belongs to one part of
@@ -50,158 +54,6 @@ them as tabs at the side, one at a time, each at its own address
 white, like a card on the ground, with the chosen sidebar page's dark text
 and its icon in colour; the others are plain grey text with a grey icon.
 
-## Languages
-
-Kobble's page is to use i18next like the React web app kit; until that
-move (listed in `packages/dashboard/BLUEPRINT.md`), every word it shows is
-in its own typed catalogue,
-`packages/dashboard/src/i18n/`, an area per part of Kobble
-(`areas/<area>.ts`: the frame, Home, System, Signals, …). Each area is
-`area(en, it, de)` (`define.ts`): English is the source, and Italian and
-German must have every key it has, with the same kind of value (a text, or
-a function that makes one from what it names), or the types refuse them;
-`test/i18n.test.ts` checks it again at run time, and `test/words-in-catalogue.test.ts` fails on any word written straight into a screen (JSX text, or a `title`, `aria-label`, `placeholder`, `alt` or `label` written as a string), names such as Kobble or GitHub, addresses and shortcuts aside. A component gets the words
-with `useT()` (`use-t.tsx`) and the language with `useLocale()`, for times
-and dates (`format.ts`, through `Intl`). Code outside components takes the
-words as an argument, English by default, so its tests stay in English.
-
-- **A new string**: add its key to the area's English, then to Italian and
-  German; the type check names any language that lacks it. Use a function
-  for words around a name or a number (`newSignals: (n) => …`), never
-  English grammar built in a component. Keep the plain, short tone; the
-  same thing has the same word everywhere (the pages' names in `shell`).
-- **A new area**: write `areas/<area>.ts` and add it to `AREAS` in
-  `messages.ts`. When the three languages pass 300 lines, give each
-  language its own file (as `setup.ts`, `setup-it.ts`, `setup-de.ts`,
-  `setup-area.ts`).
-- **A new language**: add its code to `LOCALES` and its own name to
-  `OWN_NAME` (`locale.ts`), then a value for it in every `area(…)`, the
-  types show where; and its name for the kobolds in
-  `core/src/agents/language-settings.ts`.
-- **The server's words**: the server writes in English. The few the
-  dashboard shows often (the launcher's problem titles, the updates' steps
-  and reasons) are matched and said again in `server-texts.ts`; the rest
-  stays English.
-- **Not translated**: what people and kobolds write (signals, cards,
-  explorations, answers), the names of products, add-ons and kits, and
-  setting groups from the server.
-
-The catalogue is home-made, not a library such as i18next: a few small
-typed objects give a type error for a missing word without a library's type
-setup, and the dashboard needs no plural rules beyond one and many.
-
-## Faces
-
-The kobolds and the personas are drawn as kobolds
-(`packages/dashboard/src/components/kobold-face.tsx`): long ears, a round
-head, two eyes, and a hat. Each of Kobble's kobolds wears the hat of its job
-(`packages/dashboard/src/lib/kobolds.ts`): Sprocket, the support kobold, its
-blue floppy cap (it carries the factory's kobold name when the team gave
-one); Doodle, the explorer, a beret; Tinker, Doodle's maker, a toque;
-Bolt, the builder, a trucker cap; Mimic, the tester, a cap; Sieve, the
-sorter, headphones. A persona has a hat (phones, toque, cap or beret) and a colour
-(pink, amber, blue, teal, violet, green or slate), each a tile, a skin and a
-hat colour; its file may say which (`face`), otherwise they come from its id
-and never change. Someone no persona stands for is an empty grey tile.
-
-## Type
-
-Inter (bundled with the dashboard, so it works offline) for everything,
-the name beside the kobold too (`--font-name`), unless the company's theme
-gives its wordmark (`--wordmark`).
-
-| Use                  | Size | Weight | Colour               |
-| -------------------- | ---- | ------ | -------------------- |
-| Page title           | 22px | 600    | `--foreground`       |
-| Kobble in the corner | 21px | 700    | `--foreground`       |
-| Card title           | 14px | 600    | `--foreground`       |
-| Text                 | 14px | 400    | `--foreground`       |
-| Secondary text       | 13px | 400    | `--foreground-2`     |
-| About a page or card | 13px | 400    | `--muted-foreground` |
-| Small label          | 12px | 400    | `--label`            |
-| Group in the sidebar | 11px | 500    | `--sidebar-muted`    |
-
-## Colours
-
-Text, from the strongest: `--foreground`, `--foreground-2`,
-`--muted-foreground`, `--label`, `--faint`.
-
-| Variable                                     | Light                                       | For                                                                |
-| -------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
-| `--ground`, `--background`                   | #f7f7f8                                     | the window and Kobble's pages, columns on Build                    |
-| `--sidebar`, `--sidebar-active`              | #fbfbfc, #ececef                            | the sidebar; the open page in it                                   |
-| `--panel`, `--card`, `--popover`             | #ffffff                                     | the panel, cards, menus                                            |
-| `--page`                                     | #fafbfd                                     | the page body                                                      |
-| `--primary`, `--primary-foreground`          | #141824, #ffffff                            | the main button of a place (dark)                                  |
-| `--blue`, `--blue-foreground`                | #3156d8, #ffffff                            | the product's tile; sparingly, an action that changes the app      |
-| `--tint`, `--tint-line`, `--tint-foreground` | #f3f5fc, #e1e6f7, #5b6074                   | the Ask field, the kobold's corner                                 |
-| `--border`, `--line-soft`, `--border-soft`   | #e6e6ea, #ececef, #f0f2f5                   | rings of the panel, buttons, fields and cards; lines between parts |
-| `--hover`                                    | #efeff2                                     | a row under the mouse                                              |
-| `--understand`, `--explore`, `--build`       | #e64f86, #e9a23b, #3156d8                   | the icons of Signals, Explorations, and Factory and Releases       |
-| `--persona-1` … `--persona-5`                | #fde7ef, #fff3df, #e9eeff, #e3f6f2, #f1ecff | each persona's soft colour, in order                               |
-| `--fresh`                                    | #e64f86                                     | the outline of something new                                       |
-| `--success`, `--warning`, `--destructive`    | #12a594, #e9a23b, #d9534f                   | seen scenes and lights; starting; problems                         |
-
-States, each a background and its text: new (`--open`), solved, a story
-that didn't hold (`--wrong`), and the warm pair for an idea's ticket on
-Build.
-
-| State       | Variables                           | Light            |
-| ----------- | ----------------------------------- | ---------------- |
-| New, heard  | `--open`, `--open-foreground`       | #fde7ef, #a1214f |
-| An idea     | `--solving`, `--solving-foreground` | #fff3df, #8a5300 |
-| Solved      | `--solved`, `--solved-foreground`   | #e3f6f2, #0b6d61 |
-| Didn't hold | `--wrong`, `--wrong-foreground`     | #f1f2f6, #5f6479 |
-
-Text on the colours it sits on is readable (WCAG AA, 4.5:1), except
-`--label` and `--faint`, which are only for short labels next to stronger
-text.
-
-## Light only
-
-The dashboard is light only for now: `color-scheme: light`, no dark values,
-and a company theme's rules for a computer set to dark are switched off in
-the page's style sheets (`packages/dashboard/src/lib/light-only.ts`).
-
-## Spacing and corners
-
-| Piece               | Corner | Inside            |
-| ------------------- | ------ | ----------------- |
-| Card (`Card`)       | 14px   | 24px              |
-| A thing on a board  | 14px   | 12px              |
-| Button              | 12px   | 32px high, 0 12px |
-| Small button        | 10px   | 30px high, 0 11px |
-| Page in the sidebar | 12px   | 32px high, 0 10px |
-| Pill                | round  | 24px high, 0 10px |
-
-Parts of a page are 16px apart, cards in a list 8 to 14px.
-
-## Shadows
-
-| Variable           | For                                            |
-| ------------------ | ---------------------------------------------- |
-| `--shadow-soft`    | a card: a 1px ring in `--line-soft`, no shadow |
-| `--shadow-lift`    | a card under the mouse                         |
-| `--shadow-current` | the page open in the sidebar, the chosen tab   |
-| `--shadow-card`    | a card: a 1px ring in `--border`, no shadow    |
-| `--shadow-panel`   | the kobold's card                              |
-| `--shadow-big`     | a dialog or a panel over the page              |
-
-## Motion
-
-Motion helps a person see what changed; it never makes them wait.
-
-- **Quick and gentle:** 150–250 ms, an ease-out curve. Nothing bounces or
-  loops without a reason.
-- **What may move:** something opening or closing (a release in Settings ›
-  Updates, a **More**), something coming in (changes fading in one after
-  another, 40 ms apart, the first eight), a spinner while the product works
-  (**Try again** while it checks), and a soft light on something that happens
-  by itself ("Arriving by itself").
-- **Nothing moves under `prefers-reduced-motion`:** `index.css` turns every
-  animation off and shortens every transition, so each piece must read well
-  standing still.
-
 ## Pieces
 
 - **Buttons** (`packages/dashboard/src/components/ui/button.tsx`): `default` is dark, `outline` white
@@ -227,3 +79,32 @@ Motion helps a person see what changed; it never makes them wait.
   kobold speaks or works, never a generic icon.
 - **Tabs** inside a page: a grey track
   (`--surface-2`) with the chosen one white and lifted.
+
+## Faces
+
+The kobolds and the personas are drawn as kobolds
+(`packages/dashboard/src/components/kobold-face.tsx`): long ears, a round
+head, two eyes, and a hat. Each of Kobble's kobolds wears the hat of its job
+(`packages/dashboard/src/lib/kobolds.ts`): Sprocket, the support kobold, its
+blue floppy cap (it carries the factory's kobold name when the team gave
+one); Doodle, the explorer, a beret; Tinker, Doodle's maker, a toque;
+Bolt, the builder, a trucker cap; Mimic, the tester, a cap; Sieve, the
+sorter, headphones. A persona has a hat (phones, toque, cap or beret) and a colour
+(pink, amber, blue, teal, violet, green or slate), each a tile, a skin and a
+hat colour; its file may say which (`face`), otherwise they come from its id
+and never change. Someone no persona stands for is an empty grey tile.
+
+## Motion
+
+Motion helps a person see what changed; it never makes them wait.
+
+- **Quick and gentle:** 150–250 ms, an ease-out curve. Nothing bounces or
+  loops without a reason.
+- **What may move:** something opening or closing (a release in Settings ›
+  Updates, a **More**), something coming in (changes fading in one after
+  another, 40 ms apart, the first eight), a spinner while the product works
+  (**Try again** while it checks), and a soft light on something that happens
+  by itself ("Arriving by itself").
+- **Nothing moves under `prefers-reduced-motion`:** `index.css` turns every
+  animation off and shortens every transition, so each piece must read well
+  standing still.
