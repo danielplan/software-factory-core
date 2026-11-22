@@ -10,6 +10,7 @@ import {
   usageSettings,
 } from "../agents/usage-settings.ts";
 import type { Company } from "../company/company.ts";
+import { withBackendAddress } from "../parts/addresses.ts";
 import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
 import { checkGroups, type SettingGroup } from "../settings/setting-groups.ts";
@@ -60,10 +61,12 @@ export function assembleFactory(
   });
   problems.push(...dependencyProblems(known));
   // Products are found in folder order: their parts go after what they need.
-  const parts = inStartOrder([
-    ...known.flatMap((product) => partsOf(product, kits)),
-    ...extensions.flatMap((extension) => extension.parts),
-  ]);
+  const parts = inStartOrder(
+    withBackendAddress([
+      ...known.flatMap((product) => partsOf(product, kits)),
+      ...extensions.flatMap((extension) => extension.parts),
+    ]),
+  );
   const settings = [
     modelSettings,
     builderSettings,

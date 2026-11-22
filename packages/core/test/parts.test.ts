@@ -15,6 +15,7 @@ import {
   portOf,
   type Part,
 } from "../src/index.ts";
+import { withBackendAddress } from "../src/parts/addresses.ts";
 
 const part = (fields: Partial<Part> & { id: string }): Part =>
   partSchema.parse({
@@ -93,6 +94,45 @@ test("addresses come from the settings files, fixed ports or another part", () =
   // A part that points at itself has no address.
   const self = part({ id: "self", port: { part: "self" } });
   assert.equal(portOf(self, [self], root), null);
+});
+
+test("a part that needs a backend gets its address as BACKEND_URL", () => {
+  const root = mkdtempSync(join(tmpdir(), "parts-"));
+  const server = part({ id: "server", type: "backend", port: { fixed: 3000 } });
+  const quiet = part({ id: "quiet", type: "backend" });
+  const store = part({ id: "store", type: "data", port: { fixed: 5432 } });
+  const parts = withBackendAddress([
+    server,
+    quiet,
+    store,
+    part({ id: "app", dependsOn: ["store", "quiet", "server"] }),
+    part({
+      id: "own",
+      dependsOn: ["server"],
+      env: { BACKEND_URL: "https://example.com" },
+    }),
+    part({ id: "alone", dependsOn: ["store"] }),
+  ]);
+  const env = (id: string) => {
+    const found = parts.find((p) => p.id === id);
+    assert.ok(found);
+    return envOf(found, parts, root);
+  };
+  // The first backend it needs that answers on a port.
+  assert.deepEqual(env("app"), { BACKEND_URL: "http://127.0.0.1:3000" });
+  // Its own setting wins; nothing for a part that needs no backend.
+  assert.deepEqual(env("own"), { BACKEND_URL: "https://example.com" });
+  assert.equal(env("alone"), undefined);
+  assert.equal(env("server"), undefined);
+  // An address of a part that is not there, or answers nowhere, is empty.
+  const lost = part({
+    id: "lost",
+    env: { A: "{address:none}", B: "{address:plain}" },
+  });
+  assert.deepEqual(envOf(lost, [lost, part({ id: "plain" })], root), {
+    A: "",
+    B: "",
+  });
 });
 
 test("a part may say what type of part it is, one of four", () => {
