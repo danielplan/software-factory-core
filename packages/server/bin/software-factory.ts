@@ -5,7 +5,8 @@
 // software-factory prototype … (a card's prototype, in its own copy of the code)
 // software-factory upgrade (the project's factory, to this core's version)
 // software-factory check (the checks of Kobble's files) · check-docs (the
-// knowledge base's checks) · help
+// knowledge base's checks) · verify and check-format (each product's checks,
+// as the project's git hooks run them) · help
 //
 // Run in a project, starts its factory on this computer and opens it in the
 // browser. The factory lives in the project, in its factory/ folder, found

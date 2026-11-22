@@ -15,6 +15,7 @@ import { PROTOTYPE_USAGE } from "./prototypes/command.ts";
 import { checkKnowledge } from "./knowledge-check.ts";
 import { checkRecordsHere } from "./check-command.ts";
 import { rulesHere } from "./rules-command.ts";
+import { checkFormatHere, verifyHere } from "./verify-command.ts";
 
 export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
                                              start the project's factory and open it
@@ -22,12 +23,26 @@ software-factory new <name>                  a folder for a new idea, set up the
 software-factory check [folder]              the checks of Kobble's files (factory/kobble/)
 software-factory check-docs                  the knowledge base's checks (docs/)
 software-factory rules [product]             the rules of a product's kit: conventions, libraries, lessons
+software-factory verify [file…]              each product's verify command (with files: the products they are in)
+software-factory check-format [file…]        each product's format check (with files: the products they are in)
 software-factory upgrade                     the project's factory, to this core's version
 software-factory help                        this help
 ${CARD_USAGE}
 ${PROTOTYPE_USAGE}`;
 
 type Out = (line: string) => void;
+
+// The commands answered here, by their first word: the checks, and the rules.
+const ANSWERED = new Map<
+  string,
+  (from: string, rest: string[], out: Out) => number | Promise<number>
+>([
+  ["check-docs", (from, _rest, out) => checkDocsHere(from, out)],
+  ["check", (from, rest, out) => checkRecordsHere(from, rest[0], out)],
+  ["rules", (from, rest, out) => rulesHere(from, rest[0], allKits, out)],
+  ["verify", (from, rest, out) => verifyHere(from, rest, allKits, out)],
+  ["check-format", (from, rest, out) => checkFormatHere(from, rest, out)],
+]);
 
 // Answers a command that ends here; its exit code, or null when the server
 // should start (a folder, `new`, nothing).
@@ -49,9 +64,8 @@ export async function topCommand(
     out(USAGE);
     return 0;
   }
-  if (first === "check-docs") return checkDocsHere(from, out);
-  if (first === "check") return checkRecordsHere(from, positionals[1], out);
-  if (first === "rules") return rulesHere(from, positionals[1], allKits, out);
+  const answer = first === undefined ? undefined : ANSWERED.get(first);
+  if (answer) return answer(from, positionals.slice(1), out);
   // Starting the factory, and the commands answered elsewhere (card, upgrade).
   if (
     first === undefined ||

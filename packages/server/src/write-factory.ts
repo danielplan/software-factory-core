@@ -24,6 +24,7 @@ import {
 import type { CreateCompany, SetupProduct } from "./api.ts";
 import { installSkills } from "./install-skills.ts";
 import { pinCore } from "./pin-core.ts";
+import { addProjectChecks } from "./project-checks.ts";
 import { addKitServers } from "./kit-servers.ts";
 import { Refused } from "./refused.ts";
 
@@ -41,6 +42,7 @@ export function writeCompany(
   createFactoryFolder(root, { name, about: request.about }, templates);
   pointToFactory(project);
   installSkills(project);
+  addProjectChecks(project, name);
   pinCore(project);
   return root;
 }

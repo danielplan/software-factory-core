@@ -40,6 +40,24 @@ CLI, or Jira Cloud with an API token, each checked before it is saved.
   the framework's own generator. `software-factory new <name>` starts a new
   project.
 
+## The project's own checks
+
+A project with no `package.json` at its top gets one when its factory folder
+is made, as a company's factory keeps it: private, with the core pinned, and
+`npm run verify` (every product's `verify`, then the knowledge base's
+checks) and `npm run check:docs`. With it comes `lefthook.yml`, the git
+hooks that `npm install` at the top sets up:
+
+- **before a commit:** `software-factory check-format` on the staged files,
+  which runs the `format:check` of each product they are in, and
+  `software-factory check-docs` when a page changed;
+- **before a push:** `software-factory verify` on the pushed files, which
+  runs the `verify` command of each product they are in.
+
+A project that has a `package.json` keeps its own (the core is only pinned
+in it), and one with git hooks of its own (lefthook's settings, husky) gets
+no `lefthook.yml`. The factory's `AGENTS.md` says what holds for both.
+
 ## How a new product is made
 
 Each new product is a job the page shows while it works, in this order:
@@ -67,20 +85,22 @@ description would make the folder, and the starter would never be copied.
 
 ## Where it lives
 
-| Part                | Where                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| The coach           | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
-| What it may install | `packages/server/src/installables.ts`                                                              |
-| Making products     | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
-| Finding products    | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
-| Its guide           | `packages/skills/guides/setup-coach.md`                                                            |
-| The page            | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
-| The files           | `factory/setup.json` (the setup conversation and its map)                                          |
+| Part                 | Where                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| The coach            | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
+| What it may install  | `packages/server/src/installables.ts`                                                              |
+| Making products      | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
+| The project's checks | `packages/server/src/project-checks.ts`, `packages/server/src/verify-command.ts`                   |
+| Finding products     | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
+| Its guide            | `packages/skills/guides/setup-coach.md`                                                            |
+| The page             | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
+| The files            | `factory/setup.json` (the setup conversation and its map)                                          |
 
 ## Checked and not checked
 
 Checked by tests: the coach's steps, map and records, setting up and
 connecting (`setup-coach.test.ts`, `setup.test.ts`, `connect.test.ts`);
 making products, from `configure` to the product made from its starter and
-described (`setup-makes-products.test.ts`, `create-products.test.ts`).
+described (`setup-makes-products.test.ts`, `create-products.test.ts`); the
+project's own checks and the commands they run (`project-checks.test.ts`).
 Not checked by a test: what the coach says about a real codebase.
