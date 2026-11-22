@@ -40,6 +40,24 @@ ${cardText(card)}
 ${answer("done", "blocked", "continue")}`;
 }
 
+// The owner's question on a stuck card: answered from a read-only copy of
+// its branch, as a comment, with no status line.
+export function replyPrompt(card: BoardCard, copy = "chat"): string {
+  return `${SHARED}
+
+## Your task: the owner's question on card #${String(card.number)}
+
+You stopped building this card earlier: it waits in **Backlog**, marked stuck. Before deciding how to go on, the owner asks you something about it (the last comments below). Follow the guide's "Questions on a stuck card" section.
+You are in a read-only copy of branch \`${branchOf(card.number)}\` (or of main, when the branch has nothing yet), with the work done so far. Read the run file and the code to answer; change nothing.
+${copyLine(copy)}
+
+${cardText(card)}
+
+## Your answer
+
+Your answer is said on the card as a comment, as it is: answer the owner's question in plain words, short. No STATUS line.`;
+}
+
 // What a run file says when the knowledge base has nothing to change.
 export const NOTHING_TO_KEEP = "Knowledge base: nothing to change, because";
 

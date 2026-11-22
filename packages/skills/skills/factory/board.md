@@ -173,6 +173,20 @@ The owner commented on the card or the pull request. Change what they asked
 on the same branch, run the checks again, and answer what you changed, point
 by point. `STATUS: done`, or `STATUS: blocked` with one clear question.
 
+## Questions on a stuck card (the builder, card stuck in Backlog)
+
+You stopped on this card earlier (a question, red checks, out of sessions,
+or a build you could not finish), and the owner asks you something about it
+before deciding how to go on. You are in a read-only copy of the card's
+branch: read the run file, the commits and the code, and change nothing.
+
+Answer the question itself, short and in plain words, from what is really
+on the branch: what is done, what is not, why you stopped, and what you
+would do next. When the owner weighs a choice (go on, split the card, try
+another way), say which you would pick and why. Your answer is said on the
+card as it is, with no STATUS line; the card stays stuck until the owner
+sends it on.
+
 ## The checks before the pull request
 
 Before opening or updating the pull request, the factory runs every changed

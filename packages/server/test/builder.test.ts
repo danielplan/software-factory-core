@@ -528,3 +528,62 @@ test("a builder that says it is not finished but adds nothing twice in a row is 
   assert.match(card.comments.at(-1)?.body ?? "", /added nothing/);
   work.switch("build", false);
 });
+
+test("the owner asks the builder about a stuck card: it answers on the card from a read-only copy, and the card stays stuck", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      30,
+      {
+        title: "Big",
+        stage: "backlog",
+        body: withPlan("", "The plan."),
+        labels: [STUCK_LABEL],
+        comments: [
+          {
+            author: "factory",
+            body: markComment("Steps 1 and 2 are built.", "out-of-sessions"),
+            at: now(),
+            where: "card",
+          },
+        ],
+      },
+    ],
+  ]);
+  const readOnly: boolean[] = [];
+  const { claude, prompts } = pretendClaude((options) => {
+    readOnly.push(options.readOnly);
+    return "Step 3 is left: the slots. I would go on.";
+  });
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  assert.equal(work.view().stuck?.[0]?.answering, false);
+  await assert.rejects(work.ask(31, "Why?"), /not stuck/);
+  await work.ask(30, "What is left?");
+  assert.equal(work.view().stuck?.[0]?.answering, true);
+  await settled(work);
+  const card = kept.get(30);
+  assert.ok(card);
+  assert.equal(card.stage, "backlog");
+  assert.deepEqual(readOnly, [true]);
+  assert.match(prompts[0] ?? "", /the owner's question on card #30/);
+  assert.match(prompts[0] ?? "", /What is left\?/);
+  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "replied");
+  const stuck = work.view().stuck?.[0];
+  assert.ok(stuck);
+  assert.equal(stuck.note, "out-of-sessions");
+  assert.equal(stuck.answering, false);
+  assert.deepEqual(
+    stuck.talk.map((said) => [said.by, said.text]),
+    [
+      ["owner", "What is left?"],
+      ["builder", "Step 3 is left: the slots. I would go on."],
+    ],
+  );
+  // Answered once: the next readings start no new reply.
+  await work.refresh();
+  await settled(work);
+  assert.equal(prompts.length, 1);
+  work.switch("build", false);
+});

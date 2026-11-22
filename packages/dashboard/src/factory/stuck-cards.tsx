@@ -5,9 +5,18 @@
 // is helping the builder: answer it or give it a hint (its suggested answers,
 // when it asked, are quick picks) and send. The reply goes into the card's
 // conversation, and the card goes to To do, where it says "Your hint is with
-// the builder".
+// the builder". Or ask the builder about it first: the question goes on the
+// card, the builder answers there from the work so far, and the card stays
+// here until it is sent on.
 
-import { ArrowUpRight, Check, CircleAlert, Play, Send } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  CircleAlert,
+  MessageCircleQuestion,
+  Play,
+  Send,
+} from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -74,26 +83,6 @@ function StuckCard({
   onSent,
 }: Readonly<{ one: Stuck; now: Date; onSent: () => void }>) {
   const { builder: t } = useT();
-  const [hint, write] = useState("");
-  const [sending, setSending] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const said = hint.trim();
-  // Out of sessions, not stuck on anything: Continue needs no words, a hint
-  // goes with it when written.
-  const carryOn = one.note === "out-of-sessions";
-  const sent = said || (carryOn ? t.stuck.carryOn : "");
-  const label = carryOn ? t.stuck.continue : t.stuck.send;
-  const send = () => {
-    setSending(true);
-    setProblem(null);
-    post("/api/work/answer", { number: one.number, text: sent }).then(
-      onSent,
-      (error: unknown) => {
-        setSending(false);
-        setProblem(messageOf(error));
-      },
-    );
-  };
   return (
     <article className="flex flex-col gap-1.5 rounded-lg border border-border bg-card px-3 py-2.5 motion-safe:animate-rise">
       <p className="flex w-full items-center gap-2 text-xs text-muted-foreground">
@@ -120,12 +109,63 @@ function StuckCard({
         />
         <Markdown text={reasonOf(one, t.why)} inline />
       </div>
+      <Talk one={one} />
+      <Reply one={one} onSent={onSent} />
+    </article>
+  );
+}
+
+// The owner's words on a stuck card: a quick pick or their own, sent to
+// hand the card back (Continue, when it only ran out of sessions), or asked
+// as a question that keeps it here.
+function Reply({ one, onSent }: Readonly<{ one: Stuck; onSent: () => void }>) {
+  const t = useT().builder.stuck;
+  const [hint, write] = useState("");
+  const [sending, setSending] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const said = hint.trim();
+  // Out of sessions, not stuck on anything: Continue needs no words, a hint
+  // goes with it when written.
+  const way =
+    one.note === "out-of-sessions"
+      ? { Icon: Play, label: t.continue, empty: t.carryOn, box: t.hintIfAny }
+      : { Icon: Send, label: t.send, empty: "", box: t.placeholder };
+  const sent = said || way.empty;
+  const send = () => {
+    setSending(true);
+    setProblem(null);
+    post("/api/work/answer", { number: one.number, text: sent }).then(
+      onSent,
+      (error: unknown) => {
+        setSending(false);
+        setProblem(messageOf(error));
+      },
+    );
+  };
+  // A question stays here: the box empties, and the builder's reply comes
+  // with the board's next reading.
+  const ask = () => {
+    setSending(true);
+    setProblem(null);
+    post("/api/work/ask", { number: one.number, text: said })
+      .then(() => {
+        write("");
+      })
+      .catch((error: unknown) => {
+        setProblem(messageOf(error));
+      })
+      .finally(() => {
+        setSending(false);
+      });
+  };
+  return (
+    <>
       {one.ask && one.ask.answers.length > 0 && (
         <QuickPicks ask={one.ask} said={said} onPick={write} />
       )}
       <textarea
-        aria-label={t.stuck.answerOn(one.number)}
-        placeholder={carryOn ? t.stuck.hintIfAny : t.stuck.placeholder}
+        aria-label={t.answerOn(one.number)}
+        placeholder={way.box}
         value={hint}
         onChange={(event) => {
           write(event.target.value);
@@ -134,20 +174,52 @@ function StuckCard({
         className={cn(FIELD_AREA, "mt-1 resize-y text-xs")}
       />
       {problem && <p className="text-xs text-destructive">{problem}</p>}
-      <Button
-        size="pill-sm"
-        className="self-start"
-        disabled={!sent || sending}
-        onClick={send}
-      >
-        {carryOn ? (
-          <Play aria-hidden className="size-3.5" />
-        ) : (
-          <Send aria-hidden className="size-3.5" />
-        )}
-        {sending ? t.stuck.sending : label}
-      </Button>
-    </article>
+      <div className="flex flex-wrap gap-1.5">
+        <Button size="pill-sm" disabled={!sent || sending} onClick={send}>
+          <way.Icon aria-hidden className="size-3.5" />
+          {sending ? t.sending : way.label}
+        </Button>
+        <Button
+          size="pill-sm"
+          variant="outline"
+          disabled={!said || sending || one.answering}
+          onClick={ask}
+        >
+          <MessageCircleQuestion aria-hidden className="size-3.5" />
+          {t.ask}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+// What the owner asked about the card since it stopped, and the builder's
+// replies; while one waits, a line says the builder is on it.
+function Talk({ one }: Readonly<{ one: Stuck }>) {
+  const t = useT().builder.stuck;
+  if (one.talk.length === 0 && !one.answering) return null;
+  return (
+    <div className="mt-1 grid gap-1" aria-label={t.talk}>
+      {one.talk.map((said) => (
+        <div
+          key={`${said.at}-${said.by}`}
+          className={cn(
+            "rounded-lg px-2.5 py-1.5 text-xs leading-snug",
+            said.by === "owner" ? "bg-wash" : "border border-border",
+          )}
+        >
+          <p className="font-medium text-muted-foreground">
+            {said.by === "owner" ? t.you : t.builder}
+          </p>
+          <Markdown text={said.text} />
+        </div>
+      ))}
+      {one.answering && (
+        <p className="text-xs text-muted-foreground motion-safe:animate-pulse">
+          {t.answering}
+        </p>
+      )}
+    </div>
   );
 }
 

@@ -31,8 +31,9 @@ import {
   waitsForOwner,
 } from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
-import { markComment } from "./protocol.ts";
+import { askedComment, markComment } from "./protocol.ts";
 import type { PullRequests } from "./pull-requests.ts";
+import { type Running, STEPS, withQuestion, workingOf } from "./running.ts";
 import { snapshotOf } from "./snapshot.ts";
 import { clockOf } from "./usage-limit.ts";
 import { SeenPullRequests } from "./seen-pull-requests.ts";
@@ -53,14 +54,6 @@ export type BoardWorkOptions = {
   // The builder on from the start (the factory's own board work); off
   // when not given, until it is switched on.
   building?: boolean;
-};
-
-// A job on a card, at its lane's place (its working copy).
-type Running = { job: Job; title: string; steps: string[]; place: number };
-const STEPS = 40;
-const WHAT: Record<Job["kind"], string> = {
-  build: "building",
-  feedback: "answering the review of",
 };
 
 export class BoardWork {
@@ -95,8 +88,12 @@ export class BoardWork {
   }
 
   view(): WorkView {
-    const [building, ...alsoBuilding] = this.inLane("build");
-    const planning = this.inLane("chat");
+    // The builder's replies on stuck cards run in the chat lane, but are
+    // the builder's work.
+    const chat = this.inLane("chat");
+    const replying = chat.filter((one) => one.job.kind === "reply");
+    const planning = chat.filter((one) => one.job.kind !== "reply");
+    const [building, ...alsoBuilding] = [...this.inLane("build"), ...replying];
     const builder: BuilderView = {
       on: this.on.build,
       working: building ? workingOf(building) : null,
@@ -151,6 +148,12 @@ export class BoardWork {
       .sort((a, b) => a.place - b.place);
   }
 
+  // A lane takes jobs while it is on; the builder's replies on stuck cards
+  // go with the builder.
+  private laneOn(job: Job): boolean {
+    return this.on[job.lane] || (job.kind === "reply" && this.on.build);
+  }
+
   // The lane's first free place, none when all its places are taken.
   private freePlace(lane: Lane): number | null {
     const places = Math.max(1, this.options.places?.() ?? 1);
@@ -169,6 +172,16 @@ export class BoardWork {
       await this.options.cards.move(number, "todo");
     this.asking = this.asking.filter((one) => one.number !== number);
     this.stuck = this.stuck.filter((one) => one.number !== number);
+    this.options.onChange();
+    void this.refresh();
+  }
+
+  // The owner's question on a stuck card, from the Factory page: on the
+  // card, marked for the builder to answer; the card stays stuck.
+  async ask(number: number, text: string): Promise<void> {
+    const asked = withQuestion(this.stuck, number, text, this.now());
+    await this.options.cards.comment(number, askedComment(text));
+    this.stuck = asked;
     this.options.onChange();
     void this.refresh();
   }
@@ -287,7 +300,7 @@ export class BoardWork {
     await this.apply(decision);
     for (const next of this.paused() ? [] : decision.jobs) {
       const card = board.find((c) => c.number === next.number);
-      const place = this.on[next.lane] ? this.freePlace(next.lane) : null;
+      const place = this.laneOn(next) ? this.freePlace(next.lane) : null;
       if (card && place !== null && !this.running.has(next.number))
         this.begin(next, card, place);
     }
@@ -343,16 +356,6 @@ export class BoardWork {
         void this.refresh();
       });
   }
-}
-
-function workingOf(one: Running) {
-  return {
-    number: one.job.number,
-    title: one.title,
-    what: WHAT[one.job.kind],
-    activity: one.steps.at(-1) ?? null,
-    steps: [...one.steps],
-  };
 }
 
 function messageOf(error: unknown): string {

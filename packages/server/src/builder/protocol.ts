@@ -17,6 +17,9 @@ export const NOTES = [
   // The builder used its sessions in a row and is not finished yet: nothing
   // went wrong, and Continue gives it as many again.
   "out-of-sessions",
+  // The builder's answer to the owner's question on a stuck card; the card
+  // stays stuck.
+  "replied",
   // The answer to "did it work?", given in Kobble.
   "did-it-work",
   // Claude's usage limit: the card waits until it resets (untilOf).
@@ -138,6 +141,18 @@ export function readAsk(body: string): Ask | null {
   }
 }
 
+// The owner's question to the builder on a stuck card, from the Factory
+// page: the owner's own comment, marked so the builder answers it.
+const ASKED = "<!-- asks-the-builder -->";
+
+export function askedComment(text: string): string {
+  return `${text.trimEnd()}\n\n${ASKED}`;
+}
+
+export function isAsked(body: string): boolean {
+  return body.trimEnd().endsWith(ASKED);
+}
+
 export function isFactory(body: string): boolean {
   return readNote(body) !== null;
 }
@@ -145,7 +160,7 @@ export function isFactory(body: string): boolean {
 export function stripMarker(body: string): string {
   const match = MARKER.exec(body);
   const text = match ? body.slice(0, match.index).trimEnd() : body;
-  return withoutAsk(text.replace(UNTIL, "")).trimEnd();
+  return withoutAsk(text.replace(UNTIL, "").replace(ASKED, "")).trimEnd();
 }
 
 // The answer and its last line's status ("STATUS: done"); no status when

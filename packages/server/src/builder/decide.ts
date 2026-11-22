@@ -15,6 +15,7 @@ import type { Stage, StuckView } from "../api.ts";
 import {
   AGREEMENT_NOTES,
   type Ask,
+  isAsked,
   NOTES,
   type Note,
   readAsk,
@@ -59,7 +60,9 @@ export type BoardCard = {
 
 // The coach answers in the cards (chat); the builder builds (build).
 export type Lane = "chat" | "build";
-export type JobKind = "build" | "feedback";
+// A reply: the builder answers the owner's question on a stuck card, in the
+// chat lane (a read-only copy), while the builder is on.
+export type JobKind = "build" | "feedback" | "reply";
 export type Job = { lane: Lane; kind: JobKind; number: number };
 
 export type Decision = {
@@ -88,14 +91,14 @@ export function decide(
     jobs: [],
     asks: [],
     stuck: [],
-    order: { feedback: [], resumed: [], build: [] },
+    order: { feedback: [], resumed: [], build: [], reply: [] },
   };
   for (const card of cards) look(card, running, found, now);
-  const { feedback, resumed, build } = found.order;
+  const { feedback, resumed, build, reply } = found.order;
   return {
     moves: found.moves,
     comments: found.comments,
-    jobs: [...feedback, ...resumed, ...build],
+    jobs: [...feedback, ...resumed, ...build, ...reply],
     asks: found.asks,
     stuck: found.stuck,
   };
@@ -159,6 +162,10 @@ function lookInStage(card: BoardCard, found: Found): void {
       if (!card.stuck && waitsForAnswer(card)) markStuck(card, found);
       else order.build.push({ lane: "build", kind: "build", number });
       break;
+    case "backlog":
+      if (card.stuck && asksTheBuilder(card))
+        order.reply.push({ lane: "chat", kind: "reply", number });
+      break;
     case "doing":
       lookInProgress(card, found);
       break;
@@ -201,7 +208,7 @@ function markStuck(card: BoardCard, found: Found): void {
 
 // The notes that say who has the card: every one but the reports.
 const OWNING_NOTES: readonly Note[] = NOTES.filter(
-  (n) => n !== "progress" && n !== "paused",
+  (n) => n !== "progress" && n !== "paused" && n !== "replied",
 );
 
 // The builder gave up: the checks still red after its rounds of fixing, or
@@ -223,11 +230,43 @@ export function handedBack(
   );
 }
 
+// Where the talk about a stuck card starts: after the builder's last word
+// on it (why it stopped, or its last reply).
+function talkStart(thread: Message[]): number {
+  return (
+    thread.findLastIndex((m) => {
+      const note = readNote(m.body);
+      return note !== null && OWNING_NOTES.includes(note);
+    }) + 1
+  );
+}
+
+// The owner asked the builder something on the card since it stopped, and
+// the builder has not answered yet.
+export function asksTheBuilder(card: Pick<BoardCard, "thread">): boolean {
+  const { thread } = card;
+  const from = Math.max(
+    talkStart(thread),
+    thread.findLastIndex((m) => readNote(m.body) === "replied") + 1,
+  );
+  return thread.slice(from).some((m) => isAsked(m.body));
+}
+
+export type Said = { by: "owner" | "builder"; text: string; at: string };
+
 // Where a stuck card waits for the owner (Backlog), with the builder's last
-// word on it: the question it asks, or why it gave up, and since when.
+// word on it: the question it asks, or why it gave up, and since when; then
+// what the owner and the builder said about it since.
 export function stuckOf(
   card: Pick<BoardCard, "stage" | "closed" | "stuck" | "thread">,
-): { note: Note; text: string; ask: Ask | null; since: string } | null {
+): {
+  note: Note;
+  text: string;
+  ask: Ask | null;
+  since: string;
+  talk: Said[];
+  answering: boolean;
+} | null {
   if (!card.stuck || card.closed || card.stage !== "backlog") return null;
   const last = card.thread.findLast((m) => {
     const note = readNote(m.body);
@@ -240,6 +279,18 @@ export function stuckOf(
     text: stripMarker(last.body),
     ask: readAsk(last.body),
     since: last.at,
+    talk: card.thread.slice(talkStart(card.thread)).flatMap((m): Said[] => {
+      const said = readNote(m.body);
+      if (said !== null && said !== "replied") return [];
+      return [
+        {
+          by: said === "replied" ? "builder" : "owner",
+          text: stripMarker(m.body),
+          at: m.at,
+        },
+      ];
+    }),
+    answering: asksTheBuilder(card),
   };
 }
 

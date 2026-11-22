@@ -55,6 +55,7 @@ const STATUS: Partial<Record<Note, string>> = {
   "checks-failed": "Built, but some checks still fail",
   "out-of-sessions":
     "Not finished after its sessions: continue to give it more",
+  replied: "The builder answered your question",
   paused: "Paused: Claude's usage limit; it carries on by itself",
 };
 
