@@ -103,18 +103,22 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
       )}
       {VARIANT === "B" && tab === "Connections" ? (
         <div className="grid gap-8">
-          <Group title="Where the code lives" about="The service your extensions always need.">
+          <Group title="Where the code lives" about="Pick one: the Factory builds on its branches and pull requests.">
             {codeHost && (
               <Card
                 ext={codeHost}
-                label="Connected"
-                note="Always needed: code and pull requests"
+                label="In use"
+                note="Branches and pull requests"
                 onOpen={() => {
                   setOpenId("github");
                 }}
                 action={null}
               />
             )}
+            <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
+              <span className="font-semibold">GitLab</span>
+              Comes later.
+            </div>
           </Group>
           <TrackerGroup
             title="Where cards live"
