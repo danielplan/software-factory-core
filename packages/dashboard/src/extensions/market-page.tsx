@@ -1,7 +1,8 @@
-// Variant B: a marketplace, a page of its own. A search field and filters,
-// the extensions as cards in a grid; a click opens one's details. Installing
-// one that needs another asks first and installs both; removing one that
-// others need is refused, with why.
+// The marketplace, a page of its own. A search field and filters, the
+// extensions as cards in a grid; a click opens one's details. Installing one
+// that needs another asks first and installs both; removing one that others
+// need is refused, with why. Where GitHub and Jira belong differs by variant:
+// A, a setting in Factory's details; B, a Connections tab; C, a group here.
 
 import { Check, Download, Search } from "lucide-react";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import {
 import type { FactoryState } from "@/dashboard/dashboard";
 import { GroupForm } from "@/dashboard/settings-card";
 import { FIELD } from "@/lib/field-style";
+import { VARIANT } from "@/lib/prototype-flags";
 import { cn } from "@/lib/utils";
 
 import { Adds, Logo, Maker, Needs } from "./bits";
@@ -32,7 +34,8 @@ const fits = (e: Ext, filter: Filter) =>
   (filter === "Your team's" && e.maker === "team");
 
 export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
-  const { all, turn, problem } = useExtensions(state);
+  const { all, turn, moveCards, problem } = useExtensions(state);
+  const [tab, setTab] = useState<"Extensions" | "Connections">("Extensions");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -45,9 +48,11 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
       fits(e, filter) &&
       `${e.name} ${e.about}`.toLowerCase().includes(query.trim().toLowerCase()),
   );
+  // A and B keep the boards out of the list of extensions.
   const shown = matches.filter((e) => !e.tracker);
   const trackers = all.filter((e) => e.tracker);
   const trackerShown =
+    VARIANT === "C" &&
     filter !== "Your team's" &&
     (filter !== "Installed" || trackers.some((e) => e.on)) &&
     trackers.some((e) => matches.includes(e));
@@ -63,6 +68,42 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         title="Extensions"
         about="What your factory can do. Install what you need; the kobold can write your own."
       />
+      {VARIANT === "B" && (
+        <div role="tablist" aria-label="Marketplace" className="flex gap-1 border-b border-border-soft">
+          {(["Extensions", "Connections"] as const).map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={tab === name}
+              onClick={() => {
+                setTab(name);
+              }}
+              className={cn(
+                "-mb-px border-b-2 px-3 py-2 text-[13px] font-medium",
+                tab === name
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+      {VARIANT === "B" && tab === "Connections" ? (
+        <TrackerGroup
+          title="Connections"
+          about="The outside services your extensions use. More, like Slack, come later."
+          trackers={trackers}
+          onOpen={setOpenId}
+          onMove={(from, to) => {
+            setMoving({ from, to });
+          }}
+          later="Slack"
+        />
+      ) : (
+        <>
       <div className="flex flex-wrap items-center gap-3">
         <label className="relative min-w-[220px] flex-1 sm:max-w-sm">
           <Search
@@ -103,6 +144,8 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}
       {trackerShown && (
         <TrackerGroup
+          title="Where your cards live"
+          about="Pick one: the Factory works the cards there."
           trackers={trackers}
           onOpen={setOpenId}
           onMove={(from, to) => {
@@ -151,6 +194,8 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
           );
         })
       )}
+        </>
+      )}
       <Details
         ext={opened}
         all={all}
@@ -197,8 +242,8 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
             <Button
               size="pill"
               onClick={() => {
+                if (moving) moveCards(moving.to.id);
                 setMoving(null);
-                window.location.hash = "#settings/connections";
               }}
             >
               {moving?.from ? "Move" : "Connect"}
@@ -337,21 +382,26 @@ function TrackerAction({
 
 // The boards the Factory can work the cards on: pick one.
 function TrackerGroup({
+  title,
+  about,
   trackers,
   onOpen,
   onMove,
+  later,
 }: Readonly<{
+  title: string;
+  about: string;
   trackers: Ext[];
   onOpen: (id: string) => void;
   onMove: (from: Ext, to: Ext) => void;
+  // A service that comes later, shown quietly.
+  later?: string;
 }>) {
   return (
-    <section aria-label="Where your cards live" className="grid gap-3">
+    <section aria-label={title} className="grid gap-3">
       <div className="grid gap-0.5 px-1">
-        <h2 className="text-[15px] font-semibold">Where your cards live</h2>
-        <p className="text-[13px] text-muted-foreground">
-          Pick one: the Factory works the cards there.
-        </p>
+        <h2 className="text-[15px] font-semibold">{title}</h2>
+        <p className="text-[13px] text-muted-foreground">{about}</p>
       </div>
       <div className="grid items-stretch gap-4 sm:grid-cols-2">
         {trackers.map((ext) => (
@@ -365,6 +415,12 @@ function TrackerGroup({
             action={<TrackerAction ext={ext} trackers={trackers} onMove={onMove} />}
           />
         ))}
+        {later && (
+          <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
+            <span className="font-semibold">{later}</span>
+            Comes later.
+          </div>
+        )}
       </div>
     </section>
   );
@@ -407,7 +463,10 @@ function Details({
   onRemove: (e: Ext) => void;
 }>) {
   const [refused, setRefused] = useState<string | null>(null);
-  const needing = ext ? neededBy(ext, all) : [];
+  // In A the boards are a setting of Factory, not extensions that need it.
+  const needing = (ext ? neededBy(ext, all) : []).filter(
+    (e) => VARIANT !== "A" || !e.tracker,
+  );
   const groups =
     ext?.on && ext.real
       ? state.settings.filter((g) => ext.settings.includes(g.id))
@@ -436,6 +495,38 @@ function Details({
             <Part title="What it adds">
               <Adds ext={ext} />
             </Part>
+            {VARIANT === "A" && ext.id === "factory" && (
+              <Part title="Your cards live in">
+                <div className="grid gap-2">
+                  {all
+                    .filter((e) => e.tracker)
+                    .map((t) => (
+                      <div
+                        key={t.id}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg p-2",
+                          t.on && "bg-success/[0.07]",
+                        )}
+                      >
+                        <Logo ext={t} />
+                        <span className="flex-1 text-[13px] font-medium">{t.name}</span>
+                        {t.on ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
+                            In use
+                            <Check aria-hidden className="size-4" />
+                          </span>
+                        ) : (
+                          <TrackerAction
+                            ext={t}
+                            trackers={all.filter((e) => e.tracker)}
+                            onMove={onMove}
+                          />
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </Part>
+            )}
             <Part title="What it needs">
               {ext.needs.length === 0 ? (
                 <span className="text-[13px]">Nothing</span>

@@ -1,0 +1,79 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - generic [ref=f1e6]: Acme
+    - navigation "Overview" [ref=f1e18]:
+      - link "Home" [ref=f1e19] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e24] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e36]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e37]
+    - navigation "Pages" [ref=f1e38]:
+      - generic [ref=f1e39]:
+        - generic [ref=f1e40]: Work
+        - link "Signals Sieve" [ref=f1e41] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e47]': Sieve
+        - link "Explorations Doodle 2" [ref=f1e293] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=f1e64]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e65]': Doodle
+            - generic [ref=f1e294]: "2"
+        - link "Factory Bolt" [ref=f1e77] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e82]': Bolt
+        - link "Releases" [ref=f1e96] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=f1e101]:
+        - generic [ref=f1e102]: Customers
+        - link "Personas Mimic" [ref=f1e103] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e111]': Mimic
+    - generic [ref=f1e122]:
+      - button "Send feedback" [ref=f1e123] [cursor=pointer]
+      - navigation "The factory" [ref=f1e128]:
+        - link "Extensions" [ref=f1e129] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=f1e133] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e138]:
+    - generic [ref=f1e140]:
+      - generic [ref=f1e141]:
+        - heading "Extensions" [level=1] [ref=f1e144]
+        - paragraph [ref=f1e145]: What your factory can do. Install what you need; the kobold can write your own.
+      - tablist "Marketplace" [ref=f1e146]:
+        - tab "Extensions" [ref=f1e147] [cursor=pointer]
+        - tab "Connections" [active] [selected] [ref=f1e148] [cursor=pointer]
+      - region "Connections" [ref=f1e295]:
+        - generic [ref=f1e296]:
+          - heading "Connections" [level=2] [ref=f1e297]
+          - paragraph [ref=f1e298]: The outside services your extensions use. More, like Slack, come later.
+        - generic [ref=f1e299]:
+          - article "GitHub board" [ref=f1e300]:
+            - button "Open GitHub board" [ref=f1e301] [cursor=pointer]
+            - generic [ref=f1e302]:
+              - generic [ref=f1e303]: GitHub board
+              - paragraph [ref=f1e309]: Work tracked on a GitHub board, through the GitHub CLI.
+            - button "Switch to GitHub" [ref=f1e311] [cursor=pointer]
+          - article "Jira Cloud" [ref=f1e312]:
+            - button "Open Jira Cloud" [ref=f1e313] [cursor=pointer]
+            - generic [ref=f1e314]:
+              - generic [ref=f1e315]:
+                - generic [ref=f1e319]: Jira Cloud
+                - generic [ref=f1e321]:
+                  - text: In use
+                  - img "In use" [ref=f1e322]
+              - paragraph [ref=f1e325]: Work tracked in a Jira Cloud project, with an API token.
+          - generic [ref=f1e326]:
+            - generic [ref=f1e327]: Slack
+            - text: Comes later.
+  - region "Sprocket" [ref=f1e280]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e281] [cursor=pointer]:
+      - generic [ref=f1e291]: Ask Sprocket anything
+      - generic [ref=f1e292]: ⌘J

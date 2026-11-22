@@ -23,7 +23,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { VARIANT } from "@/lib/prototype-flags";
 import type { Page } from "@/lib/routes";
 import { useFactoryName, useLogo } from "@/lib/brand";
 import type { KoboldStatus } from "@/lib/shell-view";
@@ -100,15 +99,11 @@ function GroupLabel({ children }: Readonly<{ children: ReactNode }>) {
 }
 
 const QUIET: Item[] = [
-  ...(VARIANT === "A"
-    ? []
-    : [
-        {
-          page: "extensions" as const,
-          icon: <Puzzle aria-hidden />,
-          color: "var(--explore)",
-        },
-      ]),
+  {
+    page: "extensions",
+    icon: <Puzzle aria-hidden />,
+    color: "var(--explore)",
+  },
   {
     page: "settings",
     icon: <Settings aria-hidden />,

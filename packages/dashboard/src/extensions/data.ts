@@ -167,6 +167,7 @@ const MADE_UP: MadeUp[] = [
 ];
 
 const KEY = "kobble.made-up-extensions";
+const TRACKER_KEY = "kobble.made-up-cards";
 
 function readOn(): Record<string, boolean> {
   try {
@@ -183,9 +184,14 @@ function readOn(): Record<string, boolean> {
 export function useExtensions(state: FactoryState): {
   all: Ext[];
   turn: (id: string, on: boolean) => void;
+  // Where the cards live, made up: nothing real is connected or moved.
+  moveCards: (to: string) => void;
   problem: string | null;
 } {
   const [madeOn, setMadeOn] = useState(readOn);
+  const [cards, setCards] = useState(
+    () => localStorage.getItem(TRACKER_KEY) ?? "github",
+  );
   const [problem, setProblem] = useState<string | null>(null);
   const nameOf = (id: string) =>
     MADE_UP.find((m) => m.id === id)?.name ??
@@ -205,7 +211,7 @@ export function useExtensions(state: FactoryState): {
     ...finish({ ...base, ...OF_ADD_ON[addOn.id] }, addOn.id),
     name: addOn.name,
     about: addOn.about,
-    on: addOn.tracker ? state.company.tracker === addOn.id : addOn.on,
+    on: addOn.tracker ? cards === addOn.id : addOn.on,
     real: true,
     tracker: addOn.tracker,
     settings: addOn.settings,
@@ -231,7 +237,16 @@ export function useExtensions(state: FactoryState): {
       setProblem(messageOf(error));
     });
   };
-  return { all: [...made.slice(0, 5), ...real, ...made.slice(5)], turn, problem };
+  const moveCards = (to: string) => {
+    localStorage.setItem(TRACKER_KEY, to);
+    setCards(to);
+  };
+  return {
+    all: [...made.slice(0, 5), ...real, ...made.slice(5)],
+    turn,
+    moveCards,
+    problem,
+  };
 }
 
 // The extensions of `ext` that are needed and not installed yet.

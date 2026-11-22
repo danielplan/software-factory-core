@@ -1,4 +1,4 @@
-// Prototype only: which variant of the extensions page shows, chosen outside the
+// Prototype only: which variant of where GitHub and Jira belong shows, chosen outside the
 // app by the page address (?variant=B), kept for the visit; and the made-up
 // state Home shows (?state=empty | many).
 
@@ -26,9 +26,9 @@ function readState(): MadeState {
 
 export const MADE_STATE: MadeState = readState();
 
-// Each variant opens on its extensions page: the first time the page opens
+// The marketplace opens first: the first time the page opens
 // on Home (or on no page), in a visit. Home stays one click away.
-const OPENS = { A: "#settings/add-ons", B: "#extensions", C: "#extensions" };
+const OPENS = { A: "#extensions", B: "#extensions", C: "#extensions" };
 const OPENED = "kobble.opened";
 
 function openOnExtensions(): void {

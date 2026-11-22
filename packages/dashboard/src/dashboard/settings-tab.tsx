@@ -27,8 +27,6 @@ import { WhatsNew } from "@/updates/whats-new";
 import { useT } from "@/i18n/use-t";
 import type { Messages } from "@/i18n/messages";
 
-import { GrownTab } from "@/extensions/grown-tab";
-import { VARIANT } from "@/lib/prototype-flags";
 import { LanguageCard } from "./language-card";
 import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
@@ -181,18 +179,6 @@ function sectionsOf(
         <WhatsNew />
       </Topic>,
     ),
-    // Variant A keeps the extensions in Settings; B and C have a page.
-    ...(VARIANT === "A"
-      ? [
-          section(
-            n.addOns,
-            "Add-ons",
-            <Section name={n.addOns}>
-              <GrownTab state={state} />
-            </Section>,
-          ),
-        ]
-      : []),
     section(n.language, "This computer", <LanguageCard />),
     section(
       n.computer,

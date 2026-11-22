@@ -1,0 +1,175 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Extensions
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Extensions
+                - paragraph: What your factory can do. Install what you need; the kobold can write your own.
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=f2e290]:
+          - button [ref=f2e291] [cursor=pointer]:
+            - generic [ref=f2e288]: Ask Sprocket anything
+            - generic [ref=f2e289]: ⌘J
+  - dialog "Factory" [ref=f2e293]:
+    - generic [ref=f2e294]:
+      - generic [ref=f2e299]:
+        - heading "Factory" [level=2] [ref=f2e300]
+        - generic [ref=f2e301]: Kobble
+      - paragraph [ref=f2e302]: The board where work is built, from to do to done.
+      - generic [ref=f2e303]:
+        - heading "What it adds" [level=3] [ref=f2e304]
+        - generic [ref=f2e305]:
+          - generic [ref=f2e306]:
+            - generic [ref=f2e307]: Pages
+            - generic [ref=f2e308]: Factory
+          - generic [ref=f2e310]:
+            - generic [ref=f2e311]: Home blocks
+            - generic [ref=f2e312]:
+              - generic [ref=f2e313]: Product status
+              - generic [ref=f2e314]: Waiting for you
+              - generic [ref=f2e315]: The loop
+          - generic [ref=f2e316]:
+            - generic [ref=f2e317]: Kobolds
+            - generic [ref=f2e318]: Bolt
+          - generic [ref=f2e320]:
+            - generic [ref=f2e321]: Stages
+            - generic [ref=f2e322]: Factory
+      - generic [ref=f2e324]:
+        - heading "Your cards live in" [level=3] [ref=f2e325]
+        - generic [ref=f2e326]:
+          - generic [ref=f2e327]:
+            - generic [ref=f2e331]: GitHub board
+            - generic [ref=f2e332]: In use
+          - generic [ref=f2e335]:
+            - generic [ref=f2e339]: Jira Cloud
+            - button "Switch to Jira" [active] [ref=f2e340] [cursor=pointer]
+      - generic [ref=f2e341]:
+        - heading "What it needs" [level=3] [ref=f2e342]
+        - generic [ref=f2e343]: Nothing
+      - generic [ref=f2e344]:
+        - heading "What needs it" [level=3] [ref=f2e345]
+        - generic [ref=f2e346]: Explorations, Releases, GitHub board
+      - generic [ref=f2e347]:
+        - heading "Settings" [level=3] [ref=f2e348]
+        - generic [ref=f2e349]: It has no settings.
+      - button "Remove" [ref=f2e351] [cursor=pointer]
+    - button "Close" [ref=f2e352] [cursor=pointer]

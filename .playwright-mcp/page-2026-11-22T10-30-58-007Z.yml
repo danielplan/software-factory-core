@@ -1,0 +1,157 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Extensions
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Extensions
+                - paragraph: What your factory can do. Install what you need; the kobold can write your own.
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - generic:
+                  - heading [level=2]: Where your cards live
+                  - paragraph: "Pick one: the Factory works the cards there."
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic: GitHub board
+                        - generic: In use
+                      - paragraph: Work tracked on a GitHub board, through the GitHub CLI.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Jira Cloud
+                      - paragraph: Work tracked in a Jira Cloud project, with an API token.
+                    - generic:
+                      - button: Switch to Jira
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=e5]:
+          - button [ref=e6] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "Move from GitHub board to Jira Cloud?" [ref=e19]:
+    - heading "Move from GitHub board to Jira Cloud?" [level=2] [ref=e20]
+    - paragraph [ref=e21]: Your cards stay where they are.
+    - generic [ref=e22]:
+      - button "Cancel" [active] [ref=e23] [cursor=pointer]
+      - button "Move" [ref=e24] [cursor=pointer]
+    - button "Close" [ref=e25] [cursor=pointer]
