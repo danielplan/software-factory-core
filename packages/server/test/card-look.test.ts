@@ -35,6 +35,7 @@ const detail = (number: number): CardDetail => ({
   ],
   dependsOn: [],
   neededBy: [],
+  kept: null,
 });
 
 const cards = { show: (n: number) => Promise.resolve(detail(n)) } as Cards;
