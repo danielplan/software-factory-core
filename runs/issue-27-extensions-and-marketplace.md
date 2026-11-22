@@ -115,4 +115,53 @@ Decisions in step 2:
 - Not tried in the browser: dragging a block with the mouse (the move
   buttons, hiding and the keyboard were); it is the prototype's code.
 
-Step 3 is not started.
+Step 3 (a team's own extension, and the slots) is partly done. Built and checked
+(tests, lint, types, dead code, duplicates, docs; looked at in the browser):
+
+- **Loading from `factory/extensions/<id>/extension.json`**
+  (`core/src/extensions/team.ts`). An extension of the team is a description,
+  never code that runs. **The checks before loading** (the open point,
+  decided here): the file reads and fits the description with no word it does
+  not know; it does not say `core`, `always`, `tracker` or `parts` (only
+  Kobble's own may: so nothing unknown starts a program); its id is its
+  folder's name and not another extension's; it does not bring a page, block
+  or kobold another brings; its guide files are inside its own folder; its
+  settings are only in `team.env` or `settings/`. One that fails is left out,
+  with a plain line among the factory's problems, and never stops the others.
+- **The same checks before a pull request**: a branch that changes
+  `factory/extensions/` fails the builder's checks when an extension in it
+  would be refused (`extensionsReport`), so the builder fixes it first.
+- **Off switch**: Settings › Advanced › "Your team's extensions" (`team.env`,
+  on by default); off loads none, saving it reads the factory again.
+- **In the Marketplace**: the team's extensions are Available (or Installed)
+  with "Made by your team", installed and removed like the others
+  (installing is the review's second step: the pull request is the first).
+- **The guide**: the factory skill's `extensions.md`; Sprocket's guide says a
+  team asks for an extension only through its chat (as an exploration) and
+  that pages and Home blocks cannot come from one yet. An installed
+  extension's guides for the builder reach the builder's prompt.
+- **The builder is allowed in the factory's folder**: nothing forbade it (it
+  works in the whole copy); the folder is committed like any other.
+
+![A team's extension offered, "Made by your team"](issue-27-extensions-and-marketplace/team-extension-offered.png)
+![Its details](issue-27-extensions-and-marketplace/team-extension-details.png)
+![The off switch in Settings](issue-27-extensions-and-marketplace/team-extensions-setting.png)
+
+(The first picture also shows a second, broken extension left out, with why.)
+
+Decisions in step 3: no migration (no folder means nothing to load, the
+switch is on until turned off); the extension starter is not made yet.
+
+**Not done in step 3** (next):
+
+- Pages and Home blocks that run from a team's extension (built into Kobble's
+  page when the factory starts, so they look like Kobble), and the extension
+  starter with a page, a stage and a Home block (the open point about
+  Verification as its example is open still).
+- Stages from extensions: neighbours, work moving on only when a stage's
+  checks pass, Settings asking on a clash, the team moving a stage.
+- The slots (Your code, Your tasks) filled once at setup by the setup coach,
+  one filler for every extension.
+- The upgrade moving existing factories over (add-on switches to installed
+  extensions, the board connection into the slots): the add-on switches
+  already are installed extensions, so only the slots remain.
