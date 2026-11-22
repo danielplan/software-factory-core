@@ -14,6 +14,8 @@ import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
 import { checkGroups, type SettingGroup } from "../settings/setting-groups.ts";
 import type { Extension, Guide, Kit } from "./extension.ts";
+import { slotsOf } from "./slots.ts";
+import { ownExtensionsSettings } from "./team.ts";
 
 // What the core knows about: every extension and kit installed.
 export type Available = { extensions: Extension[]; kits: Kit[] };
@@ -68,6 +70,7 @@ export function assembleFactory(
     usageSettings,
     usageFolderSettings,
     updateSettings,
+    ownExtensionsSettings,
     ...extensions.flatMap((extension) => extension.settings),
   ];
   problems.push(
@@ -103,11 +106,50 @@ function chosenExtensions(
   const named = (id: string) => available.extensions.some((e) => e.id === id);
   for (const id of [...company.extensions, ...company.without])
     if (!named(id)) problems.push(`there is no extension "${id}"`);
-  return available.extensions.filter((extension) =>
+  const chosen = available.extensions.filter((extension) =>
     extension.core
       ? !company.without.includes(extension.id)
       : company.extensions.includes(extension.id),
   );
+  problems.push(...extensionProblems(available.extensions, chosen, company));
+  return chosen;
+}
+
+const SLOT_WORDS = {
+  code: "where the code lives",
+  tasks: "where the tasks are kept",
+};
+
+// An extension whose needs are not installed, or that is always needed and
+// was removed: the factory does not start, and says why.
+function extensionProblems(
+  all: Extension[],
+  chosen: Extension[],
+  company: Company,
+): string[] {
+  const nameOf = (id: string) => all.find((e) => e.id === id)?.name ?? id;
+  const unfilled = slotsOf(all, company).filter((s) => s.fillers.length === 0);
+  return [
+    ...all
+      .filter((e) => e.always && company.without.includes(e.id))
+      .map((e) => `${e.name} is always needed, so it cannot be removed`),
+    ...chosen.flatMap((extension) =>
+      unfilled
+        .filter((one) => extension.slots.includes(one.slot))
+        .map(
+          (one) =>
+            `${extension.name} uses ${SLOT_WORDS[one.slot]}, but nothing fills it`,
+        ),
+    ),
+    ...chosen.flatMap((extension) =>
+      extension.needs
+        .filter((id) => !chosen.some((e) => e.id === id))
+        .map(
+          (id) =>
+            `${extension.name} needs ${nameOf(id)}, which is not installed`,
+        ),
+    ),
+  ];
 }
 
 function chosenKits(

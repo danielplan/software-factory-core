@@ -126,6 +126,63 @@ test("the loop counts each stage and shows its latest two", () => {
   assert.equal(empty[2]?.says, "to build");
 });
 
+test("the loop follows the order of work: stages of removed extensions leave, a team's own shows without a count", () => {
+  const input = { work: null, signals: [], fresh: 0, exploring: [] };
+  const place = (id: string, own: boolean, by = "Factory") => ({
+    id,
+    name: id.toUpperCase(),
+    by,
+    own,
+  });
+  const loop = loopOf(input, undefined, undefined, [
+    place("signals", true),
+    place("build", true),
+    place("check", false, "Checks"),
+    place("done", true),
+    place("release", true),
+  ]);
+  assert.deepEqual(
+    loop.map((stage) => [stage.id, stage.count, stage.says]),
+    [
+      ["signals", 0, "new"],
+      ["build", 0, "to build"],
+      ["check", null, "Checks"],
+      ["done", 0, "merged"],
+    ],
+  );
+});
+
+test("a team's stage shows how many cards it holds: the open ones labelled with it", () => {
+  const place = {
+    id: "check",
+    name: "Check",
+    by: "Checks",
+    own: false,
+  };
+  const says = (cards: CardView[]) => {
+    const input = { work: work(cards), signals: [], fresh: 0, exploring: [] };
+    const [stage] = loopOf(input, undefined, undefined, [place]);
+    return [stage?.count, stage?.says];
+  };
+  assert.deepEqual(says([]), [null, "Checks"]);
+  assert.deepEqual(says([card(1, "doing", { held: "check" })]), [
+    1,
+    "piece of work",
+  ]);
+  // Another stage's, finished, and closed cards are not in it.
+  assert.deepEqual(
+    says([
+      card(1, "review", { held: "check" }),
+      card(2, "review", { held: "other" }),
+      card(3, "done", { held: "check" }),
+      card(4, "doing", { held: "check", closed: true }),
+      card(5, "todo", { held: "check" }),
+      card(6, "todo"),
+    ]),
+    [2, "pieces of work"],
+  );
+});
+
 test("the status line says how the product is and what the builder does", () => {
   const all = { light: "running", running: 2, shown: 2 };
   assert.equal(

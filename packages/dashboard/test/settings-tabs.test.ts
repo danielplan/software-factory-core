@@ -12,9 +12,9 @@ import {
 test("Settings has six tabs, in order", () => {
   assert.deepEqual(SETTINGS_TABS, [
     "Connections",
+    "Stages",
     "AI models",
     "Updates",
-    "Add-ons",
     "This computer",
     "Advanced",
   ]);
@@ -22,7 +22,6 @@ test("Settings has six tabs, in order", () => {
 
 test("each tab has its own address", () => {
   assert.equal(tabHash("Connections"), "#settings/connections");
-  assert.equal(tabHash("Add-ons"), "#settings/add-ons");
   assert.equal(tabHash("AI models"), "#settings/ai-models");
   assert.equal(tabHash("This computer"), "#settings/this-computer");
 });

@@ -18,6 +18,8 @@ export function githubAddOn(cli: Cli = realCli()): AddOn {
       about: "Work tracked on a GitHub board, through the GitHub CLI.",
       core: true,
       tracker: true,
+      // Where the code lives: the only filler of the slot today.
+      fills: ["code"],
     }),
     routes: (host) => routes(new GitHub(cli, host.changed), host),
   };

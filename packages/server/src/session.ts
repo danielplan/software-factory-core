@@ -12,10 +12,12 @@ import {
   type Factory,
   FACTORY_FOLDER,
   hasFactory,
+  ownExtensionsSettings,
   prepareFactory,
   saveCompany,
   saveGroup,
   type Templates,
+  withTeamExtensions,
 } from "@software-factory/core";
 import { Launcher } from "@software-factory/launcher";
 
@@ -65,6 +67,8 @@ export class Session {
   readonly options: SessionOptions;
   private root: string | null = null;
   private factory: Factory | null = null;
+  // Kobble's extensions and the team's own, read again with the factory.
+  private known: Available;
   private launcher: Launcher | null = null;
   private stopListening: (() => void) | null = null;
   private jobs: Job[] = [];
@@ -82,6 +86,7 @@ export class Session {
 
   constructor(given: SessionOptions) {
     const options = (this.options = withModelChoice(given, () => this.root));
+    this.known = options.available;
     this.coach = new SetupCoach({
       ...options.coach,
       project: options.project,
@@ -114,11 +119,7 @@ export class Session {
     return {
       mode: "factory",
       project: this.options.project,
-      ...factoryView(
-        this.factory,
-        this.root,
-        this.options.available.extensions,
-      ),
+      ...factoryView(this.factory, this.root, this.known.extensions),
       parts: this.launcher?.state() ?? [],
       kits,
       jobs: this.jobs,
@@ -239,14 +240,12 @@ export class Session {
       refuseAny(this.saveSettings(tracker, secrets).refused);
     if (entry) saveBoard(root, { ...readBoard(root), [tracker]: entry });
     this.onboarding = false;
-    const { extensions } = this.options.available;
-    this.changeCompany((c) => trackedWith(c, extensions, tracker));
+    this.changeCompany((c) => trackedWith(c, this.known.extensions, tracker));
   }
 
   // An add-on switched on or off (switch.ts).
   switchAddOn(id: string, on: boolean): void {
-    const { extensions } = this.options.available;
-    this.changeCompany((company) => switched(company, extensions, id, on));
+    this.changeCompany((c) => switched(c, this.known.extensions, id, on));
   }
 
   // Whether the factory has this add-on on.
@@ -260,7 +259,8 @@ export class Session {
     if (!this.root || !group) throw new Refused("There is no such setting.");
     const { changes, refused } = checkChanges(group, values);
     if (Object.keys(refused).length === 0) saveGroup(group, this.root, changes);
-    this.options.onChange();
+    if (group.id === ownExtensionsSettings.id) this.reload();
+    else this.options.onChange();
     return { refused };
   }
 
@@ -301,7 +301,7 @@ export class Session {
 
   // What the coach's configure acts on: this factory, as it is made.
   private workshop(): Workshop {
-    const { kits, extensions } = this.options.available;
+    const { kits, extensions } = this.known;
     return {
       project: this.options.project,
       kits,
@@ -366,6 +366,7 @@ export class Session {
     const loaded = prepareFactory(root, this.options.available);
     if ("problem" in loaded) throw new Refused(loaded.problem);
     this.factory = loaded;
+    this.known = withTeamExtensions(root, this.options.available).available;
     this.launcher?.setParts(loaded.parts);
     this.work.connect(root);
     this.options.onChange();

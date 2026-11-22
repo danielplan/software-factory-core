@@ -1,0 +1,279 @@
+// A team's own extensions: each in its own folder of the company's factory
+// (factory/extensions/<id>/extension.json), written by the builder when the
+// team asks Sprocket for something, and reviewed like any change before it
+// reaches the main branch. Nothing is loaded without passing the checks
+// below, and one extension that fails them never stops the others: it is
+// left out and the factory says why, in plain words.
+//
+// An extension of the team is a description (a file), never code that runs
+// by itself: it can bring a page, Home blocks, a kobold, a stage, a guide and
+// settings, and it can need other extensions. It cannot start programs, be
+// always needed, track work or take the place of one of Kobble's own pieces:
+// those are for Kobble's extensions, so that nothing unknown runs.
+
+import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { join, resolve, sep } from "node:path";
+
+import { z } from "zod";
+
+import { readSettings } from "../parts/addresses.ts";
+import type { SettingGroup } from "../settings/setting-groups.ts";
+import { TEAM_FILE } from "../settings/team-file.ts";
+import {
+  extensionSchema,
+  type Extension,
+  type View,
+  withBrought,
+} from "./extension.ts";
+import { readItems } from "./views.ts";
+import type { Available } from "./registry.ts";
+
+// Where a team's extensions are, in the company's factory folder.
+export const TEAM_EXTENSIONS_FOLDER = "extensions";
+
+// The file that describes one extension, in its own folder.
+export const TEAM_EXTENSION_FILE = "extension.json";
+
+// What only Kobble's own extensions have.
+const NOT_FOR_A_TEAM = ["core", "always", "tracker", "fills", "parts"] as const;
+
+// The shape of a team's extension: Kobble's, with a typo refused instead of
+// ignored and nothing that only Kobble's own have.
+const teamExtensionSchema = extensionSchema.strict();
+
+export const OWN_EXTENSIONS_KEY = "FACTORY_OWN_EXTENSIONS";
+
+// The off switch: whether the factory loads the team's own extensions at
+// all. On unless the team switches it off, for everyone (team.env).
+export const ownExtensionsSettings: SettingGroup = {
+  id: "own-extensions",
+  name: "Your team's extensions",
+  about:
+    "Extensions your team asked for, kept in the factory's extensions folder. Off: none of them is loaded, and everything else works as before.",
+  file: TEAM_FILE,
+  usedBy: [],
+  fields: [
+    {
+      key: OWN_EXTENSIONS_KEY,
+      label: "Load your team's own extensions",
+      help: "On (the standard): extensions in the factory's extensions folder are checked and offered in the Marketplace. Off: none is loaded.",
+      kind: "choice",
+      default: "on",
+      choices: [
+        { value: "off", label: "Off" },
+        { value: "on", label: "On" },
+      ],
+    },
+  ],
+};
+
+export function ownExtensionsOn(root: string): boolean {
+  return readSettings(root, TEAM_FILE)[OWN_EXTENSIONS_KEY] !== "off";
+}
+
+// What an extension is given by another (a page, a Home block, a kobold)
+// cannot be given twice: the page and Home would not know which is meant.
+const SINGLE = ["pages", "blocks", "kobolds", "stages"] as const;
+
+// The pages that are Kobble's own frame, not an extension's.
+const RESERVED_PAGES = ["home", "system", "extensions", "settings", "connect"];
+
+function insideFolder(folder: string, file: string): string | null {
+  const path = resolve(folder, file);
+  if (!existsSync(path)) return null;
+  const real = realpathSync(path);
+  return real.startsWith(realpathSync(folder) + sep) ? real : null;
+}
+
+type Read = { extension: Extension } | { problem: string };
+
+// The extension's file, read and checked against what an extension of a
+// team may say.
+function described(folder: string, where: string): Read {
+  const file = join(folder, TEAM_EXTENSION_FILE);
+  const left = (why: string): Read => ({
+    problem: `${where} ${why}, so it is not loaded`,
+  });
+  if (!existsSync(file)) return left(`has no ${TEAM_EXTENSION_FILE}`);
+  let data: unknown;
+  try {
+    data = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return left(`has an ${TEAM_EXTENSION_FILE} that cannot be read`);
+  }
+  if (typeof data !== "object" || data === null || Array.isArray(data))
+    return left("is not described as an extension");
+  const only = NOT_FOR_A_TEAM.find((key) => key in data);
+  if (only)
+    return {
+      problem: `${where} says "${only}", which only Kobble's own extensions can: it is not loaded`,
+    };
+  const parsed = teamExtensionSchema.safeParse(data);
+  return parsed.success
+    ? { extension: withBrought(parsed.data) }
+    : {
+        problem: `${where} is not right, so it is not loaded: ${z.prettifyError(parsed.error)}`,
+      };
+}
+
+// Why an extension cannot sit among the others, or null.
+function clashes(
+  extension: Extension,
+  name: string,
+  taken: Extension[],
+  where: string,
+): string | null {
+  if (extension.id !== name)
+    return `${where} is called "${extension.id}" inside: the folder and the id must be the same, so it is not loaded`;
+  const same = taken.find((other) => other.id === extension.id);
+  if (same)
+    return `${where} has the id of ${same.name}: ids are not shared, so it is not loaded`;
+  for (const kind of SINGLE) {
+    const double = extension.brings[kind].find((one) =>
+      taken.some((other) => other.brings[kind].includes(one)),
+    );
+    if (double)
+      return `${where} brings "${double}", which another extension brings already: it is not loaded`;
+  }
+  const reserved = extension.brings.pages.find((page) =>
+    RESERVED_PAGES.includes(page),
+  );
+  if (reserved)
+    return `${where} brings the page "${reserved}", which is Kobble's own: it is not loaded`;
+  for (const kind of ["pages", "blocks"] as const) {
+    const described = extension[kind].map((one) => one.id);
+    const missing = extension.brings[kind].find(
+      (one) => !described.includes(one),
+    );
+    if (missing)
+      return `${where} brings the ${kind === "pages" ? "page" : "block"} "${missing}" but does not describe it under "${kind}": it is not loaded`;
+  }
+  const lonely = extension.stages.find((stage) =>
+    [...stage.after, ...stage.before].includes(stage.id),
+  );
+  if (lonely)
+    return `${where} puts the stage "${lonely.id}" next to itself: it is not loaded`;
+  const group = extension.settings.find(
+    (one) =>
+      one.file !== TEAM_FILE && !/^settings\/[\w.-]+\.env$/.test(one.file),
+  );
+  return group
+    ? `${where} keeps settings in ${group.file}: only ${TEAM_FILE} and the settings folder are allowed, so it is not loaded`
+    : null;
+}
+
+// The extension with its guides' files found inside its own folder.
+function withGuideFiles(
+  folder: string,
+  extension: Extension,
+  where: string,
+): Read {
+  const guides = [];
+  for (const guide of extension.guides) {
+    const real = insideFolder(folder, guide.file);
+    if (!real)
+      return {
+        problem: `${where} has a guide, ${guide.file}, that is not in its own folder: it is not loaded`,
+      };
+    guides.push({ ...guide, file: real });
+  }
+  return { extension: { ...extension, guides } };
+}
+
+// A view with its list files found inside the extension's own folder and
+// readable as lists of items.
+function withListFiles(
+  folder: string,
+  views: View[],
+  where: string,
+): { views: View[] } | { problem: string } {
+  const checked: View[] = [];
+  for (const view of views) {
+    const parts = [];
+    for (const part of view.parts) {
+      if (part.show !== "list" || !part.from) {
+        parts.push(part);
+        continue;
+      }
+      const real = insideFolder(folder, part.from);
+      if (!real)
+        return {
+          problem: `${where} shows a list from ${part.from}, which is not in its own folder: it is not loaded`,
+        };
+      const read = readItems(real);
+      if ("problem" in read)
+        return {
+          problem: `${where} shows a list from ${part.from}, which ${read.problem}: it is not loaded`,
+        };
+      parts.push({ ...part, from: real });
+    }
+    checked.push({ ...view, parts });
+  }
+  return { views: checked };
+}
+
+// One folder's extension, checked: the extension, or why it is left out.
+function readOne(parent: string, name: string, taken: Extension[]): Read {
+  const folder = join(parent, name);
+  const where = `The extension in ${TEAM_EXTENSIONS_FOLDER}/${name}`;
+  const read = described(folder, where);
+  if ("problem" in read) return read;
+  const problem = clashes(read.extension, name, taken, where);
+  if (problem) return { problem };
+  const guided = withGuideFiles(folder, read.extension, where);
+  if ("problem" in guided) return guided;
+  const pages = withListFiles(folder, guided.extension.pages, where);
+  if ("problem" in pages) return pages;
+  const blocks = withListFiles(folder, guided.extension.blocks, where);
+  if ("problem" in blocks) return blocks;
+  return {
+    extension: {
+      ...guided.extension,
+      pages: pages.views,
+      blocks: blocks.views,
+    },
+  };
+}
+
+// The team's extensions found in the factory folder, each checked: the ones
+// that pass, and a plain line for each that does not. `taken` are the
+// extensions that are there already (Kobble's own).
+export function readTeamExtensions(
+  root: string,
+  taken: Extension[],
+): { extensions: Extension[]; problems: string[] } {
+  const parent = join(root, TEAM_EXTENSIONS_FOLDER);
+  if (!existsSync(parent)) return { extensions: [], problems: [] };
+  const extensions: Extension[] = [];
+  const problems: string[] = [];
+  const names = readdirSync(parent, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+  for (const name of names) {
+    const read = readOne(parent, name, [...taken, ...extensions]);
+    if ("problem" in read) problems.push(read.problem);
+    else extensions.push(read.extension);
+  }
+  return { extensions, problems };
+}
+
+// What the factory knows about with the team's extensions added, unless the
+// off switch is off; and what was wrong with any of them.
+export function withTeamExtensions(
+  root: string,
+  available: Available,
+): { available: Available; problems: string[] } {
+  if (!ownExtensionsOn(root)) return { available, problems: [] };
+  const { extensions, problems } = readTeamExtensions(
+    root,
+    available.extensions,
+  );
+  return {
+    available: {
+      ...available,
+      extensions: [...available.extensions, ...extensions],
+    },
+    problems,
+  };
+}

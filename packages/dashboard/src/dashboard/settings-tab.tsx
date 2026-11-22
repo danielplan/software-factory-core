@@ -2,8 +2,8 @@ import {
   Bot,
   ChevronDown,
   Laptop,
+  ListOrdered,
   Plug,
-  Puzzle,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
@@ -27,10 +27,10 @@ import { WhatsNew } from "@/updates/whats-new";
 import { useT } from "@/i18n/use-t";
 import type { Messages } from "@/i18n/messages";
 
-import { AddOnsTab } from "./add-ons-tab";
 import { LanguageCard } from "./language-card";
 import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
+import { StagesCard } from "./stages-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 import {
   GROUP_TABS,
@@ -44,10 +44,10 @@ import { FactoryPrograms } from "./system-page";
 // The factory's settings, in six tabs at the side; only the chosen one
 // shows, at its own address (#settings/updates). Connections: where work
 // is tracked, the live app. AI models: which model each kind of work uses,
-// and the builder's group. Updates. Add-ons: the add-ons and kits. This
+// and the builder's group. Updates. This
 // computer: the start on the desktop. Advanced: the factory's own programs,
-// then each settings group that no add-on has (an add-on's are in its card
-// on Add-ons). Each card shows what is set now and saves on its own; the
+// then each settings group that no extension has (an extension's are in its
+// details in the Marketplace). Each card shows what is set now and saves on its own; the
 // parts that read it can be restarted from there.
 export function SettingsTab({
   state,
@@ -91,6 +91,11 @@ const LOOKS: Record<
     color: "var(--source-app)",
     word: "connections",
   },
+  Stages: {
+    icon: <ListOrdered aria-hidden />,
+    color: "var(--explore)",
+    word: "stages",
+  },
   "AI models": {
     icon: <Bot aria-hidden />,
     color: "var(--explore)",
@@ -100,11 +105,6 @@ const LOOKS: Record<
     icon: <RefreshCw aria-hidden />,
     color: "var(--build)",
     word: "updates",
-  },
-  "Add-ons": {
-    icon: <Puzzle aria-hidden />,
-    color: "var(--explore)",
-    word: "addOns",
   },
   "This computer": {
     icon: <Laptop aria-hidden />,
@@ -166,6 +166,7 @@ function sectionsOf(
   return [
     section(n.tracker, "Connections", <TrackerCard state={state} />),
     section(n.liveApp, "Connections", <LiveAppCard />),
+    section(n.stages, "Stages", <StagesCard state={state} />),
     section(
       n.updates,
       "Updates",
@@ -179,13 +180,6 @@ function sectionsOf(
       <Topic title={n.whatsNew} about={whatsNewAbout}>
         <WhatsNew />
       </Topic>,
-    ),
-    section(
-      n.addOns,
-      "Add-ons",
-      <Section name={n.addOns}>
-        <AddOnsTab state={state} />
-      </Section>,
     ),
     section(n.language, "This computer", <LanguageCard />),
     section(

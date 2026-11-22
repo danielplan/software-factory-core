@@ -10,6 +10,9 @@ import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
 
 import { teamRoutes } from "../coach/setup-team.ts";
 import { feedbackRoutes } from "../feedback/routes.ts";
+import { homeLayoutRoutes } from "../home-layout.ts";
+import { stagesRoutes } from "../stages.ts";
+import { workRoutes } from "../work-book.ts";
 import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
@@ -20,6 +23,39 @@ import { storeOf } from "./usage-routes.ts";
 import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
+
+// What the team arranges, kept in the factory's files: Home's blocks and the
+// order of stages; and the cards, as the pieces of work going through them.
+function arrangedInFiles(
+  session: Session,
+  tell: (event: string) => void,
+  cli: Cli,
+) {
+  const factory = () => {
+    const state = session.state();
+    return state.mode === "factory" ? state : null;
+  };
+  return {
+    ...homeLayoutRoutes(session.options.project, tellerOf(tell), () =>
+      (factory()?.addOns ?? []).flatMap((one) => one.brings.blocks),
+    ),
+    ...stagesRoutes(session),
+    ...workRoutes({
+      cards: () =>
+        connectedCards(join(session.options.project, FACTORY_FOLDER), cli),
+      kobbles: () =>
+        (factory()?.addOns ?? [])
+          .filter((one) => one.builtIn)
+          .flatMap((one) => one.screens.stages.map((stage) => stage.id)),
+      course: () =>
+        (factory()?.stages.order ?? []).map(({ id, checks }) => ({
+          id,
+          checks,
+        })),
+      changed: tellerOf(tell),
+    }),
+  };
+}
 
 function kobbleAlone(
   session: Session,
@@ -70,6 +106,7 @@ export function kobbleOf(
       ...updates.routes,
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
+      ...arrangedInFiles(session, tell, more.cli),
       ...feedback.routes,
       ...releasesRoutes({
         project: session.options.project,

@@ -147,7 +147,9 @@ export const feedbackItalian: typeof feedbackEnglish = {
         said: "La release non è riuscita",
       },
       personas: { text: "Vorresti che le personas facessero di più? Dimmelo" },
+      extensions: { text: "Ti serve un'estensione che non c'è? Dimmelo" },
       settings: { text: "Non trovi un'impostazione? Chiedimelo" },
+      team: { text: "Vuoi cambiare qualcosa in questa pagina? Dimmelo" },
     },
     starts: {
       startBug: {

@@ -4,14 +4,15 @@ import {
   House,
   Inbox,
   Menu,
+  Puzzle,
   Settings,
   Columns3,
   Tag,
   Users,
 } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 
-import type { Light } from "@/api";
+import type { Light, ShownView } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
 import { type Doing, PageKobold } from "@/components/page-kobold";
 import { StatusLight } from "@/components/status-light";
@@ -31,6 +32,7 @@ import { UpdateRow } from "@/updates/update-row";
 import { FeedbackRow } from "@/feedback/feedback-row";
 
 import { type Item, PageLink, ProductState } from "./sidebar-links";
+import { GroupLabel, TeamPages } from "./team-pages";
 
 // Home and System at the top (System with the product's light, or Open when
 // it runs), then the pages in labelled groups: the work, from what came in
@@ -89,15 +91,12 @@ const GROUPS: { label: "work" | "customers"; items: Item[] }[] = [
   },
 ];
 
-function GroupLabel({ children }: Readonly<{ children: ReactNode }>) {
-  return (
-    <span className="px-2.5 pb-1 text-[11px] font-medium text-sidebar-muted">
-      {children}
-    </span>
-  );
-}
-
 const QUIET: Item[] = [
+  {
+    page: "extensions",
+    icon: <Puzzle aria-hidden />,
+    color: "#667085",
+  },
   {
     page: "settings",
     icon: <Settings aria-hidden />,
@@ -113,11 +112,17 @@ type SidebarProps = Readonly<{
   // gives one; Kobble's own name without one.
   name: string | null;
   current: Page;
+  // What is open in the page: for a team's page, which one.
+  open: string | null;
   counts: Partial<Record<Page, number>>;
   kobold: KoboldStatus;
   // What each kobold does now (lib/kobolds.ts).
   doing: Doing;
   light: Light;
+  // The pages of extensions that are not installed: not in the sidebar.
+  left: Page[];
+  // The pages the team's own extensions bring, in a group of their own.
+  team: ShownView[];
   // The product's light, and where it opens while it runs.
   product: { light: Light; link: string | null };
 }>;
@@ -162,7 +167,8 @@ export function Sidebar(props: SidebarProps) {
 }
 
 function Content(props: SidebarProps & { onGo?: () => void }) {
-  const { current, counts, doing, product, onGo } = props;
+  const { current, counts, doing, product, left, onGo } = props;
+  const { team, open } = props;
   const nav = useT().shell.nav;
   return (
     <>
@@ -176,7 +182,18 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
           </PageLink>
         ))}
       </nav>
-      <Pages current={current} counts={counts} doing={doing} onGo={onGo} />
+      <Pages
+        current={current}
+        counts={counts}
+        doing={doing}
+        left={left}
+        onGo={onGo}
+      />
+      <TeamPages
+        pages={team}
+        current={current === "team" ? open : null}
+        onGo={onGo}
+      />
       <div className="mt-auto grid gap-0.5 pt-4">
         <UpdateRow />
         <FeedbackRow current={current} />
@@ -254,17 +271,24 @@ function Pages({
   current,
   counts,
   doing,
+  left,
   onGo,
 }: Readonly<{
   current: Page;
   counts: Partial<Record<Page, number>>;
   doing: Doing;
+  left: Page[];
   onGo?: () => void;
 }>) {
   const t = useT().shell;
+  // A group whose pages are all left out is left out too.
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !left.includes(item.page)),
+  })).filter((group) => group.items.length > 0);
   return (
     <nav aria-label={t.nav.pages} className="grid gap-px">
-      {GROUPS.map((group, at) => (
+      {groups.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{t.groups[group.label]}</GroupLabel>
           {group.items.map((item) => (

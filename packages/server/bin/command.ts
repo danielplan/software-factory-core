@@ -23,6 +23,7 @@ import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/add-ons/github/board-setup.ts";
 import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { jiraAddOn } from "../src/add-ons/jira/index.ts";
+import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
 
 // The parts that ran before the factory started again on a new Kobble.
 const RESUME = "SOFTWARE_FACTORY_RESUME";
@@ -48,13 +49,17 @@ if (answered !== null) process.exit(answered);
 
 // The add-ons that ship with the factory.
 const addOns = [githubAddOn(), jiraAddOn()];
+const extensions = [
+  ...KOBBLE_EXTENSIONS,
+  ...addOns.map((addOn) => addOn.extension),
+];
 
 // The project's factory, brought to this core's version: done, then exit.
 if (process.argv[2] === "upgrade")
   process.exit(
     await upgradeCommand(process.cwd(), {
       kits: allKits,
-      extensions: addOns.map((addOn) => addOn.extension),
+      extensions,
     }),
   );
 
@@ -75,7 +80,7 @@ const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");
 const session = new Session({
   project,
   available: {
-    extensions: addOns.map((addOn) => addOn.extension),
+    extensions,
     kits: allKits,
   },
   templates: {

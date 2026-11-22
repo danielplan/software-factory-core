@@ -1,14 +1,18 @@
 // The factory as the page shows it: its products, kits and add-ons.
 
 import {
+  courseOf,
   type Extension,
   type Factory,
   groupView,
   type Kit,
+  shownView,
+  slotsOf,
 } from "@software-factory/core";
 
 import type { KitView, ProductView, State } from "./api.ts";
 import { readBoard } from "./connect/board-file.ts";
+import { chosenStages, stagesView } from "./stages.ts";
 
 // What the page shows of an open factory, from its files.
 export function factoryView(
@@ -17,7 +21,15 @@ export function factoryView(
   extensions: Extension[],
 ): Pick<
   Extract<State, { mode: "factory" }>,
-  "root" | "company" | "products" | "settings" | "problems" | "board" | "addOns"
+  | "root"
+  | "company"
+  | "products"
+  | "settings"
+  | "problems"
+  | "board"
+  | "addOns"
+  | "stages"
+  | "slots"
 > {
   return {
     root,
@@ -33,8 +45,33 @@ export function factoryView(
       builtIn: extension.core,
       on: factory.extensions.some((e) => e.id === extension.id),
       tracker: extension.tracker,
+      always: extension.always,
+      needs: extension.needs,
+      slots: extension.slots,
+      brings: extension.brings,
+      screens: {
+        pages: extension.pages.map(shownView),
+        blocks: extension.blocks.map(shownView),
+        stages: extension.stages.map(({ id, name }) => ({ id, name })),
+      },
       settings: extension.settings.map((group) => group.id),
     })),
+    stages: stagesOf(factory, root),
+    slots: slotsOf(extensions, factory.company),
+  };
+}
+
+// The stages of the installed extensions in the team's order, and the
+// clash left open between two of them, by id.
+function stagesOf(factory: Factory, root: string) {
+  const { order, clash } = stagesView(root, factory.extensions);
+  const course = courseOf(factory.extensions, chosenStages(root));
+  return {
+    order: order.map((stage) => ({
+      ...stage,
+      checks: course.find((one) => one.id === stage.id)?.checks ?? [],
+    })),
+    clash: clash && { first: clash.first.id, second: clash.second.id },
   };
 }
 
@@ -45,6 +82,13 @@ export function kitViews(kits: Kit[]): KitView[] {
     about: kit.about,
     kind: kit.kind,
     canCreate: kit.create !== null,
+    madeBy: "kobble",
+    brings: [
+      ...(kit.rules.length > 0 ? (["rules"] as const) : []),
+      ...(kit.starter ? (["starter"] as const) : []),
+      ...(Object.keys(kit.commands).length > 0 ? (["checks"] as const) : []),
+      ...(Object.keys(kit.mcp).length > 0 ? (["tools"] as const) : []),
+    ],
   }));
 }
 

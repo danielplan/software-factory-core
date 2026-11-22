@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { withKept } from "@software-factory/core";
+
 import { markComment, readNote, stripMarker } from "../src/builder/protocol.ts";
 import {
   aboutOf,
+  heldArgs,
   isStuck,
   labelArgs,
   planOf,
@@ -51,6 +54,48 @@ test("a card the builder got stuck on carries the stuck label, made where there 
     ["issue", "edit", "7", ...repo, "--remove-label", STUCK_LABEL],
   ]);
   assert.deepEqual(stuckArgs(7, [], false, repo), []);
+});
+
+test("a card in a team's stage carries its label, made where there is none yet, and only one", () => {
+  const repo = ["--repo", "o/r"];
+  assert.deepEqual(heldArgs(7, ["type: bug"], "checklist", repo), [
+    [
+      "label",
+      "create",
+      "stage: checklist",
+      ...repo,
+      "--color",
+      "8957e5",
+      "--force",
+    ],
+    ["issue", "edit", "7", ...repo, "--add-label", "stage: checklist"],
+  ]);
+  assert.deepEqual(heldArgs(7, ["stage: checklist"], "checklist", repo), []);
+  assert.deepEqual(heldArgs(7, ["stage: checklist"], "audit", repo).at(-1), [
+    "issue",
+    "edit",
+    "7",
+    ...repo,
+    "--add-label",
+    "stage: audit",
+    "--remove-label",
+    "stage: checklist",
+  ]);
+  assert.deepEqual(heldArgs(7, ["stage: checklist", "x"], null, repo), [
+    ["issue", "edit", "7", ...repo, "--remove-label", "stage: checklist"],
+  ]);
+  assert.deepEqual(heldArgs(7, ["x"], null, repo), []);
+});
+
+test("what a card says it asks for leaves out what its piece of work keeps", () => {
+  const body = withKept(withPlan("It asks for A.", "Do A."), {
+    stage: "build",
+    passed: [],
+    history: [],
+    parts: {},
+  });
+  assert.equal(aboutOf(body), "It asks for A.");
+  assert.equal(planOf(body), "## The agreed plan\n\nDo A.");
 });
 
 test("an earlier factory's notes and plan are read too", () => {

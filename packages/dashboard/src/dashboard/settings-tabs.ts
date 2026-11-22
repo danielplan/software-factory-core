@@ -3,9 +3,9 @@
 
 export const SETTINGS_TABS = [
   "Connections",
+  "Stages",
   "AI models",
   "Updates",
-  "Add-ons",
   "This computer",
   "Advanced",
 ] as const;

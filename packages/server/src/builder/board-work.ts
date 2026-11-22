@@ -8,6 +8,8 @@
 // a person answers. The cards the builder got stuck on are shown apart
 // (Stuck); the owner's hint on one hands it back to the builder (To do).
 
+import { labelledStage } from "@software-factory/core";
+
 import type {
   Asking,
   BuilderView,
@@ -259,6 +261,7 @@ export class BoardWork {
         asks: false,
         type: typeOf(labels),
         stuck: isStuck(labels),
+        held: labelledStage(labels),
       }),
     );
     this.problem = null;

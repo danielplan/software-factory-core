@@ -2,6 +2,8 @@
 // that are issues of the connected repository (and carry the factory's label,
 // unless it takes in every card), each in the column of its Status field.
 
+import { keptIn, withKept } from "@software-factory/core";
+
 import type { Stage, StageMap } from "../api.ts";
 import { STAGES } from "../api.ts";
 import { answer, ownerOf, statusOf } from "../add-ons/github/board-setup.ts";
@@ -9,13 +11,15 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { Refused } from "../refused.ts";
 import type { Card, CardDetail, Cards, CardType } from "./cards.ts";
 import { blockedBy, relationsOf } from "./github-relations.ts";
+import { type Item, type Project, readProject } from "./github-items.ts";
 import {
-  type Item,
-  itemOf,
-  ITEMS,
-  type ProjectAnswer,
-} from "./github-items.ts";
-import { labelArgs, planOf, stuckArgs, typeEdit, withPlan } from "./cards.ts";
+  heldArgs,
+  labelArgs,
+  planOf,
+  stuckArgs,
+  typeEdit,
+  withPlan,
+} from "./cards.ts";
 
 // The board as board.json keeps it.
 export type GitHubBoard = {
@@ -24,8 +28,6 @@ export type GitHubBoard = {
   label: string;
   stages: StageMap;
 };
-
-type Project = { id: string; items: Item[] };
 
 export function githubCards(cli: Cli, board: GitHubBoard): Cards {
   const cards = new GitHubCards(cli, board);
@@ -36,6 +38,7 @@ export function githubCards(cli: Cli, board: GitHubBoard): Cards {
     comment: (number, text) => cards.comment(number, text),
     create: (title, body, stage) => cards.create(title, body, stage),
     writePlan: (number, plan) => cards.writePlan(number, plan),
+    keepWork: (number, kept, held) => cards.keepWork(number, kept, held),
     dependOn: (number, on) => cards.dependOn(number, on),
     replace: (number, by) => cards.replace(number, by),
     setType: (number, type) => cards.setType(number, type),
@@ -78,6 +81,7 @@ class GitHubCards {
       ...card,
       body: read.body,
       agreed: planOf(read.body) !== null,
+      kept: keptIn(read.body),
       ...related,
       comments: read.comments.map((c) => ({
         author: c.author?.login ?? "",
@@ -154,15 +158,38 @@ class GitHubCards {
   }
 
   async writePlan(number: number, plan: string): Promise<void> {
+    await this.editBody(number, (body) => withPlan(body, plan));
+  }
+
+  // The card's text, changed by `change`, written back when it differs.
+  private async editBody(
+    number: number,
+    change: (body: string) => string,
+  ): Promise<void> {
     const { body } = await this.issue<{ body: string }>(number, "body");
-    await this.gh([
-      "issue",
-      "edit",
-      String(number),
-      ...this.repo,
-      "--body",
-      withPlan(body, plan),
-    ]);
+    const written = change(body);
+    if (written !== body)
+      await this.gh([
+        "issue",
+        "edit",
+        String(number),
+        ...this.repo,
+        "--body",
+        written,
+      ]);
+  }
+
+  // The card's piece of work: what it keeps in its text, and the label of the
+  // team's stage that holds it.
+  async keepWork(
+    number: number,
+    kept: Parameters<typeof withKept>[1],
+    held: string | null,
+  ): Promise<void> {
+    const { card } = await this.find(number);
+    await this.editBody(number, (body) => withKept(body, kept));
+    for (const args of heldArgs(number, card.labels, held, this.repo))
+      await this.gh(args);
   }
 
   // The card's type as a label (made when GitHub has none of that name);
@@ -278,20 +305,8 @@ class GitHubCards {
   }
 
   // The board's id and its items, each with its column and issue.
-  private async project(): Promise<Project> {
-    const number = String(this.board.board);
-    const read = JSON.parse(
-      await this.gh([
-        "api",
-        "graphql",
-        "-f",
-        `query={ repositoryOwner(login: ${JSON.stringify(this.owner)}) { ... on User { projectV2(number: ${number}) { ${ITEMS} } } ... on Organization { projectV2(number: ${number}) { ${ITEMS} } } } }`,
-      ]),
-    ) as ProjectAnswer;
-    const found = read.data?.repositoryOwner?.projectV2;
-    if (!found)
-      throw new Refused(`There is no board ${number} of ${this.owner}.`);
-    return { id: found.id, items: found.items.nodes.map(itemOf) };
+  private project(): Promise<Project> {
+    return readProject(this.gh.bind(this), this.owner, this.board.board);
   }
 
   // Puts the item in the column of the stage, as board.json matches them.

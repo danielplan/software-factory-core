@@ -28,3 +28,11 @@ export function dayIn(locale: Locale, iso: string): string {
     year: "numeric",
   });
 }
+
+// Names in a row, as people in the language shown write them: "a, b and c".
+export function listIn(locale: Locale, items: string[]): string {
+  return new Intl.ListFormat(locale, {
+    style: "long",
+    type: "conjunction",
+  }).format(items);
+}

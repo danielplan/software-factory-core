@@ -44,8 +44,9 @@ test("the old addresses lead to the new pages", () => {
   assert.equal(movedHash("#ideas"), "#explore");
   assert.equal(movedHash("#ideas/idea-1"), "#explore/idea-1");
   assert.equal(movedHash("#workshop"), "#system");
-  assert.equal(movedHash("#workshop/add-ons"), "#settings/add-ons");
-  assert.equal(movedHash("#add-ons"), "#settings/add-ons");
+  assert.equal(movedHash("#workshop/add-ons"), "#extensions");
+  assert.equal(movedHash("#add-ons"), "#extensions");
+  assert.equal(movedHash("#settings/add-ons"), "#extensions");
   assert.equal(movedHash("ideas/idea-1"), "#explore/idea-1");
   assert.equal(movedHash("#today"), "#signals");
   assert.equal(movedHash("#customers"), "#personas");
@@ -57,10 +58,7 @@ test("the old addresses lead to the new pages", () => {
     page: "explore",
     open: "idea-1",
   });
-  assert.deepEqual(placeOf("#add-ons"), {
-    page: "settings",
-    open: "add-ons",
-  });
+  assert.deepEqual(placeOf("#add-ons"), { page: "extensions", open: null });
 });
 
 test("the new addresses have not moved", () => {

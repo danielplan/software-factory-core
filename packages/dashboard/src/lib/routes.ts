@@ -1,8 +1,9 @@
 // Where the dashboard is, from the address after the # (#explore/<id>), so
 // a reload stays there. Addresses from before the pages were renamed or
-// taken away (#board, #ideas/<id>, #workshop, #add-ons, #today, #customers,
-// #products, #understand, #prototype) still lead somewhere that makes sense.
+// taken away (#board, #ideas/<id>, #workshop, #add-ons, #settings/add-ons,
+// #today, #customers, #products, #understand, #prototype) still lead somewhere that makes sense.
 
+// "team" is a page one of the team's own extensions brings (#team/<id>).
 // Explorations is still the page "explore", and the Factory board "build":
 // their addresses stay as they were.
 export const PAGES = [
@@ -13,7 +14,9 @@ export const PAGES = [
   "build",
   "releases",
   "personas",
+  "extensions",
   "settings",
+  "team",
 ] as const;
 export type Page = (typeof PAGES)[number];
 
@@ -31,9 +34,10 @@ const FIRST: Page = "home";
 const MOVED = new Map([
   ["board", "build"],
   ["ideas", "explore"],
-  ["workshop/add-ons", "settings/add-ons"],
+  ["workshop/add-ons", "extensions"],
+  ["settings/add-ons", "extensions"],
   ["workshop", "system"],
-  ["add-ons", "settings/add-ons"],
+  ["add-ons", "extensions"],
   ["today", "signals"],
   ["feedback", "signals"],
   ["customers", "personas"],

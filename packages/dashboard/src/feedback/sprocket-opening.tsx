@@ -32,7 +32,9 @@ const HERE: Record<Page, Kind | "ask"> = {
   build: "bug",
   releases: "bug",
   personas: "wish",
+  extensions: "wish",
   settings: "ask",
+  team: "ask",
 };
 
 const CHOICES = [

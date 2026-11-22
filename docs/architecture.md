@@ -367,9 +367,103 @@ extension with the routes the server answers for it, at
 `/api/add-ons/<id>/…` and only while it is on; its page, if any, is in
 `packages/dashboard/src/add-ons/`. Built-in add-ons (`core: true`) are on
 unless the company file switches them off (`without`); others are switched
-on by name (`extensions`); the owner switches them in the dashboard's
-Settings (Add-ons), which also lists the kits. The first add-ons are where work is tracked: a
-GitHub board and Jira Cloud (`tracker: true`). What each adds:
+on by name (`extensions`); the owner installs and removes them in the
+dashboard's Marketplace, which also shows the connections (where the code and
+the tasks are) and the kits. An extension says what it **brings** (pages,
+Home blocks, kobolds, stages), what it **needs** (other extensions, by id),
+the **slots** it uses (`code`, `tasks`: the jobs the factory fills once for
+every extension) and whether it is **always** needed. Installing one brings
+what it needs; removing one that another needs, or an always-needed one, is
+refused; a factory with a need missing does not start, and says why
+(`assembleFactory`). Kobble's own pieces are extensions too (Factory,
+Explorations, Signals, Personas, Releases: `server/src/add-ons/kobble.ts`),
+and the page of one that is removed leaves the sidebar. Home is built
+from the blocks the installed extensions bring (`brings.blocks`): the team
+arranges it with Arrange Home, and the arrangement is kept for everybody in
+`factory/home.json` (`server/src/home-layout.ts`, GET and POST
+`/api/home-layout`). With no file Home shows what it showed before it could be
+arranged (the product line, what waits, the loop); a block whose extension is
+removed leaves Home and returns in its place with it; a block an extension
+brings later starts off Home.
+
+A team's own extensions are in the company's factory folder, one folder each
+(`factory/extensions/<id>/extension.json`), written by the builder when the
+team asks Sprocket for one, and reviewed like any change. They are a
+description, never code that runs: an extension of the team brings pages,
+Home blocks, stages, kobolds (by name), guides and settings, and can need
+other extensions; it cannot start programs, be always needed, track
+work or reuse the id or what another extension brings, and its guide files
+and settings files stay in its own folder and the settings folder. Nothing
+loads without passing these checks (`readTeamExtensions`,
+`packages/core/src/extensions/team.ts`); one that fails is left out with a
+plain line among the factory's problems, never stopping the others. The same
+checks run on the builder's branch before its pull request
+(`extensionsReport`, `server/src/builder/checks.ts`), so a pull request
+never brings an extension that is then left out. The team's extensions are
+offered in the Marketplace as "Made by your team", installed and removed like
+Kobble's own, and switched off all together in Settings (`own-extensions`,
+in `team.env`, on by default). An installed extension's guides for the
+builder are added to its prompt (`server/src/builder/extension-guides.ts`).
+How the builder writes one: the factory skill's `extensions.md`, with a
+starter to copy (`extension-starter/`: a page, a Home block and a stage).
+
+A team's **page and Home block** are described, not coded (`pages`, `blocks`
+in the description): a name, a line, an icon and parts, each some text or a
+list (items written there or kept in a JSON file of the extension's folder,
+read each time it is shown: `shownView`, `core/src/extensions/views.ts`). The
+page draws them with its own components (`dashboard/src/extensions/screen-view.tsx`),
+so they look like Kobble's own and cannot change how it works: pages show in
+the sidebar under Your team (`#team/<id>`), blocks on Home. Because a team's
+extension cannot start programs, nothing it describes runs.
+
+**Stages** are not fixed: each comes from an extension (`stages`), which
+suggests its place by naming the stages it comes `after` and `before`
+(`orderStages`, `core/src/extensions/stages.ts`; a neighbour that is not
+installed does not matter). Two stages that fit the same place, or that each
+want to come after the other, are a clash: Settings › Stages asks the team
+which comes first, and the team can move any stage; the answer is kept in
+`factory/stages.json` and wins over the suggestions. Home's loop follows the
+order: Kobble's counted stages show while their extension is installed, and a
+team's own stage shows how many cards it holds.
+
+**The piece of work** (`core/src/work/work.ts`) is what every extension
+shares, and for now it is the board's **card**: the only piece of work there
+is. It has the card's number and title, its stage, the checks of that stage
+that have passed and a history of every move (who, when, from where).
+Extensions add their part to it (a few words under their own id, `addPart`).
+It moves with `moveWork`: to the next stage only when every check of the stage
+it is in has passed, one stage at a time; back to an earlier stage with no
+checks, which start again. A stage names its checks in the extension
+(`checks`), as words: a person or the extension's kobold marks one as passed
+(`passCheck`).
+
+A card goes through **Build**, the team's stages between Build and Done, and
+**Done** (`cardCourse`); Kobble's other stages (signals, explore, release) hold
+no card. Kobble's own stages stay as they are, with no checks: a card is in
+Build or Done as its board column says, and moving it between columns is the
+board's. Only a team's stage is kept on the card: a label (`stage: checklist`)
+puts it there, and a marked section of the card's text, as the agreed plan has
+(`withKept`), keeps the checks that passed and the history. A card with
+neither is where its board column puts it, so every card has a stage from the
+start and no migration moves anything. A card that is Done or closed is
+finished: the label no longer holds it. A stage whose extension is removed lets
+its cards go back to Build.
+
+The server answers `/api/work-pieces` (list, check, move; `server/src/work-book.ts`)
+from the board's cards. A move into Done also moves the card's column to Done;
+a move out of Done puts it in Review. A move is told to everyone who listens
+(`Moved`) and to the page. No screen starts or moves a piece of work.
+
+**Slots** are the jobs the factory fills once for every extension (`SLOTS`:
+`code`, `tasks`). Only Kobble defines them and only Kobble's own extensions
+fill one (`fills`; a tracker fills `tasks`): GitHub fills `code`; the one in
+use for `tasks` is the company's tracker, so the board the team connected at
+setup is the filler for every extension and swapping it swaps it for all
+(`slotsOf`, `core/src/extensions/slots.ts`). An installed extension that uses
+a slot nothing can fill stops the factory, with the reason.
+
+The first add-ons are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
+shown as connections, not as extensions. What each adds:
 
 | Point                              | What                                                                                                              | Today                                                                                                        |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |

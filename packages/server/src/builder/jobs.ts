@@ -22,6 +22,7 @@ import {
 } from "./checks.ts";
 import type { BoardCard, Job } from "./decide.ts";
 import { byHand } from "./by-hand.ts";
+import { guidesFor, withGuides } from "./extension-guides.ts";
 import { keepKnowledge } from "./knowledge-kept.ts";
 import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
 import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
@@ -279,11 +280,15 @@ export class Jobs {
       ? await this.options.browser().catch(() => null)
       : null;
     try {
+      const copy = await at.build();
       return await builderTurn({
         claude: this.options.claude,
-        copy: await at.build(),
+        copy,
         card,
-        prompt,
+        prompt: withGuides(
+          prompt,
+          guidesFor(copy.path, this.options.available, "builder"),
+        ),
         onActivity,
         model: this.options.model?.(),
         timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,

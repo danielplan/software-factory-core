@@ -1,0 +1,66 @@
+// The order of the stages of work, the team's own: kept in the factory's
+// folder (factory/stages.json) beside Home's arrangement. Nothing there means
+// the team never moved a stage, so the order comes from what the extensions
+// suggest. Saving it settles a clash and moves any stage; the page is told.
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+import {
+  type Extension,
+  FACTORY_FOLDER,
+  orderStages,
+  type StageOrder,
+} from "@software-factory/core";
+
+import type { Route } from "./add-ons/add-on.ts";
+import { Refused } from "./refused.ts";
+import type { Session } from "./session.ts";
+
+const FILE = "stages.json";
+
+// The stage ids the team put in order, or none when there is no file or it
+// is not one (a file edited by hand into something else: the suggestions rule).
+export function chosenStages(root: string): string[] {
+  const file = join(root, FILE);
+  if (!existsSync(file)) return [];
+  try {
+    const read = JSON.parse(readFileSync(file, "utf8")) as { order?: unknown };
+    return Array.isArray(read.order) &&
+      read.order.every((one) => typeof one === "string")
+      ? read.order
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+// The stages of the installed extensions, in the order the team has them.
+export function stagesView(root: string, installed: Extension[]): StageOrder {
+  return orderStages(installed, chosenStages(root));
+}
+
+export function stagesRoutes(session: Session): Record<string, Route> {
+  const root = join(session.options.project, FACTORY_FOLDER);
+  return {
+    "POST /api/stages": (body) => {
+      const { order } = (body ?? {}) as { order?: unknown };
+      const state = session.state();
+      const known =
+        state.mode === "factory"
+          ? state.stages.order.map((stage) => stage.id)
+          : [];
+      if (
+        !Array.isArray(order) ||
+        !order.every((one) => typeof one === "string" && known.includes(one))
+      )
+        throw new Refused("That is not an order of the stages.");
+      mkdirSync(root, { recursive: true });
+      writeFileSync(
+        join(root, FILE),
+        `${JSON.stringify({ order: [...new Set(order)] }, null, 2)}\n`,
+      );
+      session.options.onChange();
+    },
+  };
+}

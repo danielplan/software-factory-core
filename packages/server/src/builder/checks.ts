@@ -14,7 +14,9 @@ import {
   type Available,
   FACTORY_FOLDER,
   loadFactory,
+  readTeamExtensions,
   run,
+  TEAM_EXTENSIONS_FOLDER,
 } from "@software-factory/core";
 import { unlistedPackagesOf } from "@software-factory/kits";
 
@@ -56,7 +58,10 @@ export async function checkWithFixes(options: {
         onActivity(`Checking ${c.name}: ${c.command}`);
       },
     );
-    const outcome = withReport(ran, libraryReport(copy, available, changed));
+    const outcome = withReport(
+      withReport(ran, libraryReport(copy, available, changed)),
+      extensionsReport(copy, available, changed),
+    );
     if (options.card === undefined) return outcome;
     return withReport(
       outcome,
@@ -121,6 +126,26 @@ export function libraryReport(
       ];
     })
     .join("\n\n");
+}
+
+// The team's extensions the factory would refuse to load, said as a failed
+// check, when the branch changed any; "" when it did not or all pass. The
+// same checks run when the factory loads them, so a pull request never
+// brings an extension that is then left out.
+export function extensionsReport(
+  copy: string,
+  available: Available,
+  changed: string[],
+): string {
+  const folder = `${FACTORY_FOLDER}/${TEAM_EXTENSIONS_FOLDER}/`;
+  if (!changed.some((file) => file.startsWith(folder))) return "";
+  const { problems } = readTeamExtensions(
+    join(copy, FACTORY_FOLDER),
+    available.extensions,
+  );
+  if (problems.length === 0) return "";
+  const list = problems.map((problem) => `- ${problem}`).join("\n");
+  return `### Your team's extensions: not loaded\n\n${list}\n\nThe factory leaves out an extension that fails these checks. Fix each one in its folder, following the extension guide (\`extension-guide.md\` in the factory skill's guides).`;
 }
 
 // The outcome with one more failed check's report, when it has one.

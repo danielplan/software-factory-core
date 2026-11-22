@@ -9,6 +9,7 @@ import {
   type Available,
   type Factory,
 } from "./extensions/registry.ts";
+import { withTeamExtensions } from "./extensions/team.ts";
 import type { Part } from "./parts/part.ts";
 import { findProducts } from "./products/find-products.ts";
 import type { Product } from "./products/product.ts";
@@ -33,14 +34,15 @@ export function loadFactory(
   const products = copy
     ? found.products.map((product) => movedPort(product, available, copy))
     : found.products;
-  const factory = assembleFactory(read.company, products, available);
+  const team = withTeamExtensions(root, available);
+  const factory = assembleFactory(read.company, products, team.available);
   const parts = copy
     ? factory.parts.map((part) => withCopyEnv(part, products, copy))
     : factory.parts;
   return {
     ...factory,
     parts,
-    problems: [...found.problems, ...factory.problems],
+    problems: [...found.problems, ...team.problems, ...factory.problems],
   };
 }
 

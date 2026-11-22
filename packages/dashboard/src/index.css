@@ -507,3 +507,137 @@
   background-size: 200% 100%;
   animation: shimmer 2.2s ease-in-out infinite;
 }
+
+/* Calm, short motion for the Marketplace and Home's arrange mode: 150 to
+   250 ms, ease-out. All of it off when the person prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  /* A card rising into view, a little after the one before it. Only
+     backwards: once in, it holds no transform (so a hover can lift it). */
+  .m-rise {
+    animation: m-rise 0.22s ease-out backwards;
+  }
+  .m-stagger > :nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .m-stagger > :nth-child(2) {
+    animation-delay: 25ms;
+  }
+  .m-stagger > :nth-child(3) {
+    animation-delay: 50ms;
+  }
+  .m-stagger > :nth-child(4) {
+    animation-delay: 75ms;
+  }
+  .m-stagger > :nth-child(5) {
+    animation-delay: 100ms;
+  }
+  .m-stagger > :nth-child(6) {
+    animation-delay: 125ms;
+  }
+  .m-stagger > :nth-child(7) {
+    animation-delay: 150ms;
+  }
+  .m-stagger > :nth-child(8) {
+    animation-delay: 175ms;
+  }
+  .m-stagger > :nth-child(n + 9) {
+    animation-delay: 200ms;
+  }
+  /* A card just installed: from white to its green, its check popping in. */
+  .m-tint {
+    animation: m-tint 0.25s ease-out backwards;
+  }
+  .m-pop {
+    animation: m-pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4) backwards;
+  }
+  /* A card being removed fades and shrinks a little. */
+  .m-leave {
+    animation: m-leave 0.2s ease-out forwards;
+  }
+  /* Home's blocks come in together once: one gentle fade, a 4px rise. */
+  .m-home-in {
+    animation: m-home-in 0.2s ease-out backwards;
+  }
+  /* A block just placed on Home: a ring that fades. */
+  .m-ring {
+    animation: m-ring 1.4s ease-out backwards;
+  }
+  /* A dialog: a soft fade with the panel rising 4px (160 ms), the backdrop
+     fading in with it; closing is a 120 ms fade only. No scale: the panel is
+     placed with the translate property, so only opacity and a small
+     transform move here and nothing jumps. */
+  [data-slot="dialog-content"][data-state="open"] {
+    animation: m-dialog-in 0.16s ease-out;
+  }
+  [data-slot="dialog-overlay"][data-state="open"] {
+    animation: m-fade-in 0.16s ease-out;
+  }
+  [data-slot="dialog-content"][data-state="closed"],
+  [data-slot="dialog-overlay"][data-state="closed"] {
+    animation: m-fade-out 0.12s ease-out forwards;
+  }
+}
+@keyframes m-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes m-tint {
+  from {
+    background-color: var(--card);
+    box-shadow: 0 0 0 1px transparent;
+  }
+}
+@keyframes m-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+}
+@keyframes m-leave {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes m-ring {
+  from {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+@keyframes m-home-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes m-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes m-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes m-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+/* Reduced motion: dialogs just appear and disappear. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-content"],
+  [data-slot="dialog-overlay"] {
+    animation: none !important;
+  }
+}

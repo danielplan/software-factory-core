@@ -17,10 +17,64 @@ export {
   type ExtensionFile,
   type Guide,
   type McpServer,
+  type Slot,
+  SLOTS,
+  type StageSpec,
+  type Check,
+  type View,
+  type ViewItem,
+  VIEW_ICONS,
   type Kit,
   type KitFile,
 } from "./extensions/extension.ts";
+export {
+  readItems,
+  type ShownPart,
+  type ShownView,
+  shownView,
+} from "./extensions/views.ts";
+export { fillsOf, type SlotState, slotsOf } from "./extensions/slots.ts";
+export {
+  type Clash,
+  courseOf,
+  orderStages,
+  type PlacedStage,
+  type StageOrder,
+} from "./extensions/stages.ts";
+export {
+  addPart,
+  BUILD_STAGE,
+  cardCourse,
+  type Course,
+  DONE_STAGE,
+  isHeld,
+  type Kept,
+  keptIn,
+  labelledStage,
+  type Move,
+  type Moved,
+  moveWork,
+  type OnBoard,
+  openChecks,
+  type Outcome,
+  passCheck,
+  pieceOf,
+  stageLabel,
+  stageOfCard,
+  type Work,
+  withKept,
+  withoutKept,
+} from "./work/work.ts";
 export { copyStarter, starterName } from "./extensions/starter.ts";
+export {
+  OWN_EXTENSIONS_KEY,
+  ownExtensionsOn,
+  ownExtensionsSettings,
+  readTeamExtensions,
+  TEAM_EXTENSION_FILE,
+  TEAM_EXTENSIONS_FOLDER,
+  withTeamExtensions,
+} from "./extensions/team.ts";
 export {
   assembleFactory,
   type Available,

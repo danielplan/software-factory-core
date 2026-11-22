@@ -16,7 +16,11 @@ export type {
   IconName,
   IdeaView,
   KitView,
+  ProductView,
+  ShownPart,
+  ShownView,
   StageMap,
+  StagesView,
   State,
   WorkView,
 } from "../../server/src/api.ts";

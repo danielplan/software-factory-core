@@ -2,7 +2,12 @@
 // page shows, and the requests its buttons send. The web interface imports
 // these types only.
 
-import type { Company, GroupView } from "@software-factory/core";
+import type {
+  Company,
+  GroupView,
+  ShownView,
+  SlotState,
+} from "@software-factory/core";
 
 import type { Board } from "./connect/board-file.ts";
 import type { PartView } from "@software-factory/launcher";
@@ -13,6 +18,10 @@ export type KitView = {
   about: string;
   kind: string;
   canCreate: boolean;
+  // Who made it: Kobble ships every kit today; a team's own kit will say so.
+  madeBy: "kobble" | "team";
+  // What it teaches the kobolds, by key: rules, a starter, checks, tools.
+  brings: ("rules" | "starter" | "checks" | "tools")[];
 };
 
 export type ProductView = {
@@ -57,6 +66,9 @@ export type CardView = {
   type?: "bug" | "feature" | "improvement" | null;
   // The builder got stuck on it (its stuck label): not a new idea.
   stuck?: boolean;
+  // The team's stage that holds it (its "stage: …" label), when one does:
+  // it is that piece of work's stage while it is not Done.
+  held?: string | null;
   // Handed back to the builder with the owner's hint (in To do).
   hint?: boolean;
 };
@@ -162,6 +174,12 @@ export type State =
       board: Board;
       // Every add-on there is, on or off.
       addOns: AddOnView[];
+      // The stages of work of the installed extensions, in order, and the
+      // place two of them both fit (the team is asked in Settings).
+      stages: StagesView;
+      // The jobs the factory fills once for every extension (where the code
+      // lives, where the tasks are kept): who can fill each, and who does.
+      slots: SlotState[];
       // Just set up: connecting where work is tracked comes first.
       onboarding: boolean;
     };
@@ -350,7 +368,39 @@ export type AddOnView = {
   on: boolean;
   // Tracks work: a board to connect.
   tracker: boolean;
+  // Needed in every factory: it cannot be removed.
+  always: boolean;
+  // The extensions it needs, by id.
+  needs: string[];
+  // The jobs it uses that the factory fills once ("code", "tasks").
+  slots: string[];
+  // What it brings, by id: pages, Home blocks, kobolds, stages.
+  brings: {
+    pages: string[];
+    blocks: string[];
+    kobolds: string[];
+    stages: string[];
+  };
+  // The pages, Home blocks and stages it describes (a team's own), with the
+  // lists read now; Kobble's own are drawn by the page in code.
+  screens: {
+    pages: ShownView[];
+    blocks: ShownView[];
+    stages: { id: string; name: string }[];
+  };
   // Its settings groups, by id (shown while it is on).
   settings: string[];
 };
+
+export type StagesView = {
+  order: {
+    id: string;
+    name: string;
+    by: string;
+    // The checks work passes to leave it.
+    checks: { id: string; name: string }[];
+  }[];
+  clash: { first: string; second: string } | null;
+};
+export type { ShownPart, ShownView, SlotState } from "@software-factory/core";
 export type { Board } from "./connect/board-file.ts";
