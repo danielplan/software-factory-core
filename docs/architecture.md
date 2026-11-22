@@ -384,8 +384,31 @@ arranges it with Arrange Home, and the arrangement is kept for everybody in
 `/api/home-layout`). With no file Home shows what it showed before it could be
 arranged (the product line, what waits, the loop); a block whose extension is
 removed leaves Home and returns in its place with it; a block an extension
-brings later starts off Home. The first add-ons
-are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
+brings later starts off Home.
+
+A team's own extensions are in the company's factory folder, one folder each
+(`factory/extensions/<id>/extension.json`), written by the builder when the
+team asks Sprocket for one, and reviewed like any change. They are a
+description, never code that runs: an extension of the team brings pages,
+Home blocks, kobolds, stages (as words, for now), guides and settings, and
+can need other extensions; it cannot start programs, be always needed, track
+work or reuse the id or what another extension brings, and its guide files
+and settings files stay in its own folder and the settings folder. Nothing
+loads without passing these checks (`readTeamExtensions`,
+`packages/core/src/extensions/team.ts`); one that fails is left out with a
+plain line among the factory's problems, never stopping the others. The same
+checks run on the builder's branch before its pull request
+(`extensionsReport`, `server/src/builder/checks.ts`), so a pull request
+never brings an extension that is then left out. The team's extensions are
+offered in the Marketplace as "Made by your team", installed and removed like
+Kobble's own, and switched off all together in Settings (`own-extensions`,
+in `team.env`, on by default). An installed extension's guides for the
+builder are added to its prompt (`server/src/builder/extension-guides.ts`).
+How the builder writes one: the factory skill's `extensions.md`. Not built
+yet: pages and Home blocks that run from a team's extension, stages from
+extensions, and the slots filled once at setup.
+
+The first add-ons are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
 shown as connections, not as extensions. What each adds:
 
 | Point                              | What                                                                                                              | Today                                                                                                        |

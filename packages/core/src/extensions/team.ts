@@ -76,68 +76,71 @@ function insideFolder(folder: string, file: string): string | null {
   return real.startsWith(realpathSync(folder) + sep) ? real : null;
 }
 
-// One folder's extension, checked: the extension, or why it is left out.
-function readOne(
-  parent: string,
-  name: string,
-  taken: Extension[],
-): { extension: Extension } | { problem: string } {
-  const folder = join(parent, name);
-  const where = `The extension in ${TEAM_EXTENSIONS_FOLDER}/${name}`;
+type Read = { extension: Extension } | { problem: string };
+
+// The extension's file, read and checked against what an extension of a
+// team may say.
+function described(folder: string, where: string): Read {
   const file = join(folder, TEAM_EXTENSION_FILE);
-  if (!existsSync(file))
-    return {
-      problem: `${where} has no ${TEAM_EXTENSION_FILE}, so it is not loaded`,
-    };
+  const left = (why: string): Read => ({
+    problem: `${where} ${why}, so it is not loaded`,
+  });
+  if (!existsSync(file)) return left(`has no ${TEAM_EXTENSION_FILE}`);
   let data: unknown;
   try {
     data = JSON.parse(readFileSync(file, "utf8"));
   } catch {
-    return {
-      problem: `${where} has an ${TEAM_EXTENSION_FILE} that cannot be read, so it is not loaded`,
-    };
+    return left(`has an ${TEAM_EXTENSION_FILE} that cannot be read`);
   }
   if (typeof data !== "object" || data === null || Array.isArray(data))
+    return left("is not described as an extension");
+  const only = NOT_FOR_A_TEAM.find((key) => key in data);
+  if (only)
     return {
-      problem: `${where} is not described as an extension, so it is not loaded`,
+      problem: `${where} says "${only}", which only Kobble's own extensions can: it is not loaded`,
     };
-  for (const key of NOT_FOR_A_TEAM)
-    if (key in data)
-      return {
-        problem: `${where} says "${key}", which only Kobble's own extensions can: it is not loaded`,
-      };
   const parsed = teamExtensionSchema.safeParse(data);
-  if (!parsed.success)
-    return {
-      problem: `${where} is not right, so it is not loaded: ${z.prettifyError(parsed.error)}`,
-    };
-  const extension = parsed.data;
+  return parsed.success
+    ? { extension: parsed.data }
+    : {
+        problem: `${where} is not right, so it is not loaded: ${z.prettifyError(parsed.error)}`,
+      };
+}
+
+// Why an extension cannot sit among the others, or null.
+function clashes(
+  extension: Extension,
+  name: string,
+  taken: Extension[],
+  where: string,
+): string | null {
   if (extension.id !== name)
-    return {
-      problem: `${where} is called "${extension.id}" inside: the folder and the id must be the same, so it is not loaded`,
-    };
-  const clash = taken.find((other) => other.id === extension.id);
-  if (clash)
-    return {
-      problem: `${where} has the id of ${clash.name}: ids are not shared, so it is not loaded`,
-    };
+    return `${where} is called "${extension.id}" inside: the folder and the id must be the same, so it is not loaded`;
+  const same = taken.find((other) => other.id === extension.id);
+  if (same)
+    return `${where} has the id of ${same.name}: ids are not shared, so it is not loaded`;
   for (const kind of SINGLE) {
     const double = extension.brings[kind].find((one) =>
       taken.some((other) => other.brings[kind].includes(one)),
     );
     if (double)
-      return {
-        problem: `${where} brings "${double}", which another extension brings already: it is not loaded`,
-      };
+      return `${where} brings "${double}", which another extension brings already: it is not loaded`;
   }
-  for (const group of extension.settings)
-    if (
-      group.file !== TEAM_FILE &&
-      !/^settings\/[\w.-]+\.env$/.test(group.file)
-    )
-      return {
-        problem: `${where} keeps settings in ${group.file}: only ${TEAM_FILE} and the settings folder are allowed, so it is not loaded`,
-      };
+  const group = extension.settings.find(
+    (one) =>
+      one.file !== TEAM_FILE && !/^settings\/[\w.-]+\.env$/.test(one.file),
+  );
+  return group
+    ? `${where} keeps settings in ${group.file}: only ${TEAM_FILE} and the settings folder are allowed, so it is not loaded`
+    : null;
+}
+
+// The extension with its guides' files found inside its own folder.
+function withGuideFiles(
+  folder: string,
+  extension: Extension,
+  where: string,
+): Read {
   const guides = [];
   for (const guide of extension.guides) {
     const real = insideFolder(folder, guide.file);
@@ -148,6 +151,16 @@ function readOne(
     guides.push({ ...guide, file: real });
   }
   return { extension: { ...extension, guides } };
+}
+
+// One folder's extension, checked: the extension, or why it is left out.
+function readOne(parent: string, name: string, taken: Extension[]): Read {
+  const folder = join(parent, name);
+  const where = `The extension in ${TEAM_EXTENSIONS_FOLDER}/${name}`;
+  const read = described(folder, where);
+  if ("problem" in read) return read;
+  const problem = clashes(read.extension, name, taken, where);
+  return problem ? { problem } : withGuideFiles(folder, read.extension, where);
 }
 
 // The team's extensions found in the factory folder, each checked: the ones
@@ -164,7 +177,7 @@ export function readTeamExtensions(
   const names = readdirSync(parent, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
   for (const name of names) {
     const read = readOne(parent, name, [...taken, ...extensions]);
     if ("problem" in read) problems.push(read.problem);

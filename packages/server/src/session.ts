@@ -67,8 +67,7 @@ export class Session {
   readonly options: SessionOptions;
   private root: string | null = null;
   private factory: Factory | null = null;
-  // What the factory can use: what ships with Kobble, and the team's own
-  // extensions found in its folder (read again whenever the factory is).
+  // Kobble's extensions and the team's own, read again with the factory.
   private known: Available;
   private launcher: Launcher | null = null;
   private stopListening: (() => void) | null = null;
@@ -241,14 +240,12 @@ export class Session {
       refuseAny(this.saveSettings(tracker, secrets).refused);
     if (entry) saveBoard(root, { ...readBoard(root), [tracker]: entry });
     this.onboarding = false;
-    const { extensions } = this.known;
-    this.changeCompany((c) => trackedWith(c, extensions, tracker));
+    this.changeCompany((c) => trackedWith(c, this.known.extensions, tracker));
   }
 
   // An add-on switched on or off (switch.ts).
   switchAddOn(id: string, on: boolean): void {
-    const { extensions } = this.known;
-    this.changeCompany((company) => switched(company, extensions, id, on));
+    this.changeCompany((c) => switched(c, this.known.extensions, id, on));
   }
 
   // Whether the factory has this add-on on.
@@ -262,7 +259,6 @@ export class Session {
     if (!this.root || !group) throw new Refused("There is no such setting.");
     const { changes, refused } = checkChanges(group, values);
     if (Object.keys(refused).length === 0) saveGroup(group, this.root, changes);
-    // The off switch for the team's own extensions changes what is loaded.
     if (group.id === ownExtensionsSettings.id) this.reload();
     else this.options.onChange();
     return { refused };
