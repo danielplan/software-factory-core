@@ -1,6 +1,6 @@
-// A prototype while the kobold makes it, before it runs: its page drawing
-// itself piece by piece with a light sweeping over it, the kobold hopping at
-// its work, what it does now, and how long it has been at it. Once it runs,
+// A prototype while Tinker, Doodle's maker, makes it, before it runs: its
+// page drawing itself piece by piece with a light sweeping over it, Tinker
+// hopping at its work, what it does now, and how long it has been at it. Once it runs,
 // the live screen shows instead, with one line of what the kobold does.
 // Motion only when the computer allows it.
 
@@ -8,6 +8,7 @@ import { type CSSProperties, useEffect, useState } from "react";
 
 import type { VersionRun } from "@/api";
 import { KoboldHead } from "@/components/kobold-face";
+import { MAKER } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
 import { SCREEN } from "./prototype-screen";
@@ -67,7 +68,7 @@ function Page() {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent motion-safe:animate-sweep" />
       <div className="absolute right-3 bottom-2">
         <div className="relative motion-safe:animate-hop">
-          <KoboldHead size={34} />
+          <KoboldHead size={34} hat={MAKER.hat} color={MAKER.color} />
           {SPARKS.map((spark) => (
             <span
               key={spark.delay}
@@ -95,11 +96,15 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   if (!(run.state === "running" && run.url)) return null;
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
-      <span className="relative flex size-2 flex-none">
-        <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
-        <span className="relative inline-flex size-2 rounded-full bg-blue" />
+      <KoboldHead
+        size={20}
+        hat={MAKER.hat}
+        color={MAKER.color}
+        className="flex-none motion-safe:animate-bob"
+      />
+      <span className="flex-none font-medium">
+        {t.building(MAKER.name, run.version)}
       </span>
-      <span className="flex-none font-medium">{t.beingMade}</span>
       <span key={run.activity} className="truncate motion-safe:animate-pop">
         {run.activity ?? t.atWork}
       </span>
@@ -119,11 +124,7 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
     <div className="grid gap-2.5">
       <Page />
       <div className="flex items-center gap-2 text-xs font-medium text-blue">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full rounded-full bg-blue opacity-60 motion-safe:animate-ping" />
-          <span className="relative inline-flex size-2 rounded-full bg-blue" />
-        </span>
-        {t.explore.board.making}
+        {t.explore.board.building(MAKER.name, run.version)}
         {clock && (
           <span className="ml-auto font-normal text-muted-foreground tabular-nums">
             {clock}

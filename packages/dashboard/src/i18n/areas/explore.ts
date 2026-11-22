@@ -85,7 +85,6 @@ const en = {
     agreed: "Agreed",
     sketch: "Sketch",
     remove: "Remove it",
-    making: "The kobold is making it",
     stopped: "It stopped.",
     stepsAsExpected: (good: number, all: number) =>
       `${String(good)} of ${String(all)} steps as expected`,
@@ -104,7 +103,7 @@ const en = {
       `Show the ${String(n)} other variants, archived since one was agreed`,
     hideArchived: "Archive the other variants again",
     usualState: "usual",
-    beingMade: "Being made, live:",
+    building: (name: string, key: string) => `${name} is building ${key}:`,
     atWork: "the kobold is at work",
     stillMade:
       "Still being made: you can use it, and it changes as the kobold works",

@@ -86,7 +86,6 @@ export const exploreGerman: ExploreWords = {
     agreed: "Vereinbart",
     sketch: "Skizze",
     remove: "Entfernen",
-    making: "Der Kobold baut es",
     stopped: "Es hat angehalten.",
     stepsAsExpected: (good, all) =>
       `${String(good)} von ${String(all)} Schritten wie erwartet`,
@@ -105,7 +104,7 @@ export const exploreGerman: ExploreWords = {
       `Die ${String(n)} anderen Varianten zeigen, archiviert seit eine vereinbart ist`,
     hideArchived: "Die anderen Varianten wieder archivieren",
     usualState: "normal",
-    beingMade: "Wird gebaut, live:",
+    building: (name, key) => `${name} baut ${key}:`,
     atWork: "der Kobold ist bei der Arbeit",
     stillMade:
       "Wird noch gebaut: du kannst es benutzen, und es ändert sich, während der Kobold arbeitet",

@@ -18,6 +18,14 @@ export type Kobold = {
   page: Page | null;
 };
 
+// Doodle's helper who builds an exploration's prototypes, one at work on
+// each prototype being made: shown on its card, not in the sidebar.
+export const MAKER = {
+  name: "Tinker",
+  hat: "toque",
+  color: "#4f6bed",
+} as const;
+
 export const KOBOLDS: Kobold[] = [
   {
     id: "support",

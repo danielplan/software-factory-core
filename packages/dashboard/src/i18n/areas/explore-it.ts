@@ -85,7 +85,6 @@ export const exploreItalian: ExploreWords = {
     agreed: "D'accordo",
     sketch: "Bozza",
     remove: "Toglila",
-    making: "Il kobold lo sta facendo",
     stopped: "Si è fermato.",
     stepsAsExpected: (good, all) =>
       `${String(good)} di ${String(all)} passi come previsto`,
@@ -104,7 +103,7 @@ export const exploreItalian: ExploreWords = {
       `Mostra le altre ${String(n)} varianti, archiviate da quando una è concordata`,
     hideArchived: "Archivia di nuovo le altre varianti",
     usualState: "normale",
-    beingMade: "In lavorazione, dal vivo:",
+    building: (name, key) => `${name} sta costruendo ${key}:`,
     atWork: "il kobold è al lavoro",
     stillMade:
       "Ancora in lavorazione: puoi usarlo, e cambia mentre il kobold lavora",

@@ -98,7 +98,7 @@ Things on the board, each with an id (`note-1`, `choice-1`):
 - a **prototype** (`make_prototype`): there is no button for it, you
   start it, naming the page the change is on (`opens`, such as `#build`
   or `/orders`), so it opens there. It is made in the background in a few
-  minutes, by a maker kobold in its own copy of the code, which also adds
+  minutes, by **Tinker**, your maker kobold, in its own copy of the code, which also adds
   the made-up data the change needs to be seen. **A prototype holds variants**: the
   team switches between them on the board, outside the app, and the app
   shows the one picked.
@@ -123,6 +123,9 @@ Things on the board, each with an id (`note-1`, `choice-1`):
     answers with made-up data, not a real kobold. Promise only that; when
     someone says something is buggy, ask what they did and what happened
     before you send the change.
+  - **It reloads by itself.** The prototype on the board shows each change
+    as Tinker makes it and starts again once Tinker is done: never ask the
+    team to reload a page or open it again; say what to try instead.
   - **Another way** (`another_way`): when the team is unsure how a screen
     should look or work, or asks to see it done differently, add a variant
     (four at most).
