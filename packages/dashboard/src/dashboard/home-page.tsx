@@ -9,11 +9,13 @@ import {
   ExternalLink,
   FlaskConical,
   Inbox,
+  Plus,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { StatusLight } from "@/components/status-light";
 import { PageHead } from "@/components/page-head";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useExplorations } from "@/explorations/explorations-page";
 import {
@@ -74,6 +76,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const { data: signals } = useSignals();
   const t = useT();
   const [arranging, setArranging] = useState(false);
+  const [adding, setAdding] = useState(false);
   // B: only the blocks of installed extensions are on offer.
   const { all } = useExtensions(state);
   const installed =
@@ -229,15 +232,36 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
         title={t.shell.pages.home}
         about={t.home.about}
         actions={
-          <ArrangeButton
-            editing={arranging}
-            onClick={() => {
-              setArranging(!arranging);
-            }}
-          />
+          <>
+            {arranging && (
+              <Button
+                variant="ring"
+                size="pill"
+                onClick={() => {
+                  setAdding(true);
+                }}
+              >
+                <Plus aria-hidden />
+                Add a block
+              </Button>
+            )}
+            <ArrangeButton
+              editing={arranging}
+              onClick={() => {
+                setArranging(!arranging);
+                setAdding(false);
+              }}
+            />
+          </>
         }
       />
-      <HomeBlocks blocks={blocks} editing={arranging} installed={installed} />
+      <HomeBlocks
+        blocks={blocks}
+        editing={arranging}
+        installed={installed}
+        adding={adding}
+        onAdding={setAdding}
+      />
     </>
   );
 }

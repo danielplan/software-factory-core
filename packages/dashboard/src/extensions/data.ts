@@ -289,7 +289,8 @@ const kit = (
   stages: [],
   needsIds: [],
   needs: [],
-  on: usedBy.length > 0,
+  // A kit is always in: it comes with Kobble, or was made for the team.
+  on: true,
   real: false,
   tracker: false,
   settings: [],

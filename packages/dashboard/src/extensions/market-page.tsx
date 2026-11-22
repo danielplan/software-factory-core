@@ -19,7 +19,6 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { GroupForm } from "@/dashboard/settings-card";
 import { FIELD } from "@/lib/field-style";
 import { VARIANT } from "@/lib/prototype-flags";
-import { askSupport } from "@/support/ask-support";
 import { cn } from "@/lib/utils";
 
 import { Adds, Logo, Maker, Needs } from "./bits";
@@ -351,6 +350,7 @@ function Card({
   action,
   note,
   usedBy,
+  badge,
   label = "Installed",
 }: Readonly<{
   ext: Ext;
@@ -359,6 +359,8 @@ function Card({
   note?: string;
   // The products that use it (a kit), as chips in the card's foot.
   usedBy?: string[];
+  // A small muted badge beside the name.
+  badge?: string;
   // What to press; none once it is in.
   action: React.ReactNode;
   label?: "Installed" | "In use" | "Connected" | "Pre-installed";
@@ -383,7 +385,14 @@ function Card({
         <div className="flex items-center gap-3">
           <Logo ext={ext} />
           <div className="grid min-w-0 gap-1">
-            <span className="truncate font-semibold">{ext.name}</span>
+            <span className="flex items-center gap-2">
+              <span className="truncate font-semibold">{ext.name}</span>
+              {badge && (
+                <span className="whitespace-nowrap rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-normal text-muted-foreground">
+                  {badge}
+                </span>
+              )}
+            </span>
             {ext.maker === "team" && <Maker ext={ext} />}
           </div>
           {ext.on && (
@@ -796,29 +805,10 @@ function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
             onOpen={() => {
               onOpen(k.id);
             }}
-            action={
-              k.maker === "kobble" ? (
-                <span className="py-1.5 text-xs text-muted-foreground">
-                  Pre-installed
-                </span>
-              ) : null
-            }
+            action={null}
           />
         ))}
       </div>
-      <p className="px-1 text-xs text-muted-foreground">
-        Building something else?{" "}
-        <button
-          type="button"
-          className="text-blue hover:underline"
-          onClick={() => {
-            askSupport("I want a kit for…");
-          }}
-        >
-          Ask Sprocket
-        </button>{" "}
-        for a kit of your own.
-      </p>
     </section>
   );
 }
@@ -835,7 +825,7 @@ function KitDetails({
         <div className="grid min-w-0 flex-1 gap-1">
           <DialogTitle className="truncate">{ext.name}</DialogTitle>
           <span className="inline-flex h-5 w-fit items-center rounded-full bg-surface-2 px-2 text-[11px] font-medium text-muted-foreground">
-            {ext.maker === "team" ? "Product kit · Your team" : "Product kit · Pre-installed"}
+            {ext.maker === "team" ? "Product kit · Your team" : "Pre-installed with Kobble"}
           </span>
         </div>
       </div>

@@ -24,7 +24,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export type BlockId =
@@ -214,10 +213,15 @@ export function HomeBlocks({
   blocks,
   editing,
   installed,
+  adding,
+  onAdding,
 }: Readonly<{
   blocks: Record<BlockId, ReactNode>;
   editing: boolean;
   installed: Installed;
+  // The "Add a block" dialog, opened from the page's header or the empty slot.
+  adding: boolean;
+  onAdding: (open: boolean) => void;
 }>) {
   const [layout, change] = useLayout();
   const [dragging, setDragging] = useState<BlockId | null>(null);
@@ -306,19 +310,37 @@ export function HomeBlocks({
         </div>
       ))}
       {arranging && (
-        <div className="flex items-center justify-between gap-2">
-          <AddBlock layout={layout} change={change} installed={installed} />
+        <>
           <button
             type="button"
-            className={button}
             onClick={() => {
-              change(DEFAULT);
+              onAdding(true);
             }}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-6 text-[13px] text-muted-foreground hover:bg-surface hover:text-foreground"
           >
-            Start again
+            <Plus aria-hidden className="size-4" />
+            Add a block
           </button>
-        </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className={button}
+              onClick={() => {
+                change(DEFAULT);
+              }}
+            >
+              Start again
+            </button>
+          </div>
+        </>
       )}
+      <AddBlock
+        layout={layout}
+        change={change}
+        installed={installed}
+        open={adding && arranging}
+        onOpenChange={onAdding}
+      />
     </>
   );
 }
@@ -444,10 +466,14 @@ function AddBlock({
   layout,
   change,
   installed,
+  open,
+  onOpenChange,
 }: Readonly<{
   layout: Layout;
   change: (l: Layout) => void;
   installed: Installed;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }>) {
   const offered = BLOCKS.filter((b) => offeredOf(b.id, installed));
   const from = [...new Set(offered.map((b) => b.from))];
@@ -455,13 +481,7 @@ function AddBlock({
   const picked = from.includes(chosen) ? chosen : (from[0] ?? "");
   const mine = offered.filter((b) => b.from === picked);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ring" size="pill">
-          <Plus aria-hidden />
-          Add a block
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="grid max-h-[85vh] gap-0 overflow-hidden p-0 sm:max-w-[760px]">
         <DialogTitle className="px-5 pt-4 pb-3 text-[15px] font-semibold">
           Add a block to Home

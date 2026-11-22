@@ -1,0 +1,116 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Marketplace" [ref=e131] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e135] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e140]:
+    - generic [ref=e280]:
+      - generic [ref=e281]:
+        - generic [ref=e282]:
+          - heading "Home" [level=1] [ref=e284]
+          - generic [ref=e285]:
+            - button "Add a block" [ref=e347] [cursor=pointer]
+            - button "Done" [active] [ref=e348] [cursor=pointer]
+        - paragraph [ref=e287]: What waits for you, and where the work is.
+      - generic [ref=e288]:
+        - generic [ref=e349]:
+          - generic [ref=e357]: Product statusFactory
+          - button "Move up" [disabled] [ref=e358]
+          - button "Move down" [ref=e361] [cursor=pointer]
+          - button "Hide" [ref=e364] [cursor=pointer]
+        - generic [ref=e289]:
+          - img "Stopped" [ref=e290]
+          - generic [ref=e291]: The product is stopped · Bolt is resting
+          - link "System" [ref=e292] [cursor=pointer]:
+            - /url: "#system"
+      - generic [ref=e293]:
+        - generic [ref=e368]:
+          - generic [ref=e376]: Waiting for youFactory
+          - button "Move up" [ref=e377] [cursor=pointer]
+          - button "Move down" [ref=e380] [cursor=pointer]
+          - button "Hide" [ref=e383] [cursor=pointer]
+        - generic [ref=e294]:
+          - generic [ref=e387]:
+            - generic [ref=e388]: Continue
+            - generic [ref=e389]:
+              - generic [ref=e390]: The basket is empty when people come back to pay
+              - generic [ref=e391]: B is agreed. You can hand it off.
+            - link "Continue" [ref=e392] [cursor=pointer]:
+              - /url: "#explore/X-1"
+          - generic [ref=e395]:
+            - generic [ref=e396]: Continue
+            - generic [ref=e397]:
+              - generic [ref=e398]: One invoice a month for businesses
+              - generic [ref=e399]: Does his accountant need one invoice, or is one payment enough?
+            - link "Continue" [ref=e400] [cursor=pointer]:
+              - /url: "#explore/X-2"
+      - generic [ref=e319]:
+        - generic [ref=e403]:
+          - generic [ref=e411]: The loopFactory
+          - button "Move up" [ref=e412] [cursor=pointer]
+          - button "Move down" [disabled] [ref=e415]
+          - button "Hide" [ref=e418] [cursor=pointer]
+        - generic [ref=e320]:
+          - link "Signals 0 new" [ref=e321] [cursor=pointer]:
+            - /url: "#signals"
+            - generic [ref=e322]: Signals
+            - generic [ref=e327]: 0 new
+          - link "Explorations 2 being explored The basket is empty when people come back to pay One invoice a month for businesses" [ref=e422] [cursor=pointer]:
+            - /url: "#explore"
+            - generic [ref=e329]: Explorations
+            - generic [ref=e333]: 2 being explored
+            - generic [ref=e423]: The basket is empty when people come back to pay
+            - generic [ref=e424]: One invoice a month for businesses
+          - link "Factory 0 to build" [ref=e334] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=e335]: Factory
+            - generic [ref=e339]: 0 to build
+          - link "Done 0 merged" [ref=e340] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=e341]: Done
+            - generic [ref=e346]: 0 merged
+      - button "Add a block" [ref=e425] [cursor=pointer]
+      - button "Start again" [ref=e428] [cursor=pointer]
+  - region "Sprocket" [ref=e267]:
+    - button "Ask Sprocket anything ⌘J" [ref=e268] [cursor=pointer]:
+      - generic [ref=e278]: Ask Sprocket anything
+      - generic [ref=e279]: ⌘J
