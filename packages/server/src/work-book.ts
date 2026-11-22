@@ -1,74 +1,35 @@
-// The pieces of work of the team's own stages, kept in the factory's folder
-// (factory/work.json) with their stage and history. The core's rules say
-// when one may move (a stage's checks must have passed); this keeps them,
-// answers the page, and tells everyone who listens when one moves.
-
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { randomUUID } from "node:crypto";
+// The board's cards as pieces of work: a card is the piece of work, and the
+// only one for now. Its stage is where its board column puts it (Build until
+// it is Done), or the team's stage that holds it; what it keeps of its piece
+// of work (the checks that passed, its history) is in the card's text, and
+// the team's stage that holds it is a label on it. The core's rules say when
+// one may move (a stage's checks must have passed); this answers the page
+// and the extensions' kobolds, keeps the moves on the card, and tells
+// everyone who listens.
+//
+// Kobble's own stages stay as they are, with no checks: moving a card
+// between the board's columns is the board's. A card in a team's stage that
+// is moved to Done on the board is finished there.
 
 import {
   type Course,
-  FACTORY_FOLDER,
+  DONE_STAGE,
+  isHeld,
+  type Kept,
   moveWork,
   type Moved,
+  type OnBoard,
   type Outcome,
   openChecks,
   passCheck,
-  startWork,
+  pieceOf,
   type Work,
+  cardCourse,
 } from "@software-factory/core";
 
 import type { Route } from "./add-ons/add-on.ts";
+import type { CardDetail, Cards } from "./cards/cards.ts";
 import { Refused } from "./refused.ts";
-
-const FILE = "work.json";
-// More pieces than any factory holds at once: a guard against a file that is
-// not one.
-const MOST = 5000;
-
-const isWork = (one: unknown): one is Work => {
-  if (typeof one !== "object" || one === null) return false;
-  const work = one as Record<string, unknown>;
-  return (
-    typeof work.id === "string" &&
-    typeof work.title === "string" &&
-    typeof work.stage === "string" &&
-    Array.isArray(work.passed) &&
-    Array.isArray(work.history) &&
-    typeof work.parts === "object" &&
-    work.parts !== null
-  );
-};
-
-// The pieces in the file; none when there is no file or it is not one.
-export function readWork(root: string): Work[] {
-  const file = join(root, FILE);
-  if (!existsSync(file)) return [];
-  try {
-    const read = JSON.parse(readFileSync(file, "utf8")) as { pieces?: unknown };
-    return Array.isArray(read.pieces) &&
-      read.pieces.length <= MOST &&
-      read.pieces.every(isWork)
-      ? read.pieces
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-function keep(root: string, pieces: Work[]): void {
-  mkdirSync(root, { recursive: true });
-  writeFileSync(join(root, FILE), `${JSON.stringify({ pieces }, null, 2)}\n`);
-}
-
-// How many pieces are in each stage.
-export function countByStage(pieces: Work[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const piece of pieces)
-    counts[piece.stage] = (counts[piece.stage] ?? 0) + 1;
-  return counts;
-}
 
 const text = (value: unknown, what: string): string => {
   if (typeof value !== "string" || value.trim() === "")
@@ -84,74 +45,128 @@ const settled = (outcome: Outcome): Work => {
 const whoOf = (by: unknown): string =>
   typeof by === "string" && by.trim() ? by.trim().slice(0, 80) : "team";
 
-function find(pieces: Work[], id: unknown): Work {
-  const found = pieces.find((one) => one.id === id);
-  if (!found) throw new Refused("There is no such piece of work.");
-  return found;
+const numberOf = (value: unknown): number => {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number <= 0)
+    throw new Refused("Say the number of the card.");
+  return number;
+};
+
+// What the board says of a card, as the piece of work needs it.
+export const onBoard = (card: {
+  number: number;
+  title: string;
+  stage: string | null;
+  closed: boolean;
+  labels: string[];
+}): OnBoard => ({
+  number: card.number,
+  title: card.title,
+  // Done is the board's stage and the piece of work's alike.
+  done: card.stage === "done",
+  closed: card.closed,
+  labels: card.labels,
+});
+
+// The card's piece of work, with what it kept.
+export function pieceOfCard(detail: CardDetail, course: Course): Work {
+  return pieceOf(onBoard(detail), detail.kept, course);
 }
 
-const replace = (pieces: Work[], work: Work) =>
-  pieces.map((one) => (one.id === work.id ? work : one));
+const keptOf = (work: Work): Kept => ({
+  stage: work.stage,
+  passed: work.passed,
+  history: work.history,
+  parts: work.parts,
+});
 
-export function workRoutes(host: {
-  project: string;
+type Host = {
+  cards: () => Cards;
   // The stages in the team's order, with their checks, as they are now.
   course: () => Course;
+  // The stages of Kobble's own extensions: they hold no card but Build and
+  // Done.
+  kobbles: () => string[];
   changed: (what: string) => void;
   // Told when a piece moves, if anyone listens besides the page.
   heard?: (moved: Moved) => void;
   now?: () => string;
-}): Record<string, Route> {
-  const root = join(host.project, FACTORY_FOLDER);
-  const now = host.now ?? (() => new Date().toISOString());
+};
+
+// The stages a card can be in, as the team has them now.
+function courseOfCards(host: Host): Course {
+  const stages = cardCourse(host.course(), host.kobbles());
+  if (stages.length === 0)
+    throw new Refused("Build has to come before Done in the order.");
+  return stages;
+}
+
+// The card keeps its piece of work: its note, and the team's stage by label.
+function keep(cards: Cards, number: number, work: Work): Promise<void> {
+  if (!cards.keepWork)
+    throw new Refused("This board cannot keep a card's piece of work.");
+  return cards.keepWork(
+    number,
+    keptOf(work),
+    isHeld(work.stage) ? work.stage : null,
+  );
+}
+
+// Every open card as a piece of work, with the checks it still has to pass.
+async function listed(host: Host) {
+  const cards = host.cards();
+  const stages = courseOfCards(host);
+  const pieces = await Promise.all(
+    (await cards.list())
+      .filter((card) => !card.closed)
+      .map(async (card) => {
+        const piece = pieceOf(onBoard(card), null, stages);
+        // Only a card in a team's stage has anything kept to read.
+        const work = isHeld(piece.stage)
+          ? pieceOfCard(await cards.show(card.number), stages)
+          : piece;
+        return { ...work, open: openChecks(work, stages) };
+      }),
+  );
+  return { pieces };
+}
+
+async function checked(host: Host, number: number, check: string) {
+  const cards = host.cards();
+  const stages = courseOfCards(host);
+  const piece = pieceOfCard(await cards.show(number), stages);
+  await keep(cards, number, settled(passCheck(piece, stages, check)));
+  host.changed("work");
+}
+
+async function moved(host: Host, number: number, to: string, by: string) {
+  const cards = host.cards();
+  const stages = courseOfCards(host);
+  const detail = await cards.show(number);
+  if (detail.closed)
+    throw new Refused(`#${String(number)} is closed: open it again first.`);
+  const before = pieceOfCard(detail, stages);
+  const now = host.now?.() ?? new Date().toISOString();
+  const after = settled(moveWork(before, to, stages, by, now));
+  // Build and Done are the board's: the column follows the stage.
+  if (after.stage === DONE_STAGE) await cards.move(number, "done");
+  else if (before.stage === DONE_STAGE) await cards.move(number, "review");
+  await keep(cards, number, after);
+  host.heard?.({ work: after, from: before.stage, to: after.stage });
+  host.changed("work");
+}
+
+export function workRoutes(host: Host): Record<string, Route> {
   const body = (given: unknown) => (given ?? {}) as Record<string, unknown>;
   return {
-    "GET /api/work-pieces": () => ({
-      pieces: readWork(root).map((piece) => ({
-        ...piece,
-        open: openChecks(piece, host.course()),
-      })),
-    }),
-    "POST /api/work-pieces": (given) => {
-      const { title, by } = body(given);
-      const started = settled(
-        startWork(
-          randomUUID(),
-          text(title, "what the work is"),
-          host.course(),
-          whoOf(by),
-          now(),
-        ),
-      );
-      keep(root, [...readWork(root), started]);
-      host.changed("work");
-      return { id: started.id };
-    },
+    "GET /api/work-pieces": () => listed(host),
     "POST /api/work-pieces/check": (given) => {
-      const { id, check } = body(given);
-      const pieces = readWork(root);
-      const passed = settled(
-        passCheck(find(pieces, id), host.course(), text(check, "the check")),
-      );
-      keep(root, replace(pieces, passed));
-      host.changed("work");
+      const { number, check } = body(given);
+      return checked(host, numberOf(number), text(check, "the check"));
     },
     "POST /api/work-pieces/move": (given) => {
-      const { id, to, by } = body(given);
-      const pieces = readWork(root);
-      const before = find(pieces, id);
-      const moved = settled(
-        moveWork(
-          before,
-          text(to, "the stage"),
-          host.course(),
-          whoOf(by),
-          now(),
-        ),
-      );
-      keep(root, replace(pieces, moved));
-      host.heard?.({ work: moved, from: before.stage, to: moved.stage });
-      host.changed("work");
+      const { number, to, by } = body(given);
+      return moved(host, numberOf(number), text(to, "the stage"), whoOf(by));
     },
   };
 }

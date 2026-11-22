@@ -5,6 +5,8 @@
 // between two marks, so whoever runs the factory (on another computer)
 // reads it there.
 
+import { type Kept, stageLabel, withoutKept } from "@software-factory/core";
+
 import type { Stage } from "../api.ts";
 import { STAGES } from "../api.ts";
 import { STAGE_COLUMNS } from "../connect/stages.ts";
@@ -34,6 +36,9 @@ export type CardDetail = Card & {
   // The cards it depends on, and the cards that depend on it.
   dependsOn: Related[];
   neededBy: Related[];
+  // What its piece of work keeps in its text (stage, checks passed,
+  // history); none before it moved into a team's stage.
+  kept: Kept | null;
 };
 
 export type Cards = {
@@ -51,6 +56,14 @@ export type Cards = {
   // The card is not needed any more because the other one does it: closed,
   // with a note on both, so it stays findable.
   replace: (number: number, by: number) => Promise<void>;
+  // The card's piece of work: what it keeps in its text, and the team's stage
+  // that holds it (a label where it is tracked; none when Build or Done, the
+  // board's own, holds it).
+  keepWork?: (
+    number: number,
+    kept: Kept | null,
+    held: string | null,
+  ) => Promise<void>;
   // What kind of work it is (a label where it is tracked); none takes it off.
   setType?: (number: number, type: CardType | null) => Promise<void>;
   // Marks the card as one the builder got stuck on (STUCK_LABEL), or takes
@@ -113,7 +126,8 @@ function headedPlan(body: string): string | null {
 }
 
 // What a card asks for, without its agreed plan.
-export function aboutOf(body: string): string {
+export function aboutOf(text: string): string {
+  const body = withoutKept(text);
   const at = body.indexOf(START);
   const cut = at >= 0 ? at : body.indexOf(`${PLAN_HEADING}\n`);
   return (cut >= 0 ? body.slice(0, cut) : body).trim();
@@ -162,6 +176,30 @@ export function stuckArgs(
       "--force",
     ],
     [...edit, "--add-label", STUCK_LABEL],
+  ];
+}
+
+// GitHub's commands that put a card in a team's stage by a label (made when
+// GitHub has none of that name), or take it out of every team's stage.
+export function heldArgs(
+  number: number,
+  labels: string[],
+  held: string | null,
+  repo: string[],
+): string[][] {
+  const wanted = held === null ? null : stageLabel(held);
+  const off = labels
+    .filter((label) => label.startsWith(stageLabel("")) && label !== wanted)
+    .flatMap((label) => ["--remove-label", label]);
+  const on = wanted !== null && !labels.includes(wanted);
+  const edit = ["issue", "edit", String(number), ...repo];
+  return [
+    ...(on
+      ? [["label", "create", wanted, ...repo, "--color", "8957e5", "--force"]]
+      : []),
+    ...(on || off.length > 0
+      ? [[...edit, ...(on ? ["--add-label", wanted] : []), ...off]]
+      : []),
   ];
 }
 

@@ -132,8 +132,6 @@ export type Placed = {
   name: string;
   by: string;
   own: boolean;
-  // The pieces of work in it (Kobble counts its own stages from the board).
-  pieces?: number;
 };
 
 // The loop: the stages in the order the team has them. The stages Kobble
@@ -147,17 +145,24 @@ export function loopOf(
 ): Stage[] {
   const counted = countedStages(input, m, pages);
   if (!order) return counted;
+  // A card is a piece of work; a team's stage holds the open ones it is
+  // labelled with (Kobble counts its own stages from the board's columns).
+  const piecesIn = (stage: string) =>
+    (input.work?.cards ?? []).filter(
+      (card) => !card.closed && card.stage !== "done" && card.held === stage,
+    ).length;
   return order.flatMap((place): Stage[] => {
     const known = counted.find((stage) => stage.id === place.id);
     if (known) return [known];
+    const pieces = piecesIn(place.id);
     return place.own
       ? []
       : [
           {
             id: place.id,
             name: place.name,
-            count: place.pieces ? place.pieces : null,
-            says: place.pieces ? m.stages.pieces(place.pieces) : place.by,
+            count: pieces > 0 ? pieces : null,
+            says: pieces > 0 ? m.stages.pieces(pieces) : place.by,
             items: [],
             href: "#extensions",
           },

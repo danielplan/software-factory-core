@@ -196,7 +196,8 @@ the browser on a made-up factory with two team extensions):
 Step 3, third part (built and checked: the full `npm run verify` passes, 569
 tests; looked at in the browser):
 
-- **The piece of work** (`core/src/work/work.ts`): id, title, stage, the checks
+- **The piece of work** (first built as its own pieces in `factory/work.json`;
+  see "The card is the piece of work" below, which replaces that): id, title, stage, the checks
   of its stage that have passed, a history of every move, and a part per
   extension. `moveWork` goes to the next stage only when every check of the
   stage it is in has passed, one stage at a time; going back needs none and
@@ -215,16 +216,66 @@ tests; looked at in the browser):
 ![A team's stage on Home, with two pieces of work in it](issue-27-extensions-and-marketplace/home-work-in-stage.png)
 
 Decisions: a check is a name that a person or the extension's kobold marks as
-passed, because a team's extension never runs code. The pieces of work kept in
-`factory/work.json` are those of a team's own stages; no migration is needed
-(no file means no pieces).
+passed, because a team's extension never runs code.
 
-**Not done** (for a card of its own):
+## The card is the piece of work (the owner's change, session 5)
 
-- No screen starts a piece of work, ticks its checks or moves it; the routes
-  and the count on Home are there, a screen was not in the agreed plan.
-- Kobble's own stages (signals, explore, build, done, release) still count the
-  board's cards as before; they are not pieces of work with checks yet, and no
-  extension of Kobble's listens to a move yet.
+The owner asked: make the board card the piece of work, the only one for now;
+a card has a stage and a history; it can only move on from a team's stage when
+that stage's checks pass; Kobble's own stages stay as they are, with no checks;
+drop `factory/work.json`; and a migration that gives each existing card its
+stage from where it sits today.
+
+- **Built.** `core/src/work/work.ts`: `pieceOf` makes the card a piece of work
+  (`OnBoard` is what the board says of it); `cardCourse` is what a card can go
+  through (Build, a team's stages between Build and Done, Done: Kobble's other
+  stages hold no card); `moveWork`, `passCheck` and `openChecks` are as before;
+  `startWork` is gone (a card is already there). `server/src/work-book.ts`
+  answers `/api/work-pieces` (list, check, move) from the board's cards; the
+  file `factory/work.json` and its reading are gone. Home counts a team's
+  stage from the cards (`CardView.held`), not from the server.
+- **Where a card keeps its piece of work** (decided here, cheap to change): the
+  team's stage as a label on the card (`stage: checklist`, like `type: bug`),
+  so every list of cards carries it with no extra reading; the checks that
+  passed, the history and the extensions' parts in a marked section of the
+  card's text (`<!-- factory:work … -->`, as the agreed plan is kept), so
+  whoever runs the factory on another computer reads them. What a card kept
+  counts only for the stage it kept it in. `Cards.keepWork` writes both
+  (GitHub today).
+- **Kobble's stages stay.** A card with no label is in Build, or in Done when
+  its column is Done or it is closed; moving it between columns is the board's,
+  with no checks. A move into Done through the work route also moves the
+  column to Done; a move out of Done puts it in Review; a closed card does not
+  move. A team's stage that is gone (its extension removed) lets its cards go
+  back to Build.
+- **"Move into" or "move on from".** The hint says a card "can only move into a
+  team's stage when that stage's checks have passed". The card's own words are
+  "work moves on only when that stage's checks pass", and the core's rule since
+  the last session is that a stage's checks must pass to leave it. I kept
+  that: a card is stopped from leaving a team's stage until its checks pass.
+- **The migration: none, and why.** Every card already has its stage from where
+  it sits today: a card with no label is where its board column puts it, so
+  nothing is stored, nothing has to be moved, and a company has nothing to do.
+  A migration could not do more: migrations run on the factory's files, and
+  the cards are on the tracker (writing a label on every card at upgrade would
+  need the network, and would say what the column already says). The file
+  `factory/work.json` was only ever in this unreleased branch, so no company
+  has one to move away from.
+- **Differences from the pieces before:** no "start a piece of work" (a card
+  starts as a card); the history starts at the first move through the work
+  route (the board's own column moves are not in it).
+- **Checked:** tests (579, coverage thresholds met), lint, types, dead code,
+  duplicates. The GitHub stand-in of the card tests now remembers labels. Not
+  tried against a real board, and not looked at in the browser again: Home's
+  count looks as in `home-work-in-stage.png`, and its numbers come from the
+  cards' labels (a dashboard test).
+
+**Not done** (for cards of their own):
+
+- No screen moves a card into a team's stage or ticks its checks (the routes
+  and Home's count are there); a screen was not in the agreed plan.
+- No extension of Kobble's listens to a move yet.
 - The setup coach has no tool of its own to fill Your code (GitHub is the only
   filler); Your tasks is filled by connecting the board, as before.
+- Only a GitHub board can keep a card's piece of work (the only tracker with
+  cards for now).

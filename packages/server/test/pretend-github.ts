@@ -35,6 +35,9 @@ export function pretendGitHub() {
   const closed = new Set<number>();
   // Items taken off the board (their issues stay).
   const removed = new Set<number>();
+  // The labels of each issue, and the labels GitHub has been asked to make.
+  const labels = new Map<number, string[]>();
+  const made = new Set<string>();
   const says = (out: unknown) =>
     Promise.resolve({
       code: 0,
@@ -52,7 +55,9 @@ export function pretendGitHub() {
           title: issue.title,
           url: `https://github.com/acme/shop/issues/${String(number)}`,
           repository: { nameWithOwner: "acme/shop" },
-          labels: { nodes: [] },
+          labels: {
+            nodes: (labels.get(number) ?? []).map((name) => ({ name })),
+          },
           state: closed.has(number) ? "CLOSED" : "OPEN",
           blockedBy: {
             nodes: (blockedBy.get(number) ?? []).map((n) => ({
@@ -122,7 +127,15 @@ export function pretendGitHub() {
         body: found.body,
         comments: [{ author: { login: "ana" }, body: "Euros only?" }],
       });
-    if (verb === "edit" && found) found.body = value("--body");
+    if (verb === "edit" && found) {
+      if (args.includes("--body")) found.body = value("--body");
+      const now = new Set(labels.get(Number(number)));
+      args.forEach((arg, at) => {
+        if (arg === "--add-label") now.add(args[at + 1] ?? "");
+        if (arg === "--remove-label") now.delete(args[at + 1] ?? "");
+      });
+      labels.set(Number(number), [...now]);
+    }
     if (verb === "comment") said.push(`#${String(number)}: ${value("--body")}`);
     if (verb === "close") closed.add(Number(number));
     if (verb === "create") {
@@ -152,6 +165,10 @@ export function pretendGitHub() {
       return says("{}");
     }
     if (first === "issue") return issue(args);
+    if (first === "label" && second === "create") {
+      made.add(args[2] ?? "");
+      return says("");
+    }
     if (first === "project" && second === "item-delete") {
       removed.add(Number(/item-(\d+)/.exec(args.join(" "))?.[1]));
       return says("{}");
@@ -168,5 +185,5 @@ export function pretendGitHub() {
     run,
     start: () => ({ answer: () => {}, done: Promise.resolve(1) }),
   };
-  return { cli, issues, said, closed, removed };
+  return { cli, issues, said, closed, removed, labels, made };
 }

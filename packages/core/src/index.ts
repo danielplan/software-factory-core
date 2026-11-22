@@ -43,15 +43,27 @@ export {
 } from "./extensions/stages.ts";
 export {
   addPart,
+  BUILD_STAGE,
+  cardCourse,
   type Course,
+  DONE_STAGE,
+  isHeld,
+  type Kept,
+  keptIn,
+  labelledStage,
   type Move,
   type Moved,
   moveWork,
+  type OnBoard,
   openChecks,
   type Outcome,
   passCheck,
-  startWork,
+  pieceOf,
+  stageLabel,
+  stageOfCard,
   type Work,
+  withKept,
+  withoutKept,
 } from "./work/work.ts";
 export { copyStarter, starterName } from "./extensions/starter.ts";
 export {

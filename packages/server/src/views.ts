@@ -13,7 +13,6 @@ import {
 import type { KitView, ProductView, State } from "./api.ts";
 import { readBoard } from "./connect/board-file.ts";
 import { chosenStages, stagesView } from "./stages.ts";
-import { countByStage, readWork } from "./work-book.ts";
 
 // What the page shows of an open factory, from its files.
 export function factoryView(
@@ -67,12 +66,10 @@ export function factoryView(
 function stagesOf(factory: Factory, root: string) {
   const { order, clash } = stagesView(root, factory.extensions);
   const course = courseOf(factory.extensions, chosenStages(root));
-  const counts = countByStage(readWork(root));
   return {
     order: order.map((stage) => ({
       ...stage,
       checks: course.find((one) => one.id === stage.id)?.checks ?? [],
-      pieces: counts[stage.id] ?? 0,
     })),
     clash: clash && { first: clash.first.id, second: clash.second.id },
   };

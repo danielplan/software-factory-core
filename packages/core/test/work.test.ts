@@ -3,17 +3,26 @@ import { test } from "node:test";
 
 import {
   addPart,
+  cardCourse,
   courseOf,
   defineExtension,
+  keptIn,
+  labelledStage,
   moveWork,
   openChecks,
   passCheck,
-  startWork,
+  pieceOf,
+  stageLabel,
+  stageOfCard,
+  withKept,
+  withoutKept,
+  type Kept,
+  type OnBoard,
   type Work,
 } from "../src/index.ts";
 
-// The piece of work: a stage, a history, and moving on only when the stage's
-// checks have passed.
+// The piece of work is the board's card: a stage, a history, and moving on
+// only when the stage's checks have passed.
 
 const course = [
   { id: "build", checks: [] },
@@ -27,11 +36,16 @@ const course = [
   { id: "done", checks: [] },
 ];
 
-const started = (): Work => {
-  const out = startWork("w1", "A page", course, "ada", "2026-11-22T10:00:00Z");
-  assert.ok("work" in out);
-  return out.work;
-};
+const onBoard = (more: Partial<OnBoard> = {}): OnBoard => ({
+  number: 7,
+  title: "A page",
+  done: false,
+  closed: false,
+  labels: [],
+  ...more,
+});
+
+const started = (): Work => pieceOf(onBoard(), null, course);
 
 const moved = (work: Work, to: string, at = "2026-11-22T11:00:00Z") => {
   const out = moveWork(work, to, course, "ada", at);
@@ -39,15 +53,107 @@ const moved = (work: Work, to: string, at = "2026-11-22T11:00:00Z") => {
   return out.work;
 };
 
-test("work starts in the first stage, with that in its history", () => {
+test("a card is in Build until it is finished, with no history yet", () => {
   const work = started();
+  assert.equal(work.id, "7");
+  assert.equal(work.title, "A page");
   assert.equal(work.stage, "build");
-  assert.deepEqual(work.history, [
-    { from: null, to: "build", at: "2026-11-22T10:00:00Z", by: "ada" },
-  ]);
-  assert.deepEqual(startWork("w", "t", [], "ada", "now"), {
-    refused: "There is no stage for work to start in.",
-  });
+  assert.deepEqual(work.history, []);
+  assert.equal(stageOfCard(onBoard({ done: true }), course), "done");
+  assert.equal(stageOfCard(onBoard({ closed: true }), course), "done");
+});
+
+test("a team's stage holds a card by its label while it is not finished", () => {
+  const labels = [stageLabel("checklist"), "type: bug"];
+  assert.equal(labelledStage(labels), "checklist");
+  assert.equal(labelledStage(["type: bug"]), null);
+  assert.equal(stageOfCard(onBoard({ labels }), course), "checklist");
+  // Finished on the board: the label no longer holds it.
+  assert.equal(stageOfCard(onBoard({ labels, done: true }), course), "done");
+  assert.equal(stageOfCard(onBoard({ labels, closed: true }), course), "done");
+  // The stage is gone (its extension was removed): back to Build.
+  assert.equal(
+    stageOfCard(onBoard({ labels: [stageLabel("gone")] }), course),
+    "build",
+  );
+});
+
+test("what a card kept counts for the stage it kept it in only", () => {
+  const kept: Kept = {
+    stage: "checklist",
+    passed: ["ticked"],
+    history: [{ from: "build", to: "checklist", at: "t", by: "ada" }],
+    parts: { checklist: { note: "ok" } },
+  };
+  const held = pieceOf(
+    onBoard({ labels: [stageLabel("checklist")] }),
+    kept,
+    course,
+  );
+  assert.deepEqual(held.passed, ["ticked"]);
+  assert.equal(held.history.length, 1);
+  assert.deepEqual(held.parts, { checklist: { note: "ok" } });
+  // Moved on the board since: its checks start again, its history stays.
+  const since = pieceOf(onBoard({ done: true }), kept, course);
+  assert.deepEqual(since.passed, []);
+  assert.equal(since.history.length, 1);
+});
+
+test("a card keeps its piece of work in its text, without touching the rest", () => {
+  const kept: Kept = {
+    stage: "checklist",
+    passed: [],
+    history: [{ from: "build", to: "checklist", at: "t", by: "a --> <b>" }],
+    parts: {},
+  };
+  const body =
+    "What it asks for.\n\n<!-- factory:agreed-plan -->\nPlan\n<!-- /factory:agreed-plan -->\n";
+  const written = withKept(body, kept);
+  assert.ok(written.startsWith(body.trimEnd()));
+  assert.deepEqual(keptIn(written), kept);
+  // Writing again replaces it; writing none takes it out.
+  const again = withKept(written, { ...kept, passed: ["x"] });
+  assert.equal(again.split("factory:work").length, 2);
+  assert.deepEqual(keptIn(again)?.passed, ["x"]);
+  assert.equal(withoutKept(written), body.trimEnd());
+  assert.equal(withKept(written, null), body.trimEnd());
+  assert.equal(withKept("", kept).startsWith("<!-- factory:work"), true);
+});
+
+test("a text with no piece of work, or a broken one, keeps none", () => {
+  assert.equal(keptIn("Just words."), null);
+  assert.equal(keptIn("<!-- factory:work\nnot json\n-->"), null);
+  assert.equal(keptIn('<!-- factory:work\n{"stage":1}\n-->'), null);
+  assert.equal(keptIn("<!-- factory:work\n{"), null);
+  assert.equal(withoutKept("<!-- factory:work\n{"), "<!-- factory:work\n{");
+});
+
+test("a card goes through Build, a team's stages and Done only", () => {
+  const all = [
+    { id: "signals", checks: [] },
+    { id: "explore", checks: [] },
+    { id: "build", checks: [] },
+    { id: "checklist", checks: [] },
+    { id: "release", checks: [] },
+    { id: "done", checks: [] },
+    { id: "after", checks: [] },
+  ];
+  assert.deepEqual(
+    cardCourse(all, ["signals", "explore", "release", "build", "done"]).map(
+      (one) => one.id,
+    ),
+    ["build", "checklist", "done"],
+  );
+  assert.deepEqual(
+    cardCourse(
+      [
+        { id: "done", checks: [] },
+        { id: "build", checks: [] },
+      ],
+      [],
+    ),
+    [],
+  );
 });
 
 test("work moves on one stage at a time and the history keeps each move", () => {
@@ -93,7 +199,7 @@ test("work sent back needs no checks and starts the earlier stage's checks again
   assert.ok("work" in passed);
   work = moved(passed.work, "build");
   assert.deepEqual(work.passed, []);
-  assert.equal(work.history.length, 3);
+  assert.equal(work.history.length, 2);
 });
 
 test("a stage that is not there, or the one it is in, is refused", () => {

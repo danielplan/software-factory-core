@@ -95,13 +95,17 @@ loop on Home shows the stage in its place, with how many pieces of work are
 in it.
 
 A stage can ask for **checks**: `"checks": [{ "id": "ticked", "name": "Every
-item is ticked off" }]`. A piece of work leaves the stage for the next one only
-when every check has passed, one stage at a time; sending it back needs none.
-A check is a name, not code: a person or the extension's kobold marks it as
-passed on the piece of work (`POST /api/work-pieces/check`), and the factory
-keeps the piece with its stage and its history in `factory/work.json`. There
-is no screen yet for starting or moving a piece of work: say so on the card
-and do not promise one.
+item is ticked off" }]`. The board's **card** is the piece of work, and for now
+the only one: it goes through Build, the team's stages between Build and Done,
+and Done. A card leaves a team's stage for the next one only when every check
+has passed, one stage at a time; sending it back needs none. A check is a name,
+not code: a person or the extension's kobold marks it as passed on the card
+(`POST /api/work-pieces/check` with the card's `number` and the `check`) and
+moves it (`POST /api/work-pieces/move` with `number` and `to`). The card keeps
+its stage (a `stage: …` label) and its history in its own text, so nothing
+else is kept. Kobble's own stages (Build, Done) have no checks and are moved
+on the board as before. There is no screen yet for moving a card between a
+team's stages: say so on the card and do not promise one.
 
 ### Kobolds
 

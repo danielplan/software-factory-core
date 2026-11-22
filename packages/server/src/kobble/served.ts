@@ -24,9 +24,13 @@ import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
 
 export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
 
-// What the team arranges, kept in the factory's files: Home's blocks, the
-// order of stages, and the pieces of work going through them.
-function arrangedInFiles(session: Session, tell: (event: string) => void) {
+// What the team arranges, kept in the factory's files: Home's blocks and the
+// order of stages; and the cards, as the pieces of work going through them.
+function arrangedInFiles(
+  session: Session,
+  tell: (event: string) => void,
+  cli: Cli,
+) {
   const factory = () => {
     const state = session.state();
     return state.mode === "factory" ? state : null;
@@ -37,7 +41,12 @@ function arrangedInFiles(session: Session, tell: (event: string) => void) {
     ),
     ...stagesRoutes(session),
     ...workRoutes({
-      project: session.options.project,
+      cards: () =>
+        connectedCards(join(session.options.project, FACTORY_FOLDER), cli),
+      kobbles: () =>
+        (factory()?.addOns ?? [])
+          .filter((one) => one.builtIn)
+          .flatMap((one) => one.screens.stages.map((stage) => stage.id)),
       course: () =>
         (factory()?.stages.order ?? []).map(({ id, checks }) => ({
           id,
@@ -97,7 +106,7 @@ export function kobbleOf(
       ...updates.routes,
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
-      ...arrangedInFiles(session, tell),
+      ...arrangedInFiles(session, tell, more.cli),
       ...feedback.routes,
       ...releasesRoutes({
         project: session.options.project,

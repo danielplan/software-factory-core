@@ -1,6 +1,8 @@
 // The items of a GitHub board as its GraphQL API answers them: each with
 // its Status column and, when it is an issue, the issue.
 
+import { Refused } from "../refused.ts";
+
 type Issue = {
   number: number;
   title: string;
@@ -58,4 +60,26 @@ function issueOf(content: Node["content"]): Issue | null {
       .filter((b) => b.state !== "CLOSED")
       .map((b) => b.number),
   };
+}
+
+export type Project = { id: string; items: Item[] };
+
+// The board's id and its items, each with its column and issue.
+export async function readProject(
+  gh: (args: string[]) => Promise<string>,
+  owner: string,
+  board: number,
+): Promise<Project> {
+  const number = String(board);
+  const read = JSON.parse(
+    await gh([
+      "api",
+      "graphql",
+      "-f",
+      `query={ repositoryOwner(login: ${JSON.stringify(owner)}) { ... on User { projectV2(number: ${number}) { ${ITEMS} } } ... on Organization { projectV2(number: ${number}) { ${ITEMS} } } } }`,
+    ]),
+  ) as ProjectAnswer;
+  const found = read.data?.repositoryOwner?.projectV2;
+  if (!found) throw new Refused(`There is no board ${number} of ${owner}.`);
+  return { id: found.id, items: found.items.nodes.map(itemOf) };
 }

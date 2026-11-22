@@ -424,21 +424,35 @@ want to come after the other, are a clash: Settings › Stages asks the team
 which comes first, and the team can move any stage; the answer is kept in
 `factory/stages.json` and wins over the suggestions. Home's loop follows the
 order: Kobble's counted stages show while their extension is installed, and a
-team's own stage shows how many pieces of work are in it.
+team's own stage shows how many cards it holds.
 
 **The piece of work** (`core/src/work/work.ts`) is what every extension
-shares: an id, a title, its stage, the checks of that stage that have passed
-and a history of every move (who, when, from where). Extensions add their part
-to it (a few words under their own id, `addPart`). It moves with `moveWork`:
-to the next stage only when every check of the stage it is in has passed, one
-stage at a time; back to an earlier stage with no checks, which start again. A
-stage names its checks in the extension (`checks`), as words: a person or the
-extension's kobold marks one as passed (`passCheck`). The server keeps the
-pieces in `factory/work.json` and answers `/api/work-pieces` (list, start,
-check, move) in `server/src/work-book.ts`; a move is told to everyone who
-listens (`Moved`) and to the page. Today the pieces are those of a team's own
-stages: Kobble's own stages count the board's cards as before, and no screen
-starts or moves a piece yet.
+shares, and for now it is the board's **card**: the only piece of work there
+is. It has the card's number and title, its stage, the checks of that stage
+that have passed and a history of every move (who, when, from where).
+Extensions add their part to it (a few words under their own id, `addPart`).
+It moves with `moveWork`: to the next stage only when every check of the stage
+it is in has passed, one stage at a time; back to an earlier stage with no
+checks, which start again. A stage names its checks in the extension
+(`checks`), as words: a person or the extension's kobold marks one as passed
+(`passCheck`).
+
+A card goes through **Build**, the team's stages between Build and Done, and
+**Done** (`cardCourse`); Kobble's other stages (signals, explore, release) hold
+no card. Kobble's own stages stay as they are, with no checks: a card is in
+Build or Done as its board column says, and moving it between columns is the
+board's. Only a team's stage is kept on the card: a label (`stage: checklist`)
+puts it there, and a marked section of the card's text, as the agreed plan has
+(`withKept`), keeps the checks that passed and the history. A card with
+neither is where its board column puts it, so every card has a stage from the
+start and no migration moves anything. A card that is Done or closed is
+finished: the label no longer holds it. A stage whose extension is removed lets
+its cards go back to Build.
+
+The server answers `/api/work-pieces` (list, check, move; `server/src/work-book.ts`)
+from the board's cards. A move into Done also moves the card's column to Done;
+a move out of Done puts it in Review. A move is told to everyone who listens
+(`Moved`) and to the page. No screen starts or moves a piece of work.
 
 **Slots** are the jobs the factory fills once for every extension (`SLOTS`:
 `code`, `tasks`). Only Kobble defines them and only Kobble's own extensions

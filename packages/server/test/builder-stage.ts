@@ -140,6 +140,7 @@ export function pretendBoard(kept: Map<number, Kept>) {
         comments: c.comments,
         dependsOn: [],
         neededBy: [],
+        kept: null,
       };
     },
     move: (number, stage) => {

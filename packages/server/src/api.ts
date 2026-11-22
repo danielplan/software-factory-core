@@ -66,6 +66,9 @@ export type CardView = {
   type?: "bug" | "feature" | "improvement" | null;
   // The builder got stuck on it (its stuck label): not a new idea.
   stuck?: boolean;
+  // The team's stage that holds it (its "stage: …" label), when one does:
+  // it is that piece of work's stage while it is not Done.
+  held?: string | null;
   // Handed back to the builder with the owner's hint (in To do).
   hint?: boolean;
 };
@@ -394,9 +397,8 @@ export type StagesView = {
     id: string;
     name: string;
     by: string;
-    // The checks work passes to leave it, and the pieces of work in it.
+    // The checks work passes to leave it.
     checks: { id: string; name: string }[];
-    pieces: number;
   }[];
   clash: { first: string; second: string } | null;
 };
