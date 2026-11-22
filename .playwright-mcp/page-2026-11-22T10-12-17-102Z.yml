@@ -1,0 +1,128 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Settings" [ref=e131] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e136]:
+    - generic [ref=e137]:
+      - generic [ref=e138]:
+        - heading "Home" [level=1] [ref=e141]
+        - paragraph [ref=e142]: What waits for you, and where the work is.
+      - generic [ref=e143]:
+        - button "Start again" [ref=e144] [cursor=pointer]
+        - button "Done" [active] [ref=e145] [cursor=pointer]
+      - generic [ref=e146]:
+        - generic [ref=e147]:
+          - generic [ref=e155]: Product status
+          - button "Move up" [disabled] [ref=e156]
+          - button "Move down" [ref=e159] [cursor=pointer]
+          - button "Hide" [ref=e162] [cursor=pointer]
+        - generic [ref=e166]:
+          - img "Stopped" [ref=e167]
+          - generic [ref=e168]: The product is stopped · Bolt is resting
+          - link "System" [ref=e169] [cursor=pointer]:
+            - /url: "#system"
+      - generic [ref=e170]:
+        - generic [ref=e171]:
+          - generic [ref=e179]: Waiting for you
+          - button "Move up" [ref=e180] [cursor=pointer]
+          - button "Move down" [ref=e183] [cursor=pointer]
+          - button "Hide" [ref=e186] [cursor=pointer]
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]: Continue
+            - generic [ref=e193]:
+              - generic [ref=e194]: The basket is empty when people come back to pay
+              - generic [ref=e195]: B is agreed. You can hand it off.
+            - link "Continue" [ref=e196] [cursor=pointer]:
+              - /url: "#explore/X-1"
+          - generic [ref=e199]:
+            - generic [ref=e200]: Continue
+            - generic [ref=e201]:
+              - generic [ref=e202]: One invoice a month for businesses
+              - generic [ref=e203]: Does his accountant need one invoice, or is one payment enough?
+            - link "Continue" [ref=e204] [cursor=pointer]:
+              - /url: "#explore/X-2"
+      - generic [ref=e207]:
+        - generic [ref=e208]:
+          - generic [ref=e216]: The loop
+          - button "Move up" [ref=e217] [cursor=pointer]
+          - button "Move down" [disabled] [ref=e220]
+          - button "Hide" [ref=e223] [cursor=pointer]
+        - generic [ref=e227]:
+          - link "Signals 0 new" [ref=e228] [cursor=pointer]:
+            - /url: "#signals"
+            - generic [ref=e229]: Signals
+            - generic [ref=e234]: 0 new
+          - link "Explorations 2 being explored The basket is empty when people come back to pay One invoice a month for businesses" [ref=e235] [cursor=pointer]:
+            - /url: "#explore"
+            - generic [ref=e236]: Explorations
+            - generic [ref=e240]: 2 being explored
+            - generic [ref=e241]: The basket is empty when people come back to pay
+            - generic [ref=e242]: One invoice a month for businesses
+          - link "Factory 0 to build" [ref=e243] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=e244]: Factory
+            - generic [ref=e248]: 0 to build
+          - link "Done 0 merged" [ref=e249] [cursor=pointer]:
+            - /url: "#build"
+            - generic [ref=e250]: Done
+            - generic [ref=e255]: 0 merged
+      - generic [ref=e256]:
+        - generic [ref=e257]: Blocks you can add
+        - generic [ref=e258]:
+          - generic [ref=e259]: GitHub board
+          - generic [ref=e260]:
+            - generic [ref=e261]:
+              - generic [ref=e262]: Open reviews
+              - generic [ref=e263]: Pull requests waiting for your review
+            - button "Add" [ref=e264] [cursor=pointer]
+        - generic [ref=e266]:
+          - generic [ref=e267]: Checks
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - generic [ref=e270]: Failed check
+              - generic [ref=e271]: Checks that failed on a pull request
+            - button "Add" [ref=e272] [cursor=pointer]
+        - button "Make your own block…" [ref=e274] [cursor=pointer]
+  - region "Sprocket" [ref=e278]:
+    - button "Ask Sprocket anything ⌘J" [ref=e279] [cursor=pointer]:
+      - generic [ref=e289]: Ask Sprocket anything
+      - generic [ref=e290]: ⌘J

@@ -28,7 +28,31 @@ import { overallOf } from "@/lib/shell-view";
 import { useT } from "@/i18n/use-t";
 import { useSignals } from "@/signals/use-signals";
 
+import { MADE_STATE } from "@/lib/prototype-flags";
+
 import type { FactoryState } from "./dashboard";
+import { type BlockId, HomeBlocks } from "./home-blocks";
+
+// Prototype: made-up items, so Home shows something to arrange.
+function madeUp(count: number): WaitingItem[] {
+  const all: WaitingItem[] = [
+    ["Review", "Retry the sync when the live app is slow", "#58"],
+    ["Review", "Show the kobold's trace in a card's panel on the Factory page", "#61"],
+    ["Answer", "Which board should the new add-on read?", "#63"],
+    ["Review", "packages/dashboard/src/explorations/board/prototype-states.tsx", "#64"],
+    ["Continue", "Make your own extensions", ""],
+    ["Sort", "3 new signals", ""],
+  ].map(([kind, title, number], at) => ({
+    id: `made-up-${String(at)}`,
+    kind: kind as WaitingItem["kind"],
+    title: title ?? "",
+    about: "Made-up example",
+    number: number || null,
+    href: "#build",
+    outside: false,
+  }));
+  return all.slice(0, count);
+}
 
 const KIND_COLOUR: Record<WaitingItem["kind"], string> = {
   Review: "var(--build)",
@@ -58,10 +82,22 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const shown = products.filter((part) => part.light !== "none");
   const product = overallOf(products, t.shell).lit;
   const building = state.work?.builder.working;
-  const waiting = waitingOf(input, t.home);
-  return (
-    <>
-      <PageHead title={t.shell.pages.home} about={t.home.about} />
+  const real = waitingOf(input, t.home);
+  const waiting =
+    MADE_STATE === "empty"
+      ? []
+      : MADE_STATE === "many"
+        ? [...real, ...madeUp(6)].slice(0, 8)
+        : real.length > 0
+          ? real
+          : madeUp(3);
+  const reviewsNow = waiting.filter((item) => item.kind === "Review");
+  const reviews =
+    reviewsNow.length === 0 && MADE_STATE !== "empty"
+      ? madeUp(4).filter((item) => item.kind === "Review")
+      : reviewsNow;
+  const blocks: Record<BlockId, ReactNode> = {
+    status: (
       <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-foreground-2">
         <StatusLight light={product} />
         <span className="min-w-0 flex-1">
@@ -79,6 +115,8 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
           {t.shell.pages.system}
         </a>
       </div>
+    ),
+    waiting: (
       <Card className="gap-0 py-0 shadow-soft">
         {waiting.length === 0 ? (
           <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
@@ -88,12 +126,78 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
           waiting.map((item) => <WaitingRow key={item.id} item={item} />)
         )}
       </Card>
+    ),
+    loop: (
       <Card className="grid gap-0 overflow-hidden py-0 shadow-soft sm:grid-cols-2 lg:grid-cols-4">
         {loopOf(input, t.home, t.shell.pages).map((stage, at) => (
           <StageCell key={stage.id} stage={stage} first={at === 0} />
         ))}
       </Card>
+    ),
+    reviews: (
+      <BlockCard name="Open reviews" from="GitHub board">
+        {reviews.length === 0 ? (
+          <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
+            No pull request waits for your review.
+          </p>
+        ) : (
+          reviews.map((item) => <WaitingRow key={item.id} item={item} />)
+        )}
+      </BlockCard>
+    ),
+    failed: (
+      <BlockCard name="Failed check" from="Checks">
+        {MADE_STATE === "empty" ? (
+          <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
+            No check has failed.
+          </p>
+        ) : (
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5">
+            <span className="min-w-0">
+              <span className="flex items-center gap-2 text-[13px]">
+                <StatusLight light="problem" />
+                <span className="truncate">Lint and type check failed</span>
+              </span>
+              <span className="block break-all text-xs text-muted-foreground">
+                #58 Retry the sync when the live app is slow · packages/server/src/kobble/sync.ts
+              </span>
+            </span>
+            <a
+              href="#build"
+              className="inline-flex h-7 items-center gap-1 rounded-lg border border-border px-2.5 text-xs hover:bg-hover"
+            >
+              Open
+              <ArrowRight aria-hidden className="size-3" />
+            </a>
+          </div>
+        )}
+      </BlockCard>
+    ),
+  };
+  return (
+    <>
+      <PageHead title={t.shell.pages.home} about={t.home.about} />
+      <HomeBlocks blocks={blocks} />
     </>
+  );
+}
+
+// A block an add-on offers: its name and where it comes from, over a card.
+function BlockCard({
+  name,
+  from,
+  children,
+}: Readonly<{ name: string; from: string; children: ReactNode }>) {
+  return (
+    <div className="grid gap-1.5">
+      <span className="flex items-center gap-2 text-[13px] font-medium">
+        {name}
+        <span className="text-xs font-normal text-muted-foreground">
+          {from}
+        </span>
+      </span>
+      <Card className="gap-0 py-0 shadow-soft">{children}</Card>
+    </div>
   );
 }
 

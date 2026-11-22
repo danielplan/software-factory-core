@@ -1,0 +1,37 @@
+- main [ref=e339]:
+  - generic [ref=e340]:
+    - generic [ref=e341]:
+      - link "Explorations" [ref=e342] [cursor=pointer]:
+        - /url: "#explore"
+      - generic [ref=e345]: /
+      - generic [ref=e346]: A Home block that…
+      - button "Drop" [ref=e347] [cursor=pointer]
+      - button "Hand off" [disabled]
+    - generic [ref=e348]:
+      - application "The exploration's board" [ref=e351]:
+        - group [ref=e354]:
+          - article "The problem" [ref=e355]:
+            - generic [ref=e357]:
+              - generic [ref=e365]: The problem
+              - 'button "Sketch: click to agree" [ref=e369] [cursor=pointer]': Sketch
+            - paragraph [ref=e372]: A Home block that…
+        - generic "Control Panel" [ref=e374]:
+          - button "Zoom In" [ref=e375] [cursor=pointer]
+          - button "Zoom Out" [ref=e378] [cursor=pointer]
+          - button "Fit View" [ref=e381] [cursor=pointer]
+        - link "React Flow attribution" [ref=e385] [cursor=pointer]:
+          - /url: https://reactflow.dev/attribution
+          - text: React Flow
+      - complementary [ref=e387]:
+        - generic [ref=e401]:
+          - generic [ref=e402]:
+            - generic [ref=e403]: Doodle
+            - generic [ref=e404]: your explorer
+          - generic [ref=e405]: Thinking…
+        - paragraph [ref=e407]: Thinking…
+        - generic [ref=e409]:
+          - textbox "Talk to the kobold" [ref=e410]:
+            - /placeholder: Talk to the kobold…
+          - generic [ref=e411]:
+            - button "Talk out loud" [ref=e412] [cursor=pointer]
+            - button "Stop" [ref=e413] [cursor=pointer]
