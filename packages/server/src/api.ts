@@ -390,7 +390,14 @@ export type AddOnView = {
 };
 
 export type StagesView = {
-  order: { id: string; name: string; by: string }[];
+  order: {
+    id: string;
+    name: string;
+    by: string;
+    // The checks work passes to leave it, and the pieces of work in it.
+    checks: { id: string; name: string }[];
+    pieces: number;
+  }[];
   clash: { first: string; second: string } | null;
 };
 export type { ShownPart, ShownView, SlotState } from "@software-factory/core";

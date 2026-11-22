@@ -44,7 +44,8 @@
       "id": "checklist",
       "name": "Checklist",
       "after": ["build"],
-      "before": ["done"]
+      "before": ["done"],
+      "checks": [{ "id": "ticked", "name": "Every item is ticked off" }]
     }
   ],
   "guides": [

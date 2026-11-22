@@ -193,12 +193,38 @@ the browser on a made-up factory with two team extensions):
 ![Settings › Stages asks which of two comes first](issue-27-extensions-and-marketplace/stages-clash.png)
 ![Home: the team's stages in the loop and its block](issue-27-extensions-and-marketplace/home-team-block-and-stage.png)
 
-**Not done in step 3** (next):
+Step 3, third part (built and checked: the full `npm run verify` passes, 569
+tests; looked at in the browser):
 
-- **Work moving on only when a stage's checks pass**, and the piece of work with
-  its stage and history (and extensions hearing when it moves). Stages are
-  ordered and shown, but nothing is moved through them or checked yet; a
-  team's stage has no count. This needs the core's piece of work first.
-- Cleaning up a removed team extension's block from `factory/home.json`.
-- The setup coach asking for each slot by name (it fills the tasks slot by
-  connecting the board, as before; the code slot has one filler).
+- **The piece of work** (`core/src/work/work.ts`): id, title, stage, the checks
+  of its stage that have passed, a history of every move, and a part per
+  extension. `moveWork` goes to the next stage only when every check of the
+  stage it is in has passed, one stage at a time; going back needs none and
+  starts that stage's checks again. A stage names its `checks` in the
+  extension (words, not code; the starter has one). The server keeps the pieces
+  in `factory/work.json` and answers `/api/work-pieces` (list, start, check,
+  move; `server/src/work-book.ts`); a move is told to the page and to any
+  listener the server is given (`Moved`). Home's loop shows a team's stage with
+  how many pieces are in it.
+- **Home lets go of a block** no extension brings any more (a team's extension
+  whose folder is gone) when Home is next saved; a block of an extension that
+  is only not installed stays.
+- **The setup coach** names the two slots, Your code and Your tasks, in its
+  guide.
+
+![A team's stage on Home, with two pieces of work in it](issue-27-extensions-and-marketplace/home-work-in-stage.png)
+
+Decisions: a check is a name that a person or the extension's kobold marks as
+passed, because a team's extension never runs code. The pieces of work kept in
+`factory/work.json` are those of a team's own stages; no migration is needed
+(no file means no pieces).
+
+**Not done** (for a card of its own):
+
+- No screen starts a piece of work, ticks its checks or moves it; the routes
+  and the count on Home are there, a screen was not in the agreed plan.
+- Kobble's own stages (signals, explore, build, done, release) still count the
+  board's cards as before; they are not pieces of work with checks yet, and no
+  extension of Kobble's listens to a move yet.
+- The setup coach has no tool of its own to fill Your code (GitHub is the only
+  filler); Your tasks is filled by connecting the board, as before.

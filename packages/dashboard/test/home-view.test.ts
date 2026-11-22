@@ -152,6 +152,24 @@ test("the loop follows the order of work: stages of removed extensions leave, a 
   );
 });
 
+test("a team's stage with work in it shows how many pieces are there", () => {
+  const input = { work: null, signals: [], fresh: 0, exploring: [] };
+  const place = (pieces: number) => ({
+    id: "check",
+    name: "Check",
+    by: "Checks",
+    own: false,
+    pieces,
+  });
+  const says = (pieces: number) => {
+    const [stage] = loopOf(input, undefined, undefined, [place(pieces)]);
+    return [stage?.count, stage?.says];
+  };
+  assert.deepEqual(says(0), [null, "Checks"]);
+  assert.deepEqual(says(1), [1, "piece of work"]);
+  assert.deepEqual(says(3), [3, "pieces of work"]);
+});
+
 test("the status line says how the product is and what the builder does", () => {
   const all = { light: "running", running: 2, shown: 2 };
   assert.equal(

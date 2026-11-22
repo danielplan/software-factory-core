@@ -27,6 +27,8 @@ const en = {
       `to build · ${String(review)} to review`,
     done: "Done",
     merged: "merged",
+    pieces: (count: number): string =>
+      count === 1 ? "piece of work" : "pieces of work",
   },
   arrange: {
     arrange: "Arrange Home",
@@ -103,6 +105,7 @@ export const home = area(
         `da costruire · ${String(review)} da rivedere`,
       done: "Fatto",
       merged: "unite",
+      pieces: (count) => (count === 1 ? "lavoro" : "lavori"),
     },
     arrange: {
       arrange: "Organizza Home",
@@ -176,6 +179,7 @@ export const home = area(
       toBuildAndReview: (review) => `zu bauen · ${String(review)} zu prüfen`,
       done: "Erledigt",
       merged: "zusammengeführt",
+      pieces: (count) => (count === 1 ? "Arbeitsstück" : "Arbeitsstücke"),
     },
     arrange: {
       arrange: "Home anordnen",

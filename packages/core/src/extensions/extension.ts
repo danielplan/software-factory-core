@@ -84,11 +84,17 @@ const viewSchema = z.object({
 // Where a stage of work sits among the others: it names its neighbours, by
 // stage id, and the factory works out the order (stages.ts). A neighbour
 // that is not installed is not a problem: the others around it still hold.
+// A check is something that must hold before work leaves the stage: named
+// here, and marked as passed on the piece of work, by a person or by the
+// extension's kobold (work.ts).
+const checkSchema = z.object({ id, name: z.string().min(1) });
+
 const stageSchema = z.object({
   id,
   name: z.string().min(1),
   after: z.array(id).default([]),
   before: z.array(id).default([]),
+  checks: z.array(checkSchema).default([]),
 });
 
 // The jobs the factory itself fills once, for every extension: where the
@@ -170,9 +176,9 @@ export const kitSchema = z.object({
 
 export type Guide = z.infer<typeof guideSchema>;
 export type View = z.infer<typeof viewSchema>;
-type ViewPart = z.infer<typeof viewPartSchema>;
 export type ViewItem = z.infer<typeof itemSchema>;
 export type StageSpec = z.infer<typeof stageSchema>;
+export type Check = z.infer<typeof checkSchema>;
 export type McpServer = z.infer<typeof mcpServerSchema>;
 export type ExtensionFile = z.input<typeof extensionSchema>;
 export type Extension = z.infer<typeof extensionSchema>;

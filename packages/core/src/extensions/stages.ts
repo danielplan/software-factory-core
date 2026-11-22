@@ -5,7 +5,7 @@
 // says so (a clash) for the team to settle. The team's own order, kept in the
 // factory's files, wins over every suggestion: the team can move any stage.
 
-import type { Extension } from "./extension.ts";
+import type { Check, Extension } from "./extension.ts";
 
 // A stage in the order: who brings it, and the words to show it with.
 export type PlacedStage = { id: string; name: string; by: string };
@@ -111,4 +111,17 @@ export function orderStages(
     .filter((stage) => !placed.has(stage.id))
     .reduce((so, stage) => slotted(so, stage, extensions), kept);
   return { order, clash: null };
+}
+
+// The stages in the team's order, each with the checks its extension asks:
+// what a piece of work goes through (work/work.ts).
+export function courseOf(
+  extensions: Extension[],
+  chosen: string[] = [],
+): { id: string; checks: Check[] }[] {
+  const specs = extensions.flatMap((extension) => extension.stages);
+  return orderStages(extensions, chosen).order.map((stage) => ({
+    id: stage.id,
+    checks: specs.find((spec) => spec.id === stage.id)?.checks ?? [],
+  }));
 }

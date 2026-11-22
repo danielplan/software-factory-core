@@ -20,6 +20,7 @@ export {
   type Slot,
   SLOTS,
   type StageSpec,
+  type Check,
   type View,
   type ViewItem,
   VIEW_ICONS,
@@ -35,10 +36,23 @@ export {
 export { fillsOf, type SlotState, slotsOf } from "./extensions/slots.ts";
 export {
   type Clash,
+  courseOf,
   orderStages,
   type PlacedStage,
   type StageOrder,
 } from "./extensions/stages.ts";
+export {
+  addPart,
+  type Course,
+  type Move,
+  type Moved,
+  moveWork,
+  openChecks,
+  type Outcome,
+  passCheck,
+  startWork,
+  type Work,
+} from "./work/work.ts";
 export { copyStarter, starterName } from "./extensions/starter.ts";
 export {
   OWN_EXTENSIONS_KEY,

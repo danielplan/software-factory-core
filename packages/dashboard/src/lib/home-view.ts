@@ -115,8 +115,8 @@ function answersOf(
 export type Stage = {
   id: string;
   name: string;
-  // Null for a stage of a team's own extension: Kobble does not count work
-  // in it, it only shows where it sits.
+  // Null for a stage of a team's own extension that holds no work yet: it
+  // only shows where it sits.
   count: number | null;
   // What the count is ("new", "being explored", "building · 1 to review").
   says: string;
@@ -127,7 +127,14 @@ export type Stage = {
 
 // A stage in the order of work, with the name of the extension that brings it
 // and whether that one is Kobble's own.
-export type Placed = { id: string; name: string; by: string; own: boolean };
+export type Placed = {
+  id: string;
+  name: string;
+  by: string;
+  own: boolean;
+  // The pieces of work in it (Kobble counts its own stages from the board).
+  pieces?: number;
+};
 
 // The loop: the stages in the order the team has them. The stages Kobble
 // counts (signals, exploring, building, done) show while their extension is
@@ -149,8 +156,8 @@ export function loopOf(
           {
             id: place.id,
             name: place.name,
-            count: null,
-            says: place.by,
+            count: place.pieces ? place.pieces : null,
+            says: place.pieces ? m.stages.pieces(place.pieces) : place.by,
             items: [],
             href: "#extensions",
           },

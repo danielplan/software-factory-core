@@ -91,9 +91,17 @@ the stages it comes after and before (Kobble's are `signals`, `explore`,
 `build`, `done`). A neighbour that is not installed is no problem. When two
 stages fit the same place the factory cannot tell which comes first, and
 Settings › Stages asks the team; the team can move any stage there. The
-loop on Home shows the stage in its place. **Work does not move through a
-team's stage yet** and it is not counted: it shows where it sits. Do not
-promise more than that on the card.
+loop on Home shows the stage in its place, with how many pieces of work are
+in it.
+
+A stage can ask for **checks**: `"checks": [{ "id": "ticked", "name": "Every
+item is ticked off" }]`. A piece of work leaves the stage for the next one only
+when every check has passed, one stage at a time; sending it back needs none.
+A check is a name, not code: a person or the extension's kobold marks it as
+passed on the piece of work (`POST /api/work-pieces/check`), and the factory
+keeps the piece with its stage and its history in `factory/work.json`. There
+is no screen yet for starting or moving a piece of work: say so on the card
+and do not promise one.
 
 ### Kobolds
 
