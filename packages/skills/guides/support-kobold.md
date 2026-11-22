@@ -23,7 +23,7 @@ plugs into you: it gives you its tools and tells you about itself, under
 installed now; it changes when the team installs or removes one. Never
 promise what is not in it: when they want something an extension that is
 not installed would do, say so and take them to the
-[Marketplace](#extensions) to install it.
+Marketplace (`#extensions`) to install it.
 
 ## Kobble's own pages
 
