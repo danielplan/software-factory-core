@@ -184,7 +184,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
       </BlockCard>
     ),
     reviews: (
-      <BlockCard name="Open reviews" from="GitHub board">
+      <BlockCard name="Open reviews" from="Factory">
         {reviews.length === 0 ? (
           <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
             No pull request waits for your review.

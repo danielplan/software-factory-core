@@ -4,7 +4,7 @@
 // need is refused, with why. Where GitHub and Jira belong differs by variant:
 // A, a setting in Factory's details; B, a Connections tab; C, a group here.
 
-import { Check, Download, Search } from "lucide-react";
+import { Check, Download, Package, Plug, Puzzle, Search } from "lucide-react";
 import { useState } from "react";
 
 import { PageHead } from "@/components/page-head";
@@ -24,6 +24,12 @@ import { cn } from "@/lib/utils";
 
 import { Adds, Logo, Maker, Needs } from "./bits";
 import { type Ext, KITS, missingFor, neededBy, useExtensions } from "./data";
+
+const TABS = [
+  { name: "Extensions", icon: <Puzzle aria-hidden /> },
+  { name: "Connections", icon: <Plug aria-hidden /> },
+  { name: "Product kits", icon: <Package aria-hidden /> },
+] as const;
 
 const FILTERS = ["All", "Installed", "Kobble's", "Your team's"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -87,8 +93,12 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         }
       />
       {VARIANT === "B" && (
-        <div role="tablist" aria-label="Marketplace" className="flex gap-1 border-b border-border-soft">
-          {(["Extensions", "Connections", "Product kits"] as const).map((name) => (
+        <div
+          role="tablist"
+          aria-label="Marketplace"
+          className="inline-flex w-fit gap-1 rounded-xl bg-surface-2 p-1"
+        >
+          {TABS.map(({ name, icon }) => (
             <button
               key={name}
               type="button"
@@ -98,12 +108,13 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                 setTab(name);
               }}
               className={cn(
-                "-mb-px border-b-2 px-3 py-2 text-[13px] font-medium",
+                "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium [&_svg]:size-3.5",
                 tab === name
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
+                  ? "bg-card text-foreground shadow-current"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
+              {icon}
               {name}
             </button>
           ))}
@@ -339,12 +350,15 @@ function Card({
   onOpen,
   action,
   note,
+  usedBy,
   label = "Installed",
 }: Readonly<{
   ext: Ext;
   onOpen: () => void;
   // A small line under the one-liner.
   note?: string;
+  // The products that use it (a kit), as chips in the card's foot.
+  usedBy?: string[];
   // What to press; none once it is in.
   action: React.ReactNode;
   label?: "Installed" | "In use" | "Connected" | "Pre-installed";
@@ -388,7 +402,12 @@ function Card({
         <p className="text-[13px] text-foreground/75">{ext.about}</p>
         {note && <p className="text-xs text-muted-foreground">{note}</p>}
       </div>
-      {action && <div className="relative flex justify-end">{action}</div>}
+      {(action || (usedBy && usedBy.length > 0)) && (
+        <div className="relative flex flex-wrap items-center justify-between gap-2">
+          {usedBy && usedBy.length > 0 ? <UsedBy products={usedBy} /> : <span />}
+          {action}
+        </div>
+      )}
     </article>
   );
 }
@@ -737,6 +756,29 @@ function Details({
   );
 }
 
+// The products that use a kit: a small chip each, with its initial.
+function UsedBy({ products }: Readonly<{ products: string[] }>) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[11px] text-muted-foreground">Used by</span>
+      {products.map((name) => (
+        <span
+          key={name}
+          className="inline-flex h-6 items-center gap-1.5 rounded-full bg-card/80 py-0 pr-2.5 pl-1 text-xs shadow-soft"
+        >
+          <span
+            aria-hidden
+            className="grid size-4 place-items-center rounded-full bg-blue/15 text-[9px] font-semibold text-blue"
+          >
+            {name.charAt(0)}
+          </span>
+          {name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // B: the product kits Kobble comes with, and the team's own.
 function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
   return (
@@ -750,7 +792,7 @@ function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
           <Card
             key={k.id}
             ext={k}
-            note={k.kit?.usedBy ? `Used by: ${k.kit.usedBy}` : undefined}
+            usedBy={k.kit?.usedBy}
             onOpen={() => {
               onOpen(k.id);
             }}
@@ -785,7 +827,7 @@ function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
 function KitDetails({
   ext,
   kit,
-}: Readonly<{ ext: Ext; kit: { usedBy: string | null; brings: string[] } }>) {
+}: Readonly<{ ext: Ext; kit: { usedBy: string[]; brings: string[] } }>) {
   return (
     <div className="grid gap-4">
       <div className="flex items-center gap-3.5 pr-6">
@@ -806,9 +848,11 @@ function KitDetails({
         </ul>
       </Part>
       <Part title="Used by">
-        <span className="text-[13px]">
-          {kit.usedBy ?? "No product yet."}
-        </span>
+        {kit.usedBy.length > 0 ? (
+          <UsedBy products={kit.usedBy} />
+        ) : (
+          <span className="text-[13px]">No product yet.</span>
+        )}
       </Part>
     </div>
   );

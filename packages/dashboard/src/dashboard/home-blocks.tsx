@@ -85,9 +85,9 @@ export const BLOCKS: BlockInfo[] = [
   {
     id: "reviews",
     name: "Open reviews",
-    from: "GitHub board",
-    ext: "github",
-    about: "Pull requests waiting for your review",
+    from: "Factory",
+    ext: "factory",
+    about: "The Factory's cards in review, on whichever board they live",
   },
   {
     id: "failed",

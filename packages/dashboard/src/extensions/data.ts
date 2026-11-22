@@ -31,7 +31,7 @@ export type Ext = {
   fields: { label: string; value: string }[];
   changes: string[];
   // A product kit: the product that uses it, and what it brings.
-  kit?: { usedBy: string | null; brings: string[] };
+  kit?: { usedBy: string[]; brings: string[] };
 };
 
 const NONE = { pages: [], blocks: [], kobolds: [] };
@@ -60,7 +60,6 @@ const base: Made = {
 // What each real add-on adds and needs; made up.
 const OF_ADD_ON: Record<string, Partial<Made>> = {
   github: {
-    adds: { ...NONE, blocks: ["Open reviews"] },
     stages: ["Factory"],
     needsIds: ["factory"],
     extra: ["The GitHub CLI, signed in"],
@@ -89,7 +88,7 @@ const MADE_UP: MadeUp[] = [
     id: "factory",
     name: "Factory",
     about: "The board where work is built, from to do to done.",
-    adds: { pages: ["Factory"], blocks: ["Product status", "Waiting for you", "The loop"], kobolds: ["Bolt"] },
+    adds: { pages: ["Factory"], blocks: ["Product status", "Waiting for you", "The loop", "Open reviews"], kobolds: ["Bolt"] },
     stages: ["Factory"],
     on: true,
   }),
@@ -279,7 +278,7 @@ const kit = (
   id: string,
   name: string,
   about: string,
-  usedBy: string | null,
+  usedBy: string[],
   maker: Ext["maker"] = "kobble",
 ): Ext => ({
   id,
@@ -290,7 +289,7 @@ const kit = (
   stages: [],
   needsIds: [],
   needs: [],
-  on: usedBy !== null,
+  on: usedBy.length > 0,
   real: false,
   tracker: false,
   settings: [],
@@ -300,10 +299,10 @@ const kit = (
 });
 
 export const KITS: Ext[] = [
-  kit("react-web-app", "React web app", "How a React web app is built, checked and run.", "Acme Shop"),
-  kit("expo-app", "Expo app", "How a phone app with Expo is built, checked and run.", "Acme Shop app"),
-  kit("nestjs-backend", "NestJS backend", "How a NestJS server is built, checked and run.", null),
-  kit("sveltekit-app", "SvelteKit web app", "How a SvelteKit web app is built, checked and run.", null),
-  kit("typescript-package", "TypeScript package", "How a TypeScript library is built, checked and published.", null),
-  kit("shopify-theme", "Shopify theme", "How a Shopify theme is built, checked and previewed.", null, "team"),
+  kit("react-web-app", "React web app", "How a React web app is built, checked and run.", ["Acme Shop", "Acme Admin"]),
+  kit("expo-app", "Expo app", "How a phone app with Expo is built, checked and run.", ["Acme Shop app"]),
+  kit("nestjs-backend", "NestJS backend", "How a NestJS server is built, checked and run.", []),
+  kit("sveltekit-app", "SvelteKit web app", "How a SvelteKit web app is built, checked and run.", []),
+  kit("typescript-package", "TypeScript package", "How a TypeScript library is built, checked and published.", []),
+  kit("shopify-theme", "Shopify theme", "How a Shopify theme is built, checked and previewed.", [], "team"),
 ];
