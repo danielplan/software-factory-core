@@ -124,12 +124,13 @@ export class Session {
 
   // The first step: the project's factory folder, which opens with no
   // products yet.
-  createCompany(request: CreateCompany): string {
+  createCompany(request: CreateCompany, say?: (line: string) => void): string {
     if (this.root) throw new Refused("This factory has its company already.");
     const root = writeCompany(
       request,
       this.options.project,
       this.options.templates,
+      say,
     );
     this.open(root);
     return root;
@@ -288,7 +289,9 @@ export class Session {
       root: () => this.root,
       company: () => this.factory?.company ?? null,
       makeFolder: (company) => {
-        this.createCompany(company);
+        const said: string[] = [];
+        this.createCompany(company, (line) => said.push(line));
+        return said;
       },
       saveCompany: (company) => {
         saveCompany(this.rootOrRefuse(), company);

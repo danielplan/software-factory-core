@@ -1,7 +1,7 @@
 // Brings a company's factory to the core it runs on: the migrations of every
 // release after the factory's version, in order; then what the factory owns
 // in the project, refreshed every time (the skills, the kits' MCP
-// servers); the new version in factory.json; and the factory's checks.
+// servers, the project files the core owns: project-files.ts); the new version in factory.json; and the factory's checks.
 
 import {
   compareVersions,
@@ -14,7 +14,7 @@ import { checkKnowledge } from "../knowledge-check.ts";
 
 import { installSkills } from "../install-skills.ts";
 import { addKitServers } from "../kit-servers.ts";
-import { pinCore } from "../pin-core.ts";
+import { projectFilesSaid } from "../project-files.ts";
 import { themeProblems } from "../theme-check.ts";
 import {
   companyOf,
@@ -60,10 +60,9 @@ export async function upgradeFactory(
   );
   if (servers.length > 0)
     done.push(`Added the MCP servers ${servers.join(", ")} to .mcp.json.`);
-  if (pinCore(project, to))
-    done.push(
-      `Pinned the core in package.json at release ${to}: run npm install.`,
-    );
+  const files = projectFilesSaid(project, companyOf(root).name, to);
+  done.push(...files.done);
+  left.push(...files.left);
   if (compareVersions(to, from) > 0)
     saveCompany(root, { ...companyOf(root), core: to });
   return { from, to, done, left, problems: await problemsOf(context) };

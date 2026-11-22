@@ -44,7 +44,7 @@ hold for any company comes here, written in general terms.
   `npx software-factory upgrade` brings the factory to that release: it runs
   the migrations of every release in between, refreshes what the factory
   owns in the project (the skills, the kits' tools, the knowledge base's
-  missing shape), writes the new version and runs the factory's checks. It
+  missing shape, the git hooks and the core's scripts in `package.json`), writes the new version and runs the factory's checks. It
   says what it did and what it leaves to the owner, who reviews and commits.
   Inside Kobble, Settings › Updates offers a newer release as a card for the
   builder. See [versions](../reference/versions.md) and

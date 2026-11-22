@@ -40,6 +40,12 @@ here reach every company with its next upgrade, so they are made with care.
   who use a factory are not developers, but are curious and capable.
 - **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
 - Never loosen a check or add a lint-disabling comment without asking.
+- **What the core owns, it overwrites; customizations go through a declared
+  place.** A file or value the core writes in a factory is written the same
+  way in every factory, by setup and again by every upgrade, never left
+  alone because a team edited it; what a team wants differently has a
+  place of its own (such as `factory/hooks.yml`) or waits for a declared
+  setting ([decision 0015](docs/decisions/0015-the-core-overwrites-what-it-owns.md)).
 - **Work reaches main through a pull request.** Commit on a branch, push it
   and open a pull request; never push to main directly. A product's release
   notes (the Releases page) are written from the pull requests merged since

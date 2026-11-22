@@ -24,6 +24,7 @@ import { GIT } from "@software-factory/knowledge-base";
 
 import { trackedWith } from "../extension-switch.ts";
 import { moveOut } from "./move-out.ts";
+import { projectFilesSaid } from "../project-files.ts";
 import { Refused } from "../refused.ts";
 import { knowledgeShape } from "./knowledge-shape.ts";
 
@@ -142,6 +143,13 @@ export const MIGRATIONS: Migration[] = [
     about:
       "The knowledge base keeps its shape: the pages it lacks come from the template",
     run: ({ root }) => knowledgeShape(root),
+  },
+  {
+    version: "0.15.0",
+    about:
+      "The core owns lefthook.yml and its scripts in package.json; the team's own hooks go in factory/hooks.yml",
+    run: ({ project, root }) =>
+      projectFilesSaid(project, companyOf(root).name, "0.15.0"),
   },
 ];
 

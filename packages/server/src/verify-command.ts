@@ -5,7 +5,7 @@
 // software-factory check-format [file…]: the format check of each product a
 // file is in (its own `npm run format:check`, when it has one). They are the
 // project's own checks: `npm run verify` at the top of a project and its git
-// hooks run them (project-checks.ts). Each product's output is shown as it
+// hooks run them (project-files.ts). Each product's output is shown as it
 // runs; the command fails when one check failed.
 
 import { execFileSync, spawnSync } from "node:child_process";

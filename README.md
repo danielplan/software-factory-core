@@ -73,8 +73,9 @@ Other commands:
 
 - `npx software-factory upgrade` brings the factory to the release you pinned.
 - `npx software-factory new <name>` starts a new project for a new idea. A
-  project set up new gets its own checks at its top: a `package.json` with
-  `npm run verify` and git hooks (`lefthook.yml`).
+  Every project gets the factory's checks at its top: scripts in
+  `package.json` (`npm run verify`) and git hooks (`lefthook.yml`), written
+  again by each upgrade; the team's own hooks go in `factory/hooks.yml`.
 - `npx software-factory verify` runs every product's `verify` command.
 
 ![System: the product's parts and how they connect, with Start and Open](docs/images/system.png)

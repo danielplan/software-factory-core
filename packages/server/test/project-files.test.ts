@@ -1,12 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -17,11 +11,22 @@ import {
   createFactoryFolder,
   defineKit,
   releaseOf,
+  saveCompany,
 } from "@software-factory/core";
 import { GIT, templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/skills";
 
-import { addProjectChecks } from "../src/project-checks.ts";
+import { checkRecordsHere } from "../src/check-command.ts";
+import {
+  CORE_HOOKS,
+  CORE_SCRIPTS,
+  editedProjectFiles,
+  HOOKS_FILE,
+  TEAM_HOOKS,
+  writeProjectFiles,
+} from "../src/project-files.ts";
+import { companyOf } from "../src/upgrade/migrations.ts";
+import { upgradeFactory } from "../src/upgrade/upgrade.ts";
 import {
   checkFormatHere,
   type Shell,
@@ -30,71 +35,186 @@ import {
 } from "../src/verify-command.ts";
 import { writeCompany } from "../src/write-factory.ts";
 
-// A new project gets its own checks at its top, as a company's factory has
-// them: a package.json that checks every product and the knowledge base,
-// and git hooks that run the factory's checks of what changed.
+// The project files the core owns, written the same way in every factory:
+// lefthook.yml whole, taking in the team's own factory/hooks.yml, and the
+// core's keys in package.json; every other key is the team's. Then the
+// factory's own checks they run.
 
 const templates = {
   knowledgeBase: templateFolder,
   agents: join(templatesFolder, "AGENTS.md"),
 };
+const lefthook = join(
+  import.meta.dirname,
+  "..",
+  "..",
+  "..",
+  "node_modules",
+  ".bin",
+  "lefthook",
+);
 
-test("a new project gets a package.json with its checks, the core pinned, and git hooks", () => {
-  const project = mkdtempSync(join(tmpdir(), "fresh-"));
-  writeCompany({ name: "Bike shop", about: "" }, project, templates);
-  const data = JSON.parse(
+type PackageJson = {
+  name?: string;
+  private?: boolean;
+  scripts: Record<string, string>;
+  devDependencies: Record<string, string>;
+};
+const packageOf = (project: string) =>
+  JSON.parse(
     readFileSync(join(project, "package.json"), "utf8"),
-  ) as {
-    name: string;
-    private: boolean;
-    scripts: Record<string, string>;
-    devDependencies: Record<string, string>;
-  };
+  ) as PackageJson;
+
+test("a new project gets the core's package.json, git hooks and a place for the team's own", () => {
+  const project = mkdtempSync(join(tmpdir(), "fresh-"));
+  const said: string[] = [];
+  writeCompany({ name: "Bike shop", about: "" }, project, templates, (line) =>
+    said.push(line),
+  );
+  const data = packageOf(project);
   assert.equal(data.name, "bike-shop");
   assert.equal(data.private, true);
-  assert.deepEqual(data.scripts, {
-    prepare: "lefthook install",
-    verify: "software-factory verify && npm run check:docs",
-    "check:docs": "software-factory check-docs",
-  });
+  assert.deepEqual(data.scripts, CORE_SCRIPTS);
   assert.equal(
     data.devDependencies["software-factory"],
     releaseOf(CORE_VERSION),
   );
   assert.ok(data.devDependencies.lefthook);
-  const hooks = readFileSync(join(project, "lefthook.yml"), "utf8");
-  assert.match(hooks, /software-factory check-format \{staged_files\}/);
-  assert.match(hooks, /software-factory check-docs/);
-  assert.match(hooks, /software-factory verify --pushed\n {6}use_stdin: true/);
+  assert.equal(readFileSync(join(project, HOOKS_FILE), "utf8"), CORE_HOOKS);
+  assert.match(CORE_HOOKS, /software-factory check-format \{staged_files\}/);
+  assert.match(
+    CORE_HOOKS,
+    /software-factory verify --pushed\n {6}use_stdin: true/,
+  );
+  assert.match(CORE_HOOKS, /extends:\n {2}- factory\/hooks\.yml\n$/);
+  assert.match(
+    readFileSync(join(project, TEAM_HOOKS), "utf8"),
+    /^# The team's own git hooks/,
+  );
   assert.equal(
     readFileSync(join(project, ".gitignore"), "utf8"),
     "node_modules/\n",
   );
+  assert.match(said.join("\n"), /Made package\.json/);
+  assert.deepEqual(editedProjectFiles(project), []);
 });
 
-test("a project with a package.json or git hooks of its own keeps them", () => {
-  const own = mkdtempSync(join(tmpdir(), "own-"));
-  writeFileSync(join(own, "package.json"), '{ "name": "mine" }\n');
-  assert.equal(addProjectChecks(own, "Mine"), false);
-  assert.equal(
-    readFileSync(join(own, "package.json"), "utf8"),
-    '{ "name": "mine" }\n',
+test("lefthook takes in the team's own hooks from factory/hooks.yml", () => {
+  const project = mkdtempSync(join(tmpdir(), "hooks-"));
+  execFileSync(GIT, ["init", "-q"], { cwd: project });
+  mkdirSync(join(project, "factory"));
+  writeProjectFiles(project, "Shop", CORE_VERSION);
+  const dump = () =>
+    execFileSync(lefthook, ["dump"], { cwd: project, encoding: "utf8" });
+  // The template has only comments: the core's hooks alone.
+  assert.match(dump(), /name: verify/);
+  writeFileSync(
+    join(project, TEAM_HOOKS),
+    "pre-commit:\n  jobs:\n    - name: our check\n      run: npm run ours\n",
   );
-  assert.ok(!existsSync(join(own, "lefthook.yml")));
+  const merged = dump();
+  assert.match(merged, /name: format/);
+  assert.match(merged, /name: our check/);
+  // The team's file is never written again.
+  writeProjectFiles(project, "Shop", CORE_VERSION);
+  assert.match(readFileSync(join(project, TEAM_HOOKS), "utf8"), /our check/);
+});
 
-  const hooked = mkdtempSync(join(tmpdir(), "hooked-"));
-  mkdirSync(join(hooked, ".husky"));
-  writeFileSync(join(hooked, ".gitignore"), "dist");
-  assert.equal(addProjectChecks(hooked, "Hooked"), true);
-  const data = JSON.parse(
-    readFileSync(join(hooked, "package.json"), "utf8"),
-  ) as { scripts: Record<string, string> };
-  assert.equal(data.scripts.prepare, undefined);
-  assert.ok(!existsSync(join(hooked, "lefthook.yml")));
-  assert.equal(
-    readFileSync(join(hooked, ".gitignore"), "utf8"),
-    "dist\nnode_modules/\n",
+test("an existing project's hooks and scripts: the core's are written again, the rest is kept, the old ones said", async () => {
+  const project = mkdtempSync(join(tmpdir(), "company-"));
+  const root = join(project, "factory");
+  createFactoryFolder(root, { name: "Boats" }, templates);
+  // A factory from before 0.15.0, with its own checks at the top.
+  saveCompany(root, { ...companyOf(root), core: "0.14.0" });
+  const own = {
+    name: "boats-checks",
+    private: true,
+    type: "module",
+    scripts: {
+      prepare: "lefthook install",
+      "check:docs": "npm run check:links && npm run check:pages",
+      "check:links": "remark . --frail",
+      setup: "node scripts/setup.mjs",
+      test: 'node --test "scripts/**/*.test.mjs"',
+    },
+    devDependencies: { lefthook: "2.0.0", "remark-cli": "12.0.1" },
+  };
+  writeFileSync(
+    join(project, "package.json"),
+    `${JSON.stringify(own, null, 2)}\n`,
   );
+  const hooks =
+    "pre-commit:\n  jobs:\n    - name: changes row\n      run: node scripts/hooks/changes-row.mjs\n";
+  writeFileSync(join(project, HOOKS_FILE), hooks);
+
+  const upgraded = await upgradeFactory({
+    project,
+    root,
+    kits: [],
+    extensions: [],
+  });
+  assert.equal(readFileSync(join(project, HOOKS_FILE), "utf8"), CORE_HOOKS);
+  const kept = join(root, "hooks-before-0.15.yml");
+  assert.equal(readFileSync(kept, "utf8"), hooks);
+  assert.match(
+    readFileSync(join(project, TEAM_HOOKS), "utf8"),
+    /factory\/hooks-before-0\.15\.yml: bring over/,
+  );
+  const data = packageOf(project);
+  assert.deepEqual(data.scripts, {
+    ...own.scripts,
+    ...CORE_SCRIPTS,
+  });
+  assert.equal(data.devDependencies["remark-cli"], "12.0.1");
+  assert.equal(data.devDependencies.lefthook, "2.2.1");
+  assert.equal(
+    data.devDependencies["software-factory"],
+    releaseOf(CORE_VERSION),
+  );
+  const left = upgraded.left.join("\n");
+  assert.match(
+    left,
+    /lefthook\.yml is kept as factory\/hooks-before-0\.15\.yml/,
+  );
+  assert.match(
+    left,
+    /replaced "check:docs" \(it was "npm run check:links && npm run check:pages"\)/,
+  );
+  assert.ok(!left.includes('"prepare"'));
+  assert.deepEqual(editedProjectFiles(project), []);
+
+  // Changed by hand, the check says so; the next upgrade writes them again.
+  writeFileSync(join(project, HOOKS_FILE), `${CORE_HOOKS}# ours\n`);
+  writeFileSync(
+    join(project, "package.json"),
+    `${JSON.stringify({ ...data, scripts: { ...data.scripts, verify: "echo ok" } }, null, 2)}\n`,
+  );
+  const lines: string[] = [];
+  assert.equal(
+    checkRecordsHere(project, undefined, (line) => lines.push(line)),
+    1,
+  );
+  assert.match(
+    lines.join("\n"),
+    /lefthook\.yml is not the one the core writes[^\n]*factory\/hooks\.yml/,
+  );
+  assert.match(lines.join("\n"), /the script "verify" is the core's/);
+  const again = await upgradeFactory({
+    project,
+    root,
+    kits: [],
+    extensions: [],
+  });
+  assert.match(again.left.join("\n"), /replaced "verify" \(it was "echo ok"\)/);
+  assert.deepEqual(editedProjectFiles(project), []);
+});
+
+test("a package.json that cannot be read is said, not taken for the core's", () => {
+  const project = mkdtempSync(join(tmpdir(), "broken-"));
+  writeFileSync(join(project, "package.json"), "{ not json");
+  assert.deepEqual(editedProjectFiles(project), [
+    "package.json cannot be read as JSON.",
+  ]);
 });
 
 const kit = defineKit({

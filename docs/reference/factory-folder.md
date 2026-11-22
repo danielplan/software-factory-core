@@ -7,12 +7,13 @@
 ```text
 acme/                    the project, one repository
 ├─ AGENTS.md             the project's rules, pointing to factory/AGENTS.md
-├─ package.json          the core pinned; in a project set up new, its checks
-├─ lefthook.yml          a project set up new: its git hooks
+├─ package.json          the core pinned, the core's scripts, the team's own
+├─ lefthook.yml          the git hooks, written by the core
 ├─ docs/                 the knowledge base, beside the project's own docs
 ├─ shop/                 a product's code, with product.json and BLUEPRINT.md
 └─ factory/              its factory
    ├─ AGENTS.md          the agents' ground rules and workflow
+   ├─ hooks.yml          the team's own git hooks, taken in by lefthook.yml
    ├─ factory.json       the company: its kits, extensions and products' folders
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map
