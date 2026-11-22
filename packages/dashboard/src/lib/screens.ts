@@ -2,9 +2,8 @@
 // among the extensions. Kobble's own are drawn by the page in code and have no
 // description here, so they have no screen; their names are words.
 
-import type { AddOnView, ShownView } from "@/api";
-
-import { wordOf } from "./home-layout";
+import type { AddOnView, ShownView } from "../api.ts";
+import { wordOf } from "./home-layout.ts";
 
 type Kind = "pages" | "blocks";
 
