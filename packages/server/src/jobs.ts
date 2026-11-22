@@ -77,7 +77,7 @@ function runStep(
         ...process.env,
         CI: "1",
         npm_config_yes: "true",
-        FORCE_COLOR: "0",
+        NO_COLOR: "1",
       },
     });
     const lines = (chunk: Buffer) => {
