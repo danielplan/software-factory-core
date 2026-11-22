@@ -28,8 +28,10 @@ secrets, in `factory/settings/`, not in git (see
 The sidebar shows an update row above Settings only when something needs
 the team: changes ready on GitHub, an update running, or a newer Kobble.
 
-- **The team's folder** takes the newest main from GitHub without anyone
-  using git, only when nothing can be lost, by itself every few minutes (on
+- **The team's folder** takes the newest of its base branch from GitHub
+  (what origin's HEAD points to, else the remote's default, else main:
+  `packages/server/src/base-branch.ts`) without anyone using git, only when
+  nothing can be lost, by itself every few minutes (on
   unless switched off). After it, what the changes need is installed when
   their package files changed; when that brings a new Kobble, the factory
   starts again on it with the parts that ran; otherwise the running products

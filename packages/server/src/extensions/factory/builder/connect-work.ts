@@ -224,6 +224,11 @@ export class ConnectedWork {
   }
 
   // Where the code lives, for the card panel and Resolve.
+  // The code host, when the board is connected and one is.
+  hostOrNull(): CodeHost | null {
+    return this.work ? this.codeHost : null;
+  }
+
   hostOrRefuse(): CodeHost {
     this.orRefuse();
     if (!this.codeHost) throw new Refused("There is no code host yet.");

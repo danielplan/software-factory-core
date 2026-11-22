@@ -8,6 +8,7 @@ import { run } from "@software-factory/core";
 import type { WorkView } from "../src/api.ts";
 import { markComment } from "../src/extensions/factory/builder/protocol.ts";
 import type { Cards, CardDetail } from "../src/cards/cards.ts";
+import { baseBranchOf } from "../src/base-branch.ts";
 import { cardLook, supportCards } from "../src/extensions/factory/card-look.ts";
 import { project } from "./builder-stage.ts";
 
@@ -54,8 +55,9 @@ test("Sprocket looks at a card: its text, its conversation, and its branch with 
   await git("commit", "--quiet", "-m", "#7 Step 1");
   await git("push", "--quiet", "origin", "factory/issue-7");
   await git("checkout", "--quiet", "main");
+  const where = { project: source, baseBranch: () => baseBranchOf(source) };
 
-  const seen = await cardLook(7, cards, source, "2026-01-01T10:00:00Z");
+  const seen = await cardLook(7, cards, where, "2026-01-01T10:00:00Z");
   assert.match(seen, /# #7 Big/);
   assert.match(seen, /column: Backlog · stuck since 2026-01-01T10:00:00Z/);
   assert.match(
@@ -79,11 +81,11 @@ test("Sprocket looks at a card: its text, its conversation, and its branch with 
   await git("push", "--quiet", "origin", "factory/issue-9");
   await git("checkout", "--quiet", "main");
   await git("branch", "--quiet", "-D", "factory/issue-9");
-  const pushed = await cardLook(9, cards, source, null);
+  const pushed = await cardLook(9, cards, where, null);
   assert.match(pushed, /\(as pushed; against/);
   assert.match(pushed, /app\/NINE\.md/);
 
-  const none = await cardLook(8, cards, source, null);
+  const none = await cardLook(8, cards, where, null);
   assert.match(none, /`factory\/issue-8` has nothing yet/);
   assert.doesNotMatch(none, /stuck since/);
 });
@@ -93,6 +95,7 @@ test("Sprocket sends the team's answer on only for a stuck card", async () => {
   const work = { stuck: [{ number: 7 }] } as unknown as WorkView;
   const on = supportCards({
     project: "/nowhere",
+    baseBranch: () => Promise.resolve("main"),
     cards: () => cards,
     work: () => work,
     answer: (number, text) => {

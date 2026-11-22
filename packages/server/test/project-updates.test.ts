@@ -29,15 +29,16 @@ function git(cwd: string, ...args: string[]): string {
   }).trim();
 }
 
-// A pretend GitHub (a bare repository), the owner's folder cloned from it,
-// and a second clone where new work is merged and sent to GitHub.
-function world() {
+// A pretend GitHub (a bare repository, its default branch main unless
+// said), the owner's folder cloned from it, and a second clone where new
+// work is merged and sent to GitHub.
+function world(branch = "main") {
   const base = mkdtempSync(join(tmpdir(), "project-updates-"));
   made.push(base);
   const github = join(base, "github.git");
   const folder = join(base, "folder");
   const elsewhere = join(base, "elsewhere");
-  git(base, "init", "--quiet", "--bare", "--initial-branch=main", github);
+  git(base, "init", "--quiet", "--bare", `--initial-branch=${branch}`, github);
   git(base, "clone", "--quiet", github, elsewhere);
   for (const cwd of [elsewhere]) {
     git(cwd, "config", "user.email", "test@example.com");
@@ -46,7 +47,7 @@ function world() {
   writeFileSync(join(elsewhere, "readme.md"), "one\n");
   git(elsewhere, "add", ".");
   git(elsewhere, "commit", "--quiet", "-m", "First version");
-  git(elsewhere, "push", "--quiet", "origin", "main");
+  git(elsewhere, "push", "--quiet", "origin", branch);
   git(base, "clone", "--quiet", github, folder);
   git(folder, "config", "user.email", "test@example.com");
   git(folder, "config", "user.name", "Test");
@@ -55,7 +56,7 @@ function world() {
     writeFileSync(join(elsewhere, file), `${title}\n`);
     git(elsewhere, "add", ".");
     git(elsewhere, "commit", "--quiet", "-m", "Work in progress");
-    git(elsewhere, "switch", "--quiet", "main");
+    git(elsewhere, "switch", "--quiet", branch);
     git(
       elsewhere,
       "merge",
@@ -66,7 +67,7 @@ function world() {
       "work",
     );
     git(elsewhere, "branch", "--quiet", "-D", "work");
-    git(elsewhere, "push", "--quiet", "origin", "main");
+    git(elsewhere, "push", "--quiet", "origin", branch);
   };
   return { base, folder, merge };
 }
@@ -231,4 +232,15 @@ test("following with the switch on updates, and the update finishes with what co
   while (updates.state.updating)
     await new Promise((resolve) => setTimeout(resolve, 20));
   assert.equal(existsSync(join(folder, "notes.md")), true);
+});
+
+test("it follows the project's base branch when that is not main", async () => {
+  const { folder, merge } = world("trunk");
+  merge("notes.md", "Notes on trunk");
+  const updates = new ProjectUpdates({ root: folder });
+  assert.deepEqual(await updates.update(), { kind: "updated", count: 1 });
+  assert.equal(
+    readFileSync(join(folder, "notes.md"), "utf8").trim(),
+    "Notes on trunk",
+  );
 });
