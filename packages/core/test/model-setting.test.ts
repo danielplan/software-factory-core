@@ -116,3 +116,34 @@ test("the chosen model keeps stopping a conversation's turn", () => {
   assert.equal(chosen.interrupt?.("s1"), true);
   assert.deepEqual(stopped, ["s1"]);
 });
+
+test("the kobolds who talk think it through: high unless chosen, read again on every run", async () => {
+  const { seen, claude } = recorder();
+  let root: string | null = null;
+  const chosen = withChosenModel(claude, () => root);
+  await chosen.run(base);
+  root = factoryWith();
+  writeFileSync(
+    join(root, "settings", "factory.env"),
+    "FACTORY_TALK_EFFORT=xhigh\n",
+  );
+  await chosen.run(base);
+  writeFileSync(
+    join(root, "settings", "factory.env"),
+    "FACTORY_TALK_EFFORT=nonsense\n",
+  );
+  await chosen.run(base);
+  await chosen.run({ ...base, effort: "low" });
+  assert.deepEqual(
+    seen.map((o) => o.effort),
+    ["high", "xhigh", "high", "low"],
+  );
+  assert.deepEqual(
+    checkChanges(modelSettings, { FACTORY_TALK_EFFORT: "max" }).refused,
+    {},
+  );
+  assert.notDeepEqual(
+    checkChanges(modelSettings, { FACTORY_TALK_EFFORT: "lots" }).refused,
+    {},
+  );
+});

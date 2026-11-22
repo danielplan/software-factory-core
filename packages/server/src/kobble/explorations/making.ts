@@ -79,7 +79,7 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
   });
   const asked = askFor(exploration, on.board, made, {
     change,
-    maps: codeMaps(on.root),
+    maps: codeMaps(on.root, on.project),
   });
   let result: Awaited<ReturnType<typeof lookAndFix>>;
   try {

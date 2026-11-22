@@ -20,6 +20,7 @@ import type { Option } from "./board-things.ts";
 import { addWorldTools } from "./world-tools.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { addDeeperTool, type Way } from "./deeper.ts";
+import { addIdeaTool } from "./idea-tool.ts";
 
 export type BoardTools = {
   token: string;
@@ -27,6 +28,8 @@ export type BoardTools = {
   look: () => string;
   point: (id: string) => string;
   rename: (change: { title?: string; problem?: string }) => string;
+  // Parks another idea as an exploration of its own, waiting.
+  addIdea: (idea: { title: string; problem: string }) => string;
   // Starts making the prototype of a choice's option, or changing one.
   make: (choice: string, options: string[], opens?: string) => string;
   change: (prototype: string, change: string) => string;
@@ -54,7 +57,9 @@ const FROM = {
   from: z
     .string()
     .optional()
-    .describe("The thing this one follows: its arrow comes in the same step."),
+    .describe(
+      "The thing this one is about, only when it is: its arrow comes in the same step, and the two sit near each other.",
+    ),
   label: z.string().optional().describe("The arrow's label, a word or two."),
 };
 const fromOf = (a: Record<string, unknown>) => ({
@@ -206,6 +211,7 @@ function serverFor(on: BoardTools): McpServer {
     },
     (args) => toolAnswer(() => on.rename(args)),
   );
+  addIdeaTool(server, on.addIdea);
   addPrototypeTools(server, on);
   addDeeperTool(server, on.deeper);
   server.registerTool(

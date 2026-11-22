@@ -196,7 +196,8 @@ function explorationPrototype(board: Board): Made | null {
 
 // A new question on the board, in an exploration that has its prototype:
 // the variant shown so far becomes the prototype's base, and the new
-// question's options are its variants now, in the same copy.
+// question's options are its variants now, in the same copy, with a record
+// of their own (no changes, data states or tests of the old question).
 function newQuestion(
   board: Board,
   ongoing: Made,
@@ -211,8 +212,14 @@ function newQuestion(
   const base = ongoing.variants?.find((one) => one.key === ongoing.variant);
   const [first] = options;
   const letters = options.map((one) => one.key);
+  // The old question's changes, data states and tests are not the new
+  // question's: they stay in the base's code, not in its record.
+  const rest: Made = { ...ongoing };
+  delete rest.changes;
+  delete rest.states;
   const made: Made = {
-    ...ongoing,
+    ...rest,
+    tests: [],
     agreed: false,
     name: options.length > 1 ? question : (first?.name ?? question),
     difference: options.length > 1 ? "" : (first?.difference ?? ""),

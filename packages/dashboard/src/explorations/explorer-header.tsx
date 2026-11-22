@@ -8,17 +8,16 @@ import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
 import type { Messages } from "@/i18n/messages";
 
-// What the explorer does now, in a few words: answering, a step of its
-// work, a version being made, or what it is for when it waits.
+// What the explorer does now, in a few words: answering or a step of its
+// work; nothing when it waits. A prototype being made shows on its card on
+// the board, with what the maker does, not here a second time.
 function doingOf(
   page: ExplorationPage,
   says: Messages["explore"]["talk"],
 ): string | null {
   const { talk } = page;
-  if (talk.writing !== null)
-    return talk.writing ? says.talking : (talk.activity ?? says.thinking);
-  const making = page.runs.find((run) => run.making);
-  return making ? says.making(making.version) : null;
+  if (talk.writing === null) return null;
+  return talk.writing ? says.talking : (talk.activity ?? says.thinking);
 }
 
 // Who talks here: the explorer kobold on a tile of its colour, its name and

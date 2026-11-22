@@ -40,6 +40,11 @@ export function replySoFar(event: ClaudeEvent, writing: string): string {
   return reply;
 }
 
+// Whether this event is part of its thinking before (or between) its words.
+export function addsThinking(event: ClaudeEvent): boolean {
+  return event.event?.delta?.type === "thinking_delta";
+}
+
 // Whether this event adds text to the reply being written.
 export function addsText(event: ClaudeEvent): boolean {
   return event.event?.delta?.type === "text_delta";

@@ -45,6 +45,12 @@ function pretendClaude() {
         const send = (event: object) =>
           stdout.write(`${JSON.stringify(event)}\n`);
         send({ type: "stream_event", event: { type: "message_start" } });
+        if (turn.message.content.includes("(think)"))
+          for (const thought of ["What is asked?", "Two ways."])
+            send({
+              type: "stream_event",
+              event: { delta: { type: "thinking_delta", thinking: thought } },
+            });
         for (const word of words)
           send({
             type: "stream_event",
@@ -366,4 +372,28 @@ test("extra tools can be denied, and instructions last the whole conversation", 
   });
   assert.ok(args.includes("Read(**/.env*)"));
   assert.equal(args[args.indexOf("--append-system-prompt") + 1], "Be brief.");
+});
+
+test("while Claude thinks before its words, the activity says so once", async () => {
+  const pretend = pretendClaude();
+  const warm = new WarmClaude("claude", { start: pretend.start });
+  const activity: string[] = [];
+  const texts: string[] = [];
+  const done = await warm.run({
+    ...base,
+    effort: "high",
+    prompt: "Plan it (think)",
+    session: { id: "s-9", resume: false },
+    onActivity: (line) => activity.push(line),
+    onText: (t) => texts.push(t),
+  });
+  assert.equal(done.text, "Sure, number 1");
+  assert.deepEqual(
+    activity.filter((line) => line === "Thinking it through"),
+    ["Thinking it through"],
+  );
+  assert.equal(texts.at(-1), "Sure, number 1 ");
+  const { args } = pretend.started[0]!;
+  assert.equal(args[args.indexOf("--effort") + 1], "high");
+  warm.stop();
 });

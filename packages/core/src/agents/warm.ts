@@ -14,6 +14,7 @@ import { describeEvent } from "./activity.ts";
 import { claudeArgs, type RunOptions } from "./claude.ts";
 import {
   addsText,
+  addsThinking,
   type ClaudeEvent,
   type ClaudeResult,
   readEvent,
@@ -52,6 +53,8 @@ type Turn = {
   told: boolean;
   answered: string[];
   follow: NodeJS.Timeout | null;
+  // Thinking now, before or between its words (said once each time).
+  thinking: boolean;
 };
 
 type Open = {
@@ -186,6 +189,7 @@ export class WarmClaude {
         told: false,
         answered: [],
         follow: null,
+        thinking: false,
       };
       open.child.stdin.write(userLine(options.prompt));
     }).then((result) => {
@@ -214,8 +218,14 @@ export class WarmClaude {
     if (event.type === "stream_event") {
       turn.writing = replySoFar(event, turn.writing);
       // The answers so far stay shown while the next one is written.
-      if (addsText(event))
+      if (addsText(event)) {
+        turn.thinking = false;
         turn.options.onText?.([...turn.answered, turn.writing].join("\n\n"));
+      }
+      if (addsThinking(event) && !turn.thinking) {
+        turn.thinking = true;
+        turn.options.onActivity("Thinking it through");
+      }
       return;
     }
     for (const text of describeEvent(event, turn.options.cwd))

@@ -25,7 +25,7 @@ import { CHANGE_WORDS } from "./making-words.ts";
 import type { ChangeStart } from "./prototypes.ts";
 import { inLanguage } from "../../language.ts";
 import type { Way } from "./deeper.ts";
-import { renameExploration } from "./actions.ts";
+import { parkIdea, renameExploration } from "./actions.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -83,7 +83,6 @@ export class ExplorationTalks {
   private readonly done = new Map<string, string[]>();
   private toolsUrl = "";
   private readonly options: TalksOptions;
-
   constructor(options: TalksOptions) {
     this.options = options;
   }
@@ -198,7 +197,7 @@ export class ExplorationTalks {
     await this.answer(
       id,
       talk,
-      "We start this exploration. Read the problem and what we heard, put a choice with two or three ways on the board (and a diagram if it helps), link the problem to it, and ask what matters most.",
+      "We start this exploration. Read the problem and what we heard, draw the picture of how it would work and the one choice that is open first, with two or three ways, and ask what matters most.",
     );
   }
 
@@ -249,6 +248,7 @@ export class ExplorationTalks {
         this.options.onChange();
         return this.look(id);
       },
+      addIdea: (idea) => parkIdea(this.options, idea),
     };
   }
 
@@ -301,7 +301,7 @@ export class ExplorationTalks {
       ...(heard.length > 0 ? ["What we heard:", ...heard] : []),
       ")",
       "",
-      "(Answer in at most 60 words, in short Markdown: what changed in a line, a short list when there is more than one point, then one question on its own line.)",
+      "(Think it through first, as your guide says: what is really asked, what you checked, the ways and what breaks them, what is missing, where the exploration goes next. Then answer in at most 60 words, in short Markdown: what changed in a line, a short list when there is more than one point, then one question on its own line.)",
     ].join("\n");
     await talk.answer(prompt, spokenIn, {
       ...RIGHTS,

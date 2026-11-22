@@ -15,6 +15,8 @@ const DISALLOWED = [
 ];
 const READ_ONLY = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
 
+export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
+
 export type Mcp = {
   name: string;
   url: string;
@@ -36,6 +38,9 @@ export type RunOptions = {
   timeLimitMs?: number;
   // A model other than the account's default, for example "sonnet".
   model?: string;
+  // How hard it thinks before it answers ("low" to "max"); none means the
+  // account's own setting.
+  effort?: Effort;
   // One MCP server over HTTP and no other (not even the account's own), whose
   // tools are allowed without asking.
   mcp?: Mcp;
@@ -68,6 +73,7 @@ export function claudeArgs(options: RunOptions, input = false): string[] {
   if (options.tools) args.push("--tools", options.tools.join(","));
   if (options.tools && !options.mcp) args.push("--strict-mcp-config");
   if (options.model) args.push("--model", options.model);
+  if (options.effort) args.push("--effort", options.effort);
   if (options.mcp)
     args.push(...mcpArgs([options.mcp, ...(options.alsoMcp ?? [])]));
   if (options.editFolder) args.push("--add-dir", options.editFolder);

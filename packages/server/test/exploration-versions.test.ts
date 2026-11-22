@@ -381,7 +381,15 @@ test("a new question in an exploration with a prototype becomes its variants, in
   board = {
     ...board,
     things: board.things.map((t) =>
-      t.id === made.id ? { ...t, variant: "B" } : t,
+      t.id === made.id
+        ? {
+            ...t,
+            variant: "B",
+            changes: ["Move the button up"],
+            states: ["empty", "many"],
+            tests: ["the button is up"],
+          }
+        : t,
     ),
   };
   board = applyAct(board, two("What does it say?"), "kobold").board;
@@ -397,6 +405,10 @@ test("a new question in an exploration with a prototype becomes its variants, in
   );
   assert.equal(now.variant, "A");
   assert.equal(now.name, "What does it say?");
+  // The old question's changes, data states and tests stay behind.
+  assert.equal(now.changes, undefined);
+  assert.equal(now.states, undefined);
+  assert.deepEqual(now.tests, []);
   assert.match(second.change ?? "", /new question: “What does it say\?”/);
   assert.match(
     second.change ?? "",

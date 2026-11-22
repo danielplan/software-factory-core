@@ -191,6 +191,37 @@ test("starting one, the kobold draws on the board with its tools and points at w
   }
 });
 
+test("another idea that comes up, the kobold parks it as an exploration of its own, waiting", async () => {
+  const factory = await explorationsFactory([
+    {
+      calls: [
+        [
+          "add_exploration",
+          {
+            title: "A shared marketplace",
+            problem: "Teams cannot share their extensions with each other.",
+          },
+        ],
+      ],
+      reply: "Parked it.",
+    },
+  ]);
+  try {
+    await factory.press("/start", { id: "X-3" });
+    await factory.settled("X-3");
+    assert.match(
+      factory.answers[0]?.[0] ?? "",
+      /Parked X-\d+ “A shared marketplace”/,
+    );
+    const view = await factory.read<ExplorationsView>(
+      "/api/kobble/explorations",
+    );
+    assert.ok(view.waiting.some((row) => row.title === "A shared marketplace"));
+  } finally {
+    factory.close();
+  }
+});
+
 test("people agree, choose, add pictures and remove their own", async () => {
   const factory = await explorationsFactory();
   try {

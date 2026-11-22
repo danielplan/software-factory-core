@@ -13,12 +13,12 @@ import { useState } from "react";
 import type { TestResult, VersionRun } from "@/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Markdown } from "@/components/markdown";
 
 import { Frame, useBoardDo } from "./frame";
 import { Making, MakingLine } from "./prototype-making";
 import { Starting } from "./prototype-starting";
 import { States } from "./prototype-states";
+import { Segment, ShownVariant, SwitchRow } from "./prototype-switches";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 import { useT } from "@/i18n/use-t";
@@ -123,7 +123,9 @@ function variantsOf(made: Made, picked: string | null) {
     (made.variants?.length ?? 0) > 1 ? (made.variants ?? []) : [];
   const first = variants[0]?.key ?? "";
   const variant = variants.length > 0 ? (picked ?? made.variant ?? first) : "";
-  return { variants, variant };
+  // The agreed one: the variant the board keeps, once the prototype is agreed.
+  const agreed = made.agreed ? (made.variant ?? variant) : undefined;
+  return { variants, variant, agreed };
 }
 
 // What the frame shows: the live screen (with what the kobold does, while
@@ -172,7 +174,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const [picked, pick] = useState<string | null>(null);
   const [state, setState] = useState("");
   if (thing.kind !== "prototype") return null;
-  const { variants, variant } = variantsOf(thing, picked);
+  const { variants, variant, agreed } = variantsOf(thing, picked);
   const run = page.runs.find((one) => one.version === thing.key);
   const open = ["waiting", "exploring"].includes(page.exploration.status);
   const shownRun = shownOf(run, thing.opens, { variant, state });
@@ -180,20 +182,26 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   return (
     <Frame
       data={data}
-      title={`${thing.key} · ${thing.name}`}
+      title={thing.name}
+      tag={thing.key}
       glow={run?.making === true}
     >
       {variants.length > 0 && (
         <Variants
           variants={variants}
           shown={variant}
-          agreed={thing.agreed ? variant : undefined}
+          agreed={agreed}
           onPick={(key) => {
             pick(key);
             act("board", { do: { act: "show", id: thing.id, variant: key } });
           }}
         />
       )}
+      <ShownVariant
+        letter={about?.key}
+        name={about?.name}
+        difference={about?.difference ?? thing.difference}
+      />
       <States states={thing.states ?? []} shown={state} onPick={setState} />
       <Shown
         run={run}
@@ -209,7 +217,6 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         }
       />
       <About
-        difference={about?.difference ?? thing.difference}
         words={stateWords(run, t.explore)}
         test={page.tests[thing.key] ?? null}
       />
@@ -217,14 +224,11 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   );
 }
 
-// How the version shown differs (and what it was changed from), what odd
-// thing happened, and its last persona test.
+// What odd thing happened, and its last persona test.
 function About({
-  difference,
   words,
   test,
 }: Readonly<{
-  difference: string;
   words: string | null;
   test: TestResult | null;
 }>) {
@@ -232,9 +236,6 @@ function About({
   const result = test ? testWords(test, t.explore.board) : null;
   return (
     <>
-      <div className="text-xs text-muted-foreground">
-        <Markdown text={difference} />
-      </div>
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
         <a
@@ -251,8 +252,10 @@ function About({
   );
 }
 
-// The switch between a prototype's variants, outside the app: one segment
-// each, its letter and name, a tick on the agreed one.
+// The switch between a prototype's variants, outside the app: one short
+// segment each, its letter (its name on hover and under the switch), a tick
+// on the agreed one. Once one is agreed, the others are archived behind a
+// "+N" segment that shows them again; nothing is removed.
 function Variants({
   variants,
   shown,
@@ -264,42 +267,44 @@ function Variants({
   agreed: string | undefined;
   onPick: (key: string) => void;
 }>) {
-  const t = useT();
+  const b = useT().explore.board;
+  const [all, showAll] = useState(false);
+  const archived = agreed !== undefined && !all;
+  const listed = archived
+    ? variants.filter((one) => one.key === agreed)
+    : variants;
+  const others = variants.length - 1;
   return (
-    <div
-      role="tablist"
-      aria-label={t.explore.board.variants}
-      className="nodrag flex flex-wrap gap-1 rounded-[10px] bg-[#f3f4f7] p-1"
-    >
-      {variants.map((one) => {
-        const on = one.key === shown;
-        return (
-          <button
-            key={one.key}
-            type="button"
-            role="tab"
-            aria-selected={on}
-            title={[`${one.key} · ${one.name}`, one.difference]
-              .filter(Boolean)
-              .join(": ")}
-            onClick={() => {
-              onPick(one.key);
-            }}
-            className={cn(
-              "inline-flex h-7 max-w-[12rem] items-center gap-1.5 rounded-[7px] px-2.5 text-xs",
-              on
-                ? "bg-card font-semibold text-foreground shadow-[0_1px_2px_rgb(20_24_36/0.12)]"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <span className="flex-none">{one.key}</span>
-            <span className="truncate font-normal">{one.name}</span>
-            {one.key === agreed && (
-              <Check aria-hidden className="size-3 flex-none text-[#197653]" />
-            )}
-          </button>
-        );
-      })}
-    </div>
+    <SwitchRow label={b.variant} role="tablist">
+      {listed.map((one) => (
+        <Segment
+          key={one.key}
+          role="tab"
+          on={one.key === shown}
+          title={[`${one.key} · ${one.name}`, one.difference]
+            .filter(Boolean)
+            .join(": ")}
+          onPick={() => {
+            onPick(one.key);
+          }}
+        >
+          {one.key}
+          {one.key === agreed && (
+            <Check aria-hidden className="size-3 flex-none text-[#197653]" />
+          )}
+        </Segment>
+      ))}
+      {agreed !== undefined && others > 0 && (
+        <Segment
+          on={false}
+          title={archived ? b.showArchived(others) : b.hideArchived}
+          onPick={() => {
+            showAll(archived);
+          }}
+        >
+          {archived ? `+${String(others)}` : "−"}
+        </Segment>
+      )}
+    </SwitchRow>
   );
 }

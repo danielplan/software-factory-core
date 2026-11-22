@@ -72,6 +72,14 @@ test("the maker's map: every code file with what its first comment says, screens
   assert.doesNotMatch(map, /node_modules|order-list\.test/);
 });
 
+test("the maker's map starts with the pages the factory keeps, to read how the product looks first", () => {
+  const folder = project();
+  const map = codeMaps(join(folder, "factory"), folder);
+  assert.match(map, /design system/);
+  assert.match(map, /docs\/journeys\/ordering\.md: Ordering a basket/);
+  assert.ok(map.indexOf("ordering.md") < map.indexOf("## A map of Shop"));
+});
+
 test("no products: the picture says so", () => {
   const folder = mkdtempSync(join(tmpdir(), "picture-"));
   assert.match(productPicture(folder, folder), /No product is described yet/);

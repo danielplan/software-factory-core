@@ -2,37 +2,25 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { toStart } from "../src/explorations/board/prototype-shown.ts";
-import { columnsOf } from "../src/explorations/view.ts";
+import { areaOf } from "../src/explorations/view.ts";
 
-// An exploration's board in small, in the list: its things in columns
-// along their arrows.
+// An exploration's board in small, in the list: the part of the whiteboard
+// its things cover, so all of it fits.
 
-const thing = (id: string) => ({ id, kind: "note", agreed: false });
-
-test("things go one column past what points to them, at most four a column", () => {
-  const things = ["problem", "choice", "a", "b", "note"].map(thing);
-  const columns = columnsOf(things, [
-    { from: "problem", to: "choice" },
-    { from: "choice", to: "a" },
-    { from: "choice", to: "b" },
-    { from: "note", to: "choice" },
-  ]);
+test("the board in small covers every thing, with a margin", () => {
+  const size = { width: 100, height: 30 };
   assert.deepEqual(
-    columns.map((column) => column.map((one) => one.id)),
-    [["problem", "note"], ["choice"], ["a", "b"]],
-  );
-  const many = Array.from({ length: 6 }, (_, at) => thing(`n${String(at)}`));
-  assert.equal(columnsOf(many, [])[0]?.length, 4);
-  // A loop does not go on for ever.
-  assert.ok(
-    columnsOf(
-      [thing("x"), thing("y")],
+    areaOf(
       [
-        { from: "x", to: "y" },
-        { from: "y", to: "x" },
+        { x: 0, y: 0 },
+        { x: 300, y: -50 },
       ],
-    ).length <= 3,
+      size,
+      10,
+    ),
+    { x: -10, y: -60, width: 420, height: 100 },
   );
+  assert.deepEqual(areaOf([], size), { x: 0, y: 0, width: 0, height: 0 });
 });
 
 // The board starts its prototype by itself, so the canvas shows the real

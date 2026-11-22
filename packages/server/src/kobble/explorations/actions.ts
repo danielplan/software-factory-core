@@ -77,6 +77,17 @@ export function newExploration(
   });
 }
 
+// Another idea, parked by the kobold from an exploration: waiting, as a New
+// exploration is; what the kobold is told.
+export function parkIdea(
+  on: { store: () => KobbleStore; onChange: () => void },
+  idea: { title: string; problem: string },
+): string {
+  const parked = newExploration(on.store(), idea);
+  on.onChange();
+  return `Parked ${parked.id} “${parked.title}”, waiting in Explorations.`;
+}
+
 // A fresh exploration, opened at once on its canvas: the team says its idea
 // to the kobold there, who names it. One the team opened and left without
 // a word is opened again instead of making another.

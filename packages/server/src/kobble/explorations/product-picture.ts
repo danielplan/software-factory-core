@@ -100,9 +100,22 @@ function firstComment(path: string): string {
   return words.length > MOST_WORDS ? `${words.slice(0, MOST_WORDS)}…` : words;
 }
 
-// Every product's map, for the prototype maker's prompt.
-export function codeMaps(root: string): string {
-  return findProducts(root).products.map(codeMap).filter(Boolean).join("\n\n");
+// Every product's map, for the prototype maker's prompt; with the project,
+// the pages the factory keeps first, so the maker reads how the product
+// looks (its design system) and what matters for the change before it
+// builds.
+export function codeMaps(root: string, project?: string): string {
+  const pages = project ? docsPages(project) : [];
+  const docs =
+    pages.length > 0
+      ? [
+          "## The pages the factory keeps",
+          "Read the one on how the product looks (its design system, its look, its pieces) and those about what you change, before you build:",
+          ...pages.map((p) => `- ${p}`),
+        ].join("\n")
+      : "";
+  const maps = findProducts(root).products.map(codeMap).filter(Boolean);
+  return [docs, ...maps].filter(Boolean).join("\n\n");
 }
 
 // Every file under a folder, as paths in it, never inside installed

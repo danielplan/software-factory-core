@@ -98,12 +98,15 @@ function RemoveButton({ data }: Readonly<{ data: ThingData }>) {
 export function Frame({
   data,
   title,
+  tag,
   tone = "card",
   glow = false,
   children,
 }: Readonly<{
   data: ThingData;
   title?: string;
+  // After the kind, in its badge: the prototype's letter.
+  tag?: string;
   tone?: "card" | "note";
   // Glows while the kobold works on it (a prototype being made).
   glow?: boolean;
@@ -130,7 +133,7 @@ export function Frame({
       <Handle type="target" position={Position.Left} className="opacity-0" />
       <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
         <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
-        <KindBadge kind={thing.kind} />
+        <KindBadge kind={thing.kind} tag={tag} />
         <span className="ml-auto flex items-center gap-1">
           <AgreeTick data={data} />
           <RemoveButton data={data} />
@@ -145,7 +148,10 @@ export function Frame({
   );
 }
 
-function KindBadge({ kind }: Readonly<{ kind: ThingData["thing"]["kind"] }>) {
+function KindBadge({
+  kind,
+  tag,
+}: Readonly<{ kind: ThingData["thing"]["kind"]; tag?: string }>) {
   const t = useT();
   const { Icon, tint } = KINDS[kind];
   return (
@@ -156,7 +162,7 @@ function KindBadge({ kind }: Readonly<{ kind: ThingData["thing"]["kind"] }>) {
       )}
     >
       <Icon aria-hidden className="size-3" />
-      {t.explore.kinds[kind]}
+      {tag ? `${t.explore.kinds[kind]} ${tag}` : t.explore.kinds[kind]}
     </span>
   );
 }
