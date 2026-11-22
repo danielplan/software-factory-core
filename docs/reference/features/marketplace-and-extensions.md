@@ -42,8 +42,11 @@ How one is built: [the extension module](../extension-module.md).
 
 A team's own extension lives in the company's factory folder,
 `factory/extensions/<id>/extension.json`, with its guide files beside it.
-The builder writes it when the team asks Sprocket for one, and the team
-reviews its pull request like any change. It is a **description, never code
+The team asks Sprocket for one: **Make your own**, at the end of the
+Extensions tab, opens Sprocket's conversation with the request started
+(`features/marketplace/make-own.tsx`). Sprocket hands it to Doodle as an
+exploration, the builder writes it, and the team reviews its pull request
+like any change. It is a **description, never code
 that runs** ([decision 0014](../../decisions/0014-team-extensions-are-descriptions.md)).
 
 It can bring:
