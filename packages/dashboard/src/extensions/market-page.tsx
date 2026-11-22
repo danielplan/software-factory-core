@@ -174,6 +174,11 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                   <Card
                     key={ext.id}
                     ext={ext}
+                    note={
+                      VARIANT === "A" && ext.id === "factory"
+                        ? `Add-on: ${trackers.find((t) => t.on)?.name ?? "none yet"}`
+                        : undefined
+                    }
                     onOpen={() => {
                       setOpenId(ext.id);
                     }}
@@ -295,10 +300,13 @@ function Card({
   ext,
   onOpen,
   action,
+  note,
   label = "Installed",
 }: Readonly<{
   ext: Ext;
   onOpen: () => void;
+  // A small line under the one-liner.
+  note?: string;
   // What to press; none once it is in.
   action: React.ReactNode;
   label?: "Installed" | "In use";
@@ -340,6 +348,7 @@ function Card({
           )}
         </div>
         <p className="text-[13px] text-foreground/75">{ext.about}</p>
+        {note && <p className="text-xs text-muted-foreground">{note}</p>}
       </div>
       {action && <div className="relative flex justify-end">{action}</div>}
     </article>
@@ -496,7 +505,10 @@ function Details({
               <Adds ext={ext} />
             </Part>
             {VARIANT === "A" && ext.id === "factory" && (
-              <Part title="Your cards live in">
+              <Part title="Add-ons">
+                <p className="text-xs text-muted-foreground">
+                  Where your cards live: pick one.
+                </p>
                 <div className="grid gap-2">
                   {all
                     .filter((e) => e.tracker)
