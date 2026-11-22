@@ -2,10 +2,13 @@
 // drizzle/. Its data is lost: use it only for a database built before its
 // migration history, or for a fresh start while developing.
 import pg from "pg";
+import { withDatabaseName } from "../src/database/database-url.ts";
 import { applyUpdates } from "./database.ts";
 
-const url = process.env.DATABASE_URL;
-if (!url) throw new Error("Set DATABASE_URL in .env before resetting.");
+const { DATABASE_URL, DATABASE_NAME } = process.env;
+if (!DATABASE_URL)
+  throw new Error("Set DATABASE_URL in .env before resetting.");
+const url = withDatabaseName(DATABASE_URL, DATABASE_NAME);
 const client = new pg.Client({ connectionString: url });
 try {
   await client.connect();
