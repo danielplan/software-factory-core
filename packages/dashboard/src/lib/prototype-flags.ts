@@ -25,3 +25,18 @@ function readState(): MadeState {
 }
 
 export const MADE_STATE: MadeState = readState();
+
+// Each variant opens on its extensions page: the first time the page opens
+// on Home (or on no page), in a visit. Home stays one click away.
+const OPENS = { A: "#settings/add-ons", B: "#extensions", C: "#extensions" };
+const OPENED = "kobble.opened";
+
+function openOnExtensions(): void {
+  if (sessionStorage.getItem(OPENED)) return;
+  sessionStorage.setItem(OPENED, "1");
+  const { hash } = window.location;
+  if (hash === "" || hash === "#" || hash === "#home")
+    window.history.replaceState(null, "", OPENS[VARIANT]);
+}
+
+openOnExtensions();

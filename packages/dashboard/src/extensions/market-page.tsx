@@ -98,20 +98,34 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
           No extension matches. Try other words, or ask Sprocket for one of your own.
         </p>
       ) : (
-        <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {shown.map((ext) => (
-            <Card
-              key={ext.id}
-              ext={ext}
-              onOpen={() => {
-                setOpenId(ext.id);
-              }}
-              onInstall={() => {
-                install(ext);
-              }}
-            />
-          ))}
-        </div>
+        (["Installed", "Available"] as const).map((title) => {
+          const list = shown.filter((e) => e.on === (title === "Installed"));
+          if (list.length === 0) return null;
+          return (
+            <section key={title} aria-label={title} className="grid gap-3">
+              <h2 className="flex items-center gap-2 px-1 text-[15px] font-semibold">
+                {title}
+                <span className="text-[12.5px] font-normal text-muted-foreground">
+                  {list.length}
+                </span>
+              </h2>
+              <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {list.map((ext) => (
+                  <Card
+                    key={ext.id}
+                    ext={ext}
+                    onOpen={() => {
+                      setOpenId(ext.id);
+                    }}
+                    onInstall={() => {
+                      install(ext);
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })
       )}
       <Details
         ext={opened}
@@ -165,24 +179,20 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
   );
 }
 
-const TAGS = (e: Ext) =>
-  [
-    e.adds.pages.length > 0 && (e.adds.pages.length === 1 ? "A page" : "Pages"),
-    e.stages.length > 0 && (e.stages.length === 1 ? "A stage" : "Stages"),
-    e.adds.blocks.length > 0 && "Home blocks",
-    e.adds.kobolds.length > 0 && (e.adds.kobolds.length === 1 ? "A kobold" : "Kobolds"),
-  ].filter((t): t is string => t !== false);
-
 function Card({
   ext,
   onOpen,
   onInstall,
 }: Readonly<{ ext: Ext; onOpen: () => void; onInstall: () => void }>) {
-  const tags = TAGS(ext);
   return (
     <article
       aria-label={ext.name}
-      className="relative grid content-between gap-3.5 rounded-xl bg-card p-4 shadow-soft transition-shadow hover:shadow-card"
+      className={cn(
+        "relative grid content-between gap-3.5 rounded-xl p-4 transition-shadow hover:shadow-card",
+        ext.on
+          ? "bg-success/[0.07] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--success)_22%,transparent)]"
+          : "bg-card shadow-soft",
+      )}
     >
       <button
         type="button"
@@ -195,21 +205,25 @@ function Card({
           <Logo ext={ext} />
           <div className="grid min-w-0 gap-1">
             <span className="truncate font-semibold">{ext.name}</span>
-            <Maker ext={ext} />
+            {ext.maker === "team" && <Maker ext={ext} />}
           </div>
+          {ext.on && (
+            <span
+              role="img"
+              aria-label="Installed"
+              className="ml-auto grid size-5 flex-none place-items-center rounded-full bg-success text-white"
+            >
+              <Check aria-hidden className="size-3" strokeWidth={3} />
+            </span>
+          )}
         </div>
         <p className="text-[13px] text-foreground/75">{ext.about}</p>
-        <div className="flex min-h-5 flex-wrap gap-1.5">
-          {tags.map((t) => (
-            <span key={t} className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px]">
-              {t}
-            </span>
-          ))}
+      </div>
+      {!ext.on && (
+        <div className="relative flex justify-end">
+          <InstallButton ext={ext} onInstall={onInstall} />
         </div>
-      </div>
-      <div className="relative flex justify-end">
-        <InstallButton ext={ext} onInstall={onInstall} />
-      </div>
+      )}
     </article>
   );
 }

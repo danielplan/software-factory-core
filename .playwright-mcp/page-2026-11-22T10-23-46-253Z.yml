@@ -1,0 +1,136 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]: Acme
+    - navigation "Overview" [ref=e18]:
+      - link "Home" [ref=e19] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e24] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e36]:
+          - text: Stopped
+          - img "Stopped" [ref=e37]
+    - navigation "Pages" [ref=e38]:
+      - generic [ref=e39]:
+        - generic [ref=e40]: Work
+        - link "Signals Sieve" [ref=e41] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e47]': Sieve
+        - link "Explorations Doodle" [ref=e60] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e65]': Doodle
+        - link "Factory Bolt" [ref=e77] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e82]': Bolt
+        - link "Releases" [ref=e96] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e101]:
+        - generic [ref=e102]: Customers
+        - link "Personas Mimic" [ref=e103] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e111]': Mimic
+    - generic [ref=e122]:
+      - button "Send feedback" [ref=e123] [cursor=pointer]
+      - navigation "The factory" [ref=e128]:
+        - link "Extensions" [ref=e129] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e133] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e138]:
+    - generic [ref=e140]:
+      - generic [ref=e141]:
+        - heading "Extensions" [level=1] [ref=e144]
+        - paragraph [ref=e145]: What your factory can do. Install what you need; the kobold can write your own.
+      - generic [ref=e146]:
+        - textbox "Search extensions" [ref=e148]
+        - group "Filter" [ref=e149]:
+          - button "All" [pressed] [ref=e150] [cursor=pointer]
+          - button "Installed" [ref=e151] [cursor=pointer]
+          - button "Kobble's" [ref=e152] [cursor=pointer]
+          - button "Your team's" [ref=e153] [cursor=pointer]
+      - region "Installed" [ref=e154]:
+        - heading "Installed 4" [level=2] [ref=e155]:
+          - text: Installed
+          - generic [ref=e156]: "4"
+        - generic [ref=e157]:
+          - article "Factory" [ref=e158]:
+            - button "Open Factory" [ref=e159] [cursor=pointer]
+            - generic [ref=e160]:
+              - generic [ref=e161]:
+                - generic [ref=e165]: Factory
+                - img "Installed" [ref=e167]
+              - paragraph [ref=e170]: The board where work is built, from to do to done.
+          - article "Explorations" [ref=e171]:
+            - button "Open Explorations" [ref=e172] [cursor=pointer]
+            - generic [ref=e173]:
+              - generic [ref=e174]:
+                - generic [ref=e178]: Explorations
+                - img "Installed" [ref=e180]
+              - paragraph [ref=e183]: Explore an idea with the kobold before anything is built.
+          - article "Signals" [ref=e184]:
+            - button "Open Signals" [ref=e185] [cursor=pointer]
+            - generic [ref=e186]:
+              - generic [ref=e187]:
+                - generic [ref=e192]: Signals
+                - img "Installed" [ref=e194]
+              - paragraph [ref=e197]: "What the live app reports: bugs, wishes and how it is used."
+          - article "Releases" [ref=e198]:
+            - button "Open Releases" [ref=e199] [cursor=pointer]
+            - generic [ref=e200]:
+              - generic [ref=e201]:
+                - generic [ref=e206]: Releases
+                - img "Installed" [ref=e208]
+              - paragraph [ref=e211]: Numbers and notes for each release of your product.
+      - region "Available" [ref=e212]:
+        - heading "Available 6" [level=2] [ref=e213]:
+          - text: Available
+          - generic [ref=e214]: "6"
+        - generic [ref=e215]:
+          - article "Personas" [ref=e216]:
+            - button "Open Personas" [ref=e217] [cursor=pointer]
+            - generic [ref=e218]:
+              - generic [ref=e219]: Personas
+              - paragraph [ref=e228]: Made-up customers who use the app and tell you what breaks.
+            - button "Install" [ref=e230] [cursor=pointer]
+          - article "GitHub board" [ref=e231]:
+            - button "Open GitHub board" [ref=e232] [cursor=pointer]
+            - generic [ref=e233]:
+              - generic [ref=e234]: GitHub board
+              - paragraph [ref=e240]: Work tracked on a GitHub board, through the GitHub CLI.
+            - link "Use instead" [ref=e242] [cursor=pointer]:
+              - /url: "#settings/connections"
+          - article "Jira Cloud" [ref=e243]:
+            - button "Open Jira Cloud" [ref=e244] [cursor=pointer]
+            - generic [ref=e245]:
+              - generic [ref=e246]: Jira Cloud
+              - paragraph [ref=e252]: Work tracked in a Jira Cloud project, with an API token.
+            - link "Use instead" [ref=e254] [cursor=pointer]:
+              - /url: "#settings/connections"
+          - article "Voice" [ref=e255]:
+            - button "Open Voice" [ref=e256] [cursor=pointer]
+            - generic [ref=e257]:
+              - generic [ref=e258]: Voice
+              - paragraph [ref=e265]: Talk to the kobolds and hear them answer.
+            - button "Install" [ref=e267] [cursor=pointer]
+          - article "Verification" [ref=e268]:
+            - button "Open Verification" [ref=e269] [cursor=pointer]
+            - generic [ref=e270]:
+              - generic [ref=e271]: Verification
+              - paragraph [ref=e278]: Sends a persona through a change before it is merged.
+            - button "Install" [ref=e280] [cursor=pointer]
+          - article "Daily standup" [ref=e281]:
+            - button "Open Daily standup" [ref=e282] [cursor=pointer]
+            - generic [ref=e283]:
+              - generic [ref=e291]:
+                - generic [ref=e292]: Daily standup
+                - generic [ref=e293]: Your team
+              - paragraph [ref=e294]: "A short page each morning: what moved yesterday, what waits today."
+            - button "Install" [ref=e296] [cursor=pointer]
+  - region "Sprocket" [ref=e297]:
+    - button "Ask Sprocket anything ⌘J" [ref=e298] [cursor=pointer]:
+      - generic [ref=e308]: Ask Sprocket anything
+      - generic [ref=e309]: ⌘J
