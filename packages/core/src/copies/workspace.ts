@@ -84,16 +84,15 @@ export class Workspace {
     this.path = join(settings.workspaces, name);
   }
 
-  // A clean copy of the latest main branch (or of a branch when one is
-  // given), for reading only.
-  async prepareReadOnly(branch?: string): Promise<void> {
+  // A clean copy of the latest main branch, for reading only.
+  async prepareReadOnly(): Promise<void> {
     await this.download();
     await this.git(
       "checkout",
       "--quiet",
       "--force",
       "--detach",
-      `origin/${branch ?? this.settings.baseBranch}`,
+      `origin/${this.settings.baseBranch}`,
     );
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();

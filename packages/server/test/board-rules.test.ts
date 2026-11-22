@@ -3,7 +3,6 @@ import { test } from "node:test";
 
 import {
   asksIfItWorked,
-  asksTheBuilder,
   type BoardCard,
   decide,
   handedBack,
@@ -12,7 +11,6 @@ import {
   waitsForOwner,
 } from "../src/builder/decide.ts";
 import {
-  askedComment,
   isFactory,
   linkRepositoryFiles,
   markComment,
@@ -313,52 +311,5 @@ test("review comments on the card or the pull request are answered, first of all
       ["feedback", 2],
       ["build", 1],
     ],
-  );
-});
-
-test("the owner's question on a stuck card starts the builder's reply, once; the card stays stuck", () => {
-  const stopped = factory("Out of sessions", "out-of-sessions");
-  const asked = owner(askedComment("What is left?"));
-  const stuck = (thread: Message[]) => card({ thread, stuck: true });
-  assert.equal(stripMarker(asked.body), "What is left?");
-  assert.equal(isFactory(asked.body), false);
-  assert.deepEqual(decide([stuck([stopped, asked])], none).jobs, [
-    { lane: "chat", kind: "reply", number: 1 },
-  ]);
-  assert.deepEqual(decide([stuck([stopped, asked])], none).moves, []);
-  // A plain comment is a hint, not a question; a busy card waits.
-  assert.deepEqual(decide([stuck([stopped, owner("Hm")])], none).jobs, []);
-  assert.deepEqual(decide([stuck([stopped, asked])], new Set([1])).jobs, []);
-  const replied = factory("Step 3.", "replied");
-  assert.equal(asksTheBuilder(stuck([stopped, asked, replied])), false);
-  assert.deepEqual(decide([stuck([stopped, asked, replied])], none).jobs, []);
-  // A question from before the builder stopped again is not answered.
-  assert.equal(
-    asksTheBuilder(stuck([asked, factory("Started", "started"), stopped])),
-    false,
-  );
-  const said = stuckOf(stuck([stopped, asked, replied, owner("Thanks")]));
-  assert.ok(said);
-  assert.equal(said.note, "out-of-sessions");
-  assert.equal(said.text, "Out of sessions");
-  assert.deepEqual(
-    said.talk.map((m) => [m.by, m.text]),
-    [
-      ["owner", "What is left?"],
-      ["builder", "Step 3."],
-      ["owner", "Thanks"],
-    ],
-  );
-  assert.equal(said.answering, false);
-  assert.equal(stuckOf(stuck([stopped, asked]))?.answering, true);
-  // Sent on with Continue, the card goes back to the builder as before.
-  assert.equal(
-    handedBack(
-      card({
-        stage: "todo",
-        thread: [stopped, asked, replied, owner("Go on")],
-      }),
-    ),
-    true,
   );
 });

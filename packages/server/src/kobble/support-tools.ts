@@ -13,6 +13,7 @@ import { z } from "zod";
 import { COACH_HEADER } from "../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../mcp.ts";
 import { addPersona } from "./actions.ts";
+import type { SupportCards } from "./card-look.ts";
 import { newExploration } from "./explorations/actions.ts";
 
 export type SupportTools = {
@@ -20,6 +21,8 @@ export type SupportTools = {
   store: () => KobbleStore;
   // Told to the page: "personas" or "explorations".
   changed: (what: string) => void;
+  // The cards on the Factory board: looked at, and a stuck one answered.
+  cards: SupportCards;
 };
 
 export function personasText(store: KobbleStore): string {
@@ -86,7 +89,40 @@ function serverFor(on: SupportTools): McpServer {
         return `Added ${exploration.id} “${exploration.title}”, waiting in Explorations.`;
       }),
   );
+  cardTools(server, on.cards);
   return server;
+}
+
+// A card the team asks about: looked at, and, on a stuck one, the team's
+// agreed answer sent to the builder.
+function cardTools(server: McpServer, cards: SupportCards): void {
+  const number = z.number().int().positive().describe("The card's number.");
+  server.registerTool(
+    "look_at_card",
+    {
+      description:
+        "A card on the Factory board: its text, column, conversation, and what the builder did on its branch (commits, changed files, run file). Read only.",
+      inputSchema: { number },
+    },
+    (args) => toolAnswer(() => cards.look(args.number)),
+  );
+  server.registerTool(
+    "answer_card",
+    {
+      description:
+        "Sends the team's answer or hint to the builder on a stuck card and hands the card back to it (To do), as Send on the Factory page does. Only once the team agreed to the exact words you said back.",
+      inputSchema: {
+        number,
+        text: z
+          .string()
+          .min(1)
+          .describe(
+            "The answer as the builder reads it on the card, in the team's words.",
+          ),
+      },
+    },
+    (args) => toolAnswer(() => cards.answer(args.number, args.text)),
+  );
 }
 
 export async function answerSupportTools(

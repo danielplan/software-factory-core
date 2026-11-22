@@ -21,19 +21,17 @@ import {
   type Shell,
 } from "./checks.ts";
 import type { BoardCard, Job } from "./decide.ts";
-import type { ReadCopy } from "./reply.ts";
 import { byHand } from "./by-hand.ts";
 import { guidesFor, withGuides } from "./extension-guides.ts";
 import { keepKnowledge } from "./knowledge-kept.ts";
 import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
 import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
 import { openOrUpdate, type PullRequests } from "./pull-requests.ts";
-import { replyTo } from "./reply.ts";
 import { runSessions } from "./sessions.ts";
 import { type BuildCopy, builderTurn } from "./turn.ts";
 import { Paused, pausedText } from "./usage-limit.ts";
 
-export type { ReadCopy } from "./reply.ts";
+export type ReadCopy = { path: string; prepareReadOnly: () => Promise<void> };
 export type { BuildCopy } from "./turn.ts";
 export { copyName } from "./branches.ts";
 
@@ -95,10 +93,7 @@ export class Jobs {
     };
     try {
       if (job.kind === "build") await this.build(card, at, onActivity);
-      else if (job.kind === "reply") {
-        const said = await replyTo(card, at, this.options, onActivity);
-        await this.say(card.number, said, "replied");
-      } else await this.feedback(card, at, onActivity);
+      else await this.feedback(card, at, onActivity);
     } catch (error) {
       if (!(error instanceof Paused)) throw error;
       await this.options.cards.comment(

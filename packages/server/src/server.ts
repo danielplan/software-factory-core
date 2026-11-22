@@ -26,7 +26,6 @@ import type { BoardTools } from "./kobble/explorations/board-tools.ts";
 import { kobbleOf, type TestsRunOn } from "./kobble/served.ts";
 import { answerWorld, isWorldRoute } from "./kobble/world-route.ts";
 import type { ExplorationWorlds } from "./kobble/explorations/worlds.ts";
-import { cardSaid } from "./card-said.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 
@@ -323,9 +322,12 @@ function workRoutes(session: Session) {
       session.work.orRefuse().switch("chat", on(body));
     },
     "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
-    "POST /api/work/answer": (body: unknown) =>
-      session.work.orRefuse().answer(...cardSaid(body, "answer")),
-    "POST /api/work/ask": (body: unknown) =>
-      session.work.orRefuse().ask(...cardSaid(body, "question")),
+    "POST /api/work/answer": (body: unknown) => {
+      const number = Number((body as { number?: unknown } | null)?.number);
+      if (!Number.isInteger(number)) throw new Refused("Say which card.");
+      const said = text(body, "text").trim();
+      if (said === "") throw new Refused("Write or pick an answer first.");
+      return session.work.orRefuse().answer(number, said);
+    },
   };
 }

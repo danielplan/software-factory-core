@@ -127,10 +127,6 @@ export type StuckView = Omit<Asking, "text"> & {
   text: string;
   note: string;
   since: string;
-  // What the owner asked about it since, and the builder's replies.
-  talk: { by: "owner" | "builder"; text: string; at: string }[];
-  // The owner's last question waits for the builder's reply.
-  answering: boolean;
 };
 
 export type WorkView = {

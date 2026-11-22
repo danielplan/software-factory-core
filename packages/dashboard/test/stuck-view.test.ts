@@ -13,8 +13,6 @@ const stuck = (over: Partial<Stuck>): Stuck => ({
   note: "blocked",
   ask: null,
   since: "2026-11-19T10:00:00Z",
-  talk: [],
-  answering: false,
   ...over,
 });
 

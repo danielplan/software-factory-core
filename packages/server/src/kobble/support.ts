@@ -10,12 +10,19 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { Claude, KobbleStore } from "@software-factory/core";
+import {
+  type Claude,
+  FACTORY_FOLDER,
+  type KobbleStore,
+} from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
 import type { Route } from "../add-ons/add-on.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
+import type { Cli } from "../add-ons/github/github.ts";
+import { type SupportCards, supportCards } from "./card-look.ts";
+import { connectedCards } from "./connected-cards.ts";
 import type { SupportTools } from "./support-tools.ts";
 import { inLanguage } from "../language.ts";
 
@@ -39,6 +46,7 @@ type SupportOptions = {
   // The records its tools add to, and what they tell the page.
   store: () => KobbleStore;
   changed: (what: string) => void;
+  cards: SupportCards;
 };
 
 export class SupportTalk {
@@ -98,6 +106,7 @@ export class SupportTalk {
       token: this.talk.token,
       store: this.options.store,
       changed: this.options.changed,
+      cards: this.options.cards,
     };
   }
 
@@ -140,10 +149,18 @@ export function supportRoutes(support: SupportTalk): Record<string, Route> {
 // The support kobold for the factory's project; its changes told as
 // "support".
 export function supportOf(
-  options: { claude: Claude; project: string },
+  options: Omit<Parameters<typeof supportCards>[0], "cards"> & {
+    claude: Claude;
+    cli: Cli;
+  },
   store: () => KobbleStore,
   changed: (what: string) => void,
 ): SupportTalk {
+  const cards = supportCards({
+    ...options,
+    cards: () =>
+      connectedCards(join(options.project, FACTORY_FOLDER), options.cli),
+  });
   return new SupportTalk({
     claude: options.claude,
     project: options.project,
@@ -152,5 +169,6 @@ export function supportOf(
     },
     store,
     changed,
+    cards,
   });
 }

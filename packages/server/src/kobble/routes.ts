@@ -17,7 +17,6 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { asked, field } from "../asked.ts";
 import type { WorkView } from "../api.ts";
 import type { Cards } from "../cards/cards.ts";
-import { cardsFor, NO_BOARD } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";
 import {
   addPersona,
@@ -35,6 +34,7 @@ import { type Browser, PersonaTests } from "./persona-tests.ts";
 import { LiveSync } from "./sync.ts";
 import { connect, disconnect } from "./connect.ts";
 import { boardIdeas, factoryView } from "./factory-view.ts";
+import { connectedCards } from "./connected-cards.ts";
 import { supportOf, supportRoutes } from "./support.ts";
 import type { SupportTools } from "./support-tools.ts";
 import {
@@ -55,6 +55,8 @@ type KobbleOptions = {
   // The connected board's cards as the builder last read them; none
   // without a board.
   work: () => WorkView | null;
+  // The owner's answer on a stuck card, handed back to the builder.
+  answer: (number: number, text: string) => Promise<void>;
   // What a persona test runs on: the apps it can be sent into, an app's
   // address as it is now (the first app's without a product), and a
   // browser.
@@ -177,21 +179,6 @@ function liveRoutes(
       return { sync: sync.view() };
     },
   };
-}
-
-// The connected board's cards; refused with how to connect one when there
-// is none.
-export function connectedCards(factory: string, cli: Cli): Cards {
-  const found = cardsFor(factory, cli);
-  if ("problem" in found)
-    throw new Refused(
-      [
-        "No GitHub board is connected yet, so there is nowhere to put it.",
-        ...(found.problem === NO_BOARD ? [] : [found.problem]),
-        "Connect one in [Settings](#settings), under Where work is tracked.",
-      ].join(" "),
-    );
-  return found.cards;
 }
 
 // The explorations, and persona tests, which may run on a prototype of one.

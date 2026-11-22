@@ -17,7 +17,8 @@ import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
-import { connectedCards, servedKobble, tellerOf } from "./routes.ts";
+import { connectedCards } from "./connected-cards.ts";
+import { servedKobble, tellerOf } from "./routes.ts";
 import { releasesRoutes } from "../releases/routes.ts";
 import { storeOf } from "./usage-routes.ts";
 import { appAddress, appsOf, playwrightBrowser } from "./test-setup.ts";
@@ -69,6 +70,7 @@ function kobbleAlone(
     claude: session.options.coach.claude,
     cli: more.cli,
     work: () => session.work.view(),
+    answer: (number, text) => session.work.orRefuse().answer(number, text),
     testsRunOn: testsRunOn ?? {
       apps: () => appsOf(() => session.launcherOrRefuse()),
       app: (product) => appAddress(() => session.launcherOrRefuse(), product),
