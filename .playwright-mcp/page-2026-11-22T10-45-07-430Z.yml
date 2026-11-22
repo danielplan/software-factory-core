@@ -1,0 +1,91 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Marketplace" [ref=e131] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e135] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e140]:
+    - generic [ref=e142]:
+      - generic [ref=e143]:
+        - heading "Marketplace" [level=1] [ref=e146]
+        - paragraph [ref=e147]: What your factory can do, and the services it works with.
+      - tablist "Marketplace" [ref=e148]:
+        - tab "Extensions" [ref=e149] [cursor=pointer]
+        - tab "Connections" [active] [selected] [ref=e150] [cursor=pointer]
+      - generic [ref=e151]:
+        - region "Your code" [ref=e152]:
+          - generic [ref=e153]:
+            - heading "Your code" [level=2] [ref=e154]
+            - paragraph [ref=e155]: Branches and pull requests. Pick one.
+          - article "GitHub" [ref=e157]:
+            - button "Open GitHub" [ref=e158] [cursor=pointer]
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e164]: GitHub
+                - generic [ref=e166]:
+                  - text: In use
+                  - img "In use" [ref=e167]
+              - paragraph [ref=e170]: Your code and its pull requests, through the GitHub CLI.
+              - paragraph [ref=e171]: Branches and pull requests
+        - region "Your tasks" [ref=e172]:
+          - generic [ref=e173]:
+            - heading "Your tasks" [level=2] [ref=e174]
+            - paragraph [ref=e175]: Where the Factory's cards are kept. Pick one.
+          - generic [ref=e176]:
+            - article "GitHub board" [ref=e177]:
+              - button "Open GitHub board" [ref=e178] [cursor=pointer]
+              - generic [ref=e179]:
+                - generic [ref=e180]:
+                  - generic [ref=e184]: GitHub board
+                  - generic [ref=e186]:
+                    - text: In use
+                    - img "In use" [ref=e187]
+                - paragraph [ref=e190]: Work tracked on a GitHub board, through the GitHub CLI.
+            - article "Jira Cloud" [ref=e191]:
+              - button "Open Jira Cloud" [ref=e192] [cursor=pointer]
+              - generic [ref=e193]:
+                - generic [ref=e194]: Jira Cloud
+                - paragraph [ref=e200]: Work tracked in a Jira Cloud project, with an API token.
+              - button "Switch to Jira" [ref=e202] [cursor=pointer]
+  - region "Sprocket" [ref=e203]:
+    - button "Ask Sprocket anything ⌘J" [ref=e204] [cursor=pointer]:
+      - generic [ref=e214]: Ask Sprocket anything
+      - generic [ref=e215]: ⌘J

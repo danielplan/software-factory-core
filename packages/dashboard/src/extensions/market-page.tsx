@@ -107,7 +107,7 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
       )}
       {VARIANT === "B" && tab === "Connections" ? (
         <div className="grid gap-8">
-          <Group title="Where the code lives" about="Pick one: the Factory builds on its branches and pull requests.">
+          <Group title="Your code" about="Branches and pull requests. Pick one.">
             {codeHost && (
               <Card
                 ext={codeHost}
@@ -119,26 +119,16 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                 action={null}
               />
             )}
-            <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
-              <span className="font-semibold">GitLab</span>
-              Comes later.
-            </div>
           </Group>
           <TrackerGroup
-            title="Where cards live"
-            about="Pick one: the Factory works the cards there."
+            title="Your tasks"
+            about="Where the Factory's cards are kept. Pick one."
             trackers={trackers}
             onOpen={setOpenId}
             onMove={(from, to) => {
               setMoving({ from, to });
             }}
           />
-          <Group title="Where the team chats" about="For notes and questions from the kobolds.">
-            <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
-              <span className="font-semibold">Slack</span>
-              Comes later.
-            </div>
-          </Group>
         </div>
       ) : (
         <>
@@ -620,7 +610,7 @@ function Details({
                     onClick={onConnections}
                     className="text-blue hover:underline"
                   >
-                    where the code lives, where cards live
+                    Your code, Your tasks
                   </button>
                 </p>
               )}
