@@ -60,13 +60,7 @@ export function assembleFactory(
     return [];
   });
   problems.push(...dependencyProblems(known));
-  // Products are found in folder order: their parts go after what they need.
-  const parts = inStartOrder(
-    withBackendAddress([
-      ...known.flatMap((product) => partsOf(product, kits)),
-      ...extensions.flatMap((extension) => extension.parts),
-    ]),
-  );
+  const parts = allParts(known, kits, extensions);
   const settings = [
     modelSettings,
     builderSettings,
@@ -174,6 +168,22 @@ function withKit(product: Product, kit: Kit): KnownProduct {
     kit: kit.id,
     commands: { ...kit.commands, ...product.commands },
   };
+}
+
+// The products' parts and the extensions' parts, each knowing the backend
+// it needs. Products are found in folder order: their parts go after what
+// they need.
+function allParts(
+  products: KnownProduct[],
+  kits: Kit[],
+  extensions: Extension[],
+): Part[] {
+  return inStartOrder(
+    withBackendAddress([
+      ...products.flatMap((product) => partsOf(product, kits)),
+      ...extensions.flatMap((extension) => extension.parts),
+    ]),
+  );
 }
 
 function partsOf(product: KnownProduct, kits: Kit[]): Part[] {
