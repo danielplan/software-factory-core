@@ -56,6 +56,7 @@ test("the example company: its products, their kits, the parts and settings they
       "usage-log",
       "usage-log-folder",
       "updates",
+      "own-extensions",
       "github",
     ],
   );

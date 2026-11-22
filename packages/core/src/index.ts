@@ -22,6 +22,15 @@ export {
 } from "./extensions/extension.ts";
 export { copyStarter, starterName } from "./extensions/starter.ts";
 export {
+  OWN_EXTENSIONS_KEY,
+  ownExtensionsOn,
+  ownExtensionsSettings,
+  readTeamExtensions,
+  TEAM_EXTENSION_FILE,
+  TEAM_EXTENSIONS_FOLDER,
+  withTeamExtensions,
+} from "./extensions/team.ts";
+export {
   assembleFactory,
   type Available,
   type Factory,

@@ -14,6 +14,7 @@ import { checkParts, inStartOrder, type Part } from "../parts/part.ts";
 import type { Product } from "../products/product.ts";
 import { checkGroups, type SettingGroup } from "../settings/setting-groups.ts";
 import type { Extension, Guide, Kit } from "./extension.ts";
+import { ownExtensionsSettings } from "./team.ts";
 
 // What the core knows about: every extension and kit installed.
 export type Available = { extensions: Extension[]; kits: Kit[] };
@@ -68,6 +69,7 @@ export function assembleFactory(
     usageSettings,
     usageFolderSettings,
     updateSettings,
+    ownExtensionsSettings,
     ...extensions.flatMap((extension) => extension.settings),
   ];
   problems.push(
