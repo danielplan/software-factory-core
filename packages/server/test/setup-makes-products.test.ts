@@ -20,7 +20,7 @@ import { Session } from "../src/session.ts";
 // The whole way a new factory gets its apps, as the setup coach builds it:
 // `configure` with the project, then its new products, then the tracker.
 // Each product is made from its kit's starter, then described next to its
-// code with the commands its kit finds there.
+// code with the commands its kit finds there and what its starter brings.
 
 function starterKit(kind: string, starter: string) {
   return defineKit({
@@ -46,9 +46,13 @@ function starterKit(kind: string, starter: string) {
   });
 }
 
-function starter(name: string): string {
+function starter(name: string, more: Record<string, string> = {}): string {
   const folder = mkdtempSync(join(tmpdir(), "starter-"));
   mkdirSync(join(folder, "src"));
+  for (const [file, text] of Object.entries(more)) {
+    mkdirSync(join(folder, file, ".."), { recursive: true });
+    writeFileSync(join(folder, file), text);
+  }
   writeFileSync(join(folder, "package.json"), JSON.stringify({ name }));
   writeFileSync(
     join(folder, "src", "main.ts"),
@@ -76,7 +80,15 @@ test("configure makes each new product from its kit's starter, then describes it
       extensions: [],
       kits: [
         starterKit("web", starter("new-web")),
-        starterKit("server", starter("new-server")),
+        // A backend's starter with its settings and a made-up world.
+        starterKit(
+          "server",
+          starter("new-server", {
+            ".env.example":
+              "DATABASE_URL=postgres://here/new-server\nDATABASE_NAME=\n",
+            "prototype-world/start.json": "{}",
+          }),
+        ),
       ],
     },
     templates: {
@@ -136,8 +148,24 @@ test("configure makes each new product from its kit's starter, then describes it
     }
     const app = JSON.parse(
       readFileSync(join(project, "booking-app", "product.json"), "utf8"),
-    ) as { dependsOn: string[] };
+    ) as { dependsOn: string[]; copyEnv: object; world?: string };
     assert.deepEqual(app.dependsOn, ["booking-server"]);
+    assert.deepEqual([app.copyEnv, app.world], [{}, undefined]);
+    assert.ok(!existsSync(join(project, "booking-app", ".env")));
+    // What the backend's starter brings: its settings file, its world, and
+    // a database of its own in each working copy.
+    const server = join(project, "booking-server");
+    const backend = JSON.parse(
+      readFileSync(join(server, "product.json"), "utf8"),
+    ) as { copyEnv: object; world?: string };
+    assert.equal(backend.world, "prototype-world");
+    assert.deepEqual(backend.copyEnv, {
+      DATABASE_NAME: "booking-server-{port:booking-server}",
+    });
+    assert.equal(
+      readFileSync(join(server, ".env"), "utf8"),
+      readFileSync(join(server, ".env.example"), "utf8"),
+    );
     const state = session.state();
     assert.deepEqual(
       state.jobs.map((job) => [job.id, job.state]),

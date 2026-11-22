@@ -199,6 +199,10 @@ export type SetupProduct = {
   dependsOn?: string[];
   // Its first blueprint, drafted from its code.
   blueprint?: string;
+  // Its made-up world's folder and its settings in a working copy, from
+  // its kit's starter (create-products.ts).
+  world?: string;
+  copyEnv?: Record<string, string>;
 };
 
 // The map the setup coach draws with the owner: how the project works, in

@@ -3,15 +3,16 @@
 // when the kit has one, finished by the kit's commands (or made by them
 // alone, with the framework's own generator). Only then is it described
 // next to its code (product.json, its first blueprint), with the commands
-// its kit finds in the code made, and in the shape the product's own
-// Prettier writes, so its checks pass from the start. Each new product is a
+// its kit finds in the code made and what its starter brings (its settings
+// file, its made-up world, a database per working copy), and in the shape
+// the product's own Prettier writes, so its checks pass from the start. Each new product is a
 // job the page shows while it works; existing code is described as it is.
 //
 // The order matters: describing first would make the product's folder, and
 // a folder that is there already is used as it is, so the starter would
 // never be copied.
 
-import { existsSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 import { copyStarter, type Kit } from "@software-factory/core";
@@ -31,6 +32,9 @@ export type Adding = {
 };
 
 type Log = (line: string) => void;
+
+// The folder of situations a starter brings as a product's made-up world.
+const WORLD_FOLDER = "prototype-world";
 
 // The products the coach adds to the factory at root: the kits they need
 // first (refused as a whole when one does not fit), then each made and
@@ -103,12 +107,14 @@ async function makeOne(
     log(`No kit can make a ${product.kind}.`);
     return false;
   }
-  const made = existsSync(product.folder)
-    ? usedAsItIs(product, log)
-    : await fromKit(kit, steps, product, log);
+  const fresh = !existsSync(product.folder);
+  const made = fresh
+    ? await fromKit(kit, steps, product, log)
+    : usedAsItIs(product, log);
   if (!existsSync(product.folder)) return false;
   try {
-    await described(product, kit, describe, log);
+    const taken = fresh ? withStarterSettings(product) : product;
+    await described(taken, kit, describe, log);
   } catch (error) {
     log(error instanceof Error ? error.message : String(error));
     return false;
@@ -130,7 +136,38 @@ async function fromKit(
   const parent = dirname(product.folder);
   mkdirSync(parent, { recursive: true });
   if (kit.starter && !copied(kit.starter, kit.name, product, log)) return false;
+  settingsFromExample(product.folder, log);
   return (await runSteps(steps, parent, log)) && existsSync(product.folder);
+}
+
+// The settings file of a product made from a starter that lists its
+// settings in .env.example: a copy of it, so the product starts as it is.
+function settingsFromExample(folder: string, log: Log): void {
+  const example = join(folder, ".env.example");
+  const settings = join(folder, ".env");
+  if (!existsSync(example) || existsSync(settings)) return;
+  copyFileSync(example, settings);
+  log("Made its .env from .env.example.");
+}
+
+// What a product made from its kit's starter takes from what the starter
+// brings: its made-up world (a prototype-world/ folder), and a database of
+// its own in each working copy when its settings name DATABASE_NAME (named
+// after the product and the copy's own port).
+function withStarterSettings(product: SetupProduct): SetupProduct {
+  const { folder, id } = product;
+  const world = existsSync(join(folder, WORLD_FOLDER)) ? WORLD_FOLDER : null;
+  const example = join(folder, ".env.example");
+  const database =
+    existsSync(example) &&
+    /^DATABASE_NAME=/m.test(readFileSync(example, "utf8"));
+  return {
+    ...product,
+    ...(world && !product.world ? { world } : {}),
+    ...(database
+      ? { copyEnv: { DATABASE_NAME: `${id}-{port:${id}}`, ...product.copyEnv } }
+      : {}),
+  };
 }
 
 // The kit's starter copied into the product's folder, as the product; a

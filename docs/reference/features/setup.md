@@ -66,10 +66,16 @@ Each new product is a job the page shows while it works, in this order:
 1. **Made:** its kit's starter is copied into the product's folder under
    the product's name, then the kit's own commands finish it (its packages
    installed); a kit without a starter makes it with the framework's
-   generator. A folder that has code already is used as it is.
+   generator. Where the starter lists its settings in `.env.example`, the
+   product gets its `.env` as a copy of it. A folder that has code already
+   is used as it is.
 2. **Described,** once its code is there: `product.json` with the commands
-   its kit finds in the code made (its `verify` check and how it starts),
-   and the starter's `BLUEPRINT.md` (or a first one).
+   its kit finds in the code made (its `verify` check, how it starts, its
+   world check), and the starter's `BLUEPRINT.md` (or a first one). What
+   the starter brings is named too: a `prototype-world/` folder becomes the
+   product's made-up `world`, and settings that name `DATABASE_NAME` give
+   each working copy a database of its own
+   (`"copyEnv": { "DATABASE_NAME": "<id>-{port:<id>}" }`).
 3. **Formatted:** what the factory wrote is put in the shape of the
    product's own Prettier, with its settings, so the product's `verify`
    passes from the start.

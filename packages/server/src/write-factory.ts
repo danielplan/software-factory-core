@@ -95,6 +95,8 @@ export function describeProduct(root: string, product: SetupProduct): string[] {
       commands: product.commands ?? {},
       dependsOn: product.dependsOn ?? [],
       ...(product.port ? { port: product.port } : {}),
+      ...(product.world ? { world: product.world } : {}),
+      ...(product.copyEnv ? { copyEnv: product.copyEnv } : {}),
     },
     product.blueprint,
   );
