@@ -6,9 +6,14 @@ import { after, test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
 import { Refused } from "../src/refused.ts";
-import { releasesRoutes, type ReleasesView } from "../src/releases/routes.ts";
+import {
+  releasesRoutes,
+  type ReleasesView,
+} from "../src/extensions/releases/routes.ts";
 
 // The Releases page's routes with a stand-in GitHub CLI and a stand-in
 // kobold: the coming release (no kobold asked until the team prepares it),
@@ -147,6 +152,7 @@ function routesOf(
   const routes = releasesRoutes({
     project: project(connected),
     cli,
+    boards: slotFillers([githubAddOn(cli)]).tasks,
     claude,
     changed: (what) => told.push(what),
   });

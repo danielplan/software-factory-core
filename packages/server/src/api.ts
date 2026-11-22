@@ -357,8 +357,6 @@ export type ChangeDraft =
 // The company the coach names, which makes the factory's folder.
 export type CreateCompany = { name: string; about: string };
 
-export type { GitHubStatus } from "./add-ons/github/github.ts";
-
 export type AddOnView = {
   id: string;
   name: string;

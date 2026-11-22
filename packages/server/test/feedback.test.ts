@@ -6,11 +6,18 @@ import { after, test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 import { FeedbackArrivals } from "../src/feedback/arrivals.ts";
 import { boardOf, FeedbackBoard } from "../src/feedback/board.ts";
 import { feedbackRoutes } from "../src/feedback/routes.ts";
+import { plugsOf } from "./plugs.ts";
 import { pretendClaude } from "./pretend-claude.ts";
+
+// Signals' and Personas' plugs, from the factory's records.
+function plugged(store: KobbleStore) {
+  const plugs = plugsOf(store);
+  return { signals: () => plugs.signals, personas: () => plugs.personas };
+}
 
 // The public feedback board as the server reads and writes it: through the
 // GitHub CLI with the person's own sign-in (a stand-in here), what this
@@ -153,7 +160,7 @@ test("sending puts a post on the board and remembers it, then follows it", async
     project,
     cli,
     claude: pretendClaude([]).claude,
-    store: () => new KobbleStore(root),
+    ...plugged(new KobbleStore(root)),
     changed: () => undefined,
     onSignals: () => undefined,
     repository: "acme/software-factory-feedback",
@@ -200,7 +207,7 @@ test("sending is refused plainly: no kind, no title, a missing board, a bad numb
     project,
     cli,
     claude: pretendClaude([]).claude,
-    store: () => new KobbleStore(root),
+    ...plugged(new KobbleStore(root)),
     changed: () => undefined,
     onSignals: () => undefined,
   });
@@ -253,7 +260,7 @@ test("a post from others arrives once as a signal and is matched to a persona", 
       "acme/fb",
       join(root, "settings", "sent.json"),
     ),
-    store: () => store,
+    ...plugged(store),
     claude: claude.claude,
     factory: root,
     cwd: project,
@@ -295,7 +302,7 @@ test("a factory that does not read the board takes in nothing; a failed matching
         "acme/fb",
         join(root, "settings", "s.json"),
       ),
-      store: () => store,
+      ...plugged(store),
       claude,
       factory: root,
       cwd: project,
@@ -329,7 +336,7 @@ test("a person changes or removes the persona a post was matched to", async () =
           '{"matches":[{"post":41,"persona":"bruno","why":"they lose a morning"}]}',
       },
     ]).claude,
-    store: () => store,
+    ...plugged(store),
     changed: () => undefined,
     onSignals: () => undefined,
   });

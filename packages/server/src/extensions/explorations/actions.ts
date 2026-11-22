@@ -1,0 +1,330 @@
+// What a person does with an exploration: start one that waits, make a new
+// one for an idea of the team's, drop it, agree to a prototype (or take it
+// back), and hand off the agreed prototype: handoff.md beside it and a
+// GitHub issue on the connected board with the problem, the agreed
+// prototype's branch and what was learned.
+
+import {
+  type Board,
+  type Exploration,
+  type KobbleStore,
+  type PersonaTest,
+  titleOf,
+} from "@software-factory/core";
+import { z } from "zod";
+
+import type { Cards } from "../../cards/cards.ts";
+import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { PersonasPlug } from "../../plugs/personas.ts";
+import type { SpecWriter } from "./spec-writer.ts";
+import { Refused } from "../../refused.ts";
+
+export function explorationOf(store: KobbleStore, id: string): Exploration {
+  const exploration = store.get("explorations", id);
+  if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+  return exploration;
+}
+
+function open(store: KobbleStore, id: string): Exploration {
+  const exploration = explorationOf(store, id);
+  if (!["waiting", "exploring"].includes(exploration.status))
+    throw new Refused(`${id} is ${exploration.status} already.`);
+  return exploration;
+}
+
+// Start: a waiting exploration is explored now. True when it just started.
+export function startExploration(store: KobbleStore, id: string): boolean {
+  const exploration = open(store, id);
+  if (exploration.status === "exploring") return false;
+  store.put("explorations", { ...exploration, status: "exploring" });
+  return true;
+}
+
+const newSchema = z.object({
+  title: z.string().trim().min(1, "Say what to explore."),
+  problem: z.string().trim().default(""),
+  persona: z.string().optional(),
+  // A Backlog issue of the board it starts from.
+  issue: z.number().int().positive().optional(),
+});
+
+// New exploration: a team idea, no signal needed; it waits to be started.
+// The persona it is for, when one is named, must be there (Personas'
+// plug).
+export function newExploration(
+  store: KobbleStore,
+  body: unknown,
+  personas: PersonasPlug | null,
+  now: Date = new Date(),
+): Exploration {
+  const parsed = newSchema.safeParse(body);
+  if (!parsed.success)
+    throw new Refused(parsed.error.issues.map((i) => i.message).join(" "));
+  const { title, problem, persona, issue } = parsed.data;
+  if (persona && !personas?.get(persona))
+    throw new Refused(`There is no persona “${persona}”.`);
+  const taken = issue
+    ? store.all("explorations").find((one) => one.issue === issue)
+    : undefined;
+  if (taken)
+    throw new Refused(`#${String(issue)} is explored already, in ${taken.id}.`);
+  return store.put("explorations", {
+    id: store.nextId("explorations"),
+    title: titleOf(title),
+    status: "waiting",
+    personas: persona ? [persona] : [],
+    signals: [],
+    heard: [],
+    problem: problem || title,
+    created: now.toISOString(),
+    work: null,
+    ...(issue ? { issue } : {}),
+  });
+}
+
+// Another idea, parked by the kobold from an exploration: waiting, as a New
+// exploration is; what the kobold is told.
+export function parkIdea(
+  on: { store: () => KobbleStore; onChange: () => void },
+  idea: { title: string; problem: string },
+): string {
+  const parked = newExploration(on.store(), idea, null);
+  on.onChange();
+  return `Parked ${parked.id} “${parked.title}”, waiting in Explorations.`;
+}
+
+// A fresh exploration, opened at once on its canvas: the team says its idea
+// to the kobold there, who names it. One the team opened and left without
+// a word is opened again instead of making another.
+export function freshExploration(
+  store: KobbleStore,
+  now: Date = new Date(),
+): Exploration {
+  const untouched = store
+    .all("explorations")
+    .find(
+      (one) =>
+        one.status === "exploring" &&
+        !one.problem &&
+        one.signals.length === 0 &&
+        !one.issue &&
+        store.conversation(one.id).messages.length === 0,
+    );
+  if (untouched) return untouched;
+  return store.put("explorations", {
+    id: store.nextId("explorations"),
+    title: NEW_TITLE,
+    status: "exploring",
+    personas: [],
+    signals: [],
+    heard: [],
+    problem: "",
+    created: now.toISOString(),
+    work: null,
+  });
+}
+
+export const NEW_TITLE = "New idea";
+
+export function dropExploration(store: KobbleStore, id: string): Exploration {
+  return store.put("explorations", { ...open(store, id), status: "dropped" });
+}
+
+// Hand off: the agreed prototype becomes a GitHub issue on the connected
+// board, its first column; handoff.md says the same. An idea that changes no
+// screen (how the builder works, a rule) needs no prototype: then the
+// board's agreed choices, notes and diagrams are what is handed off. A
+// board with a prototype on it hands off that prototype, agreed and with
+// its variant, or nothing: a prototype the team worked on is never dropped
+// on the way to the builder. The board is read again before the card is
+// made, so an agreement that changed meanwhile is never lost.
+export async function handOff(
+  store: KobbleStore,
+  id: string,
+  cards: () => Cards,
+  // Writes the spec the card gets; the short summary when there is none or
+  // it cannot.
+  write?: SpecWriter,
+  // The agreed prototype's persona tests (Personas' plug); none while
+  // Personas is not installed.
+  missions?: MissionsPlug | null,
+): Promise<{ issue: number; url: string }> {
+  const exploration = open(store, id);
+  const board = store.board(id);
+  const agreed = prototypeToHandOff(board);
+  const connected = cards();
+  const tests = missions?.of(agreed?.tests ?? []) ?? [];
+  const summary = handoffText(exploration, board, agreed, tests);
+  const spec = await write?.({
+    exploration,
+    summary,
+    ...(agreed ? { branch: agreed.branch } : {}),
+  });
+  if (agreedOf(prototypeToHandOff(store.board(id))) !== agreedOf(agreed))
+    throw new Refused(
+      "What is agreed on the board changed while the spec was written: hand it off again.",
+    );
+  const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed?.key ?? "none"} -->`;
+  // Handed off agreed: straight to To do, the go-ahead to build it. An
+  // exploration of a Backlog issue fills in that issue instead.
+  const card = await handedOffCard(connected, exploration, text);
+  store.saveHandoff(
+    id,
+    `# ${exploration.title}\n\n${text}\n\nHanded off as #${String(card.number)}.\n`,
+  );
+  store.put("explorations", {
+    ...exploration,
+    status: "handed-off",
+    work: card.number,
+  });
+  return { issue: card.number, url: card.url };
+}
+
+type Made = Extract<Board["things"][number], { kind: "prototype" }>;
+
+// The prototype handed off: the agreed one, with its variant when it has
+// several; none only for a board without a prototype that has agreed
+// choices or notes. Anything else is refused, saying what to agree.
+export function prototypeToHandOff(board: Board): Made | undefined {
+  const made = board.things.filter(
+    (one): one is Made => one.kind === "prototype",
+  );
+  const agreed = made.find((one) => one.agreed);
+  if (made.length > 0 && !agreed)
+    throw new Refused(
+      `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it.`,
+    );
+  if (agreed && (agreed.variants?.length ?? 0) > 1 && !chosenVariant(agreed))
+    throw new Refused(
+      `Say which variant of prototype ${agreed.key} is to be built first.`,
+    );
+  if (!agreed && !board.things.some((one) => one.agreed))
+    throw new Refused(
+      "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
+    );
+  return agreed;
+}
+
+function agreedOf(made: Made | undefined): string {
+  return made ? `${made.key}/${chosenVariant(made)?.key ?? ""}` : "";
+}
+
+async function handedOffCard(
+  cards: Cards,
+  exploration: Exploration,
+  text: string,
+): Promise<{ number: number; url: string }> {
+  if (!exploration.issue) return cards.create(exploration.title, text, "todo");
+  await cards.writePlan(exploration.issue, text);
+  await cards.move(exploration.issue, "todo");
+  const { url } = await cards.show(exploration.issue);
+  return { number: exploration.issue, url };
+}
+
+// What the team asked to change on the prototype along the way, in order:
+// all of it is on its branch, and all of it is to be built.
+function changeLines(agreed: Made): string[] {
+  const changes = agreed.changes ?? [];
+  if (changes.length === 0) return [];
+  return [
+    "",
+    "**Changed along the way** (all of it is on the prototype's branch, and all of it is to be built):",
+    ...changes.map((one, at) => `${String(at + 1)}. ${one}`),
+  ];
+}
+
+// The agreed variant, when the prototype has several: build only that one.
+// The variant agreed, when the prototype holds several: it is what was
+// agreed (the prototype itself is named after the question).
+function chosenVariant(agreed: Made) {
+  const variants = agreed.variants ?? [];
+  if (variants.length < 2) return null;
+  return variants.find((one) => one.key === agreed.variant) ?? null;
+}
+
+function agreedLine(agreed: Made): string {
+  const chosen = chosenVariant(agreed) ?? agreed;
+  return [`${chosen.key} · ${chosen.name}.`, chosen.difference]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function variantLines(agreed: Made): string[] {
+  const variants = agreed.variants ?? [];
+  const chosen = chosenVariant(agreed);
+  if (!chosen) return [];
+  return [
+    "",
+    `The prototype holds the variants ${variants.map((one) => one.key).join(", ")}, shown by the page address (\`?variant=${chosen.key}\`). Build only ${chosen.key}: leave out the others and the variant switch.`,
+  ];
+}
+
+function handoffText(
+  exploration: Exploration,
+  board: Board,
+  agreed: Made | undefined,
+  tests: PersonaTest[],
+): string {
+  const question = board.things.find(
+    (one) =>
+      one.kind === "choice" && one.options.some((o) => o.key === agreed?.key),
+  );
+  const learned = [
+    ...board.things.flatMap((one) =>
+      one.kind === "note" ? [`- ${one.text}`] : [],
+    ),
+    ...board.things.flatMap((one) =>
+      one.agreed && (one.kind === "diagram" || one.kind === "picture")
+        ? [`- Agreed ${one.kind}: ${one.title}`]
+        : [],
+    ),
+    ...tests.map((test) => {
+      const fine = test.steps.filter((step) => step.asExpected).length;
+      return `- Persona test ${test.id}: ${String(fine)} of ${String(test.steps.length)} steps as expected.`;
+    }),
+  ];
+  const what = agreed
+    ? [
+        `**The question:** ${question?.kind === "choice" ? question.title : "—"}`,
+        "",
+        `**Agreed:** ${agreedLine(agreed)}`,
+        ...variantLines(agreed),
+        ...changeLines(agreed),
+        "",
+        `**The prototype:** on the branch \`${agreed.branch}\`.`,
+      ]
+    : [
+        "**Agreed, without a prototype** (it changes no screen):",
+        ...choicesAgreed(board),
+      ];
+  return [
+    `**The problem:** ${exploration.problem}`,
+    "",
+    ...what,
+    ...(learned.length > 0 ? ["", "**What we learned:**", ...learned] : []),
+  ].join("\n");
+}
+
+// The board's agreed choices, each with the option picked.
+function choicesAgreed(board: Board): string[] {
+  return board.things.flatMap((one) => {
+    if (one.kind !== "choice" || !one.agreed) return [];
+    const picked = one.options.find((o) => o.key === one.chosen);
+    const answer = picked ? picked.name + "." : "(no option picked)";
+    return [`- ${one.title} ${answer}`];
+  });
+}
+
+// The exploration's title or problem, as the kobold renames it.
+export function renameExploration(
+  store: KobbleStore,
+  id: string,
+  { title, problem }: { title?: string; problem?: string },
+): void {
+  const exploration = open(store, id);
+  store.put("explorations", {
+    ...exploration,
+    title: title?.trim() || exploration.title,
+    problem: problem?.trim() || exploration.problem,
+  });
+}

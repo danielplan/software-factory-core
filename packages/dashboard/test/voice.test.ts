@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { readyToSay, sayable, spoken } from "../src/voice/answer-text.ts";
+import { readyToSay, sayable, spoken } from "../src/lib/voice/answer-text.ts";
 import {
   type CallEvent,
   type CallState,
@@ -10,26 +10,26 @@ import {
   type ModelProgress,
   idleCall,
   step,
-} from "../src/voice/call.ts";
+} from "../src/lib/voice/call.ts";
 import {
   browserLanguage,
   isLanguage,
   LANGUAGES,
-} from "../src/voice/languages.ts";
-import { statusLine } from "../src/voice/status-line.ts";
-import { asksToStop, isInterruption } from "../src/voice/stop-words.ts";
+} from "../src/lib/voice/languages.ts";
+import { statusLine } from "../src/lib/voice/status-line.ts";
+import { asksToStop, isInterruption } from "../src/lib/voice/stop-words.ts";
 import {
   cleanTranscript,
   pickLanguage,
   pieces,
   tokenOf,
-} from "../src/voice/transcript.ts";
+} from "../src/lib/voice/transcript.ts";
 import {
   FRAME_SIZE,
   SAMPLE_RATE,
   VoiceDetector,
   voiceLevel,
-} from "../src/voice/voice-detector.ts";
+} from "../src/lib/voice/voice-detector.ts";
 
 // The voice's plain rules: whose turn it is in a call, what of the coach's
 // answer can be said, what stops it, which language was spoken, when a

@@ -4,7 +4,7 @@
 // Only the blocks of installed extensions are offered; a block whose
 // extension is removed leaves Home and comes back, in its place, with it.
 
-import type { AddOnView } from "../api.ts";
+import type { AddOnView } from "../api/client.ts";
 
 export type Layout = { order: string[]; hidden: string[] };
 

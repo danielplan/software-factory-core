@@ -12,7 +12,7 @@ import { parseArgs } from "node:util";
 import { findFactory } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
-import { type Cli, realCli } from "../add-ons/github/github.ts";
+import { type Cli, realCli } from "../github-cli.ts";
 import { Refused } from "../refused.ts";
 import {
   type Card,
@@ -21,7 +21,7 @@ import {
   stageNamed,
   stageWord,
 } from "./cards.ts";
-import { cardsFor } from "./cards-for.ts";
+import { cardsFor, type TaskBoards } from "./cards-for.ts";
 
 export const CARD_USAGE = `software-factory card list [stage]          the board's cards, with their stage
 software-factory card show <number>          a card: its text, comments, agreed plan
@@ -44,6 +44,8 @@ type Out = (line: string) => void;
 // Runs one card command; its exit code.
 export async function cardCommand(
   args: string[],
+  // Where work is tracked: the trackers' cards (the `tasks` slot).
+  boards: TaskBoards,
   from = process.cwd(),
   cli: Cli = realCli(),
   out: Out = (line) => {
@@ -69,7 +71,7 @@ export async function cardCommand(
       out(CARD_USAGE);
       return 0;
     }
-    const { cards, project } = cardsHere(from, cli);
+    const { cards, project } = cardsHere(from, boards);
     await run(verb, rest, values, { cards, project, cli, out });
     return 0;
   } catch (error) {
@@ -212,11 +214,14 @@ async function agree(
 }
 
 // The cards of the board the factory here is connected to.
-function cardsHere(from: string, cli: Cli): { cards: Cards; project: string } {
+function cardsHere(
+  from: string,
+  boards: TaskBoards,
+): { cards: Cards; project: string } {
   const root = findFactory(from);
   if (!root)
     throw new Refused("There is no factory here: run it in a project.");
-  const found = cardsFor(root, cli);
+  const found = cardsFor(root, boards);
   if ("problem" in found) throw new Refused(found.problem);
   return { cards: found.cards, project: dirname(root) };
 }

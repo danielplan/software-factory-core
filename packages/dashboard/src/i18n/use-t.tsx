@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 
-import { get, post } from "@/api";
+import { get, post } from "@/api/client";
 
 import {
   chosenLocale,

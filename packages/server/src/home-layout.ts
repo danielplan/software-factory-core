@@ -13,7 +13,7 @@ import { join } from "node:path";
 
 import { FACTORY_FOLDER } from "@software-factory/core";
 
-import type { Route } from "./add-ons/add-on.ts";
+import type { Route } from "./http.ts";
 import { Refused } from "./refused.ts";
 
 type Layout = { order: string[]; hidden: string[] };

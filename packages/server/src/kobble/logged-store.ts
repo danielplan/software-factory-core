@@ -32,10 +32,13 @@ export class LoggedStore extends KobbleStore {
     kind: K,
     record: KobbleKinds[K],
   ): KobbleKinds[K] {
-    const before =
-      kind === "explorations" ? this.get("explorations", record.id) : null;
+    // Only an exploration's changes are logged: read as it was before.
+    const logged = kind === "explorations";
+    const before = logged
+      ? (this.get(kind, record.id) as KobbleKinds["explorations"] | null)
+      : null;
     const saved = super.put(kind, record);
-    if (kind === "explorations")
+    if (logged)
       this.usage.write(
         record.id,
         explorationEvents(before, saved as KobbleKinds["explorations"]),

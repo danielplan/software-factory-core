@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import type { Board } from "@software-factory/core";
 
-import { applyAct } from "../src/kobble/explorations/board-acts.ts";
+import { applyAct } from "../src/extensions/explorations/board-acts.ts";
 
 // The kobold adds a thing and its arrow in one step.
 

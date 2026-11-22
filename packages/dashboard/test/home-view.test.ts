@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { CardView, WorkView } from "../src/api.ts";
+import type { CardView, WorkView } from "../src/api/client.ts";
 import { loopOf, statusLine, waitingOf } from "../src/lib/home-view.ts";
-import { updateRow } from "../src/updates/updates-model.ts";
+import { updateRow } from "../src/features/updates/updates-model.ts";
 
 function card(
   number: number,

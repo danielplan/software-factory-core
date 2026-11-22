@@ -54,7 +54,9 @@ to `factory/extensions/<id>/`, rename it and keep only what the team asked for.
   that another needs is refused.
 - `slots`: `"code"` or `"tasks"` when it uses the connection the factory
   filled at setup. It never connects anything itself.
-- `guides`: Markdown files in its own folder, for an agent (`builder` today).
+- `guides`: Markdown files in its own folder, for an agent: `builder` (it
+  reads them before it builds) or `support` (Sprocket reads them before it
+  answers about the extension, so it can guide the team to it).
   The agent reads them before it works. This is how a rule of the team's own
   reaches every card: write what to do and why, in plain steps.
 - `settings`: groups of settings (see the core's `settingGroupSchema`), kept

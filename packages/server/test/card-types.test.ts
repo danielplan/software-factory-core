@@ -3,7 +3,11 @@ import { test } from "node:test";
 
 import { withKept } from "@software-factory/core";
 
-import { markComment, readNote, stripMarker } from "../src/builder/protocol.ts";
+import {
+  markComment,
+  readNote,
+  stripMarker,
+} from "../src/extensions/factory/builder/protocol.ts";
 import {
   aboutOf,
   heldArgs,

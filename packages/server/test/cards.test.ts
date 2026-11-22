@@ -7,10 +7,12 @@ import { test } from "node:test";
 
 import { GIT } from "@software-factory/knowledge-base";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 import { planOf, stageNamed, withPlan } from "../src/cards/cards.ts";
 import { cardCommand } from "../src/cards/command.ts";
-import { githubCards } from "../src/cards/github-cards.ts";
+import { githubCards } from "../src/extensions/github/cards.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
 import { BOARD, pretendGitHub } from "./pretend-github.ts";
 
 // The board's cards for the coding agents: listed, shown, moved, made, and
@@ -52,7 +54,10 @@ function project(tracker = "github"): string {
 
 async function card(folder: string, cli: Cli, ...args: string[]) {
   const lines: string[] = [];
-  const code = await cardCommand(args, folder, cli, (line) => lines.push(line));
+  const boards = slotFillers([githubAddOn(cli)]).tasks;
+  const code = await cardCommand(args, boards, folder, cli, (line) =>
+    lines.push(line),
+  );
   return { code, said: lines.join("\n") };
 }
 

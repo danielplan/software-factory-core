@@ -6,10 +6,10 @@ import {
   type BoardCard,
   decide,
   handedBack,
-  type Message,
   stuckOf,
   waitsForOwner,
-} from "../src/builder/decide.ts";
+} from "../src/extensions/factory/builder/decide.ts";
+import { type Message } from "../src/code-host.ts";
 import {
   isFactory,
   linkRepositoryFiles,
@@ -17,7 +17,10 @@ import {
   readNote,
   readStatusLine,
   stripMarker,
-} from "../src/builder/protocol.ts";
+} from "../src/extensions/factory/builder/protocol.ts";
+
+import { realCli } from "../src/github-cli.ts";
+import { githubCodeHost } from "../src/extensions/github/code-host.ts";
 
 // The board's rules: what happens next to each card, from its stage and the
 // notes in its thread; and how the factory's notes and an agent's status
@@ -74,8 +77,8 @@ test("the factory's notes carry a hidden mark; an agent's answer ends with its s
   assert.equal(
     linkRepositoryFiles(
       "![shot](runs/1.png) [run](./runs/1.md) [web](https://x.y) [top](#a)",
-      "o/r",
-      "factory/card-1",
+      (path) =>
+        githubCodeHost(realCli(), "o/r").fileLink("factory/card-1", path),
     ),
     "![shot](https://github.com/o/r/blob/factory/card-1/runs/1.png?raw=true) [run](https://github.com/o/r/blob/factory/card-1/runs/1.md) [web](https://x.y) [top](#a)",
   );

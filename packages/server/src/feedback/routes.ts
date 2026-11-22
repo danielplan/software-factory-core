@@ -7,13 +7,14 @@ import { join } from "node:path";
 import {
   type Claude,
   FACTORY_FOLDER,
-  type KobbleStore,
   RELEASE_SOURCE,
 } from "@software-factory/core";
 
-import type { Route } from "../add-ons/add-on.ts";
-import type { Cli } from "../add-ons/github/github.ts";
+import type { Route } from "../http.ts";
+import type { Cli } from "../github-cli.ts";
 import { field } from "../asked.ts";
+import type { PersonasPlug } from "../plugs/personas.ts";
+import type { SignalsPlug } from "../plugs/signals.ts";
 import { Refused } from "../refused.ts";
 import { FeedbackArrivals } from "./arrivals.ts";
 import {
@@ -39,7 +40,10 @@ type Options = {
   project: string;
   cli: Cli;
   claude: Claude;
-  store: () => KobbleStore | null;
+  // Where its posts arrive and who they are matched to: Signals' and
+  // Personas' plugs, none while each is not installed.
+  signals: () => SignalsPlug | null;
+  personas: () => PersonasPlug | null;
   changed: () => void;
   // Signals changed (some arrived, or a persona was changed).
   onSignals: () => void;
@@ -57,7 +61,8 @@ export function feedbackRoutes(options: Options) {
   );
   const arrivals = new FeedbackArrivals({
     board,
-    store: options.store,
+    signals: options.signals,
+    personas: options.personas,
     claude: options.claude,
     factory,
     cwd: project,
@@ -77,21 +82,21 @@ export function feedbackRoutes(options: Options) {
 function personaRoute(options: Options): Record<string, Route> {
   return {
     "POST /api/feedback/persona": (body) => {
-      const store = options.store();
-      if (!store) throw new Refused("There is no factory yet.");
+      const signals = options.signals();
+      if (!signals) throw new Refused("Signals is not installed.");
       const id = field(body, "id");
       const persona = (body as { persona?: unknown } | null)?.persona;
-      const signal = store.get("signals", id);
+      const signal = signals.get(id);
       if (signal?.source !== "feedback")
         throw new Refused("That is not a post from the feedback board.");
       if (persona !== null && typeof persona !== "string")
         throw new Refused("Say which persona, or none.");
-      if (persona !== null && !store.get("personas", persona))
+      if (persona !== null && !options.personas()?.get(persona))
         throw new Refused("There is no such persona.");
       // A persona picked by a person has no reason of the kobold's.
       const rest = { ...signal, persona };
       delete rest.why;
-      store.put("signals", rest);
+      signals.change(rest);
       options.onSignals();
     },
   };

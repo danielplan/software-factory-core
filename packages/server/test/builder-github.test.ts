@@ -6,18 +6,27 @@ import { test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
-import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
-import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
-import type { BoardCard } from "../src/builder/decide.ts";
-import { readNote } from "../src/builder/protocol.ts";
+import type { Cli } from "../src/github-cli.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
 import {
-  githubPullRequests,
+  realShell,
+  runChecks,
+  shownOutput,
+} from "../src/extensions/factory/builder/checks.ts";
+import {
+  ConnectedWork,
+  workFor,
+} from "../src/extensions/factory/builder/connect-work.ts";
+import type { BoardCard } from "../src/extensions/factory/builder/decide.ts";
+import { readNote } from "../src/extensions/factory/builder/protocol.ts";
+import {
   openOrUpdate,
-  type PullRequests,
   RESOLVE_ASK,
-} from "../src/builder/pull-requests.ts";
-import { SeenPullRequests } from "../src/builder/seen-pull-requests.ts";
+} from "../src/extensions/factory/builder/pull-requests.ts";
+import { type PullRequests } from "../src/code-host.ts";
+import { githubPullRequests } from "../src/extensions/github/pull-requests.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
+import { SeenPullRequests } from "../src/extensions/factory/builder/seen-pull-requests.ts";
 
 // The builder's pull requests through the GitHub CLI (a stand-in that
 // answers what GitHub would and remembers what it was asked), the checks
@@ -164,16 +173,20 @@ test("the board work is put together from a factory with a connected board, and 
   company("none");
   const claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) };
   const { cli } = pretendCli({});
+  // Where the code lives: GitHub fills the `code` slot.
+  const github = githubAddOn(cli);
   const settings = {
     project,
     cli,
     claude,
-    available: { kits: [], extensions: [] },
+    available: { kits: [], extensions: [github.extension] },
     onChange: () => undefined,
+    codeHosts: slotFillers([github]).code,
+    boards: slotFillers([github]).tasks,
   };
-  assert.equal(workFor({ ...settings, root }), null);
+  assert.equal(workFor({ ...settings, root, codeHosts: {} }), null);
 
-  const connected = new ConnectedWork({ ...settings, coach: { claude } });
+  const connected = new ConnectedWork(settings);
   connected.connect(root);
   assert.equal(connected.view(), null);
   assert.throws(() => connected.orRefuse(), /Connect a board first/);
@@ -185,8 +198,24 @@ test("the board work is put together from a factory with a connected board, and 
       github: { repository: "o/r", board: 1, label: "*", stages: {} },
     }),
   );
+  // A code host only some other extension could give: the builder cannot
+  // work the board, and says why.
+  const elsewhere = new ConnectedWork({ ...settings, codeHosts: {} });
+  elsewhere.connect(root);
+  assert.throws(
+    () => elsewhere.orRefuse(),
+    /The code lives with github, where the builder cannot push yet/,
+  );
+  const nowhere = new ConnectedWork({
+    ...settings,
+    available: { kits: [], extensions: [] },
+  });
+  nowhere.connect(root);
+  assert.throws(() => nowhere.orRefuse(), /Nothing says where the code lives/);
+
   connected.connect(root);
   const work = connected.orRefuse();
+  assert.equal(connected.hostOrRefuse().name, "GitHub");
   // The builder works as soon as the factory starts; the coach waits.
   assert.equal(connected.view()?.builder.on, true);
   assert.equal(connected.view()?.coach.on, false);
@@ -277,10 +306,9 @@ test("built again with its pull request open, the description stays and what the
     said: () => Promise.resolve([]),
   };
   const url = await openOrUpdate(
-    prs,
+    { ...prs, fileLink: (branch, path) => `${branch}/${path}` },
     { number: 4, title: "A card" },
     "Brought in main and resolved the clash in a.ts.",
-    false,
   );
   assert.equal(url, "https://x/pull/9");
   assert.deepEqual(updated, [null]);

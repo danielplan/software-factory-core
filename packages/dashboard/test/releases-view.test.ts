@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { ReleasesView } from "../src/api.ts";
+import type { ReleasesView } from "../src/api/client.ts";
 import { ENGLISH } from "../src/i18n/messages.ts";
 import { placeOf } from "../src/lib/routes.ts";
-import { problemWith, shownOf, whyOf } from "../src/releases/view.ts";
+import { problemWith, shownOf, whyOf } from "../src/features/releases/view.ts";
 
 type Ready = Extract<ReleasesView, { connected: true }>;
 

@@ -11,7 +11,7 @@ import {
 } from "@software-factory/core";
 import { skillsFolder } from "@software-factory/skills";
 
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
 
 const made: string[] = [];
 after(() => {

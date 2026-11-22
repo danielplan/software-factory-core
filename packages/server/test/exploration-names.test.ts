@@ -4,9 +4,9 @@ import { test } from "node:test";
 import {
   askFor,
   commitWords,
-} from "../src/kobble/explorations/making-words.ts";
-import { freeKey, madeFor } from "../src/kobble/explorations/versions.ts";
-import { plainWords } from "../src/kobble/explorations/views.ts";
+} from "../src/extensions/explorations/making-words.ts";
+import { freeKey, madeFor } from "../src/extensions/explorations/versions.ts";
+import { plainWords } from "../src/extensions/explorations/views.ts";
 
 // What things on an exploration's board are called: a preview's short
 // words, and the names of prototypes.

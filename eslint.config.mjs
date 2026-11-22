@@ -147,9 +147,9 @@ export default tseslint.config(
       "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
-  { files: ["*.mjs", "*.cjs"], ...tseslint.configs.disableTypeChecked },
+  { files: ["*.mjs", "**/*.cjs"], ...tseslint.configs.disableTypeChecked },
   {
-    files: ["*.cjs"],
+    files: ["**/*.cjs"],
     languageOptions: { globals: globals.node, sourceType: "commonjs" },
   },
 );

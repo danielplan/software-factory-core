@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { knowledgeOwed } from "../src/builder/knowledge-kept.ts";
-import { NOTHING_TO_KEEP } from "../src/builder/prompts.ts";
+import { knowledgeOwed } from "../src/extensions/factory/builder/knowledge-kept.ts";
+import { NOTHING_TO_KEEP } from "../src/extensions/factory/builder/prompts.ts";
 
 // Before a pull request: code changed without the knowledge base owes it a
 // round of update-context, unless the run file says why nothing changes.

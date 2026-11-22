@@ -1,5 +1,7 @@
 # The live export
 
+[Knowledge base](../index.md) · [Reference](index.md) · [Signals](features/signals.md)
+
 **Type:** Reference · Answers: what does Kobble read from the live app, and how is it set up?
 
 Kobble's signals come from the app as it runs for its customers. The app
@@ -48,8 +50,10 @@ The first time there is no `since`. The app answers with JSON:
 }
 ```
 
-- `cursor`: any text; Kobble keeps it in `factory/kobble/sync.json` and sends
-  it back as `since` next time.
+- `cursor`: any text; Kobble keeps it beside the signals, in
+  `factory/kobble/signals/.sync.json` (on this computer, not in git), and
+  sends it back as `since` next time. Each computer reads the export for
+  itself.
 - `id`: the event's id, the same every time it is sent. Kobble takes each
   event once: an id it has seen is left out.
 - `at`: when it happened, an ISO time with its offset.

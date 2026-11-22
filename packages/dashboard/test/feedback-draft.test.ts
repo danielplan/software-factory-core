@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { bodyOf, draftOf, teamBits, titleOf } from "../src/feedback/draft.ts";
-import type { Post } from "../src/feedback/feedback-board.ts";
-import { findSimilarPosts } from "../src/feedback/similar.ts";
-import { isBugWords, looksLikeFeedback } from "../src/feedback/words.ts";
+import {
+  bodyOf,
+  draftOf,
+  teamBits,
+  titleOf,
+} from "../src/features/support/draft.ts";
+import type { Post } from "../src/api/feedback-board.ts";
+import { findSimilarPosts } from "../src/features/support/similar.ts";
+import {
+  isBugWords,
+  looksLikeFeedback,
+} from "../src/features/support/words.ts";
 
 const AT = "2026-11-20T10:00:00Z";
 function post(number: number, title: string, thumbs = 1): Post {

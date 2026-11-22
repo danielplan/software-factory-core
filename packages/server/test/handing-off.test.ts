@@ -4,9 +4,10 @@ import { test } from "node:test";
 import type { KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
-import { HandOffs } from "../src/kobble/explorations/handing-off.ts";
-import { MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
-import { factoryView } from "../src/kobble/factory-view.ts";
+import { HandOffs } from "../src/extensions/explorations/handing-off.ts";
+import { MakerDesk } from "../src/extensions/explorations/maker-desk.ts";
+import { factoryView } from "../src/extensions/factory/factory-view.ts";
+import { plugsOf } from "./plugs.ts";
 
 // What the team sees while work is under way: a hand-off's stages and the
 // spec writer's steps; a clash with main only as a problem in Review; and a
@@ -62,7 +63,7 @@ test("a clash with main asks for Resolve in Review; back in To do or Building th
   const work = {
     cards: [card(1, "review"), card(2, "todo"), card(3, "doing")],
   } as unknown as WorkView;
-  const cards = factoryView(store, work).columns.flatMap((column) =>
+  const cards = factoryView(work, plugsOf(store)).columns.flatMap((column) =>
     column.cards.map((one) => [one.number, one.conflict, one.resolving]),
   );
   assert.deepEqual(

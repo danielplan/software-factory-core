@@ -131,8 +131,8 @@ own working copy; it has its own settings files, made from the examples.
   open a pull request for part of the scope, and do not ask the owner whether
   to go on. Each session must add at least one commit, or the factory stops.
   The factory gives a card at most 3 sessions in a row: when the third still
-  ends with `continue`, it opens a draft pull request and asks the owner how
-  to go on. So build the most important parts first. Your answer on each
+  ends with `continue`, it stops and asks the owner how to go on; the work
+  stays on the branch in the factory's copy, not pushed. So build the most important parts first. Your answer on each
   `continue` becomes a short note on the card, so say what is done and what
   is next, and nothing else.
 - When the agreed scope is built and checked, write the pull request's
@@ -177,12 +177,16 @@ by point. `STATUS: done`, or `STATUS: blocked` with one clear question.
 
 Before opening or updating the pull request, the factory runs every changed
 product's verify command itself. When some fail, you get what failed, up to
-three rounds; the pull request is opened once every check passes. If they
-are still red after that, the factory opens a draft pull request with what
-fails, and the card waits for the owner:
+three rounds. Once every check passes, the factory commits and pushes
+through the repository's own git hooks; what they refuse comes to you like
+a red check, in the same rounds. The pull request is opened once all of it
+passes. If they are still red after that, nothing is pushed: the work stays
+in the factory's copy, and the card waits for the owner with what fails:
 
 - Every red check is yours to fix, also one that already failed before your
   change: a broken or out-of-date test is fixed like any other code.
+- Your commits go through the repository's git hooks too: never skip them
+  (`--no-verify`, `LEFTHOOK=0`); fix what they refuse.
 - Fix the cause. Never loosen a check, skip a test or lower a threshold.
 - Run the checks that failed again yourself (the factory then runs them
   all), and say what you changed. `STATUS: done`.

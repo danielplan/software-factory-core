@@ -1,11 +1,15 @@
 // The knowledge-base rules that no standard tool checks, inside every folder
-// named `context/` (the template, a factory from before 0.6.0) and inside the
-// knowledge base checked as such (a project's docs/):
+// named `context/` (the template, a factory from before 0.6.0), inside the
+// knowledge base checked as such (a project's docs/) and inside each folder
+// named as one (the core's own docs/, checked with the rest of its
+// repository):
 // - every page sits in a Diátaxis folder, and its "**Type:**" line matches
 //   the folder and says which question the page answers ("Answers:");
 // - decision records are MADR: NNNN-title.md, front matter, the three headings;
 // - every page is linked from another Markdown file (no orphans);
-// - pages and blueprints say what is true now: no "run NNN" headings.
+// - pages and blueprints say what is true now: no "run NNN" headings;
+// - the knowledge base keeps its shape: its index and every section's
+//   index (SKELETON), so each kind of page has its home.
 
 import { dirname, posix } from "node:path";
 
@@ -24,6 +28,20 @@ const MADR_HEADINGS = [
   "## Decision Outcome",
 ];
 const DECISION_FIELDS = ["status", "date", "decision-makers"];
+// The pages every knowledge base keeps, as the template starts it: the
+// index, each section's index, and how the knowledge base is kept.
+export const SKELETON = [
+  "index.md",
+  "tutorials/index.md",
+  "how-to/index.md",
+  "how-to/maintain-the-knowledge-base.md",
+  "reference/index.md",
+  "reference/features/index.md",
+  "reference/conventions/index.md",
+  "reference/lessons/index.md",
+  "explanation/index.md",
+  "decisions/index.md",
+];
 const TYPE_START = "**Type:** ";
 const OUTSIDE =
   "Page outside the Diátaxis sections (use tutorials/, how-to/, reference/, explanation/ or decisions/)";
@@ -32,14 +50,18 @@ const OUTSIDE =
 // a screen or two (how-to/maintain-the-knowledge-base.md).
 export const LONG_PAGE_WORDS = 1200;
 
-// The knowledge base a page belongs to ("context", "company/context", or "."
-// when the folder checked is the knowledge base itself), and its path inside
-// it; null when the page is not in one.
+// The knowledge base a page belongs to ("context", "company/context", a
+// folder named as one, such as "docs", or "." when the folder checked is the
+// knowledge base itself), and its path inside it; null when the page is not
+// in one.
 export function placeInContext(
   file: string,
   whole = false,
+  bases: string[] = [],
 ): { base: string; inside: string } | null {
   if (whole) return { base: ".", inside: file };
+  const named = bases.find((base) => file.startsWith(`${base}/`));
+  if (named) return { base: named, inside: file.slice(named.length + 1) };
   const parts = file.split("/");
   const at = parts.indexOf("context");
   if (at < 0 || at === parts.length - 1) return null;
@@ -136,15 +158,17 @@ function lengthHint(file: string, text: string): Problem[] {
 }
 
 // pages: every Markdown file under the root checked, with its text; whole:
-// the root checked is a knowledge base itself (a project's docs/).
+// the root checked is a knowledge base itself (a project's docs/); bases: the
+// folders under the root that are knowledge bases, each keeping the shape.
 export function checkRules(
   pages: Map<string, string>,
   whole = false,
+  bases: string[] = [],
 ): Problem[] {
   const problems: Problem[] = [];
   const linked = linkedFiles(pages);
   for (const [file, text] of pages) {
-    const place = placeInContext(file, whole);
+    const place = placeInContext(file, whole, bases);
     if (posix.basename(file) === "BLUEPRINT.md")
       problems.push(...runHeadings(file, text));
     if (!place) continue;
@@ -158,5 +182,26 @@ export function checkRules(
         message: "Orphan page: no other page links to it",
       });
   }
+  // The shape is kept by a project's knowledge base (its docs/, checked as
+  // a whole or named), not by a loose context folder.
+  if (whole) problems.push(...skeletonProblems(".", pages));
+  for (const base of bases) problems.push(...skeletonProblems(base, pages));
   return problems;
+}
+
+// The pages of the shape a knowledge base lacks, each a problem at the
+// folder: put back from the template (the upgrade does).
+function skeletonProblems(base: string, pages: Map<string, string>): Problem[] {
+  return SKELETON.flatMap((page) => {
+    const file = base === "." ? page : `${base}/${page}`;
+    return pages.has(file)
+      ? []
+      : [
+          {
+            file,
+            message:
+              "Missing page of the knowledge base's shape: every knowledge base keeps its index and each section's index (take it from the template)",
+          },
+        ];
+  });
 }

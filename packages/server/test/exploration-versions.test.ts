@@ -1,20 +1,26 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { applyAct } from "../src/kobble/explorations/board-acts.ts";
+import { applyAct } from "../src/extensions/explorations/board-acts.ts";
 import type { Claude, RunOptions } from "@software-factory/core";
 
-import { askerFor, MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
-import { lookedWords } from "../src/kobble/explorations/maker-tools.ts";
-import { lookAndFix, notWhileMade } from "../src/kobble/explorations/looks.ts";
+import {
+  askerFor,
+  MakerDesk,
+} from "../src/extensions/explorations/maker-desk.ts";
+import { lookedWords } from "../src/extensions/explorations/maker-tools.ts";
+import {
+  lookAndFix,
+  notWhileMade,
+} from "../src/extensions/explorations/looks.ts";
 import {
   cutOffIn,
   cutRun,
   markedIn,
   opensIn,
   shownAddress,
-} from "../src/kobble/explorations/versions.ts";
-import { choicePrototype } from "../src/kobble/explorations/versions.ts";
+} from "../src/extensions/explorations/versions.ts";
+import { choicePrototype } from "../src/extensions/explorations/versions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 import { inGit } from "./git-project.ts";
 

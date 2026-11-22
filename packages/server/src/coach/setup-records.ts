@@ -2,38 +2,45 @@
 // drawn in "Who it's for" become personas (each with a kobold that fits what
 // it does), and the starting points in "Where to start" become explorations
 // waiting to be started. Ones already there (by name or title) are skipped.
-
-import { KobbleStore } from "@software-factory/core";
+// Each goes through its extension's plug: none is made while Personas, or
+// Explorations, is not installed.
 
 import { type Draft, SETUP_AREAS } from "../api.ts";
-import { addPersona } from "../kobble/actions.ts";
-import { newExploration } from "../kobble/explorations/actions.ts";
+import type { IdeasPlug } from "../plugs/ideas.ts";
+import type { PersonasPlug } from "../plugs/personas.ts";
 
 export function recordsFromSetup(
-  root: string,
   map: Pick<Draft, "cards">,
+  plugs: { personas: PersonasPlug | null; ideas: IdeasPlug | null },
 ): { personas: number; explorations: number } {
-  const store = new KobbleStore(root);
   const cardsIn = (area: string) =>
     map.cards.filter((card) => card.area === area && card.tone !== "question");
-  const names = new Set(store.all("personas").map((p) => p.name.toLowerCase()));
-  let personas = 0;
+  return {
+    personas: plugs.personas ? personasFrom(plugs.personas, cardsIn) : 0,
+    explorations: plugs.ideas ? ideasFrom(plugs.ideas, cardsIn) : 0,
+  };
+}
+
+type CardsIn = (area: string) => Draft["cards"];
+
+function personasFrom(personas: PersonasPlug, cardsIn: CardsIn): number {
+  const names = new Set(personas.all().map((p) => p.name.toLowerCase()));
+  let added = 0;
   for (const card of cardsIn(SETUP_AREAS.people)) {
     if (names.has(card.title.toLowerCase())) continue;
-    addPersona(store, { name: card.title, about: card.text ?? "" });
-    personas++;
+    personas.add({ name: card.title, about: card.text ?? "" });
+    added++;
   }
-  const titles = new Set(
-    store.all("explorations").map((x) => x.title.toLowerCase()),
-  );
-  let explorations = 0;
+  return added;
+}
+
+function ideasFrom(ideas: IdeasPlug, cardsIn: CardsIn): number {
+  const titles = new Set(ideas.all().map((x) => x.title.toLowerCase()));
+  let added = 0;
   for (const card of cardsIn(SETUP_AREAS.start)) {
     if (titles.has(card.title.toLowerCase())) continue;
-    newExploration(store, {
-      title: card.title,
-      problem: card.text ?? card.title,
-    });
-    explorations++;
+    ideas.take({ title: card.title, problem: card.text ?? card.title });
+    added++;
   }
-  return { personas, explorations };
+  return added;
 }

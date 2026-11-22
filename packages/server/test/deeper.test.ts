@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { deeperIn } from "../src/kobble/explorations/deeper.ts";
-import type { Made } from "../src/kobble/explorations/versions.ts";
+import { deeperIn } from "../src/extensions/explorations/deeper.ts";
+import type { Made } from "../src/extensions/explorations/versions.ts";
 
 // The team picked a variant: it stays as the base, the others go, and new
 // variants refine it.

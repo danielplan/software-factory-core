@@ -44,9 +44,9 @@ import { addOns, type Installable } from "./installables.ts";
 import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
-import { switched, trackedWith } from "./add-ons/switch.ts";
-import { ConnectedWork } from "./builder/connect-work.ts";
+import { switched, trackedWith } from "./extension-switch.ts";
 import { withModelChoice } from "./model-choice.ts";
+import { PluggedIn } from "./plugged-in.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
 export type SessionOptions = {
@@ -58,8 +58,7 @@ export type SessionOptions = {
   // The setup coach's and the idea coach's instructions, and the trackers
   // it can set up a board with (tracker-setup.ts).
   coach: CoachOptions;
-  // The tools on this computer the coach may install, once the owner
-  // agreed (installables.ts: computerTools).
+  // Tools on this computer the coach may install once agreed (computerTools).
   tools: Installable[];
 };
 
@@ -81,8 +80,9 @@ export class Session {
   private toolsBase = "";
   // Just set up: connecting the tools comes first.
   private onboarding = false;
-  // The connected board's cards, the builder and the coach in the cards.
-  readonly work: ConnectedWork;
+  // The installed extensions' plugs, once the app served them, and who
+  // follows the factory opening and closing.
+  readonly plugged = new PluggedIn();
 
   constructor(given: SessionOptions) {
     const options = (this.options = withModelChoice(given, () => this.root));
@@ -94,8 +94,8 @@ export class Session {
       installables: [...options.tools, ...addOns(options.available.extensions)],
       onChange: options.onChange,
       made: () => this.root !== null,
+      plug: (name) => this.plugged.plug(name),
     });
-    this.work = new ConnectedWork(options);
     const root = join(options.project, FACTORY_FOLDER);
     if (hasFactory(root)) this.open(root);
   }
@@ -124,7 +124,7 @@ export class Session {
       kits,
       jobs: this.jobs,
       ideas: this.ideas?.list() ?? [],
-      work: this.work.view(),
+      work: this.plugged.plug("work")?.view() ?? null,
       onboarding: this.onboarding,
     };
   }
@@ -270,7 +270,7 @@ export class Session {
   }
 
   close(): void {
-    this.work.stop();
+    this.plugged.closed();
     this.stopListening?.();
     this.launcher?.stopNow();
     this.launcher?.close();
@@ -368,7 +368,7 @@ export class Session {
     this.factory = loaded;
     this.known = withTeamExtensions(root, this.options.available).available;
     this.launcher?.setParts(loaded.parts);
-    this.work.connect(root);
+    this.plugged.opened(root);
     this.options.onChange();
   }
 }

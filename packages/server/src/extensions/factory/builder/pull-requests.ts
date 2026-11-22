@@ -1,0 +1,82 @@
+// The builder's pull requests, through the code host in the `code` slot:
+// opened once the checks pass, or updated when the card is built again, with
+// the screenshots the branch adds in the description; and what the owner
+// asks when one clashes (Resolve).
+
+import { existsSync } from "node:fs";
+import { basename, extname, join } from "node:path";
+
+import type { PullRequests } from "../../../code-host.ts";
+import { branchOf } from "../../../cards/cards.ts";
+import { changedFiles } from "./checks.ts";
+import { markComment } from "./protocol.ts";
+import type { BoardCard } from "./decide.ts";
+
+const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
+const MOST_PICTURES = 12;
+
+// What the owner says on a card whose pull request clashes (Resolve), as
+// the card goes back to To do: the builder takes it into In progress, brings
+// in main and settles the clash on the same branch and pull request.
+export const RESOLVE_ASK =
+  "Please bring in the latest main and resolve the merge conflicts, keeping what both sides meant.";
+
+// The pictures the branch adds (the screenshots of its run), at most a
+// dozen: shown in the description, since a picture only named in it is one
+// nobody opens.
+async function picturesIn(copy: string, base: string): Promise<string[]> {
+  return (await changedFiles(copy, base))
+    .filter((file) => PICTURE.test(file) && existsSync(join(copy, file)))
+    .slice(0, MOST_PICTURES);
+}
+
+// The description's pictures, each shown from the branch where the code
+// lives.
+export function picturesSection(
+  pictures: string[],
+  link: (file: string) => string,
+): string {
+  if (pictures.length === 0) return "";
+  const shown = pictures.map(
+    (file) => `![${basename(file, extname(file))}](${link(file)})`,
+  );
+  return `\n\n## Screenshots\n\n${shown.join("\n\n")}`;
+}
+
+// Opens the card's pull request, or updates the one there is; its address.
+// Only work whose checks pass gets one, so it is never a draft.
+export async function openOrUpdate(
+  pullRequests: PullRequests & {
+    fileLink: (branch: string, path: string) => string;
+  },
+  card: Pick<BoardCard, "number" | "title">,
+  text: string,
+  at?: { build: () => Promise<{ path: string }> },
+): Promise<string> {
+  const branch = branchOf(card.number);
+  const base = await pullRequests.baseBranch();
+  const pictures = at ? await picturesIn((await at.build()).path, base) : [];
+  const shown = picturesSection(pictures, (file) =>
+    pullRequests.fileLink(branch, file),
+  );
+  const body = `${text}${shown}\n\nCloses #${String(card.number)}.`;
+  const found = await pullRequests.find(branch);
+  // Built again (a clash resolved): the description stays about the card,
+  // and what this run did is said on the pull request.
+  if (found?.state === "OPEN") {
+    await pullRequests.update(found.number, null, false);
+    await pullRequests.comment(
+      found.number,
+      markComment(`${text}${shown}`, "fixed"),
+    );
+    return found.url;
+  }
+  const made = await pullRequests.open({
+    branch,
+    base,
+    title: card.title,
+    body,
+    draft: false,
+  });
+  return made.url;
+}

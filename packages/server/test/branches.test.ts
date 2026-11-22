@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
 import { GIT } from "@software-factory/knowledge-base";
 
-import { commitAndPush, originProblem } from "../src/builder/branches.ts";
+import {
+  commitLeft,
+  pushBranch,
+} from "../src/extensions/factory/builder/branches.ts";
+import { githubOriginProblem as originProblem } from "../src/extensions/github/code-host.ts";
 
 // The builder's work goes on the card's branch: a settings file left over
 // (an untracked .env.test) is nothing to commit, so the work still goes.
@@ -41,7 +45,8 @@ test("only a settings file left over: nothing is committed, the branch is still 
   writeFileSync(join(folder, "kit", ".env.test"), "SECRET=1\n");
   const before = git(folder, "rev-parse", "HEAD");
 
-  await commitAndPush(folder, "factory/issue-10", "Build #10");
+  assert.equal(await commitLeft(folder, "Build #10"), null);
+  assert.equal(await pushBranch(folder, "factory/issue-10"), null);
 
   assert.equal(git(folder, "rev-parse", "HEAD"), before);
   assert.equal(git(origin, "rev-parse", "factory/issue-10"), before);
@@ -52,7 +57,8 @@ test("work left uncommitted is committed without the settings file and pushed", 
   writeFileSync(join(folder, "app.ts"), "export const a = 2;\n");
   writeFileSync(join(folder, ".env.test"), "SECRET=1\n");
 
-  await commitAndPush(folder, "factory/issue-10", "Build #10");
+  assert.equal(await commitLeft(folder, "Build #10"), null);
+  assert.equal(await pushBranch(folder, "factory/issue-10"), null);
 
   assert.equal(
     git(origin, "log", "-1", "--format=%s", "factory/issue-10"),
@@ -82,4 +88,28 @@ test("origin must be the board's repository on GitHub, or the work never reaches
     "https://github.com/acme/blog.git",
   );
   assert.match((await originProblem(folder, "acme/shop")) ?? "", /acme\/blog/);
+});
+
+test("commits and pushes go through the repository's own git hooks, and say what they refused", async () => {
+  const { folder, origin } = copy();
+  const hook = (name: string, words: string) => {
+    const path = join(folder, ".git", "hooks", name);
+    writeFileSync(path, `#!/bin/sh\necho "${words}" >&2\nexit 1\n`);
+    chmodSync(path, 0o755);
+  };
+  hook("pre-commit", "app.ts is not formatted");
+  writeFileSync(join(folder, "app.ts"), "export const a=3\n");
+  const before = git(folder, "rev-parse", "HEAD");
+  assert.match(
+    (await commitLeft(folder, "Build #10")) ?? "",
+    /app\.ts is not formatted/,
+  );
+  assert.equal(git(folder, "rev-parse", "HEAD"), before);
+
+  hook("pre-push", "2 tests failed");
+  assert.match(
+    (await pushBranch(folder, "factory/issue-10")) ?? "",
+    /2 tests failed/,
+  );
+  assert.throws(() => git(origin, "rev-parse", "--verify", "factory/issue-10"));
 });

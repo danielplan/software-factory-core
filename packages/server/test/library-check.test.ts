@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { allKits } from "@software-factory/kits";
 
-import { libraryReport } from "../src/builder/checks.ts";
+import { libraryReport } from "../src/extensions/factory/builder/checks.ts";
 import { topCommand } from "../src/top-commands.ts";
 
 // Before a pull request, each product the branch touched uses only the

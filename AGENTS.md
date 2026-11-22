@@ -18,7 +18,7 @@ here reach every company with its next upgrade, so they are made with care.
   in `packages/server/src/upgrade/migrations.ts`, for the release it comes
   in, so `software-factory upgrade` makes it; what it cannot decide alone it
   leaves to the owner, said in a line. How a release is made and reaches the
-  projects: [releasing the core](docs/releasing.md).
+  projects: [make a release](docs/how-to/make-a-release.md).
 - **Every change to what a company sees or relies on** (an extension point, a
   product description field, a file a company writes, a command) says so in
   its commit message, with what a company has to do, if anything; what a
@@ -38,21 +38,41 @@ here reach every company with its next upgrade, so they are made with care.
   listed in the blueprint and only shrinks.
 - Simple, clear and consistent language in code, comments and docs. The people
   who use a factory are not developers, but are curious and capable.
-- **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [the design system's languages](docs/reference/design-system.md#languages). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
+- **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
 - Never loosen a check or add a lint-disabling comment without asking.
 - **Work reaches main through a pull request.** Commit on a branch, push it
   and open a pull request; never push to main directly. A product's release
   notes (the Releases page) are written from the pull requests merged since
   the last release, so work pushed straight to main ships unlisted.
+- **Extensions never talk to each other; they plug in.** An extension can
+  be installed and removed, so no code reaches into another one: the core
+  defines the plugs (the slots, what an extension brings: pages, Home
+  blocks, kobolds, stages; its guides for a kobold; Sprocket's hand-offs,
+  `server/src/kobble/support-plug.ts`), and each extension plugs in from its
+  own code. `needs` says only what must be installed with it, never
+  something to call. Removing an extension takes away everything it plugged
+  in, and nothing else breaks.
+- **The docs follow the code.** A branch that changes code also brings the
+  docs in line (`docs/`, the README, `AGENTS.md`, a `BLUEPRINT.md`, the
+  skills' guides), or says why none need to change in a commit message line
+  `Docs: none, because …`; `npm run check:docs-follow` (part of verify)
+  fails otherwise.
 
 ## Layout
 
 - `packages/core/`: the core's code (`src/`, tests in `test/`).
+- `packages/server/`: the local server and the `software-factory` command:
+  core modules, `src/extensions/<id>/` and `src/app/` (its `BLUEPRINT.md`).
+- `packages/dashboard/`: Kobble's page, a React web app: shared folders,
+  `src/features/<area>/` and `src/app/` (its `BLUEPRINT.md`).
+- `packages/kits/`: one kit per kind of product, with its rules and starter.
+- `packages/launcher/`: starts, watches and stops a product's parts.
 - `packages/skills/`: the skills, as the files agents read (`skills/`), their guides and templates.
 - `packages/knowledge-base/`: the knowledge base's structure (`template/`)
   and its checks (`bin/`, `src/`).
 - `examples/acme/`: the example company.
-- `docs/`: how the core is built and why.
+- `docs/`: Kobble's knowledge base, in the shape every factory's has: how
+  the core is built and why. Start at [its index](docs/index.md).
 
 ## Commands
 

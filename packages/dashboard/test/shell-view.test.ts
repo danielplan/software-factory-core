@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { CardView, IdeaView, PartView, WorkView } from "../src/api.ts";
+import type {
+  CardView,
+  IdeaView,
+  PartView,
+  WorkView,
+} from "../src/api/client.ts";
 import { countsOf, koboldStatus, overallOf } from "../src/lib/shell-view.ts";
 import { lightOnly, type RuleLike } from "../src/lib/light-only.ts";
 
@@ -131,7 +136,7 @@ test("light only: every rule for a computer set to dark is switched off", () => 
 });
 
 test("the answer sent from a waiting card: the owner's words, else the picked answer", async () => {
-  const { answerText } = await import("../src/factory/answer-text.ts");
+  const { answerText } = await import("../src/features/factory/answer-text.ts");
   const waiting = {
     number: 1,
     title: "T",
@@ -151,7 +156,7 @@ test("the answer sent from a waiting card: the owner's words, else the picked an
 });
 
 test("setting up is done only once the kobold has finished, not when the folder exists", async () => {
-  const { setUpDone } = await import("../src/setup-guided/steps.ts");
+  const { setUpDone } = await import("../src/features/setup/steps.ts");
   assert.equal(setUpDone({ made: true, working: true }), false);
   assert.equal(setUpDone({ made: false, working: false }), false);
   assert.equal(setUpDone({ made: true, working: false }), true);

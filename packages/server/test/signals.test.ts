@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { test } from "node:test";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 import {
   isRelevant,
   Signals,
   verifySignature,
-} from "../src/builder/signals.ts";
+} from "../src/extensions/factory/builder/signals.ts";
 
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 

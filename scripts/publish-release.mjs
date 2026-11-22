@@ -26,7 +26,7 @@ const tag = `release-${version}`;
 const missing = whatsNewProblems(here, version);
 if (missing.length > 0)
   throw new Error(
-    `Write what's new for ${version} first (docs/releasing.md):\n${missing.join("\n")}`,
+    `Write what's new for ${version} first (docs/how-to/make-a-release.md):\n${missing.join("\n")}`,
   );
 
 const git = (args, cwd = here) =>

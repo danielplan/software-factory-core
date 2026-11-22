@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { toStart } from "../src/explorations/board/prototype-shown.ts";
-import { areaOf } from "../src/explorations/view.ts";
+import { toStart } from "../src/features/explorations/board/prototype-shown.ts";
+import { areaOf } from "../src/features/explorations/view.ts";
 
 // An exploration's board in small, in the list: the part of the whiteboard
 // its things cover, so all of it fits.

@@ -6,8 +6,8 @@ import { test } from "node:test";
 
 import { saveCompany } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
-import type { Fetcher } from "../src/add-ons/jira/jira.ts";
+import type { Cli } from "../src/github-cli.ts";
+import type { Fetcher } from "../src/extensions/jira/jira.ts";
 import { readBoard } from "../src/connect/board-file.ts";
 import { suggestStages } from "../src/connect/stages.ts";
 import type { Session } from "../src/session.ts";

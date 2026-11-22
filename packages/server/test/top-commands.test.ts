@@ -1,8 +1,17 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+
+import { templateFolder } from "@software-factory/knowledge-base";
 
 import { topCommand } from "../src/top-commands.ts";
 
@@ -80,9 +89,21 @@ test("check-docs runs the knowledge base's checks of the project's docs", async 
     /Hint: docs\/explanation\/why\.md: Long page \(13\d\d words\)/,
   );
   assert.match(broken.said, /problem\(s\) in the knowledge base/);
+  // It keeps its shape: the sections' indexes it lacks are problems too.
+  assert.match(
+    broken.said,
+    /docs\/decisions\/index\.md: Missing page of the knowledge base's shape/,
+  );
 
-  // Only the hint left: the check holds.
-  writeFileSync(join(project, "docs", "index.md"), `${index}\n`);
+  // In shape, with only the hint left: the check holds.
+  cpSync(join(templateFolder, "context"), join(project, "docs"), {
+    recursive: true,
+    force: false,
+  });
+  writeFileSync(
+    join(project, "docs", "index.md"),
+    `${readFileSync(join(templateFolder, "context", "index.md"), "utf8")}\n[Why](explanation/why.md)\n`,
+  );
   rmSync(join(project, "docs", "notes.md"));
   const fine = await said(["check-docs"], project);
   assert.equal(fine.code, 0);

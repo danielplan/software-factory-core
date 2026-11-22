@@ -1,19 +1,26 @@
-// check-docs <folder> [--leave-out <folder>]…: the knowledge base's checks on
-// a folder (default: the current one), leaving out the folders named (from
-// it). Prints each problem with its file and line, and exits with 1 when
+// check-docs <folder> [--leave-out <folder>]… [--knowledge-base <folder>]…:
+// the knowledge base's checks on a folder (default: the current one),
+// leaving out the folders named with --leave-out and holding the folders
+// named with --knowledge-base (from it) to the knowledge base's rules and
+// shape. Prints each problem with its file and line, and exits with 1 when
 // there is any.
 
 import { checkDocs } from "../src/index.ts";
 
 const args = process.argv.slice(2);
-const leftOut = args.flatMap((arg, at) =>
-  args[at - 1] === "--leave-out" ? [arg.replace(/\/$/, "")] : [],
-);
+const OPTIONS = ["--leave-out", "--knowledge-base"];
+const named = (option: string): string[] =>
+  args.flatMap((arg, at) =>
+    args[at - 1] === option ? [arg.replace(/\/$/, "")] : [],
+  );
 const root =
   args.find(
-    (arg, at) => !arg.startsWith("--") && args[at - 1] !== "--leave-out",
+    (arg, at) => !arg.startsWith("--") && !OPTIONS.includes(args[at - 1] ?? ""),
   ) ?? ".";
-const problems = await checkDocs(root, { leftOut });
+const problems = await checkDocs(root, {
+  leftOut: named("--leave-out"),
+  knowledgeBases: named("--knowledge-base"),
+});
 for (const { file, line, message, hint } of problems) {
   const where = line ? `${file}:${String(line)}` : file;
   console.error(`${where}  ${hint ? "Hint: " : ""}${message}`);

@@ -4,7 +4,7 @@
 // Drawn in one 44×44 box: long ears, a round head, two eyes with a
 // highlight, and the hat on top.
 
-import type { Face, PersonaColor, PersonaHat } from "@/api";
+import type { Face, PersonaColor, PersonaHat } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 const INK = "#1b2236";

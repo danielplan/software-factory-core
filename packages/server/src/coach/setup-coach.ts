@@ -7,7 +7,7 @@
 // anything. One turn at a time; the owner sees the reply while it is
 // written and what the coach is doing.
 
-import type { Browser } from "../kobble/persona-tests.ts";
+import type { Browser } from "../kobble/browser.ts";
 import { readdirSync } from "node:fs";
 
 import type { Claude, Kit } from "@software-factory/core";
@@ -16,6 +16,7 @@ import type { ChangeDraft, CoachView, Draft } from "../api.ts";
 import type { Installable } from "../installables.ts";
 import { Refused } from "../refused.ts";
 import { recordsFromSetup } from "./setup-records.ts";
+import type { PlugBoard } from "../plugs/index.ts";
 import type { Drawing } from "./map.ts";
 import { type TrackerSetup, trackerFacts } from "../connect/tracker-setup.ts";
 import { projectFacts } from "./project-facts.ts";
@@ -53,6 +54,9 @@ export type SetupCoachOptions = {
   // What the trackers that come with the factory can set up with the owner
   // (where the code is, the boards there; connecting or making one).
   trackers?: TrackerSetup[];
+  // The installed extensions' plugs: what setup drew about people and where
+  // to start goes to Personas and Explorations through them.
+  plug?: PlugBoard;
 };
 
 // What a session gives the coaches: Claude Code, both coaches' instructions,
@@ -180,7 +184,11 @@ export class SetupCoach {
   finish(root?: string): void {
     if (this.talk.working)
       throw new Refused("Kobble is still being set up: wait until it is done.");
-    if (root) recordsFromSetup(root, this.map);
+    if (root)
+      recordsFromSetup(this.map, {
+        personas: this.options.plug?.("personas") ?? null,
+        ideas: this.options.plug?.("ideas") ?? null,
+      });
     this.finished = true;
     this.keep();
     this.options.onChange();
