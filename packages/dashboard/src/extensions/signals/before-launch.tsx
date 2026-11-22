@@ -9,11 +9,12 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { Face, MissionNow, PersonaRow } from "@/api/client";
+import type { Face, MissionNow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { personaHash } from "@/lib/routes";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { personasSchema } from "@/api/schemas/personas";
 import { cn } from "@/lib/utils";
 
 import { CARD } from "@/components/page-bits";
@@ -105,9 +106,7 @@ const STAND_INS: Face[] = [
 ];
 
 function NoCustomersYet() {
-  const { data } = useRead("/api/kobble/personas") as Read<{
-    personas: PersonaRow[];
-  }>;
+  const { data } = useRead("/api/kobble/personas", personasSchema);
   const faces = data?.personas.length
     ? data.personas.slice(0, 4).map((persona) => persona.face)
     : STAND_INS;

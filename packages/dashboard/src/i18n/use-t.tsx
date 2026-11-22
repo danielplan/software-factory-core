@@ -17,14 +17,11 @@ import {
 } from "react";
 import { I18nextProvider } from "react-i18next";
 
-import { get, post } from "@/api/client";
+import { post } from "@/api/client";
+import { getChecked } from "@/api/query";
+import { languageAnswerSchema } from "@/api/schemas/language";
 
-import {
-  chosenLocale,
-  isChoice,
-  type LanguageChoice,
-  type Locale,
-} from "./locale";
+import { chosenLocale, type LanguageChoice, type Locale } from "./locale";
 import { i18n } from "./messages";
 
 type Language = {
@@ -44,9 +41,9 @@ export function LanguageProvider({
 }: Readonly<{ children: ReactNode }>) {
   const [choice, setChoice] = useState<LanguageChoice>("browser");
   useEffect(() => {
-    get<{ choice: unknown }>("/api/language").then(
+    getChecked("/api/language", languageAnswerSchema).then(
       ({ choice: saved }) => {
-        if (isChoice(saved)) setChoice(saved);
+        setChoice(saved);
       },
       () => undefined,
     );

@@ -1,74 +1,53 @@
-// Talking to the factory's server: its state (once, then every change as
-// it happens) and the buttons' requests.
+// Talking to the factory's server: its requests, and the buttons'. Reading
+// what a page shows goes through TanStack Query (query.ts); the factory's
+// state and its stream of changes are in live.ts.
 
-import { useEffect, useState } from "react";
+import { i18n } from "../i18n/messages.ts";
 
-import type { State } from "../../../server/src/api.ts";
-
+// The kinds of records the server answers with, as their schemas read
+// them (schemas/): every type is inferred from its zod schema.
 export type {
   AddOnView,
-  Board,
+  ShownPart,
+  ShownView,
+  StagesView,
+} from "./schemas/add-ons.ts";
+export type {
   Card,
-  CardView,
   CoachView,
   Draft,
   IconName,
   IdeaView,
-  KitView,
-  ProductView,
-  ShownPart,
-  ShownView,
-  StageMap,
-  StagesView,
-  State,
-  WorkView,
-} from "../../../server/src/api.ts";
+} from "./schemas/coach.ts";
+export type { Face, PersonaColor, PersonaHat } from "./schemas/faces.ts";
+export type { GroupView } from "./schemas/setting-groups.ts";
+export type { Light, PartView } from "./schemas/parts.ts";
+export type { KitView, ProductView } from "./schemas/products.ts";
+export type { FactoryState, State } from "./schemas/state.ts";
+export type { Board, CardView, StageMap, WorkView } from "./schemas/work.ts";
+export type { SignalRow, SignalsView, SyncView } from "./schemas/signals.ts";
 export type {
-  Face,
-  GroupView,
-  PersonaColor,
-  PersonaHat,
-} from "../../../core/src/index.ts";
-export type { GitHubStatus } from "../../../server/src/extensions/github/github.ts";
-export type { SignalsView } from "../../../server/src/extensions/signals/views.ts";
-export type { SignalRow } from "../../../server/src/kobble/signal-rows.ts";
-export type { MissionNow } from "../../../server/src/plugs/missions.ts";
-export type {
+  MissionNow,
   PersonaPage as KobblePersonaPage,
   PersonaRow,
+  PersonaTest,
   TestPage,
-} from "../../../server/src/extensions/personas/views.ts";
-export type { PersonaTest } from "../../../core/src/index.ts";
-export type { ReleasesView } from "../../../server/src/extensions/releases/routes.ts";
-export type { FeedbackView } from "../../../server/src/feedback/routes.ts";
-export type {
-  Kind as FeedbackKind,
-  Post as FeedbackPost,
-  State as FeedbackState,
-} from "../../../server/src/feedback/board.ts";
-export type { SyncView } from "../../../server/src/extensions/signals/sync.ts";
-export type { MissionIdea } from "../../../server/src/extensions/personas/mission-ideas.ts";
-export type {
-  FactoryCard,
-  FactoryView,
-} from "../../../server/src/extensions/factory/factory-view.ts";
+} from "./schemas/personas.ts";
+export type { ReleasesView } from "./schemas/releases.ts";
+export type { FactoryCard, FactoryView } from "./schemas/factory.ts";
 export type {
   ExplorationPage,
   ExplorationRow,
   ExplorationsView,
   TestResult,
-} from "../../../server/src/extensions/explorations/views.ts";
-export type { VersionRun } from "../../../server/src/prototypes/mode.ts";
-export type { Light, PartView } from "../../../launcher/src/index.ts";
+  VersionRun,
+} from "./schemas/explorations.ts";
 
 // A persona's face worked out from who they are.
 export { faceFrom } from "../../../core/src/kobble/face.ts";
 
 // The core's version, and where its releases are (for links to its docs).
 export { CORE_VERSION, RELEASE_SOURCE } from "../../../core/src/version.ts";
-
-// The state once there is a factory (before, the page shows only setup).
-export type FactoryState = Extract<State, { mode: "factory" }>;
 
 // The server answers buttons only from its own page, which says so.
 const PAGE_HEADER = "x-software-factory";
@@ -80,9 +59,7 @@ async function answerOf<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = (body as { error?: unknown }).error;
     throw new RequestProblem(
-      typeof error === "string"
-        ? error
-        : "The factory did not answer. Is its window still open?",
+      typeof error === "string" ? error : i18n.t("shell.noAnswer"),
     );
   }
   return body as T;
@@ -100,58 +77,6 @@ export async function post<T>(path: string, body: unknown = {}): Promise<T> {
       body: JSON.stringify(body),
     }),
   );
-}
-
-// Pages that show Kobble's files (signals, explorations, personas, tests,
-// the Factory board) read them again whenever the stream says they
-// changed.
-const kobbleHeard = new Set<() => void>();
-
-export function onKobbleChanged(listener: () => void): () => void {
-  kobbleHeard.add(listener);
-  return () => kobbleHeard.delete(listener);
-}
-
-function tellKobble(): void {
-  for (const listener of kobbleHeard) listener();
-}
-
-// The factory's state, kept up to date from its stream of changes; null
-// until the first answer; `connected` false while the server is away.
-export function useFactoryState(): { state: State | null; connected: boolean } {
-  const [state, setState] = useState<State | null>(null);
-  const [connected, setConnected] = useState(true);
-  useEffect(() => {
-    let closed = false;
-    get<State>("/api/state").then(
-      (first) => {
-        if (!closed) setState(first);
-      },
-      () => {
-        setConnected(false);
-      },
-    );
-    // EventSource tries again by itself when the connection drops.
-    const events = new EventSource("/api/events");
-    events.onmessage = (event: MessageEvent<string>) => {
-      setState(JSON.parse(event.data) as State);
-      setConnected(true);
-    };
-    events.onopen = () => {
-      setConnected(true);
-      void get<State>("/api/state").then(setState, () => undefined);
-      tellKobble();
-    };
-    events.addEventListener("kobble-changed", tellKobble);
-    events.onerror = () => {
-      setConnected(false);
-    };
-    return () => {
-      closed = true;
-      events.close();
-    };
-  }, []);
-  return { state, connected };
 }
 
 export function messageOf(error: unknown): string {

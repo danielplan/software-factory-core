@@ -14,7 +14,8 @@ import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, ROW } from "@/components/page-bits";
 import { agoOf, stepWords } from "@/lib/signals-view";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { testPageSchema } from "@/api/schemas/personas";
 import { Markdown } from "@/components/markdown";
 
 import { SignalLine } from "./signal-line";
@@ -29,7 +30,8 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
   const { data, problem } = useRead(
     `/api/kobble/test?id=${encodeURIComponent(id)}`,
-  ) as Read<TestPage>;
+    testPageSchema,
+  );
   return (
     <div>
       {problem && (

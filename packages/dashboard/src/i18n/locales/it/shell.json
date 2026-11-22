@@ -56,5 +56,7 @@
   },
   "closed": "La finestra della fabbrica sembra chiusa. Riavviala con software-factory.",
   "opening": "Apro la fabbrica…",
-  "misfit": "Qualcosa nei file della fabbrica non torna"
+  "misfit": "Qualcosa nei file della fabbrica non torna",
+  "unexpected": "La fabbrica ha risposto qualcosa che questa pagina non sa leggere. La fabbrica è aggiornata?",
+  "noAnswer": "La fabbrica non ha risposto. La sua finestra è ancora aperta?"
 }

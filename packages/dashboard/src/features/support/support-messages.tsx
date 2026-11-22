@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
 
-import type { SupportView } from "./use-support";
+import type { SupportView } from "@/api/schemas/support";
 
 export function Messages({
   support,

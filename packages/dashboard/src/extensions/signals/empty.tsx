@@ -19,7 +19,8 @@ import {
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { handledSchema } from "@/api/schemas/signals";
 
 import { CARD, TypeChip } from "@/components/page-bits";
 import { lookAgainWords, statusWords, whoOf } from "@/lib/signals-view";
@@ -253,9 +254,7 @@ export function AllQuiet({
 }
 
 function Handled() {
-  const { data } = useRead("/api/kobble/handled") as Read<{
-    signals: SignalRow[];
-  }>;
+  const { data } = useRead("/api/kobble/handled", handledSchema);
   const t = useTranslation().t;
   if (!data) return null;
   return (

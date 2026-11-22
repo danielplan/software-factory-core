@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { HashRouter } from "react-router";
 
-import { useFactoryState } from "@/api/client";
+import { useFactoryState } from "@/api/live";
 import { Dashboard } from "./router";
 
 import { setBrand } from "@/lib/brand";
@@ -11,7 +11,7 @@ import { setBrand } from "@/lib/brand";
 // The whole page: the dashboard (it asks for the company first when there
 // is none), and a line at the top while the factory's window is closed.
 export function App() {
-  const { state, connected } = useFactoryState();
+  const { state, connected, problem } = useFactoryState();
   const t = useTranslation().t;
   const company = state?.mode === "factory" ? state.company : null;
   useEffect(() => {
@@ -29,8 +29,11 @@ export function App() {
         </div>
       )}
       {state === null && (
-        <p className="pt-[30vh] text-center text-muted-foreground">
-          {t("shell.opening")}
+        <p
+          role={problem ? "alert" : undefined}
+          className="pt-[30vh] text-center text-muted-foreground"
+        >
+          {problem ?? t("shell.opening")}
         </p>
       )}
       {state && (

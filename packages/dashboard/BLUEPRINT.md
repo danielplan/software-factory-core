@@ -31,10 +31,12 @@ src/app/                the app, the frame around the pages (shell.tsx),
                         on the address after the #), the installed
                         extensions' modules (extensions.ts), and Settings
                         put together (settings-page.tsx)
-src/api/                talking to the server: the requests and the types
-                        of its answers (client.ts), reading what a page
-                        shows (use-read.ts and the hooks on it), the
-                        feedback board
+src/api/                talking to the server: the requests (client.ts),
+                        reading through TanStack Query (query.ts), the
+                        factory's state and its stream of changes
+                        (live.ts), one zod schema per kind of record the
+                        server answers with, the source of its type
+                        (schemas/), the feedback board
 src/components/ui/      shadcn's pieces, as generated
 src/components/layout/  the sidebar, the page's head, a problem's box
 src/components/         pieces several areas share: the kobolds' faces,
@@ -76,9 +78,6 @@ kit's table instead.
 Code written before Kobble was held to its kit. Each line is to be moved to
 the kit's library, one card at a time; nothing new is added to it.
 
-- **Data from the server:** fetched by hand (`src/api/client.ts`,
-  `src/api/use-read.ts`, effects in the components), not TanStack Query;
-  answers are not checked with zod.
 - **Forms:** fields kept in component state, not react-hook-form.
 - **Tests:** the logic is tested with node's test runner (`test/`); there
   are no component tests with Testing Library and MSW, no click-throughs

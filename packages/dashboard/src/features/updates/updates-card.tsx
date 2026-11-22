@@ -8,17 +8,17 @@ import { useState } from "react";
 import { messageOf, post } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { updatesViewSchema } from "@/api/schemas/updates";
 import { Markdown } from "@/components/markdown";
 
-import type { UpdatesView } from "../../../../server/src/updates/served.ts";
 import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
 import { updatesSummary } from "./updates-model";
 
 export function UpdatesCard() {
-  const { data } = useRead("/api/updates") as Read<UpdatesView>;
+  const { data } = useRead("/api/updates", updatesViewSchema);
   const [problem, setProblem] = useState<string | null>(null);
   const { locale } = useLanguage();
   const m = messagesIn(locale);

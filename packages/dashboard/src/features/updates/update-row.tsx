@@ -26,12 +26,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { updatesViewSchema } from "@/api/schemas/updates";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/i18n/use-t";
 import { messagesIn } from "@/i18n/messages";
 
-import type { UpdatesView } from "../../../../server/src/updates/served.ts";
+import type { UpdatesView } from "@/api/schemas/updates";
 import {
   type UpdateRow as Row,
   updateRow,
@@ -55,7 +56,7 @@ const FRAME: Record<Row["tone"], string> = {
 };
 
 export function UpdateRow() {
-  const { data } = useRead("/api/updates") as Read<UpdatesView>;
+  const { data } = useRead("/api/updates", updatesViewSchema);
   const [open, setOpen] = useState(false);
   const { locale } = useLanguage();
   const row = data ? updateRow(data, undefined, messagesIn(locale)) : null;

@@ -6,7 +6,9 @@ import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { get, messageOf, post, type State } from "@/api/client";
+import { messageOf, post, type State } from "@/api/client";
+import { getChecked } from "@/api/query";
+import { explorationsViewSchema } from "@/api/schemas/explorations";
 import { Button } from "@/components/ui/button";
 
 import { pickedStart } from "./first-exploration";
@@ -82,9 +84,9 @@ export function BarAction({
 async function openKobble(picked: string | null): Promise<void> {
   await post("/api/setup/open");
   if (!picked) return;
-  type Row = { id: string; title: string };
-  const list = await get<Record<"exploring" | "waiting" | "done", Row[]>>(
+  const list = await getChecked(
     "/api/kobble/explorations",
+    explorationsViewSchema,
   );
   const found = [...list.waiting, ...list.exploring].find(
     (row) => row.title.toLowerCase() === picked.toLowerCase(),

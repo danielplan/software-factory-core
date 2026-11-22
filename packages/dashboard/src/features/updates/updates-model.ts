@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import type { UpdatesView } from "../../../../server/src/updates/served.ts";
+import type { UpdatesView } from "../../api/schemas/updates.ts";
 import { clockIn } from "../../i18n/format.ts";
 import type { Locale } from "../../i18n/locale.ts";
 import { ENGLISH } from "../../i18n/messages.ts";

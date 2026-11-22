@@ -56,5 +56,7 @@
   },
   "closed": "Das Fenster der Fabrik scheint geschlossen. Starte sie neu mit software-factory.",
   "opening": "Die Fabrik öffnet sich…",
-  "misfit": "Etwas in den Dateien der Fabrik passt nicht"
+  "misfit": "Etwas in den Dateien der Fabrik passt nicht",
+  "unexpected": "Die Fabrik hat etwas geantwortet, das diese Seite nicht lesen kann. Ist die Fabrik auf dem neuesten Stand?",
+  "noAnswer": "Die Fabrik hat nicht geantwortet. Ist ihr Fenster noch offen?"
 }

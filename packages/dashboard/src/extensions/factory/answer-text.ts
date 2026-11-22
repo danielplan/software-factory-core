@@ -1,7 +1,7 @@
 // The comment the owner sends from a waiting card: their own words, else
 // the answer they picked ("**A**: With tax"); empty while neither.
 
-import type { FactoryView } from "../../../../server/src/extensions/factory/factory-view.ts";
+import type { FactoryView } from "../../api/schemas/factory.ts";
 
 export type Waiting = FactoryView["waiting"][number];
 

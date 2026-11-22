@@ -10,16 +10,14 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  get,
-  type KobblePersonaPage,
-  messageOf,
-  type MissionIdea,
-  post,
-} from "@/api/client";
+import { type KobblePersonaPage, messageOf, post } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
-import { type Read, useRead } from "@/api/use-read";
+import { getChecked, type Read, useRead } from "@/api/query";
+import {
+  type MissionIdea,
+  missionIdeaAnswerSchema,
+} from "@/api/schemas/personas";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
@@ -77,7 +75,7 @@ export function PersonaMissions({
 // the page reads it).
 function useIdea(persona: string) {
   // Asked for once, then kept by the factory until the persona is sent.
-  const read = useRead(ideaPath(persona)) as Read<{ mission: MissionIdea }>;
+  const read = useRead(ideaPath(persona), missionIdeaAnswerSchema);
   const [again, setAgain] = useState<Read<{ mission: MissionIdea }> | null>(
     null,
   );
@@ -85,7 +83,7 @@ function useIdea(persona: string) {
   const problem = again ? again.problem : read.problem;
   const tryAgain = () => {
     setAgain({ data: null, problem: null });
-    get<{ mission: MissionIdea }>(`${ideaPath(persona)}&again=yes`).then(
+    getChecked(`${ideaPath(persona)}&again=yes`, missionIdeaAnswerSchema).then(
       (data) => {
         setAgain({ data, problem: null });
       },

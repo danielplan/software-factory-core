@@ -1,14 +1,11 @@
 import { Download, LogIn } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  type Board,
-  get,
-  type GitHubStatus,
-  messageOf,
-  post,
-} from "@/api/client";
+import { type Board, messageOf, post } from "@/api/client";
+import { readOf } from "@/api/query";
+import { type GitHubStatus, gitHubStatusSchema } from "@/api/schemas/github";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 
@@ -77,30 +74,21 @@ type Act = (path: string, body?: unknown) => void;
 // What the GitHub CLI says now, looked at again every few seconds while
 // the owner installs or signs in; and a step to take.
 function useGitHub() {
-  const [status, setStatus] = useState<GitHubStatus | null>(null);
-  const [problem, setProblem] = useState<string | null>(null);
-  const look = useCallback(() => {
-    get<GitHubStatus>("/api/add-ons/github/status")
-      .then(setStatus)
-      .catch((error: unknown) => {
-        setProblem(messageOf(error));
-      });
-  }, []);
-  useEffect(() => {
-    look();
-    const every = setInterval(look, 2000);
-    return () => {
-      clearInterval(every);
-    };
-  }, [look]);
+  const read = useQuery({
+    ...readOf("/api/add-ons/github/status", gitHubStatusSchema),
+    refetchInterval: 2000,
+  });
+  const [sendProblem, setProblem] = useState<string | null>(null);
   const act: Act = (path, body = {}) => {
     setProblem(null);
     post(path, body)
-      .then(look)
+      .then(() => read.refetch())
       .catch((error: unknown) => {
         setProblem(messageOf(error));
       });
   };
+  const status: GitHubStatus | null = read.data ?? null;
+  const problem = sendProblem ?? (read.error ? messageOf(read.error) : null);
   return { status, problem, act };
 }
 

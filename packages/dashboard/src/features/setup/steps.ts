@@ -2,7 +2,8 @@
 // area of the setup map (setup coach's areas), and setting up at the end.
 // "Bring over" shows only when the kobold found something to bring.
 
-import { type Draft, SETUP_AREAS } from "../../../../server/src/api.ts";
+import type { Draft } from "../../api/schemas/coach.ts";
+import { SETUP_AREAS } from "../../../../server/src/api.ts";
 
 export type Step = {
   id: string;

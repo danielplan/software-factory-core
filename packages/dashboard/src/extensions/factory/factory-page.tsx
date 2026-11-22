@@ -12,18 +12,14 @@ import { ArrowUpRight, LoaderCircle, Plug, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  type FactoryState,
-  type FactoryView,
-  messageOf,
-  post,
-} from "@/api/client";
+import { type FactoryState, messageOf, post } from "@/api/client";
 import { boardOf } from "@/components/connected-board";
 import { PageHead } from "@/components/layout/page-head";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { type Read, useRead } from "@/api/use-read";
+import { type Read, useRead } from "@/api/query";
+import { type FactoryView, factoryViewSchema } from "@/api/schemas/factory";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
@@ -314,5 +310,5 @@ function NotConnected() {
 // Kobble's files change.
 function useFactoryView(state: FactoryState): Read<FactoryView> {
   const read = state.work?.read ?? "";
-  return useRead(`/api/kobble/factory?read=${read}`) as Read<FactoryView>;
+  return useRead(`/api/kobble/factory?read=${read}`, factoryViewSchema);
 }

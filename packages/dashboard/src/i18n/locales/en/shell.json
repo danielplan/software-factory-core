@@ -56,5 +56,7 @@
   },
   "closed": "The factory's window seems closed. Start it again with software-factory.",
   "opening": "Opening the factory…",
-  "misfit": "Something in the factory's files does not fit"
+  "misfit": "Something in the factory's files does not fit",
+  "unexpected": "The factory answered something this page cannot read. Is the factory up to date?",
+  "noAnswer": "The factory did not answer. Is its window still open?"
 }

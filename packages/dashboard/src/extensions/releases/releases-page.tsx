@@ -7,11 +7,11 @@
 import { LoaderCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import type { ReleasesView } from "@/api/client";
 import { PageHead } from "@/components/layout/page-head";
 import { ProblemBox } from "@/components/layout/problem-box";
 
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { releasesViewSchema } from "@/api/schemas/releases";
 
 import { ComingRelease } from "./coming-release";
 import { PastReleases } from "./past-releases";
@@ -19,7 +19,7 @@ import { shownOf } from "./view";
 
 export function ReleasesPage() {
   const t = useTranslation().t;
-  const shown = shownOf(useRead("/api/releases") as Read<ReleasesView>);
+  const shown = shownOf(useRead("/api/releases", releasesViewSchema));
   return (
     <>
       <PageHead title={t("shell.pages.releases")} about={t("releases.about")} />

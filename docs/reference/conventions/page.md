@@ -35,6 +35,13 @@ promises, folders, extra libraries and what still differs from the kit.
   (`packages/dashboard/.dependency-cruiser.cjs`).
 - **Every word in three languages**, through i18next (`useTranslation()`): see
   [languages](../languages.md).
+- **Data from the server:** read through TanStack Query (`src/api/query.ts`,
+  `useRead(path, schema)`), each answer checked with its zod schema in
+  `src/api/schemas/`, whose inferred type the page uses; each schema is
+  bound to the server's own type (`satisfies z.ZodType<…>`), so drift fails
+  the type check. The state's stream (`src/api/live.ts`) refreshes the
+  reads when Kobble's files change; a failed read shows as a problem, never
+  as an empty list.
 - **Addresses:** each page has its address after the # (`#explore/X-1`),
   routed by React Router's hash router in `src/app/router.tsx`. A link is a
   plain `href="#<page>"`; an old address is listed in `MOVED`

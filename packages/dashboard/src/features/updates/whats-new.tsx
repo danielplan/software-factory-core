@@ -5,9 +5,12 @@
 
 import type { TFunction } from "i18next";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
-import { get, onKobbleChanged, post } from "@/api/client";
+import { post } from "@/api/client";
+import { readOf } from "@/api/query";
+import { type WhatsNewView, whatsNewViewSchema } from "@/api/schemas/updates";
 import { Markdown } from "@/components/markdown";
 import {
   Collapsible,
@@ -19,7 +22,6 @@ import { useLanguage } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 import { compareVersions } from "../../../../core/src/version.ts";
-import type { WhatsNewView } from "../../../../server/src/updates/whats-new.ts";
 import { ago, shownChange, showsNewer } from "./whats-new-model";
 
 type Words = TFunction;
@@ -34,32 +36,22 @@ const KIND_LOOK = {
 export function WhatsNew() {
   const { locale } = useLanguage();
   const m = messagesIn(locale);
-  const [view, setView] = useState<WhatsNewView | null>(null);
   const [trying, setTrying] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const path = `/api/updates/whats-new?language=${locale}`;
-  const load = useCallback(() => {
-    get<WhatsNewView>(path).then(
-      (next) => {
-        setView(next);
-        setFailed(false);
-      },
-      () => {
-        setFailed(true);
-      },
-    );
-  }, [path]);
-  useEffect(() => {
-    load();
-    return onKobbleChanged(load);
-  }, [load]);
+  // The last view read stays while a newer read fails: the problem shows
+  // above it.
+  const read = useQuery({
+    ...readOf(`/api/updates/whats-new?language=${locale}`, whatsNewViewSchema),
+    placeholderData: keepPreviousData,
+  });
+  const view = read.data ?? null;
+  const failed = read.isError;
   const tryAgain = () => {
     setTrying(true);
     post("/api/updates/look")
       .catch(() => undefined)
       .finally(() => {
         setTrying(false);
-        load();
+        void read.refetch();
       });
   };
   const problem = (

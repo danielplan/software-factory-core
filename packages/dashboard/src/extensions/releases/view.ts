@@ -2,8 +2,8 @@
 // state the page is in, and whether the number typed can be released. Kept
 // apart from the components so it is checked on its own.
 
-import type { ReleasesView } from "../../api/client.ts";
-import type { Read } from "../../api/use-read.ts";
+import type { Read } from "../../api/query.ts";
+import type { ReleasesView } from "../../api/schemas/releases.ts";
 
 type Connected = Extract<ReleasesView, { connected: true }>;
 

@@ -3,7 +3,7 @@
 // checked on its own.
 
 import type { TFunction } from "i18next";
-import type { FactoryView } from "../../../server/src/extensions/factory/factory-view.ts";
+import type { FactoryView } from "../api/schemas/factory.ts";
 import { ENGLISH } from "../i18n/messages.ts";
 
 export type Stuck = FactoryView["stuck"][number];

@@ -5,12 +5,9 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  get,
-  messageOf,
-  type MissionIdea,
-  type PersonaRow,
-} from "@/api/client";
+import { messageOf, type PersonaRow } from "@/api/client";
+import { getChecked } from "@/api/query";
+import { missionIdeaAnswerSchema } from "@/api/schemas/personas";
 import { Button } from "@/components/ui/button";
 
 import { ideaPath, send } from "./missions";
@@ -27,8 +24,9 @@ export function SendEveryone({
     setFailed(null);
     Promise.all(
       waiting.map(async (persona) => {
-        const { mission } = await get<{ mission: MissionIdea }>(
+        const { mission } = await getChecked(
           ideaPath(persona.id),
+          missionIdeaAnswerSchema,
         );
         await send(persona.id, mission);
       }),

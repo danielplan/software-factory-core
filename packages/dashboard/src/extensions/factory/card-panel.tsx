@@ -9,13 +9,17 @@ import { ArrowUpRight, GitPullRequest, SquareTerminal, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { get, messageOf, post } from "@/api/client";
+import { messageOf, post } from "@/api/client";
+import { queryClient, useRead } from "@/api/query";
+import {
+  type CardPanel as Panel,
+  cardPanelSchema,
+} from "@/api/schemas/factory";
 import { AgentTrace } from "@/components/agent-trace";
 import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
-import type { CardPanel as Panel } from "../../../../server/src/extensions/factory/factory-card.ts";
 import { type CardType, TypePicker } from "@/components/card-type";
 import { DeleteCard } from "./delete-card";
 import { useLocale } from "@/i18n/use-t";
@@ -37,32 +41,26 @@ export function CardPanel({
   onDelete: () => void;
 }>) {
   const t = useTranslation().t;
-  const [panel, setPanel] = useState<Panel | null>(null);
-  const [problem, setProblem] = useState<string | null>(null);
+  const path = `/api/kobble/factory/card?number=${String(number)}`;
+  const read = useRead(path, cardPanelSchema);
+  const panel = read.data;
+  const [sendProblem, setProblem] = useState<string | null>(null);
+  const problem = sendProblem ?? read.problem;
   // The card, or what the builder does on it (while it builds).
   const [tab, setTab] = useState<"card" | "trace">("card");
   useEffect(() => {
-    let current = true;
-    get<Panel>(`/api/kobble/factory/card?number=${String(number)}`).then(
-      (read) => {
-        if (current) setPanel(read);
-      },
-      (error: unknown) => {
-        if (current) setProblem(messageOf(error));
-      },
-    );
     const close = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", close);
     return () => {
-      current = false;
       window.removeEventListener("keydown", close);
     };
-  }, [number, onClose]);
+  }, [onClose]);
   const pick = (type: CardType | null) => {
     if (!panel) return;
-    setPanel({ ...panel, type });
+    // Shown at once; the server's next answer confirms it.
+    queryClient.setQueryData([path], { ...panel, type });
     post("/api/kobble/factory/type", { number, type: type ?? "none" }).catch(
       (error: unknown) => {
         setProblem(messageOf(error));

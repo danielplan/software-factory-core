@@ -8,14 +8,13 @@ import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
 import { Switch } from "@/components/ui/switch";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { type TeamChoices, teamChoicesSchema } from "@/api/schemas/setup";
 import { cn } from "@/lib/utils";
-
-import type { TeamChoices } from "../../../../server/src/coach/setup-team.ts";
 
 export function TeamTiles() {
   const t = useTranslation().t;
-  const { data } = useRead("/api/setup/team") as Read<TeamChoices>;
+  const { data } = useRead("/api/setup/team", teamChoicesSchema);
   const [shown, show] = useState<TeamChoices | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const now = shown ?? data;

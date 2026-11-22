@@ -87,12 +87,12 @@ the extensions.
 The layout is in place; some parts still differ, and each list only shrinks.
 The blueprints keep the lists; the main ones:
 
-- The page fetches by hand, where the kit uses TanStack Query. It has no
-  component tests yet.
+- The page has no component tests yet.
 - The server's routes are written by hand on `node:http`, each body read
   field by field, not a router with a zod schema per body.
-- The page imports some of the server's types by relative path, not through
-  a package export.
+- The page's schemas name the server's types by relative path (type-only,
+  so a change on the server that the page cannot read fails the type
+  check), not through a package export.
 - The GitHub CLI is also run outside the slots: by the feedback board, by
   Releases and by the Factory's webhook signals.
 - Two core pieces still read records themselves: the live sync's

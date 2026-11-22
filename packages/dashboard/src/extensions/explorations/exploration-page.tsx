@@ -11,7 +11,8 @@ import { useTranslation } from "react-i18next";
 import { type ExplorationPage as Page, messageOf, post } from "@/api/client";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { explorationPageSchema } from "@/api/schemas/explorations";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
@@ -23,7 +24,8 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
   const { data, problem } = useRead(
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
-  ) as Read<Page>;
+    explorationPageSchema,
+  );
   const [said, say] = useState<string | null>(null);
   // The things a person attached to what they type next.
   const [attached, setAttached] = useState<string[]>([]);

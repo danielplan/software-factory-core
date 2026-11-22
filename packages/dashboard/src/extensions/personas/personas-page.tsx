@@ -18,7 +18,8 @@ import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, Head } from "@/components/page-bits";
 import { originWords, personaPlaceOf } from "@/lib/signals-view";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { personaPageSchema, personasSchema } from "@/api/schemas/personas";
 import { Markdown } from "@/components/markdown";
 import { askSupport } from "@/lib/ask-support";
 
@@ -36,9 +37,7 @@ export function PersonasPage({ open }: Readonly<{ open: string | null }>) {
 
 function PersonaList() {
   const t = useTranslation().t;
-  const { data, problem } = useRead("/api/kobble/personas") as Read<{
-    personas: PersonaRow[];
-  }>;
+  const { data, problem } = useRead("/api/kobble/personas", personasSchema);
   const adding = () => {
     askSupport(t("personas.askNew"));
   };
@@ -164,7 +163,8 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
   const { data, problem } = useRead(
     `/api/kobble/persona?id=${encodeURIComponent(id)}`,
-  ) as Read<KobblePersonaPage>;
+    personaPageSchema,
+  );
   return (
     <div>
       <a

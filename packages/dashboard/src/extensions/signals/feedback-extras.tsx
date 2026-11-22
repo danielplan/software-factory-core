@@ -16,7 +16,8 @@ import {
   useMine,
 } from "@/api/feedback-board";
 import { StatePill } from "./state-pill";
-import { type Read, useRead } from "@/api/use-read";
+import { useRead } from "@/api/query";
+import { personasSchema } from "@/api/schemas/personas";
 import { cn } from "@/lib/utils";
 
 import { FaceOf } from "@/components/page-bits";
@@ -88,9 +89,7 @@ export function FeedbackLine({
 }
 
 function usePersonas(): PersonaRow[] {
-  const { data } = useRead("/api/kobble/personas") as Read<{
-    personas: PersonaRow[];
-  }>;
+  const { data } = useRead("/api/kobble/personas", personasSchema);
   return data?.personas ?? [];
 }
 
