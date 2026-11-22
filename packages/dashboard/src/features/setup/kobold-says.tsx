@@ -7,12 +7,13 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import { type Card, type CoachView, messageOf, post } from "@/api/client";
+import { FieldProblem } from "@/components/field-problem";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown";
+import { answerSchema, markOf } from "@/lib/forms";
 
 import { cardsIn, type Step } from "./steps";
 
@@ -47,17 +48,16 @@ export function KoboldSays({
   );
 }
 
-// An answer to one of the kobold's questions: some words.
-const answerSchema = z.object({ answer: z.string().trim().min(1) });
-
 // One of the kobold's questions, answered in place.
 function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
   const t = useTranslation().t;
   const form = useForm({
     resolver: zodResolver(answerSchema),
     defaultValues: { answer: "" },
-    mode: "onChange",
+    mode: "onTouched",
   });
+  const answer = form.getFieldState("answer", form.formState);
+  const why = `answer-${card.id}-problem`;
   const [problem, setProblem] = useState<string | null>(null);
   const send = form.handleSubmit(async ({ answer }) => {
     setProblem(null);
@@ -76,15 +76,22 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
     <form className="grid gap-2" onSubmit={(event) => void send(event)}>
       <p>
         <b className="font-semibold">
-          {/[.?!]$/.test(card.title) ? card.title : `${card.title}.`}
+          <Markdown
+            text={/[.?!]$/.test(card.title) ? card.title : `${card.title}.`}
+            inline
+          />
         </b>{" "}
         <Markdown text={card.text ?? ""} inline />
       </p>
       <div className="flex gap-2">
         <input
-          aria-label={t("setup.says.answerOn", { title: card.title })}
-          className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
+          aria-label={t("setup.says.answerOn", {
+            // Said without its Markdown marks.
+            title: card.title.replaceAll(/[*`]/g, ""),
+          })}
+          className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none aria-invalid:ring-1 aria-invalid:ring-destructive"
           placeholder={t("setup.says.yourAnswer")}
+          {...markOf(answer, why)}
           {...form.register("answer")}
         />
         <Button type="submit" size="pill-sm" disabled={!form.formState.isValid}>
@@ -92,7 +99,12 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
           {t("setup.says.answer")}
         </Button>
       </div>
-      {problem && <p className="text-[13px] text-destructive">{problem}</p>}
+      <FieldProblem id={why} field={answer} />
+      {problem && (
+        <p role="alert" className="text-[13px] text-destructive">
+          {problem}
+        </p>
+      )}
     </form>
   );
 }

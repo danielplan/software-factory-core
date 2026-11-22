@@ -65,5 +65,9 @@
     "dismissed": "Scartato",
     "added": "Aggiunto a {{id}}",
     "waiting": "{{id}} aspetta in Esplorazioni"
+  },
+  "form": {
+    "needed": "Scrivi qualcosa qui.",
+    "address": "Scrivi un indirizzo web, come https://your-app/api/kobble/export."
   }
 }

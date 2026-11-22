@@ -5,14 +5,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import { type Card, faceFrom, messageOf, post } from "@/api/client";
+import { FieldProblem } from "@/components/field-problem";
 import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
+import { markOf, newPersonaSchema } from "@/lib/forms";
 import { cn } from "@/lib/utils";
 
 import { appParts, fromLine, textOf, withHidden } from "./card-bits";
@@ -251,12 +252,6 @@ export function NewPersona({
   );
 }
 
-// A persona the owner adds: who they are (needed), and what they do.
-const newCardSchema = z.object({
-  title: z.string().trim().min(1),
-  text: z.string(),
-});
-
 function PersonaForm({
   area,
   onProblem,
@@ -268,10 +263,12 @@ function PersonaForm({
 }>) {
   const t = useTranslation().t;
   const form = useForm({
-    resolver: zodResolver(newCardSchema),
+    resolver: zodResolver(newPersonaSchema),
     defaultValues: { title: "", text: "" },
-    mode: "onChange",
+    mode: "onTouched",
   });
+  const who = form.getFieldState("title", form.formState);
+  const whyNot = useId();
   const add = form.handleSubmit(async (card) => {
     onProblem(null);
     await post("/api/setup/draft", { add: { area, ...card } }).then(
@@ -289,11 +286,13 @@ function PersonaForm({
       <label className="grid gap-1 text-xs text-muted-foreground">
         {t("setup.cards.who")}
         <input
-          className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none"
+          className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none aria-invalid:ring-1 aria-invalid:ring-destructive"
           placeholder={t("setup.cards.whoExample")}
+          {...markOf(who, whyNot)}
           {...form.register("title")}
         />
       </label>
+      <FieldProblem id={whyNot} field={who} />
       <label className="grid gap-1 text-xs text-muted-foreground">
         {t("setup.cards.what")}
         <textarea
