@@ -24,6 +24,9 @@ import { MakeOwn } from "./make-own";
 // The installed extensions first, then those to install.
 const SECTIONS = ["installed", "available"] as const;
 
+// The installed extensions first, then those to install.
+const SECTIONS = ["installed", "available"] as const;
+
 export function ExtensionsTab({
   addOns,
   fresh,
