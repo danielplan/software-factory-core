@@ -5,13 +5,18 @@
 import {
   ArrowDown,
   ArrowUp,
+  Check,
   GripVertical,
+  LayoutGrid,
   Plus,
   Send,
   X,
 } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
+import { get, onKobbleChanged, post } from "@/api";
+
+import { Button } from "@/components/ui/button";
 import { KoboldHead } from "@/components/kobold-face";
 import { FIELD } from "@/lib/field-style";
 import { VARIANT } from "@/lib/prototype-flags";
@@ -65,23 +70,32 @@ const DEFAULT: Layout = {
   hidden: ["reviews", "failed"],
 };
 
-const STORE = "kobble.home-layout";
-
-function load(): Layout {
-  try {
-    const raw = localStorage.getItem(STORE);
-    if (raw) return JSON.parse(raw) as Layout;
-  } catch {
-    // fall through to the default
-  }
-  return DEFAULT;
-}
-
+// One Home for the whole team: kept in the factory's files, read again when
+// it changes (the page's stream) and every few seconds.
 function useLayout() {
-  const [layout, set] = useState<Layout>(load);
+  const [layout, set] = useState<Layout>(DEFAULT);
+  useEffect(() => {
+    let current = true;
+    const load = () => {
+      get<{ layout: Layout | null }>("/api/home-layout").then(
+        (read) => {
+          if (current) set(read.layout ?? DEFAULT);
+        },
+        () => undefined,
+      );
+    };
+    load();
+    const stop = onKobbleChanged(load);
+    const again = setInterval(load, 3000);
+    return () => {
+      current = false;
+      stop();
+      clearInterval(again);
+    };
+  }, []);
   const change = (next: Layout) => {
-    localStorage.setItem(STORE, JSON.stringify(next));
     set(next);
+    post("/api/home-layout", next).catch(() => undefined);
   };
   return [layout, change] as const;
 }
@@ -110,37 +124,35 @@ function nudge(l: Layout, id: BlockId, by: -1 | 1): Layout {
 const button =
   "inline-flex h-7 items-center gap-1 rounded-lg border border-border px-2.5 text-xs hover:bg-hover";
 
+// Variant A: Arrange Home, at the right of the page's title; Done while arranging.
+export function ArrangeButton({
+  editing,
+  onClick,
+}: Readonly<{ editing: boolean; onClick: () => void }>) {
+  return (
+    <Button variant="ring" size="pill" onClick={onClick}>
+      {editing ? (
+        <Check aria-hidden />
+      ) : (
+        <LayoutGrid aria-hidden />
+      )}
+      {editing ? "Done" : "Arrange Home"}
+    </Button>
+  );
+}
+
 export function HomeBlocks({
   blocks,
-}: Readonly<{ blocks: Record<BlockId, ReactNode> }>) {
+  editing,
+}: Readonly<{ blocks: Record<BlockId, ReactNode>; editing: boolean }>) {
   const [layout, change] = useLayout();
-  const [editing, setEditing] = useState(false);
   const [dragging, setDragging] = useState<BlockId | null>(null);
   const [over, setOver] = useState<BlockId | null>(null);
   const shown = visibleOf(layout);
   const arranging = VARIANT === "A" && editing;
   return (
     <>
-      {VARIANT === "A" ? (
-        <div className="flex items-center justify-end gap-2">
-          {editing && (
-            <button
-              type="button"
-              className={button}
-              onClick={() => change(DEFAULT)}
-            >
-              Start again
-            </button>
-          )}
-          <button
-            type="button"
-            className={button}
-            onClick={() => setEditing(!editing)}
-          >
-            {editing ? "Done" : "Arrange Home"}
-          </button>
-        </div>
-      ) : (
+      {VARIANT === "B" && (
         <AskKobold layout={layout} change={change} />
       )}
       {shown.map((id, at) => (
@@ -236,7 +248,16 @@ function Offers({
   const from = [...new Set(offered.map((b) => b.from))];
   return (
     <div className="grid gap-3 rounded-xl border border-border bg-surface p-3.5">
-      <span className="text-[13px] font-medium">Blocks you can add</span>
+      <span className="flex items-center justify-between text-[13px] font-medium">
+        Blocks you can add
+        <button
+          type="button"
+          className={button}
+          onClick={() => change(DEFAULT)}
+        >
+          Start again
+        </button>
+      </span>
       {offered.length === 0 && (
         <span className="text-xs text-muted-foreground">
           Every block the add-ons offer is on Home.

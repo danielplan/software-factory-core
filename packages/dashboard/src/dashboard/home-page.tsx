@@ -10,7 +10,7 @@ import {
   FlaskConical,
   Inbox,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import { StatusLight } from "@/components/status-light";
 import { PageHead } from "@/components/page-head";
@@ -28,10 +28,10 @@ import { overallOf } from "@/lib/shell-view";
 import { useT } from "@/i18n/use-t";
 import { useSignals } from "@/signals/use-signals";
 
-import { MADE_STATE } from "@/lib/prototype-flags";
+import { MADE_STATE, VARIANT } from "@/lib/prototype-flags";
 
 import type { FactoryState } from "./dashboard";
-import { type BlockId, HomeBlocks } from "./home-blocks";
+import { ArrangeButton, type BlockId, HomeBlocks } from "./home-blocks";
 
 // Prototype: made-up items, so Home shows something to arrange.
 function madeUp(count: number): WaitingItem[] {
@@ -72,6 +72,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const { data: explorations } = useExplorations();
   const { data: signals } = useSignals();
   const t = useT();
+  const [arranging, setArranging] = useState(false);
   const input: HomeInput = {
     work: state.work,
     signals: signals?.signals ?? [],
@@ -176,8 +177,21 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   };
   return (
     <>
-      <PageHead title={t.shell.pages.home} about={t.home.about} />
-      <HomeBlocks blocks={blocks} />
+      <PageHead
+        title={t.shell.pages.home}
+        about={t.home.about}
+        actions={
+          VARIANT === "A" && (
+            <ArrangeButton
+              editing={arranging}
+              onClick={() => {
+                setArranging(!arranging);
+              }}
+            />
+          )
+        }
+      />
+      <HomeBlocks blocks={blocks} editing={arranging} />
     </>
   );
 }
