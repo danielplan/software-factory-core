@@ -20,6 +20,12 @@ Write only in that folder. Never change Kobble's own extensions, the
 dashboard or the server: if what the team asked for needs that, say so on the
 card instead.
 
+## The starter
+
+Start from [the extension starter](extension-starter/README.md): a whole small
+extension with a page, a Home block and a stage, which loads as it is. Copy it
+to `factory/extensions/<id>/`, rename it and keep only what the team asked for.
+
 ## The description
 
 ```json
@@ -27,9 +33,12 @@ card instead.
   "id": "brand-words",
   "name": "Brand words",
   "about": "Keeps the product's texts in the team's own voice.",
-  "needs": [],
+  "needs": ["factory"],
   "slots": [],
-  "brings": { "pages": [], "blocks": [], "kobolds": [], "stages": [] },
+  "pages": [],
+  "blocks": [],
+  "stages": [],
+  "brings": { "kobolds": [] },
   "settings": [],
   "guides": [
     { "agent": "builder", "title": "Our voice", "file": "our-voice.md" }
@@ -50,11 +59,46 @@ card instead.
   reaches every card: write what to do and why, in plain steps.
 - `settings`: groups of settings (see the core's `settingGroupSchema`), kept
   in `team.env` or in a file in the `settings/` folder.
-- `brings`: the pages, Home blocks, kobolds and stages it is about, by id.
-  The Marketplace lists them. **Nothing builds a page or a Home block from a
-  team's extension yet**, and a stage or a kobold cannot be added by one:
-  do not promise those on the card. Leave them empty unless the plan agreed
-  to the lists as a description only.
+
+### A page and a Home block
+
+A page and a block are described, never coded: Kobble's own page draws them
+in its own look, so they look like the rest and cannot change how Kobble
+works. Each has an `id`, a `name`, a line (`about`), an `icon` (`puzzle`,
+`list`, `check`, `flag`, `calendar`, `chart`, `note`, `star`) and `parts`, one
+under the other:
+
+- `{ "show": "text", "title": "…", "text": "…" }`: some words (a blank line
+  starts a new paragraph).
+- `{ "show": "list", "title": "…", "items": [{ "title": "…", "about": "…",
+"tag": "late" }], "from": "items.json", "empty": "…" }`: a list. The items
+  can be written in the description, or kept in a JSON file of the
+  extension's own folder (a list of objects with a `title`, and an `about`
+  and `tag` if wanted), read each time the page is shown, so a kobold can
+  keep it up to date. `empty` is what shows when there is nothing.
+
+A page shows in the sidebar under Your team; a block can be added to Home
+(Arrange Home › Add a block). Both leave when the extension is removed. The
+ids `home`, `system`, `extensions`, `settings` and `connect` are Kobble's.
+What a page cannot do: show anything but text and lists, run code, or read a
+file outside its own folder. Say so on the card when the team asks for more.
+
+### A stage
+
+`"stages": [{ "id": "checklist", "name": "Checklist", "after": ["build"],
+"before": ["done"] }]` puts a stage in the order work goes through, by naming
+the stages it comes after and before (Kobble's are `signals`, `explore`,
+`build`, `done`). A neighbour that is not installed is no problem. When two
+stages fit the same place the factory cannot tell which comes first, and
+Settings › Stages asks the team; the team can move any stage there. The
+loop on Home shows the stage in its place. **Work does not move through a
+team's stage yet** and it is not counted: it shows where it sits. Do not
+promise more than that on the card.
+
+### Kobolds
+
+`brings.kobolds` only lists a kobold by name for the Marketplace; an extension
+cannot add one that runs yet.
 
 ## What the factory refuses
 
@@ -66,8 +110,12 @@ factory's problems and in the pull request's checks) when:
 - the id is not the folder's name, or is the id of one of Kobble's own;
 - it says `core`, `always`, `tracker` or `parts`: those are only for
   Kobble's own extensions, so that nothing unknown starts a program;
-- it brings a page, a block or a kobold that another extension brings;
-- a guide is not a file inside its own folder;
+- it brings a page, a block, a kobold or a stage that another extension
+  brings, or a page Kobble keeps for itself, or says it brings a page or a
+  block without describing it;
+- a stage names itself as its own neighbour;
+- a guide, or a list's file, is not inside its own folder, or a list's file is
+  not a JSON list of items with a title;
 - its settings are kept anywhere but `team.env` and the `settings/` folder.
 
 One extension that is refused never stops the others. The team can also

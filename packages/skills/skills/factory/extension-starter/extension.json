@@ -1,0 +1,53 @@
+{
+  "id": "checklist",
+  "name": "Checklist",
+  "about": "A list of things to tick off before work is called done.",
+  "needs": ["factory"],
+  "pages": [
+    {
+      "id": "checklist",
+      "name": "Checklist",
+      "about": "What has to be true before work is done.",
+      "icon": "check",
+      "parts": [
+        {
+          "show": "text",
+          "title": "How it works",
+          "text": "Work comes here after it is built and leaves when every item below is ticked off."
+        },
+        {
+          "show": "list",
+          "title": "Items",
+          "from": "items.json",
+          "empty": "Nothing to check."
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "id": "checklist-open",
+      "name": "Open checklist items",
+      "about": "What still has to be checked.",
+      "icon": "list",
+      "parts": [
+        {
+          "show": "list",
+          "from": "items.json",
+          "empty": "Everything is checked."
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "checklist",
+      "name": "Checklist",
+      "after": ["build"],
+      "before": ["done"]
+    }
+  ],
+  "guides": [
+    { "agent": "builder", "title": "The checklist", "file": "guide.md" }
+  ]
+}
