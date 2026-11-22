@@ -157,5 +157,11 @@
   },
   "kits": {
     "about": "Kobble arriva con questi kit. Ognuno insegna ai kobold un tipo di prodotto."
+  },
+  "makeOwn": {
+    "title": "Crea la tua estensione",
+    "text": "Al team serve qualcosa che Kobble non fa? Dillo a Sprocket. Doodle lo esplora con te, il costruttore lo scrive nella cartella della tua fabbrica e tu lo controlli prima che venga usato.",
+    "button": "Dillo a Sprocket",
+    "ask": "Vorremmo un'estensione tutta nostra."
   }
 }

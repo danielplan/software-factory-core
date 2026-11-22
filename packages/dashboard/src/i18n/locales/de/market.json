@@ -156,5 +156,11 @@
   },
   "kits": {
     "about": "Kobble kommt mit diesen Kits. Jedes bringt den Kobolden eine Art von Produkt bei."
+  },
+  "makeOwn": {
+    "title": "Eigene Erweiterung",
+    "text": "Dein Team braucht etwas, das Kobble nicht kann? Sag es Sprocket. Doodle erkundet es mit dir, der Baumeister schreibt es in den Ordner deiner Fabrik, und du prüfst es, bevor es genutzt wird.",
+    "button": "Sprocket sagen",
+    "ask": "Wir hätten gern eine eigene Erweiterung."
   }
 }

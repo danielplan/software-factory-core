@@ -156,5 +156,11 @@
   },
   "kits": {
     "about": "Kobble comes with these kits. Each teaches the kobolds one kind of product."
+  },
+  "makeOwn": {
+    "title": "Make your own extension",
+    "text": "Your team needs something Kobble doesn't do? Tell Sprocket. Doodle explores it with you, the builder writes it in your factory's folder, and you review it before it's used.",
+    "button": "Tell Sprocket",
+    "ask": "We'd like an extension of our own."
   }
 }
