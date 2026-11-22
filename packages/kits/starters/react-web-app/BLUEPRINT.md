@@ -13,16 +13,18 @@ src/app/                          app.tsx: the top bar and the routes (the home 
 src/api/                          GET /api/items (load-items.ts), its zod schema (items.schema.ts), the query hook (use-items.ts), ApiError and the app's own error codes (api-error.ts)
 src/components/ui/                shadcn pieces, as generated: button, card, empty, alert (trimmed of the parts nobody uses)
 src/components/layout/            top bar, loading and error states
-src/lib/                          general logic without screens: class names (classes.ts), error texts (error-text.ts)
+src/hooks/                        hooks several areas use: the words for a failed request (use-error-text.ts)
+src/lib/                          general logic without screens: class names, with the theme's type sizes (classes.ts)
 src/i18n/                         i18next set-up, the translations (locales/<language>/<area>.json), Intl formats
 src/features/home/                the one area: components/home-page.tsx, the item cards and the empty state
 src/theme.css, public/            tokens, icon
-test/                             component tests, the structure test, the translations test, the situations test, the shared world test
+test/                             component tests, the structure test, the translations test, the situations test, the shared world test, the class names test
+e2e/                              Playwright click-throughs: the real build with the pretend backend in the browser (pretend.ts), and the built prototype; playwright.config.ts serves both
 prototype/                        the one pretend backend (pretend-backend.ts, its MSW handler), the situations (situations.ts), the shared world (world.ts, shared-world.ts), start.ts (MSW's service worker, the message to the frame), reloads.ts (the factory's reload), public/mockServiceWorker.js (MSW's, generated)
 scripts/                          build-prototype.ts (npm run prototype), live-prototype.ts (npm run prototype:live), check-real-build.ts (npm run check:prototypes)
 ```
 
-**Prototype:** `npm run prototype -- --base <url path> --out <folder>` builds the app in Vite's `prototype` mode at that base; `npm run prototype:live -- --port <port>` runs it live. `src/main.tsx` holds the one switch: when the mode is `prototype` it loads `prototype/start.ts` with a dynamic `import()` and waits for MSW's service worker before rendering; the real build drops the branch. `?situation=<key>` picks a situation from `prototype/situations.ts` (the first by default); with `FACTORY_WORLD_URL` set, the factory's shared world is used instead. See the [README](README.md#prototype).
+**Prototype:** `npm run prototype -- --base <url path> --out <folder>` builds the app in Vite's `prototype` mode at that base (`/` and `dist-prototype/` without them); `npm run prototype:live -- --port <port>` runs it live (on 5180 without it). `src/main.tsx` holds the one switch: when the mode is `prototype` it loads `prototype/start.ts` with a dynamic `import()` and waits for MSW's service worker before rendering; the real build drops the branch. `?situation=<key>` picks a situation from `prototype/situations.ts` (the first by default); with `FACTORY_WORLD_URL` set, the factory's shared world is used instead. See the [README](README.md#prototype).
 
 A new area is a folder in `src/features/`, its name in `.dependency-cruiser.cjs` (`areas`), a route in `src/app/app.tsx` and its texts in `src/i18n/locales/`. A new request is a function in `src/api/` with its zod schema, and its answer in `prototype/pretend-backend.ts`.
 
@@ -32,7 +34,8 @@ A new area is a folder in `src/features/`, its name in `.dependency-cruiser.cjs`
 - **Truthful states:** loading, a failed load and an empty list are distinct; a failed load is never shown as an empty list.
 - **No text written into screens:** every text a person reads is a key in the translation files (English to start with); ESLint refuses text in JSX, and the tests fail when a language misses a key, a plural form or an error code.
 - **The real build has no prototype code:** no file of `prototype/`, no MSW and no `mockServiceWorker.js` in `dist/`; `src/` reaches `prototype/` only through the dynamic `import()` in `main.tsx`; `npm run check:prototypes` proves it after each build.
-- **One pretend backend** (`prototype/pretend-backend.ts`) for the component tests and the prototype; every situation is typed against the app's own check of the answer and opens the home page.
+- **One pretend backend** (`prototype/pretend-backend.ts`) for the component tests, the click-throughs and the prototype; every situation is typed against the app's own check of the answer and opens the home page.
+- **Every journey has its click-through** in `e2e/`, run with `npm run test:e2e` before a change to a journey is handed over.
 - **The prototype tells the factory its situations:** `{ type: "factory-prototype", app: "new-web-app", situations: [{ key, name }], current, world }`, with at least a normal day and an empty one.
 - **The checks below stay at least as strict as the starter's:** tighten them freely, loosen one only with the owner's agreement. No inline `eslint-disable`.
 
@@ -41,15 +44,15 @@ A new area is a folder in `src/features/`, its name in `.dependency-cruiser.cjs`
 | Command | What it does |
 |---|---|
 | `npm run verify` | every check: Prettier; ESLint (`strictTypeChecked`, SonarJS, React hooks, jsx-a11y, no text written into JSX, no inline disabling; files up to 300 lines, functions up to 60 lines, 80 in `.tsx` files, complexity 12, nesting 3, no `console`) and dependency-cruiser (the import rules); TypeScript with `noUncheckedIndexedAccess`; knip; jscpd (at most 1% copied code); Vitest with Testing Library, the MSW pretend backend, the structure test, the translations test, the situations test and the coverage floor; the build; and `npm run check:prototypes` |
+| `npm run test:e2e` | builds the app and the prototype, then the Playwright click-throughs in Chromium (`npx playwright install --only-shell chromium` once per computer) |
 | `npm run dev` | the app in development, with `/api` sent to `BACKEND_URL` from `.env` when it is set |
 | `npm run build` | the real build, in `dist/` |
 | `npm run check:prototypes` | after the build: fails when `dist/` holds prototype code or MSW's worker |
-| `npm run prototype -- --base <path> --out <folder>` | the prototype as static files, to be served at that path |
-| `npm run prototype:live -- --port <port>` | the prototype running live on that port |
+| `npm run prototype -- --base <path> --out <folder>` | the prototype as static files, to be served at that path (`/` into `dist-prototype/` without them) |
+| `npm run prototype:live -- --port <port>` | the prototype running live on that port (5180 without it) |
 
 ## Open
 
 - **No backend yet:** `GET /api/items` (and `POST /api/items`, which no screen uses yet) is made up and answered only by the pretend backend. The product replaces it with its own requests and decides which backend answers them.
 - **One language:** English only; a second language brings a language switch and the browser's language detection (see the README).
-- **No click-through tests:** add Playwright journeys with the app's first journeys.
 - **Not wired into the repository's tools:** the root setup and the git hooks of the repository it lands in do not know this folder until they are told.

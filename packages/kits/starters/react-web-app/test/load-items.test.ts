@@ -1,14 +1,17 @@
+import { renderHook } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { expect, test } from "vitest";
 import { ApiError } from "../src/api/api-error.ts";
 import { loadItems } from "../src/api/load-items.ts";
-import { errorText } from "../src/lib/error-text.ts";
+import { useErrorText } from "../src/hooks/use-error-text.ts";
 import { server } from "./pretend-server.ts";
 
 // Every failure of a request is an ApiError with a code, and a person reads
 // the code's text in the active language.
 
 const load = () => loadItems({ signal: new AbortController().signal });
+const errorText = (error: unknown) =>
+  renderHook(() => useErrorText()).result.current(error);
 
 async function failure(): Promise<ApiError> {
   const error: unknown = await load().catch((caught: unknown) => caught);
