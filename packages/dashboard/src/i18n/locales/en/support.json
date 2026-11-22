@@ -1,0 +1,10 @@
+{
+  "answering": "{{name}} is answering…",
+  "ask": "Ask {{name}} anything",
+  "role": "Support · answers questions, adds explorations and personas",
+  "newConversation": "New conversation",
+  "close": "Close",
+  "empty": "Ask how Kobble works, where something is, or anything about your product.",
+  "thinking": "Thinking…",
+  "question": "Ask a question"
+}

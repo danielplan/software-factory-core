@@ -1,64 +1,36 @@
-import { useEffect, useState } from "react";
+// The pages by address, with React Router on the address after the #
+// (#explore/X-1): the core's pages, the pages of the installed extensions
+// and of the team's own, and the old addresses, which lead to where their
+// page is now. An address no page has, or the page of an extension that is
+// removed, shows Home.
+
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router";
 
 import type { FactoryState, State } from "@/api/client";
-import { trackersOf } from "@/features/connect/trackers";
 import { ProblemBox } from "@/components/layout/problem-box";
-import { ConnectPage } from "@/features/connect/connect-page";
-import { ExplorationPage } from "@/features/explorations/exploration-page";
-import { ExplorationsPage } from "@/features/explorations/explorations-page";
-import { MarketPage } from "@/features/marketplace/market-page";
 import { TeamPage } from "@/components/screen-view";
-import { FactoryPage } from "@/features/factory/factory-page";
-import { pagesLeftOut } from "@/lib/market-view";
-import { screenOf } from "@/lib/screens";
-import { movedHash, type Place, placeOf } from "@/lib/routes";
-import { ReleasesPage } from "@/features/releases/releases-page";
-import { PersonasPage } from "@/features/personas/personas-page";
-import { GuidedSetup } from "@/features/setup/guided-setup";
-import { SignalsPage } from "@/features/signals/signals-page";
-
+import { ConnectPage } from "@/features/connect/connect-page";
+import { trackersOf } from "@/features/connect/trackers";
 import { HomePage } from "@/features/home/home-page";
+import { MarketPage } from "@/features/marketplace/market-page";
+import { GuidedSetup } from "@/features/setup/guided-setup";
 import { SystemPage } from "@/features/system/system-page";
-import { useT } from "@/i18n/use-t";
+import type { ExtensionPage } from "@/lib/page-module";
+import { MOVED, movedHash, placeOf, placeShown } from "@/lib/routes";
+import { screenOf } from "@/lib/screens";
 
-import { featureBlocks } from "./home-blocks";
+import { blocksOf, pagesOf } from "./extensions";
 import { SettingsPage } from "./settings-page";
 import { Shell } from "./shell";
-
-// The page in the address, an old address replaced by its new one (so the
-// back button does not lead to it again).
-function placeFromHash(): Place {
-  const moved = movedHash(window.location.hash);
-  if (moved) window.history.replaceState(null, "", moved);
-  return placeOf(window.location.hash);
-}
-
-function usePlace(): Place {
-  const [place, setPlace] = useState(placeFromHash);
-  useEffect(() => {
-    const follow = () => {
-      setPlace(placeFromHash());
-    };
-    window.addEventListener("hashchange", follow);
-    return () => {
-      window.removeEventListener("hashchange", follow);
-    };
-  }, []);
-  return place;
-}
-
-// The page of an extension that is removed is not there: Home shows instead.
-function placeShown(
-  place: Place,
-  left: Place["page"][],
-  addOns: FactoryState["addOns"],
-): Place {
-  const gone =
-    left.includes(place.page) ||
-    (place.page === "team" &&
-      !(place.open && screenOf(addOns, "pages", place.open, true)));
-  return gone ? { page: "home", open: null } : place;
-}
 
 // The dashboard: before there is a company, only the setup page; once there
 // is a factory, its pages.
@@ -70,70 +42,125 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
-  const t = useT();
-  const place = usePlace();
+  const pages = pagesOf(state);
+  const home = <HomePage state={state} featureBlocks={blocksOf(state)} />;
+  const connect = <ConnectPage trackers={trackersOf(state.addOns)} />;
   // Just set up, connecting where work is tracked comes first.
-  const { page, open } = state.onboarding
-    ? { ...place, page: "connect" as const }
-    : placeShown(place, pagesLeftOut(state.addOns), state.addOns);
+  if (state.onboarding)
+    return (
+      <Frame state={state} pages={pages} onboarding>
+        {connect}
+      </Frame>
+    );
+  return (
+    <Routes>
+      {[...MOVED.keys()].map((old) => (
+        <Route key={old} path={`${old}/*`} element={<Moved />} />
+      ))}
+      <Route element={<Frame state={state} pages={pages} />}>
+        <Route index element={home} />
+        <Route path="home" element={home} />
+        <Route path="system" element={<SystemPage state={state} />} />
+        <Route
+          path="extensions/*"
+          element={
+            <WithOpen
+              show={(open) => <MarketPage state={state} open={open} />}
+            />
+          }
+        />
+        <Route
+          path="settings/*"
+          element={
+            <WithOpen
+              show={(open) => <SettingsPage state={state} open={open} />}
+            />
+          }
+        />
+        <Route path="connect/*" element={connect} />
+        <Route
+          path="team/:id"
+          element={<TeamPageOf state={state} home={home} />}
+        />
+        {pages.map((page) => (
+          <Route
+            key={page.id}
+            path={`${page.id}/*`}
+            element={
+              <WithOpen
+                show={(open) => <page.Page state={state} open={open} />}
+              />
+            }
+          />
+        ))}
+        <Route path="*" element={home} />
+      </Route>
+    </Routes>
+  );
+}
+
+// The frame around the page: the sidebar lit at the page shown, a line when
+// the factory's files do not fit, and the page.
+function Frame({
+  state,
+  pages,
+  onboarding = false,
+  children,
+}: Readonly<{
+  state: FactoryState;
+  pages: ExtensionPage[];
+  onboarding?: boolean;
+  children?: ReactNode;
+}>) {
+  const t = useTranslation().t;
+  const { pathname } = useLocation();
+  const place = onboarding
+    ? { page: "connect" as const, open: null }
+    : placeShown(placeOf(pathname), pages, state.addOns);
+  const extension = pages.find((one) => one.id === place.page);
   return (
     <Shell
       state={state}
-      current={page === "connect" ? "settings" : page}
-      open={open}
-      // An exploration fills the whole window.
-      fill={page === "explore" && open !== null}
+      pages={pages}
+      current={place.page === "connect" ? "settings" : place.page}
+      open={place.open}
+      fill={extension?.fills?.(place.open) ?? false}
     >
       {state.problems.length > 0 && (
-        <ProblemBox title={t.shell.misfit} text={state.problems.join(" · ")} />
+        <ProblemBox
+          title={t("shell.misfit")}
+          text={state.problems.join(" · ")}
+        />
       )}
-      {page === "team" ? (
-        <TeamPageOf state={state} id={open} />
-      ) : (
-        <PageBody state={state} page={page} open={open} />
-      )}
+      {children ?? <Outlet />}
     </Shell>
   );
 }
 
-function PageBody({
-  state,
-  page,
-  open,
-}: Readonly<{
-  state: FactoryState;
-  page: Exclude<Place["page"], "team">;
-  open: string | null;
-}>) {
-  switch (page) {
-    case "connect":
-      return <ConnectPage trackers={trackersOf(state.addOns)} />;
-    case "signals":
-      return <SignalsPage open={open} app={state.company.name} />;
-    case "personas":
-      return <PersonasPage open={open} />;
-    case "explore":
-      return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
-    case "build":
-      return <FactoryPage state={state} />;
-    case "releases":
-      return <ReleasesPage />;
-    case "home":
-      return <HomePage state={state} featureBlocks={featureBlocks} />;
-    case "system":
-      return <SystemPage state={state} />;
-    case "extensions":
-      return <MarketPage state={state} open={open} />;
-    case "settings":
-      return <SettingsPage state={state} open={open} />;
-  }
+// A page with what is open in it: the rest of the address after the page
+// (#personas/mia/tests: "mia/tests"), or nothing.
+function WithOpen({
+  show,
+}: Readonly<{ show: (open: string | null) => ReactNode }>) {
+  const rest = useParams()["*"];
+  return show(rest || null);
 }
 
-// A page one of the team's own extensions brings.
+// An old address, replaced by its new one, so the back button does not lead
+// to it again.
+function Moved() {
+  const { pathname } = useLocation();
+  const now = movedHash(pathname.slice(1)) ?? "#home";
+  return <Navigate replace to={`/${now.slice(1)}`} />;
+}
+
+// A page one of the team's own extensions brings; Home when that
+// extension is not installed.
 function TeamPageOf({
   state,
-  id,
-}: Readonly<{ state: FactoryState; id: string | null }>) {
-  const found = id ? screenOf(state.addOns, "pages", id, true) : undefined;
-  return found && <TeamPage view={found.view} by={found.addOn.name} />;
+  home,
+}: Readonly<{ state: FactoryState; home: ReactNode }>) {
+  const { id = "" } = useParams();
+  const found = screenOf(state.addOns, "pages", id, true);
+  return found ? <TeamPage view={found.view} by={found.addOn.name} /> : home;
 }

@@ -1,0 +1,70 @@
+{
+  "didNotWork": "Non ha funzionato",
+  "trackerLabel": "Dove si tiene il lavoro",
+  "page": {
+    "title": "Dove deve tenere il suo lavoro la fabbrica?",
+    "about": "Le idee su cui siete d'accordo diventano schede sulla bacheca del team, e la fabbrica costruisce da lì. Collega la bacheca da cui lavora.",
+    "goToBoard": "Vai alla bacheca"
+  },
+  "connected": {
+    "tracked": "Il tuo lavoro è tracciato su ",
+    "to": "Collegata a ",
+    "all": ", tutto il suo lavoro.",
+    "labelled": ", il lavoro con l'etichetta “{{label}}”.",
+    "stagesLabel": "Fasi e colonne"
+  },
+  "stages": {
+    "draft": "Bozza",
+    "backlog": "Backlog",
+    "todo": "Da fare",
+    "doing": "In corso",
+    "review": "Da rivedere",
+    "done": "Fatto"
+  },
+  "pick": {
+    "choose": "Scegli: {{label, lowercase}}…",
+    "work": "Il lavoro che la fabbrica prende",
+    "every": {
+      "cards": "Ogni scheda sulla bacheca",
+      "issues": "Ogni issue sulla bacheca"
+    },
+    "only": {
+      "cards": "Solo le schede con l'etichetta “factory”",
+      "issues": "Solo le issue con l'etichetta “factory”"
+    },
+    "notOnBoard": "Non su questa bacheca",
+    "whichColumn": "Quale colonna è quale",
+    "matched": "Abbinate dai nomi delle colonne; cambia quelle sbagliate.",
+    "columnFor": "Colonna per {{stage}}"
+  },
+  "github": {
+    "cli": "La GitHub CLI su questo computer",
+    "install": "Installala",
+    "board": "La tua bacheca",
+    "boardConnected": "La tua bacheca, collegata",
+    "signedInAs": "Accesso come {{login}}",
+    "signIn": "Accedi a GitHub",
+    "signInWith": "Accedi con GitHub",
+    "typeCode": "Scrivi questo codice nella finestra del browser che si è aperta:",
+    "notSignedIn": "Accesso non riuscito",
+    "allow": "Permetti alla fabbrica di leggere le bacheche",
+    "repository": "Repository",
+    "boardPick": "Bacheca"
+  },
+  "jira": {
+    "login": "Il tuo Jira e un token",
+    "project": "Il tuo progetto",
+    "projectPick": "Progetto",
+    "site": "Sito",
+    "siteHelp": "Per esempio acme.atlassian.net.",
+    "email": "La tua email",
+    "emailHelp": "Quella con cui accedi a Jira.",
+    "token": "Token API",
+    "tokenHelp": "Tenuto solo su questo computer.",
+    "createToken": "Crea un token API",
+    "check": "Controlla"
+  },
+  "checking": "Controllo…",
+  "connect": "Collega",
+  "noColumn": "· nessuna colonna"
+}

@@ -3,8 +3,12 @@
 // row, a person's row with initials, a big row to pick, and New persona.
 // Clicking a card asks the kobold about it; × takes it off.
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { type Card, faceFrom, messageOf, post } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -13,7 +17,6 @@ import { cn } from "@/lib/utils";
 
 import { appParts, fromLine, textOf, withHidden } from "./card-bits";
 import { ICON } from "./icons";
-import { useT } from "@/i18n/use-t";
 
 // What a card can do: be removed.
 export type CardActs = { onRemove: (id: string) => void };
@@ -28,11 +31,11 @@ function Icon({ card }: Readonly<{ card: Card }>) {
 }
 
 function Remove({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <button
       type="button"
-      aria-label={t.setup.cards.takeOff(card.title)}
+      aria-label={t("setup.cards.takeOff", { title: card.title })}
       className="grid size-7 flex-none place-items-center rounded-lg text-faint hover:bg-ground hover:text-foreground-2"
       onClick={(event) => {
         event.stopPropagation();
@@ -57,7 +60,7 @@ function Editable({
   value: string;
   className?: string;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   // The text keeps what the card shows apart: its folder, its source.
   const whole = (now: string) =>
     field === "text" ? withHidden(card, now) : now;
@@ -68,7 +71,7 @@ function Editable({
       spellCheck={false}
       role="textbox"
       aria-label={
-        field === "title" ? t.setup.cards.title : t.setup.cards.whatItSays
+        field === "title" ? t("setup.cards.title") : t("setup.cards.whatItSays")
       }
       className={cn(
         "-mx-1 rounded-md px-1 outline-none hover:bg-ground focus:bg-ground",
@@ -99,10 +102,10 @@ export function Tile({
   person = false,
   app = false,
 }: Readonly<{ card: Card; acts: CardActs; person?: boolean; app?: boolean }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const parts = app
     ? appParts(card)
-    : { text: textOf(card), from: fromLine(card, t.setup.guess) };
+    : { text: textOf(card), from: fromLine(card, t) };
   return (
     <article
       className={cn(
@@ -137,7 +140,7 @@ export function Tile({
 }
 
 export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       className={cn(
@@ -154,7 +157,7 @@ export function Row({ card, acts }: Readonly<{ card: Card; acts: CardActs }>) {
         </div>
       </div>
       <span className="text-xs text-faint max-sm:hidden">
-        {fromLine(card, t.setup.guess)}
+        {fromLine(card, t)}
       </span>
       <Remove card={card} acts={acts} />
     </div>
@@ -193,7 +196,7 @@ export function BoardCard({
   card,
   acts,
 }: Readonly<{ card: Card; acts: CardActs }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className="flex items-center gap-3 rounded-xl bg-card px-5 py-4 shadow-card">
       <Icon card={card} />
@@ -207,7 +210,7 @@ export function BoardCard({
       </div>
       {card.confirmed && (
         <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#e6f6f3] px-2.5 text-xs font-medium text-[#0d7a6d]">
-          <Check className="size-3" aria-hidden /> {t.setup.connected}
+          <Check className="size-3" aria-hidden /> {t("setup.connected")}
         </span>
       )}
       <Remove card={card} acts={acts} />
@@ -220,7 +223,7 @@ export function NewPersona({
   area,
   onProblem,
 }: Readonly<{ area: string; onProblem: (problem: string | null) => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [open, setOpen] = useState(false);
   if (!open)
     return (
@@ -233,7 +236,7 @@ export function NewPersona({
       >
         <span className="grid justify-items-center gap-1.5">
           <Plus className="size-[18px]" aria-hidden />
-          {t.setup.cards.addCustomer}
+          {t("setup.cards.addCustomer")}
         </span>
       </button>
     );
@@ -248,6 +251,12 @@ export function NewPersona({
   );
 }
 
+// A persona the owner adds: who they are (needed), and what they do.
+const newCardSchema = z.object({
+  title: z.string().trim().min(1),
+  text: z.string(),
+});
+
 function PersonaForm({
   area,
   onProblem,
@@ -257,56 +266,50 @@ function PersonaForm({
   onProblem: (problem: string | null) => void;
   onDone: () => void;
 }>) {
-  const t = useT();
-  const [title, setTitle] = useState("");
-  const [text, setText] = useState("");
-  const add = () => {
+  const t = useTranslation().t;
+  const form = useForm({
+    resolver: zodResolver(newCardSchema),
+    defaultValues: { title: "", text: "" },
+    mode: "onChange",
+  });
+  const add = form.handleSubmit(async (card) => {
     onProblem(null);
-    post("/api/setup/draft", { add: { area, title, text } }).then(
+    await post("/api/setup/draft", { add: { area, ...card } }).then(
       onDone,
       (error: unknown) => {
         onProblem(messageOf(error));
       },
     );
-  };
+  });
   return (
     <form
       className="grid gap-2 rounded-xl bg-card px-4 py-3.5 shadow-card"
-      onSubmit={(event) => {
-        event.preventDefault();
-        add();
-      }}
+      onSubmit={(event) => void add(event)}
     >
       <label className="grid gap-1 text-xs text-muted-foreground">
-        {t.setup.cards.who}
+        {t("setup.cards.who")}
         <input
           className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none"
-          value={title}
-          placeholder={t.setup.cards.whoExample}
-          onChange={(event) => {
-            setTitle(event.target.value);
-          }}
+          placeholder={t("setup.cards.whoExample")}
+          {...form.register("title")}
         />
       </label>
       <label className="grid gap-1 text-xs text-muted-foreground">
-        {t.setup.cards.what}
+        {t("setup.cards.what")}
         <textarea
           rows={2}
           className="rounded-lg bg-ground px-3 py-2 text-[13px] text-foreground outline-none"
-          value={text}
-          onChange={(event) => {
-            setText(event.target.value);
-          }}
+          {...form.register("text")}
         />
       </label>
       <div className="flex gap-2">
-        <Button type="submit" size="pill-sm" disabled={!title.trim()}>
+        <Button type="submit" size="pill-sm" disabled={!form.formState.isValid}>
           <Plus aria-hidden />
-          {t.setup.cards.add}
+          {t("setup.cards.add")}
         </Button>
         <Button type="button" size="pill-sm" variant="ring" onClick={onDone}>
           <X aria-hidden />
-          {t.setup.cards.cancel}
+          {t("setup.cards.cancel")}
         </Button>
       </div>
     </form>

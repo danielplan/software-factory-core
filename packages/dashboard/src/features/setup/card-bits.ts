@@ -2,8 +2,9 @@
 // tiles and rows: where a card says it came from, its text without that,
 // what kind of thing it is, and a person's initials.
 
+import type { TFunction } from "i18next";
 import type { Card } from "@/api/client";
-import { ENGLISH, type Messages } from "../../i18n/messages.ts";
+import { ENGLISH } from "../../i18n/messages.ts";
 
 // "… (AGENTS.md)" at the end of a card's text: the page it came from.
 function split(card: Card): { text: string; source: string | null } {
@@ -25,13 +26,13 @@ export function textOf(card: Card): string {
 }
 
 // The line under a card: where it came from, a guess until agreed.
-export function fromLine(
-  card: Card,
-  m: Messages["setup"]["guess"] = ENGLISH.setup.guess,
-): string {
+export function fromLine(card: Card, m: TFunction = ENGLISH): string {
   const source = sourceOf(card);
-  if (card.confirmed) return source ? m.from(source) : m.agreed;
-  return source ? m.guessFrom(source) : m.guess;
+  if (card.confirmed)
+    return source ? m("setup.guess.from", { source }) : m("setup.guess.agreed");
+  return source
+    ? m("setup.guess.guessFrom", { source })
+    : m("setup.guess.guess");
 }
 
 // A program the factory builds: its card starts with its folder

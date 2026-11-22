@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post, type AddOnView, type Board } from "@/api/client";
 import { lookOf } from "@/components/add-on-looks";
@@ -7,20 +8,19 @@ import { TRACKER_STEPS } from "./trackers";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { ChoiceCard } from "@/components/choice-card";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
 
 // Where work is tracked, right after setup: the choice and its steps, and
 // once done, the way to the board.
 export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
       <header className="grid gap-2">
         <h1 className="text-[22px] font-semibold tracking-[-0.015em]">
-          {t.connect.page.title}
+          {t("connect.page.title")}
         </h1>
-        <p className="text-muted-foreground">{t.connect.page.about}</p>
+        <p className="text-muted-foreground">{t("connect.page.about")}</p>
       </header>
       {done ? (
         <section className="grid gap-4 rounded-xl bg-card p-6 shadow-soft">
@@ -32,7 +32,7 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
             }}
           >
             <ArrowRight aria-hidden />
-            {t.connect.page.goToBoard}
+            {t("connect.page.goToBoard")}
           </Button>
         </section>
       ) : (
@@ -58,7 +58,7 @@ export function TrackerChoice({
   connected?: Board;
   onDone: (message: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [choice, setChoice] = useState(current === "none" ? "github" : current);
   const choices = [
     ...trackers
@@ -93,7 +93,7 @@ export function TrackerChoice({
       <div
         className="grid gap-3 sm:grid-cols-2"
         role="radiogroup"
-        aria-label={t.connect.trackerLabel}
+        aria-label={t("connect.trackerLabel")}
       >
         {choices.map((one) => (
           <ChoiceCard
@@ -109,7 +109,7 @@ export function TrackerChoice({
         ))}
       </div>
       {Steps && <Steps onDone={onDone} connected={connected?.[choice]} />}
-      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
+      {problem && <ProblemBox title={t("connect.didNotWork")} text={problem} />}
     </div>
   );
 }

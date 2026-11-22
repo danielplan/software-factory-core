@@ -17,20 +17,26 @@ layer that puts them together. Code flows one way, shared → features → app
 ```text
 packages/dashboard/src/
 ├─ main.tsx          the start: the company's theme, then the app
-├─ app/              the shell, the pages by address, and what each feature
-│                    brings to Home and Settings, put together
+├─ app/              the shell, the pages by address, and the installed
+│                    extensions' modules, put together (extensions.ts)
 ├─ api/              talking to the server
 ├─ components/       shared pieces: ui/ (shadcn), layout/ (the shell's)
-├─ hooks/  lib/      general hooks and logic, shared by several features
+├─ hooks/  lib/      general hooks and logic, shared by several areas;
+│                    lib/page-module.ts is what an extension brings
 ├─ i18n/             the words, in English, Italian and German
-└─ features/<area>/  one per extension (factory, explorations, signals,
-                     personas, releases) and per core area (home, system,
-                     settings, marketplace, setup, support, updates, connect)
+├─ features/<area>/  one per core area (home, system, settings,
+│                    marketplace, setup, support, updates, connect)
+└─ extensions/<id>/  one per extension (factory, explorations, signals,
+                     personas, releases); index.tsx exports its module
 ```
 
-A feature never imports another. Home gets the blocks each feature brings
-from `packages/dashboard/src/app/home-blocks.tsx`; what two features share
-moves to a shared folder.
+As on the server, each extension is a module: its `index.tsx` brings its
+pages (by address, with their sidebar rows), its Home blocks and its
+settings sections, and `app/` puts together only the installed ones, so a
+removed extension's page code is not mounted at all. A feature never
+imports another; the core never imports an extension, and an extension
+never imports another or a core feature. What two share moves to a shared
+folder.
 
 ## The server
 
@@ -55,7 +61,7 @@ the extensions.
   `.dependency-cruiser.cjs` at the top, and `npm run check:borders:dashboard`
   with `packages/dashboard/.dependency-cruiser.cjs`. The page's rules add the
   kit's own: no import cycles, no file nobody imports, `components/ui/` stays
-  shadcn's, `lib/` has no screens.
+  shadcn's, `lib/` has no screens, and only `app/` imports an extension.
 - **The records test**, `packages/server/test/record-owners.test.ts`, checks
   that only the owner of a collection names it in a store call.
 - **The libraries test**, `packages/kits/test/libraries.test.ts`, fails on a
@@ -81,13 +87,12 @@ the extensions.
 The layout is in place; some parts still differ, and each list only shrinks.
 The blueprints keep the lists; the main ones:
 
-- The page writes its own word catalogue, routing on `location.hash` and
-  fetching by hand, where the kit uses i18next, React Router and TanStack
-  Query. It has no component tests yet.
+- The page has no component tests yet.
 - The server's routes are written by hand on `node:http`, each body read
   field by field, not a router with a zod schema per body.
-- The page imports some of the server's types by relative path, not through
-  a package export.
+- The page's schemas name the server's types by relative path (type-only,
+  so a change on the server that the page cannot read fails the type
+  check), not through a package export.
 - The GitHub CLI is also run outside the slots: by the feedback board, by
   Releases and by the Factory's webhook signals.
 - Two core pieces still read records themselves: the live sync's

@@ -68,7 +68,7 @@ at the world and change it (`look_at_world`, `world_rows`, `change_world`,
 | The worlds | `packages/server/src/extensions/explorations/`: `worlds.ts`, `world-tools.ts`, `world-route.ts`; `packages/core/src/kobble/world.ts`, `packages/core/src/kobble/situations.ts` |
 | The copies | `packages/server/src/prototypes/`                                                                                                                                              |
 | The skill  | `packages/skills/skills/explore/SKILL.md`                                                                                                                                      |
-| The page   | `packages/dashboard/src/features/explorations/board/` (the prototype's card)                                                                                                   |
+| The page   | `packages/dashboard/src/extensions/explorations/board/` (the prototype's card)                                                                                                 |
 
 ## Checked and not checked
 

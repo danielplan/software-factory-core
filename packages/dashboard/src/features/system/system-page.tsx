@@ -1,5 +1,7 @@
+import type { TFunction } from "i18next";
 import { Play, Square } from "lucide-react";
 import { Fragment, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   type FactoryState,
@@ -19,8 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageHead } from "@/components/layout/page-head";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
+
 import { columnsOf } from "./columns";
 
 import { PartCard } from "./part-card";
@@ -34,15 +35,15 @@ import { SystemMap } from "./system-map";
 export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const press = usePress(setProblem);
-  const t = useT();
-  const s = t.system;
+  const t = useTranslation().t;
+  const s = t;
   const products = state.parts.filter((part) => part.area === "products");
-  const top = headline(products, s.headline);
+  const top = headline(products, s);
   return (
     <>
       <PageHead
-        title={t.shell.pages.system}
-        about={s.about}
+        title={t("shell.pages.system")}
+        about={s("system.about")}
         actions={
           products.length > 0 && (
             <>
@@ -54,7 +55,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                 }}
               >
                 <Play aria-hidden />
-                {s.startAll}
+                {s("system.startAll")}
               </Button>
               <Button
                 variant="outline"
@@ -64,7 +65,7 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
                 }}
               >
                 <Square aria-hidden />
-                {s.stopAll}
+                {s("system.stopAll")}
               </Button>
             </>
           )
@@ -74,17 +75,22 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
         <StatusLight light={top.light} />
         <span className="min-w-0 flex-1">{top.text}</span>
       </div>
-      {problem && <ProblemBox title={s.didNotWork} text={problem} />}
-      <Area title={s.yourProduct} parts={products} onPress={press} map>
+      {problem && <ProblemBox title={s("system.didNotWork")} text={problem} />}
+      <Area
+        title={s("system.yourProduct")}
+        parts={products}
+        onPress={press}
+        map
+      >
         <p className="py-6 text-center text-[13px] text-muted-foreground">
-          {s.noPartsBefore}{" "}
+          {s("system.noPartsBefore")}{" "}
           <a
             href="#explore"
             className="text-foreground underline underline-offset-2"
           >
-            {t.shell.pages.explore}
+            {t("shell.pages.explore")}
           </a>
-          {s.noPartsAfter}
+          {s("system.noPartsAfter")}
         </p>
       </Area>
       <Legend />
@@ -97,13 +103,13 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
 export function FactoryPrograms({ state }: Readonly<{ state: FactoryState }>) {
   const [problem, setProblem] = useState<string | null>(null);
   const press = usePress(setProblem);
-  const s = useT().system;
+  const s = useTranslation().t;
   const factory = state.parts.filter((part) => part.area === "factory");
   if (factory.length === 0) return null;
   return (
     <>
-      {problem && <ProblemBox title={s.didNotWork} text={problem} />}
-      <Area title={s.programs} parts={factory} onPress={press} />
+      {problem && <ProblemBox title={s("system.didNotWork")} text={problem} />}
+      <Area title={s("system.programs")} parts={factory} onPress={press} />
     </>
   );
 }
@@ -119,13 +125,13 @@ function usePress(setProblem: (problem: string | null) => void) {
 
 // What the lights mean.
 function Legend() {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <>
       <div className="flex flex-wrap gap-4 px-1 text-xs text-muted-foreground">
         {LIGHTS.map((light) => (
           <span key={light} className="inline-flex items-center gap-1.5">
-            <StatusLight light={light} /> {t.shell.lights[light]}
+            <StatusLight light={light} /> {t(`shell.lights.${light}`)}
           </span>
         ))}
       </div>
@@ -222,7 +228,7 @@ function AreaCard({
 // first, then starting, then all running, else not running yet.
 function headline(
   parts: PartView[],
-  says: Messages["system"]["headline"],
+  says: TFunction,
 ): {
   light: PartView["light"];
   text: string;
@@ -235,27 +241,27 @@ function headline(
   if (lit.length === 0)
     return {
       light: "none",
-      text: says.none,
+      text: says("system.headline.none"),
     };
   if (problems > 0)
     return {
       light: "problem",
-      text: says.problem(problems),
+      text: says("system.headline.problem", { count: problems }),
     };
   if (lit.some((part) => part.light === "starting"))
-    return { light: "starting", text: says.starting };
+    return { light: "starting", text: says("system.headline.starting") };
   if (lit.every((part) => part.light === "running"))
     return {
       light: "running",
-      text: says.running,
+      text: says("system.headline.running"),
     };
   if (lit.some((part) => part.light === "running"))
     return {
       light: "stopped",
-      text: says.some,
+      text: says("system.headline.some"),
     };
   return {
     light: "stopped",
-    text: says.stopped,
+    text: says("system.headline.stopped"),
   };
 }

@@ -4,13 +4,15 @@
 
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { get, messageOf, post, type State } from "@/api/client";
+import { messageOf, post, type State } from "@/api/client";
+import { getChecked } from "@/api/query";
+import { explorationsViewSchema } from "@/api/schemas/explorations";
 import { Button } from "@/components/ui/button";
 
 import { pickedStart } from "./first-exploration";
 import { setUpDone, type Step } from "./steps";
-import { useT } from "@/i18n/use-t";
 
 type SetupState = Extract<State, { mode: "setup" }>;
 
@@ -25,7 +27,7 @@ export function BarAction({
   at: number;
   onGo: (n: number) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { coach } = state;
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -45,13 +47,13 @@ export function BarAction({
   const next = () => {
     onGo(at + 1);
   };
-  let label = t.setup.bar.continue;
+  let label = t("setup.bar.continue");
   let act = next;
-  if (step.id === "hello") label = t.setup.bar.go;
+  if (step.id === "hello") label = t("setup.bar.go");
   if (step.id === "setup") {
     const done = setUpDone(coach);
     if (coach.phase === "build" && !done) return null;
-    label = done ? t.setup.bar.pickStart : t.setup.bar.setUp;
+    label = done ? t("setup.bar.pickStart") : t("setup.bar.setUp");
     if (!done)
       act = () => {
         run(() => post("/api/setup/build"));
@@ -59,7 +61,7 @@ export function BarAction({
   }
   if (step.id === "start") {
     const picked = pickedStart();
-    label = picked ? t.setup.bar.open : t.setup.bar.look;
+    label = picked ? t("setup.bar.open") : t("setup.bar.look");
     act = () => {
       run(() => openKobble(picked));
     };
@@ -82,9 +84,9 @@ export function BarAction({
 async function openKobble(picked: string | null): Promise<void> {
   await post("/api/setup/open");
   if (!picked) return;
-  type Row = { id: string; title: string };
-  const list = await get<Record<"exploring" | "waiting" | "done", Row[]>>(
+  const list = await getChecked(
     "/api/kobble/explorations",
+    explorationsViewSchema,
   );
   const found = [...list.waiting, ...list.exploring].find(
     (row) => row.title.toLowerCase() === picked.toLowerCase(),

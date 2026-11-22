@@ -46,7 +46,7 @@ A mission can also run on a prototype's branch, from the exploration's
 | ------------- | ---------------------------------------------------------------------------------------------------------- |
 | The extension | `packages/server/src/extensions/personas/`: `persona-tests.ts`, `mission-ideas.ts`, `index.ts` (its plugs) |
 | The skill     | `packages/skills/skills/persona-test/SKILL.md`                                                             |
-| The page      | `packages/dashboard/src/features/personas/`                                                                |
+| The page      | `packages/dashboard/src/extensions/personas/`                                                              |
 | The files     | `factory/kobble/personas/<id>.json`, `factory/kobble/tests/T-<n>.json`                                     |
 
 ## Checked and not checked

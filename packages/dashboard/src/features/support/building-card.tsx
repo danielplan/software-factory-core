@@ -11,9 +11,10 @@ import {
   Send,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 
 import { useSignedIn, withSignIn } from "@/api/feedback-board";
@@ -43,16 +44,17 @@ function Heading({
   thread,
   ready,
 }: Readonly<{ thread: Thread; ready: boolean }>) {
-  const w = useT().feedback.window;
+  const w = useTranslation().t;
+  const kind = thread.kind === "bug" ? "bug" : "wish";
   return (
     <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground [&_svg]:size-3">
       {thread.kind === "bug" ? <Bug aria-hidden /> : <Lightbulb aria-hidden />}
-      {w.kinds[thread.kind === "bug" ? "bug" : "wish"]} · {w.newPost}
+      {w(`feedback.window.kinds.${kind}`)} · {w("feedback.window.newPost")}
       <span className="ml-auto flex items-center gap-1.5">
         {!ready && (
           <span className="size-1.5 rounded-full bg-[#8b8ff0] motion-safe:animate-breathe" />
         )}
-        {ready ? w.ready : w.writing}
+        {ready ? w("feedback.window.ready") : w("feedback.window.writing")}
       </span>
     </span>
   );
@@ -62,12 +64,12 @@ function Title({
   draft,
   ready,
 }: Readonly<{ draft: Draft | null; ready: boolean }>) {
-  const w = useT().feedback.window;
+  const w = useTranslation().t;
   if (!draft) return <Placeholder className="h-4 w-2/3" />;
   if (ready)
     return (
       <input
-        aria-label={w.titleLabel}
+        aria-label={w("feedback.window.titleLabel")}
         value={draft.title}
         onChange={(event) => {
           editDraft({ title: event.target.value });
@@ -110,18 +112,22 @@ function PartText({
   part,
   onChange,
 }: Readonly<{ part: Part; onChange: (edit: Partial<Part>) => void }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <span className="min-w-0 break-words">
-      {part.label === "error" ? t.window.errorPrefix : ""}
+      {part.label === "error" ? t("feedback.window.errorPrefix") : ""}
       {teamBits(part.text).map((bit, at) =>
         bit.team && !part.removed ? (
           <button
             key={at}
             type="button"
-            title={t.window.publicBoard(t.remove)}
+            title={t("feedback.window.publicBoard", {
+              remove: t("feedback.remove"),
+            })}
             onClick={() => {
-              onChange({ text: part.text.replace(bit.text, t.chat.taken) });
+              onChange({
+                text: part.text.replace(bit.text, t("feedback.chat.taken")),
+              });
             }}
             className="rounded-sm bg-warning/25 px-0.5 text-foreground hover:bg-destructive/15 hover:line-through"
           >
@@ -144,7 +150,7 @@ function PartChip({
   ready: boolean;
   onChange: (edit: Partial<Part>) => void;
 }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <span
       className={cn(
@@ -157,7 +163,9 @@ function PartChip({
       {ready && (
         <button
           type="button"
-          aria-label={part.removed ? t.putBack : t.remove}
+          aria-label={
+            part.removed ? t("feedback.putBack") : t("feedback.remove")
+          }
           onClick={() => {
             onChange({ removed: !part.removed });
           }}
@@ -175,24 +183,26 @@ function SendBar({
   sending,
 }: Readonly<{ draft: Draft; sending: boolean }>) {
   const signedIn = useSignedIn();
-  const w = useT().feedback.window;
+  const w = useTranslation().t;
   return (
     <div className="flex items-center gap-2 border-t border-line-soft pt-2.5 text-[11.5px] text-muted-foreground motion-safe:animate-rise [&_svg]:size-3.5">
       <CircleUserRound aria-hidden />
       <span className="flex-1">
-        {signedIn ? w.signedInAs(signedIn) : w.withSignIn}
+        {signedIn
+          ? w("feedback.window.signedInAs", { name: signedIn })
+          : w("feedback.window.withSignIn")}
       </span>
       <Button
         size="sm"
         disabled={!draft.title.trim()}
         busy={sending}
-        aria-label={w.sendPost}
+        aria-label={w("feedback.window.sendPost")}
         onClick={() => {
           withSignIn(sendDraft);
         }}
       >
         <Send aria-hidden />
-        {w.send}
+        {w("feedback.window.send")}
       </Button>
     </div>
   );

@@ -7,11 +7,12 @@
 
 import { Package, Plug, Puzzle } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView, FactoryState } from "@/api/client";
 import { PageHead } from "@/components/layout/page-head";
 import { ProblemBox } from "@/components/layout/problem-box";
-import { useT } from "@/i18n/use-t";
+
 import { boardAction, thingOf } from "@/lib/market-view";
 import { useFlip } from "@/hooks/use-flip";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ export function MarketPage({
   state,
   open,
 }: Readonly<{ state: FactoryState; open: string | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const tab = tabOf(open);
   const { addOns, products, kits } = state;
   const boards = addOns.filter((addOn) => addOn.tracker);
@@ -52,8 +53,8 @@ export function MarketPage({
   const page = useRef<HTMLDivElement>(null);
   useFlip(page);
   const opened = thingOf(
-    t.market,
-    t.shell,
+    t,
+    t,
     { addOns, kits, products, tracker, ...(codeBy ? { codeBy } : {}) },
     openKey,
   );
@@ -68,10 +69,10 @@ export function MarketPage({
   };
   return (
     <div ref={page} className="grid gap-5">
-      <PageHead title={t.shell.pages.extensions} about={t.market.about} />
+      <PageHead title={t("shell.pages.extensions")} about={t("market.about")} />
       <Tabs tab={tab} />
       {market.problem && (
-        <ProblemBox title={t.connect.didNotWork} text={market.problem} />
+        <ProblemBox title={t("connect.didNotWork")} text={market.problem} />
       )}
       <Panel
         tab={tab}
@@ -156,7 +157,7 @@ function MainAction({
 // The three tabs in the design system's tab track, a marker sliding
 // between them (not when the person prefers reduced motion).
 function Tabs({ tab }: Readonly<{ tab: TabId }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const links = useRef<Partial<Record<TabId, HTMLAnchorElement | null>>>({});
   const marker = useRef<HTMLSpanElement>(null);
   useLayoutEffect(() => {
@@ -170,7 +171,7 @@ function Tabs({ tab }: Readonly<{ tab: TabId }>) {
   return (
     <div
       role="tablist"
-      aria-label={t.tabsLabel}
+      aria-label={t("market.tabsLabel")}
       className="relative inline-flex w-fit gap-1 rounded-xl bg-surface-2 p-1"
     >
       <span
@@ -195,7 +196,7 @@ function Tabs({ tab }: Readonly<{ tab: TabId }>) {
           )}
         >
           {icon}
-          {t.tabs[id]}
+          {t(`market.tabs.${id}`)}
         </a>
       ))}
     </div>

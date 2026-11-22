@@ -55,11 +55,9 @@ test("pointing at a part brings out it and the parts at the other ends of its li
 
 test("each type of part says what it means, in plain words", () => {
   assert.deepEqual(
-    Object.entries(ENGLISH.system.types).map(([type, { label, means }]) => [
-      type,
-      label,
-      means,
-    ]),
+    Object.entries(ENGLISH("system.types", { returnObjects: true })).map(
+      ([type, { label, means }]) => [type, label, means],
+    ),
     [
       ["screen", "Screen", "what people open, a web page or app"],
       ["backend", "Backend", "works behind the screens"],

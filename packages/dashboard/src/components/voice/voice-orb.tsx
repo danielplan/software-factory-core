@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import { useVoiceLevel } from "@/hooks/voice/use-voice-level";
 import type { VoiceCall } from "@/lib/voice/voice-call";
-import { useT } from "@/i18n/use-t";
 
 export type OrbMode =
   "preparing" | "listening" | "writing" | "thinking" | "speaking";
@@ -26,13 +27,13 @@ export function VoiceOrb({
   call,
   mode,
 }: Readonly<{ call: VoiceCall; mode: OrbMode }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const level = useVoiceLevel(call);
   const percent = mode === "listening" ? Math.round(level * 100) : 0;
   return (
     <div
       role="meter"
-      aria-label={t.voice.yourVoice}
+      aria-label={t("voice.yourVoice")}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}

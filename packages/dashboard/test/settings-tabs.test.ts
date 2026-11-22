@@ -7,7 +7,7 @@ import {
   shownTab,
   tabHash,
   tabsOf,
-} from "../src/features/settings/settings-tabs.ts";
+} from "../src/lib/settings-tabs.ts";
 
 test("Settings has six tabs, in order", () => {
   assert.deepEqual(SETTINGS_TABS, [

@@ -1,8 +1,9 @@
+import { useTranslation } from "react-i18next";
+
 import type { StageMap } from "@/api/client";
 import { STAGES } from "@/lib/stages";
 
 import { Pick } from "./pick";
-import { useT } from "@/i18n/use-t";
 
 export type Columns = { columns: string[]; suggested: StageMap };
 
@@ -25,18 +26,18 @@ export function StageMapping({
   value: StageMap;
   onChange: (value: StageMap) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const options = [
-    { value: NONE, label: t.connect.pick.notOnBoard },
+    { value: NONE, label: t("connect.pick.notOnBoard") },
     ...columns.map((column) => ({ value: column, label: column })),
   ];
   return (
     <div className="grid gap-2.5 rounded-xl bg-surface-2/60 p-4">
       <span className="text-[13px] font-medium">
-        {t.connect.pick.whichColumn}
+        {t("connect.pick.whichColumn")}
       </span>
       <span className="text-xs text-muted-foreground">
-        {t.connect.pick.matched}
+        {t("connect.pick.matched")}
       </span>
       {ROWS.map((stage) => {
         return (
@@ -50,10 +51,12 @@ export function StageMapping({
                 className="size-2 rounded-full"
                 style={{ background: stage.colour }}
               />
-              {t.connect.stages[stage.id]}
+              {t(`connect.stages.${stage.id}`)}
             </span>
             <Pick
-              label={t.connect.pick.columnFor(t.connect.stages[stage.id])}
+              label={t("connect.pick.columnFor", {
+                stage: t(`connect.stages.${stage.id}`),
+              })}
               value={value[stage.id] || NONE}
               options={options}
               onPick={(picked) => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { SignalRow } from "../src/api/client.ts";
-import { countsOf, koboldLine } from "../src/lib/shell-view.ts";
+import { koboldLine } from "../src/lib/shell-view.ts";
 import {
   agoOf,
   alreadyLine,
@@ -148,12 +148,6 @@ test("the signal shown, and the next one once it is handled", () => {
   assert.equal(nextAfter(list, "b"), "c");
   assert.equal(nextAfter(list, "c"), "b");
   assert.equal(nextAfter([{ id: "a" }], "a"), null);
-});
-
-test("the sidebar counts the new signals as a badge", () => {
-  assert.deepEqual(countsOf(0, null, 3), { signals: 3 });
-  assert.deepEqual(countsOf(0, null, 0), {});
-  assert.deepEqual(countsOf(0, null), {});
 });
 
 test("the kobold's card says what it does, or Idle", () => {

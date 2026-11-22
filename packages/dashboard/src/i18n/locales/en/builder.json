@@ -1,0 +1,42 @@
+{
+  "trace": {
+    "card": "Card",
+    "tab": "Trace · {{n}}",
+    "steps_one": "1 step",
+    "steps_other": "{{count}} steps",
+    "live": " · live",
+    "nothingYet": "Nothing yet."
+  },
+  "stuck": {
+    "title": "Stuck",
+    "count_one": "1 card the builder could not finish",
+    "count_other": "{{count}} cards the builder could not finish",
+    "seeCard": "See the whole card",
+    "answerOn": "Answer the builder on card #{{n}}",
+    "placeholder": "Answer the builder, give it a hint, or ask Sprocket",
+    "sending": "Sending…",
+    "send": "Send and let it try again",
+    "continue": "Continue",
+    "carryOn": "Carry on where you stopped.",
+    "ask": "Ask Sprocket",
+    "askAbout": "Card #{{n}} “{{title}}” is stuck. What is going on, and what should I do?",
+    "askAbout_asked": "Card #{{n}} “{{title}}” is stuck. {{question}}",
+    "hintIfAny": "A hint for the next sessions, if you like",
+    "pick": "Pick an answer",
+    "suggested": "Suggested"
+  },
+  "why": {
+    "checksFailed": "The checks stayed red after three tries.",
+    "failed": "The builder could not finish it.",
+    "outOfSessions": "It used its three sessions and is not finished yet. Continue gives it three more.",
+    "asks": "The builder asks: {{question}}",
+    "stopped": "The builder stopped and asks you."
+  },
+  "since": {
+    "justNow": "Stuck just now",
+    "minutes": "Stuck for {{n}} min",
+    "hours": "Stuck for {{n}} h",
+    "days_one": "Stuck for 1 day",
+    "days_other": "Stuck for {{count}} days"
+  }
+}

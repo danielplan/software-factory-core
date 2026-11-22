@@ -1,0 +1,48 @@
+{
+  "cannotRead": "The signals cannot be read",
+  "syncFailed": "The last sync with the live app did not work",
+  "noneNew": "No new signals.",
+  "newSignals": "New signals",
+  "syncedNothing": "Synced with the live app · nothing new",
+  "syncedNew": "Synced with the live app · {{n}} new",
+  "syncNow": "Sync now",
+  "signal": "Signal {{id}}",
+  "fix": "Fix",
+  "dismiss": "Dismiss",
+  "ok": "OK",
+  "reads": {
+    "bug": "people report, and errors and failed automations",
+    "request": "people send, and when the assistant can’t do something",
+    "feedback": "from persona tests and everything else"
+  },
+  "connect": {
+    "seeHere": "What you’ll see here",
+    "title": "Connect your app",
+    "reads": "Kobble reads what happens in {{app}} every 30 minutes.",
+    "address": "Address of the export",
+    "token": "Token",
+    "tokenHint": "Paste the token from your app",
+    "checking": "Checking…",
+    "connect": "Connect",
+    "saved": "Saved on this computer only, in .env",
+    "privacy": "Only anonymous events leave {{app}}: no names, no entries.",
+    "how": "How to add the export to your app"
+  },
+  "quietTitle": "All quiet",
+  "quiet": {
+    "none": "No new bugs, requests or feedback from {{app}}.",
+    "hide": "Hide handled signals",
+    "see": "See handled signals",
+    "nothingHandled": "Nothing handled yet"
+  },
+  "before": {
+    "sendMore": "Send more personas",
+    "toImprove": "to find what to improve.",
+    "afterLaunch": "After launch,",
+    "connectApp": "connect {{app}}",
+    "toHear": "to hear from customers.",
+    "onMission": "On a mission",
+    "noCustomers": "No customers yet. Send your personas to try the app, and what they find shows up here.",
+    "send": "Send a persona"
+  }
+}

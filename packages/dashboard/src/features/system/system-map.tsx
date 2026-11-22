@@ -24,12 +24,12 @@ import {
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { PartView } from "@/api/client";
 import { arrange } from "@/lib/layout";
 import { type Line, linesOf, nearOf } from "./system-map-lines";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { PartCard } from "./part-card";
 import { TypeTag } from "./type-tag";
@@ -112,7 +112,7 @@ function PartsMap({
   parts,
   onPress,
 }: Readonly<{ parts: PartView[]; onPress: (path: string) => void }>) {
-  const t = useT().system;
+  const t = useTranslation().t;
   const [pointed, setPointed] = useState<string | null>(null);
   const [frame, down] = useNarrow();
   const lines = useMemo(() => linesOf(parts), [parts]);
@@ -151,11 +151,13 @@ function PartsMap({
           panOnDrag
           minZoom={0.4}
           maxZoom={1}
-          aria-label={t.mapLabel}
+          aria-label={t("system.mapLabel")}
           style={COLOURS}
         />
       </div>
-      <p className="px-1 text-xs text-muted-foreground">{t.mapLegend}</p>
+      <p className="px-1 text-xs text-muted-foreground">
+        {t("system.mapLegend")}
+      </p>
     </div>
   );
 }

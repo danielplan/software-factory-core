@@ -1,0 +1,57 @@
+{
+  "about": "How the factory works here: where work is tracked, the order of work, updates, and the settings of its parts.",
+  "tabs": {
+    "connections": "Connections",
+    "stages": "Stages",
+    "models": "AI models",
+    "updates": "Updates",
+    "computer": "This computer",
+    "advanced": "Advanced"
+  },
+  "sections": {
+    "language": "Language",
+    "stages": "The order of work",
+    "tracker": "Where work is tracked",
+    "liveApp": "The live app",
+    "updates": "Updates",
+    "whatsNew": "What's new in Kobble",
+    "programs": "The factory's programs",
+    "computer": "This computer"
+  },
+  "stages": {
+    "about": "Work goes through these stages, one after the other. Each comes from an extension, which suggests where it sits. Move any stage to where your team wants it.",
+    "by": "From {{n}}",
+    "moveUp": "Move earlier",
+    "moveDown": "Move later",
+    "clash": "{{a}} and {{b}} both fit the same place. Which comes first?",
+    "first": "{{n}} first",
+    "none": "No stage yet.",
+    "notKept": "The order could not be saved."
+  },
+  "language": {
+    "about": "The language Kobble and its kobolds speak on this computer.",
+    "browser": "As the browser ({{name}})"
+  },
+  "updatesAbout": "Merged work comes to this computer from GitHub; new versions of Kobble come as a card for the builder.",
+  "computerAbout": "For owners who do not use a terminal.",
+  "tracker": {
+    "none": "No board connected yet",
+    "about": "Now: {{now}}. Where the ideas you agree to become work to build.",
+    "change": "Change where work is tracked"
+  },
+  "liveApp": {
+    "about": "Where Kobble reads what happens in your app, every 30 minutes.",
+    "readsFrom": "Reads from",
+    "disconnect": "Disconnect",
+    "notConnected": "Not connected. Connect it on"
+  },
+  "form": {
+    "notSaved": "Not saved",
+    "save": "Save",
+    "saved": "Saved.",
+    "restartToCount": " It counts once restarted:",
+    "restart": "Restart {{name}}",
+    "set": "{{label}} (set)",
+    "replace": "{{help}} Type a new one to replace it."
+  }
+}

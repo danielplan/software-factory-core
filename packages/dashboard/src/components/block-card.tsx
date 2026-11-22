@@ -2,10 +2,11 @@
 // comes from, over a card; and the line a block shows when it has nothing.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { Card } from "@/components/ui/card";
-import { useT } from "@/i18n/use-t";
+
 import { ownersOf } from "@/lib/home-layout";
 import { nameOf } from "@/lib/market-view";
 import { blockName } from "@/lib/screens";
@@ -16,7 +17,7 @@ export function BlockCard({
   addOns,
   children,
 }: Readonly<{ id: string; addOns: AddOnView[]; children: ReactNode }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const owner = ownersOf(addOns).get(id);
   return (
     <div className="grid gap-1.5">
@@ -24,10 +25,10 @@ export function BlockCard({
         data-block-title
         className="flex items-center gap-2 text-[13px] font-medium"
       >
-        {blockName(t.market.blocks, addOns, id)}
+        {blockName(t("market.blocks", { returnObjects: true }), addOns, id)}
         {owner && (
           <span className="text-xs font-normal text-muted-foreground">
-            {nameOf(t.market, owner)}
+            {nameOf(t, owner)}
           </span>
         )}
       </span>

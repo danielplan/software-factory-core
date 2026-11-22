@@ -3,6 +3,7 @@
 
 import { Download, Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,13 @@ import {
   FILTERS,
   matching,
 } from "@/lib/market-view";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 
 import { Card } from "./card";
+
+// The installed extensions first, then those to install.
+const SECTIONS = ["installed", "available"] as const;
 
 export function ExtensionsTab({
   addOns,
@@ -32,10 +36,10 @@ export function ExtensionsTab({
   onOpen: (key: string) => void;
   onInstall: (addOn: AddOnView) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = matching(addOns, t.market, filter, query);
+  const shown = matching(addOns, t, filter, query);
   return (
     <>
       <Search
@@ -46,10 +50,10 @@ export function ExtensionsTab({
       />
       {shown.length === 0 ? (
         <p className="px-1 py-8 text-center text-[13px] text-muted-foreground">
-          {t.market.noMatch}
+          {t("market.noMatch")}
         </p>
       ) : (
-        (["installed", "available"] as const).map((section) => (
+        SECTIONS.map((section) => (
           <Shelf
             key={section}
             section={section}
@@ -80,7 +84,7 @@ function Search({
   onQuery: (query: string) => void;
   onFilter: (filter: Filter) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <div className="flex flex-wrap items-center gap-3">
       <label className="relative min-w-[220px] flex-1 sm:max-w-sm">
@@ -91,8 +95,8 @@ function Search({
         <input
           className={cn(FIELD, "pl-8")}
           value={query}
-          placeholder={t.search}
-          aria-label={t.search}
+          placeholder={t("market.search")}
+          aria-label={t("market.search")}
           onChange={(event) => {
             onQuery(event.target.value);
           }}
@@ -100,7 +104,7 @@ function Search({
       </label>
       <div
         role="group"
-        aria-label={t.filterLabel}
+        aria-label={t("market.filterLabel")}
         className="flex flex-wrap gap-1.5"
       >
         {FILTERS.map((name) => (
@@ -118,7 +122,7 @@ function Search({
                 : "border-border bg-card hover:bg-hover",
             )}
           >
-            {t.filters[name]}
+            {t(`market.filters.${name}`)}
           </button>
         ))}
       </div>
@@ -144,12 +148,15 @@ function Shelf({
   onOpen: (key: string) => void;
   onInstall: (addOn: AddOnView) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (list.length === 0) return null;
   return (
-    <section aria-label={t.market.sections[section]} className="grid gap-3">
+    <section
+      aria-label={t(`market.sections.${section}`)}
+      className="grid gap-3"
+    >
       <h2 className="flex items-center gap-2 px-1 text-[15px] font-semibold">
-        {t.market.sections[section]}
+        {t(`market.sections.${section}`)}
         <span className="text-[12.5px] font-normal text-muted-foreground">
           {list.length}
         </span>
@@ -158,7 +165,7 @@ function Shelf({
         {list.map((addOn) => (
           <Card
             key={addOn.id}
-            thing={extensionThing(t.market, t.shell, addOns, addOn)}
+            thing={extensionThing(t, t, addOns, addOn)}
             fresh={fresh.includes(addOn.id)}
             leaving={leaving === addOn.id}
             onOpen={() => {
@@ -183,11 +190,11 @@ function Shelf({
 export function InstallButton({
   onInstall,
 }: Readonly<{ onInstall: () => void }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <Button size="pill" onClick={onInstall}>
       <Download aria-hidden />
-      {t.install}
+      {t("market.install")}
     </Button>
   );
 }

@@ -1,0 +1,69 @@
+{
+  "types": {
+    "bug": "Bug",
+    "request": "Richiesta di funzione",
+    "feedback": "Feedback",
+    "idea": "Idea",
+    "question": "Domanda aperta"
+  },
+  "sources": {
+    "app": "Nell'app",
+    "usage": "Uso",
+    "errors": "Errori",
+    "test": "Missione",
+    "feedback": "Bacheca dei feedback"
+  },
+  "someone": "Qualcuno",
+  "explore": "Esplora",
+  "addTo": "Aggiungi a {{id}}",
+  "alreadyExplored": "Già esplorato in",
+  "alreadyFixed": "Già corretto in",
+  "ago": {
+    "now": "adesso",
+    "minutes": "{{n}} min fa",
+    "hours": "{{n}} h fa",
+    "yesterday": "ieri",
+    "days": "{{n}} giorni fa"
+  },
+  "sync": {
+    "notConnected": "Non collegato all'app dal vivo",
+    "notYet": "Non ancora sincronizzato con l'app dal vivo · ogni 30 min",
+    "synced": "Sincronizzato con l'app dal vivo {{ago}} · ogni 30 min"
+  },
+  "signalCount_one": "1 segnale",
+  "signalCount_other": "{{count}} segnali",
+  "signalCount_many": "{{count}} segnali",
+  "origin": {
+    "usage": "Trovata nell'uso",
+    "developer": "Aggiunta da te"
+  },
+  "status": {
+    "explored": "Esplorato in {{to}}",
+    "fixed": "Corretto in {{to}}",
+    "sentToFix": "Mandato a correggere",
+    "new": "Nuovo",
+    "dismissed": "Scartato"
+  },
+  "mission": {
+    "queued": "Aspetta il suo turno",
+    "opening": "Apro l'app…"
+  },
+  "step": "Al passo {{number}}: {{did}}",
+  "tests": {
+    "queued": "In attesa",
+    "running": "In missione",
+    "done": "Fatto",
+    "failed": "Non riuscito"
+  },
+  "lookAgain": {
+    "soon": "Il kobold guarda di nuovo tra poco.",
+    "minute": "Il kobold guarda di nuovo tra un minuto.",
+    "minutes": "Il kobold guarda di nuovo tra {{n}} minuti."
+  },
+  "done": {
+    "fixed": "{{id}} è in Da fare della fabbrica",
+    "dismissed": "Scartato",
+    "added": "Aggiunto a {{id}}",
+    "waiting": "{{id}} aspetta in Esplorazioni"
+  }
+}

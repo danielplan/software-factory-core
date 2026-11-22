@@ -5,11 +5,12 @@
 // what is done, each stage with its count and its latest two. Kept apart
 // from the page so it is checked on its own.
 
+import type { TFunction } from "i18next";
 import type { WorkView } from "../api/client.ts";
 import { reasonOf } from "./stuck-view.ts";
-import { ENGLISH, type Messages } from "../i18n/messages.ts";
+import { ENGLISH } from "../i18n/messages.ts";
 
-type Words = Messages["home"];
+type Words = TFunction;
 
 export type WaitingItem = {
   id: string;
@@ -42,8 +43,8 @@ const MOST = 6;
 
 export function waitingOf(
   input: HomeInput,
-  m: Words = ENGLISH.home,
-  why: Messages["builder"]["why"] = ENGLISH.builder.why,
+  m: Words = ENGLISH,
+  why: TFunction = ENGLISH,
 ): WaitingItem[] {
   const { work } = input;
   const cards = (work?.cards ?? []).filter((card) => !card.closed);
@@ -53,7 +54,7 @@ export function waitingOf(
       id: `review-${String(card.number)}`,
       kind: "Review",
       title: card.title,
-      about: card.pullRequest ? m.review.built : m.review.waits,
+      about: card.pullRequest ? m("home.review.built") : m("home.review.waits"),
       number: `#${String(card.number)}`,
       href: card.pullRequest ?? card.url,
       outside: true,
@@ -75,7 +76,7 @@ export function waitingOf(
           {
             id: "sort",
             kind: "Sort",
-            title: m.newSignals(input.fresh),
+            title: m("home.newSignals", { count: input.fresh }),
             about: input.signals[0]?.text ?? "",
             number: null,
             href: "#signals",
@@ -91,7 +92,7 @@ export function waitingOf(
 function answersOf(
   work: WorkView | null,
   m: Words,
-  why: Messages["builder"]["why"],
+  why: TFunction,
 ): WaitingItem[] {
   const item = (number: number, title: string, about: string) => ({
     id: `answer-${String(number)}`,
@@ -104,7 +105,7 @@ function answersOf(
   });
   return [
     ...(work?.asking ?? []).map((asking) =>
-      item(asking.number, asking.title, asking.ask?.question ?? m.asks),
+      item(asking.number, asking.title, asking.ask?.question ?? m("home.asks")),
     ),
     ...(work?.stuck ?? []).map((one) =>
       item(one.number, one.title, reasonOf(one, why)),
@@ -139,8 +140,8 @@ export type Placed = {
 // installed; a team's own stage shows where it sits, without a count.
 export function loopOf(
   input: HomeInput,
-  m: Words = ENGLISH.home,
-  pages: Messages["shell"]["pages"] = ENGLISH.shell.pages,
+  m: Words = ENGLISH,
+  pages: TFunction = ENGLISH,
   order: Placed[] | null = null,
 ): Stage[] {
   const counted = countedStages(input, m, pages);
@@ -162,7 +163,10 @@ export function loopOf(
             id: place.id,
             name: place.name,
             count: pieces > 0 ? pieces : null,
-            says: pieces > 0 ? m.stages.pieces(pieces) : place.by,
+            says:
+              pieces > 0
+                ? m("home.stages.pieces", { count: pieces })
+                : place.by,
             items: [],
             href: "#extensions",
           },
@@ -170,11 +174,7 @@ export function loopOf(
   });
 }
 
-function countedStages(
-  input: HomeInput,
-  m: Words,
-  pages: Messages["shell"]["pages"],
-): Stage[] {
+function countedStages(input: HomeInput, m: Words, pages: TFunction): Stage[] {
   const cards = input.work?.cards ?? [];
   const open = cards.filter((card) => !card.closed);
   const building = open.filter(
@@ -186,36 +186,36 @@ function countedStages(
   return [
     {
       id: "signals",
-      name: pages.signals,
+      name: pages("shell.pages.signals"),
       count: input.fresh,
-      says: m.stages.newSignals,
+      says: m("home.stages.newSignals"),
       items: two(input.signals.map((signal) => signal.text)),
       href: "#signals",
     },
     {
       id: "explore",
-      name: pages.explore,
+      name: pages("shell.pages.explore"),
       count: input.exploring.length,
-      says: m.stages.exploring,
+      says: m("home.stages.exploring"),
       items: two(input.exploring.map((row) => row.title)),
       href: "#explore",
     },
     {
       id: "build",
-      name: pages.build,
+      name: pages("shell.pages.build"),
       count: building.length,
       says:
         review.length > 0
-          ? m.stages.toBuildAndReview(review.length)
-          : m.stages.toBuild,
+          ? m("home.stages.toBuildAndReview", { review: review.length })
+          : m("home.stages.toBuild"),
       items: two([...review, ...building].map((card) => card.title)),
       href: "#build",
     },
     {
       id: "done",
-      name: m.stages.done,
+      name: m("home.stages.done"),
       count: done.length,
-      says: m.stages.merged,
+      says: m("home.stages.merged"),
       items: two(done.map((card) => card.title)),
       href: "#build",
     },
@@ -227,21 +227,25 @@ function countedStages(
 export function statusLine(
   product: { light: string; running: number; shown: number },
   building: string | null,
-  m: Words = ENGLISH.home,
+  m: Words = ENGLISH,
 ): string {
-  const { line } = m;
-  const work = building ? line.building(building) : line.resting;
-  return `${productLine(product, line)} · ${work}`;
+  const work = building
+    ? m("home.line.building", { card: building })
+    : m("home.line.resting");
+  return `${productLine(product, m)} · ${work}`;
 }
 
 function productLine(
   product: { light: string; running: number; shown: number },
-  line: Words["line"],
+  line: Words,
 ): string {
-  if (product.shown === 0) return line.none;
-  if (product.light === "problem") return line.problem;
-  if (product.light === "starting") return line.starting;
-  if (product.running === product.shown) return line.running;
-  if (product.running === 0) return line.stopped;
-  return line.some(product.running, product.shown);
+  if (product.shown === 0) return line("home.line.none");
+  if (product.light === "problem") return line("home.line.problem");
+  if (product.light === "starting") return line("home.line.starting");
+  if (product.running === product.shown) return line("home.line.running");
+  if (product.running === 0) return line("home.line.stopped");
+  return line("home.line.some", {
+    running: product.running,
+    shown: product.shown,
+  });
 }

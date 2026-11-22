@@ -1,0 +1,45 @@
+{
+  "trace": {
+    "card": "Scheda",
+    "tab": "Traccia · {{n}}",
+    "steps_one": "1 passo",
+    "steps_other": "{{count}} passi",
+    "steps_many": "{{count}} passi",
+    "live": " · dal vivo",
+    "nothingYet": "Ancora niente."
+  },
+  "stuck": {
+    "title": "Bloccate",
+    "count_one": "1 scheda che il costruttore non ha potuto finire",
+    "count_other": "{{count}} schede che il costruttore non ha potuto finire",
+    "count_many": "{{count}} schede che il costruttore non ha potuto finire",
+    "seeCard": "Vedi tutta la scheda",
+    "answerOn": "Rispondi al costruttore sulla scheda #{{n}}",
+    "placeholder": "Rispondi al costruttore, dagli un suggerimento o chiedi a Sprocket",
+    "sending": "Invio…",
+    "send": "Invia e lascialo riprovare",
+    "continue": "Continua",
+    "carryOn": "Continua da dove ti sei fermato.",
+    "ask": "Chiedi a Sprocket",
+    "askAbout": "La scheda #{{n}} “{{title}}” è bloccata. Cosa succede, e cosa devo fare?",
+    "askAbout_asked": "La scheda #{{n}} “{{title}}” è bloccata. {{question}}",
+    "hintIfAny": "Un suggerimento per le prossime sessioni, se vuoi",
+    "pick": "Scegli una risposta",
+    "suggested": "Suggerita"
+  },
+  "why": {
+    "checksFailed": "I controlli sono rimasti rossi dopo tre tentativi.",
+    "failed": "Il costruttore non è riuscito a finirla.",
+    "outOfSessions": "Ha usato le sue tre sessioni e non ha ancora finito. Continua gliene dà altre tre.",
+    "asks": "Il costruttore chiede: {{question}}",
+    "stopped": "Il costruttore si è fermato e ti chiede."
+  },
+  "since": {
+    "justNow": "Bloccata ora",
+    "minutes": "Bloccata da {{n}} min",
+    "hours": "Bloccata da {{n}} h",
+    "days_one": "Bloccata da 1 giorno",
+    "days_other": "Bloccata da {{count}} giorni",
+    "days_many": "Bloccata da {{count}} giorni"
+  }
+}

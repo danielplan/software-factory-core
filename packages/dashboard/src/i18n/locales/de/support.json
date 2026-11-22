@@ -1,0 +1,10 @@
+{
+  "answering": "{{name}} antwortet…",
+  "ask": "Frag {{name}} alles",
+  "role": "Hilfe · beantwortet Fragen, legt Erkundungen und Personas an",
+  "newConversation": "Neues Gespräch",
+  "close": "Schließen",
+  "empty": "Frag, wie Kobble funktioniert, wo etwas ist, oder alles über dein Produkt.",
+  "thinking": "Denkt nach…",
+  "question": "Stell eine Frage"
+}

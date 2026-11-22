@@ -4,42 +4,40 @@
 // needs the room, and its own bar leads back.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryState } from "@/api/client";
-import { pagesLeftOut } from "@/lib/market-view";
 import { teamPagesOf } from "@/lib/screens";
 import { useExplorations } from "@/api/use-explorations";
 import type { Page } from "@/lib/routes";
-import {
-  countsOf,
-  koboldsDoing,
-  koboldStatus,
-  overallOf,
-} from "@/lib/shell-view";
-import { useT } from "@/i18n/use-t";
+import type { ExtensionPage } from "@/lib/page-module";
+import { koboldsDoing, koboldStatus, overallOf } from "@/lib/shell-view";
+
 import { FeedbackRow } from "@/features/support/feedback-row";
 import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
-import { useSignals } from "@/api/use-signals";
 import { UpdateRow } from "@/features/updates/update-row";
 
 import { Sidebar } from "@/components/layout/sidebar";
 
 export function Shell({
   state,
+  pages,
   current,
   open = null,
   fill = false,
   children,
 }: Readonly<{
   state: FactoryState;
+  // The pages of the installed extensions, for the sidebar.
+  pages: ExtensionPage[];
   current: Page;
   // What is open in the page: for a team's page, which one.
   open?: string | null;
   fill?: boolean;
   children: ReactNode;
 }>) {
-  const sidebar = useSidebarParts(state);
+  const sidebar = useSidebarParts(state, pages);
   if (fill)
     return <main className="min-h-dvh min-w-0 bg-ground">{children}</main>;
   return (
@@ -69,12 +67,12 @@ export function Shell({
   );
 }
 
-// What the sidebar shows besides the pages: the counts, the kobold's status
-// and light, and what each kobold does now.
-function useSidebarParts(state: FactoryState) {
-  const t = useT().shell;
-  const { data: explorations } = useExplorations();
-  const { data: signals } = useSignals();
+// What the sidebar shows: the installed extensions' pages, each with what
+// it counts, the kobold's status and light, and what each kobold does now.
+function useSidebarParts(state: FactoryState, pages: ExtensionPage[]) {
+  const t = useTranslation().t;
+  const exploring = pages.some((page) => page.id === "explore");
+  const { data: explorations } = useExplorations(exploring);
   const support = useSupport();
   useSprocketMoves();
   const overall = overallOf(state.parts, t);
@@ -84,14 +82,13 @@ function useSidebarParts(state: FactoryState) {
     ...(explorations?.waiting ?? []),
   ];
   return {
-    counts: countsOf(
-      explorations?.exploring.length ?? 0,
-      state.work,
-      signals?.counts.new,
-    ),
+    pages: pages.map(({ id, sidebar: { Count, ...row } }) => ({
+      page: id,
+      ...row,
+      count: Count && <Count state={state} />,
+    })),
     kobold: koboldStatus(state.work, state.ideas, overall.words, all, t),
     light: overall.lit,
-    left: pagesLeftOut(state.addOns),
     team: teamPagesOf(state.addOns),
     product: {
       light: overallOf(products, t).lit,

@@ -12,24 +12,40 @@ promises, folders, extra libraries and what still differs from the kit.
 
 ## Where code goes
 
-| The code is…                                                       | It goes in…                                                    |
-| ------------------------------------------------------------------ | -------------------------------------------------------------- |
-| one extension's or core area's screens and logic                   | `packages/dashboard/src/features/<area>/`                      |
-| talking to the server                                              | `packages/dashboard/src/api/`                                  |
-| a piece several areas share                                        | `packages/dashboard/src/components/`                           |
-| shadcn's pieces, as generated                                      | `packages/dashboard/src/components/ui/`                        |
-| the shell's pieces (sidebar, page head)                            | `packages/dashboard/src/components/layout/`                    |
-| a general hook, or logic without screens                           | `packages/dashboard/src/hooks/`, `packages/dashboard/src/lib/` |
-| a word on a screen                                                 | `packages/dashboard/src/i18n/areas/`                           |
-| putting the areas together: routes, Home's blocks, Settings' cards | `packages/dashboard/src/app/`                                  |
+| The code is…                                                    | It goes in…                                                    |
+| --------------------------------------------------------------- | -------------------------------------------------------------- |
+| one core area's screens and logic                               | `packages/dashboard/src/features/<area>/`                      |
+| one extension's screens and logic, and its module (`index.tsx`) | `packages/dashboard/src/extensions/<id>/`                      |
+| talking to the server                                           | `packages/dashboard/src/api/`                                  |
+| a piece several areas share                                     | `packages/dashboard/src/components/`                           |
+| shadcn's pieces, as generated                                   | `packages/dashboard/src/components/ui/`                        |
+| the shell's pieces (sidebar, page head)                         | `packages/dashboard/src/components/layout/`                    |
+| a general hook, or logic without screens                        | `packages/dashboard/src/hooks/`, `packages/dashboard/src/lib/` |
+| a word on a screen                                              | `packages/dashboard/src/i18n/locales/<language>/`              |
+| putting the areas together: routes, the installed extensions    | `packages/dashboard/src/app/`                                  |
 
 ## Rules
 
-- **One way:** shared folders → features → app. A feature never imports
-  another; what two share moves to a shared folder. Checked by
-  `npm run check:borders:dashboard` (`packages/dashboard/.dependency-cruiser.cjs`).
-- **Every word in three languages**, through `useT()`: see
+- **One way:** shared folders → features and extensions → app. A feature
+  never imports another; an extension never imports another extension or a
+  core feature, and the core never imports an extension: each extension
+  plugs in through its module (`src/lib/page-module.ts`), and only `app/`
+  imports the extensions, mounting the installed ones. What two share moves
+  to a shared folder. Checked by `npm run check:borders:dashboard`
+  (`packages/dashboard/.dependency-cruiser.cjs`).
+- **Every word in three languages**, through i18next (`useTranslation()`): see
   [languages](../languages.md).
+- **Data from the server:** read through TanStack Query (`src/api/query.ts`,
+  `useRead(path, schema)`), each answer checked with its zod schema in
+  `src/api/schemas/`, whose inferred type the page uses; each schema is
+  bound to the server's own type (`satisfies z.ZodType<…>`), so drift fails
+  the type check. The state's stream (`src/api/live.ts`) refreshes the
+  reads when Kobble's files change; a failed read shows as a problem, never
+  as an empty list.
+- **Addresses:** each page has its address after the # (`#explore/X-1`),
+  routed by React Router's hash router in `src/app/router.tsx`. A link is a
+  plain `href="#<page>"`; an old address is listed in `MOVED`
+  (`src/lib/routes.ts`) and leads to its new page.
 - **The look:** the variables and pieces in [the design system](../design-system.md);
   every button has an icon; every state holds.
 - **One library per job,** the one the kit's table or the blueprint names;

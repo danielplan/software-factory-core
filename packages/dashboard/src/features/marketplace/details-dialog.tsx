@@ -5,6 +5,7 @@
 
 import { Check, Users } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView, FactoryState } from "@/api/client";
 import { IconTile } from "@/components/add-on-looks";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { GroupForm } from "@/components/settings-card";
 import { listIn } from "@/i18n/format";
-import { useLocale, useT } from "@/i18n/use-t";
+import { useLocale } from "@/i18n/use-t";
 import {
   alwaysLine,
   type Link,
@@ -91,7 +92,7 @@ function Removal({
   addOns: AddOnView[];
   onRemove: (addOn: AddOnView) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const locale = useLocale();
   const list = (items: string[]) => listIn(locale, items);
   const [refused, setRefused] = useState<string | null>(null);
@@ -120,16 +121,16 @@ function Removal({
             setAsking(why === null);
           }}
         >
-          {t.remove}
+          {t("market.remove")}
         </button>
       )}
       <Confirm
         question={
           asking
             ? {
-                title: t.removeTitle(name),
+                title: t("market.removeTitle", { name }),
                 lines: removing(t, addOn, list),
-                yes: t.remove,
+                yes: t("market.remove"),
                 onYes: () => {
                   onRemove(addOn);
                 },
@@ -149,7 +150,7 @@ function Header({
   thing,
   action,
 }: Readonly<{ thing: Thing; action: ReactNode }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <div className="flex flex-wrap items-start gap-4 p-6 pr-14">
       <IconTile id={thing.look} big />
@@ -157,7 +158,9 @@ function Header({
         <DialogTitle className="truncate">{thing.name}</DialogTitle>
         <span className="flex items-center gap-1 text-xs text-muted-foreground">
           {thing.maker === "team" && <Users aria-hidden className="size-3" />}
-          {thing.maker === "team" ? t.madeByTeam : t.madeByKobble}
+          {thing.maker === "team"
+            ? t("market.madeByTeam")
+            : t("market.madeByKobble")}
         </span>
         <DialogDescription className="text-[13px]">
           {thing.about}
@@ -167,7 +170,7 @@ function Header({
         <div className="grid justify-items-end gap-2">
           {thing.state !== null && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
-              {t.states[thing.state]}
+              {t(`market.states.${thing.state}`)}
               <span
                 aria-hidden
                 className="grid size-5 place-items-center rounded-full bg-success text-white"
@@ -193,7 +196,7 @@ function Body({
   state: FactoryState;
   onOpen: (to: string) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const groups = state.settings.filter((group) =>
     thing.settings.includes(group.id),
   );
@@ -202,7 +205,7 @@ function Body({
       <Brings thing={thing} />
       <Who thing={thing} onOpen={onOpen} />
       {groups.length > 0 && (
-        <Section title={t.sectionsOf.settings}>
+        <Section title={t("market.sectionsOf.settings")}>
           <div className="grid gap-4">
             {groups.map((group) => (
               <GroupForm key={group.id} group={group} state={state} />
@@ -216,10 +219,10 @@ function Body({
 
 // What it brings: a row for each kind, or just chips for a kit.
 function Brings({ thing }: Readonly<{ thing: Thing }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   if (thing.brings.length === 0) return null;
   return (
-    <Section title={t.sectionsOf.brings}>
+    <Section title={t("market.sectionsOf.brings")}>
       {thing.kind === "kit" ? (
         <div className="flex flex-wrap gap-1.5">
           {thing.brings.flatMap((row) =>
@@ -246,7 +249,7 @@ function Who({
   thing,
   onOpen,
 }: Readonly<{ thing: Thing; onOpen: (to: string) => void }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const chips = (links: Link[]) => (
     <div className="flex flex-wrap gap-1.5">
       {links.map(({ label, to }) => (
@@ -271,22 +274,28 @@ function Who({
   return (
     <>
       {thing.needs.length > 0 && (
-        <Section title={t.sectionsOf.needs}>{chips(thing.needs)}</Section>
+        <Section title={t("market.sectionsOf.needs")}>
+          {chips(thing.needs)}
+        </Section>
       )}
       {neededBy !== null && (
-        <Section title={t.sectionsOf.neededBy}>
-          {neededBy.length === 0 ? none(t.nothingNeedsIt) : chips(neededBy)}
+        <Section title={t("market.sectionsOf.neededBy")}>
+          {neededBy.length === 0
+            ? none(t("market.nothingNeedsIt"))
+            : chips(neededBy)}
         </Section>
       )}
       {usedBy?.kind === "things" && (
-        <Section title={t.sectionsOf.usedBy}>{chips(usedBy.links)}</Section>
+        <Section title={t("market.sectionsOf.usedBy")}>
+          {chips(usedBy.links)}
+        </Section>
       )}
       {usedBy?.kind === "products" && (
-        <Section title={t.sectionsOf.usedBy}>
+        <Section title={t("market.sectionsOf.usedBy")}>
           {usedBy.names.length > 0 ? (
             <UsedBy products={usedBy.names} label={false} />
           ) : (
-            none(t.noProduct)
+            none(t("market.noProduct"))
           )}
         </Section>
       )}

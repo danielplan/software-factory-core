@@ -5,8 +5,9 @@
 // extension is removed leaves Home and comes back, in its place, with it.
 
 import type { AddOnView } from "../api/client.ts";
+import type { Layout } from "../api/schemas/home.ts";
 
-export type Layout = { order: string[]; hidden: string[] };
+export type { Layout };
 
 // Home as it was before it could be arranged: the product line, what waits
 // and the loop. Every other block starts off Home, so Home is the same until

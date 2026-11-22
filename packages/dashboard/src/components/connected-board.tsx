@@ -1,8 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryState } from "@/api/client";
 import { STAGES } from "@/lib/stages";
-import { useT } from "@/i18n/use-t";
 
 type Entry = FactoryState["board"][string];
 
@@ -14,14 +14,14 @@ export function ConnectedBoard({
   state,
   brief = false,
 }: Readonly<{ state: FactoryState; brief?: boolean }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const board = boardOf(state);
   if (!board) return null;
   const { name, href, entry } = board;
   return (
     <div className="grid gap-3">
       <p className="text-[13px]">
-        {brief ? t.connect.connected.tracked : t.connect.connected.to}
+        {brief ? t("connect.connected.tracked") : t("connect.connected.to")}
         <a
           href={href}
           target="_blank"
@@ -32,8 +32,8 @@ export function ConnectedBoard({
           <ArrowUpRight className="size-3.5" aria-hidden />
         </a>
         {entry.label === "*"
-          ? t.connect.connected.all
-          : t.connect.connected.labelled(entry.label)}
+          ? t("connect.connected.all")
+          : t("connect.connected.labelled", { label: entry.label })}
       </p>
       {!brief && <StageColumns entry={entry} />}
     </div>
@@ -41,11 +41,11 @@ export function ConnectedBoard({
 }
 
 function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <ul
       className="flex flex-wrap gap-2"
-      aria-label={t.connect.connected.stagesLabel}
+      aria-label={t("connect.connected.stagesLabel")}
     >
       {STAGES.filter((stage) => stage.id !== "draft").map((stage) => {
         const column = (entry.stages as Record<string, string>)[stage.id];
@@ -59,9 +59,9 @@ function StageColumns({ entry }: Readonly<{ entry: Entry }>) {
               className="size-2 rounded-full"
               style={{ background: stage.colour }}
             />
-            {t.connect.stages[stage.id]}
+            {t(`connect.stages.${stage.id}`)}
             <span className="text-muted-foreground">
-              {column ? `= ${column}` : "· no column"}
+              {column ? `= ${column}` : t("connect.noColumn")}
             </span>
           </li>
         );

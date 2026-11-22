@@ -29,7 +29,7 @@ test("a clash is answered by putting one of the two first", () => {
 });
 
 test("Kobble's stages are named in the words, a team's own by themselves", () => {
-  const words = messagesIn("it").market.stages;
+  const words = messagesIn("it");
   assert.equal(stageName(words, { id: "build", name: "Factory" }), "Fabbrica");
   assert.equal(stageName(words, { id: "check", name: "Check" }), "Check");
   assert.equal(stageName(words, { id: "constructor", name: "Mine" }), "Mine");

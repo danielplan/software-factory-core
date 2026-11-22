@@ -2,8 +2,8 @@
 // section of the details with its rows, and the products that use a kit.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
-import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 // A small pill; clickable when it leads somewhere.
@@ -56,12 +56,12 @@ export function UsedBy({
   products,
   label = true,
 }: Readonly<{ products: string[]; label?: boolean }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {label && (
         <span className="text-[11px] text-muted-foreground">
-          {t.sectionsOf.usedBy}
+          {t("market.sectionsOf.usedBy")}
         </span>
       )}
       {products.map((name) => (

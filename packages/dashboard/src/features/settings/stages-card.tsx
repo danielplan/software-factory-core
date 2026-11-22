@@ -4,10 +4,11 @@
 
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type FactoryState, post, type StagesView } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import { nameOf } from "@/lib/market-view";
 import { moveStage, settle, stageName } from "./stages-view";
 
@@ -16,12 +17,12 @@ import { Topic } from "@/components/settings-card";
 type Place = StagesView["order"][number];
 
 export function StagesCard({ state }: Readonly<{ state: FactoryState }>) {
-  const t = useT();
-  const w = t.settings.stages;
+  const t = useTranslation().t;
+  const w = t;
   const { order, clash } = state.stages;
   const [problem, setProblem] = useState(false);
   const ids = order.map((place) => place.id);
-  const named = (place: Place) => stageName(t.market.stages, place);
+  const named = (place: Place) => stageName(t, place);
   const keep = (next: string[]) => {
     setProblem(false);
     post("/api/stages", { order: next }).catch(() => {
@@ -31,17 +32,23 @@ export function StagesCard({ state }: Readonly<{ state: FactoryState }>) {
   const first = order.find((place) => place.id === clash?.first);
   const second = order.find((place) => place.id === clash?.second);
   return (
-    <Topic title={t.settings.sections.stages} about={w.about}>
+    <Topic
+      title={t("settings.sections.stages")}
+      about={w("settings.stages.about")}
+    >
       {first && second && (
         <Clash
-          question={w.clash(named(first), named(second))}
+          question={w("settings.stages.clash", {
+            a: named(first),
+            b: named(second),
+          })}
           answers={[
             {
-              label: w.first(named(first)),
+              label: w("settings.stages.first", { n: named(first) }),
               ids: settle(ids, first.id, second.id),
             },
             {
-              label: w.first(named(second)),
+              label: w("settings.stages.first", { n: named(second) }),
               ids: settle(ids, second.id, first.id),
             },
           ]}
@@ -49,7 +56,9 @@ export function StagesCard({ state }: Readonly<{ state: FactoryState }>) {
         />
       )}
       {order.length === 0 ? (
-        <p className="text-[13px] text-muted-foreground">{w.none}</p>
+        <p className="text-[13px] text-muted-foreground">
+          {w("settings.stages.none")}
+        </p>
       ) : (
         <ol className="grid gap-1.5">
           {order.map((place, at) => (
@@ -68,7 +77,7 @@ export function StagesCard({ state }: Readonly<{ state: FactoryState }>) {
       )}
       {problem && (
         <p role="alert" className="text-[13px] text-destructive">
-          {w.notKept}
+          {w("settings.stages.notKept")}
         </p>
       )}
     </Topic>
@@ -124,9 +133,9 @@ function StageRow({
   state: FactoryState;
   onMove: (by: -1 | 1) => void;
 }>) {
-  const t = useT();
-  const w = t.settings.stages;
-  const name = stageName(t.market.stages, place);
+  const t = useTranslation().t;
+  const w = t;
+  const name = stageName(t, place);
   const owner = state.addOns.find((one) => one.id === place.by);
   return (
     <li className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
@@ -136,13 +145,13 @@ function StageRow({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[13px] font-medium">{name}</span>
         <span className="block truncate text-xs text-muted-foreground">
-          {w.by(owner ? nameOf(t.market, owner) : place.by)}
+          {w("settings.stages.by", { n: owner ? nameOf(t, owner) : place.by })}
         </span>
       </span>
       <Button
         variant="ghost"
         size="icon"
-        aria-label={`${w.moveUp}: ${name}`}
+        aria-label={`${w("settings.stages.moveUp")}: ${name}`}
         disabled={at === 0}
         onClick={() => {
           onMove(-1);
@@ -153,7 +162,7 @@ function StageRow({
       <Button
         variant="ghost"
         size="icon"
-        aria-label={`${w.moveDown}: ${name}`}
+        aria-label={`${w("settings.stages.moveDown")}: ${name}`}
         disabled={last}
         onClick={() => {
           onMove(1);

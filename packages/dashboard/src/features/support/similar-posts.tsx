@@ -2,8 +2,8 @@
 // 👍, or sliding in while they type.
 
 import { ThumbsUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 
 import {
@@ -26,7 +26,7 @@ export function SimilarOffer({
   post,
   problem,
 }: Readonly<{ post: Post; problem: string | null }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <div className="grid gap-2 motion-safe:animate-slide-in">
       <SimilarRow
@@ -41,7 +41,7 @@ export function SimilarOffer({
         onClick={writeDraft}
         className="self-end text-[12px] text-muted-foreground hover:text-foreground"
       >
-        {t.chat.different} →
+        {t("feedback.chat.different")} →
       </button>
     </div>
   );
@@ -109,7 +109,7 @@ export function SimilarAsYouType({
 }: Readonly<{ text: string; thread: Thread | null; onThumb: () => void }>) {
   const mine = useMine();
   const onBoard = useOnBoard();
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const step = thread?.step ?? "choose";
   if (!["choose", "listen", "question", "again"].includes(step)) return null;
   if (text.trim().length < 6) return null;
@@ -122,7 +122,7 @@ export function SimilarAsYouType({
   return (
     <div className="grid gap-1.5 px-4 pt-2">
       <span className="text-[11px] text-muted-foreground">
-        {t.window.alreadyOnBoard}
+        {t("feedback.window.alreadyOnBoard")}
       </span>
       {posts.map((post) => (
         <div key={post.number} className="motion-safe:animate-slide-in">

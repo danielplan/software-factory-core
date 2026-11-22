@@ -23,9 +23,9 @@ import {
   Wrench,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 // The kind of a step, from its first words, with its icon and colour.
 const KINDS: [RegExp, LucideIcon, string][] = [
@@ -58,7 +58,7 @@ export function AgentTrace({
   steps,
   live,
 }: Readonly<{ steps: string[]; live: boolean }>) {
-  const t = useT().builder.trace;
+  const t = useTranslation().t;
   const end = useRef<HTMLOListElement>(null);
   useEffect(() => {
     const list = end.current;
@@ -75,8 +75,8 @@ export function AgentTrace({
           />
         ))}
         <span className="ml-2 font-mono text-[11px] text-[#6b7280]">
-          {t.steps(steps.length)}
-          {live ? t.live : ""}
+          {t("builder.trace.steps", { count: steps.length })}
+          {live ? t("builder.trace.live") : ""}
         </span>
       </div>
       <ol
@@ -84,7 +84,7 @@ export function AgentTrace({
         className="grid max-h-[60vh] gap-1 overflow-y-auto px-3 py-2.5 font-mono text-[12px] leading-snug text-[#d1d5db]"
       >
         {steps.length === 0 && (
-          <li className="text-[#6b7280]">{t.nothingYet}</li>
+          <li className="text-[#6b7280]">{t("builder.trace.nothingYet")}</li>
         )}
         {steps.map((step, at) => {
           const { Icon, tint } = kindOf(step);

@@ -4,13 +4,19 @@
 
 import { KeyRound, Plug } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { type Board, get, messageOf, post, type StageMap } from "@/api/client";
+import { type Board, messageOf, post, type StageMap } from "@/api/client";
+import { useRead } from "@/api/query";
+import {
+  boardsSchema,
+  columnsSchema,
+  repositoriesSchema,
+} from "@/api/schemas/github";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { Pick, WhichWork } from "../pick";
-import { type Columns, StageMapping } from "../stage-map";
-import { useT } from "@/i18n/use-t";
+import { StageMapping } from "../stage-map";
 
 export const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 
@@ -24,22 +30,14 @@ export function BoardPicker({
   onAllow: () => void;
   onDone: (message: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const choice = useBoardChoice(connected);
   const { repository, board, label, stages } = choice;
   const [checking, setChecking] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const repositories = useList<string>(
-    "/api/add-ons/github/repositories",
-    setProblem,
-  );
-  const owner = repository.split("/")[0] ?? "";
-  const boards = useList<{ number: number; title: string }>(
-    owner
-      ? `/api/add-ons/github/boards?owner=${encodeURIComponent(owner)}`
-      : null,
-    setProblem,
-  );
+  const [sendProblem, setProblem] = useState<string | null>(null);
+  const lists = useLists(repository);
+  const { repositories, boards } = lists;
+  const problem = sendProblem ?? lists.problem;
   const connect = async () => {
     setChecking(true);
     setProblem(null);
@@ -77,11 +75,11 @@ export function BoardPicker({
         />
       )}
       <WhichWork value={label} onPick={choice.setLabel} noun="cards" />
-      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
+      {problem && <ProblemBox title={t("connect.didNotWork")} text={problem} />}
       {problem?.includes("allow it") && (
         <Button variant="outline" className={SMALL} onClick={onAllow}>
           <KeyRound aria-hidden />
-          {t.connect.github.allow}
+          {t("connect.github.allow")}
         </Button>
       )}
       <Button
@@ -90,10 +88,31 @@ export function BoardPicker({
         onClick={() => void connect()}
       >
         <Plug aria-hidden />
-        {checking ? t.connect.checking : t.connect.connect}
+        {checking ? t("connect.checking") : t("connect.connect")}
       </Button>
     </div>
   );
+}
+
+// The repositories, and the boards of the picked repository's owner, as
+// GitHub lists them; why it could not, to show.
+function useLists(repository: string) {
+  const repositories = useRead(
+    "/api/add-ons/github/repositories",
+    repositoriesSchema,
+  );
+  const owner = repository.split("/")[0] ?? "";
+  const boards = useRead(
+    owner
+      ? `/api/add-ons/github/boards?owner=${encodeURIComponent(owner)}`
+      : null,
+    boardsSchema,
+  );
+  return {
+    repositories: repositories.data ?? [],
+    boards: boards.data ?? [],
+    problem: repositories.problem ?? boards.problem,
+  };
 }
 
 // The repository and its owner's board, picked from lists.
@@ -112,17 +131,17 @@ function RepositoryAndBoard({
   onRepository: (value: string) => void;
   onBoard: (value: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <Pick
-        label={t.connect.github.repository}
+        label={t("connect.github.repository")}
         value={repository}
         options={repositories.map((one) => ({ value: one, label: one }))}
         onPick={onRepository}
       />
       <Pick
-        label={t.connect.github.boardPick}
+        label={t("connect.github.boardPick")}
         value={board}
         options={boards.map((one) => ({
           value: String(one.number),
@@ -148,42 +167,16 @@ function BoardColumns({
   onSuggested: (stages: StageMap) => void;
   onStages: (stages: StageMap) => void;
 }>) {
-  const [columns, setColumns] = useState<string[]>([]);
+  const { data } = useRead(
+    `/api/add-ons/github/columns?repository=${encodeURIComponent(repository)}&board=${board}`,
+    columnsSchema,
+  );
+  const columns = data?.columns ?? [];
   useEffect(() => {
-    get<Columns>(
-      `/api/add-ons/github/columns?repository=${encodeURIComponent(repository)}&board=${board}`,
-    )
-      .then((found) => {
-        setColumns(found.columns);
-        onSuggested(found.suggested);
-      })
-      .catch(() => {
-        setColumns([]);
-      });
-  }, [repository, board, onSuggested]);
+    if (data) onSuggested(data.suggested);
+  }, [data, onSuggested]);
   if (!stages || columns.length === 0) return null;
   return <StageMapping columns={columns} value={stages} onChange={onStages} />;
-}
-
-// A list the server gives (none for no path); why it could not, to show.
-function useList<T>(
-  path: string | null,
-  onProblem: (problem: string | null) => void,
-): T[] {
-  const [list, setList] = useState<T[]>([]);
-  useEffect(() => {
-    if (!path) return;
-    get<T[]>(path)
-      .then((found) => {
-        setList(found);
-        onProblem(null);
-      })
-      .catch((error: unknown) => {
-        setList([]);
-        onProblem(messageOf(error));
-      });
-  }, [path, onProblem]);
-  return list;
 }
 
 // The choice as it is made, from the board connected now if there is one:
