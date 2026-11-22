@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { type Folder, ModelStore } from "../src/voice/model-store.ts";
+import { type Folder, ModelStore } from "../src/lib/voice/model-store.ts";
 
 // The speech models' files kept in the browser's file store, with a pretend
 // file store in memory: which model downloads, what is kept, an interrupted

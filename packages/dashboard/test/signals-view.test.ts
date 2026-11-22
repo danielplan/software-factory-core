@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { SignalRow } from "../src/api.ts";
+import type { SignalRow } from "../src/api/client.ts";
 import { countsOf, koboldLine } from "../src/lib/shell-view.ts";
 import {
   agoOf,
@@ -22,7 +22,7 @@ import {
   TYPE_WORDS,
   tintIndexOf,
   whoOf,
-} from "../src/signals/view.ts";
+} from "../src/lib/signals-view.ts";
 
 // What the Signals and Personas pages say.
 

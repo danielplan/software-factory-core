@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, mock, test } from "node:test";
 
-import type { ModelProgress } from "../src/voice/call.ts";
-import { type Hearing, WhisperEars } from "../src/voice/ears.ts";
-import type { Shown } from "../src/voice/live-words.ts";
-import { MicrophoneError } from "../src/voice/microphone.ts";
-import { Recogniser } from "../src/voice/recogniser.ts";
-import { FRAME_SIZE, SAMPLE_RATE } from "../src/voice/voice-detector.ts";
-import type { Ask, Tell } from "../src/voice/whisper-worker.ts";
+import type { ModelProgress } from "../src/lib/voice/call.ts";
+import { type Hearing, WhisperEars } from "../src/lib/voice/ears.ts";
+import type { Shown } from "../src/lib/voice/live-words.ts";
+import { MicrophoneError } from "../src/lib/voice/microphone.ts";
+import { Recogniser } from "../src/lib/voice/recogniser.ts";
+import { FRAME_SIZE, SAMPLE_RATE } from "../src/lib/voice/voice-detector.ts";
+import type { Ask, Tell } from "../src/lib/voice/whisper-worker.ts";
 
 // The ears with the speech models' worker and the microphone pretended: the
 // quick model's drafts while the owner speaks; the accurate model writing

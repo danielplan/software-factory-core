@@ -5,8 +5,8 @@
 // what is done, each stage with its count and its latest two. Kept apart
 // from the page so it is checked on its own.
 
-import type { WorkView } from "../api.ts";
-import { reasonOf } from "../factory/stuck-view.ts";
+import type { WorkView } from "../api/client.ts";
+import { reasonOf } from "./stuck-view.ts";
 import { ENGLISH, type Messages } from "../i18n/messages.ts";
 
 type Words = Messages["home"];

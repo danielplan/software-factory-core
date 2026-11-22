@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { AddOnView, ShownView } from "../src/api.ts";
+import type { AddOnView, ShownView } from "../src/api/client.ts";
 import {
   blockAbout,
   blockName,

@@ -1,4 +1,4 @@
-import type { Light } from "@/api";
+import type { Light } from "@/api/client";
 import { useT } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 

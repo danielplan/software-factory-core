@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { AddOnView } from "../src/api.ts";
+import type { AddOnView } from "../src/api/client.ts";
 import {
   hide,
   layoutFrom,

@@ -6,7 +6,7 @@
 // the catalogue by id; an extension it does not know (a team's own) shows
 // the name and line of its own definition.
 
-import type { AddOnView, KitView, ProductView } from "../api.ts";
+import type { AddOnView, KitView, ProductView } from "../api/client.ts";
 import type { Messages } from "../i18n/messages.ts";
 import { KOBOLDS } from "./kobolds.ts";
 import type { Page } from "./routes.ts";

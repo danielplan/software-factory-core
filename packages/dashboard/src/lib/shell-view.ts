@@ -4,7 +4,7 @@
 // factory's light. Kept apart from the
 // components so it is checked on its own.
 
-import type { IdeaView, Light, PartView, WorkView } from "../api.ts";
+import type { IdeaView, Light, PartView, WorkView } from "../api/client.ts";
 import { ENGLISH, type Messages } from "../i18n/messages.ts";
 import type { KoboldId } from "./kobolds.ts";
 import type { Page } from "./routes.ts";

@@ -8,17 +8,17 @@ import {
   type ModelProgress,
   showsVoice,
   step,
-} from "../src/voice/call.ts";
-import { isFiller } from "../src/voice/fillers.ts";
-import { LiveWords } from "../src/voice/live-words.ts";
-import { statusLine } from "../src/voice/status-line.ts";
+} from "../src/lib/voice/call.ts";
+import { isFiller } from "../src/lib/voice/fillers.ts";
+import { LiveWords } from "../src/lib/voice/live-words.ts";
+import { statusLine } from "../src/lib/voice/status-line.ts";
 import {
   DRAFT_EVERY_MS,
   FRAME_SIZE,
   SAMPLE_RATE,
   VoiceDetector,
   WRITE_EARLY_AFTER_MS,
-} from "../src/voice/voice-detector.ts";
+} from "../src/lib/voice/voice-detector.ts";
 
 // Hearing the owner quickly: the drafts while they speak and the words
 // shown from them, the sentence handed over early once they go quiet (so it

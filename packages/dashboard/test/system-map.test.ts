@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { PartView } from "../src/api.ts";
+import type { PartView } from "../src/api/client.ts";
 import { ENGLISH } from "../src/i18n/messages.ts";
-import { linesOf, nearOf } from "../src/lib/system-map.ts";
+import { linesOf, nearOf } from "../src/features/system/system-map-lines.ts";
 
 function part(id: string, dependsOn: string[] = []): PartView {
   return {

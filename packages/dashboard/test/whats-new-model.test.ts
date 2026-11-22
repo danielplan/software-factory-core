@@ -9,7 +9,7 @@ import {
   firstSentence,
   shownChange,
   showsNewer,
-} from "../src/updates/whats-new-model.ts";
+} from "../src/features/updates/whats-new-model.ts";
 
 test("a text splits into its first sentence and the rest", () => {
   assert.deepEqual(firstSentence("One. Two. Three."), {
