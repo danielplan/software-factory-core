@@ -164,8 +164,9 @@ from the map:
 1. `configure` the project (its name makes the folder), then its products:
    existing code with its folder, a new product without one (it is made
    with its kit's starter, then described with the commands its kit finds
-   in it). A project with no `package.json` at its top gets one, with its
-   checks and git hooks.
+   in it). The project gets the factory's git hooks (`lefthook.yml`) and
+   scripts in its `package.json`; what `configure` says of hooks or
+   scripts it replaced, tell the owner.
 2. Write each product's `BLUEPRINT.md` (a new product has its starter's:
    make it this product's), and the knowledge base's pages from the map:
    what the project is and for whom, its workflows, what must never happen,

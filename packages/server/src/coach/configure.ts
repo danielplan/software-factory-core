@@ -50,7 +50,8 @@ export type Workshop = {
   // The factory's folder, once made.
   root: () => string | null;
   company: () => Company | null;
-  makeFolder: (company: { name: string; about: string }) => void;
+  // What was said of the project files the core owns.
+  makeFolder: (company: { name: string; about: string }) => string[];
   saveCompany: (company: Company) => void;
   // The names of the new products that could not be made.
   addProducts: (products: SetupProduct[]) => Promise<string[]>;
@@ -104,8 +105,11 @@ function project(shop: Workshop, given: { name: string; about?: string }) {
   const company = shop.company();
   const about = given.about?.trim() ?? company?.about ?? "";
   if (!company) {
-    shop.makeFolder({ name: given.name, about });
-    return "Made the factory's folder (factory/), with its knowledge base.";
+    const said = shop.makeFolder({ name: given.name, about });
+    return [
+      "Made the factory's folder (factory/), with its knowledge base.",
+      ...said,
+    ].join("\n");
   }
   shop.saveCompany({ ...company, name: given.name.trim(), about });
   return "Changed the project.";

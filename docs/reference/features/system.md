@@ -18,7 +18,7 @@ kit's. The factory's own programs show in Settings, not on System.
 
 A part that needs a backend (a part of type backend that answers on a
 port, named in its `dependsOn`) is started with that backend's address in
-`BACKEND_URL`, unless its kit sets one: a web app's development server sends
+`BACKEND_URL`, always, in every factory: a web app's development server sends
 its `/api` requests there, so it reaches the server it depends on. A part's
 settings may also name another part's port (`{port:<part>}`) or address
 (`{address:<part>}`), filled in as it starts

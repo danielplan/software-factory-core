@@ -40,24 +40,38 @@ CLI, or Jira Cloud with an API token, each checked before it is saved.
   the framework's own generator. `software-factory new <name>` starts a new
   project.
 
-## The project's own checks
+## The project files the core owns
 
-A project with no `package.json` at its top gets one when its factory folder
-is made, as a company's factory keeps it: private, with the core pinned, and
-`npm run verify` (every product's `verify`, then the knowledge base's
-checks) and `npm run check:docs`. With it comes `lefthook.yml`, the git
-hooks that `npm install` at the top sets up:
+Some files at the top of the project are the core's: setup writes them, and
+every `software-factory upgrade` writes them again, the same way in every
+factory, so all are on the same page. What the team wants differently goes in
+a place of its own, never by editing the core's
+([decision 0015](../../decisions/0015-the-core-overwrites-what-it-owns.md)).
 
-- **before a commit:** `software-factory check-format` on the staged files,
-  which runs the `format:check` of each product they are in, and
-  `software-factory check-docs` when a page changed;
-- **before a push:** `software-factory verify --pushed`, which runs the
-  `verify` command of each product changed by the pushed commits no remote
-  has yet (a new branch counts only its own).
+- **`lefthook.yml`,** the git hooks, whole (it says so at its top), which
+  `npm install` at the top sets up:
+  - **before a commit:** `software-factory check-format` on the staged
+    files, which runs the `format:check` of each product they are in, and
+    `software-factory check-docs` when a page changed;
+  - **before a push:** `software-factory verify --pushed`, which runs the
+    `verify` command of each product changed by the pushed commits no
+    remote has yet (a new branch counts only its own).
 
-A project that has a `package.json` keeps its own (the core is only pinned
-in it), and one with git hooks of its own (lefthook's settings, husky) gets
-no `lefthook.yml`. The factory's `AGENTS.md` says what holds for both.
+  It ends by taking in (`extends`) the team's own hooks,
+  `factory/hooks.yml`: the team's file, made from a short template when it
+  is missing and never changed by the core.
+
+- **In `package.json`** (made when missing): the core pinned, lefthook at
+  the core's version, and the scripts `prepare` (`lefthook install`),
+  `verify` (every product's `verify`, then the knowledge base's checks),
+  `check:docs` and `check:format`. Every other key and script is the
+  team's.
+
+A `lefthook.yml` the core did not write is kept as
+`factory/hooks-before-<version>.yml` (not taken in), and the owner is told to
+bring the team's own hooks into `factory/hooks.yml`; a script the core
+replaced is named with its old value. `software-factory check` says when one
+of these files was changed by hand.
 
 ## How a new product is made
 
@@ -92,16 +106,16 @@ description would make the folder, and the starter would never be copied.
 
 ## Where it lives
 
-| Part                 | Where                                                                                              |
-| -------------------- | -------------------------------------------------------------------------------------------------- |
-| The coach            | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
-| What it may install  | `packages/server/src/installables.ts`                                                              |
-| Making products      | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
-| The project's checks | `packages/server/src/project-checks.ts`, `packages/server/src/verify-command.ts`                   |
-| Finding products     | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
-| Its guide            | `packages/skills/guides/setup-coach.md`                                                            |
-| The page             | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
-| The files            | `factory/setup.json` (the setup conversation and its map)                                          |
+| Part                | Where                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| The coach           | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
+| What it may install | `packages/server/src/installables.ts`                                                              |
+| Making products     | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
+| The project's files | `packages/server/src/project-files.ts`, `packages/server/src/verify-command.ts`                    |
+| Finding products    | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
+| Its guide           | `packages/skills/guides/setup-coach.md`                                                            |
+| The page            | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
+| The files           | `factory/setup.json` (the setup conversation and its map)                                          |
 
 ## Checked and not checked
 
@@ -109,5 +123,6 @@ Checked by tests: the coach's steps, map and records, setting up and
 connecting (`setup-coach.test.ts`, `setup.test.ts`, `connect.test.ts`);
 making products, from `configure` to the product made from its starter and
 described (`setup-makes-products.test.ts`, `create-products.test.ts`); the
-project's own checks and the commands they run (`project-checks.test.ts`).
+project files the core owns, their upgrade and the commands they run
+(`project-files.test.ts`).
 Not checked by a test: what the coach says about a real codebase.

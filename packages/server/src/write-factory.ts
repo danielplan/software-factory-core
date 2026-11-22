@@ -1,6 +1,6 @@
 // The project's factory folder from the dashboard's setup steps: the
 // company first (the folder, the project's rules pointing to it, and the
-// project's own checks), then products whenever the owner adds them: the
+// project files the core owns), then products whenever the owner adds them: the
 // kits their kinds need first, then each product's description once its
 // code is there (found in existing code, or just made).
 
@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 
 import {
   addProduct,
+  CORE_VERSION,
   createFactoryFolder,
   FACTORY_FOLDER,
   findProducts,
@@ -23,16 +24,17 @@ import {
 
 import type { CreateCompany, SetupProduct } from "./api.ts";
 import { installSkills } from "./install-skills.ts";
-import { pinCore } from "./pin-core.ts";
-import { addProjectChecks } from "./project-checks.ts";
+import { projectFilesSaid } from "./project-files.ts";
 import { addKitServers } from "./kit-servers.ts";
 import { Refused } from "./refused.ts";
 
-// The factory folder made in the project; its path.
+// The factory folder made in the project; its path. What is said of the
+// project files the core owns (project-files.ts) goes to `say`.
 export function writeCompany(
   request: CreateCompany,
   project: string,
   templates: Templates,
+  say: (line: string) => void = () => {},
 ): string {
   const name = request.name.trim();
   if (!name) throw new Refused("Give the project a name.");
@@ -42,8 +44,8 @@ export function writeCompany(
   createFactoryFolder(root, { name, about: request.about }, templates);
   pointToFactory(project);
   installSkills(project);
-  addProjectChecks(project, name);
-  pinCore(project);
+  const { done, left } = projectFilesSaid(project, name, CORE_VERSION);
+  for (const line of [...done, ...left]) say(line);
   return root;
 }
 
