@@ -536,13 +536,27 @@
   .m-leave {
     animation: m-leave 0.2s ease-out forwards;
   }
+  /* Home's blocks come in together once: one gentle fade, a 4px rise. */
+  .m-home-in {
+    animation: m-home-in 0.2s ease-out backwards;
+  }
   /* A block just placed on Home: a ring that fades. */
   .m-ring {
     animation: m-ring 1.4s ease-out backwards;
   }
-  /* A dialog scales in from 98% with a fade. */
+  /* A dialog: a soft fade with the panel rising 4px (160 ms), the backdrop
+     fading in with it; closing is a 120 ms fade only. No scale: the panel is
+     placed with the translate property, so only opacity and a small
+     transform move here and nothing jumps. */
   [data-slot="dialog-content"][data-state="open"] {
-    animation: m-dialog 0.2s ease-out;
+    animation: m-dialog-in 0.16s ease-out;
+  }
+  [data-slot="dialog-overlay"][data-state="open"] {
+    animation: m-fade-in 0.16s ease-out;
+  }
+  [data-slot="dialog-content"][data-state="closed"],
+  [data-slot="dialog-overlay"][data-state="closed"] {
+    animation: m-fade-out 0.12s ease-out forwards;
   }
 }
 @keyframes m-rise {
@@ -580,9 +594,32 @@
     box-shadow: 0 0 0 3px transparent;
   }
 }
-@keyframes m-dialog {
+@keyframes m-home-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.98);
+    transform: translateY(4px);
+  }
+}
+@keyframes m-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes m-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes m-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+/* Reduced motion: dialogs just appear and disappear. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-content"],
+  [data-slot="dialog-overlay"] {
+    animation: none !important;
   }
 }

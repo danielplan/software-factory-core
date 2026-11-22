@@ -73,8 +73,13 @@ const STAGE_LOOK: Record<Stage["id"], { icon: ReactNode; colour: string }> = {
 };
 
 export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
-  const { data: explorations } = useExplorations();
-  const { data: signals } = useSignals();
+  const { data: explorations, problem: exploringProblem } = useExplorations();
+  const { data: signals, problem: signalsProblem } = useSignals();
+  // Blocks are shown once what they show is read, so none of them grows or
+  // moves after it appears.
+  const ready =
+    (explorations !== null || exploringProblem !== null) &&
+    (signals !== null || signalsProblem !== null);
   const t = useT();
   const [arranging, setArranging] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -275,6 +280,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
         blocks={blocks}
         editing={arranging}
         installed={installed}
+        ready={ready}
         adding={adding}
         onAdding={setAdding}
         resetting={resetting}

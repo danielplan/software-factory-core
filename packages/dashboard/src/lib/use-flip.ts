@@ -20,15 +20,24 @@ function placeOf(el: HTMLElement): { x: number; y: number } {
   return { x, y };
 }
 
+// `act` is a counter the page bumps when the person does something to the
+// things (reorder, add, hide): with it, things only move after such a change,
+// never because the page around them shifted (data arriving, a layout
+// coming in). Without it, every change of place is followed.
 export function useFlip(
   ref: RefObject<HTMLElement | null>,
   enter = false,
+  act?: number,
 ): void {
   const before = useRef(new Map<string, { x: number; y: number }>());
+  const actWas = useRef(act);
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const asked = act === undefined || act !== actWas.current;
+    actWas.current = act;
+    const calm =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches || !asked;
     const now = new Map<string, { x: number; y: number }>();
     for (const el of root.querySelectorAll<HTMLElement>("[data-flip]")) {
       const id = el.dataset.flip ?? "";

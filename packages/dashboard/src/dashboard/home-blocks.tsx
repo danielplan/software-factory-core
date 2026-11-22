@@ -133,14 +133,21 @@ function whole(layout: Layout): Layout {
 // it changes (the page's stream) and every few seconds.
 function useLayout() {
   const [layout, set] = useState<Layout>(DEFAULT);
+  // Home waits for the team's layout before it shows its blocks, so they
+  // come once, in their place.
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     let current = true;
     const load = () => {
       get<{ layout: Layout | null }>("/api/home-layout").then(
         (read) => {
-          if (current) set(read.layout ? whole(read.layout) : DEFAULT);
+          if (!current) return;
+          set(read.layout ? whole(read.layout) : DEFAULT);
+          setLoaded(true);
         },
-        () => undefined,
+        () => {
+          if (current) setLoaded(true);
+        },
       );
     };
     load();
@@ -156,7 +163,7 @@ function useLayout() {
     set(next);
     post("/api/home-layout", next).catch(() => undefined);
   };
-  return [layout, change] as const;
+  return [layout, change, loaded] as const;
 }
 
 // Blocks of an extension that is not installed are not offered (null: all are).
@@ -216,6 +223,7 @@ export function HomeBlocks({
   blocks,
   editing,
   installed,
+  ready,
   adding,
   onAdding,
   resetting,
@@ -224,6 +232,8 @@ export function HomeBlocks({
   blocks: Record<BlockId, ReactNode>;
   editing: boolean;
   installed: Installed;
+  // What the blocks show has been read: they come in together, in place.
+  ready: boolean;
   // The "Add a block" dialog, opened from the page's header or the empty slot.
   adding: boolean;
   onAdding: (open: boolean) => void;
@@ -231,13 +241,21 @@ export function HomeBlocks({
   resetting: boolean;
   onResetting: (open: boolean) => void;
 }>) {
-  const [layout, change] = useLayout();
+  const [layout, rawChange, loaded] = useLayout();
+  // What the person does to the blocks, counted: only that moves them.
+  const [act, setAct] = useState(0);
+  const change = (next: Layout) => {
+    setAct((n) => n + 1);
+    rawChange(next);
+  };
+  const changeNow = useRef(change);
+  changeNow.current = change;
   const [dragging, setDragging] = useState<BlockId | null>(null);
   const [over, setOver] = useState<BlockId | null>(null);
   // Calm motion: blocks slide to their new place and a new one fades in; a
   // hidden one collapses away; a placed one gets a ring that fades.
   const root = useRef<HTMLDivElement>(null);
-  useFlip(root, true);
+  useFlip(root, true, act);
   const [leaving, setLeaving] = useState<BlockId | null>(null);
   const [lit, setLit] = useState<BlockId | null>(null);
   // Placing a block just added: it follows the pointer until it is put down.
@@ -257,7 +275,9 @@ export function HomeBlocks({
   useEffect(() => {
     if (!placingId) return;
     const place = (at: number) => {
-      change(placeAt(now.current.layout, placingId, at, now.current.installed));
+      changeNow.current(
+        placeAt(now.current.layout, placingId, at, now.current.installed),
+      );
       setPlacing(null);
       setLit(placingId);
       setTimeout(() => {
@@ -310,7 +330,7 @@ export function HomeBlocks({
       window.removeEventListener("keydown", key, true);
       document.body.style.cursor = "";
     };
-  }, [placingId, change]);
+  }, [placingId]);
   // Leaving arrange mode puts a block still in hand away.
   useEffect(() => {
     if (!arranging) setPlacing(null);
@@ -332,9 +352,10 @@ export function HomeBlocks({
       setLeaving(null);
     }, 200);
   };
+  if (!loaded || !ready) return null;
   return (
     <>
-      <div ref={root} className="contents">
+      <div ref={root} className="m-home-in grid gap-4">
         {shown.map((id, at) => (
           <div
             key={id}

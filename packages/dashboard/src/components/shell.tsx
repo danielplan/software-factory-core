@@ -45,7 +45,12 @@ export function Shell({
       <main className="min-w-0 flex-1">
         <div
           key={current}
-          className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-28 motion-safe:animate-rise sm:px-10 sm:pt-[34px]"
+          className={
+            "mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-28 sm:px-10 sm:pt-[34px]" +
+            // Home does not animate when it opens; motion there is only for
+            // what the person does.
+            (current === "home" ? "" : " motion-safe:animate-rise")
+          }
         >
           {children}
         </div>
