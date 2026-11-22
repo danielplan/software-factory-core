@@ -2,9 +2,12 @@
 // step, or its open questions about it, each with a small field to answer
 // it. There is no chat: the owner corrects cards in place.
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { type Card, type CoachView, messageOf, post } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
@@ -44,32 +47,33 @@ export function KoboldSays({
   );
 }
 
+// An answer to one of the kobold's questions: some words.
+const answerSchema = z.object({ answer: z.string().trim().min(1) });
+
 // One of the kobold's questions, answered in place.
 function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
   const t = useTranslation().t;
-  const [answer, setAnswer] = useState("");
+  const form = useForm({
+    resolver: zodResolver(answerSchema),
+    defaultValues: { answer: "" },
+    mode: "onChange",
+  });
   const [problem, setProblem] = useState<string | null>(null);
-  const send = () => {
+  const send = form.handleSubmit(async ({ answer }) => {
     setProblem(null);
-    post("/api/setup/say", {
-      text: `${answer.trim()}\n\n(About: ${card.title} [${card.id}])\n\n(On the step: ${step.area ?? step.name})`,
+    await post("/api/setup/say", {
+      text: `${answer}\n\n(About: ${card.title} [${card.id}])\n\n(On the step: ${step.area ?? step.name})`,
     }).then(
       () => {
-        setAnswer("");
+        form.reset();
       },
       (error: unknown) => {
         setProblem(messageOf(error));
       },
     );
-  };
+  });
   return (
-    <form
-      className="grid gap-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        send();
-      }}
-    >
+    <form className="grid gap-2" onSubmit={(event) => void send(event)}>
       <p>
         <b className="font-semibold">
           {/[.?!]$/.test(card.title) ? card.title : `${card.title}.`}
@@ -81,12 +85,9 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
           aria-label={t("setup.says.answerOn", { title: card.title })}
           className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
           placeholder={t("setup.says.yourAnswer")}
-          value={answer}
-          onChange={(event) => {
-            setAnswer(event.target.value);
-          }}
+          {...form.register("answer")}
         />
-        <Button type="submit" size="pill-sm" disabled={!answer.trim()}>
+        <Button type="submit" size="pill-sm" disabled={!form.formState.isValid}>
           <Send aria-hidden />
           {t("setup.says.answer")}
         </Button>

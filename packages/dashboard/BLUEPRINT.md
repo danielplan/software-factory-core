@@ -78,7 +78,12 @@ kit's table instead.
 Code written before Kobble was held to its kit. Each line is to be moved to
 the kit's library, one card at a time; nothing new is added to it.
 
-- **Forms:** fields kept in component state, not react-hook-form.
+- **Forms:** the forms with fields (the live app's address and token, a
+  persona added in setup, an answer to the coach's question) use
+  react-hook-form with zod; the chat boxes (Doodle's talk panel, the
+  coach's answer box, Sprocket's box, an answer on a stuck card) still keep
+  their text in component state, as voice, attachments and quick picks
+  write into it too.
 - **Tests:** the logic is tested with node's test runner (`test/`); there
   are no component tests with Testing Library and MSW, no click-throughs
   with Playwright, and no prototype mode.

@@ -5,8 +5,11 @@
 // again, and the signals already handled.
 
 import { Eye, Plug } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { type UseFormRegisterReturn, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import {
   CORE_VERSION,
@@ -41,15 +44,13 @@ const HOW = `https://github.com/${RELEASE_SOURCE.replace(/^github:/, "")}/blob/r
 function Field({
   label,
   placeholder,
-  value,
+  field,
   secret = false,
-  onChange,
 }: Readonly<{
   label: string;
   placeholder: string;
-  value: string;
+  field: UseFormRegisterReturn;
   secret?: boolean;
-  onChange: (value: string) => void;
 }>) {
   return (
     <label className="flex flex-col gap-1.5 text-[13px] text-muted-foreground">
@@ -58,10 +59,7 @@ function Field({
         type={secret ? "password" : "text"}
         autoComplete="off"
         placeholder={placeholder}
-        value={value}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
+        {...field}
         className="h-10 rounded-xl border border-border bg-card px-3 text-[13px] text-foreground outline-none placeholder:text-faint focus-visible:ring-[3px] focus-visible:ring-ring/30"
       />
     </label>
@@ -87,27 +85,31 @@ export function ConnectSignals({ app }: Readonly<{ app: string }>) {
   );
 }
 
+// The live app's address and its token, both needed.
+const connectSchema = z.object({
+  url: z.string().trim().min(1),
+  token: z.string().trim().min(1),
+});
+
 function ConnectCard({ app }: Readonly<{ app: string }>) {
-  const [url, setUrl] = useState("");
-  const [token, setToken] = useState("");
-  const [busy, setBusy] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(connectSchema),
+    defaultValues: { url: "", token: "" },
+    mode: "onChange",
+  });
+  const { isSubmitting: busy, isValid } = form.formState;
   const [problem, setProblem] = useState<string | null>(null);
   const t = useTranslation().t;
+  const connect = form.handleSubmit(async (values) => {
+    setProblem(null);
+    await post("/api/kobble/connect", values).catch((error: unknown) => {
+      setProblem(messageOf(error));
+    });
+  });
   return (
     <form
       className={cn(CARD, "flex flex-col gap-4 px-7 py-[26px]")}
-      onSubmit={(event) => {
-        event.preventDefault();
-        setBusy(true);
-        setProblem(null);
-        post("/api/kobble/connect", { url, token })
-          .catch((error: unknown) => {
-            setProblem(messageOf(error));
-          })
-          .finally(() => {
-            setBusy(false);
-          });
-      }}
+      onSubmit={(event) => void connect(event)}
     >
       <div className="flex items-center gap-3.5">
         <KoboldHead size={48} />
@@ -124,15 +126,13 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
       <Field
         label={t("signals.connect.address")}
         placeholder="https://your-app/api/kobble/export"
-        value={url}
-        onChange={setUrl}
+        field={form.register("url")}
       />
       <Field
         label={t("signals.connect.token")}
         placeholder={t("signals.connect.tokenHint")}
-        value={token}
+        field={form.register("token")}
         secret
-        onChange={setToken}
       />
       {problem && (
         <p role="alert" className="text-[13px] text-destructive">
@@ -140,11 +140,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
         </p>
       )}
       <div className="flex items-center gap-2.5">
-        <Button
-          type="submit"
-          size="pill"
-          disabled={busy || !url.trim() || !token.trim()}
-        >
+        <Button type="submit" size="pill" disabled={busy || !isValid}>
           <Plug aria-hidden />
           {busy ? t("signals.connect.checking") : t("signals.connect.connect")}
         </Button>

@@ -3,9 +3,12 @@
 // row, a person's row with initials, a big row to pick, and New persona.
 // Clicking a card asks the kobold about it; × takes it off.
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { type Card, faceFrom, messageOf, post } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -248,6 +251,12 @@ export function NewPersona({
   );
 }
 
+// A persona the owner adds: who they are (needed), and what they do.
+const newCardSchema = z.object({
+  title: z.string().trim().min(1),
+  text: z.string(),
+});
+
 function PersonaForm({
   area,
   onProblem,
@@ -258,34 +267,31 @@ function PersonaForm({
   onDone: () => void;
 }>) {
   const t = useTranslation().t;
-  const [title, setTitle] = useState("");
-  const [text, setText] = useState("");
-  const add = () => {
+  const form = useForm({
+    resolver: zodResolver(newCardSchema),
+    defaultValues: { title: "", text: "" },
+    mode: "onChange",
+  });
+  const add = form.handleSubmit(async (card) => {
     onProblem(null);
-    post("/api/setup/draft", { add: { area, title, text } }).then(
+    await post("/api/setup/draft", { add: { area, ...card } }).then(
       onDone,
       (error: unknown) => {
         onProblem(messageOf(error));
       },
     );
-  };
+  });
   return (
     <form
       className="grid gap-2 rounded-xl bg-card px-4 py-3.5 shadow-card"
-      onSubmit={(event) => {
-        event.preventDefault();
-        add();
-      }}
+      onSubmit={(event) => void add(event)}
     >
       <label className="grid gap-1 text-xs text-muted-foreground">
         {t("setup.cards.who")}
         <input
           className="h-9 rounded-lg bg-ground px-3 text-[13px] text-foreground outline-none"
-          value={title}
           placeholder={t("setup.cards.whoExample")}
-          onChange={(event) => {
-            setTitle(event.target.value);
-          }}
+          {...form.register("title")}
         />
       </label>
       <label className="grid gap-1 text-xs text-muted-foreground">
@@ -293,14 +299,11 @@ function PersonaForm({
         <textarea
           rows={2}
           className="rounded-lg bg-ground px-3 py-2 text-[13px] text-foreground outline-none"
-          value={text}
-          onChange={(event) => {
-            setText(event.target.value);
-          }}
+          {...form.register("text")}
         />
       </label>
       <div className="flex gap-2">
-        <Button type="submit" size="pill-sm" disabled={!title.trim()}>
+        <Button type="submit" size="pill-sm" disabled={!form.formState.isValid}>
           <Plus aria-hidden />
           {t("setup.cards.add")}
         </Button>
