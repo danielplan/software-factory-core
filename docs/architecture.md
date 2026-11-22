@@ -390,8 +390,8 @@ A team's own extensions are in the company's factory folder, one folder each
 (`factory/extensions/<id>/extension.json`), written by the builder when the
 team asks Sprocket for one, and reviewed like any change. They are a
 description, never code that runs: an extension of the team brings pages,
-Home blocks, kobolds, stages (as words, for now), guides and settings, and
-can need other extensions; it cannot start programs, be always needed, track
+Home blocks, stages, kobolds (by name), guides and settings, and can need
+other extensions; it cannot start programs, be always needed, track
 work or reuse the id or what another extension brings, and its guide files
 and settings files stay in its own folder and the settings folder. Nothing
 loads without passing these checks (`readTeamExtensions`,
@@ -404,9 +404,36 @@ offered in the Marketplace as "Made by your team", installed and removed like
 Kobble's own, and switched off all together in Settings (`own-extensions`,
 in `team.env`, on by default). An installed extension's guides for the
 builder are added to its prompt (`server/src/builder/extension-guides.ts`).
-How the builder writes one: the factory skill's `extensions.md`. Not built
-yet: pages and Home blocks that run from a team's extension, stages from
-extensions, and the slots filled once at setup.
+How the builder writes one: the factory skill's `extensions.md`, with a
+starter to copy (`extension-starter/`: a page, a Home block and a stage).
+
+A team's **page and Home block** are described, not coded (`pages`, `blocks`
+in the description): a name, a line, an icon and parts, each some text or a
+list (items written there or kept in a JSON file of the extension's folder,
+read each time it is shown: `shownView`, `core/src/extensions/views.ts`). The
+page draws them with its own components (`dashboard/src/extensions/screen-view.tsx`),
+so they look like Kobble's own and cannot change how it works: pages show in
+the sidebar under Your team (`#team/<id>`), blocks on Home. Because a team's
+extension cannot start programs, nothing it describes runs.
+
+**Stages** are not fixed: each comes from an extension (`stages`), which
+suggests its place by naming the stages it comes `after` and `before`
+(`orderStages`, `core/src/extensions/stages.ts`; a neighbour that is not
+installed does not matter). Two stages that fit the same place, or that each
+want to come after the other, are a clash: Settings › Stages asks the team
+which comes first, and the team can move any stage; the answer is kept in
+`factory/stages.json` and wins over the suggestions. Home's loop follows the
+order: Kobble's counted stages show while their extension is installed, and a
+team's own stage shows where it sits, with no count. Work does not move
+through a team's stage, and no check is run for it, yet.
+
+**Slots** are the jobs the factory fills once for every extension (`SLOTS`:
+`code`, `tasks`). Only Kobble defines them and only Kobble's own extensions
+fill one (`fills`; a tracker fills `tasks`): GitHub fills `code`; the one in
+use for `tasks` is the company's tracker, so the board the team connected at
+setup is the filler for every extension and swapping it swaps it for all
+(`slotsOf`, `core/src/extensions/slots.ts`). An installed extension that uses
+a slot nothing can fill stops the factory, with the reason.
 
 The first add-ons are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
 shown as connections, not as extensions. What each adds:

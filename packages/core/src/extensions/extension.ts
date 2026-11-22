@@ -170,7 +170,7 @@ export const kitSchema = z.object({
 
 export type Guide = z.infer<typeof guideSchema>;
 export type View = z.infer<typeof viewSchema>;
-export type ViewPart = z.infer<typeof viewPartSchema>;
+type ViewPart = z.infer<typeof viewPartSchema>;
 export type ViewItem = z.infer<typeof itemSchema>;
 export type StageSpec = z.infer<typeof stageSchema>;
 export type McpServer = z.infer<typeof mcpServerSchema>;

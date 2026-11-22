@@ -4,7 +4,7 @@ import { area } from "../define.ts";
 
 const en = {
   about:
-    "How the factory works here: where work is tracked, updates, add-ons, and the settings of its parts.",
+    "How the factory works here: where work is tracked, the order of work, updates, and the settings of its parts.",
   tabs: {
     connections: "Connections",
     stages: "Stages",
@@ -69,7 +69,7 @@ export const settings = area(
   en,
   {
     about:
-      "Come lavora qui la fabbrica: dove si traccia il lavoro, aggiornamenti, componenti aggiuntivi e le impostazioni delle sue parti.",
+      "Come lavora qui la fabbrica: dove si traccia il lavoro, l'ordine del lavoro, aggiornamenti e le impostazioni delle sue parti.",
     tabs: {
       connections: "Collegamenti",
       stages: "Fasi",
@@ -131,7 +131,7 @@ export const settings = area(
   },
   {
     about:
-      "Wie die Fabrik hier arbeitet: wo die Arbeit verfolgt wird, Updates, Erweiterungen und die Einstellungen ihrer Teile.",
+      "Wie die Fabrik hier arbeitet: wo die Arbeit verfolgt wird, die Reihenfolge der Arbeit, Updates und die Einstellungen ihrer Teile.",
     tabs: {
       connections: "Verbindungen",
       stages: "Stufen",

@@ -19,7 +19,6 @@ export type {
   ProductView,
   ShownPart,
   ShownView,
-  SlotState,
   StageMap,
   StagesView,
   State,

@@ -152,16 +152,53 @@ Step 3 (a team's own extension, and the slots) is partly done. Built and checked
 Decisions in step 3: no migration (no folder means nothing to load, the
 switch is on until turned off); the extension starter is not made yet.
 
+Step 3, second part (built and checked: tests, lint, types, docs; looked at in
+the browser on a made-up factory with two team extensions):
+
+- **Team pages and Home blocks.** Described, not coded: `pages` and `blocks` in
+  `extension.json`, each with a name, a line, an icon and parts (text, or a
+  list kept in the description or in a JSON file of the extension's folder,
+  read each time it is shown). Kobble's page draws them with its own
+  components (`screen-view.tsx`), so they look like Kobble's. Pages are in the
+  sidebar under "Your team" (`#team/<id>`), blocks come with Arrange Home ›
+  Add a block like any other. Decision: this reads "built into Kobble's page
+  when the factory starts" as "drawn by Kobble's own components from the
+  description the factory reads when it starts", because a team's extension
+  never runs code (the first safety rule). Checks added: a page or block is
+  described when brought, no page that is Kobble's frame, list files inside
+  the folder and a JSON list of items.
+- **The extension starter** (`factory/extension-starter/`: a page, a Home
+  block, a stage and a guide, loads as it is: a server test copies it and
+  loads it). Open point decided: it does **not** use Verification as its
+  example. Verification may become a Kobble extension of its own, and a
+  starter's example id would clash with it; the example is a made-up
+  "Checklist".
+- **Stages from extensions.** `stages` in the description (id, name, `after`,
+  `before`); `orderStages` works the order out; two stages for one place (or
+  each after the other) are a clash that Settings › Stages (a new tab) asks
+  the team about; the team can move any stage; the answer is in
+  `factory/stages.json`. Kobble's own stages (signals, explore, build, done,
+  release) name their neighbours, so they are a chain with nothing open.
+  Home's loop follows the order and shows a team's stage without a count.
+  Personas no longer brings the stage "signals" (Signals does).
+- **The slots.** `fills` on an extension (GitHub fills Your code, a tracker
+  fills Your tasks); `slotsOf` says who can fill each and who does (the
+  company's tracker for tasks), the Connections tab reads it. An installed
+  extension that uses a slot nothing fills stops the factory. A team's own
+  extension cannot say `fills`. No migration: the board a company already
+  connected is the filler, so the slots are filled from today's files.
+- **Settings' line** no longer says add-ons.
+
+![A team's own page, under Your team](issue-27-extensions-and-marketplace/team-page.png)
+![Settings › Stages asks which of two comes first](issue-27-extensions-and-marketplace/stages-clash.png)
+![Home: the team's stages in the loop and its block](issue-27-extensions-and-marketplace/home-team-block-and-stage.png)
+
 **Not done in step 3** (next):
 
-- Pages and Home blocks that run from a team's extension (built into Kobble's
-  page when the factory starts, so they look like Kobble), and the extension
-  starter with a page, a stage and a Home block (the open point about
-  Verification as its example is open still).
-- Stages from extensions: neighbours, work moving on only when a stage's
-  checks pass, Settings asking on a clash, the team moving a stage.
-- The slots (Your code, Your tasks) filled once at setup by the setup coach,
-  one filler for every extension.
-- The upgrade moving existing factories over (add-on switches to installed
-  extensions, the board connection into the slots): the add-on switches
-  already are installed extensions, so only the slots remain.
+- **Work moving on only when a stage's checks pass**, and the piece of work with
+  its stage and history (and extensions hearing when it moves). Stages are
+  ordered and shown, but nothing is moved through them or checked yet; a
+  team's stage has no count. This needs the core's piece of work first.
+- Cleaning up a removed team extension's block from `factory/home.json`.
+- The setup coach asking for each slot by name (it fills the tasks slot by
+  connecting the board, as before; the code slot has one filler).
