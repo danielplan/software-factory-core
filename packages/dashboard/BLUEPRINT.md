@@ -27,7 +27,8 @@ is the module's declaration, not a barrel: it re-exports nothing.
 ```text
 src/main.tsx            the start: the company's theme, then the app
 src/app/                the app, the frame around the pages (shell.tsx),
-                        the pages by address (router.tsx), the installed
+                        the pages by address (router.tsx, React Router
+                        on the address after the #), the installed
                         extensions' modules (extensions.ts), and Settings
                         put together (settings-page.tsx)
 src/api/                talking to the server: the requests and the types
@@ -75,8 +76,6 @@ kit's table instead.
 Code written before Kobble was held to its kit. Each line is to be moved to
 the kit's library, one card at a time; nothing new is added to it.
 
-- **Pages and addresses:** written by hand on `location.hash`
-  (`src/app/router.tsx`), not React Router.
 - **Data from the server:** fetched by hand (`src/api/client.ts`,
   `src/api/use-read.ts`, effects in the components), not TanStack Query;
   answers are not checked with zod.

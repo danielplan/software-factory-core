@@ -35,6 +35,10 @@ promises, folders, extra libraries and what still differs from the kit.
   (`packages/dashboard/.dependency-cruiser.cjs`).
 - **Every word in three languages**, through i18next (`useTranslation()`): see
   [languages](../languages.md).
+- **Addresses:** each page has its address after the # (`#explore/X-1`),
+  routed by React Router's hash router in `src/app/router.tsx`. A link is a
+  plain `href="#<page>"`; an old address is listed in `MOVED`
+  (`src/lib/routes.ts`) and leads to its new page.
 - **The look:** the variables and pieces in [the design system](../design-system.md);
   every button has an icon; every state holds.
 - **One library per job,** the one the kit's table or the blueprint names;

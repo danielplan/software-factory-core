@@ -1,7 +1,12 @@
 // Where the dashboard is, from the address after the # (#explore/<id>), so
-// a reload stays there. Addresses from before the pages were renamed or
-// taken away (#board, #ideas/<id>, #workshop, #add-ons, #settings/add-ons,
-// #today, #customers, #products, #understand, #prototype) still lead somewhere that makes sense.
+// a reload stays there. React Router shows the page (app/router.tsx); this
+// says which page the sidebar lights and what is open in it. Addresses
+// from before the pages were renamed or taken away (#board, #ideas/<id>,
+// #workshop, #add-ons, #settings/add-ons, #today, #customers, #products,
+// #understand, #prototype) still lead somewhere that makes sense.
+
+import type { AddOnView } from "../api/client.ts";
+import { screenOf } from "./screens.ts";
 
 // "team" is a page one of the team's own extensions brings (#team/<id>).
 // Explorations is still the page "explore", and the Factory board "build":
@@ -31,7 +36,7 @@ export type Place = {
 const FIRST: Page = "home";
 
 // The old pages and where they are now.
-const MOVED = new Map([
+export const MOVED = new Map([
   ["board", "build"],
   ["ideas", "explore"],
   ["workshop/add-ons", "extensions"],
@@ -46,8 +51,10 @@ const MOVED = new Map([
   ["prototype", "explore/"],
 ]);
 
+// The parts of an address, written as a hash (#explore/X-1) or as the
+// router's path (/explore/X-1).
 function partsOf(hash: string): { asked: string; rest: string | null } {
-  const path = hash.startsWith("#") ? hash.slice(1) : hash;
+  const path = hash.replace(/^[#/]/, "");
   const slash = path.indexOf("/");
   if (slash === -1) return { asked: path, rest: null };
   return { asked: path.slice(0, slash), rest: path.slice(slash + 1) || null };
@@ -80,4 +87,30 @@ export function personaHash(id?: string, tests?: { test?: string }): string {
   return tests.test
     ? `${base}/tests/${encodeURIComponent(tests.test)}`
     : `${base}/tests`;
+}
+
+// The pages of the core, always there; an extension's are there only while
+// it is installed.
+const CORE_PAGES = new Set<Place["page"]>([
+  "home",
+  "system",
+  "extensions",
+  "settings",
+  "connect",
+]);
+
+// The page of an extension that is removed is not there: Home shows instead.
+export function placeShown(
+  place: Place,
+  pages: readonly { id: string }[],
+  addOns: AddOnView[],
+): Place {
+  const there =
+    CORE_PAGES.has(place.page) ||
+    pages.some((page) => page.id === place.page) ||
+    (place.page === "team" &&
+      place.open !== null &&
+      screenOf(addOns, "pages", decodeURIComponent(place.open), true) !==
+        undefined);
+  return there ? place : { page: FIRST, open: null };
 }

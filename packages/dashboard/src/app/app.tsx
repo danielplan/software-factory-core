@@ -1,6 +1,7 @@
 import { WifiOff } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { HashRouter } from "react-router";
 
 import { useFactoryState } from "@/api/client";
 import { Dashboard } from "./router";
@@ -32,7 +33,13 @@ export function App() {
           {t("shell.opening")}
         </p>
       )}
-      {state && <Dashboard state={state} />}
+      {state && (
+        // The address after the #, as it always was; a page shows at once,
+        // without React's transitions keeping the last one on screen.
+        <HashRouter useTransitions={false}>
+          <Dashboard state={state} />
+        </HashRouter>
+      )}
     </div>
   );
 }
