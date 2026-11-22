@@ -34,6 +34,7 @@ const addOn = (id: string, more: Partial<AddOnView> = {}): AddOnView => ({
   needs: [],
   slots: [],
   brings: none,
+  screens: { pages: [], blocks: [], stages: [] },
   settings: [],
   ...more,
 });

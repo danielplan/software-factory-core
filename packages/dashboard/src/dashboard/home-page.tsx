@@ -20,6 +20,7 @@ import {
   ReviewsBlock,
   SignalsBlock,
   StatusBlock,
+  TeamBlock,
   WaitingBlock,
 } from "./home-cards";
 import { ArrangeButton, HomeBlocks } from "./home-blocks";
@@ -46,6 +47,15 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
     exploring: <ExploringBlock input={input} addOns={addOns} />,
     signals: <SignalsBlock input={input} addOns={addOns} />,
     reviews: <ReviewsBlock waiting={waiting} addOns={addOns} />,
+    // The blocks the team's own extensions describe.
+    ...Object.fromEntries(
+      addOns
+        .flatMap((addOn) => addOn.screens.blocks)
+        .map((view) => [
+          view.id,
+          <TeamBlock key={view.id} view={view} addOns={addOns} />,
+        ]),
+    ),
   };
   // The blocks of installed extensions that this page can draw.
   const offered = new Set([...offeredOf(addOns)].filter((id) => id in blocks));

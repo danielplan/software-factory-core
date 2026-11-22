@@ -143,6 +143,11 @@ export const marketGerman: typeof marketEnglish = {
       `Deine Karten bleiben, wo sie sind. Danach verbindest du ${to}.`,
     switchGo: "Weiter",
   },
+  // A page or block a team's own extension describes.
+  screen: {
+    emptyList: "Hier ist noch nichts.",
+    from: (name: string) => `Von ${name}`,
+  },
   kits: {
     about:
       "Kobble kommt mit diesen Kits. Jedes bringt den Kobolden eine Art von Produkt bei.",

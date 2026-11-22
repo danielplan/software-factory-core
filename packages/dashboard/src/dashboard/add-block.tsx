@@ -14,7 +14,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useT } from "@/i18n/use-t";
-import { type Layout, wordOf } from "@/lib/home-layout";
+import type { Layout } from "@/lib/home-layout";
+import { blockAbout, blockName } from "@/lib/screens";
 import { nameOf } from "@/lib/market-view";
 
 import { BlockPreview } from "./block-preview";
@@ -24,12 +25,14 @@ export const smallButton =
 
 export function AddBlock({
   layout,
+  addOns,
   offeredBy,
   open,
   onOpenChange,
   onPick,
 }: Readonly<{
   layout: Layout;
+  addOns: AddOnView[];
   // The installed extensions that offer blocks, with the ones Home can show.
   offeredBy: { addOn: AddOnView; blocks: string[] }[];
   open: boolean;
@@ -88,6 +91,7 @@ export function AddBlock({
                 <BlockOffer
                   key={id}
                   id={id}
+                  addOns={addOns}
                   on={!layout.hidden.includes(id)}
                   onPick={onPick}
                 />
@@ -102,22 +106,24 @@ export function AddBlock({
 
 function BlockOffer({
   id,
+  addOns,
   on,
   onPick,
 }: Readonly<{
   id: string;
+  addOns: AddOnView[];
   on: boolean;
   onPick: (id: string, x: number, y: number) => void;
 }>) {
   const t = useT();
-  const name = wordOf(t.market.blocks, id);
+  const name = blockName(t.market.blocks, addOns, id);
   return (
     <div className="grid gap-2.5 rounded-xl border border-border p-3">
       <div className="flex items-start gap-3">
         <span className="min-w-0 flex-1">
           <span className="block text-[13px] font-medium">{name}</span>
           <span className="block text-xs text-muted-foreground">
-            {wordOf(t.home.blockAbout, id)}
+            {blockAbout(t.home.blockAbout, addOns, id)}
           </span>
         </span>
         {on ? (

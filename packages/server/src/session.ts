@@ -9,7 +9,6 @@ import {
   type Changes,
   checkChanges,
   type Company,
-  type Extension,
   type Factory,
   FACTORY_FOLDER,
   hasFactory,
@@ -247,11 +246,6 @@ export class Session {
   // An add-on switched on or off (switch.ts).
   switchAddOn(id: string, on: boolean): void {
     this.changeCompany((c) => switched(c, this.known.extensions, id, on));
-  }
-
-  // The extensions the factory has installed.
-  installedExtensions(): Extension[] {
-    return this.factory?.extensions ?? [];
   }
 
   // Whether the factory has this add-on on.

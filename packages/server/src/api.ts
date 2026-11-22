@@ -370,9 +370,13 @@ export type AddOnView = {
     kobolds: string[];
     stages: string[];
   };
-  // The pages and Home blocks it describes (a team's own), with their lists
-  // read now; Kobble's own are drawn by the page in code.
-  screens: { pages: ShownView[]; blocks: ShownView[] };
+  // The pages, Home blocks and stages it describes (a team's own), with the
+  // lists read now; Kobble's own are drawn by the page in code.
+  screens: {
+    pages: ShownView[];
+    blocks: ShownView[];
+    stages: { id: string; name: string }[];
+  };
   // Its settings groups, by id (shown while it is on).
   settings: string[];
 };

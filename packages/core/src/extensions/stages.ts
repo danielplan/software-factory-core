@@ -85,12 +85,9 @@ function slotted(
   const at = (id: string) => kept.findIndex((one) => one.id === id);
   const after = Math.max(-1, ...(spec?.after ?? []).map(at));
   const before = (spec?.before ?? []).map(at).filter((i) => i >= 0);
-  const place =
-    after >= 0
-      ? after + 1
-      : before.length > 0
-        ? Math.min(...before)
-        : kept.length;
+  let place = kept.length;
+  if (after >= 0) place = after + 1;
+  else if (before.length > 0) place = Math.min(...before);
   return [...kept.slice(0, place), stage, ...kept.slice(place)];
 }
 

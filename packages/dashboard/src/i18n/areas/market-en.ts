@@ -143,6 +143,11 @@ export const marketEnglish = {
       `Your cards stay where they are. Next you connect ${to}.`,
     switchGo: "Continue",
   },
+  // A page or block a team's own extension describes.
+  screen: {
+    emptyList: "Nothing here yet.",
+    from: (name: string) => `From ${name}`,
+  },
   kits: {
     about:
       "Kobble comes with these kits. Each teaches the kobolds one kind of product.",

@@ -10,10 +10,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
 
-import { defineExtension, FACTORY_FOLDER } from "@software-factory/core";
+import { FACTORY_FOLDER } from "@software-factory/core";
 
 import { chosenStages, stagesRoutes, stagesView } from "../src/stages.ts";
 import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { stage } from "./stage.ts";
 
 const made: string[] = [];
 after(() => {
@@ -21,27 +22,6 @@ after(() => {
 });
 
 const url = new URL("http://localhost/");
-
-// Two extensions that both want the place after Build.
-const both = [
-  ...KOBBLE_EXTENSIONS,
-  defineExtension({
-    id: "checks",
-    name: "Checks",
-    about: "Checks.",
-    stages: [
-      { id: "verify", name: "Verify", after: ["build"], before: ["done"] },
-    ],
-  }),
-  defineExtension({
-    id: "approval",
-    name: "Approval",
-    about: "Approval.",
-    stages: [
-      { id: "approve", name: "Approve", after: ["build"], before: ["done"] },
-    ],
-  }),
-];
 
 function folder() {
   const root = mkdtempSync(join(tmpdir(), "stages-"));
@@ -68,61 +48,80 @@ test("a stage of a removed extension leaves the order, and the others hold", () 
   assert.equal(clash, null);
 });
 
-test("two stages for one place are a clash until the team's order is saved", async () => {
-  const project = folder();
-  const root = join(project, FACTORY_FOLDER);
-  assert.equal(stagesView(root, both).clash?.first.id, "verify");
-  const told: string[] = [];
-  const routes = stagesRoutes(
-    project,
-    () => both,
-    () => told.push("changed"),
-  );
-  const save = routes["POST /api/stages"];
+// A factory whose two extensions of the team each add a stage with no
+// neighbours: the factory cannot tell which comes first.
+async function twoStages() {
+  const { session, server } = await stage();
+  const root = session.createCompany({ name: "Beta", about: "" });
+  for (const id of ["first", "second"]) {
+    const folder = join(root, "extensions", id);
+    mkdirSync(folder, { recursive: true });
+    writeFileSync(
+      join(folder, "extension.json"),
+      JSON.stringify({
+        id,
+        name: id,
+        about: id,
+        stages: [{ id: `${id}-stage`, name: id }],
+      }),
+    );
+  }
+  session.switchAddOn("voice", true);
+  session.switchAddOn("first", true);
+  session.switchAddOn("second", true);
+  const stages = () => {
+    const state = session.state();
+    assert.ok(state.mode === "factory");
+    return state.stages;
+  };
+  const save = stagesRoutes(session)["POST /api/stages"];
   assert.ok(save);
-  const order = [
-    "signals",
-    "explore",
-    "build",
-    "approve",
-    "verify",
-    "done",
-    "release",
-  ];
-  await save({ order }, url);
-  assert.deepEqual(told, ["changed"]);
-  assert.deepEqual(chosenStages(root), order);
-  assert.deepEqual(
-    JSON.parse(readFileSync(join(root, "stages.json"), "utf8")),
-    { order },
-  );
-  const settled = stagesView(root, both);
-  assert.equal(settled.clash, null);
-  assert.deepEqual(
-    settled.order.map((stage) => stage.id),
-    order,
-  );
+  return {
+    stages,
+    save: async (order: unknown) => save({ order }, url),
+    root,
+    close: () => {
+      session.close();
+      server.close();
+    },
+  };
+}
+
+test("two stages for one place are a clash until the team's order is saved", async () => {
+  const { stages, save, root, close } = await twoStages();
+  try {
+    assert.deepEqual(stages().clash, {
+      first: "first-stage",
+      second: "second-stage",
+    });
+    await save(["second-stage", "first-stage"]);
+    assert.deepEqual(
+      JSON.parse(readFileSync(join(root, "stages.json"), "utf8")),
+      { order: ["second-stage", "first-stage"] },
+    );
+    assert.equal(stages().clash, null);
+    assert.deepEqual(
+      stages().order.map((one) => one.id),
+      ["second-stage", "first-stage"],
+    );
+  } finally {
+    close();
+  }
 });
 
 test("only stages there are can be put in order", async () => {
-  const project = folder();
-  const save = stagesRoutes(
-    project,
-    () => both,
-    () => undefined,
-  )["POST /api/stages"];
-  assert.ok(save);
-  await assert.rejects(
-    async () => save({ order: ["build", "nonsense"] }, url),
-    /not an order of the stages/,
-  );
-  await assert.rejects(async () => save({ order: "build" }, url), Error);
-  assert.deepEqual(chosenStages(join(project, FACTORY_FOLDER)), []);
+  const { save, root, close } = await twoStages();
+  try {
+    await assert.rejects(save(["first-stage", "nonsense"]), /not an order/);
+    await assert.rejects(save("first-stage"), /not an order/);
+    assert.deepEqual(chosenStages(root), []);
+  } finally {
+    close();
+  }
 });
 
 test("a stages file that is not one is ignored", () => {
-  const project = folder();
-  const root = join(project, FACTORY_FOLDER);
+  const root = join(folder(), FACTORY_FOLDER);
   mkdirSync(root, { recursive: true });
   writeFileSync(join(root, "stages.json"), "{ nope");
   assert.deepEqual(chosenStages(root), []);

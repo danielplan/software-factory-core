@@ -171,17 +171,24 @@ export function brought(
   addOn: AddOnView,
 ): Thing["brings"] {
   const { pages, blocks, kobolds, stages } = addOn.brings;
-  const nameIn = (map: Record<string, string>) => (id: string) =>
-    found(map, id) ?? id;
+  // Kobble's own are words; a team's own say their names themselves.
+  const nameIn =
+    (map: Record<string, string>, own: { id: string; name: string }[]) =>
+    (id: string) =>
+      found(map, id) ?? own.find((one) => one.id === id)?.name ?? id;
+  const { screens } = addOn;
   const rows = [
     {
       label: words.brings.page(pages.length),
-      names: pages.map(nameIn(shell.pages)),
+      names: pages.map(nameIn(shell.pages, screens.pages)),
     },
-    { label: words.brings.blocks, names: blocks.map(nameIn(words.blocks)) },
+    {
+      label: words.brings.blocks,
+      names: blocks.map(nameIn(words.blocks, screens.blocks)),
+    },
     {
       label: words.brings.stage(stages.length),
-      names: stages.map(nameIn(words.stages)),
+      names: stages.map(nameIn(words.stages, screens.stages)),
     },
     {
       label: words.brings.kobold(kobolds.length),

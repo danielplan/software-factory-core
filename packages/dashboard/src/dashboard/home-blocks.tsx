@@ -100,9 +100,10 @@ export function HomeBlocks({
           />
         )}
       </div>
-      {held && <HeldBlock id={held.id} x={held.x} y={held.y} />}
+      {held && <HeldBlock id={held.id} x={held.x} y={held.y} addOns={addOns} />}
       <AddBlock
         layout={layout}
+        addOns={addOns}
         offeredBy={addOns
           .filter((addOn) => addOn.on)
           .map((addOn) => ({

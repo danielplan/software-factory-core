@@ -5,7 +5,8 @@ import { ArrowDown, ArrowUp, GripVertical, Plus, X } from "lucide-react";
 
 import type { AddOnView } from "@/api";
 import { useT } from "@/i18n/use-t";
-import { ownersOf, wordOf } from "@/lib/home-layout";
+import { ownersOf } from "@/lib/home-layout";
+import { blockName } from "@/lib/screens";
 import { nameOf } from "@/lib/market-view";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +45,7 @@ export function ArrangeBar({
         className="size-4 cursor-grab text-muted-foreground"
       />
       <span className="min-w-0 flex-1 truncate font-medium">
-        {wordOf(t.market.blocks, id)}
+        {blockName(t.market.blocks, addOns, id)}
         {owner && (
           <span className="ml-2 font-normal text-muted-foreground">
             {nameOf(t.market, owner)}
@@ -115,7 +116,8 @@ export function HeldBlock({
   id,
   x,
   y,
-}: Readonly<{ id: string; x: number; y: number }>) {
+  addOns,
+}: Readonly<{ id: string; x: number; y: number; addOns: AddOnView[] }>) {
   const t = useT();
   return (
     <div
@@ -124,7 +126,7 @@ export function HeldBlock({
       style={{ left: x + 14, top: y + 14, rotate: "1.5deg" }}
     >
       <span className="text-[13px] font-medium">
-        {wordOf(t.market.blocks, id)}
+        {blockName(t.market.blocks, addOns, id)}
       </span>
       <span className="text-[11px] text-muted-foreground">
         {t.home.arrange.holding}

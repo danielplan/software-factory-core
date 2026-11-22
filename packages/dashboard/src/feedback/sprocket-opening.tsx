@@ -34,6 +34,7 @@ const HERE: Record<Page, Kind | "ask"> = {
   personas: "wish",
   extensions: "wish",
   settings: "ask",
+  team: "ask",
 };
 
 const CHOICES = [

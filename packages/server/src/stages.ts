@@ -15,6 +15,7 @@ import {
 
 import type { Route } from "./add-ons/add-on.ts";
 import { Refused } from "./refused.ts";
+import type { Session } from "./session.ts";
 
 const FILE = "stages.json";
 
@@ -27,7 +28,7 @@ export function chosenStages(root: string): string[] {
     const read = JSON.parse(readFileSync(file, "utf8")) as { order?: unknown };
     return Array.isArray(read.order) &&
       read.order.every((one) => typeof one === "string")
-      ? (read.order as string[])
+      ? read.order
       : [];
   } catch {
     return [];
@@ -39,16 +40,16 @@ export function stagesView(root: string, installed: Extension[]): StageOrder {
   return orderStages(installed, chosenStages(root));
 }
 
-export function stagesRoutes(
-  project: string,
-  installed: () => Extension[],
-  changed: () => void,
-): Record<string, Route> {
-  const root = join(project, FACTORY_FOLDER);
+export function stagesRoutes(session: Session): Record<string, Route> {
+  const root = join(session.options.project, FACTORY_FOLDER);
   return {
     "POST /api/stages": (body) => {
       const { order } = (body ?? {}) as { order?: unknown };
-      const known = installed().flatMap((one) => one.stages.map((s) => s.id));
+      const state = session.state();
+      const known =
+        state.mode === "factory"
+          ? state.stages.order.map((stage) => stage.id)
+          : [];
       if (
         !Array.isArray(order) ||
         !order.every((one) => typeof one === "string" && known.includes(one))
@@ -59,7 +60,7 @@ export function stagesRoutes(
         join(root, FILE),
         `${JSON.stringify({ order: [...new Set(order)] }, null, 2)}\n`,
       );
-      changed();
+      session.options.onChange();
     },
   };
 }

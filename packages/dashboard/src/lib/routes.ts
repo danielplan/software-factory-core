@@ -3,6 +3,7 @@
 // taken away (#board, #ideas/<id>, #workshop, #add-ons, #settings/add-ons,
 // #today, #customers, #products, #understand, #prototype) still lead somewhere that makes sense.
 
+// "team" is a page one of the team's own extensions brings (#team/<id>).
 // Explorations is still the page "explore", and the Factory board "build":
 // their addresses stay as they were.
 export const PAGES = [
@@ -15,6 +16,7 @@ export const PAGES = [
   "personas",
   "extensions",
   "settings",
+  "team",
 ] as const;
 export type Page = (typeof PAGES)[number];
 

@@ -73,11 +73,7 @@ export function kobbleOf(
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
       ...homeLayoutRoutes(session.options.project, tellerOf(tell)),
-      ...stagesRoutes(
-        session.options.project,
-        () => session.installedExtensions(),
-        session.options.onChange,
-      ),
+      ...stagesRoutes(session),
       ...feedback.routes,
       ...releasesRoutes({
         project: session.options.project,

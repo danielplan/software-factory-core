@@ -8,8 +8,10 @@ import { ConnectPage } from "@/connect/connect-page";
 import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
 import { MarketPage } from "@/extensions/market-page";
+import { TeamPage } from "@/extensions/screen-view";
 import { FactoryPage } from "@/factory/factory-page";
 import { pagesLeftOut } from "@/lib/market-view";
+import { screenOf } from "@/lib/screens";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { ReleasesPage } from "@/releases/releases-page";
 import { PersonasPage } from "@/personas/personas-page";
@@ -46,8 +48,16 @@ function usePlace(): Place {
 }
 
 // The page of an extension that is removed is not there: Home shows instead.
-function placeShown(place: Place, left: Place["page"][]): Place {
-  return left.includes(place.page) ? { page: "home", open: null } : place;
+function placeShown(
+  place: Place,
+  left: Place["page"][],
+  addOns: FactoryState["addOns"],
+): Place {
+  const gone =
+    left.includes(place.page) ||
+    (place.page === "team" &&
+      !(place.open && screenOf(addOns, "pages", place.open, true)));
+  return gone ? { page: "home", open: null } : place;
 }
 
 // The dashboard: before there is a company, only the setup page; once there
@@ -65,18 +75,23 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   // Just set up, connecting where work is tracked comes first.
   const { page, open } = state.onboarding
     ? { ...place, page: "connect" as const }
-    : placeShown(place, pagesLeftOut(state.addOns));
+    : placeShown(place, pagesLeftOut(state.addOns), state.addOns);
   return (
     <Shell
       state={state}
       current={page === "connect" ? "settings" : page}
+      open={open}
       // An exploration fills the whole window.
       fill={page === "explore" && open !== null}
     >
       {state.problems.length > 0 && (
         <ProblemBox title={t.shell.misfit} text={state.problems.join(" · ")} />
       )}
-      <PageBody state={state} page={page} open={open} />
+      {page === "team" ? (
+        <TeamPageOf state={state} id={open} />
+      ) : (
+        <PageBody state={state} page={page} open={open} />
+      )}
     </Shell>
   );
 }
@@ -87,7 +102,7 @@ function PageBody({
   open,
 }: Readonly<{
   state: FactoryState;
-  page: Place["page"];
+  page: Exclude<Place["page"], "team">;
   open: string | null;
 }>) {
   switch (page) {
@@ -112,4 +127,13 @@ function PageBody({
     case "settings":
       return <SettingsTab state={state} open={open} />;
   }
+}
+
+// A page one of the team's own extensions brings.
+function TeamPageOf({
+  state,
+  id,
+}: Readonly<{ state: FactoryState; id: string | null }>) {
+  const found = id ? screenOf(state.addOns, "pages", id, true) : undefined;
+  return found && <TeamPage view={found.view} by={found.addOn.name} />;
 }

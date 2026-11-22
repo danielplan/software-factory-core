@@ -49,6 +49,7 @@ export function factoryView(
       screens: {
         pages: extension.pages.map(shownView),
         blocks: extension.blocks.map(shownView),
+        stages: extension.stages.map(({ id, name }) => ({ id, name })),
       },
       settings: extension.settings.map((group) => group.id),
     })),

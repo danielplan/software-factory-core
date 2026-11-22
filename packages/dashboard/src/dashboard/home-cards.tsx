@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import type { AddOnView } from "@/api";
+import type { AddOnView, ShownView } from "@/api";
 import { StatusLight } from "@/components/status-light";
 import { Card } from "@/components/ui/card";
 import { useT } from "@/i18n/use-t";
@@ -23,7 +23,9 @@ import {
   statusLine,
   type WaitingItem,
 } from "@/lib/home-view";
-import { ownersOf, wordOf } from "@/lib/home-layout";
+import { BlockParts } from "@/extensions/screen-view";
+import { ownersOf } from "@/lib/home-layout";
+import { blockName } from "@/lib/screens";
 import { nameOf } from "@/lib/market-view";
 import { overallOf } from "@/lib/shell-view";
 
@@ -177,6 +179,18 @@ export function SignalsBlock({
   );
 }
 
+// A block a team's own extension describes.
+export function TeamBlock({
+  view,
+  addOns,
+}: Readonly<{ view: ShownView; addOns: AddOnView[] }>) {
+  return (
+    <BlockCard id={view.id} addOns={addOns}>
+      <BlockParts view={view} />
+    </BlockCard>
+  );
+}
+
 // A block an extension brings: its name and where it comes from, over a card.
 function BlockCard({
   id,
@@ -191,7 +205,7 @@ function BlockCard({
         data-block-title
         className="flex items-center gap-2 text-[13px] font-medium"
       >
-        {wordOf(t.market.blocks, id)}
+        {blockName(t.market.blocks, addOns, id)}
         {owner && (
           <span className="text-xs font-normal text-muted-foreground">
             {nameOf(t.market, owner)}

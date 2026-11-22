@@ -149,6 +149,7 @@ export const feedbackEnglish = {
       personas: { text: "Wish personas did more? Tell me" },
       extensions: { text: "Need something an extension doesn't do? Tell me" },
       settings: { text: "Can't find a setting? Ask me" },
+      team: { text: "Something on this page you would change? Tell me" },
     },
     starts: {
       startBug: {

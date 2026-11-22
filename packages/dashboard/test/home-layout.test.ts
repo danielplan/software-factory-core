@@ -25,6 +25,7 @@ function addOn(id: string, blocks: string[], on = true): AddOnView {
     needs: [],
     slots: [],
     brings: { pages: [], blocks, kobolds: [], stages: [] },
+    screens: { pages: [], blocks: [], stages: [] },
     settings: [],
   };
 }

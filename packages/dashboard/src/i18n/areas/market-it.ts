@@ -141,6 +141,11 @@ export const marketItalian: typeof marketEnglish = {
     switchText: (to) => `Le tue schede restano dove sono. Poi colleghi ${to}.`,
     switchGo: "Continua",
   },
+  // A page or block a team's own extension describes.
+  screen: {
+    emptyList: "Ancora niente qui.",
+    from: (name: string) => `Da ${name}`,
+  },
   kits: {
     about:
       "Kobble arriva con questi kit. Ognuno insegna ai kobold un tipo di prodotto.",

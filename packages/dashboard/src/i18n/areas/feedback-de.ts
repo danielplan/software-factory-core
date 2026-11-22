@@ -149,6 +149,7 @@ export const feedbackGerman: typeof feedbackEnglish = {
       personas: { text: "Sollen Personas mehr können? Sag es mir" },
       extensions: { text: "Fehlt dir eine Erweiterung? Sag es mir" },
       settings: { text: "Findest du eine Einstellung nicht? Frag mich" },
+      team: { text: "Möchtest du auf dieser Seite etwas ändern? Sag es mir" },
     },
     starts: {
       startBug: {
