@@ -145,3 +145,26 @@ test("a folder left out is as if it were not there: its pages and the paths into
   assert.equal((await checkDocs(root)).length, 2);
   assert.deepEqual(await checkDocs(root, { leftOut: ["factory"] }), []);
 });
+
+test("a project's knowledge base keeps its shape: its index and every section's index", async () => {
+  // The template, as a project's docs/, has the whole shape.
+  assert.deepEqual(
+    await checkDocs(join(TEMPLATE, "context"), { knowledgeBase: true }),
+    [],
+  );
+  const root = repository({ "index.md": INDEX });
+  const missing = (await checkDocs(root, { knowledgeBase: true }))
+    .filter((p) => p.message.startsWith("Missing page of the knowledge base"))
+    .map((p) => p.file);
+  assert.deepEqual(missing, [
+    "decisions/index.md",
+    "explanation/index.md",
+    "how-to/index.md",
+    "how-to/maintain-the-knowledge-base.md",
+    "reference/conventions/index.md",
+    "reference/features/index.md",
+    "reference/index.md",
+    "reference/lessons/index.md",
+    "tutorials/index.md",
+  ]);
+});

@@ -3,6 +3,16 @@
 What each version of Kobble changed for you, in plain words. New versions
 arrive by themselves. Written by Kobble's makers at each release.
 
+## 0.15.0 (2026-11-22)
+
+- New: **Make your own extensions.** The Marketplace shows what your factory can do and what it works with: install and remove extensions there, and ask Sprocket for one of your team's own. Arrange Home from the blocks your extensions bring.
+- New: **Doodle thinks on a whiteboard, Tinker builds.** Doodle thinks before it answers and keeps one living picture of the idea; Tinker, Doodle's maker, builds the prototypes from your design system.
+- New: **Sprocket takes you to the right kobold.** Tell Sprocket what you want: it hands an idea to Doodle, a mission to the tester or a signal to the builder, and takes you there.
+- New: **Ask about a stuck card.** Ask Sprocket on a stuck card: it looks at what the builder did, helps you decide, and sends your answer on.
+- Changed: **Continue when the builder ran out of sessions.** A card that only needs more time says so, with a Continue button.
+- Changed: **Only work that passes is pushed.** The builder commits and pushes through your repository's own checks and opens a pull request only when everything passes; unfinished work stays on this computer, with no draft pull requests.
+- Changed: **Your knowledge base keeps its shape.** The checks before a pull request include the knowledge base, and the upgrade adds the sections it lacks.
+
 ## 0.14.0 (2026-11-22)
 
 - New: **Releases of your products.** A Releases page turns what was merged into a numbered release, with notes written for you; the kobold suggests the number only when you press Prepare.

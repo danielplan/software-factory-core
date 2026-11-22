@@ -14,6 +14,7 @@ import { checkRules } from "./rules.ts";
 
 export { GIT } from "./git.ts";
 export type { Problem } from "./problem.ts";
+export { SKELETON } from "./rules.ts";
 
 // The empty knowledge base a new company starts with (copied into its docs/).
 export const templateFolder = join(import.meta.dirname, "..", "template");

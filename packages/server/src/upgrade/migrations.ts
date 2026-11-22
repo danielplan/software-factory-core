@@ -25,6 +25,7 @@ import { GIT } from "@software-factory/knowledge-base";
 import { trackedWith } from "../add-ons/switch.ts";
 import { moveOut } from "./move-out.ts";
 import { Refused } from "../refused.ts";
+import { knowledgeShape } from "./knowledge-shape.ts";
 
 export type UpgradeContext = {
   // The project, and its factory folder in it.
@@ -135,6 +136,12 @@ export const MIGRATIONS: Migration[] = [
           "The runs' README says a run is named after its card.",
         ),
       ),
+  },
+  {
+    version: "0.15.0",
+    about:
+      "The knowledge base keeps its shape: the pages it lacks come from the template",
+    run: ({ root }) => knowledgeShape(root),
   },
 ];
 

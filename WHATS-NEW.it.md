@@ -4,6 +4,16 @@ Cosa ha cambiato ogni versione di Kobble per te, in parole semplici. Le
 nuove versioni arrivano da sole. Scritto dai creatori di Kobble a ogni
 rilascio.
 
+## 0.15.0 (2026-11-22)
+
+- New: **Crea le tue estensioni.** Il Marketplace mostra cosa sa fare la tua fabbrica e con cosa lavora: lì installi e togli le estensioni, e a Sprocket chiedi quelle del tuo team. Componi la Home con i blocchi che portano le tue estensioni.
+- New: **Doodle pensa su una lavagna, Tinker costruisce.** Doodle pensa prima di rispondere e tiene un unico disegno vivo dell'idea; Tinker, l'aiutante di Doodle, fa i prototipi con il tuo design system.
+- New: **Sprocket ti porta dal kobold giusto.** Di' a Sprocket cosa vuoi: passa un'idea a Doodle, una missione al tester o un segnale al costruttore, e ti porta lì.
+- New: **Chiedi di una scheda bloccata.** Chiedi a Sprocket su una scheda bloccata: guarda cosa ha fatto il costruttore, ti aiuta a decidere e manda avanti la tua risposta.
+- Changed: **Continua quando il costruttore ha finito le sessioni.** Una scheda che ha solo bisogno di più tempo lo dice, con un pulsante Continua.
+- Changed: **Si carica solo il lavoro che passa.** Il costruttore fa commit e push attraverso i controlli del tuo repository e apre una pull request solo quando tutto passa; il lavoro non finito resta su questo computer, senza pull request in bozza.
+- Changed: **La tua base di conoscenza tiene la sua forma.** I controlli prima di una pull request includono la base di conoscenza, e l'aggiornamento aggiunge le sezioni che le mancano.
+
 ## 0.14.0 (2026-11-22)
 
 - New: **Rilasci dei tuoi prodotti.** Una pagina Rilasci trasforma ciò che è stato unito in un rilascio numerato, con note scritte per te; il kobold suggerisce il numero solo quando premi Prepara.

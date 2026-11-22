@@ -17,8 +17,11 @@ import {
   readTeamExtensions,
   run,
   TEAM_EXTENSIONS_FOLDER,
+  knowledgeBaseOf,
 } from "@software-factory/core";
 import { unlistedPackagesOf } from "@software-factory/kits";
+
+import { checkKnowledge } from "../knowledge-check.ts";
 
 export type Check = { name: string; folder: string; command: string };
 export type CheckResult = Check & { ok: boolean; output: string };
@@ -64,8 +67,11 @@ export async function checkWithFixes(options: {
       },
     );
     const outcome = withReport(
-      withReport(ran, libraryReport(copy, available, changed)),
-      extensionsReport(copy, available, changed),
+      withReport(
+        withReport(ran, libraryReport(copy, available, changed)),
+        extensionsReport(copy, available, changed),
+      ),
+      await knowledgeReport(copy),
     );
     if (options.card === undefined) return outcome;
     return withReport(
@@ -159,6 +165,19 @@ export function extensionsReport(
   if (problems.length === 0) return "";
   const list = problems.map((problem) => `- ${problem}`).join("\n");
   return `### Your team's extensions: not loaded\n\n${list}\n\nThe factory leaves out an extension that fails these checks. Fix each one in its folder, following the extension guide (\`extension-guide.md\` in the factory skill's guides).`;
+}
+
+// The knowledge base's checks (its shape, its pages, its links), said as a
+// failed check when it has faults: a pull request never leaves the team's
+// knowledge base broken or out of shape. A project with no knowledge base
+// yet gets one with the upgrade, not here.
+export async function knowledgeReport(copy: string): Promise<string> {
+  const root = join(copy, FACTORY_FOLDER);
+  if (!existsSync(knowledgeBaseOf(root))) return "";
+  const { faults } = await checkKnowledge(root);
+  if (faults.length === 0) return "";
+  const list = faults.map((fault) => `- ${fault}`).join("\n");
+  return `### The knowledge base (docs/)\n\n${list}\n\nBring it in line with the update-context skill and the knowledge base's own how-to (\`docs/how-to/maintain-the-knowledge-base.md\`).`;
 }
 
 // The outcome with one more failed check's report, when it has one.

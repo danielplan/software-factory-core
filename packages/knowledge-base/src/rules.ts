@@ -5,7 +5,9 @@
 //   the folder and says which question the page answers ("Answers:");
 // - decision records are MADR: NNNN-title.md, front matter, the three headings;
 // - every page is linked from another Markdown file (no orphans);
-// - pages and blueprints say what is true now: no "run NNN" headings.
+// - pages and blueprints say what is true now: no "run NNN" headings;
+// - the knowledge base keeps its shape: its index and every section's
+//   index (SKELETON), so each kind of page has its home.
 
 import { dirname, posix } from "node:path";
 
@@ -24,6 +26,20 @@ const MADR_HEADINGS = [
   "## Decision Outcome",
 ];
 const DECISION_FIELDS = ["status", "date", "decision-makers"];
+// The pages every knowledge base keeps, as the template starts it: the
+// index, each section's index, and how the knowledge base is kept.
+export const SKELETON = [
+  "index.md",
+  "tutorials/index.md",
+  "how-to/index.md",
+  "how-to/maintain-the-knowledge-base.md",
+  "reference/index.md",
+  "reference/features/index.md",
+  "reference/conventions/index.md",
+  "reference/lessons/index.md",
+  "explanation/index.md",
+  "decisions/index.md",
+];
 const TYPE_START = "**Type:** ";
 const OUTSIDE =
   "Page outside the Diátaxis sections (use tutorials/, how-to/, reference/, explanation/ or decisions/)";
@@ -158,5 +174,25 @@ export function checkRules(
         message: "Orphan page: no other page links to it",
       });
   }
+  // The shape is kept by a project's knowledge base (its docs/, checked as
+  // a whole), not by a loose context folder.
+  if (whole) problems.push(...skeletonProblems(".", pages));
   return problems;
+}
+
+// The pages of the shape a knowledge base lacks, each a problem at the
+// folder: put back from the template (the upgrade does).
+function skeletonProblems(base: string, pages: Map<string, string>): Problem[] {
+  return SKELETON.flatMap((page) => {
+    const file = base === "." ? page : `${base}/${page}`;
+    return pages.has(file)
+      ? []
+      : [
+          {
+            file,
+            message:
+              "Missing page of the knowledge base's shape: every knowledge base keeps its index and each section's index (take it from the template)",
+          },
+        ];
+  });
 }
