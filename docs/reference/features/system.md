@@ -16,6 +16,14 @@ kit makes the parts for each product of its kind (`partsFor`), from the
 commands in its `product.json`, the product's own commands winning over the
 kit's. The factory's own programs show in Settings, not on System.
 
+A part that needs a backend (a part of type backend that answers on a
+port, named in its `dependsOn`) is started with that backend's address in
+`BACKEND_URL`, unless its kit sets one: a web app's development server sends
+its `/api` requests there, so it reaches the server it depends on. A part's
+settings may also name another part's port (`{port:<part>}`) or address
+(`{address:<part>}`), filled in as it starts
+(`packages/core/src/parts/addresses.ts`).
+
 The launcher starts a part, waits until it answers, keeps its light, and
 stops it. A part's problem is shown with its title in the team's language.
 
@@ -30,5 +38,6 @@ stops it. A part's problem is shown with its title in the team's language.
 
 ## Checked and not checked
 
-Checked by tests: the launcher and the parts (`packages/launcher/test/`),
+Checked by tests: the launcher and the parts, their addresses and
+`BACKEND_URL` (`packages/launcher/test/`, `packages/core/test/parts.test.ts`),
 the map's columns and lines (`packages/dashboard/test/system-map.test.ts`).

@@ -1,6 +1,7 @@
 // Where each part answers: its port, from a settings file, fixed, or
 // another part's; its address and its Open link; and its settings with the
-// ports of other parts filled in.
+// ports and addresses of other parts filled in, the backend it needs among
+// them.
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -48,20 +49,48 @@ export function linkOf(part: Part, parts: Part[], root: string): string | null {
   return address ? `${address}${part.open}` : null;
 }
 
-// The part's settings with "{port:<part>}" replaced by that part's port.
+// The part's settings with "{port:<part>}" replaced by that part's port,
+// and "{address:<part>}" by its address.
 export function envOf(
   part: Part,
   parts: Part[],
   root: string,
 ): Record<string, string> | undefined {
   if (!part.env) return undefined;
+  const other = (id: string) => parts.find((p) => p.id === id);
   return Object.fromEntries(
     Object.entries(part.env).map(([key, value]) => [
       key,
-      value.replace(/\{port:([\w-]+)\}/g, (_match, id: string) => {
-        const other = parts.find((p) => p.id === id);
-        return String((other && portOf(other, parts, root)) ?? "");
-      }),
+      value.replace(
+        /\{(port|address):([\w-]+)\}/g,
+        (_match, what: string, id: string) => {
+          const found = other(id);
+          if (!found) return "";
+          return what === "port"
+            ? String(portOf(found, parts, root) ?? "")
+            : (addressOf(found, parts, root) ?? "");
+        },
+      ),
     ]),
   );
+}
+
+// The setting with the address of the backend a part needs: a web app's
+// development server sends its /api requests there.
+const BACKEND_SETTING = "BACKEND_URL";
+
+// Each part that needs a backend (a part of type backend that answers on a
+// port, in its dependsOn) gets that backend's address in BACKEND_URL, so it
+// reaches the server it depends on; a part that sets BACKEND_URL itself
+// keeps its own.
+export function withBackendAddress(parts: Part[]): Part[] {
+  return parts.map((part) => {
+    if (part.env?.[BACKEND_SETTING] !== undefined) return part;
+    const backend = part.dependsOn
+      .map((id) => parts.find((p) => p.id === id))
+      .find((p) => p?.type === "backend" && p.port !== undefined);
+    if (!backend) return part;
+    const address = `{address:${backend.id}}`;
+    return { ...part, env: { ...part.env, [BACKEND_SETTING]: address } };
+  });
 }

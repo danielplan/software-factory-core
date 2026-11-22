@@ -39,6 +39,51 @@ CLI, or Jira Cloud with an API token, each checked before it is saved.
   first knowledge pages; the first product comes from its kit's starter, or
   the framework's own generator. `software-factory new <name>` starts a new
   project.
+
+## The project's own checks
+
+A project with no `package.json` at its top gets one when its factory folder
+is made, as a company's factory keeps it: private, with the core pinned, and
+`npm run verify` (every product's `verify`, then the knowledge base's
+checks) and `npm run check:docs`. With it comes `lefthook.yml`, the git
+hooks that `npm install` at the top sets up:
+
+- **before a commit:** `software-factory check-format` on the staged files,
+  which runs the `format:check` of each product they are in, and
+  `software-factory check-docs` when a page changed;
+- **before a push:** `software-factory verify --pushed`, which runs the
+  `verify` command of each product changed by the pushed commits no remote
+  has yet (a new branch counts only its own).
+
+A project that has a `package.json` keeps its own (the core is only pinned
+in it), and one with git hooks of its own (lefthook's settings, husky) gets
+no `lefthook.yml`. The factory's `AGENTS.md` says what holds for both.
+
+## How a new product is made
+
+Each new product is a job the page shows while it works, in this order:
+
+1. **Made:** its kit's starter is copied into the product's folder under
+   the product's name, then the kit's own commands finish it (its packages
+   installed); a kit without a starter makes it with the framework's
+   generator. Where the starter lists its settings in `.env.example`, the
+   product gets its `.env` as a copy of it. A folder that has code already
+   is used as it is.
+2. **Described,** once its code is there: `product.json` with the commands
+   its kit finds in the code made (its `verify` check, how it starts, its
+   world check), and the starter's `BLUEPRINT.md` (or a first one). What
+   the starter brings is named too: a `prototype-world/` folder becomes the
+   product's made-up `world`, and settings that name `DATABASE_NAME` give
+   each working copy a database of its own
+   (`"copyEnv": { "DATABASE_NAME": "<id>-{port:<id>}" }`).
+3. **Formatted:** what the factory wrote is put in the shape of the
+   product's own Prettier, with its settings, so the product's `verify`
+   passes from the start.
+
+Existing code is described the same way, without step 1, and nothing in
+it is changed. Making comes before describing: written first, the
+description would make the folder, and the starter would never be copied.
+
 - **Bring an existing codebase:** each kit recognises its kind of product and
   the commands that already exist, and the owner confirms each product
   found. Nothing in the code is changed: the coach drafts each product's
@@ -47,17 +92,22 @@ CLI, or Jira Cloud with an API token, each checked before it is saved.
 
 ## Where it lives
 
-| Part                | Where                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| The coach           | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
-| What it may install | `packages/server/src/installables.ts`                                                              |
-| Finding products    | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
-| Its guide           | `packages/skills/guides/setup-coach.md`                                                            |
-| The page            | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
-| The files           | `factory/setup.json` (the setup conversation and its map)                                          |
+| Part                 | Where                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| The coach            | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
+| What it may install  | `packages/server/src/installables.ts`                                                              |
+| Making products      | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
+| The project's checks | `packages/server/src/project-checks.ts`, `packages/server/src/verify-command.ts`                   |
+| Finding products     | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
+| Its guide            | `packages/skills/guides/setup-coach.md`                                                            |
+| The page             | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
+| The files            | `factory/setup.json` (the setup conversation and its map)                                          |
 
 ## Checked and not checked
 
 Checked by tests: the coach's steps, map and records, setting up and
-connecting (`setup-coach.test.ts`, `setup.test.ts`, `connect.test.ts`).
+connecting (`setup-coach.test.ts`, `setup.test.ts`, `connect.test.ts`);
+making products, from `configure` to the product made from its starter and
+described (`setup-makes-products.test.ts`, `create-products.test.ts`); the
+project's own checks and the commands they run (`project-checks.test.ts`).
 Not checked by a test: what the coach says about a real codebase.

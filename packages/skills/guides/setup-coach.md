@@ -163,10 +163,15 @@ from the map:
 
 1. `configure` the project (its name makes the folder), then its products:
    existing code with its folder, a new product without one (it is made
-   with its kit's starter).
-2. Write each product's `BLUEPRINT.md`, and the knowledge base's pages
-   from the map: what the project is and for whom, its workflows, what must
-   never happen, its words, and what is still open.
+   with its kit's starter, then described with the commands its kit finds
+   in it). A project with no `package.json` at its top gets one, with its
+   checks and git hooks.
+2. Write each product's `BLUEPRINT.md` (a new product has its starter's:
+   make it this product's), and the knowledge base's pages from the map:
+   what the project is and for whom, its workflows, what must never happen,
+   its words, and what is still open. Where a product has a format script
+   (`npm run format` in its folder), run it on what you wrote there, so its
+   `verify` still passes.
 3. **Make docs/ one space.** The project's own documentation joins the
    knowledge base instead of standing beside it: sort each page into the
    section it belongs to (a how-to, reference, explanation; dated material

@@ -21,14 +21,7 @@ import {
 } from "@software-factory/core";
 import { Launcher } from "@software-factory/launcher";
 
-import type {
-  Board,
-  ChangeDraft,
-  CreateCompany,
-  Job,
-  SetupProduct,
-  State,
-} from "./api.ts";
+import type { Board, ChangeDraft, CreateCompany, Job, State } from "./api.ts";
 import {
   type Configuration,
   configure,
@@ -38,7 +31,7 @@ import { Ideas } from "./coach/ideas.ts";
 import { pictureIn, shownPicture } from "./coach/pictures.ts";
 import { type CoachOptions, SetupCoach } from "./coach/setup-coach.ts";
 import type { ToolsFor } from "./coach/setup-tools.ts";
-import { makeAndStart } from "./create-products.ts";
+import { addProducts } from "./create-products.ts";
 import { install } from "./install.ts";
 import { addOns, type Installable } from "./installables.ts";
 import { Refused, refuseAny } from "./refused.ts";
@@ -47,7 +40,7 @@ import { factoryView, kitViews } from "./views.ts";
 import { switched, trackedWith } from "./extension-switch.ts";
 import { withModelChoice } from "./model-choice.ts";
 import { PluggedIn } from "./plugged-in.ts";
-import { writeCompany, writeProducts } from "./write-factory.ts";
+import { writeCompany } from "./write-factory.ts";
 
 export type SessionOptions = {
   // The project: its factory folder opens, or, without one, setup.
@@ -215,19 +208,6 @@ export class Session {
     this.coach.ownerChange(change);
   }
 
-  // Products the coach adds: their descriptions, then the new ones made
-  // with their kits' starters, then they start.
-  private async addProducts(products: SetupProduct[]): Promise<void> {
-    writeProducts(this.rootOrRefuse(), products, this.options.available.kits);
-    this.reload();
-    await makeAndStart(products, this.options.available.kits, {
-      show: (jobs) => {
-        this.showJobs(jobs);
-      },
-      launcher: () => this.launcher,
-    });
-  }
-
   // Where work is tracked, which ends the onboarding: a board connected and
   // checked (board.json, its secrets in settings).
   chooseBoard(
@@ -314,7 +294,17 @@ export class Session {
         saveCompany(this.rootOrRefuse(), company);
         this.reload();
       },
-      addProducts: (products) => this.addProducts(products),
+      // Made and described (create-products.ts).
+      addProducts: (products) =>
+        addProducts(this.rootOrRefuse(), products, kits, {
+          show: (jobs) => {
+            this.showJobs(jobs);
+          },
+          reread: () => {
+            this.reload();
+          },
+          launcher: () => this.launcher,
+        }),
       saveSettings: (group, values) => this.saveSettings(group, values),
       extensions,
       install: (ids) => this.installAll(ids),

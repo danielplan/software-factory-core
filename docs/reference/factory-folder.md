@@ -7,6 +7,8 @@
 ```text
 acme/                    the project, one repository
 ├─ AGENTS.md             the project's rules, pointing to factory/AGENTS.md
+├─ package.json          the core pinned; in a project set up new, its checks
+├─ lefthook.yml          a project set up new: its git hooks
 ├─ docs/                 the knowledge base, beside the project's own docs
 ├─ shop/                 a product's code, with product.json and BLUEPRINT.md
 └─ factory/              its factory

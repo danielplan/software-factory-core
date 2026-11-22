@@ -72,7 +72,13 @@ function runStep(
       cwd,
       shell: windows,
       windowsHide: true,
-      env: { ...process.env, CI: "1", npm_config_yes: "true" },
+      // No colours: the page shows the lines as they are.
+      env: {
+        ...process.env,
+        CI: "1",
+        npm_config_yes: "true",
+        NO_COLOR: "1",
+      },
     });
     const lines = (chunk: Buffer) => {
       for (const line of chunk.toString().split(/\r?\n/))
