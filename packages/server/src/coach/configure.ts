@@ -52,7 +52,8 @@ export type Workshop = {
   company: () => Company | null;
   makeFolder: (company: { name: string; about: string }) => void;
   saveCompany: (company: Company) => void;
-  addProducts: (products: SetupProduct[]) => Promise<void>;
+  // The names of the new products that could not be made.
+  addProducts: (products: SetupProduct[]) => Promise<string[]>;
   saveSettings: (
     group: string,
     values: Record<string, unknown>,
@@ -83,8 +84,12 @@ export async function configure(
   if (asked.board) said.push(await connectBoard(shop, asked.board));
   said.push(...settingsChanges(shop, asked.settings ?? {}));
   if (asked.products && asked.products.length > 0) {
-    await shop.addProducts(productsOf(shop, asked.products));
+    const failed = await shop.addProducts(productsOf(shop, asked.products));
     said.push(`Added ${asked.products.map((p) => p.name).join(", ")}.`);
+    if (failed.length > 0)
+      said.push(
+        `Could not finish making ${failed.join(", ")}: the page shows why.`,
+      );
   }
   if (asked.install && asked.install.length > 0)
     said.push(

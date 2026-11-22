@@ -1,7 +1,10 @@
 // The project's factory folder from the dashboard's setup steps: the
-// company first (the folder, and the project's rules pointing to it), then products (found in existing code, or about to be
-// made) whenever the owner adds them, with the kits their kinds need.
+// company first (the folder, the project's rules pointing to it, and the
+// project's own checks), then products whenever the owner adds them: the
+// kits their kinds need first, then each product's description once its
+// code is there (found in existing code, or just made).
 
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 import {
@@ -12,6 +15,7 @@ import {
   hasFactory,
   type Kit,
   pointToFactory,
+  PRODUCT_FILE,
   readCompany,
   saveCompany,
   type Templates,
@@ -41,9 +45,10 @@ export function writeCompany(
   return root;
 }
 
-// The products' descriptions, and the kits their kinds need added to the
-// company file. Refused as a whole when one does not fit.
-export function writeProducts(
+// The kits the products' kinds need, added to the company file with their
+// MCP servers, before any product is made. Refused as a whole when one
+// product does not fit, so nothing is made for a list that cannot be added.
+export function useKits(
   root: string,
   products: SetupProduct[],
   kits: Kit[],
@@ -69,20 +74,27 @@ export function writeProducts(
     dirname(root),
     kits.filter((kit) => kinds.has(kit.kind)),
   );
-  for (const product of products)
-    addProduct(
-      root,
-      {
-        id: product.id,
-        name: product.name,
-        kind: product.kind,
-        folder: product.folder,
-        about: product.about,
-        users: product.users ?? [],
-        commands: product.commands ?? {},
-        dependsOn: product.dependsOn ?? [],
-        ...(product.port ? { port: product.port } : {}),
-      },
-      product.blueprint,
-    );
+}
+
+// The product's description next to its code, once the code is there
+// (product.json, and its first blueprint unless it has one), listed in the
+// company file; the files it wrote.
+export function describeProduct(root: string, product: SetupProduct): string[] {
+  const hadBlueprint = existsSync(join(product.folder, "BLUEPRINT.md"));
+  addProduct(
+    root,
+    {
+      id: product.id,
+      name: product.name,
+      kind: product.kind,
+      folder: product.folder,
+      about: product.about,
+      users: product.users ?? [],
+      commands: product.commands ?? {},
+      dependsOn: product.dependsOn ?? [],
+      ...(product.port ? { port: product.port } : {}),
+    },
+    product.blueprint,
+  );
+  return hadBlueprint ? [PRODUCT_FILE] : [PRODUCT_FILE, "BLUEPRINT.md"];
 }

@@ -34,3 +34,11 @@
   and the server's extensions imported each other, so none could be removed
   alone. Keep: shared → features → app, checked by dependency-cruiser on both
   halves ([decision 0012](../../decisions/0012-both-halves-follow-the-react-kit-layout.md)).
+- **Setup described a new product before making it.** Writing its
+  `product.json` and blueprint made the product's folder; making it then
+  found the folder there, used it as it was and never copied the kit's
+  starter. New apps had no code while their job showed done, and the
+  tests only checked making on its own. Keep: a product is made first and
+  described after (`packages/server/src/create-products.ts`), and a test
+  drives the whole way the coach builds, from `configure` to the files made
+  (`packages/server/test/setup-makes-products.test.ts`).
