@@ -28,7 +28,7 @@ import { overallOf } from "@/lib/shell-view";
 import { useT } from "@/i18n/use-t";
 import { useSignals } from "@/signals/use-signals";
 
-import { MADE_STATE, VARIANT } from "@/lib/prototype-flags";
+import { MADE_STATE } from "@/lib/prototype-flags";
 
 import type { FactoryState } from "./dashboard";
 import { ArrangeButton, type BlockId, HomeBlocks } from "./home-blocks";
@@ -135,6 +135,49 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
         ))}
       </Card>
     ),
+    exploring: (
+      <BlockCard name="Being explored" from="Explorations">
+        {MADE_STATE === "empty" || input.exploring.length === 0 ? (
+          <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
+            Nothing is being explored.
+          </p>
+        ) : (
+          input.exploring.slice(0, 4).map((row) => (
+            <a
+              key={row.id}
+              href={`#explore/${encodeURIComponent(row.id)}`}
+              className="grid gap-0.5 border-t border-line-soft px-4 py-2.5 first:border-t-0 hover:bg-surface"
+            >
+              <span className="truncate text-[13px]">{row.title}</span>
+              {row.line && (
+                <span className="truncate text-xs text-muted-foreground">
+                  {row.line}
+                </span>
+              )}
+            </a>
+          ))
+        )}
+      </BlockCard>
+    ),
+    signals: (
+      <BlockCard name="New signals" from="Signals">
+        {MADE_STATE === "empty" || input.signals.length === 0 ? (
+          <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
+            No new signals.
+          </p>
+        ) : (
+          input.signals.slice(0, 3).map((signal) => (
+            <a
+              key={signal.text}
+              href="#signals"
+              className="block truncate border-t border-line-soft px-4 py-2.5 text-[13px] first:border-t-0 hover:bg-surface"
+            >
+              {signal.text}
+            </a>
+          ))
+        )}
+      </BlockCard>
+    ),
     reviews: (
       <BlockCard name="Open reviews" from="GitHub board">
         {reviews.length === 0 ? (
@@ -181,14 +224,12 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
         title={t.shell.pages.home}
         about={t.home.about}
         actions={
-          VARIANT === "A" && (
-            <ArrangeButton
-              editing={arranging}
-              onClick={() => {
-                setArranging(!arranging);
-              }}
-            />
-          )
+          <ArrangeButton
+            editing={arranging}
+            onClick={() => {
+              setArranging(!arranging);
+            }}
+          />
         }
       />
       <HomeBlocks blocks={blocks} editing={arranging} />

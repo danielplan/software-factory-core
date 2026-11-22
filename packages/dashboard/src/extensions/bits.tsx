@@ -1,0 +1,137 @@
+// Small pieces the three extensions pages share: who made it, what it
+// adds and needs, and the on/off switch.
+
+import {
+  Columns3,
+  FlaskConical,
+  Inbox,
+  Mic,
+  ShieldCheck,
+  Sunrise,
+  Tag,
+  Users,
+} from "lucide-react";
+
+import { IconTile } from "@/add-ons/looks";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+
+import { addsOf, type Ext, makerOf } from "./data";
+
+export function Maker({ ext }: Readonly<{ ext: Ext }>) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-5 w-fit items-center rounded-full px-2 text-[11px] font-medium",
+        ext.maker === "team"
+          ? "bg-wash text-wash-foreground"
+          : "bg-surface-2 text-muted-foreground",
+      )}
+    >
+      {makerOf(ext)}
+    </span>
+  );
+}
+
+const LOOKS: Record<string, { icon: React.ReactNode; color: string }> = {
+  factory: { icon: <Columns3 aria-hidden />, color: "var(--build)" },
+  explorations: { icon: <FlaskConical aria-hidden />, color: "var(--explore)" },
+  signals: { icon: <Inbox aria-hidden />, color: "var(--understand)" },
+  personas: { icon: <Users aria-hidden />, color: "var(--source-app)" },
+  releases: { icon: <Tag aria-hidden />, color: "var(--build)" },
+  voice: { icon: <Mic aria-hidden />, color: "var(--source-usage)" },
+  verification: { icon: <ShieldCheck aria-hidden />, color: "var(--source-test)" },
+  standup: { icon: <Sunrise aria-hidden />, color: "#e9a23b" },
+};
+
+export function Logo({ ext, big = false }: Readonly<{ ext: Ext; big?: boolean }>) {
+  const own = LOOKS[ext.id];
+  if (!own) return <IconTile id={ext.id} big={big} />;
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid flex-none place-items-center",
+        big ? "size-12 rounded-xl [&_svg]:size-6" : "size-8 rounded-lg [&_svg]:size-4",
+      )}
+      style={{
+        color: own.color,
+        backgroundColor: `color-mix(in oklab, ${own.color} 13%, transparent)`,
+      }}
+    >
+      {own.icon}
+    </span>
+  );
+}
+
+function Row({
+  label,
+  children,
+}: Readonly<{ label: string; children: React.ReactNode }>) {
+  return (
+    <div className="grid grid-cols-[84px_minmax(0,1fr)] items-baseline gap-2">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap items-center gap-1.5">{children}</div>
+    </div>
+  );
+}
+
+export function Adds({ ext }: Readonly<{ ext: Ext }>) {
+  const adds = addsOf(ext);
+  if (adds.length === 0)
+    return <span className="text-xs text-muted-foreground">Adds nothing yet</span>;
+  return (
+    <div className="grid gap-1.5">
+      {adds.map((one) => (
+        <Row key={one.kind} label={one.kind}>
+          {one.names.map((name) => (
+            <span
+              key={name}
+              className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs"
+            >
+              {name}
+            </span>
+          ))}
+        </Row>
+      ))}
+    </div>
+  );
+}
+
+export function Needs({ ext }: Readonly<{ ext: Ext }>) {
+  return (
+    <Row label="Needs">
+      <span className="text-xs">
+        {ext.needs.length === 0 ? "Nothing" : ext.needs.join(", ")}
+      </span>
+    </Row>
+  );
+}
+
+// On or off; a board is changed on Settings, so its switch says where.
+export function OnOff({
+  ext,
+  turn,
+}: Readonly<{ ext: Ext; turn: (id: string, on: boolean) => void }>) {
+  if (ext.tracker)
+    return (
+      <a
+        href="#settings/connections"
+        className="text-xs text-blue hover:underline"
+      >
+        {ext.on ? "In use · change" : "Use instead"}
+      </a>
+    );
+  return (
+    <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+      {ext.on ? "On" : "Off"}
+      <Switch
+        checked={ext.on}
+        aria-label={`${ext.name} on or off`}
+        onCheckedChange={(on) => {
+          turn(ext.id, on);
+        }}
+      />
+    </label>
+  );
+}

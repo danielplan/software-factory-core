@@ -1,0 +1,214 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Extensions
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Extensions
+                - paragraph: What your factory can do. Install what you need; the kobold can write your own.
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - generic:
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Factory
+                        - generic: Kobble
+                    - paragraph: The board where work is built, from to do to done.
+                    - generic:
+                      - generic: A page
+                      - generic: A stage
+                      - generic: Home blocks
+                      - generic: A kobold
+                  - generic: Installed
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Explorations
+                        - generic: Kobble
+                    - paragraph: Explore an idea with the kobold before anything is built.
+                    - generic:
+                      - generic: A page
+                      - generic: A stage
+                      - generic: Home blocks
+                      - generic: A kobold
+                  - generic: Installed
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Signals
+                        - generic: Kobble
+                    - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                    - generic:
+                      - generic: A page
+                      - generic: A stage
+                      - generic: Home blocks
+                      - generic: A kobold
+                  - generic: Installed
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Personas
+                        - generic: Kobble
+                    - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - generic: A page
+                      - generic: A stage
+                      - generic: A kobold
+                  - generic:
+                    - button: Install
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Releases
+                        - generic: Kobble
+                    - paragraph: Numbers and notes for each release of your product.
+                    - generic:
+                      - generic: A page
+                      - generic: A stage
+                  - generic: Installed
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: GitHub board
+                        - generic: Kobble
+                    - paragraph: Work tracked on a GitHub board, through the GitHub CLI.
+                    - generic:
+                      - generic: A stage
+                      - generic: Home blocks
+                  - generic:
+                    - link:
+                      - /url: "#settings/connections"
+                      - text: Use instead
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Jira Cloud
+                        - generic: Kobble
+                    - paragraph: Work tracked in a Jira Cloud project, with an API token.
+                    - generic: A stage
+                  - generic:
+                    - link:
+                      - /url: "#settings/connections"
+                      - text: Use instead
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Voice
+                        - generic: Kobble
+                    - paragraph: Talk to the kobolds and hear them answer.
+                    - generic: A kobold
+                  - generic:
+                    - button: Install
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Verification
+                        - generic: Kobble
+                    - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - generic: A stage
+                      - generic: Home blocks
+                      - generic: A kobold
+                  - generic:
+                    - button: Install
+                - article:
+                  - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Daily standup
+                        - generic: Your team
+                    - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - generic: A page
+                      - generic: Stages
+                      - generic: Home blocks
+                      - generic: A kobold
+                  - generic:
+                    - button: Install
+        - region [ref=f1e5]:
+          - button [ref=f1e6] [cursor=pointer]:
+            - generic [ref=f1e16]: Ask Sprocket anything
+            - generic [ref=f1e17]: ⌘J
+  - dialog "Install both?" [ref=f1e19]:
+    - heading "Install both?" [level=2] [ref=f1e20]
+    - paragraph [ref=f1e21]: Verification needs Personas, which is not installed yet. They are installed together.
+    - generic [ref=f1e22]:
+      - button "Cancel" [active] [ref=f1e23] [cursor=pointer]
+      - button "Install Personas and Verification" [ref=f1e24] [cursor=pointer]
+    - button "Close" [ref=f1e25] [cursor=pointer]

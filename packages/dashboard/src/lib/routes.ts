@@ -13,6 +13,7 @@ export const PAGES = [
   "build",
   "releases",
   "personas",
+  "extensions",
   "settings",
 ] as const;
 export type Page = (typeof PAGES)[number];

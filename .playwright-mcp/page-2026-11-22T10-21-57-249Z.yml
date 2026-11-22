@@ -1,0 +1,179 @@
+- generic [ref=f1e27]:
+  - complementary [ref=f1e28]:
+    - generic [ref=f1e29]: Acme
+    - navigation "Overview" [ref=f1e41]:
+      - link "Home" [ref=f1e42] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=f1e47] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=f1e59]:
+          - text: Stopped
+          - img "Stopped" [ref=f1e60]
+    - navigation "Pages" [ref=f1e61]:
+      - generic [ref=f1e62]:
+        - generic [ref=f1e63]: Work
+        - link "Signals Sieve" [ref=f1e64] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=f1e70]': Sieve
+        - link "Explorations Doodle 2" [ref=f1e83] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=f1e87]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e88]': Doodle
+            - generic [ref=f1e100]: "2"
+        - link "Factory Bolt" [ref=f1e101] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e106]': Bolt
+        - link "Releases" [ref=f1e120] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=f1e125]:
+        - generic [ref=f1e126]: Customers
+        - link "Personas Mimic" [ref=f1e127] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e135]': Mimic
+    - generic [ref=f1e146]:
+      - button "Send feedback" [ref=f1e147] [cursor=pointer]
+      - navigation "The factory" [ref=f1e152]:
+        - link "Extensions" [ref=f1e153] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=f1e157] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=f1e162]:
+    - generic [ref=f1e164]:
+      - generic [ref=f1e165]:
+        - heading "Extensions" [level=1] [ref=f1e168]
+        - paragraph [ref=f1e169]: What your factory can do. Install what you need; the kobold can write your own.
+      - generic [ref=f1e170]:
+        - textbox "Search extensions" [ref=f1e172]
+        - group "Filter" [ref=f1e173]:
+          - button "All" [pressed] [ref=f1e174] [cursor=pointer]
+          - button "Installed" [ref=f1e175] [cursor=pointer]
+          - button "Kobble's" [ref=f1e176] [cursor=pointer]
+          - button "Your team's" [ref=f1e177] [cursor=pointer]
+      - generic [ref=f1e178]:
+        - article "Factory" [ref=f1e179]:
+          - button "Open Factory" [ref=f1e180] [cursor=pointer]
+          - generic [ref=f1e181]:
+            - generic [ref=f1e186]:
+              - generic [ref=f1e187]: Factory
+              - generic [ref=f1e188]: Kobble
+            - paragraph [ref=f1e189]: The board where work is built, from to do to done.
+            - generic [ref=f1e190]:
+              - generic [ref=f1e191]: A page
+              - generic [ref=f1e192]: A stage
+              - generic [ref=f1e193]: Home blocks
+              - generic [ref=f1e194]: A kobold
+          - generic [ref=f1e195]: Installed
+        - article "Explorations" [ref=f1e199]:
+          - button "Open Explorations" [ref=f1e200] [cursor=pointer]
+          - generic [ref=f1e201]:
+            - generic [ref=f1e206]:
+              - generic [ref=f1e207]: Explorations
+              - generic [ref=f1e208]: Kobble
+            - paragraph [ref=f1e209]: Explore an idea with the kobold before anything is built.
+            - generic [ref=f1e210]:
+              - generic [ref=f1e211]: A page
+              - generic [ref=f1e212]: A stage
+              - generic [ref=f1e213]: Home blocks
+              - generic [ref=f1e214]: A kobold
+          - generic [ref=f1e215]: Installed
+        - article "Signals" [ref=f1e219]:
+          - button "Open Signals" [ref=f1e220] [cursor=pointer]
+          - generic [ref=f1e221]:
+            - generic [ref=f1e227]:
+              - generic [ref=f1e228]: Signals
+              - generic [ref=f1e229]: Kobble
+            - paragraph [ref=f1e230]: "What the live app reports: bugs, wishes and how it is used."
+            - generic [ref=f1e231]:
+              - generic [ref=f1e232]: A page
+              - generic [ref=f1e233]: A stage
+              - generic [ref=f1e234]: Home blocks
+              - generic [ref=f1e235]: A kobold
+          - generic [ref=f1e236]: Installed
+        - article "Personas" [ref=f1e240]:
+          - button "Open Personas" [ref=f1e241] [cursor=pointer]
+          - generic [ref=f1e242]:
+            - generic [ref=f1e250]:
+              - generic [ref=f1e251]: Personas
+              - generic [ref=f1e252]: Kobble
+            - paragraph [ref=f1e253]: Made-up customers who use the app and tell you what breaks.
+            - generic [ref=f1e254]:
+              - generic [ref=f1e255]: A page
+              - generic [ref=f1e256]: A stage
+              - generic [ref=f1e257]: A kobold
+          - button "Install" [ref=f1e259] [cursor=pointer]
+        - article "Releases" [ref=f1e260]:
+          - button "Open Releases" [ref=f1e261] [cursor=pointer]
+          - generic [ref=f1e262]:
+            - generic [ref=f1e268]:
+              - generic [ref=f1e269]: Releases
+              - generic [ref=f1e270]: Kobble
+            - paragraph [ref=f1e271]: Numbers and notes for each release of your product.
+            - generic [ref=f1e272]:
+              - generic [ref=f1e273]: A page
+              - generic [ref=f1e274]: A stage
+          - generic [ref=f1e275]: Installed
+        - article "GitHub board" [ref=f1e279]:
+          - button "Open GitHub board" [ref=f1e280] [cursor=pointer]
+          - generic [ref=f1e281]:
+            - generic [ref=f1e286]:
+              - generic [ref=f1e287]: GitHub board
+              - generic [ref=f1e288]: Kobble
+            - paragraph [ref=f1e289]: Work tracked on a GitHub board, through the GitHub CLI.
+            - generic [ref=f1e290]:
+              - generic [ref=f1e291]: A stage
+              - generic [ref=f1e292]: Home blocks
+          - link "Use instead" [ref=f1e294] [cursor=pointer]:
+            - /url: "#settings/connections"
+        - article "Jira Cloud" [ref=f1e295]:
+          - button "Open Jira Cloud" [ref=f1e296] [cursor=pointer]
+          - generic [ref=f1e297]:
+            - generic [ref=f1e302]:
+              - generic [ref=f1e303]: Jira Cloud
+              - generic [ref=f1e304]: Kobble
+            - paragraph [ref=f1e305]: Work tracked in a Jira Cloud project, with an API token.
+            - generic [ref=f1e306]: A stage
+          - link "Use instead" [ref=f1e309] [cursor=pointer]:
+            - /url: "#settings/connections"
+        - article "Voice" [ref=f1e310]:
+          - button "Open Voice" [ref=f1e311] [cursor=pointer]
+          - generic [ref=f1e312]:
+            - generic [ref=f1e318]:
+              - generic [ref=f1e319]: Voice
+              - generic [ref=f1e320]: Kobble
+            - paragraph [ref=f1e321]: Talk to the kobolds and hear them answer.
+            - generic [ref=f1e322]: A kobold
+          - button "Install" [ref=f1e325] [cursor=pointer]
+        - article "Verification" [ref=f1e326]:
+          - button "Open Verification" [ref=f1e327] [cursor=pointer]
+          - generic [ref=f1e328]:
+            - generic [ref=f1e334]:
+              - generic [ref=f1e335]: Verification
+              - generic [ref=f1e336]: Kobble
+            - paragraph [ref=f1e337]: Sends a persona through a change before it is merged.
+            - generic [ref=f1e338]:
+              - generic [ref=f1e339]: A stage
+              - generic [ref=f1e340]: Home blocks
+              - generic [ref=f1e341]: A kobold
+          - generic [ref=f1e342]: Installed
+        - article "Daily standup" [ref=f1e346]:
+          - button "Open Daily standup" [ref=f1e347] [cursor=pointer]
+          - generic [ref=f1e348]:
+            - generic [ref=f1e356]:
+              - generic [ref=f1e357]: Daily standup
+              - generic [ref=f1e358]: Your team
+            - paragraph [ref=f1e359]: "A short page each morning: what moved yesterday, what waits today."
+            - generic [ref=f1e360]:
+              - generic [ref=f1e361]: A page
+              - generic [ref=f1e362]: Stages
+              - generic [ref=f1e363]: Home blocks
+              - generic [ref=f1e364]: A kobold
+          - button "Install" [ref=f1e366] [cursor=pointer]
+  - region "Sprocket" [ref=f1e367]:
+    - button "Ask Sprocket anything ⌘J" [ref=f1e368] [cursor=pointer]:
+      - generic [ref=f1e16]: Ask Sprocket anything
+      - generic [ref=f1e17]: ⌘J

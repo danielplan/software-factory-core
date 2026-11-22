@@ -1,0 +1,155 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Extensions
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=1]: Home
+                - generic:
+                  - button: Done
+              - paragraph: What waits for you, and where the work is.
+            - generic:
+              - generic:
+                - generic: Product statusFactory
+                - button [disabled]
+                - button
+                - button: Hide
+              - generic:
+                - generic: The product is stopped · Bolt is resting
+                - link:
+                  - /url: "#system"
+                  - text: System
+            - generic:
+              - generic:
+                - generic: Waiting for youFactory
+                - button
+                - button
+                - button: Hide
+              - generic:
+                - generic:
+                  - generic: Continue
+                  - generic:
+                    - generic: The basket is empty when people come back to pay
+                    - generic: B is agreed. You can hand it off.
+                  - link:
+                    - /url: "#explore/X-1"
+                    - text: Continue
+                - generic:
+                  - generic: Continue
+                  - generic:
+                    - generic: One invoice a month for businesses
+                    - generic: Does his accountant need one invoice, or is one payment enough?
+                  - link:
+                    - /url: "#explore/X-2"
+                    - text: Continue
+            - generic:
+              - generic:
+                - generic: The loopFactory
+                - button
+                - button
+                - button: Hide
+              - generic:
+                - link:
+                  - /url: "#signals"
+                  - generic: Signals
+                  - generic: 0 new
+                - link:
+                  - /url: "#explore"
+                  - generic: Explorations
+                  - generic: 2 being explored
+                  - generic: The basket is empty when people come back to pay
+                  - generic: One invoice a month for businesses
+                - link:
+                  - /url: "#build"
+                  - generic: Factory
+                  - generic: 0 to build
+                - link:
+                  - /url: "#build"
+                  - generic: Done
+                  - generic: 0 merged
+            - generic:
+              - generic:
+                - generic: Being exploredExplorations
+                - button
+                - button [disabled]
+                - button: Hide
+              - generic:
+                - generic:
+                  - link:
+                    - /url: "#explore/X-1"
+                    - generic: The basket is empty when people come back to pay
+                    - generic: B is agreed. You can hand it off.
+                  - link:
+                    - /url: "#explore/X-2"
+                    - generic: One invoice a month for businesses
+                    - generic: Does his accountant need one invoice, or is one payment enough?
+            - generic:
+              - button [expanded]: Add a block
+              - button: Start again
+        - region [ref=f2e301]:
+          - button [ref=f2e302] [cursor=pointer]:
+            - generic [ref=f2e217]: Ask Sprocket anything
+            - generic [ref=f2e218]: ⌘J
+  - dialog "Add a block to Home" [active] [ref=f2e304]:
+    - heading "Add a block to Home" [level=2] [ref=f2e305]
+    - generic [ref=f2e306]:
+      - navigation "Extensions that offer blocks" [ref=f2e307]:
+        - button "Factory" [ref=f2e308] [cursor=pointer]
+        - button "Explorations" [ref=f2e313] [cursor=pointer]
+        - button "Signals" [ref=f2e318] [cursor=pointer]
+        - button "GitHub board" [ref=f2e324] [cursor=pointer]
+        - button "Checks" [ref=f2e329] [cursor=pointer]
+      - generic [ref=f2e405]:
+        - generic [ref=f2e406]:
+          - generic [ref=f2e407]: Being explored
+          - generic [ref=f2e408]: The ideas the team is exploring, and what is next for each
+        - generic [ref=f2e425]: On Home
+    - button "Close" [ref=f2e402] [cursor=pointer]

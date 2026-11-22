@@ -10,7 +10,15 @@ import { FACTORY_FOLDER } from "@software-factory/core";
 import type { Route } from "./add-ons/add-on.ts";
 import { Refused } from "./refused.ts";
 
-const BLOCKS = ["status", "waiting", "loop", "reviews", "failed"];
+const BLOCKS = [
+  "status",
+  "waiting",
+  "loop",
+  "exploring",
+  "signals",
+  "reviews",
+  "failed",
+];
 
 type Layout = { order: string[]; hidden: string[] };
 

@@ -1,15 +1,16 @@
-// Prototype only: which variant of the exploration shows, chosen outside the
+// Prototype only: which variant of the extensions page shows, chosen outside the
 // app by the page address (?variant=B), kept for the visit; and the made-up
 // state Home shows (?state=empty | many).
 
-export type Variant = "A" | "B";
+export type Variant = "A" | "B" | "C";
 
 const KEY = "kobble.variant";
 
 function readVariant(): Variant {
   const asked = new URLSearchParams(window.location.search).get("variant");
   const kept = sessionStorage.getItem(KEY);
-  const variant = (asked ?? kept ?? "A").toUpperCase() === "B" ? "B" : "A";
+  const wanted = (asked ?? kept ?? "A").toUpperCase();
+  const variant = wanted === "B" || wanted === "C" ? wanted : "A";
   sessionStorage.setItem(KEY, variant);
   return variant;
 }

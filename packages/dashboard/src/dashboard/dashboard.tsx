@@ -14,6 +14,8 @@ import { PersonasPage } from "@/personas/personas-page";
 import { GuidedSetup } from "@/setup-guided/guided-setup";
 import { SignalsPage } from "@/signals/signals-page";
 
+import { ExtensionsPage } from "@/extensions/extensions-page";
+
 import { HomePage } from "./home-page";
 import { SettingsTab } from "./settings-tab";
 import { SystemPage } from "./system-page";
@@ -100,6 +102,8 @@ function PageBody({
       return <HomePage state={state} />;
     case "system":
       return <SystemPage state={state} />;
+    case "extensions":
+      return <ExtensionsPage state={state} open={open} />;
     case "settings":
       return <SettingsTab state={state} open={open} />;
   }
