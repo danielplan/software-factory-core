@@ -5,10 +5,12 @@ import {
   type Factory,
   groupView,
   type Kit,
+  shownView,
 } from "@software-factory/core";
 
 import type { KitView, ProductView, State } from "./api.ts";
 import { readBoard } from "./connect/board-file.ts";
+import { stagesView } from "./stages.ts";
 
 // What the page shows of an open factory, from its files.
 export function factoryView(
@@ -17,7 +19,14 @@ export function factoryView(
   extensions: Extension[],
 ): Pick<
   Extract<State, { mode: "factory" }>,
-  "root" | "company" | "products" | "settings" | "problems" | "board" | "addOns"
+  | "root"
+  | "company"
+  | "products"
+  | "settings"
+  | "problems"
+  | "board"
+  | "addOns"
+  | "stages"
 > {
   return {
     root,
@@ -37,8 +46,23 @@ export function factoryView(
       needs: extension.needs,
       slots: extension.slots,
       brings: extension.brings,
+      screens: {
+        pages: extension.pages.map(shownView),
+        blocks: extension.blocks.map(shownView),
+      },
       settings: extension.settings.map((group) => group.id),
     })),
+    stages: stagesOf(factory, root),
+  };
+}
+
+// The stages of the installed extensions in the team's order, and the
+// clash left open between two of them, by id.
+function stagesOf(factory: Factory, root: string) {
+  const { order, clash } = stagesView(root, factory.extensions);
+  return {
+    order,
+    clash: clash && { first: clash.first.id, second: clash.second.id },
   };
 }
 

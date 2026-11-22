@@ -21,8 +21,16 @@ export const KOBBLE_EXTENSIONS: Extension[] = [
       pages: ["build"],
       blocks: ["status", "waiting", "loop", "reviews"],
       kobolds: ["builder"],
-      stages: ["build"],
     },
+    stages: [
+      {
+        id: "build",
+        name: "Factory",
+        after: ["signals", "explore"],
+        before: ["done"],
+      },
+      { id: "done", name: "Done", after: ["build"] },
+    ],
   }),
   kobble("explorations", "Explorations", "Explore an idea before building.", {
     needs: ["factory"],
@@ -30,24 +38,38 @@ export const KOBBLE_EXTENSIONS: Extension[] = [
       pages: ["explore"],
       blocks: ["exploring"],
       kobolds: ["explorer"],
-      stages: ["explore"],
     },
+    stages: [
+      {
+        id: "explore",
+        name: "Explorations",
+        after: ["signals"],
+        before: ["build", "done"],
+      },
+    ],
   }),
   kobble("signals", "Signals", "What the live app reports.", {
     brings: {
       pages: ["signals"],
       blocks: ["signals"],
       kobolds: ["sorter"],
-      stages: ["signals"],
     },
+    stages: [
+      {
+        id: "signals",
+        name: "Signals",
+        before: ["explore", "build", "done"],
+      },
+    ],
   }),
   kobble("personas", "Personas", "Made-up customers who try the app.", {
     needs: ["signals"],
-    brings: { pages: ["personas"], kobolds: ["tester"], stages: ["signals"] },
+    brings: { pages: ["personas"], kobolds: ["tester"] },
   }),
   kobble("releases", "Releases", "Numbers and notes for each release.", {
     needs: ["factory"],
     slots: ["code"],
-    brings: { pages: ["releases"], stages: ["release"] },
+    brings: { pages: ["releases"] },
+    stages: [{ id: "release", name: "Release", after: ["done"] }],
   }),
 ];

@@ -32,6 +32,65 @@ const bringsSchema = z.object({
   stages: z.array(id).default([]),
 });
 
+// How a page or a Home block of an extension looks: a few parts one under
+// the other, drawn by Kobble's page in its own look, so nothing a team writes
+// can change how the page works. A part is some words, or a list of items
+// (written here, or kept in a file of the extension's own folder, which the
+// extension's kobold keeps up to date).
+export const VIEW_ICONS = [
+  "puzzle",
+  "list",
+  "check",
+  "flag",
+  "calendar",
+  "chart",
+  "note",
+  "star",
+] as const;
+
+const itemSchema = z.object({
+  title: z.string().min(1),
+  about: z.string().optional(),
+  // A small word beside it ("late", "ready").
+  tag: z.string().optional(),
+});
+
+const viewPartSchema = z.discriminatedUnion("show", [
+  z.object({
+    show: z.literal("text"),
+    title: z.string().optional(),
+    text: z.string().min(1),
+  }),
+  z.object({
+    show: z.literal("list"),
+    title: z.string().optional(),
+    items: z.array(itemSchema).default([]),
+    // A JSON file in the extension's folder with more items (a list of
+    // objects like these), read each time the page is shown.
+    from: z.string().min(1).optional(),
+    // What shows when the list has nothing in it.
+    empty: z.string().optional(),
+  }),
+]);
+
+const viewSchema = z.object({
+  id,
+  name: z.string().min(1),
+  about: z.string().optional(),
+  icon: z.enum(VIEW_ICONS).default("puzzle"),
+  parts: z.array(viewPartSchema).min(1),
+});
+
+// Where a stage of work sits among the others: it names its neighbours, by
+// stage id, and the factory works out the order (stages.ts). A neighbour
+// that is not installed is not a problem: the others around it still hold.
+const stageSchema = z.object({
+  id,
+  name: z.string().min(1),
+  after: z.array(id).default([]),
+  before: z.array(id).default([]),
+});
+
 // The jobs the factory itself fills once, for every extension: where the
 // code lives and where the tasks are kept. Only the core defines them.
 export const SLOTS = ["code", "tasks"] as const;
@@ -58,6 +117,11 @@ export const extensionSchema = z.object({
     kobolds: [],
     stages: [],
   }),
+  // The pages and Home blocks it describes (a team's own; Kobble's draw theirs
+  // in code) and the stages it adds, with the places it suggests for them.
+  pages: z.array(viewSchema).default([]),
+  blocks: z.array(viewSchema).default([]),
+  stages: z.array(stageSchema).default([]),
   // The factory's own programs this extension runs.
   parts: z.array(partSchema).default([]),
   settings: z.array(settingGroupSchema).default([]),
@@ -101,6 +165,10 @@ export const kitSchema = z.object({
 });
 
 export type Guide = z.infer<typeof guideSchema>;
+export type View = z.infer<typeof viewSchema>;
+export type ViewPart = z.infer<typeof viewPartSchema>;
+export type ViewItem = z.infer<typeof itemSchema>;
+export type StageSpec = z.infer<typeof stageSchema>;
 export type McpServer = z.infer<typeof mcpServerSchema>;
 export type ExtensionFile = z.input<typeof extensionSchema>;
 export type Extension = z.infer<typeof extensionSchema>;
@@ -140,7 +208,25 @@ export function defineExtension(spec: ExtensionFile): Extension {
     throw new Error(
       `The extension "${spec.id}" is not right: ${z.prettifyError(parsed.error)}`,
     );
-  return parsed.data;
+  return withBrought(parsed.data);
+}
+
+// What an extension describes (a page, a block, a stage) is brought too: it
+// need not be said twice.
+export function withBrought(extension: Extension): Extension {
+  const joined = (ids: string[], more: { id: string }[]) => [
+    ...new Set([...ids, ...more.map((one) => one.id)]),
+  ];
+  const { brings } = extension;
+  return {
+    ...extension,
+    brings: {
+      ...brings,
+      pages: joined(brings.pages, extension.pages),
+      blocks: joined(brings.blocks, extension.blocks),
+      stages: joined(brings.stages, extension.stages),
+    },
+  };
 }
 
 export function defineKit(spec: KitFile): Kit {

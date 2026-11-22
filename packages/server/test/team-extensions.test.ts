@@ -21,7 +21,13 @@ async function openFactory() {
       id: "standup",
       name: "Daily standup",
       about: "A short note each morning.",
-      brings: { pages: ["standup"] },
+      pages: [
+        {
+          id: "standup",
+          name: "Daily standup",
+          parts: [{ show: "text", text: "A short note." }],
+        },
+      ],
     }),
   );
   // The folder is read again whenever the factory is.
@@ -83,6 +89,76 @@ test("one that does not pass the checks is not offered, and the factory says why
     assert.ok(state.mode === "factory");
     assert.equal(standupOf(session), undefined);
     assert.match(state.problems.join("\n"), /says "always"/);
+  } finally {
+    close();
+  }
+});
+
+test("its page and Home blocks are described for the page, lists read now", async () => {
+  const { session, root, close } = await openFactory();
+  try {
+    writeFileSync(
+      join(root, "extensions", "standup", "extension.json"),
+      JSON.stringify({
+        id: "standup",
+        name: "Daily standup",
+        about: "A short note.",
+        blocks: [
+          {
+            id: "standup-open",
+            name: "Open items",
+            parts: [{ show: "list", from: "open.json", empty: "None" }],
+          },
+        ],
+      }),
+    );
+    writeFileSync(
+      join(root, "extensions", "standup", "open.json"),
+      JSON.stringify([{ title: "Ask Sam" }]),
+    );
+    session.switchAddOn("voice", false);
+    const items = () =>
+      JSON.stringify(standupOf(session)?.screens.blocks[0]?.parts);
+    assert.match(items(), /Ask Sam/);
+    // The list's file changes: the next state has it, with no restart.
+    writeFileSync(
+      join(root, "extensions", "standup", "open.json"),
+      JSON.stringify([{ title: "Book the room" }]),
+    );
+    assert.match(items(), /Book the room/);
+    assert.deepEqual(standupOf(session)?.brings.blocks, ["standup-open"]);
+  } finally {
+    close();
+  }
+});
+
+test("its stage is in the order of work once it is installed", async () => {
+  const { session, root, close } = await openFactory();
+  try {
+    writeFileSync(
+      join(root, "extensions", "standup", "extension.json"),
+      JSON.stringify({
+        id: "standup",
+        name: "Daily standup",
+        about: "A short note.",
+        stages: [
+          { id: "check", name: "Check", after: ["build"], before: ["done"] },
+        ],
+      }),
+    );
+    session.switchAddOn("voice", false);
+    session.switchAddOn("standup", true);
+    const state = session.state();
+    assert.ok(state.mode === "factory");
+    assert.deepEqual(
+      state.stages.order.map((stage) => stage.id),
+      ["check"],
+    );
+    assert.equal(state.stages.clash, null);
+    session.switchAddOn("standup", false);
+    const removed = session.state();
+    assert.ok(removed.mode === "factory");
+    assert.deepEqual(removed.stages.order, []);
   } finally {
     close();
   }

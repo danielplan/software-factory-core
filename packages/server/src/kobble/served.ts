@@ -11,6 +11,7 @@ import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
 import { teamRoutes } from "../coach/setup-team.ts";
 import { feedbackRoutes } from "../feedback/routes.ts";
 import { homeLayoutRoutes } from "../home-layout.ts";
+import { stagesRoutes } from "../stages.ts";
 import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
@@ -72,6 +73,11 @@ export function kobbleOf(
       ...teamRoutes(session.options.project),
       ...languageRoutes(session.options.project),
       ...homeLayoutRoutes(session.options.project, tellerOf(tell)),
+      ...stagesRoutes(
+        session.options.project,
+        () => session.installedExtensions(),
+        session.options.onChange,
+      ),
       ...feedback.routes,
       ...releasesRoutes({
         project: session.options.project,

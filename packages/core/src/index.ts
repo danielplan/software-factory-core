@@ -17,9 +17,25 @@ export {
   type ExtensionFile,
   type Guide,
   type McpServer,
+  type StageSpec,
+  type View,
+  type ViewItem,
+  VIEW_ICONS,
   type Kit,
   type KitFile,
 } from "./extensions/extension.ts";
+export {
+  readItems,
+  type ShownPart,
+  type ShownView,
+  shownView,
+} from "./extensions/views.ts";
+export {
+  type Clash,
+  orderStages,
+  type PlacedStage,
+  type StageOrder,
+} from "./extensions/stages.ts";
 export { copyStarter, starterName } from "./extensions/starter.ts";
 export {
   OWN_EXTENSIONS_KEY,

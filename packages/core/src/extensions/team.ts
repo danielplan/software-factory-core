@@ -19,7 +19,13 @@ import { z } from "zod";
 import { readSettings } from "../parts/addresses.ts";
 import type { SettingGroup } from "../settings/setting-groups.ts";
 import { TEAM_FILE } from "../settings/team-file.ts";
-import { extensionSchema, type Extension } from "./extension.ts";
+import {
+  extensionSchema,
+  type Extension,
+  type View,
+  withBrought,
+} from "./extension.ts";
+import { readItems } from "./views.ts";
 import type { Available } from "./registry.ts";
 
 // Where a team's extensions are, in the company's factory folder.
@@ -67,7 +73,10 @@ export function ownExtensionsOn(root: string): boolean {
 
 // What an extension is given by another (a page, a Home block, a kobold)
 // cannot be given twice: the page and Home would not know which is meant.
-const SINGLE = ["pages", "blocks", "kobolds"] as const;
+const SINGLE = ["pages", "blocks", "kobolds", "stages"] as const;
+
+// The pages that are Kobble's own frame, not an extension's.
+const RESERVED_PAGES = ["home", "system", "extensions", "settings", "connect"];
 
 function insideFolder(folder: string, file: string): string | null {
   const path = resolve(folder, file);
@@ -101,7 +110,7 @@ function described(folder: string, where: string): Read {
     };
   const parsed = teamExtensionSchema.safeParse(data);
   return parsed.success
-    ? { extension: parsed.data }
+    ? { extension: withBrought(parsed.data) }
     : {
         problem: `${where} is not right, so it is not loaded: ${z.prettifyError(parsed.error)}`,
       };
@@ -126,6 +135,24 @@ function clashes(
     if (double)
       return `${where} brings "${double}", which another extension brings already: it is not loaded`;
   }
+  const reserved = extension.brings.pages.find((page) =>
+    RESERVED_PAGES.includes(page),
+  );
+  if (reserved)
+    return `${where} brings the page "${reserved}", which is Kobble's own: it is not loaded`;
+  for (const kind of ["pages", "blocks"] as const) {
+    const described = extension[kind].map((one) => one.id);
+    const missing = extension.brings[kind].find(
+      (one) => !described.includes(one),
+    );
+    if (missing)
+      return `${where} brings the ${kind === "pages" ? "page" : "block"} "${missing}" but does not describe it under "${kind}": it is not loaded`;
+  }
+  const lonely = extension.stages.find((stage) =>
+    [...stage.after, ...stage.before].includes(stage.id),
+  );
+  if (lonely)
+    return `${where} puts the stage "${lonely.id}" next to itself: it is not loaded`;
   const group = extension.settings.find(
     (one) =>
       one.file !== TEAM_FILE && !/^settings\/[\w.-]+\.env$/.test(one.file),
@@ -153,6 +180,38 @@ function withGuideFiles(
   return { extension: { ...extension, guides } };
 }
 
+// A view with its list files found inside the extension's own folder and
+// readable as lists of items.
+function withListFiles(
+  folder: string,
+  views: View[],
+  where: string,
+): { views: View[] } | { problem: string } {
+  const checked: View[] = [];
+  for (const view of views) {
+    const parts = [];
+    for (const part of view.parts) {
+      if (part.show !== "list" || !part.from) {
+        parts.push(part);
+        continue;
+      }
+      const real = insideFolder(folder, part.from);
+      if (!real)
+        return {
+          problem: `${where} shows a list from ${part.from}, which is not in its own folder: it is not loaded`,
+        };
+      const read = readItems(real);
+      if ("problem" in read)
+        return {
+          problem: `${where} shows a list from ${part.from}, which ${read.problem}: it is not loaded`,
+        };
+      parts.push({ ...part, from: real });
+    }
+    checked.push({ ...view, parts });
+  }
+  return { views: checked };
+}
+
 // One folder's extension, checked: the extension, or why it is left out.
 function readOne(parent: string, name: string, taken: Extension[]): Read {
   const folder = join(parent, name);
@@ -160,7 +219,20 @@ function readOne(parent: string, name: string, taken: Extension[]): Read {
   const read = described(folder, where);
   if ("problem" in read) return read;
   const problem = clashes(read.extension, name, taken, where);
-  return problem ? { problem } : withGuideFiles(folder, read.extension, where);
+  if (problem) return { problem };
+  const guided = withGuideFiles(folder, read.extension, where);
+  if ("problem" in guided) return guided;
+  const pages = withListFiles(folder, guided.extension.pages, where);
+  if ("problem" in pages) return pages;
+  const blocks = withListFiles(folder, guided.extension.blocks, where);
+  if ("problem" in blocks) return blocks;
+  return {
+    extension: {
+      ...guided.extension,
+      pages: pages.views,
+      blocks: blocks.views,
+    },
+  };
 }
 
 // The team's extensions found in the factory folder, each checked: the ones

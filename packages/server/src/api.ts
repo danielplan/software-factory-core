@@ -2,7 +2,7 @@
 // page shows, and the requests its buttons send. The web interface imports
 // these types only.
 
-import type { Company, GroupView } from "@software-factory/core";
+import type { Company, GroupView, ShownView } from "@software-factory/core";
 
 import type { Board } from "./connect/board-file.ts";
 import type { PartView } from "@software-factory/launcher";
@@ -166,6 +166,9 @@ export type State =
       board: Board;
       // Every add-on there is, on or off.
       addOns: AddOnView[];
+      // The stages of work of the installed extensions, in order, and the
+      // place two of them both fit (the team is asked in Settings).
+      stages: StagesView;
       // Just set up: connecting where work is tracked comes first.
       onboarding: boolean;
     };
@@ -367,7 +370,16 @@ export type AddOnView = {
     kobolds: string[];
     stages: string[];
   };
+  // The pages and Home blocks it describes (a team's own), with their lists
+  // read now; Kobble's own are drawn by the page in code.
+  screens: { pages: ShownView[]; blocks: ShownView[] };
   // Its settings groups, by id (shown while it is on).
   settings: string[];
 };
+
+export type StagesView = {
+  order: { id: string; name: string; by: string }[];
+  clash: { first: string; second: string } | null;
+};
+export type { ShownPart, ShownView } from "@software-factory/core";
 export type { Board } from "./connect/board-file.ts";
