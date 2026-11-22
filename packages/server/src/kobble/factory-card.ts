@@ -53,6 +53,8 @@ const STATUS: Partial<Record<Note, string>> = {
   "review-ready": "Built: the pull request is ready for your review",
   fixed: "Review comments answered",
   "checks-failed": "Built, but some checks still fail",
+  "out-of-sessions":
+    "Not finished after its sessions: continue to give it more",
   paused: "Paused: Claude's usage limit; it carries on by itself",
 };
 

@@ -26,6 +26,10 @@ test("a stuck card says why in one plain line", () => {
     "The builder could not finish it.",
   );
   assert.equal(
+    reasonOf(stuck({ note: "out-of-sessions", text: "Step 3 is next." })),
+    "It used its three sessions and is not finished yet. Continue gives it three more.",
+  );
+  assert.equal(
     reasonOf(
       stuck({
         text: "I need one decision.",

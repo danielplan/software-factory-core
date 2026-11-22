@@ -230,6 +230,7 @@ test("a card an older builder left in In progress after giving up goes to Backlo
   for (const gaveUp of [
     factory("Still red", "checks-failed"),
     factory("Stopped", "failed"),
+    factory("Not finished", "out-of-sessions"),
   ]) {
     const waiting = doing([started, gaveUp]);
     assert.deepEqual(waiting.jobs, []);

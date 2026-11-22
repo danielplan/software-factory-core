@@ -51,5 +51,6 @@ Start with the `factory` skill. It opens a run file named after its card, `runs/
 - Each product has a `BLUEPRINT.md`: its kind, structure, promises (what must stay true; ask before changing) and checks.
 - After changing Markdown pages, run the knowledge base's checks (`npx software-factory check-docs`).
 - The git hooks enforce the checks on commit and push; never bypass them with `--no-verify`.
+- Work reaches the main branch through a pull request: commit on a branch, push it and open one; never push to main directly. The Releases page writes a release's notes from the merged pull requests, so work pushed straight to main ships unlisted.
 
 <!-- company: how to set up a fresh copy and run each product, or a link to the how-to page that says it. -->

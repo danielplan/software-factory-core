@@ -14,6 +14,12 @@ export const NOTES = [
   "review-ready",
   "fixed",
   "checks-failed",
+  // The builder used its sessions in a row and is not finished yet: nothing
+  // went wrong, and Continue gives it as many again.
+  "out-of-sessions",
+  // An earlier builder's answer to a question on a stuck card (Sprocket
+  // answers those now): still read as the factory's, never the last word.
+  "replied",
   // The answer to "did it work?", given in Kobble.
   "did-it-work",
   // Claude's usage limit: the card waits until it resets (untilOf).

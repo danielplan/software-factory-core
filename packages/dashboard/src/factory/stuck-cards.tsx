@@ -5,15 +5,25 @@
 // is helping the builder: answer it or give it a hint (its suggested answers,
 // when it asked, are quick picks) and send. The reply goes into the card's
 // conversation, and the card goes to To do, where it says "Your hint is with
-// the builder".
+// the builder". Or ask Sprocket about it first: its conversation opens about
+// the card (with the question typed here), it looks at the card and its
+// branch, and sends the answer on once agreed.
 
-import { ArrowUpRight, Check, CircleAlert, Send } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  CircleAlert,
+  MessageCircleQuestion,
+  Play,
+  Send,
+} from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { FIELD_AREA } from "@/lib/field-style";
+import { askSupport } from "@/support/ask-support";
 import { cn } from "@/lib/utils";
 
 import { useT } from "@/i18n/use-t";
@@ -78,10 +88,15 @@ function StuckCard({
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const said = hint.trim();
+  // Out of sessions, not stuck on anything: Continue needs no words, a hint
+  // goes with it when written.
+  const carryOn = one.note === "out-of-sessions";
+  const sent = said || (carryOn ? t.stuck.carryOn : "");
+  const label = carryOn ? t.stuck.continue : t.stuck.send;
   const send = () => {
     setSending(true);
     setProblem(null);
-    post("/api/work/answer", { number: one.number, text: said }).then(
+    post("/api/work/answer", { number: one.number, text: sent }).then(
       onSent,
       (error: unknown) => {
         setSending(false);
@@ -120,7 +135,7 @@ function StuckCard({
       )}
       <textarea
         aria-label={t.stuck.answerOn(one.number)}
-        placeholder={t.stuck.placeholder}
+        placeholder={carryOn ? t.stuck.hintIfAny : t.stuck.placeholder}
         value={hint}
         onChange={(event) => {
           write(event.target.value);
@@ -129,16 +144,41 @@ function StuckCard({
         className={cn(FIELD_AREA, "mt-1 resize-y text-xs")}
       />
       {problem && <p className="text-xs text-destructive">{problem}</p>}
-      <Button
-        size="pill-sm"
-        className="self-start"
-        disabled={!said || sending}
-        onClick={send}
-      >
-        <Send aria-hidden className="size-3.5" />
-        {sending ? t.stuck.sending : t.stuck.send}
-      </Button>
+      <div className="flex flex-wrap gap-1.5">
+        <Button size="pill-sm" disabled={!sent || sending} onClick={send}>
+          {carryOn ? (
+            <Play aria-hidden className="size-3.5" />
+          ) : (
+            <Send aria-hidden className="size-3.5" />
+          )}
+          {sending ? t.stuck.sending : label}
+        </Button>
+        <AskSprocket one={one} said={said} empty={write} />
+      </div>
     </article>
+  );
+}
+
+// Sprocket's conversation about the card, with what is typed in the box as
+// the question; the box empties.
+function AskSprocket({
+  one,
+  said,
+  empty,
+}: Readonly<{ one: Stuck; said: string; empty: (text: string) => void }>) {
+  const t = useT().builder.stuck;
+  return (
+    <Button
+      size="pill-sm"
+      variant="outline"
+      onClick={() => {
+        askSupport(t.askAbout(one.number, one.title, said));
+        empty("");
+      }}
+    >
+      <MessageCircleQuestion aria-hidden className="size-3.5" />
+      {t.ask}
+    </Button>
   );
 }
 

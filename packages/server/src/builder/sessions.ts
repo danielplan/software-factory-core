@@ -12,6 +12,10 @@ const STALLED_SESSIONS = 2;
 
 export type Answer = { status: string; text: string };
 
+// Why it stopped: sessions that added nothing (failed), or all its sessions
+// used and the work not finished yet (out-of-sessions).
+export type GaveUp = { text: string; note: "failed" | "out-of-sessions" };
+
 export type SessionSteps = {
   // One session; true when earlier work on the branch exists.
   session: (continued: boolean) => Promise<Answer>;
@@ -24,7 +28,7 @@ export type SessionSteps = {
 export async function runSessions(
   continued: boolean,
   steps: SessionSteps,
-): Promise<{ answer: Answer; gaveUp: string | null }> {
+): Promise<{ answer: Answer; gaveUp: GaveUp | null }> {
   let stalled = 0;
   // The commit after the last session; the first has nothing to compare with
   // (the copy is only made on the card's branch as it starts).
@@ -38,12 +42,18 @@ export async function runSessions(
     if (stalled >= STALLED_SESSIONS)
       return {
         answer,
-        gaveUp: `${answer.text}\n\nThe builder said it was not finished, but ${String(STALLED_SESSIONS)} sessions in a row added nothing, so it stopped.`,
+        gaveUp: {
+          text: `${answer.text}\n\nThe builder said it was not finished, but ${String(STALLED_SESSIONS)} sessions in a row added nothing, so it stopped.`,
+          note: "failed",
+        },
       };
     if (n >= CONTINUE_SESSIONS)
       return {
         answer,
-        gaveUp: `${answer.text}\n\nThe builder worked ${String(CONTINUE_SESSIONS)} sessions in a row and is still not finished: ${String(CONTINUE_SESSIONS)} sessions were not enough, so it stopped. Move the card to **To do** to give it ${String(CONTINUE_SESSIONS)} more sessions, or split the card.`,
+        gaveUp: {
+          text: `${answer.text}\n\nThe builder worked ${String(CONTINUE_SESSIONS)} sessions in a row and is still not finished: ${String(CONTINUE_SESSIONS)} sessions were not enough, so it stopped. Press **Continue** on the Factory page, or move the card to **To do**, to give it ${String(CONTINUE_SESSIONS)} more sessions, or split the card.`,
+          note: "out-of-sessions",
+        },
       };
     await steps.progress(n, CONTINUE_SESSIONS, answer.text);
   }

@@ -227,6 +227,11 @@ export function pretendClaude(turn: (options: RunOptions) => string | null) {
   const prompts: string[] = [];
   const claude: Claude = {
     run: (options) => {
+      // As the real one (warm.ts): every conversation has its id.
+      if (!options.session?.id)
+        return Promise.reject(
+          new Error("A warm conversation needs a session id."),
+        );
       prompts.push(options.prompt);
       options.onActivity("Reading");
       const text = turn(options);

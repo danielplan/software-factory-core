@@ -201,12 +201,12 @@ function markStuck(card: BoardCard, found: Found): void {
 
 // The notes that say who has the card: every one but the reports.
 const OWNING_NOTES: readonly Note[] = NOTES.filter(
-  (n) => n !== "progress" && n !== "paused",
+  (n) => n !== "progress" && n !== "paused" && n !== "replied",
 );
 
 // The builder gave up: the checks still red after its rounds of fixing, or
-// it could not finish.
-const GAVE_UP: readonly Note[] = ["checks-failed", "failed"];
+// it could not finish, or it used its sessions and is not finished yet.
+const GAVE_UP: readonly Note[] = ["checks-failed", "failed", "out-of-sessions"];
 
 // A card handed back with the owner's hint: in To do, after the builder's
 // question or giving up, with a comment from the owner since.
