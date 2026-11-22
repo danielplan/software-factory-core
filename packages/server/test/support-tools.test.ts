@@ -152,8 +152,10 @@ test("Sprocket hands work on to the other kobolds and takes the person there; it
     );
     assert.equal(store.get("signals", "S-0002")?.status, "explored");
     // The page follows each move once: the last one, counted.
-    assert.equal(view.went?.n, 4);
-    assert.match(view.went?.to ?? "", /^#explore\/X-\d+$/);
+    const { went } = view;
+    assert.ok(went);
+    assert.equal(went.n, 4);
+    assert.match(went.to, /^#explore\/X-\d+$/);
   } finally {
     staged.session.close();
     staged.server.close();
