@@ -1,7 +1,7 @@
 // The board's things and arrows, kept in step with the page: things a
-// person placed stay where they are; the others are spread around them like
-// on a whiteboard (layout.ts)
-// once each has been drawn and measured, and again whenever one comes,
+// person placed stay where they are; the others are laid out left to right
+// in columns along the arrows (layout.ts), without looking at the placed
+// ones, once each has been drawn and measured, and again whenever one comes,
 // goes or changes size. Until then a thing is drawn invisibly. `arranged`
 // counts the layouts, so the view can follow.
 
@@ -10,7 +10,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import type { ExplorationPage } from "@/api/client";
 
-import { spread } from "@/lib/layout";
+import { arrange } from "@/lib/layout";
 import { edgesOf, nodesOf, shapeOf, type ThingNode } from "./nodes";
 
 export function useBoardNodes(
@@ -43,9 +43,8 @@ export function useBoardNodes(
       id: n.id,
       width: n.measured?.width ?? 0,
       height: n.measured?.height ?? 0,
-      ...(n.data.thing.place ? { place: n.data.thing.place } : {}),
     }));
-    void spread(boxes, latest.current.edges).then((places) => {
+    void arrange(boxes, latest.current.edges).then((places) => {
       if (stale) return;
       setNodes((now) =>
         now.map((n) => ({

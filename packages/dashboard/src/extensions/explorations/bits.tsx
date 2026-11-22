@@ -10,7 +10,7 @@ import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
 import { KINDS } from "./kinds";
-import { spread } from "@/lib/layout";
+import { arrange } from "@/lib/layout";
 import { areaOf } from "./view";
 
 export function Faces({
@@ -83,7 +83,8 @@ export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
   );
 }
 
-// Where each thing goes on the board in small: spread like the whiteboard.
+// Where each thing goes on the board in small: laid out like the board,
+// left to right.
 function useMiniPlaces(row: ExplorationRow) {
   const [places, setPlaces] = useState(
     () => new Map<string, { x: number; y: number }>(),
@@ -100,14 +101,13 @@ function useMiniPlaces(row: ExplorationRow) {
   useEffect(() => {
     let stale = false;
     const { things, links } = latest.current;
-    void spread(
+    void arrange(
       things.map((thing) => ({ id: thing.id, ...MINI })),
       links.map((link, at) => ({
         id: String(at),
         source: link.from,
         target: link.to,
       })),
-      110,
     ).then((found) => {
       if (!stale) setPlaces(found);
     });
