@@ -4,7 +4,15 @@
 // need is refused, with why. Where GitHub and Jira belong differs by variant:
 // A, a setting in Factory's details; B, a Connections tab; C, a group here.
 
-import { Check, Download, Package, Plug, Puzzle, Search } from "lucide-react";
+import {
+  Check,
+  Download,
+  Package,
+  Plug,
+  Puzzle,
+  Search,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 
 import { PageHead } from "@/components/page-head";
@@ -393,7 +401,12 @@ function Card({
                 </span>
               )}
             </span>
-            {ext.maker === "team" && <Maker ext={ext} />}
+            {ext.maker === "team" && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Users aria-hidden className="size-3" />
+                Made by your team
+              </span>
+            )}
           </div>
           {ext.on && (
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-success">
