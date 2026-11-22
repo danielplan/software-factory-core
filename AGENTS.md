@@ -44,6 +44,14 @@ here reach every company with its next upgrade, so they are made with care.
   and open a pull request; never push to main directly. A product's release
   notes (the Releases page) are written from the pull requests merged since
   the last release, so work pushed straight to main ships unlisted.
+- **Extensions never talk to each other; they plug in.** An extension can
+  be installed and removed, so no code reaches into another one: the core
+  defines the plugs (the slots, what an extension brings: pages, Home
+  blocks, kobolds, stages; its guides for a kobold; Sprocket's hand-offs,
+  `server/src/kobble/support-plug.ts`), and each extension plugs in from its
+  own code. `needs` says only what must be installed with it, never
+  something to call. Removing an extension takes away everything it plugged
+  in, and nothing else breaks.
 - **The docs follow the code.** A branch that changes code also brings the
   docs in line (`docs/`, the README, `AGENTS.md`, a `BLUEPRINT.md`, the
   skills' guides), or says why none need to change in a commit message line

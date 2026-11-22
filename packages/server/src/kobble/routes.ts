@@ -57,6 +57,10 @@ type KobbleOptions = {
   work: () => WorkView | null;
   // The owner's answer on a stuck card, handed back to the builder.
   answer: (number: number, text: string) => Promise<void>;
+  // Whether an extension is installed now; Sprocket hears its plug only then.
+  isOn: (extension: string) => boolean;
+  // The guides the team's own extensions bring Sprocket.
+  supportGuides: () => { title: string; file: string }[];
   // What a persona test runs on: the apps it can be sent into, an app's
   // address as it is now (the first app's without a product), and a
   // browser.

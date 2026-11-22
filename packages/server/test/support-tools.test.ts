@@ -43,7 +43,15 @@ test("the support kobold adds the persona and the exploration the team describes
       reply: "Added Ana and the idea; it waits in Explorations.",
     },
   ]);
-  const staged = await stage(pretend.claude);
+  // With Kobble's own extensions, whose plugs Sprocket hears.
+  const staged = await stage(
+    pretend.claude,
+    {},
+    undefined,
+    [],
+    undefined,
+    true,
+  );
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
@@ -111,7 +119,15 @@ test("Sprocket hands work on to the other kobolds and takes the person there; it
     { calls: [], reply: "One tap it is." },
     { calls: [], reply: "Looking at the signal." },
   ]);
-  const staged = await stage(pretend.claude);
+  // With Kobble's own extensions, whose plugs Sprocket hears.
+  const staged = await stage(
+    pretend.claude,
+    {},
+    undefined,
+    [],
+    undefined,
+    true,
+  );
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,

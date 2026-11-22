@@ -23,6 +23,7 @@ import { jiraAddOn } from "../src/add-ons/jira/index.ts";
 import type { Installable } from "../src/installables.ts";
 import { PAGE_HEADER, startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
+import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
 
 export const web = defineKit({
   id: "web-kit",
@@ -89,6 +90,9 @@ export async function stage(
     app: () => Promise.reject(new Error("There is no app in the tests.")),
     browser: () => Promise.reject(new Error("There is no browser.")),
   },
+  // Kobble's own extensions too (Factory, Explorations …), as the factory
+  // has them; left out by default, so only the add-ons' stages count.
+  kobble = false,
 ) {
   const home = mkdtempSync(join(tmpdir(), "setup-"));
   const project = join(home, "project");
@@ -96,7 +100,7 @@ export async function stage(
   for (const [file, text] of Object.entries(code))
     writeFileSync(join(project, file), text);
   const addOns = [githubAddOn(connectors.cli), jiraAddOn(connectors.fetcher)];
-  const session = sessionOf(project, claude, addOns, trackers);
+  const session = sessionOf(project, claude, addOns, trackers, kobble);
   const page = join(home, "page");
   mkdirSync(page);
   writeFileSync(join(page, "index.html"), "<p>The factory</p>");
@@ -128,11 +132,16 @@ export function sessionOf(
   claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) },
   addOns: { extension: ReturnType<typeof defineExtension> }[] = [],
   trackers: TrackerSetup[] = [],
+  kobble = false,
 ): Session {
   return new Session({
     project,
     available: {
-      extensions: [...addOns.map((a) => a.extension), voice],
+      extensions: [
+        ...(kobble ? KOBBLE_EXTENSIONS : []),
+        ...addOns.map((a) => a.extension),
+        voice,
+      ],
       kits: [web],
     },
     templates: {

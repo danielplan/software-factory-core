@@ -1,141 +1,73 @@
-// The support kobold's tools, served over MCP like the other kobolds': it
-// looks at the personas, adds a persona the team describes to it, and adds
-// an idea of the team's as an exploration that waits in Explorations. New
-// persona and New exploration open its conversation instead of a form.
-// Only its own Claude Code has the token.
+// Sprocket's tools, served over MCP like the other kobolds': its own is
+// taking the person to a place in Kobble (go_to); everything else comes
+// from the installed extensions' plugs (support-plug.ts), and leaves with
+// them. Only its own Claude Code has the token.
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 
-import type { KobbleStore } from "@software-factory/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { COACH_HEADER } from "../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../mcp.ts";
-import { addPersona } from "./actions.ts";
-import type { SupportCards } from "./card-look.ts";
-import { guideTools } from "./support-guide-tools.ts";
-import type { SupportHands } from "./support-hands.ts";
-import { newExploration } from "./explorations/actions.ts";
+import { Refused } from "../refused.ts";
+import { plugInto, type SupportPlug } from "./support-plug.ts";
 
 export type SupportTools = {
   token: string;
-  store: () => KobbleStore;
-  // Told to the page: "personas" or "explorations".
-  changed: (what: string) => void;
-  // The cards on the Factory board: looked at, and a stuck one answered.
-  cards: SupportCards;
-  // The other kobolds, to hand work on to (support-hands.ts).
-  hands: SupportHands;
+  // The plugs of the extensions installed now.
+  plugs: SupportPlug[];
   // Takes the person to a place in Kobble (#explore/X-3).
   go: (to: string) => void;
 };
 
-export function personasText(store: KobbleStore): string {
-  const personas = store.all("personas");
-  if (personas.length === 0) return "No personas yet.";
-  return personas
-    .map((one) => `- ${one.id}: ${one.name}, ${one.place}. ${one.about}`)
-    .join("\n");
+// Kobble's own pages, there whatever is installed: Home, System, the
+// Marketplace, Settings, connecting a board, a team's own extension's page.
+const OWN_PAGES = [
+  "home",
+  "system",
+  "extensions",
+  "settings",
+  "connect",
+  "team",
+];
+// The ones go_to names; connecting a board and a team's page are reached
+// from them.
+const SHOWN_PAGES = ["home", "system", "extensions", "settings"];
+
+// A place in Kobble: one of its pages (Kobble's own, or one an installed
+// extension brings), or something open in it (#explore/X-3).
+export function placeIn(to: string, pages: string[]): string {
+  const place = to.trim();
+  const page = /^#([a-z-]+)(\/[\w.~%/-]*)?$/.exec(place)?.[1];
+  if (!page || ![...OWN_PAGES, ...pages].includes(page))
+    throw new Refused(
+      `“${to}” is not a place in Kobble now: say a page that is there, like #home or #settings, or #explore/<id> while Explorations is installed.`,
+    );
+  return place;
 }
 
 function serverFor(on: SupportTools): McpServer {
   const server = new McpServer({ name: "support", version: "1.0.0" });
+  const pages = on.plugs.flatMap((plug) => plug.pages);
+  const listed = [...SHOWN_PAGES, ...pages]
+    .map((page) => "#" + page)
+    .join(", ");
   server.registerTool(
-    "list_personas",
-    { description: "The personas there are: id, name, where, who they are." },
-    () => toolAnswer(() => personasText(on.store())),
-  );
-  server.registerTool(
-    "add_persona",
+    "go_to",
     {
-      description:
-        "Adds a persona: a real kind of customer the team described. Only once the team agreed to what you will add.",
-      inputSchema: {
-        name: z.string().min(1).describe("A first name, or a role."),
-        place: z
-          .string()
-          .describe("Where they work or live, a few words (Bakery, Milan)."),
-        about: z
-          .string()
-          .describe(
-            "Who they are and what they need from the app, two or three sentences.",
-          ),
-      },
+      description: `Takes the person to a place in Kobble: a page (${listed}) or something open in it (#explore/X-3, #personas/ana).`,
+      inputSchema: { place: z.string().describe("The address, with its #.") },
     },
     (args) =>
       toolAnswer(() => {
-        const persona = addPersona(on.store(), args);
-        on.changed("personas");
-        return `Added ${persona.name} (${persona.id}): #personas/${persona.id}`;
+        const place = placeIn(args.place, pages);
+        on.go(place);
+        return `Moved. They are now at ${place}.`;
       }),
   );
-  server.registerTool(
-    "add_exploration",
-    {
-      description:
-        "Adds a feature request or idea of the team's as an exploration waiting in Explorations › Waiting. Only once the team agreed to what you will add.",
-      inputSchema: {
-        title: z.string().min(1).describe("A few words."),
-        problem: z
-          .string()
-          .describe(
-            "The problem it solves and for whom, two or three sentences.",
-          ),
-        persona: z
-          .string()
-          .optional()
-          .describe("A persona's id from list_personas, when one fits."),
-      },
-    },
-    (args) =>
-      toolAnswer(() => {
-        const exploration = newExploration(on.store(), args);
-        on.changed("explorations");
-        return `Added ${exploration.id} “${exploration.title}”, waiting in Explorations.`;
-      }),
-  );
-  cardTools(server, on);
-  guideTools(server, on);
+  plugInto(server, on.plugs, on.go);
   return server;
-}
-
-// A card the team asks about: looked at, and, on a stuck one, the team's
-// agreed answer sent to the builder.
-function cardTools(server: McpServer, on: SupportTools): void {
-  const { cards } = on;
-  const number = z.number().int().positive().describe("The card's number.");
-  server.registerTool(
-    "look_at_card",
-    {
-      description:
-        "A card on the Factory board: its text, column, conversation, and what the builder did on its branch (commits, changed files, run file). Read only.",
-      inputSchema: { number },
-    },
-    (args) => toolAnswer(() => cards.look(args.number)),
-  );
-  server.registerTool(
-    "answer_card",
-    {
-      description:
-        "Sends the team's answer or hint to the builder on a stuck card and hands the card back to it (To do), as Send on the Factory page does. Only once the team agreed to the exact words you said back.",
-      inputSchema: {
-        number,
-        text: z
-          .string()
-          .min(1)
-          .describe(
-            "The answer as the builder reads it on the card, in the team's words.",
-          ),
-      },
-    },
-    (args) =>
-      toolAnswer(async () => {
-        const sent = await cards.answer(args.number, args.text);
-        on.go("#build");
-        return sent;
-      }),
-  );
 }
 
 export async function answerSupportTools(

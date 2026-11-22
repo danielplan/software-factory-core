@@ -1,9 +1,10 @@
-// The support kobold: the one that is always there, at the bottom of every
-// page (the dashboard's support bar), for questions about Kobble and the
-// project. The same talk as the other kobolds (coach/talk.ts): it reads the
-// project and answers, takes the person to the right place, and hands work
-// on to the kobold whose job it is (support-hands.ts): it does nothing
-// alone, and changes no file of the project.
+// The support kobold, Sprocket: the one that is always there, at the bottom
+// of every page (the dashboard's support bar), for questions about Kobble and
+// the project, and the team's guide. The same talk as the other kobolds
+// (coach/talk.ts): it reads the project and answers, takes the person to the
+// right place, and hands work on to the kobold whose job it is, only through
+// the plugs of the extensions installed now (support-plug.ts): it does
+// nothing alone, and changes no file of the project.
 // The conversation lives while the factory runs; New conversation starts
 // again.
 
@@ -21,13 +22,10 @@ import type { Route } from "../add-ons/add-on.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
 import type { Cli } from "../add-ons/github/github.ts";
-import { type SupportCards, supportCards } from "./card-look.ts";
+import { supportCards } from "./card-look.ts";
 import { connectedCards } from "./connected-cards.ts";
-import {
-  type HandsOn,
-  type SupportHands,
-  supportHands,
-} from "./support-hands.ts";
+import { kobblePlugs, type Reach } from "./plugs/index.ts";
+import { plugsGuide, type SupportPlug } from "./support-plug.ts";
 import type { SupportTools } from "./support-tools.ts";
 import { inLanguage } from "../language.ts";
 
@@ -51,11 +49,10 @@ type SupportOptions = {
   claude: Claude;
   project: string;
   onChange: () => void;
-  // The records its tools add to, and what they tell the page.
-  store: () => KobbleStore;
-  changed: (what: string) => void;
-  cards: SupportCards;
-  hands: SupportHands;
+  // The plugs of the extensions installed now.
+  plugs: () => SupportPlug[];
+  // The guides the team's own extensions bring Sprocket.
+  guides: () => { title: string; file: string }[];
 };
 
 export class SupportTalk {
@@ -94,10 +91,20 @@ export class SupportTalk {
     const where = page ? `\n\n(They are on the ${page} page.)` : "";
     void this.talk.answer(`${said}${where}`, undefined, {
       ...RIGHTS,
-      instructions: inLanguage(
-        readFileSync(join(guidesFolder, "support-kobold.md"), "utf8"),
-      ),
+      instructions: inLanguage(this.instructions()),
     });
+  }
+
+  // Its guide, what the installed extensions let it do, and the team's own
+  // guides for it.
+  private instructions(): string {
+    const guides = this.options.guides();
+    const list = guides.map((g) => `- ${g.title}: \`${g.file}\``).join("\n");
+    const own =
+      guides.length === 0
+        ? ""
+        : `\n\n## Your team's own guides\n\nRead the one that fits before you answer about it:\n\n${list}`;
+    return `${readFileSync(join(guidesFolder, "support-kobold.md"), "utf8")}\n\n${plugsGuide(this.options.plugs())}${own}`;
   }
 
   // The person pressed Stop while the kobold answered.
@@ -115,10 +122,7 @@ export class SupportTalk {
   tools(): SupportTools {
     return {
       token: this.talk.token,
-      store: this.options.store,
-      changed: this.options.changed,
-      cards: this.options.cards,
-      hands: this.options.hands,
+      plugs: this.options.plugs(),
       go: (to) => {
         this.went = { to, n: (this.went?.n ?? 0) + 1 };
         this.options.onChange();
@@ -162,29 +166,29 @@ export function supportRoutes(support: SupportTalk): Record<string, Route> {
   };
 }
 
-// The support kobold for the factory's project; its changes told as
+// The support kobold for the factory's project, with the plugs of Kobble's
+// own extensions, heard while each is installed; its changes told as
 // "support".
 export function supportOf(
   options: Omit<Parameters<typeof supportCards>[0], "cards"> & {
     claude: Claude;
     cli: Cli;
+    isOn: (extension: string) => boolean;
+    supportGuides: () => { title: string; file: string }[];
   },
   store: () => KobbleStore,
   changed: (what: string) => void,
-  reach: {
-    explorations: { talks: HandsOn["talks"] };
-    tests: { tests: HandsOn["tests"] };
-  },
+  reach: Reach,
 ): SupportTalk {
   const board = () =>
     connectedCards(join(options.project, FACTORY_FOLDER), options.cli);
-  const cards = supportCards({ ...options, cards: board });
-  const hands = supportHands({
-    talks: reach.explorations.talks,
-    tests: reach.tests.tests,
+  const plugs = kobblePlugs({
+    ...reach,
     store,
-    cards: board,
     changed,
+    board,
+    cards: supportCards({ ...options, cards: board }),
+    isOn: options.isOn,
   });
   return new SupportTalk({
     claude: options.claude,
@@ -192,9 +196,7 @@ export function supportOf(
     onChange: () => {
       changed("support");
     },
-    store,
-    changed,
-    cards,
-    hands,
+    plugs: () => plugs().filter((plug) => options.isOn(plug.extension)),
+    guides: options.supportGuides,
   });
 }

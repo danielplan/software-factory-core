@@ -17,6 +17,7 @@ import { languageRoutes } from "../language.ts";
 import { factoryCardRoutes } from "./factory-card.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { updatesOf } from "../updates/session-updates.ts";
+import { guidesFor } from "../builder/extension-guides.ts";
 import { connectedCards } from "./connected-cards.ts";
 import { servedKobble, tellerOf } from "./routes.ts";
 import { releasesRoutes } from "../releases/routes.ts";
@@ -71,6 +72,9 @@ function kobbleAlone(
     cli: more.cli,
     work: () => session.work.view(),
     answer: (number, text) => session.work.orRefuse().answer(number, text),
+    isOn: (id) => session.isOn(id),
+    supportGuides: () =>
+      guidesFor(session.options.project, session.options.available, "support"),
     testsRunOn: testsRunOn ?? {
       apps: () => appsOf(() => session.launcherOrRefuse()),
       app: (product) => appAddress(() => session.launcherOrRefuse(), product),
