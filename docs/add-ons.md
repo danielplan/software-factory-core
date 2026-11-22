@@ -80,8 +80,11 @@ forward`, no public address needed) and a check every few minutes for
   waiting for the owner); a build that failed for a technical reason is
   tried again; an interrupted build resumes; merged or closed
   cards go to Done. Before a pull request the factory runs each changed
-  product's verify command itself, gives the builder one round to fix a
-  failure, and opens a draft that says so when the checks still fail.
+  product's verify command itself and gives the builder up to three rounds
+  to fix a failure; then it commits and pushes through the repository's own
+  git hooks (what they refuse is fixed in the same rounds). Work whose
+  checks fail is never pushed: it stays in the factory's copy, and the card
+  says what fails.
   Comments on the card or the pull request in Review are answered on the
   same branch. It never merges. Its guide (how to work through the board) is
   the factory skill's `board.md`. Each lane works on up to five cards at

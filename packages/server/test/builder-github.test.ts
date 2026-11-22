@@ -7,6 +7,7 @@ import { test } from "node:test";
 import type { Claude } from "@software-factory/core";
 
 import type { Cli } from "../src/add-ons/github/github.ts";
+import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
 import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
 import type { BoardCard } from "../src/builder/decide.ts";
@@ -164,14 +165,16 @@ test("the board work is put together from a factory with a connected board, and 
   company("none");
   const claude: Claude = { run: () => Promise.resolve({ ok: true, text: "" }) };
   const { cli } = pretendCli({});
+  // Where the code lives: GitHub fills the `code` slot.
+  const github = githubAddOn(cli);
   const settings = {
     project,
     cli,
     claude,
-    available: { kits: [], extensions: [] },
+    available: { kits: [], extensions: [github.extension] },
     onChange: () => undefined,
   };
-  assert.equal(workFor({ ...settings, root }), null);
+  assert.equal(workFor({ ...settings, root, codeHosts: {} }), null);
 
   const connected = new ConnectedWork({ ...settings, coach: { claude } });
   connected.connect(root);
@@ -185,8 +188,29 @@ test("the board work is put together from a factory with a connected board, and 
       github: { repository: "o/r", board: 1, label: "*", stages: {} },
     }),
   );
+  // A code host only some other extension could give: the builder cannot
+  // work the board, and says why.
+  const elsewhere = new ConnectedWork({
+    ...settings,
+    coach: { claude },
+    codeHosts: {},
+  });
+  elsewhere.connect(root);
+  assert.throws(
+    () => elsewhere.orRefuse(),
+    /The code lives with github, where the builder cannot push yet/,
+  );
+  const nowhere = new ConnectedWork({
+    ...settings,
+    available: { kits: [], extensions: [] },
+    coach: { claude },
+  });
+  nowhere.connect(root);
+  assert.throws(() => nowhere.orRefuse(), /Nothing says where the code lives/);
+
   connected.connect(root);
   const work = connected.orRefuse();
+  assert.equal(connected.hostOrRefuse().name, "GitHub");
   // The builder works as soon as the factory starts; the coach waits.
   assert.equal(connected.view()?.builder.on, true);
   assert.equal(connected.view()?.coach.on, false);
@@ -277,10 +301,9 @@ test("built again with its pull request open, the description stays and what the
     said: () => Promise.resolve([]),
   };
   const url = await openOrUpdate(
-    prs,
+    { ...prs, fileLink: (branch, path) => `${branch}/${path}` },
     { number: 4, title: "A card" },
     "Brought in main and resolved the clash in a.ts.",
-    false,
   );
   assert.equal(url, "https://x/pull/9");
   assert.deepEqual(updated, [null]);

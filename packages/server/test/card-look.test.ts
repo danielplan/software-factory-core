@@ -68,6 +68,21 @@ test("Sprocket looks at a card: its text, its conversation, and its branch with 
   assert.match(seen, /app\/BIG\.md/);
   assert.match(seen, /### runs\/issue-7-big\.md\n\n# Run\n\nStep 1 done\./);
 
+  // Work not pushed is read from the factory's own branch.
+  assert.match(seen, /on this computer, as the builder left it/);
+
+  // A branch only where the code lives is fetched from there.
+  await git("checkout", "--quiet", "-b", "factory/issue-9");
+  writeFileSync(join(source, "app", "NINE.md"), "nine");
+  await git("add", ".");
+  await git("commit", "--quiet", "-m", "#9 Pushed");
+  await git("push", "--quiet", "origin", "factory/issue-9");
+  await git("checkout", "--quiet", "main");
+  await git("branch", "--quiet", "-D", "factory/issue-9");
+  const pushed = await cardLook(9, cards, source, null);
+  assert.match(pushed, /\(as pushed; against/);
+  assert.match(pushed, /app\/NINE\.md/);
+
   const none = await cardLook(8, cards, source, null);
   assert.match(none, /`factory\/issue-8` has nothing yet/);
   assert.doesNotMatch(none, /stuck since/);

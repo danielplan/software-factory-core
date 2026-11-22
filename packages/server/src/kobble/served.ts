@@ -119,6 +119,7 @@ export function kobbleOf(
       ...factoryCardRoutes(
         join(session.options.project, FACTORY_FOLDER),
         more.cli,
+        () => session.work.hostOrRefuse(),
       ),
       "POST /api/desktop-start": () => ({
         file: putStartOnDesktop({

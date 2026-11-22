@@ -1,6 +1,7 @@
 // The builder's pull requests on GitHub, through the GitHub CLI: found by
-// their branch (open, merged or closed), opened (as a draft when the checks
-// fail), changed, and everything said on one (its comments, its reviews
+// their branch (open, merged or closed), opened (once the checks pass),
+// changed (back to a draft while new changes fail them), and everything
+// said on one (its comments, its reviews
 // and the comments on its lines), oldest first. The description shows the
 // screenshots the branch adds.
 
@@ -41,8 +42,6 @@ export type Opening = {
 };
 
 export type PullRequests = {
-  // owner/name on GitHub, where the description's pictures are shown from.
-  repository?: string;
   baseBranch: () => Promise<string>;
   find: (branch: string) => Promise<PullRequest | null>;
   open: (opening: Opening) => Promise<PullRequest>;
@@ -92,7 +91,6 @@ export function githubPullRequests(cli: Cli, repository: string): PullRequests {
       : null;
   };
   return {
-    repository,
     baseBranch: () => defaultBranch(gh, repository),
     find,
     open: async (opening) => {
@@ -199,45 +197,44 @@ async function picturesIn(copy: string, base: string): Promise<string[]> {
     .slice(0, MOST_PICTURES);
 }
 
-// The description's pictures, each shown from the branch on GitHub.
+// The description's pictures, each shown from the branch where the code
+// lives.
 export function picturesSection(
   pictures: string[],
-  repository: string,
-  branch: string,
+  link: (file: string) => string,
 ): string {
-  if (pictures.length === 0 || repository === "") return "";
+  if (pictures.length === 0) return "";
   const shown = pictures.map(
-    (file) =>
-      `![${basename(file, extname(file))}](https://github.com/${repository}/blob/${branch}/${file}?raw=true)`,
+    (file) => `![${basename(file, extname(file))}](${link(file)})`,
   );
   return `\n\n## Screenshots\n\n${shown.join("\n\n")}`;
 }
 
 // Opens the card's pull request, or updates the one there is; its address.
+// Only work whose checks pass gets one, so it is never a draft.
 export async function openOrUpdate(
-  pullRequests: PullRequests,
+  pullRequests: PullRequests & {
+    fileLink: (branch: string, path: string) => string;
+  },
   card: Pick<BoardCard, "number" | "title">,
   text: string,
-  draft: boolean,
   at?: { build: () => Promise<{ path: string }> },
 ): Promise<string> {
   const branch = branchOf(card.number);
   const base = await pullRequests.baseBranch();
   const pictures = at ? await picturesIn((await at.build()).path, base) : [];
-  const shown = picturesSection(
-    pictures,
-    pullRequests.repository ?? "",
-    branch,
+  const shown = picturesSection(pictures, (file) =>
+    pullRequests.fileLink(branch, file),
   );
   const body = `${text}${shown}\n\nCloses #${String(card.number)}.`;
   const found = await pullRequests.find(branch);
   // Built again (a clash resolved): the description stays about the card,
   // and what this run did is said on the pull request.
   if (found?.state === "OPEN") {
-    await pullRequests.update(found.number, null, draft);
+    await pullRequests.update(found.number, null, false);
     await pullRequests.comment(
       found.number,
-      markComment(`${text}${shown}`, draft ? "checks-failed" : "fixed"),
+      markComment(`${text}${shown}`, "fixed"),
     );
     return found.url;
   }
@@ -246,7 +243,7 @@ export async function openOrUpdate(
     base,
     title: card.title,
     body,
-    draft,
+    draft: false,
   });
   return made.url;
 }

@@ -4,6 +4,7 @@
 // its guides) and what the server answers for it (its routes). Built-in
 // add-ons are on unless the company switches them off.
 
+import type { CodeHostOf } from "../builder/code-host.ts";
 import type { Changes, Extension } from "@software-factory/core";
 
 import type { Board } from "../connect/board-file.ts";
@@ -28,7 +29,18 @@ export type AddOn = {
   // Its routes, by "METHOD /path": answered at /api/add-ons/<id>/path, and
   // only while the factory has it on.
   routes?: (host: AddOnHost) => Record<string, Route>;
+  // Where branches and pull requests go, when it fills the `code` slot.
+  codeHost?: CodeHostOf;
 };
+
+// The code hosts the add-ons give, by their extension's id.
+export function codeHostsOf(addOns: AddOn[]): Record<string, CodeHostOf> {
+  return Object.fromEntries(
+    addOns.flatMap(({ extension, codeHost }) =>
+      codeHost ? [[extension.id, codeHost]] : [],
+    ),
+  );
+}
 
 // Every add-on's routes at their addresses.
 export function addOnRoutes(

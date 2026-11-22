@@ -133,7 +133,7 @@ test("the builder builds a card in To do: checks, one fix, a pull request, revie
 });
 
 test("when the builder gives up or asks, the card waits in Backlog marked stuck; moved to To do, it is the builder's again", async () => {
-  const { copy } = await project();
+  const { copy, folder } = await project();
   const plan = withPlan("", "The plan.");
   const kept = new Map<number, Kept>([
     [5, { title: "Red", stage: "todo", body: plan, comments: [] }],
@@ -161,16 +161,20 @@ test("when the builder gives up or asks, the card waits in Backlog marked stuck;
   work.switch("build", true);
   await settled(work);
   // Checked, then three rounds of fixing, each checked again: still red, so
-  // a draft that says what fails, and the card waits in Backlog, stuck.
+  // nothing is pushed and no pull request opens; the card says what fails
+  // and waits in Backlog, stuck.
   assert.equal(checks.filter((c) => c === "npm test").length, 4);
   assert.ok(prompts.some((p) => p.includes("(round 3 of 3)")));
-  assert.equal(prs.made.length, 1);
-  assert.equal(prs.made[0]?.draft, true);
-  assert.match(prs.made[0].body, /## The checks fail[\s\S]*1 test failed/);
+  assert.equal(prs.made.length, 0);
+  await assert.rejects(onOrigin(folder, "factory/issue-5"));
   assert.equal(card.stage, "backlog");
   assert.equal(stuck(), true);
   assert.equal(readNote(last()), "checks-failed");
-  assert.match(last(), /draft pull request, not to merge yet/);
+  assert.match(last(), /## The checks fail[\s\S]*1 test failed/);
+  assert.match(
+    last(),
+    /stays in the factory's copy, on the branch `factory\/issue-5`: it is not pushed/,
+  );
   assert.match(last(), /\*\*Backlog\*\*, marked stuck/);
   // Shown in the Stuck list, not asked as a question too.
   await work.refresh();
@@ -199,8 +203,8 @@ test("when the builder gives up or asks, the card waits in Backlog marked stuck;
   await settled(work);
   assert.equal(card.stage, "backlog");
 
-  // Handed back: Claude Code cannot start. It gives up, with the draft of
-  // what is there.
+  // Handed back: Claude Code cannot start. It gives up; what is there stays
+  // in the factory's copy, unpushed.
   answer = null;
   handBack("Blue");
   await work.refresh();
@@ -208,7 +212,7 @@ test("when the builder gives up or asks, the card waits in Backlog marked stuck;
   assert.equal(card.stage, "backlog");
   assert.equal(readNote(last()), "failed");
   assert.match(last(), /The build stopped: spawn claude ENOENT/);
-  assert.match(last(), /pull\/100/);
+  assert.match(last(), /stays in the factory's copy/);
 
   // An answer that never says how it ended gives up the same way, after it
   // was told twice to carry on.
@@ -431,8 +435,8 @@ test("a builder that is not finished but not blocked goes on in the next session
   work.switch("build", false);
 });
 
-test("a builder still not finished after 3 sessions is stopped with a draft and asks a person", async () => {
-  const { copy } = await project();
+test("a builder still not finished after 3 sessions stops, keeps its work unpushed, and asks a person", async () => {
+  const { copy, folder } = await project();
   const kept = new Map<number, Kept>([
     [
       12,
@@ -457,8 +461,9 @@ test("a builder still not finished after 3 sessions is stopped with a draft and 
   assert.ok(card);
   assert.equal(session, 3);
   assert.equal(card.stage, "backlog");
-  assert.equal(prs.made.length, 1);
-  assert.equal(prs.made[0]?.draft, true);
+  assert.equal(prs.made.length, 0);
+  await assert.rejects(onOrigin(folder, "factory/issue-12"));
+  assert.match(card.comments.at(-1)?.body ?? "", /it is not pushed/);
   assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "out-of-sessions");
   assert.match(card.comments.at(-1)?.body ?? "", /3 sessions were not enough/);
   work.switch("build", false);
@@ -495,7 +500,7 @@ test("a builder that is blocked after an unfinished session stops the card at on
   work.switch("build", false);
 });
 
-test("a builder that says it is not finished but adds nothing twice in a row is stopped with a draft", async () => {
+test("a builder that says it is not finished but adds nothing twice in a row is stopped", async () => {
   const { copy } = await project();
   const kept = new Map<number, Kept>([
     [
@@ -528,3 +533,15 @@ test("a builder that says it is not finished but adds nothing twice in a row is 
   assert.match(card.comments.at(-1)?.body ?? "", /added nothing/);
   work.switch("build", false);
 });
+
+// The commit a branch is at where the code lives (the test's origin);
+// refused when it has no such branch.
+function onOrigin(folder: string, branch: string): Promise<string> {
+  return run("git", [
+    "-C",
+    join(folder, "origin.git"),
+    "rev-parse",
+    "--verify",
+    branch,
+  ]);
+}

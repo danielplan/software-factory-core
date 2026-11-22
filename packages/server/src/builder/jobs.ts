@@ -1,10 +1,13 @@
 // The jobs on a card: the coach plans it (read-only copy of main), the
 // builder builds it or answers its review comments (the card's branch in a
 // copy of its own). After a build the factory runs the checks itself, gives
-// the builder up to three rounds to fix what is red, pushes, and opens the
-// pull request once every check passes. When it gives up or asks, the card
-// goes to Backlog marked stuck (what it did so far up as a draft pull request
-// that says what is wrong), and waits for the owner to move it to To do.
+// the builder up to three rounds to fix what is red, then commits and pushes
+// through the repository's own git hooks (what they refuse is fixed in the
+// same rounds), and opens the pull request where the code lives (the code
+// host, from the `code` slot) once all of it passes. Work whose checks fail
+// is never pushed: when the builder gives up or asks, it stays in the
+// factory's copy, the card goes to Backlog marked stuck with what is wrong,
+// and waits for the owner to move it to To do.
 // It never takes a card's branch from a copy that is not the factory's: a
 // person works on that card by hand.
 
@@ -12,7 +15,8 @@ import { type Available, type Claude } from "@software-factory/core";
 
 import type { Browser } from "../kobble/persona-tests.ts";
 import type { Cards } from "../cards/cards.ts";
-import { copyName, headOf } from "./branches.ts";
+import { branchOf, copyName, headOf, publishBranch } from "./branches.ts";
+import type { CodeHost } from "./code-host.ts";
 import {
   changedFiles,
   checkWithFixes,
@@ -26,7 +30,7 @@ import { guidesFor, withGuides } from "./extension-guides.ts";
 import { keepKnowledge } from "./knowledge-kept.ts";
 import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
 import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
-import { openOrUpdate, type PullRequests } from "./pull-requests.ts";
+import { openOrUpdate } from "./pull-requests.ts";
 import { runSessions } from "./sessions.ts";
 import { type BuildCopy, builderTurn } from "./turn.ts";
 import { Paused, pausedText } from "./usage-limit.ts";
@@ -37,9 +41,9 @@ export { copyName } from "./branches.ts";
 
 export type JobsOptions = {
   cards: Cards;
-  pullRequests: PullRequests;
+  // Where the code lives: branches and pull requests go there.
+  codeHost: CodeHost;
   claude: Claude;
-  repository: string;
   available: Available;
   // The working copies of each lane; place 1 is "chat" and "build", the
   // others "chat-2", "build-2" … (cards at once, each in a copy of its own).
@@ -175,8 +179,8 @@ export class Jobs {
     text: string,
     onActivity: (line: string) => void,
   ) {
-    const { cards, pullRequests } = this.options;
-    await keepKnowledge(card, at, pullRequests.baseBranch, (prompt) =>
+    const { cards, codeHost } = this.options;
+    await keepKnowledge(card, at, codeHost.baseBranch, (prompt) =>
       this.agent(card, at, prompt, onActivity),
     );
     const checked = await this.checkAndPush(card, at, onActivity);
@@ -194,7 +198,7 @@ export class Jobs {
       );
       return;
     }
-    const url = await this.pullRequest(card, at, text, false);
+    const url = await this.pullRequest(card, at, text);
     await this.say(
       card.number,
       `Built, and every check passes: ${url} is ready for your review.`,
@@ -203,9 +207,9 @@ export class Jobs {
     await cards.move(card.number, "review");
   }
 
-  // The builder gave up: what it did so far goes up as a draft pull request
-  // that says what is wrong (none when it changed nothing), and the card
-  // waits in Backlog, stuck, for the owner.
+  // The builder gave up: what it did so far stays in the factory's copy, on
+  // the card's branch, never pushed while its checks fail; the card waits in
+  // Backlog, stuck, for the owner, with what is wrong.
   private async giveUp(
     card: BoardCard,
     at: Place,
@@ -214,16 +218,17 @@ export class Jobs {
     report: string | null,
   ) {
     const copy = await at.build();
-    const base = await this.options.pullRequests.baseBranch();
+    const base = await this.options.codeHost.baseBranch();
     const changed = (await changedFiles(copy.path, base)).length > 0;
     const failed = report === null ? "" : `\n\n${failedChecksSection(report)}`;
-    const url = changed
-      ? await this.pullRequest(card, at, `${text}${failed}`, true)
-      : null;
-    const draft = url
-      ? `What it did so far is in a draft pull request, not to merge yet: ${url}`
+    const kept = changed
+      ? `What it did so far stays in the factory's copy, on the branch \`${branchOf(card.number)}\`: it is not pushed while its checks do not pass.`
       : "It changed nothing yet.";
-    await this.stuck(card.number, `${text}\n\n${draft}\n\n${HAND_BACK}`, note);
+    await this.stuck(
+      card.number,
+      `${text}${failed}\n\n${kept}\n\n${HAND_BACK}`,
+      note,
+    );
   }
 
   private async feedback(
@@ -255,16 +260,15 @@ export class Jobs {
       // The description stays about the whole card: what this round did
       // is said on the pull request instead.
       if (!checked.passed) {
-        await this.options.pullRequests.update(pr.number, null, true);
+        await this.options.codeHost.update(pr.number, null, true);
         await this.sayOnPullRequest(
           pr.number,
-          `${answer.text}\n\nThe checks still fail after ${String(FIX_ROUNDS)} rounds of fixing, so this is a draft until they pass:\n\n${checked.report}`,
+          `${answer.text}\n\nThe checks still fail after ${String(FIX_ROUNDS)} rounds of fixing, so these changes are not pushed yet, and this is a draft until they pass:\n\n${checked.report}`,
           "checks-failed",
         );
         return;
       }
-      if (pr.draft)
-        await this.options.pullRequests.update(pr.number, null, false);
+      if (pr.draft) await this.options.codeHost.update(pr.number, null, false);
     }
     await this.sayOnPullRequest(pr.number, answer.text, note);
   }
@@ -292,7 +296,7 @@ export class Jobs {
         onActivity,
         model: this.options.model?.(),
         timeLimitMs: this.options.timeLimitMs ?? BUILD_TIME_MS,
-        repository: this.options.repository,
+        host: this.options.codeHost,
         now: this.now(),
         browser: browser
           ? { name: "browser", url: browser.url, headers: {} }
@@ -312,7 +316,7 @@ export class Jobs {
     return await checkWithFixes({
       copy: (await at.build()).path,
       available: this.options.available,
-      base: await this.options.pullRequests.baseBranch(),
+      base: await this.options.codeHost.baseBranch(),
       card: card.number,
       ...(this.options.shell ? { shell: this.options.shell } : {}),
       onActivity,
@@ -323,18 +327,14 @@ export class Jobs {
           fixChecksPrompt(card, report, round, FIX_ROUNDS),
           onActivity,
         ),
+      publish: async () => publishBranch((await at.build()).path, card),
     });
   }
 
   // Opens the card's pull request, or updates the one there is, with the
   // screenshots the branch adds; its address.
-  private async pullRequest(
-    card: BoardCard,
-    at: Place,
-    text: string,
-    draft: boolean,
-  ) {
-    return await openOrUpdate(this.options.pullRequests, card, text, draft, at);
+  private async pullRequest(card: BoardCard, at: Place, text: string) {
+    return await openOrUpdate(this.options.codeHost, card, text, at);
   }
 
   private async say(number: number, text: string, note: Note) {
@@ -342,6 +342,6 @@ export class Jobs {
   }
 
   private async sayOnPullRequest(number: number, text: string, note: Note) {
-    await this.options.pullRequests.comment(number, markComment(text, note));
+    await this.options.codeHost.comment(number, markComment(text, note));
   }
 }

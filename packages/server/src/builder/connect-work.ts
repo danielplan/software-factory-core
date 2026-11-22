@@ -23,7 +23,12 @@ import { readBoard } from "../connect/board-file.ts";
 import { homeOf } from "../prototypes/copies.ts";
 import { BoardWork, EVERY_MS } from "./board-work.ts";
 import { copyName, Jobs } from "./jobs.ts";
-import { githubPullRequests } from "./pull-requests.ts";
+import {
+  type CodeHost,
+  codeHostFor,
+  type CodeHostOf,
+  githubCodeHost,
+} from "./code-host.ts";
 import {
   isRelevant,
   Signals,
@@ -33,6 +38,9 @@ import {
 
 // Reading the board while GitHub's signals come as they happen.
 const WITH_SIGNALS_MS = 10 * 60_000;
+
+// The code hosts, by the extension that fills the `code` slot with one.
+export type CodeHosts = Readonly<Record<string, CodeHostOf>>;
 
 export type WorkSettings = {
   // The factory's folder and the project around it.
@@ -44,17 +52,29 @@ export type WorkSettings = {
   onChange: () => void;
   waiting?: () => ReadonlySet<number>;
   browser?: () => Promise<Browser>;
+  // The code hosts, by the extension that fills the `code` slot with one.
+  codeHosts: CodeHosts;
 };
 
 export function workFor(
   settings: WorkSettings,
-): { work: BoardWork; repository: string } | null {
+):
+  | { work: BoardWork; repository: string; codeHost: CodeHost }
+  | { problem: string }
+  | null {
   const { root, project, cli, claude, available, onChange, waiting, browser } =
     settings;
   const found = cardsFor(root, cli);
   if ("problem" in found) return null;
   const copies = join(dirname(project), `${basename(project)}-factory-copies`);
-  const pullRequests = githubPullRequests(cli, found.repository);
+  const codeHost = codeHostFor(
+    root,
+    available.extensions,
+    settings.codeHosts,
+    found.repository,
+  );
+  if ("problem" in codeHost) return codeHost;
+  const pullRequests = codeHost;
   const copyOf = async (name: string) =>
     new Workspace(
       {
@@ -69,9 +89,8 @@ export function workFor(
     );
   const jobs = new Jobs({
     cards: found.cards,
-    pullRequests,
+    codeHost,
     claude,
-    repository: found.repository,
     available,
     copies: {
       chat: (place) => copyOf(copyName("chat", place)),
@@ -90,7 +109,7 @@ export function workFor(
     building: true,
     ...(waiting ? { waiting } : {}),
   });
-  return { work, repository: found.repository };
+  return { work, repository: found.repository, codeHost };
 }
 
 // The session's board work: connected once a factory with a board opens,
@@ -99,6 +118,10 @@ export class ConnectedWork {
   private readonly settings: Omit<WorkSettings, "root">;
   private work: BoardWork | null = null;
   private repository = "";
+  private codeHost: CodeHost | null = null;
+  // Why the builder cannot work the connected board (no code host to push
+  // to); none when it can, or when no board is connected.
+  private problem: string | null = null;
   private signals: Signals | null = null;
   // The factory's own address, once it listens: where gh sends signals.
   private base: string | null = null;
@@ -116,10 +139,17 @@ export class ConnectedWork {
     coach: { claude: Claude; builderBrowser?: () => Promise<Browser> };
     available: Available;
     onChange: () => void;
+    // The code hosts, by the extension that fills the `code` slot; GitHub,
+    // through this CLI, when none are given.
+    codeHosts?: CodeHosts;
   }) {
+    const cli = options.cli ?? realCli();
     this.settings = {
       project: options.project,
-      cli: options.cli ?? realCli(),
+      cli,
+      codeHosts: options.codeHosts ?? {
+        github: (repository) => githubCodeHost(cli, repository),
+      },
       claude: options.coach.claude,
       available: options.available,
       onChange: options.onChange,
@@ -191,9 +221,12 @@ export class ConnectedWork {
     if (board === this.board) return;
     this.stop();
     this.board = board;
-    const made = workFor({ ...this.settings, root });
-    this.work = made?.work ?? null;
-    this.repository = made?.repository ?? "";
+    const made = workFor({ ...this.settings, root }) ?? { problem: null };
+    const working = "problem" in made ? null : made;
+    this.problem = "problem" in made ? made.problem : null;
+    this.work = working?.work ?? null;
+    this.repository = working?.repository ?? "";
+    this.codeHost = working?.codeHost ?? null;
     this.work?.start();
     this.startSignals();
   }
@@ -203,14 +236,25 @@ export class ConnectedWork {
     this.signals = null;
     this.work?.stop();
     this.work = null;
+    this.codeHost = null;
+    this.problem = null;
     this.board = "";
   }
 
   // For the Board tab's buttons.
   orRefuse(): BoardWork {
     if (!this.work)
-      throw new Refused("Connect a board first: the builder works its cards.");
+      throw new Refused(
+        this.problem ?? "Connect a board first: the builder works its cards.",
+      );
     return this.work;
+  }
+
+  // Where the code lives, for the card panel and Resolve.
+  hostOrRefuse(): CodeHost {
+    this.orRefuse();
+    if (!this.codeHost) throw new Refused("There is no code host yet.");
+    return this.codeHost;
   }
 }
 

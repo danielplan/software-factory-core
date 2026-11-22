@@ -462,6 +462,22 @@ setup is the filler for every extension and swapping it swaps it for all
 (`slotsOf`, `core/src/extensions/slots.ts`). An installed extension that uses
 a slot nothing can fill stops the factory, with the reason.
 
+The builder takes where branches and pull requests go from the `code`
+slot: the add-on that fills it gives a **code host** (`codeHost`, the
+`CodeHost` type in `server/src/builder/code-host.ts`: find, open, update and
+comment on a pull request, check that the copy pushes there, link a file on
+a branch), and nothing in the builder, the card panel or Resolve names a
+host. GitHub's is the only one today; another host, GitLab say, comes as an
+add-on that fills `code` with its own. With no code host for the filler, the
+builder does not work the board and says why.
+
+The builder's commits and pushes go through the repository's own git hooks,
+never around them. Only work whose checks pass is pushed: the factory runs
+the checks, then commits and pushes, and what the hooks refuse is fixed like
+a red check (`publishBranch`, `server/src/builder/branches.ts`). Work that
+does not pass stays on the card's branch in the factory's copy (the copies
+share the project's branches, so Sprocket's `look_at_card` reads it there).
+
 The first add-ons are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
 shown as connections, not as extensions. What each adds:
 
@@ -475,7 +491,7 @@ shown as connections, not as extensions. What each adds:
 | MCP servers                        | the tools agents use on a kind of product (its documentation, its checks), written into the project's `.mcp.json` | kits                                                                                                         |
 | Pages, agent tools, workflow steps | the dashboard's pages, the coach's tools, the builder's steps                                                     | to come, with the core extensions                                                                            |
 | Trackers                           | where work is tracked: a GitHub board, Jira Cloud                                                                 | add-ons (`tracker: true`, routes, connecting steps); the builder works GitHub boards (`server/src/builder/`) |
-| Code hosts                         | where branches and pull requests go: GitHub                                                                       | GitHub, in the builder (`server/src/builder/pull-requests.ts`)                                               |
+| Code hosts                         | where branches and pull requests go: GitHub                                                                       | the add-on in the `code` slot gives its `codeHost` (`server/src/builder/code-host.ts`); GitHub today         |
 | Detection                          | a kit recognises its kind of product in existing code                                                             | to come, with the setup page                                                                                 |
 
 Which add-ons the core ships, what each needs, and the order they come in:

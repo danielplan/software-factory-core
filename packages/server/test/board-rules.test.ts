@@ -19,6 +19,9 @@ import {
   stripMarker,
 } from "../src/builder/protocol.ts";
 
+import { realCli } from "../src/add-ons/github/github.ts";
+import { githubCodeHost } from "../src/builder/code-host.ts";
+
 // The board's rules: what happens next to each card, from its stage and the
 // notes in its thread; and how the factory's notes and an agent's status
 // line are read.
@@ -74,8 +77,8 @@ test("the factory's notes carry a hidden mark; an agent's answer ends with its s
   assert.equal(
     linkRepositoryFiles(
       "![shot](runs/1.png) [run](./runs/1.md) [web](https://x.y) [top](#a)",
-      "o/r",
-      "factory/card-1",
+      (path) =>
+        githubCodeHost(realCli(), "o/r").fileLink("factory/card-1", path),
     ),
     "![shot](https://github.com/o/r/blob/factory/card-1/runs/1.png?raw=true) [run](https://github.com/o/r/blob/factory/card-1/runs/1.md) [web](https://x.y) [top](#a)",
   );

@@ -14,10 +14,9 @@ import type { Stage } from "../src/api.ts";
 import { BoardWork } from "../src/builder/board-work.ts";
 import { copyName, Jobs, type JobsOptions } from "../src/builder/jobs.ts";
 import type { Message } from "../src/builder/decide.ts";
-import type {
-  PullRequest,
-  PullRequests,
-} from "../src/builder/pull-requests.ts";
+import { type CodeHost, githubCodeHost } from "../src/builder/code-host.ts";
+import type { PullRequest } from "../src/builder/pull-requests.ts";
+import { realCli } from "../src/add-ons/github/github.ts";
 import {
   type Card,
   type Cards,
@@ -182,8 +181,12 @@ export function pretendPullRequests() {
     body: string;
     thread: Message[];
   })[] = [];
-  const pullRequests: PullRequests = {
-    repository: "o/r",
+  // GitHub's own origin check and links, on the made-up o/r.
+  const github = githubCodeHost(realCli(), "o/r");
+  const pullRequests: CodeHost = {
+    name: "GitHub",
+    originProblem: (folder) => github.originProblem(folder),
+    fileLink: (branch, path) => github.fileLink(branch, path),
     baseBranch: () => Promise.resolve("main"),
     find: (branch) =>
       Promise.resolve(made.find((p) => p.branch === branch) ?? null),
@@ -271,9 +274,8 @@ export function setUp(
   const checks: string[] = [];
   const jobs = new Jobs({
     cards: board.cards,
-    pullRequests: prs.pullRequests,
+    codeHost: prs.pullRequests,
     claude,
-    repository: "o/r",
     available,
     copies: {
       chat: (place) => copy(copyName("chat", place)),

@@ -1,14 +1,17 @@
 // One turn of the builder on a card's branch, in its working copy: the
 // latest main brought in first (a clash goes to the builder to settle), the
 // same conversation told to carry on when it stops halfway, and whatever it
-// did committed and pushed whenever it ran, so a question or a review
-// continues from it. Claude's usage limit ends the turn as a pause.
+// left committed through the repository's own git hooks, so a question or a
+// review continues from it. Nothing is pushed here: only work whose checks
+// pass goes where the code lives (jobs.ts). Claude's usage limit ends the
+// turn as a pause.
 
 import { randomUUID } from "node:crypto";
 
 import type { Claude, Mcp } from "@software-factory/core";
 
-import { branchOf, commitAndPush, originProblem } from "./branches.ts";
+import { branchOf, commitTurn } from "./branches.ts";
+import type { CodeHost } from "./code-host.ts";
 import type { BoardCard } from "./decide.ts";
 import { CARRY_ON, clashPrompt } from "./prompts.ts";
 import { linkRepositoryFiles, readStatusLine } from "./protocol.ts";
@@ -34,7 +37,9 @@ export type TurnOptions = {
   onActivity: (line: string) => void;
   model: string | undefined;
   timeLimitMs: number;
-  repository: string;
+  // Where the code lives: the copy must push there, and files are linked
+  // there.
+  host: Pick<CodeHost, "originProblem" | "fileLink">;
   now: Date;
   // Its own browser, its only MCP server, so it never gets the person's
   // (their Claude Code's plugins and their browser profile).
@@ -52,7 +57,7 @@ export async function builderTurn(
   await copy.prepareSharedBranch(branch);
   // Pushed elsewhere, the work never reaches the board: said before any
   // session is spent on it.
-  const elsewhere = await originProblem(copy.path, options.repository);
+  const elsewhere = await options.host.originProblem(copy.path);
   if (elsewhere) return { status: "blocked", text: elsewhere };
   const clashes = await copy.bringInMain();
   if (clashes.length > 0)
@@ -83,11 +88,7 @@ export async function builderTurn(
   )
     result = await turn(CARRY_ON, true);
   const unsettled = await leftClashing(copy, clashes);
-  await commitAndPush(
-    copy.path,
-    branch,
-    `#${String(card.number)} ${card.title}`,
-  );
+  await commitTurn(copy.path, card, onActivity);
   if (!result.ok) pauseOn(result.error, options.now);
   if (unsettled) return { status: "blocked", text: unsettled };
   if (!result.ok)
@@ -99,7 +100,9 @@ export async function builderTurn(
   return read.status
     ? {
         status: read.status,
-        text: linkRepositoryFiles(read.text, options.repository, branch),
+        text: linkRepositoryFiles(read.text, (path) =>
+          options.host.fileLink(branch, path),
+        ),
       }
     : {
         status: "failed",

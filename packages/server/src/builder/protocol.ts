@@ -167,19 +167,15 @@ export function readStatusLine(output: string): {
   return { text: lines.slice(0, -1).join("\n").trim(), status };
 }
 
-// An agent names screenshots and files by their path in the repository; on
-// GitHub they need links into the branch, and pictures ?raw=true.
+// An agent names screenshots and files by their path in the repository;
+// where the code lives they need links into the branch, which the code host
+// makes.
 export function linkRepositoryFiles(
   text: string,
-  repository: string,
-  branch: string,
+  link: (path: string) => string,
 ): string {
   return text.replace(
     /\]\((?!https?:|#|mailto:)([^)\s]+)\)/g,
-    (_all, path: string) => {
-      const clean = path.replace(/^\.?\//, "");
-      const raw = /\.(png|jpe?g|gif|webp|svg)$/i.test(clean) ? "?raw=true" : "";
-      return `](https://github.com/${repository}/blob/${branch}/${clean}${raw})`;
-    },
+    (_all, path: string) => `](${link(path.replace(/^\.?\//, ""))})`,
   );
 }

@@ -7,6 +7,7 @@ import { defineExtension } from "@software-factory/core";
 import { stagesOf, field, labelOf } from "../../connect/fields.ts";
 import { suggestStages } from "../../connect/stages.ts";
 import { Refused } from "../../refused.ts";
+import { githubCodeHost } from "../../builder/code-host.ts";
 import type { AddOn, AddOnHost, Route } from "../add-on.ts";
 import { type Cli, GitHub, realCli } from "./github.ts";
 
@@ -22,6 +23,7 @@ export function githubAddOn(cli: Cli = realCli()): AddOn {
       fills: ["code"],
     }),
     routes: (host) => routes(new GitHub(cli, host.changed), host),
+    codeHost: (repository) => githubCodeHost(cli, repository),
   };
 }
 

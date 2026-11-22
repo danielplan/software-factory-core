@@ -8,7 +8,7 @@ import type { Cli } from "../add-ons/github/github.ts";
 import { field } from "../asked.ts";
 import { branchOf } from "../builder/branches.ts";
 import { type Note, readNote, stripMarker } from "../builder/protocol.ts";
-import { githubPullRequests, RESOLVE_ASK } from "../builder/pull-requests.ts";
+import { type PullRequests, RESOLVE_ASK } from "../builder/pull-requests.ts";
 import {
   aboutOf,
   CARD_TYPES,
@@ -61,6 +61,8 @@ const STATUS: Partial<Record<Note, string>> = {
 export function factoryCardRoutes(
   factory: string,
   cli: Cli,
+  // Where the code lives: the card's pull request is there.
+  codeHost: () => PullRequests,
 ): Record<string, Route> {
   const connected = () => {
     const found = cardsFor(factory, cli);
@@ -71,11 +73,11 @@ export function factoryCardRoutes(
     "GET /api/kobble/factory/card": async (_body, url) => {
       const number = Number(url.searchParams.get("number"));
       if (!Number.isInteger(number)) throw new Refused("Say which card.");
-      const { cards, repository } = connected();
+      const { cards } = connected();
       // Both at once: each is a call to GitHub.
       const [card, pr] = await Promise.all([
         cards.show(number),
-        githubPullRequests(cli, repository).find(branchOf(number)),
+        codeHost().find(branchOf(number)),
       ]);
       return panelOf(card, pr);
     },
@@ -96,10 +98,8 @@ export function factoryCardRoutes(
     "POST /api/kobble/factory/resolve": async (body) => {
       const number = Number((body as { number?: unknown } | null)?.number);
       if (!Number.isInteger(number)) throw new Refused("Say which card.");
-      const { cards, repository } = connected();
-      const pr = await githubPullRequests(cli, repository).find(
-        branchOf(number),
-      );
+      const { cards } = connected();
+      const pr = await codeHost().find(branchOf(number));
       if (pr?.state !== "OPEN")
         throw new Refused(`#${String(number)} has no open pull request.`);
       await cards.comment(number, RESOLVE_ASK);

@@ -45,7 +45,7 @@ import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
 import { switched, trackedWith } from "./add-ons/switch.ts";
-import { ConnectedWork } from "./builder/connect-work.ts";
+import { type CodeHosts, ConnectedWork } from "./builder/connect-work.ts";
 import { withModelChoice } from "./model-choice.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 
@@ -58,10 +58,10 @@ export type SessionOptions = {
   // The setup coach's and the idea coach's instructions, and the trackers
   // it can set up a board with (tracker-setup.ts).
   coach: CoachOptions;
-  // The tools on this computer the coach may install, once the owner
-  // agreed (installables.ts: computerTools).
+  // Tools on this computer the coach may install once agreed (computerTools).
   tools: Installable[];
-};
+  // The add-ons' code hosts, by the extension in the `code` slot.
+} & { codeHosts?: CodeHosts };
 
 export class Session {
   readonly options: SessionOptions;

@@ -81,17 +81,10 @@ export async function cardLook(
 async function branchLook(project: string, number: number): Promise<string> {
   const branch = branchOf(number);
   const git = (...args: string[]) => run("git", ["-C", project, ...args]);
-  const remote = `origin/${branch}`;
-  try {
-    await git(
-      "fetch",
-      "--quiet",
-      "origin",
-      `+refs/heads/${branch}:refs/remotes/${remote}`,
-    );
-  } catch {
-    return `## The branch\n\n\`${branch}\` has nothing yet: the builder has not pushed any work.`;
-  }
+  const found = await branchRef(git, branch);
+  if (!found)
+    return `## The branch\n\n\`${branch}\` has nothing yet: the builder has not committed any work.`;
+  const { ref: remote, where } = found;
   const base = await git("rev-parse", "--abbrev-ref", "origin/HEAD")
     .then((name) => name.trim())
     .catch(() => "origin/main");
@@ -116,11 +109,44 @@ async function branchLook(project: string, number: number): Promise<string> {
     }),
   );
   return [
-    `## The branch \`${branch}\` (against ${base})`,
+    `## The branch \`${branch}\` (${where}; against ${base})`,
     `### Commits (latest first)\n\n${commits.trim() || "(none)"}`,
     `### Files it changes\n\n${clip(changed.trim()) || "(none)"}`,
     runs.length > 0 ? runs.join("\n\n") : "(no run file yet)",
   ].join("\n\n");
+}
+
+// The card's branch: the factory's own (its copies share the project's
+// branches), which holds work not pushed while its checks fail; else the
+// one where the code lives.
+async function branchRef(
+  git: (...args: string[]) => Promise<string>,
+  branch: string,
+): Promise<{ ref: string; where: string } | null> {
+  const ok = (done: Promise<string>) =>
+    done.then(
+      () => true,
+      () => false,
+    );
+  if (await ok(git("rev-parse", "--verify", "--quiet", `refs/heads/${branch}`)))
+    return {
+      ref: branch,
+      where:
+        "on this computer, as the builder left it; pushed only once its checks pass",
+    };
+  const remote = `origin/${branch}`;
+  if (
+    await ok(
+      git(
+        "fetch",
+        "--quiet",
+        "origin",
+        `+refs/heads/${branch}:refs/remotes/${remote}`,
+      ),
+    )
+  )
+    return { ref: remote, where: "as pushed" };
+  return null;
 }
 
 function olderLeftOut(shown: number, earlier: number): string {

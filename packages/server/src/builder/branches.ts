@@ -13,52 +13,76 @@ export async function headOf(folder: string): Promise<string> {
   return (await run("git", ["-C", folder, "rev-parse", "HEAD"])).trim();
 }
 
-// Commits whatever the builder left uncommitted (never a settings file) and
-// puts the copy's work on the card's branch on GitHub. Only settings files
-// left over (an untracked .env.test) is nothing to commit, not a failure.
-export async function commitAndPush(
+// Commits whatever the builder left uncommitted (never a settings file),
+// through the repository's own git hooks. Only settings files left over (an
+// untracked .env.test) is nothing to commit, not a failure. What the hooks
+// said when they refused it; null when it is committed or there was nothing.
+export async function commitLeft(
+  folder: string,
+  message: string,
+): Promise<string | null> {
+  const git = (...args: string[]) => run("git", ["-C", folder, ...args]);
+  if ((await git("status", "--porcelain")).trim() === "") return null;
+  await stageAllButSettings(folder);
+  if ((await git("diff", "--cached", "--name-only")).trim() === "") return null;
+  return await refusal(git("commit", "--quiet", "-m", message));
+}
+
+// Puts the copy's work on the card's branch where the code lives, through
+// the repository's own git hooks (a pre-push check runs here). Only work
+// whose checks pass is pushed. What the hooks said when they refused it;
+// null when it is pushed.
+export async function pushBranch(
   folder: string,
   branch: string,
-  message: string,
-): Promise<void> {
-  const git = (...args: string[]) =>
-    run("git", ["-C", folder, ...args], { env: { LEFTHOOK: "0" } });
-  if ((await git("status", "--porcelain")).trim() !== "") {
-    await stageAllButSettings(folder);
-    if ((await git("diff", "--cached", "--name-only")).trim() !== "")
-      await git("commit", "--quiet", "-m", message);
-  }
-  await git(
-    "push",
-    "--quiet",
-    "--force",
-    "origin",
-    `HEAD:refs/heads/${branch}`,
+): Promise<string | null> {
+  return await refusal(
+    run("git", [
+      "-C",
+      folder,
+      "push",
+      "--quiet",
+      "--force",
+      "origin",
+      `HEAD:refs/heads/${branch}`,
+    ]),
   );
 }
 
-// Why the copy's work would not reach the board's repository: its origin
-// (the project's: copies are its worktrees) is another place, a folder it
-// was cloned from, say, so the branch is pushed there and GitHub never has
-// it. Null when origin is that repository. Read as written, before git's
-// insteadOf.
-export async function originProblem(
+// The card's work committed and pushed, both through the git hooks; what
+// they said when they refused it, null when it went.
+export async function publishBranch(
   folder: string,
-  repository: string,
+  card: { number: number; title: string },
 ): Promise<string | null> {
-  const url = (
-    await run("git", [
-      "-C",
-      folder,
-      "config",
-      "--get",
-      "remote.origin.url",
-    ]).catch(() => "")
-  ).trim();
-  const named = /github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(url)?.[1];
-  if (named?.toLowerCase() === repository.toLowerCase()) return null;
-  const where = url ? "`" + url + "`" : "no origin";
-  return `The builder's copy pushes to ${where}, not to ${repository} on GitHub, so its branch and pull request would never reach the board. Point the project's origin at GitHub (\`git remote set-url origin https://github.com/${repository}.git\` in the project; its copies share it), then answer here or move the card back to To do.`;
+  return (
+    (await commitLeft(folder, `#${String(card.number)} ${card.title}`)) ??
+    (await pushBranch(folder, branchOf(card.number)))
+  );
+}
+
+// After a turn: what the builder left, committed through the git hooks;
+// what they refused is told as activity.
+export async function commitTurn(
+  folder: string,
+  card: { number: number; title: string },
+  onActivity: (line: string) => void,
+): Promise<void> {
+  const refused = await commitLeft(
+    folder,
+    `#${String(card.number)} ${card.title}`,
+  );
+  if (refused) onActivity(`The git hooks refused the commit: ${refused}`);
+}
+
+async function refusal(done: Promise<string>): Promise<string | null> {
+  try {
+    await done;
+    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.replace(/^git .*? failed: /, "");
+  }
 }
 
 // The working copy of a lane's place: "build", then "build-2", "build-3" ….

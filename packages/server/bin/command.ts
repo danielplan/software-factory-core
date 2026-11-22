@@ -21,6 +21,7 @@ import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/server.ts";
 import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/add-ons/github/board-setup.ts";
+import { codeHostsOf } from "../src/add-ons/add-on.ts";
 import { githubAddOn } from "../src/add-ons/github/index.ts";
 import { jiraAddOn } from "../src/add-ons/jira/index.ts";
 import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
@@ -79,6 +80,7 @@ let changed = () => {};
 const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");
 const session = new Session({
   project,
+  codeHosts: codeHostsOf(addOns),
   available: {
     extensions,
     kits: allKits,

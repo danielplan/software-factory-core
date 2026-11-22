@@ -5,7 +5,7 @@
 // sessions add no commit twice in a row, or when the last of CONTINUE_SESSIONS
 // still ends with "continue".
 
-// Sessions in a row on one card before the builder gives up with a draft.
+// Sessions in a row on one card before the builder stops and asks.
 const CONTINUE_SESSIONS = 3;
 // Sessions in a row that may add no commit.
 const STALLED_SESSIONS = 2;

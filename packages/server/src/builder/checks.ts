@@ -33,7 +33,10 @@ export const FIX_ROUNDS = 3;
 
 // The checks, and up to FIX_ROUNDS rounds of fixing while any is red (the
 // builder fixes every red check, also one that was red before its change);
-// it stops early when the builder says only the owner can unblock it.
+// it stops early when the builder says only the owner can unblock it. Once
+// they pass, the work is published (committed and pushed through the
+// repository's own git hooks); what the hooks refuse is one more red check,
+// fixed in the same rounds.
 export async function checkWithFixes(options: {
   copy: string;
   available: Available;
@@ -46,6 +49,8 @@ export async function checkWithFixes(options: {
     report: string,
     round: number,
   ) => Promise<{ status: string; text: string }>;
+  // What the git hooks said when they refused the work; null when it went.
+  publish?: () => Promise<string | null>;
 }): Promise<CheckOutcome & { blocked: string | null }> {
   const { copy, available, base, onActivity } = options;
   const check = async () => {
@@ -71,12 +76,20 @@ export async function checkWithFixes(options: {
       ),
     );
   };
-  let checked = await check();
+  const checkAndPublish = async (): Promise<CheckOutcome> => {
+    const checked = await check();
+    if (!checked.passed || !options.publish) return checked;
+    const refused = await options.publish();
+    return refused === null
+      ? checked
+      : { passed: false, report: `The git hooks refused it:\n\n${refused}` };
+  };
+  let checked = await checkAndPublish();
   for (let round = 1; !checked.passed && round <= FIX_ROUNDS; round++) {
     const answer = await options.fix(checked.report, round);
     if (answer.status === "blocked")
       return { ...checked, blocked: answer.text };
-    checked = await check();
+    checked = await checkAndPublish();
   }
   return { ...checked, blocked: null };
 }
@@ -262,8 +275,8 @@ export const realShell: Shell = (cwd, command) =>
     });
   });
 
-// Added to the pull request when the checks fail again after review
-// comments: it is a draft until they pass.
+// What fails, said on the card when the builder gives up, or on the pull
+// request when the checks fail again after review comments.
 export function failedChecksSection(report: string): string {
   return `## The checks fail
 
