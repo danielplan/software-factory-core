@@ -43,7 +43,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const blocks: Record<string, ReactNode> = {
     status: <StatusBlock state={state} />,
     waiting: <WaitingBlock waiting={waiting} />,
-    loop: <LoopBlock input={input} />,
+    loop: <LoopBlock input={input} state={state} />,
     exploring: <ExploringBlock input={input} addOns={addOns} />,
     signals: <SignalsBlock input={input} addOns={addOns} />,
     reviews: <ReviewsBlock waiting={waiting} addOns={addOns} />,

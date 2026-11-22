@@ -126,6 +126,32 @@ test("the loop counts each stage and shows its latest two", () => {
   assert.equal(empty[2]?.says, "to build");
 });
 
+test("the loop follows the order of work: stages of removed extensions leave, a team's own shows without a count", () => {
+  const input = { work: null, signals: [], fresh: 0, exploring: [] };
+  const place = (id: string, own: boolean, by = "Factory") => ({
+    id,
+    name: id.toUpperCase(),
+    by,
+    own,
+  });
+  const loop = loopOf(input, undefined, undefined, [
+    place("signals", true),
+    place("build", true),
+    place("check", false, "Checks"),
+    place("done", true),
+    place("release", true),
+  ]);
+  assert.deepEqual(
+    loop.map((stage) => [stage.id, stage.count, stage.says]),
+    [
+      ["signals", 0, "new"],
+      ["build", 0, "to build"],
+      ["check", null, "Checks"],
+      ["done", 0, "merged"],
+    ],
+  );
+});
+
 test("the status line says how the product is and what the builder does", () => {
   const all = { light: "running", running: 2, shown: 2 };
   assert.equal(

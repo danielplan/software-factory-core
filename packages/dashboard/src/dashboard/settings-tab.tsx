@@ -2,6 +2,7 @@ import {
   Bot,
   ChevronDown,
   Laptop,
+  ListOrdered,
   Plug,
   RefreshCw,
   SlidersHorizontal,
@@ -29,6 +30,7 @@ import type { Messages } from "@/i18n/messages";
 import { LanguageCard } from "./language-card";
 import type { FactoryState } from "./dashboard";
 import { LiveAppCard } from "./live-app-card";
+import { StagesCard } from "./stages-card";
 import { GroupCard, sectionId, Topic } from "./settings-card";
 import {
   GROUP_TABS,
@@ -39,7 +41,7 @@ import {
 } from "./settings-tabs";
 import { FactoryPrograms } from "./system-page";
 
-// The factory's settings, in five tabs at the side; only the chosen one
+// The factory's settings, in six tabs at the side; only the chosen one
 // shows, at its own address (#settings/updates). Connections: where work
 // is tracked, the live app. AI models: which model each kind of work uses,
 // and the builder's group. Updates. This
@@ -88,6 +90,11 @@ const LOOKS: Record<
     icon: <Plug aria-hidden />,
     color: "var(--source-app)",
     word: "connections",
+  },
+  Stages: {
+    icon: <ListOrdered aria-hidden />,
+    color: "var(--explore)",
+    word: "stages",
   },
   "AI models": {
     icon: <Bot aria-hidden />,
@@ -159,6 +166,7 @@ function sectionsOf(
   return [
     section(n.tracker, "Connections", <TrackerCard state={state} />),
     section(n.liveApp, "Connections", <LiveAppCard />),
+    section(n.stages, "Stages", <StagesCard state={state} />),
     section(
       n.updates,
       "Updates",

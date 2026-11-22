@@ -9,8 +9,9 @@ import {
   ExternalLink,
   FlaskConical,
   Inbox,
+  Puzzle,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import type { AddOnView, ShownView } from "@/api";
 import { StatusLight } from "@/components/status-light";
@@ -38,12 +39,15 @@ const KIND_COLOUR: Record<WaitingItem["kind"], string> = {
   Sort: "var(--understand)",
 };
 
-const STAGE_LOOK: Record<Stage["id"], { icon: ReactNode; colour: string }> = {
+const STAGE_LOOK: Record<string, { icon: ReactNode; colour: string }> = {
   signals: { icon: <Inbox aria-hidden />, colour: "var(--understand)" },
   explore: { icon: <FlaskConical aria-hidden />, colour: "var(--explore)" },
   build: { icon: <Columns3 aria-hidden />, colour: "var(--build)" },
   done: { icon: <CircleCheck aria-hidden />, colour: "var(--source-app)" },
 };
+
+// A stage of a team's own extension.
+const OTHER_LOOK = { icon: <Puzzle aria-hidden />, colour: "#8b5cf6" };
 
 function Empty({ line }: Readonly<{ line: string }>) {
   return (
@@ -96,11 +100,26 @@ export function WaitingBlock({
   );
 }
 
-export function LoopBlock({ input }: Readonly<{ input: HomeInput }>) {
+export function LoopBlock({
+  input,
+  state,
+}: Readonly<{ input: HomeInput; state: FactoryState }>) {
   const t = useT();
+  const order = state.stages.order.map((place) => {
+    const owner = state.addOns.find((addOn) => addOn.id === place.by);
+    return {
+      ...place,
+      by: owner ? nameOf(t.market, owner) : place.by,
+      own: owner?.builtIn ?? false,
+    };
+  });
+  const stages = loopOf(input, t.home, t.shell.pages, order);
   return (
-    <Card className="grid gap-0 overflow-hidden py-0 shadow-soft sm:grid-cols-2 lg:grid-cols-4">
-      {loopOf(input, t.home, t.shell.pages).map((stage, at) => (
+    <Card
+      className="grid gap-0 overflow-hidden py-0 shadow-soft sm:grid-cols-2 lg:[grid-template-columns:repeat(var(--stages),minmax(0,1fr))]"
+      style={{ "--stages": stages.length } as CSSProperties}
+    >
+      {stages.map((stage, at) => (
         <StageCell key={stage.id} stage={stage} first={at === 0} />
       ))}
     </Card>
@@ -262,7 +281,9 @@ function StageCell({
   stage,
   first,
 }: Readonly<{ stage: Stage; first: boolean }>) {
-  const look = STAGE_LOOK[stage.id];
+  const look = Object.hasOwn(STAGE_LOOK, stage.id)
+    ? (STAGE_LOOK[stage.id] ?? OTHER_LOOK)
+    : OTHER_LOOK;
   return (
     <a
       href={stage.href}
@@ -284,7 +305,8 @@ function StageCell({
         {stage.name}
       </span>
       <span className="text-[22px] font-semibold tracking-[-0.02em] tabular-nums">
-        {stage.count}{" "}
+        {stage.count}
+        {stage.count !== null && " "}
         <span className="text-xs font-normal tracking-normal text-muted-foreground">
           {stage.says}
         </span>

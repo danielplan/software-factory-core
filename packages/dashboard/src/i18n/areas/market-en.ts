@@ -71,7 +71,8 @@ export const marketEnglish = {
     build: "Factory",
     explore: "Explorations",
     signals: "Signals",
-    release: "Done",
+    done: "Done",
+    release: "Release",
   },
   blocks: {
     status: "Product status",

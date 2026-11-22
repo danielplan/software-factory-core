@@ -9,9 +9,10 @@ import {
   tabsOf,
 } from "../src/dashboard/settings-tabs.ts";
 
-test("Settings has five tabs, in order", () => {
+test("Settings has six tabs, in order", () => {
   assert.deepEqual(SETTINGS_TABS, [
     "Connections",
+    "Stages",
     "AI models",
     "Updates",
     "This computer",

@@ -69,7 +69,8 @@ export const marketGerman: typeof marketEnglish = {
     build: "Fabrik",
     explore: "Erkundungen",
     signals: "Signale",
-    release: "Fertig",
+    done: "Fertig",
+    release: "Release",
   },
   blocks: {
     status: "Produktstatus",

@@ -113,9 +113,11 @@ function answersOf(
 }
 
 export type Stage = {
-  id: "signals" | "explore" | "build" | "done";
+  id: string;
   name: string;
-  count: number;
+  // Null for a stage of a team's own extension: Kobble does not count work
+  // in it, it only shows where it sits.
+  count: number | null;
   // What the count is ("new", "being explored", "building · 1 to review").
   says: string;
   // The latest two.
@@ -123,10 +125,43 @@ export type Stage = {
   href: string;
 };
 
+// A stage in the order of work, with the name of the extension that brings it
+// and whether that one is Kobble's own.
+export type Placed = { id: string; name: string; by: string; own: boolean };
+
+// The loop: the stages in the order the team has them. The stages Kobble
+// counts (signals, exploring, building, done) show while their extension is
+// installed; a team's own stage shows where it sits, without a count.
 export function loopOf(
   input: HomeInput,
   m: Words = ENGLISH.home,
   pages: Messages["shell"]["pages"] = ENGLISH.shell.pages,
+  order: Placed[] | null = null,
+): Stage[] {
+  const counted = countedStages(input, m, pages);
+  if (!order) return counted;
+  return order.flatMap((place): Stage[] => {
+    const known = counted.find((stage) => stage.id === place.id);
+    if (known) return [known];
+    return place.own
+      ? []
+      : [
+          {
+            id: place.id,
+            name: place.name,
+            count: null,
+            says: place.by,
+            items: [],
+            href: "#extensions",
+          },
+        ];
+  });
+}
+
+function countedStages(
+  input: HomeInput,
+  m: Words,
+  pages: Messages["shell"]["pages"],
 ): Stage[] {
   const cards = input.work?.cards ?? [];
   const open = cards.filter((card) => !card.closed);
