@@ -1,0 +1,107 @@
+- generic [ref=e63]:
+  - complementary [ref=e64]:
+    - generic [ref=e65]: Acme
+    - navigation "Overview" [ref=e77]:
+      - link "Home" [ref=e78] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e83] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e95]:
+          - text: Stopped
+          - img "Stopped" [ref=e96]
+    - navigation "Pages" [ref=e97]:
+      - generic [ref=e98]:
+        - generic [ref=e99]: Work
+        - link "Signals Sieve" [ref=e100] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e106]': Sieve
+        - link "Explorations Doodle 2" [ref=e119] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e123]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e124]': Doodle
+            - generic [ref=e136]: "2"
+        - link "Factory Bolt" [ref=e137] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e142]': Bolt
+        - link "Releases" [ref=e156] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e161]:
+        - generic [ref=e162]: Customers
+        - link "Personas Mimic" [ref=e163] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e171]': Mimic
+    - generic [ref=e182]:
+      - button "Send feedback" [ref=e183] [cursor=pointer]
+      - navigation "The factory" [ref=e188]:
+        - link "Marketplace" [ref=e189] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e193] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e198]:
+    - generic [ref=e200]:
+      - generic [ref=e201]:
+        - heading "Marketplace" [level=1] [ref=e204]
+        - paragraph [ref=e205]: What your factory can do, and the services it works with.
+      - tablist "Marketplace" [ref=e206]:
+        - tab "Extensions" [ref=e207] [cursor=pointer]
+        - tab "Connections" [ref=e208] [cursor=pointer]
+        - tab "Product kits" [active] [selected] [ref=e209] [cursor=pointer]
+      - region "Product kits" [ref=e210]:
+        - paragraph [ref=e211]: Kobble comes with these kits. Each teaches the kobolds one kind of product.
+        - generic [ref=e212]:
+          - article "React web app" [ref=e213]:
+            - button "Open React web app" [ref=e214] [cursor=pointer]
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - generic [ref=e220]: React web app
+                - img "Installed" [ref=e223]
+              - paragraph [ref=e226]: How a React web app is built, checked and run.
+              - paragraph [ref=e227]: "Used by: Acme Shop"
+            - generic [ref=e228]: Pre-installed
+          - article "Expo app" [ref=e230]:
+            - button "Open Expo app" [ref=e231] [cursor=pointer]
+            - generic [ref=e232]:
+              - generic [ref=e233]:
+                - generic [ref=e237]: Expo app
+                - img "Installed" [ref=e240]
+              - paragraph [ref=e243]: How a phone app with Expo is built, checked and run.
+              - paragraph [ref=e244]: "Used by: Acme Shop app"
+            - generic [ref=e245]: Pre-installed
+          - article "NestJS backend" [ref=e247]:
+            - button "Open NestJS backend" [ref=e248] [cursor=pointer]
+            - generic [ref=e249]:
+              - generic [ref=e250]: NestJS backend
+              - paragraph [ref=e256]: How a NestJS server is built, checked and run.
+            - generic [ref=e257]: Pre-installed
+          - article "SvelteKit web app" [ref=e259]:
+            - button "Open SvelteKit web app" [ref=e260] [cursor=pointer]
+            - generic [ref=e261]:
+              - generic [ref=e262]: SvelteKit web app
+              - paragraph [ref=e268]: How a SvelteKit web app is built, checked and run.
+            - generic [ref=e269]: Pre-installed
+          - article "TypeScript package" [ref=e271]:
+            - button "Open TypeScript package" [ref=e272] [cursor=pointer]
+            - generic [ref=e273]:
+              - generic [ref=e274]: TypeScript package
+              - paragraph [ref=e280]: How a TypeScript library is built, checked and published.
+            - generic [ref=e281]: Pre-installed
+          - article "Shopify theme" [ref=e283]:
+            - button "Open Shopify theme" [ref=e284] [cursor=pointer]
+            - generic [ref=e285]:
+              - generic [ref=e291]:
+                - generic [ref=e292]: Shopify theme
+                - generic [ref=e293]: Your team
+              - paragraph [ref=e294]: How a Shopify theme is built, checked and previewed.
+        - paragraph [ref=e295]:
+          - text: Building something else?
+          - button "Ask Sprocket" [ref=e296] [cursor=pointer]
+          - text: for a kit of your own.
+  - region "Sprocket" [ref=e297]:
+    - button "Ask Sprocket anything ⌘J" [ref=e298] [cursor=pointer]:
+      - generic [ref=e16]: Ask Sprocket anything
+      - generic [ref=e17]: ⌘J

@@ -30,6 +30,8 @@ export type Ext = {
   // Made-up settings of an extension that has none on the server.
   fields: { label: string; value: string }[];
   changes: string[];
+  // A product kit: the product that uses it, and what it brings.
+  kit?: { usedBy: string | null; brings: string[] };
 };
 
 const NONE = { pages: [], blocks: [], kobolds: [] };
@@ -268,3 +270,40 @@ export function addsOf(ext: Ext): { kind: string; names: string[] }[] {
     { kind: "Stages", names: ext.stages },
   ].filter((one) => one.names.length > 0);
 }
+
+// Product kits, extensions of a special kind: made up, and not switched on or
+// off: a kit comes with the first product of its kind.
+const BRINGS = ["Rules", "A starter", "Checks", "Tools for the kobolds"];
+
+const kit = (
+  id: string,
+  name: string,
+  about: string,
+  usedBy: string | null,
+  maker: Ext["maker"] = "kobble",
+): Ext => ({
+  id,
+  name,
+  about,
+  maker,
+  adds: NONE,
+  stages: [],
+  needsIds: [],
+  needs: [],
+  on: usedBy !== null,
+  real: false,
+  tracker: false,
+  settings: [],
+  fields: [],
+  changes: [],
+  kit: { usedBy, brings: BRINGS },
+});
+
+export const KITS: Ext[] = [
+  kit("react-web-app", "React web app", "How a React web app is built, checked and run.", "Acme Shop"),
+  kit("expo-app", "Expo app", "How a phone app with Expo is built, checked and run.", "Acme Shop app"),
+  kit("nestjs-backend", "NestJS backend", "How a NestJS server is built, checked and run.", null),
+  kit("sveltekit-app", "SvelteKit web app", "How a SvelteKit web app is built, checked and run.", null),
+  kit("typescript-package", "TypeScript package", "How a TypeScript library is built, checked and published.", null),
+  kit("shopify-theme", "Shopify theme", "How a Shopify theme is built, checked and previewed.", null, "team"),
+];

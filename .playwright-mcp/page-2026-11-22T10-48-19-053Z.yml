@@ -1,0 +1,189 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab [selected]: Extensions
+                - tab: Connections
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+                  - button: Kits
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Product kits
+                  - generic: "5"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: React web app
+                      - paragraph: How a React web app is built, checked and run.
+                      - paragraph: "Used by: Acme Shop"
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Expo app
+                      - paragraph: How a phone app with Expo is built, checked and run.
+                      - paragraph: "Used by: Acme Shop app"
+                  - article:
+                    - button
+                    - generic:
+                      - generic: NestJS backend
+                      - paragraph: How a NestJS server is built, checked and run.
+                    - generic: Comes with the first product of its kind
+                  - article:
+                    - button
+                    - generic:
+                      - generic: SvelteKit web app
+                      - paragraph: How a SvelteKit web app is built, checked and run.
+                    - generic: Comes with the first product of its kind
+                  - article:
+                    - button
+                    - generic:
+                      - generic: TypeScript package
+                      - paragraph: How a TypeScript library is built, checked and published.
+                    - generic: Comes with the first product of its kind
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=e5]:
+          - button [ref=e6] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "React web app" [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e25]:
+        - heading "React web app" [level=2] [ref=e26]
+        - generic [ref=e27]: Product kit
+      - paragraph [ref=e28]: How a React web app is built, checked and run.
+      - generic [ref=e29]:
+        - heading "What it brings" [level=3] [ref=e30]
+        - list [ref=e31]:
+          - listitem [ref=e32]: Rules
+          - listitem [ref=e33]: A starter
+          - listitem [ref=e34]: Checks
+          - listitem [ref=e35]: Tools for the kobolds
+      - generic [ref=e36]:
+        - heading "Used by" [level=3] [ref=e37]
+        - generic [ref=e38]: Acme Shop
+      - alert [ref=e43]: Your product Acme Shop is built with it.
+      - button "Remove" [active] [ref=e40] [cursor=pointer]
+    - button "Close" [ref=e41] [cursor=pointer]

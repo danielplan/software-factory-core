@@ -7,6 +7,7 @@ import {
   Inbox,
   Mic,
   ShieldCheck,
+  ShoppingBag,
   Sunrise,
   Tag,
   Users,
@@ -44,9 +45,18 @@ const LOOKS: Record<string, { icon: React.ReactNode; color: string }> = {
   standup: { icon: <Sunrise aria-hidden />, color: "#7fb800" },
   github: { icon: lookOf("github").icon, color: "#6366f1" },
   jira: { icon: lookOf("jira").icon, color: "#0ea5e9" },
+  "react-web-app": { icon: lookOf("react-web-app").icon, color: "#149eca" },
+  "expo-app": { icon: lookOf("expo-app").icon, color: "#7c5cff" },
+  "nestjs-backend": { icon: lookOf("nestjs-backend").icon, color: "#e0234e" },
+  "sveltekit-app": { icon: lookOf("sveltekit-app").icon, color: "#ff3e00" },
+  "shopify-theme": { icon: <ShoppingBag aria-hidden />, color: "#5a863e" },
+  "typescript-package": { icon: lookOf("typescript-package").icon, color: "#3178c6" },
 };
 
-export function Logo({ ext, big = false }: Readonly<{ ext: Ext; big?: boolean }>) {
+export function Logo({
+  ext,
+  big = false,
+}: Readonly<{ ext: { id: string }; big?: boolean }>) {
   const own = LOOKS[ext.id] ?? lookOf(ext.id);
   const color = "color" in own ? own.color : own.colour;
   return (

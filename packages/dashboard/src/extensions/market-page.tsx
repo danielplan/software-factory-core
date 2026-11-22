@@ -19,10 +19,11 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { GroupForm } from "@/dashboard/settings-card";
 import { FIELD } from "@/lib/field-style";
 import { VARIANT } from "@/lib/prototype-flags";
+import { askSupport } from "@/support/ask-support";
 import { cn } from "@/lib/utils";
 
 import { Adds, Logo, Maker, Needs } from "./bits";
-import { type Ext, missingFor, neededBy, useExtensions } from "./data";
+import { type Ext, KITS, missingFor, neededBy, useExtensions } from "./data";
 
 const FILTERS = ["All", "Installed", "Kobble's", "Your team's"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -35,7 +36,7 @@ const fits = (e: Ext, filter: Filter) =>
 
 export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
   const { all, turn, moveCards, problem } = useExtensions(state);
-  const [tab, setTab] = useState<"Extensions" | "Connections">("Extensions");
+  const [tab, setTab] = useState<"Extensions" | "Connections" | "Product kits">("Extensions");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -56,7 +57,10 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
     filter !== "Your team's" &&
     (filter !== "Installed" || trackers.some((e) => e.on)) &&
     trackers.some((e) => matches.includes(e));
-  const opened = all.find((e) => e.id === openId) ?? null;
+  const opened =
+    all.find((e) => e.id === openId) ??
+    KITS.find((e) => e.id === openId) ??
+    null;
   // The code host: GitHub itself, always needed, connected, no switch.
   const github = trackers.find((e) => e.id === "github");
   const codeHost: Ext | null = github
@@ -84,7 +88,7 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
       />
       {VARIANT === "B" && (
         <div role="tablist" aria-label="Marketplace" className="flex gap-1 border-b border-border-soft">
-          {(["Extensions", "Connections"] as const).map((name) => (
+          {(["Extensions", "Connections", "Product kits"] as const).map((name) => (
             <button
               key={name}
               type="button"
@@ -130,6 +134,8 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
             }}
           />
         </div>
+      ) : VARIANT === "B" && tab === "Product kits" ? (
+        <KitsTab onOpen={setOpenId} />
       ) : (
         <>
       <div className="flex flex-wrap items-center gap-3">
@@ -341,7 +347,7 @@ function Card({
   note?: string;
   // What to press; none once it is in.
   action: React.ReactNode;
-  label?: "Installed" | "In use" | "Connected";
+  label?: "Installed" | "In use" | "Connected" | "Pre-installed";
 }>) {
   return (
     <article
@@ -534,7 +540,9 @@ function Details({
       }}
     >
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[560px]">
-        {ext && (
+        {ext?.kit ? (
+          <KitDetails ext={ext} kit={ext.kit} />
+        ) : ext && (
           <div className="grid gap-4">
             <div className="flex items-center gap-3.5 pr-6">
               <Logo ext={ext} big />
@@ -726,6 +734,83 @@ function Details({
         </DialogContent>
       </Dialog>
     </Dialog>
+  );
+}
+
+// B: the product kits Kobble comes with, and the team's own.
+function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
+  return (
+    <section aria-label="Product kits" className="grid gap-4">
+      <p className="px-1 text-[13px] text-muted-foreground">
+        Kobble comes with these kits. Each teaches the kobolds one kind of
+        product.
+      </p>
+      <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {KITS.map((k) => (
+          <Card
+            key={k.id}
+            ext={k}
+            note={k.kit?.usedBy ? `Used by: ${k.kit.usedBy}` : undefined}
+            onOpen={() => {
+              onOpen(k.id);
+            }}
+            action={
+              k.maker === "kobble" ? (
+                <span className="py-1.5 text-xs text-muted-foreground">
+                  Pre-installed
+                </span>
+              ) : null
+            }
+          />
+        ))}
+      </div>
+      <p className="px-1 text-xs text-muted-foreground">
+        Building something else?{" "}
+        <button
+          type="button"
+          className="text-blue hover:underline"
+          onClick={() => {
+            askSupport("I want a kit for…");
+          }}
+        >
+          Ask Sprocket
+        </button>{" "}
+        for a kit of your own.
+      </p>
+    </section>
+  );
+}
+
+// A product kit's details: what it brings, who uses it, and why it stays.
+function KitDetails({
+  ext,
+  kit,
+}: Readonly<{ ext: Ext; kit: { usedBy: string | null; brings: string[] } }>) {
+  return (
+    <div className="grid gap-4">
+      <div className="flex items-center gap-3.5 pr-6">
+        <Logo ext={ext} big />
+        <div className="grid min-w-0 flex-1 gap-1">
+          <DialogTitle className="truncate">{ext.name}</DialogTitle>
+          <span className="inline-flex h-5 w-fit items-center rounded-full bg-surface-2 px-2 text-[11px] font-medium text-muted-foreground">
+            {ext.maker === "team" ? "Product kit · Your team" : "Product kit · Pre-installed"}
+          </span>
+        </div>
+      </div>
+      <DialogDescription>{ext.about}</DialogDescription>
+      <Part title="What it brings">
+        <ul className="grid gap-1 text-[13px]">
+          {kit.brings.map((b) => (
+            <li key={b}>{b}</li>
+          ))}
+        </ul>
+      </Part>
+      <Part title="Used by">
+        <span className="text-[13px]">
+          {kit.usedBy ?? "No product yet."}
+        </span>
+      </Part>
+    </div>
   );
 }
 
