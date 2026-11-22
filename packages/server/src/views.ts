@@ -33,6 +33,10 @@ export function factoryView(
       builtIn: extension.core,
       on: factory.extensions.some((e) => e.id === extension.id),
       tracker: extension.tracker,
+      always: extension.always,
+      needs: extension.needs,
+      slots: extension.slots,
+      brings: extension.brings,
       settings: extension.settings.map((group) => group.id),
     })),
   };
@@ -45,6 +49,12 @@ export function kitViews(kits: Kit[]): KitView[] {
     about: kit.about,
     kind: kit.kind,
     canCreate: kit.create !== null,
+    brings: [
+      ...(kit.rules.length > 0 ? (["rules"] as const) : []),
+      ...(kit.starter ? (["starter"] as const) : []),
+      ...(Object.keys(kit.commands).length > 0 ? (["checks"] as const) : []),
+      ...(Object.keys(kit.mcp).length > 0 ? (["tools"] as const) : []),
+    ],
   }));
 }
 

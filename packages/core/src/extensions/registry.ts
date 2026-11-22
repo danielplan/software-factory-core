@@ -39,6 +39,9 @@ export function assembleFactory(
 ): Factory {
   const problems: string[] = [];
   const extensions = chosenExtensions(company, available, problems);
+  problems.push(
+    ...extensionProblems(available.extensions, extensions, company),
+  );
   const tracker = company.tracker;
   if (
     tracker !== "none" &&
@@ -108,6 +111,29 @@ function chosenExtensions(
       ? !company.without.includes(extension.id)
       : company.extensions.includes(extension.id),
   );
+}
+
+// An extension whose needs are not installed, or that is always needed and
+// was removed: the factory does not start, and says why.
+function extensionProblems(
+  all: Extension[],
+  chosen: Extension[],
+  company: Company,
+): string[] {
+  const nameOf = (id: string) => all.find((e) => e.id === id)?.name ?? id;
+  return [
+    ...all
+      .filter((e) => e.always && company.without.includes(e.id))
+      .map((e) => `${e.name} is always needed, so it cannot be removed`),
+    ...chosen.flatMap((extension) =>
+      extension.needs
+        .filter((id) => !chosen.some((e) => e.id === id))
+        .map(
+          (id) =>
+            `${extension.name} needs ${nameOf(id)}, which is not installed`,
+        ),
+    ),
+  ];
 }
 
 function chosenKits(

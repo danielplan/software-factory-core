@@ -347,7 +347,7 @@ test("connecting Jira: the token is checked against Jira, which lists the projec
       await error(await turn("jira", false)),
       /Work is tracked with Jira Cloud/,
     );
-    assert.match(await error(await turn("telepathy", true)), /no add-on/);
+    assert.match(await error(await turn("telepathy", true)), /no extension/);
   } finally {
     session.close();
     server.close();

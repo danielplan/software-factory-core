@@ -13,6 +13,8 @@ export type KitView = {
   about: string;
   kind: string;
   canCreate: boolean;
+  // What it teaches the kobolds, by key: rules, a starter, checks, tools.
+  brings: ("rules" | "starter" | "checks" | "tools")[];
 };
 
 export type ProductView = {
@@ -350,6 +352,19 @@ export type AddOnView = {
   on: boolean;
   // Tracks work: a board to connect.
   tracker: boolean;
+  // Needed in every factory: it cannot be removed.
+  always: boolean;
+  // The extensions it needs, by id.
+  needs: string[];
+  // The jobs it uses that the factory fills once ("code", "tasks").
+  slots: string[];
+  // What it brings, by id: pages, Home blocks, kobolds, stages.
+  brings: {
+    pages: string[];
+    blocks: string[];
+    kobolds: string[];
+    stages: string[];
+  };
   // Its settings groups, by id (shown while it is on).
   settings: string[];
 };

@@ -21,6 +21,21 @@ const guideSchema = z.object({
   file: z.string().min(1),
 });
 
+// What an extension brings the factory, by id: the pages it adds to the
+// sidebar (the dashboard's page ids), the blocks it offers Home, the kobolds
+// that work for it, and the stages of work it takes part in. Their names are
+// words, kept in the dashboard by id.
+const bringsSchema = z.object({
+  pages: z.array(id).default([]),
+  blocks: z.array(id).default([]),
+  kobolds: z.array(id).default([]),
+  stages: z.array(id).default([]),
+});
+
+// The jobs the factory itself fills once, for every extension: where the
+// code lives and where the tasks are kept. Only the core defines them.
+export const SLOTS = ["code", "tasks"] as const;
+
 export const extensionSchema = z.object({
   id,
   name: z.string().min(1),
@@ -30,6 +45,19 @@ export const extensionSchema = z.object({
   // A place where work is tracked (a GitHub board, Jira): the company's
   // tracker names one.
   tracker: z.boolean().default(false),
+  // Needed in every factory: it cannot be removed (Factory builds everything).
+  always: z.boolean().default(false),
+  // The other extensions it needs, by id: installing it brings them,
+  // and one that others need cannot be removed.
+  needs: z.array(id).default([]),
+  // The slots it uses (a connection every extension shares).
+  slots: z.array(z.enum(SLOTS)).default([]),
+  brings: bringsSchema.default({
+    pages: [],
+    blocks: [],
+    kobolds: [],
+    stages: [],
+  }),
   // The factory's own programs this extension runs.
   parts: z.array(partSchema).default([]),
   settings: z.array(settingGroupSchema).default([]),
