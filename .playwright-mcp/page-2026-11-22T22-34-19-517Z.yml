@@ -1,0 +1,80 @@
+- generic [ref=e5]:
+  - navigation "Setup steps" [ref=e6]:
+    - generic [ref=e7]: kobble
+    - paragraph [ref=e17]: Setting up bakery-shop-ordering-and-delivery-app
+    - list [ref=e18]:
+      - listitem [ref=e19]:
+        - button "0 Welcome New or existing" [disabled] [ref=e20]:
+          - generic [ref=e21]: "0"
+          - generic [ref=e22]:
+            - text: Welcome
+            - generic [ref=e23]: New or existing
+      - listitem [ref=e24]:
+        - button "1 The idea One sentence, whose problem, out of scope" [disabled] [ref=e25]:
+          - generic [ref=e26]: "1"
+          - generic [ref=e27]:
+            - text: The idea
+            - generic [ref=e28]: One sentence, whose problem, out of scope
+      - listitem [ref=e29]:
+        - button "2 Your apps Proposed, you confirm" [disabled] [ref=e30]:
+          - generic [ref=e31]: "2"
+          - generic [ref=e32]:
+            - text: Your apps
+            - generic [ref=e33]: Proposed, you confirm
+      - listitem [ref=e34]:
+        - button "3 Who it’s for The people you build for" [disabled] [ref=e35]:
+          - generic [ref=e36]: "3"
+          - generic [ref=e37]:
+            - text: Who it’s for
+            - generic [ref=e38]: The people you build for
+      - listitem [ref=e39]:
+        - button "4 Team Who works on it" [disabled] [ref=e40]:
+          - generic [ref=e41]: "4"
+          - generic [ref=e42]:
+            - text: Team
+            - generic [ref=e43]: Who works on it
+      - listitem [ref=e44]:
+        - button "5 Set up Kobble writes it all, makes the apps and shows them running" [disabled] [ref=e45]:
+          - generic [ref=e46]: "5"
+          - generic [ref=e47]:
+            - text: Set up
+            - generic [ref=e48]: Kobble writes it all, makes the apps and shows them running
+      - listitem [ref=e49]:
+        - button "6 First exploration Tinker’s first prototype, with the look chosen there" [disabled] [ref=e50]:
+          - generic [ref=e51]: "6"
+          - generic [ref=e52]:
+            - text: First exploration
+            - generic [ref=e53]: Tinker’s first prototype, with the look chosen there
+    - generic [ref=e54]:
+      - paragraph [ref=e55]: About 7 minutes. You can change all of it later in Settings and Personas.
+      - generic [ref=e67]:
+        - generic [ref=e68]: Sprocket
+        - generic [ref=e69]: Here to help
+  - main [ref=e70]:
+    - generic [ref=e73]:
+      - generic [ref=e83]:
+        - heading "Let’s make something new." [level=1] [ref=e84]
+        - paragraph [ref=e85]:
+          - text: This folder looks new to me.
+          - button "Actually, we have code" [ref=e86] [cursor=pointer]
+      - generic [ref=e87]:
+        - generic [ref=e88]: /Users/you/projects/bakery-shop-ordering-and-delivery-app
+        - generic [ref=e94]: I found two apps (a React web app and a NestJS API) with a git history.
+      - list [ref=e95]:
+        - listitem [ref=e96]:
+          - generic [ref=e104]:
+            - generic [ref=e105]: "1."
+            - text: "A short interview: who it’s for and what it does"
+        - listitem [ref=e106]:
+          - generic [ref=e113]:
+            - generic [ref=e114]: "2."
+            - text: Your apps, made from the kits’ starters
+        - listitem [ref=e115]:
+          - generic [ref=e119]:
+            - generic [ref=e120]: "3."
+            - text: A first prototype you can click
+      - generic [ref=e131]:
+        - paragraph [ref=e132]: First question. Who is it for, and what is the one thing they should be able to do?
+        - generic [ref=e133]:
+          - textbox "Your answer" [ref=e134]
+          - button "Answer" [disabled]
