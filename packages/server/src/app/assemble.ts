@@ -1,174 +1,129 @@
-// Kobble's routes for the factory's server: the project, the kobold's
-// Claude Code, and what persona tests run on (the product as the launcher
-// starts it, and Playwright's browser), unless the tests give stand-ins.
+// The assembly: the core's own routes and background work (Sprocket, the
+// feedback board, updates, what the team arranges in the factory's files),
+// and every extension module served with its host. An extension's routes
+// and its own answers are answered only while it is installed, its
+// background work runs only then, and its plugs reach the others (and the
+// core) only then. What persona tests and the other kobolds that look at
+// an app run on is the product as the launcher starts it, and Playwright's
+// browser, unless the tests give stand-ins.
 
-import type { Cli } from "../extensions/github/github.ts";
-import type { Session } from "../session.ts";
-import { join } from "node:path";
-
-import { FACTORY_FOLDER, readCompany } from "@software-factory/core";
-
-import { teamRoutes } from "../coach/setup-team.ts";
-import { feedbackRoutes } from "../feedback/routes.ts";
-import { homeLayoutRoutes } from "../home-layout.ts";
-import { stagesRoutes } from "../stages.ts";
-import { workRoutes } from "../work-book.ts";
-import { languageRoutes } from "../language.ts";
-import { factoryCardRoutes } from "../extensions/factory/factory-card.ts";
-import { putStartOnDesktop } from "../desktop-start.ts";
-import { updatesOf } from "../updates/session-updates.ts";
+import type { Cli } from "../github-cli.ts";
 import { guidesFor } from "../extension-guides.ts";
-import { connectedCards } from "../kobble/connected-cards.ts";
-import { servedKobble, tellerOf } from "./kobble-routes.ts";
-import { releasesRoutes } from "../extensions/releases/routes.ts";
-import { storeOf } from "../extensions/explorations/usage.ts";
-import { appAddress, appsOf, playwrightBrowser } from "../kobble/browser.ts";
+import { homeLayoutRoutes } from "../home-layout.ts";
+import type { Route } from "../http.ts";
+import type { App, Browser } from "../kobble/browser.ts";
+import { SupportTalk, supportRoutes } from "../kobble/support.ts";
+import type { SupportTools } from "../kobble/support-tools.ts";
+import { type ExtensionModule, slotFillers } from "../plugs/extension.ts";
+import type { Session } from "../session.ts";
+import { coreOf } from "./core-routes.ts";
+import { hostOf } from "./host.ts";
+import { servePlugged } from "./plug-board.ts";
 
-export type TestsRunOn = Parameters<typeof servedKobble>[0]["testsRunOn"];
+// What a kobold that looks at an app runs on: the apps it can be sent
+// into, an app's address as it is now (the first app's without a
+// product), and a browser.
+export type TestsRunOn = {
+  apps: () => App[];
+  app: (product: string | null) => Promise<string>;
+  browser: () => Promise<Browser>;
+};
 
-// What the team arranges, kept in the factory's files: Home's blocks and the
-// order of stages; and the cards, as the pieces of work going through them.
-function arrangedInFiles(
+type Options = {
+  // The extension modules Kobble ships with (stand-ins in the tests).
+  modules: ExtensionModule[];
+  cli: Cli;
+  testsRunOn?: TestsRunOn;
+  // Starts the factory again on a new Kobble, with the parts that ran.
+  restartFactory?: (resume: string[]) => Promise<void>;
+};
+
+// Tells the page what of Kobble changed ("signals", "explorations" …).
+function tellerOf(tell: (event: string) => void) {
+  return (what: string) => {
+    tell(`event: kobble-changed\ndata: ${JSON.stringify({ what })}\n\n`);
+  };
+}
+
+export function assemble(
   session: Session,
   tell: (event: string) => void,
-  cli: Cli,
+  // The page's whole state changed.
+  stateChanged: () => void,
+  options: Options,
 ) {
+  const { project } = session.options;
+  const changed = tellerOf(tell);
+  const isOn = (id: string) => session.isOn(id);
+  const slots = slotFillers(options.modules);
+  const host = hostOf(session, {
+    cli: options.cli,
+    changed,
+    stateChanged,
+    slots,
+    ...(options.testsRunOn ? { testsRunOn: options.testsRunOn } : {}),
+  });
+  const board = servePlugged(options.modules, host, isOn);
+  session.plugged.plugInto(board.plug);
+  const core = coreOf(session, changed, {
+    cli: options.cli,
+    tasks: slots.tasks,
+    plug: board.plug,
+    ...(options.restartFactory
+      ? { restartFactory: options.restartFactory }
+      : {}),
+  });
+  const support = new SupportTalk({
+    claude: session.options.coach.claude,
+    project,
+    onChange: () => {
+      changed("support");
+    },
+    plugs: board.support,
+    guides: () => guidesFor(project, session.options.available, "support"),
+  });
+  return {
+    routes: {
+      ...core.routes,
+      ...supportRoutes(support),
+      ...homeRoutes(project, session, changed, board.home),
+      ...board.routes(),
+    },
+    answers: board.answers,
+    supportTools: (): SupportTools => support.tools(),
+    // Where the server answers the kobolds' tools and the webhooks.
+    listen: (base: string) => {
+      board.listen(base);
+      support.serveToolsAt(`${base}/kobble/support/mcp`);
+    },
+    reconcile: board.reconcile,
+    start: () => {
+      board.reconcile();
+      core.start();
+    },
+    close: () => {
+      board.close();
+      core.close();
+    },
+  };
+}
+
+// Home: how the team arranged it, and the data of the blocks the installed
+// extensions bring.
+function homeRoutes(
+  project: string,
+  session: Session,
+  changed: (what: string) => void,
+  blocks: () => Record<string, unknown>,
+): Record<string, Route> {
   const factory = () => {
     const state = session.state();
     return state.mode === "factory" ? state : null;
   };
   return {
-    ...homeLayoutRoutes(session.options.project, tellerOf(tell), () =>
+    ...homeLayoutRoutes(project, changed, () =>
       (factory()?.addOns ?? []).flatMap((one) => one.brings.blocks),
     ),
-    ...stagesRoutes(session),
-    ...workRoutes({
-      cards: () =>
-        connectedCards(join(session.options.project, FACTORY_FOLDER), cli),
-      kobbles: () =>
-        (factory()?.addOns ?? [])
-          .filter((one) => one.builtIn)
-          .flatMap((one) => one.screens.stages.map((stage) => stage.id)),
-      course: () =>
-        (factory()?.stages.order ?? []).map(({ id, checks }) => ({
-          id,
-          checks,
-        })),
-      changed: tellerOf(tell),
-    }),
+    "GET /api/home": () => ({ blocks: blocks() }),
   };
-}
-
-function kobbleAlone(
-  session: Session,
-  tell: (event: string) => void,
-  more: { cli: Cli; testsRunOn?: TestsRunOn },
-) {
-  const { testsRunOn } = more;
-  return servedKobble({
-    project: session.options.project,
-    tell,
-    claude: session.options.coach.claude,
-    cli: more.cli,
-    work: () => session.work.view(),
-    answer: (number, text) => session.work.orRefuse().answer(number, text),
-    isOn: (id) => session.isOn(id),
-    supportGuides: () =>
-      guidesFor(session.options.project, session.options.available, "support"),
-    testsRunOn: testsRunOn ?? {
-      apps: () => appsOf(() => session.launcherOrRefuse()),
-      app: (product) => appAddress(() => session.launcherOrRefuse(), product),
-      browser: playwrightBrowser,
-    },
-  });
-}
-
-// Kobble, with Updates beside it (the sidebar, Settings › Updates): the owner's folder following
-// GitHub's main (updates/), told to the page like Kobble's changes.
-export function kobbleOf(
-  session: Session,
-  tell: (event: string) => void,
-  more: {
-    cli: Cli;
-    testsRunOn?: TestsRunOn;
-    restartFactory?: (resume: string[]) => Promise<void>;
-  },
-) {
-  const kobble = kobbleAlone(session, tell, more);
-  const feedback = feedbackOf(session, tell, more.cli);
-  const updates = updatesOf(
-    session,
-    () => {
-      tell(`event: kobble-changed\ndata: {"what":"updates"}\n\n`);
-    },
-    () =>
-      connectedCards(join(session.options.project, FACTORY_FOLDER), more.cli),
-    more.restartFactory,
-  );
-  return {
-    ...kobble,
-    routes: {
-      ...kobble.routes,
-      ...updates.routes,
-      ...teamRoutes(session.options.project),
-      ...languageRoutes(session.options.project),
-      ...arrangedInFiles(session, tell, more.cli),
-      ...feedback.routes,
-      ...releasesRoutes({
-        project: session.options.project,
-        cli: more.cli,
-        claude: session.options.coach.claude,
-        changed: tellerOf(tell),
-      }),
-      ...factoryCardRoutes(
-        join(session.options.project, FACTORY_FOLDER),
-        more.cli,
-        () => session.work.hostOrRefuse(),
-      ),
-      "POST /api/desktop-start": () => ({
-        file: putStartOnDesktop({
-          project: session.options.project,
-          name: companyName(session.options.project),
-        }),
-      }),
-    },
-    start: () => {
-      kobble.start();
-      updates.start();
-      feedback.arrivals.start();
-    },
-    close: () => {
-      kobble.close();
-      updates.close();
-      feedback.arrivals.close();
-    },
-  };
-}
-
-// The public feedback board: sending to it, and its posts arriving as
-// signals.
-function feedbackOf(session: Session, tell: (event: string) => void, cli: Cli) {
-  const { project } = session.options;
-  const factory = join(project, FACTORY_FOLDER);
-  const told = (what: string) => {
-    tell(`event: kobble-changed\ndata: {"what":"${what}"}\n\n`);
-  };
-  return feedbackRoutes({
-    project,
-    cli,
-    claude: session.options.coach.claude,
-    store: () => storeOf(factory, project),
-    changed: () => {
-      told("feedback");
-    },
-    onSignals: () => {
-      told("signals");
-    },
-  });
-}
-
-// The company's name, for the start file; the project's folder without one.
-function companyName(project: string): string {
-  const read = readCompany(join(project, FACTORY_FOLDER, "factory.json"));
-  return "company" in read ? read.company.name : "";
 }

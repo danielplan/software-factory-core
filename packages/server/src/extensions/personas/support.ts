@@ -5,7 +5,7 @@
 import type { KobbleStore } from "@software-factory/core";
 import { z } from "zod";
 
-import { addPersona } from "../signals/actions.ts";
+import { addPersona } from "./actions.ts";
 import { handOff, type SupportPlug } from "../../kobble/support-plug.ts";
 
 export function personasText(store: KobbleStore): string {

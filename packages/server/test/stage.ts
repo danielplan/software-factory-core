@@ -16,14 +16,16 @@ import {
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/skills";
 
-import type { Cli } from "../src/extensions/github/github.ts";
-import { githubAddOn } from "../src/extensions/github/index.ts";
+import type { Cli } from "../src/github-cli.ts";
 import type { Fetcher } from "../src/extensions/jira/jira.ts";
-import { jiraAddOn } from "../src/extensions/jira/index.ts";
 import type { Installable } from "../src/installables.ts";
 import { PAGE_HEADER, startServer } from "../src/app/server.ts";
 import { Session } from "../src/session.ts";
-import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
+import {
+  addOnModules,
+  KOBBLE_EXTENSIONS,
+  KOBBLE_MODULES,
+} from "../src/app/modules.ts";
 
 export const web = defineKit({
   id: "web-kit",
@@ -99,7 +101,7 @@ export async function stage(
   mkdirSync(project);
   for (const [file, text] of Object.entries(code))
     writeFileSync(join(project, file), text);
-  const addOns = [githubAddOn(connectors.cli), jiraAddOn(connectors.fetcher)];
+  const addOns = addOnModules(connectors.cli, connectors.fetcher);
   const session = sessionOf(project, claude, addOns, trackers, kobble);
   const page = join(home, "page");
   mkdirSync(page);
@@ -109,7 +111,8 @@ export async function stage(
     session,
     page,
     port: 0,
-    addOns,
+    // Kobble's own are served too, and answered once installed.
+    modules: [...KOBBLE_MODULES, ...addOns],
     cli: connectors.cli,
     testsRunOn,
   });
@@ -157,4 +160,10 @@ export function sessionOf(
     },
     tools,
   });
+}
+
+// A factory server with Kobble's own extensions (Factory, Explorations,
+// Signals, Personas, Releases), as every factory has them.
+export function kobbleStage(claude?: Claude) {
+  return stage(claude, {}, undefined, [], undefined, true);
 }

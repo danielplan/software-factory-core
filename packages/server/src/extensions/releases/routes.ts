@@ -1,17 +1,18 @@
 // The Releases page's routes: the coming release (what was merged since the
 // last one, and once the team prepared it, the number the kobold suggests
 // and why) with the past releases; preparing a release, the only time the
-// kobold is asked; and making one. Like every button, a POST is answered only from the
-// factory's page (server.ts); a release made is told on the page's stream.
+// kobold is asked; and making one. Like every button, a POST is answered
+// only from the factory's page (app/server.ts); a release made is told on
+// the page's stream.
 
 import { join } from "node:path";
 
 import { type Claude, FACTORY_FOLDER } from "@software-factory/core";
 
-import type { Route } from "../../plugs/extension.ts";
-import type { Cli } from "../github/github.ts";
+import type { Route } from "../../http.ts";
+import type { Cli } from "../../github-cli.ts";
 import { field } from "../../asked.ts";
-import { cardsFor } from "../../cards/cards-for.ts";
+import { cardsFor, type TaskBoards } from "../../cards/cards-for.ts";
 import { Refused } from "../../refused.ts";
 import { githubReleases, type Past, type Releases } from "./github-releases.ts";
 import { Judge } from "./judge.ts";
@@ -21,6 +22,9 @@ import { checkNumber, lastNumber, nextNumber } from "./numbers.ts";
 type Options = {
   project: string;
   cli: Cli;
+  // Where work is tracked: its board names the repository (the `tasks`
+  // slot).
+  boards: TaskBoards;
   claude: Claude;
   // Tells the page that releases changed.
   changed: (what: string) => void;
@@ -52,13 +56,13 @@ export function releasesRoutes(options: Options): Record<string, Route> {
   const factory = join(options.project, FACTORY_FOLDER);
   const judge = new Judge(options.claude, options.project);
   const releasesOf = (): Releases => {
-    const found = cardsFor(factory, options.cli);
+    const found = cardsFor(factory, options.boards);
     if ("problem" in found) throw new Refused(NO_REPOSITORY);
     return githubReleases(options.cli, found.repository);
   };
   return {
     "GET /api/releases": async (): Promise<ReleasesView> => {
-      const found = cardsFor(factory, options.cli);
+      const found = cardsFor(factory, options.boards);
       if ("problem" in found)
         return { connected: false, problem: NO_REPOSITORY };
       const releases = githubReleases(options.cli, found.repository);

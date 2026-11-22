@@ -14,23 +14,14 @@ import { extname, join, normalize, sep } from "node:path";
 
 import { PICTURE_TYPES } from "../coach/pictures.ts";
 import { sendTheme, THEME_ROUTES } from "../theme.ts";
-import { type AddOn, addOnRoutes, type Route } from "../plugs/extension.ts";
 import { answerAgentTools, isAgentTools } from "../agent-tools.ts";
-import type { SupportTools } from "../kobble/support-tools.ts";
-import { type Cli, realCli } from "../extensions/github/github.ts";
-import { WEBHOOK_PATH } from "../extensions/factory/builder/signals.ts";
-import { readBody, send } from "../http.ts";
-import { on, optionalText, record } from "../asked.ts";
-import type { MakerTools } from "../extensions/explorations/maker-tools.ts";
-import type { BoardTools } from "../extensions/explorations/board-tools.ts";
-import { kobbleOf, type TestsRunOn } from "./assemble.ts";
-import {
-  answerWorld,
-  isWorldRoute,
-} from "../extensions/explorations/world-route.ts";
-import type { ExplorationWorlds } from "../extensions/explorations/worlds.ts";
+import { type Cli, realCli } from "../github-cli.ts";
+import { readBody, type Route, send } from "../http.ts";
+import { on, optionalText, record, text } from "../asked.ts";
+import type { ExtensionModule } from "../plugs/extension.ts";
 import { Refused } from "../refused.ts";
 import type { Session } from "../session.ts";
+import { assemble, type TestsRunOn } from "./assemble.ts";
 
 export const PAGE_HEADER = "x-software-factory";
 // A picture from the project that a setup card shows.
@@ -49,8 +40,9 @@ const TYPES: Record<string, string> = {
 
 export function startServer(options: {
   session: Session;
-  // The add-ons whose routes it answers (stand-ins in the tests).
-  addOns: AddOn[];
+  // The extension modules it serves, each while it is installed: Kobble's
+  // own and the add-ons (stand-ins in the tests).
+  modules: ExtensionModule[];
   // The built web interface (index.html and its files).
   page: string;
   port: number;
@@ -66,47 +58,45 @@ export function startServer(options: {
   const tell = (event: string) => {
     for (const response of watchers) response.write(event);
   };
+  // What is installed may have changed: each extension's background work
+  // follows it.
+  let reconcile = () => {};
   // The whole state, as the page shows it.
   const changed = () => {
+    reconcile();
     tell(`data: ${JSON.stringify(options.session.state())}\n\n`);
   };
   const { session } = options;
-  const cli = options.cli ?? realCli();
-  const kobble = kobbleOf(session, tell, { ...options, cli });
-  const routes = {
-    ...routesFor(session),
-    ...kobble.routes,
-    ...addOnRoutes(
-      options.addOns,
-      (id) => ({
-        connect: (entry, secrets) => {
-          session.chooseBoard(id, entry, secrets);
-        },
-        installTool: (tool) => session.installTool(tool),
-        changed,
-      }),
-      (id) => session.isOn(id),
-    ),
-  };
+  const app = assemble(
+    session,
+    tell,
+    () => {
+      changed();
+    },
+    { ...options, cli: options.cli ?? realCli() },
+  );
+  reconcile = app.reconcile;
+  const routes = { ...routesFor(session), ...app.routes };
   const server = createServer((incoming, response) => {
     void answer(incoming, response, {
-      // Kobble's agents' tools and worlds; the routes are all of them.
-      ...kobble,
       routes,
       watchers,
-      ...options,
+      answers: app.answers(),
+      supportTools: app.supportTools,
+      page: options.page,
+      session,
     });
   });
   server.on("listening", () => {
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
-    options.session.serveToolsAt(`http://localhost:${String(port)}/api`);
-    options.session.work.listenAt(`http://localhost:${String(port)}/api`);
-    options.session.begin();
-    kobble.serveToolsAt(`http://localhost:${String(port)}/api`);
-    kobble.start();
+    const base = `http://localhost:${String(port)}/api`;
+    session.serveToolsAt(base);
+    app.listen(base);
+    session.begin();
+    app.start();
   });
-  server.on("close", kobble.close);
+  server.on("close", app.close);
   server.listen(options.port, "127.0.0.1");
   return { server, changed };
 }
@@ -156,7 +146,6 @@ function routesFor(session: Session): Record<string, Route> {
     "POST /api/add-ons": (body) => {
       session.switchAddOn(text(body, "id"), on(body));
     },
-    ...workRoutes(session),
     "POST /api/settings": (body) =>
       session.saveSettings(text(body, "group"), record(body, "values")),
     "POST /api/parts/start": (_b, url) => launcher().start(part(url)),
@@ -170,13 +159,9 @@ function routesFor(session: Session): Record<string, Route> {
 type Context = {
   routes: Record<string, Route>;
   watchers: Set<ServerResponse>;
-  worlds: ExplorationWorlds;
-} & AgentTools;
-
-type AgentTools = {
-  boardTools: (id: string) => BoardTools;
-  makerTools: (id: string, key: string) => MakerTools;
-  supportTools: () => SupportTools;
+  // What the installed extensions answer themselves.
+  answers: ReturnType<ReturnType<typeof assemble>["answers"]>;
+  supportTools: Parameters<typeof answerAgentTools>[3]["supportTools"];
   page: string;
   session: Session;
 };
@@ -188,16 +173,15 @@ async function answer(
 ): Promise<void> {
   const host = (incoming.headers.host ?? "").replace(/:\d+$/, "");
   const url = new URL(incoming.url ?? "/", "http://localhost");
+  const own = context.answers.find((one) => one.matches(incoming, url));
   if (!HOSTS.has(host)) {
     send(response, 403, { error: "Not here." });
   } else if (url.pathname === "/api/events") {
     stream(response, context);
-  } else if (isWorldRoute(url)) {
-    await answerWorld(incoming, response, url, context.worlds);
+  } else if (own) {
+    await own.answer(incoming, response, url);
   } else if (isAgentTools(incoming, url)) {
     await answerAgentTools(incoming, response, url, context);
-  } else if (url.pathname === WEBHOOK_PATH && incoming.method === "POST") {
-    await answerSignal(incoming, response, context.session);
   } else if (url.pathname === PICTURE) {
     sendPicture(response, context.session, url.searchParams.get("path"));
   } else if (THEME_ROUTES.has(url.pathname)) {
@@ -207,25 +191,6 @@ async function answer(
   } else {
     await answerApi(incoming, response, context.routes, url);
   }
-}
-
-// A signal GitHub forwarded (gh webhook forward), signed with the
-// factory's secret.
-async function answerSignal(
-  incoming: IncomingMessage,
-  response: ServerResponse,
-  session: Session,
-): Promise<void> {
-  let body = "";
-  for await (const chunk of incoming) body += String(chunk);
-  const header = incoming.headers["x-hub-signature-256"];
-  const event = incoming.headers["x-github-event"];
-  const taken = session.work.signal(
-    typeof event === "string" ? event : "",
-    body,
-    typeof header === "string" ? header : undefined,
-  );
-  send(response, taken ? 200 : 403, taken ? {} : { error: "Not GitHub's." });
 }
 
 async function answerApi(
@@ -306,31 +271,4 @@ function sendPicture(
     "x-content-type-options": "nosniff",
   });
   response.end(readFileSync(file));
-}
-
-function text(body: unknown, key: string): string {
-  const value = (body as Record<string, unknown> | null)?.[key];
-  if (typeof value !== "string") throw new Refused(`Say which ${key}.`);
-  return value;
-}
-
-// Build's buttons: the builder and the coach in the cards switched
-// on or off, and the board read again.
-function workRoutes(session: Session) {
-  return {
-    "POST /api/builder": (body: unknown) => {
-      session.work.orRefuse().switch("build", on(body));
-    },
-    "POST /api/coach-in-cards": (body: unknown) => {
-      session.work.orRefuse().switch("chat", on(body));
-    },
-    "POST /api/work/refresh": () => session.work.orRefuse().refresh(),
-    "POST /api/work/answer": (body: unknown) => {
-      const number = Number((body as { number?: unknown } | null)?.number);
-      if (!Number.isInteger(number)) throw new Refused("Say which card.");
-      const said = text(body, "text").trim();
-      if (said === "") throw new Refused("Write or pick an answer first.");
-      return session.work.orRefuse().answer(number, said);
-    },
-  };
 }

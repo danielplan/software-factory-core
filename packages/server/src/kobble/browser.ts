@@ -1,20 +1,26 @@
-// What a persona test runs on: the product as the factory starts it on
-// this computer (the launcher, with the kit's command and port), and a
-// browser for the persona agent: Playwright's MCP server, the browser
-// Claude Code's own Playwright integration uses, started headless and
-// without a saved profile, over HTTP on a free port.
+// What a kobold that looks at an app works with (the persona tests, the
+// maker, the builder): the products as the factory starts them on this
+// computer (the launcher, with the kit's command and port), and a browser:
+// Playwright's MCP server, the browser Claude Code's own Playwright
+// integration uses, started headless and without a saved profile, over HTTP
+// on a free port.
 
 import { spawn } from "node:child_process";
 import { type AddressInfo, createServer } from "node:net";
 
 import type { Launcher } from "@software-factory/launcher";
 
-import type { App } from "../extensions/personas/mission-ideas.ts";
-import {
-  type Browser,
-  TestProblem,
-} from "../extensions/personas/persona-tests.ts";
-import { NPX } from "./programs.ts";
+import { NPX } from "../programs.ts";
+
+// A reason a test cannot go on, said in plain words.
+export class TestProblem extends Error {}
+
+// A browser a kobold uses through MCP, at its address.
+export type Browser = { url: string; close: () => void };
+
+// An app a persona can be sent into: a product the factory starts with a
+// web address.
+export type App = { id: string; name: string; does: string };
 
 // The version used; npx keeps it once fetched.
 const PLAYWRIGHT_MCP = "@playwright/mcp@0.0.85";

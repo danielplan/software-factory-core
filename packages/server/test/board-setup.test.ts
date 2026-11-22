@@ -8,7 +8,7 @@ import { test } from "node:test";
 import { GIT } from "@software-factory/knowledge-base";
 
 import { githubSetup } from "../src/extensions/github/board-setup.ts";
-import type { Cli } from "../src/extensions/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 
 // Setting up the GitHub board with the owner in setup: what the coach hears
 // before it plans, and connecting or making the board while it builds. The

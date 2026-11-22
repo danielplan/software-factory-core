@@ -8,6 +8,7 @@ import { faceFrom, KobbleStore } from "@software-factory/core";
 
 import { SETUP_AREAS } from "../src/api.ts";
 import { recordsFromSetup } from "../src/coach/setup-records.ts";
+import { plugsOf } from "./plugs.ts";
 
 const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
 
@@ -46,7 +47,7 @@ test("setup's people become personas, its starting points explorations, once", (
       card("c5", SETUP_AREAS.product, "Shop app"),
     ],
   };
-  assert.deepEqual(recordsFromSetup(root, map), {
+  assert.deepEqual(recordsFromSetup(map, plugsOf(new KobbleStore(root))), {
     personas: 2,
     explorations: 1,
   });
@@ -56,7 +57,7 @@ test("setup's people become personas, its starting points explorations, once", (
   assert.ok(
     store.all("explorations").some((x) => x.title === "Delivery exceptions"),
   );
-  assert.deepEqual(recordsFromSetup(root, map), {
+  assert.deepEqual(recordsFromSetup(map, plugsOf(new KobbleStore(root))), {
     personas: 0,
     explorations: 0,
   });

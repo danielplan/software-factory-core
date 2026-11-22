@@ -12,6 +12,7 @@
 // sees it apart from the new ideas; moving it to To do hands it back.
 
 import type { Stage, StuckView } from "../../../api.ts";
+import type { Message } from "../../../code-host.ts";
 import {
   AGREEMENT_NOTES,
   type Ask,
@@ -22,13 +23,6 @@ import {
   stripMarker,
   untilOf,
 } from "./protocol.ts";
-
-export type Message = {
-  author: string;
-  body: string;
-  at: string;
-  where: "card" | "pull request";
-};
 
 export type BoardCard = {
   number: number;

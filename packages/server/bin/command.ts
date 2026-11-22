@@ -21,10 +21,8 @@ import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/app/server.ts";
 import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/extensions/github/board-setup.ts";
-import { codeHostsOf } from "../src/plugs/extension.ts";
-import { githubAddOn } from "../src/extensions/github/index.ts";
-import { jiraAddOn } from "../src/extensions/jira/index.ts";
-import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
+import { addOnModules, KOBBLE_MODULES } from "../src/app/modules.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
 
 // The parts that ran before the factory started again on a new Kobble.
 const RESUME = "SOFTWARE_FACTORY_RESUME";
@@ -35,9 +33,15 @@ const OPENER: Partial<Record<NodeJS.Platform, string>> = {
   win32: "explorer",
 };
 
+// The extensions that ship with the factory: Kobble's own and the add-ons.
+const modules = [...KOBBLE_MODULES, ...addOnModules()];
+const extensions = modules.map((module) => module.extension);
+
 // The board's cards, for the coding agents: answered here, then done.
 if (process.argv[2] === "card")
-  process.exit(await cardCommand(process.argv.slice(3)));
+  process.exit(
+    await cardCommand(process.argv.slice(3), slotFillers(modules).tasks),
+  );
 
 // A card's prototype, in its own copy of the code: answered here, then done.
 if (process.argv[2] === "prototype")
@@ -47,13 +51,6 @@ if (process.argv[2] === "prototype")
 // here, then done (never taken for a folder to start the factory in).
 const answered = await topCommand(process.argv.slice(2));
 if (answered !== null) process.exit(answered);
-
-// The add-ons that ship with the factory.
-const addOns = [githubAddOn(), jiraAddOn()];
-const extensions = [
-  ...KOBBLE_EXTENSIONS,
-  ...addOns.map((addOn) => addOn.extension),
-];
 
 // The project's factory, brought to this core's version: done, then exit.
 if (process.argv[2] === "upgrade")
@@ -80,7 +77,6 @@ let changed = () => {};
 const claude = new WarmClaude(process.env.CLAUDE_PATH ?? "claude");
 const session = new Session({
   project,
-  codeHosts: codeHostsOf(addOns),
   available: {
     extensions,
     kits: allKits,
@@ -101,7 +97,7 @@ const session = new Session({
   },
   tools: computerTools(),
 });
-const started = startServer({ session, page, port, addOns, restartFactory });
+const started = startServer({ session, page, port, modules, restartFactory });
 changed = started.changed;
 resumeParts(process.env[RESUME]);
 

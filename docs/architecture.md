@@ -10,8 +10,8 @@ included, plugs in the same way.
 | Layer                      | Who owns it                              | What                                                                                                                                                                                                 | Where                                                                                                  |
 | -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice, Home, System, Sprocket, updates                                             | `packages/core`, `packages/server`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard` |
-| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company removes one in the Marketplace: Factory (the board and its builder, always needed), Explorations (Doodle and its prototypes), Signals, Personas, Releases | `packages/server/src/add-ons/kobble.ts`, their pages in `packages/dashboard/src`                       |
-| **Add-ons**                | the maintainer, or a company for its own | chosen per company: where work is tracked (a GitHub board, Jira Cloud); a team's own extensions, described in its factory folder                                                                     | `packages/server/src/add-ons/`, `packages/core/src/extensions/team.ts`                                 |
+| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company removes one in the Marketplace: Factory (the board and its builder, always needed), Explorations (Doodle and its prototypes), Signals, Personas, Releases | `packages/server/src/extensions/`, their pages in `packages/dashboard/src`                             |
+| **Add-ons**                | the maintainer, or a company for its own | chosen per company: where work is tracked (a GitHub board, Jira Cloud); a team's own extensions, described in its factory folder                                                                     | `packages/server/src/extensions/`, `packages/core/src/extensions/team.ts`                              |
 | **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package, other code                                                                                  | `packages/kits`                                                                                        |
 | **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                                                                               | the company's repository                                                                               |
 
@@ -46,7 +46,7 @@ explorations waiting (`packages/server/src/coach/setup-records.ts`); the
 last step offers one to start with (**Open it**), or **Look around first**. Right after, the dashboard guides
 connecting where work is tracked: a GitHub board through the GitHub CLI on
 this computer, or Jira Cloud with an API token, each checked before it is
-saved (the GitHub and Jira add-ons, `packages/server/src/add-ons/`). In a new project
+saved (the GitHub and Jira add-ons, `packages/server/src/extensions/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
 to build. The owner can talk instead of typing, to the setup coach's first
 question and to Doodle in an exploration: voice is part of the core
@@ -211,7 +211,7 @@ comes from the persona's id (`packages/core/src/kobble/face.ts`).
 **Persona tests**, called missions on the page
 (`factory/kobble/tests/T-0001.json`), let the kobold use the app as one
 persona would, on this computer only and never the live app
-(`packages/server/src/kobble/persona-tests.ts`, with the `persona-test`
+(`packages/server/src/extensions/personas/persona-tests.ts`, with the `persona-test`
 skill). Before launch they are where the first signals come from: the empty
 Signals page sends the team to Personas. For each persona the kobold first
 suggests one mission (`mission-ideas.ts`, Part 0 of the skill): a sentence
@@ -238,7 +238,7 @@ and each persona says whether it is on one (`onMission`).
 
 **Explorations** (`#explore`) are where the team works out what to build
 for a problem, with **Doodle**, the explorer kobold
-(`packages/server/src/kobble/explorations/`). An exploration starts from a
+(`packages/server/src/extensions/explorations/`). An exploration starts from a
 signal, from a sentence, from Sprocket, from setup's starting points, or
 from an open card in the board's Backlog, which waits in Explorations until
 someone explores it. Each has one board, a **whiteboard** to think on
@@ -308,7 +308,7 @@ Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 
 **The Factory board** (`#build`, `GET /api/kobble/factory`,
-`packages/server/src/kobble/factory-view.ts`) shows the agreed work on the
+`packages/server/src/extensions/factory/factory-view.ts`) shows the agreed work on the
 connected GitHub board, as the builder last read it, in four columns: To
 do, Building (the board's In progress), Review and Done. The board's
 Backlog is not agreed work: its open cards wait in Explorations, and the
@@ -321,7 +321,7 @@ builder's steps (its trace) and Delete. A card whose pull request clashes
 with main has **Resolve**, which sends it back to the builder to bring main
 in. The builder's switch is at the top.
 
-**The builder keeps to its own cards** (`packages/server/src/builder/decide.ts`).
+**The builder keeps to its own cards** (`packages/server/src/extensions/factory/builder/decide.ts`).
 A card in In progress is the builder's only when its start (the note
 `started`) is the factory's last word on it; a card a person moved there is
 left to them. A build is up to three sessions in a row
@@ -415,7 +415,7 @@ GitHub. It needs a connected GitHub repository (the page says so otherwise,
 with a link to Settings) whose account may create tags and releases. It is one
 release for the whole repository.
 
-The server side is `packages/server/src/releases/`: `GET /api/releases` (the
+The server side is `packages/server/src/extensions/releases/`: `GET /api/releases` (the
 coming release: the pull requests merged since the last tag, the suggested
 number and why once the team prepared it, and the past releases),
 `POST /api/releases/prepare` (the kobold judges what was merged and suggests
@@ -453,7 +453,7 @@ release on a team's repository.
 Two things extend a factory. A **kit** (`defineKit`) teaches it one kind of
 product. An **add-on** gives it an ability a company may want, or want
 another of in its place: in the core it is an extension (`defineExtension`),
-and in the server an `AddOn` (`packages/server/src/add-ons/add-on.ts`), the
+and in the server an `ExtensionModule` (`packages/server/src/plugs/extension.ts`), the
 extension with the routes the server answers for it, at
 `/api/add-ons/<id>/…` and only while it is on; its page, if any, is in
 `packages/dashboard/src/add-ons/`. Built-in add-ons (`core: true`) are on

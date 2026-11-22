@@ -3,7 +3,7 @@
 // Then nothing is built.
 
 import type { Cards } from "../../../cards/cards.ts";
-import { branchOf } from "./branches.ts";
+import { branchOf } from "../../../cards/cards.ts";
 import type { BoardCard } from "./decide.ts";
 
 export async function byHand(

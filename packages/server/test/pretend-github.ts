@@ -1,7 +1,7 @@
 // A stand-in GitHub for the tests of the board's cards: the GitHub CLI's
 // answers about one board and its issues, remembering what it was told.
 
-import type { Cli } from "../src/extensions/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 
 const STAGES = {
   backlog: "Backlog",

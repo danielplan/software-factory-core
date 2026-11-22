@@ -16,7 +16,7 @@ import {
 
 import { versionCopy, versionWorkspace } from "../../prototypes/copies.ts";
 import type { PrototypeMode } from "../../prototypes/mode.ts";
-import type { Browser } from "../personas/persona-tests.ts";
+import type { Browser } from "../../kobble/browser.ts";
 import type { Photograph } from "../../kobble/usage-pictures.ts";
 import { lookAndFix, type Looks } from "./looks.ts";
 import { finishMaking, type Ready } from "./made.ts";

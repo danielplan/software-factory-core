@@ -9,13 +9,10 @@ import { randomUUID } from "node:crypto";
 import type { Claude, KobbleStore } from "@software-factory/core";
 import { z } from "zod";
 
+import type { App } from "../../kobble/browser.ts";
 import { Refused } from "../../refused.ts";
 import { answerOf, personaTestSkill, who } from "./persona-tests.ts";
 import { inLanguage } from "../../language.ts";
-
-// An app a persona can be sent into: a product the factory starts with a
-// web address.
-export type App = { id: string; name: string; does: string };
 
 export type MissionIdea = {
   task: string;

@@ -13,9 +13,10 @@
 
 import { type Available, type Claude } from "@software-factory/core";
 
-import type { Browser } from "../../personas/persona-tests.ts";
+import type { Browser } from "../../../kobble/browser.ts";
 import type { Cards } from "../../../cards/cards.ts";
-import { branchOf, copyName, headOf, publishBranch } from "./branches.ts";
+import { copyName, headOf, publishBranch } from "./branches.ts";
+import { branchOf } from "../../../cards/cards.ts";
 import type { CodeHost } from "../../../code-host.ts";
 import {
   changedFiles,

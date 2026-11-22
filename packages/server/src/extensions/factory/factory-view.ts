@@ -3,8 +3,6 @@
 // exploration's handed-off prototype, or a fix of a signal. Read from what
 // the builder last read of the board.
 
-import type { KobbleStore } from "@software-factory/core";
-
 import type {
   Asking,
   CardView,
@@ -12,6 +10,8 @@ import type {
   StuckView,
   WorkView,
 } from "../../api.ts";
+import type { IdeasPlug } from "../../plugs/ideas.ts";
+import type { SignalsPlug } from "../../plugs/signals.ts";
 
 export const FACTORY_COLUMNS = [
   { id: "todo", title: "To do" },
@@ -105,37 +105,25 @@ export function columnOf(issue: string, work: WorkView | null): string | null {
 }
 
 export function factoryView(
-  store: KobbleStore,
   work: WorkView | null,
+  // Where cards came from: the explorations handed off as cards
+  // (Explorations' plug), and the issues signals were fixed in ("#41",
+  // Signals' plug); none of either while it is not installed.
+  from: { ideas: IdeasPlug | null; signals: SignalsPlug | null },
 ): FactoryView {
-  const explorations = store.all("explorations");
-  const fixes = new Set(
-    store
-      .all("signals")
-      .filter((signal) => signal.status === "fixed" && signal.to)
-      .map((signal) => signal.to),
-  );
+  const { handedOff, fixes } = cameFrom(from);
   const cards = (work?.cards ?? []).map((card) => {
     const column = columnOfCard(card);
     const clashes = card.conflict ?? false;
-    const from = explorations.find((one) => one.work === card.number);
-    const agreed = from
-      ? store
-          .board(from.id)
-          .things.find((one) => one.kind === "prototype" && one.agreed)
-      : undefined;
+    const made = handedOff.find((one) => one.work === card.number);
     return {
       column,
       card: {
         number: card.number,
         title: card.title,
         url: card.url,
-        from: from
-          ? {
-              exploration: from.id,
-              title: from.title,
-              key: agreed?.kind === "prototype" ? agreed.key : null,
-            }
+        from: made
+          ? { exploration: made.exploration, title: made.title, key: made.key }
           : null,
         fix: fixes.has(`#${String(card.number)}`),
         type: card.type ?? null,
@@ -162,6 +150,21 @@ export function factoryView(
         .sort((a, b) => Number(b.hint) - Number(a.hint)),
     })),
     builder: builderOf(work),
+  };
+}
+
+// The explorations handed off as cards, and the issues signals were fixed
+// in ("#41").
+function cameFrom(from: {
+  ideas: IdeasPlug | null;
+  signals: SignalsPlug | null;
+}) {
+  const fixed = (from.signals?.all() ?? []).flatMap((signal) =>
+    signal.status === "fixed" && signal.to ? [signal.to] : [],
+  );
+  return {
+    handedOff: from.ideas?.handedOff() ?? [],
+    fixes: new Set(fixed),
   };
 }
 

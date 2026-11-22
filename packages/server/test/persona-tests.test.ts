@@ -8,8 +8,9 @@ import { KobbleStore } from "@software-factory/core";
 
 import { PersonaTests } from "../src/extensions/personas/persona-tests.ts";
 import { standIn } from "./pretend-claude.ts";
-import type { TestPage } from "../src/extensions/signals/views.ts";
+import type { TestPage } from "../src/extensions/personas/views.ts";
 import { stage } from "./stage.ts";
+import { plugsOf } from "./plugs.ts";
 
 // Persona tests: the persona agent uses the app through a browser only and
 // keeps a diary; the analyst turns it into signals. A stand-in Claude Code
@@ -36,24 +37,32 @@ async function testFactory(
 ) {
   const { claude, seen } = standIn(answers);
   let closed = 0;
-  const staged = await stage(claude, {}, undefined, [], {
-    apps: () => [
-      { id: "shop", name: "Shop", does: "Where customers order" },
-      {
-        id: "office",
-        name: "Back office",
-        does: "Where the team keeps the shop",
-      },
-    ],
-    app,
-    browser: () =>
-      Promise.resolve({
-        url: "http://localhost:9/mcp",
-        close: () => {
-          closed += 1;
+  const staged = await stage(
+    claude,
+    {},
+    undefined,
+    [],
+    {
+      apps: () => [
+        { id: "shop", name: "Shop", does: "Where customers order" },
+        {
+          id: "office",
+          name: "Back office",
+          does: "Where the team keeps the shop",
         },
-      }),
-  });
+      ],
+      app,
+      browser: () =>
+        Promise.resolve({
+          url: "http://localhost:9/mcp",
+          close: () => {
+            closed += 1;
+          },
+        }),
+    },
+    // Kobble's own extensions, Personas among them.
+    true,
+  );
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
@@ -244,6 +253,7 @@ test("a test left running when the factory stopped says it did not finish", () =
     claude: standIn([]).claude,
     cwd: folder,
     store: () => store,
+    signals: () => plugsOf(store).signals,
     app: () => Promise.resolve(""),
     browser: () => Promise.reject(new Error("none")),
     onChange: () => {},

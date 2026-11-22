@@ -6,7 +6,9 @@ import { after, test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/extensions/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
 import { Refused } from "../src/refused.ts";
 import {
   releasesRoutes,
@@ -150,6 +152,7 @@ function routesOf(
   const routes = releasesRoutes({
     project: project(connected),
     cli,
+    boards: slotFillers([githubAddOn(cli)]).tasks,
     claude,
     changed: (what) => told.push(what),
   });

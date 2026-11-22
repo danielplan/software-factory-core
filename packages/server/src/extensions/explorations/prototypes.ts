@@ -35,7 +35,7 @@ import {
   freeVariant,
   withVariant,
 } from "./versions.ts";
-import type { Browser } from "../personas/persona-tests.ts";
+import type { Browser } from "../../kobble/browser.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { deeperIn, type Way } from "./deeper.ts";
 

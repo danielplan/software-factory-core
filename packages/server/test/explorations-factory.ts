@@ -9,7 +9,7 @@ import { KobbleStore } from "@software-factory/core";
 
 import type { ExplorationPage } from "../src/extensions/explorations/views.ts";
 import { pretendClaude } from "./pretend-claude.ts";
-import { stage } from "./stage.ts";
+import { kobbleStage } from "./stage.ts";
 
 const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
 
@@ -17,7 +17,8 @@ type Turn = Parameters<typeof pretendClaude>[0][number];
 
 export async function explorationsFactory(turns: Turn[] = []) {
   const pretend = pretendClaude(turns);
-  const staged = await stage(pretend.claude);
+  // With Kobble's own extensions, Explorations among them.
+  const staged = await kobbleStage(pretend.claude);
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,

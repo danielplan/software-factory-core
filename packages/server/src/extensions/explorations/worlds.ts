@@ -18,10 +18,14 @@ import {
   WorldRefused,
 } from "@software-factory/core";
 
+import type { PersonasPlug } from "../../plugs/personas.ts";
+
 type Options = {
   // The factory's folder: its products name their worlds.
   root: string;
   store: () => KobbleStore;
+  // Personas' plug: a persona's situation; none while it is not installed.
+  personas: () => PersonasPlug | null;
   now?: () => Date;
 };
 
@@ -72,7 +76,7 @@ export class ExplorationWorlds {
   // a product has a world.
   startFor(id: string, persona: string | undefined): void {
     const named = persona
-      ? this.options.store().get("personas", persona)?.situation
+      ? this.options.personas()?.get(persona)?.situation
       : undefined;
     if (named && this.offered()) this.start(id, named);
   }

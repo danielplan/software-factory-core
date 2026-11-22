@@ -5,9 +5,9 @@
 // Which issues Kobble waits for "did it work?" about comes from the records.
 
 import { type Card, type Cards, isStuck } from "../../../cards/cards.ts";
-import { branchOf } from "./branches.ts";
+import { branchOf } from "../../../cards/cards.ts";
 import type { BoardCard } from "./decide.ts";
-import type { PullRequests } from "./pull-requests.ts";
+import type { PullRequests } from "../../../code-host.ts";
 
 const READ: readonly (string | null)[] = [
   "planning",

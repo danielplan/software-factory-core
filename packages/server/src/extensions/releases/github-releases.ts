@@ -4,10 +4,10 @@
 // latest commit and a GitHub release on it). Nothing is kept in the
 // factory's files.
 
-import { answer } from "../github/board-setup.ts";
-import type { Cli } from "../github/github.ts";
+import { answer } from "../../github-cli.ts";
+import type { Cli } from "../../github-cli.ts";
 import { type CardType, typeOf } from "../../cards/cards.ts";
-import { branchOf } from "../factory/builder/branches.ts";
+import { branchOf } from "../../cards/cards.ts";
 import type { Merged } from "./notes.ts";
 import { numberOfTag, tagOf } from "./numbers.ts";
 

@@ -6,6 +6,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { Refused } from "./refused.ts";
 
+// One of the server's routes: the answer to a request, by its body and
+// address.
+export type Route = (body: unknown, url: URL) => unknown;
+
 // A file a route answers with, such as a picture, and its type.
 export class FileAnswer {
   readonly file: string;

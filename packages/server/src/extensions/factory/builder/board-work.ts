@@ -37,7 +37,7 @@ import {
 } from "./decide.ts";
 import type { Jobs } from "./jobs.ts";
 import { markComment } from "./protocol.ts";
-import type { PullRequests } from "./pull-requests.ts";
+import type { PullRequests } from "../../../code-host.ts";
 import { snapshotOf } from "./snapshot.ts";
 import { clockOf } from "./usage-limit.ts";
 import { SeenPullRequests } from "./seen-pull-requests.ts";
@@ -360,6 +360,5 @@ function workingOf(one: Running) {
   };
 }
 
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);

@@ -7,11 +7,10 @@ import { extname } from "node:path";
 
 import type { Claude, KobbleStore, PersonaTest } from "@software-factory/core";
 
-import type { Route } from "../../plugs/extension.ts";
+import type { Route } from "../../http.ts";
 import { asked, field } from "../../asked.ts";
 import type { Cards } from "../../cards/cards.ts";
 import { Refused } from "../../refused.ts";
-import type { PersonaTests } from "../personas/persona-tests.ts";
 import { FileAnswer } from "../../http.ts";
 import { PICTURE_TYPES } from "../../coach/pictures.ts";
 import { addPicture, personActs } from "./person-acts.ts";
@@ -29,8 +28,11 @@ import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { talkRoutes } from "./talk-routes.ts";
 import { type SpecWriter, specWriter } from "./spec-writer.ts";
-import { type BoardIdea, explorationPage, explorationsView } from "./views.ts";
-import type { Browser } from "../personas/persona-tests.ts";
+import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { PersonasPlug } from "../../plugs/personas.ts";
+import type { BoardIdea } from "../../plugs/work.ts";
+import { explorationPage, explorationsView } from "./views.ts";
+import type { Browser } from "../../kobble/browser.ts";
 import { ExplorationWorlds } from "./worlds.ts";
 import { HandOffs } from "./handing-off.ts";
 
@@ -44,6 +46,10 @@ type Options = {
   cards: () => Cards;
   // The board's ideas (its Backlog), as the builder last read them.
   ideas?: () => BoardIdea[];
+  // Personas' plugs: who an idea is for, and the prototypes' tests; none
+  // while Personas is not installed.
+  personas: () => PersonasPlug | null;
+  missions: () => MissionsPlug | null;
   onChange: () => void;
 };
 
@@ -62,11 +68,17 @@ export function servedExplorations(options: Options) {
   const handOffNow = (id: string) =>
     handOffs.run(id, async ({ stage, step }) => {
       const write = writerOf(options, step);
-      const handed = await handOff(store(), id, options.cards, async (on) => {
-        const spec = await write(on);
-        stage("card");
-        return spec;
-      });
+      const handed = await handOff(
+        store(),
+        id,
+        options.cards,
+        async (on) => {
+          const spec = await write(on);
+          stage("card");
+          return spec;
+        },
+        options.missions(),
+      );
       stage("prototypes");
       await prototypes.removeAll(id);
       return handed;
@@ -81,8 +93,13 @@ export function servedExplorations(options: Options) {
       return answer ?? {};
     };
   const routes = {
-    ...readRoutes(store, talks, prototypes, options.ideas, handOffs),
-    ...buttonRoutes(store, button, { talks, prototypes, handOffNow }),
+    ...readRoutes(store, { talks, prototypes, handOffs }, options),
+    ...buttonRoutes(store, button, {
+      talks,
+      prototypes,
+      handOffNow,
+      personas: options.personas,
+    }),
     ...talkRoutes(store, talks, button),
   };
   return {
@@ -92,8 +109,9 @@ export function servedExplorations(options: Options) {
     worlds,
     // Test: a persona test on the prototype's branch, as the exploration's
     // first persona; it shows on the prototype's card.
-    testRoute: (tests: PersonaTests): Route =>
-      button((body) => ({ test: testPrototype(store(), tests, body) })),
+    testRoute: button((body) => ({
+      test: testPrototype(store(), options.missions(), body),
+    })),
     close: () => {
       prototypes.close();
     },
@@ -154,7 +172,7 @@ function makersFor(
 // first persona; it shows on the prototype's card.
 function testPrototype(
   store: KobbleStore,
-  tests: PersonaTests,
+  missions: MissionsPlug | null,
   body: unknown,
 ): PersonaTest {
   const exploration = explorationOf(store, field(body, "id"));
@@ -165,7 +183,11 @@ function testPrototype(
   if (!made) throw new Refused(`${exploration.id} has no prototype ${key}.`);
   if (!persona)
     throw new Refused("Testing needs a persona: this exploration has none.");
-  const test = tests.start({
+  if (!missions)
+    throw new Refused(
+      "Personas is not installed: install it in the Marketplace (#extensions) to test a prototype.",
+    );
+  const test = missions.start({
     persona,
     task: field(body, "task"),
     on: prototypeBranch(exploration.id, key),
@@ -179,11 +201,14 @@ function testPrototype(
 
 function readRoutes(
   store: () => KobbleStore,
-  talks: ExplorationTalks,
-  prototypes: ExplorationPrototypes,
-  ideas: (() => BoardIdea[]) | undefined,
-  handOffs: HandOffs,
+  on: {
+    talks: ExplorationTalks;
+    prototypes: ExplorationPrototypes;
+    handOffs: HandOffs;
+  },
+  options: Options,
 ): Record<string, Route> {
+  const { talks, prototypes, handOffs } = on;
   return {
     "GET /api/kobble/explorations/picture": (_body, url) => {
       const file = store().pictureFile(
@@ -198,7 +223,8 @@ function readRoutes(
         store(),
         (one) => talks.view(one),
         (one) => prototypes.runs(one),
-        ideas?.() ?? [],
+        options.ideas?.() ?? [],
+        options.personas(),
       ),
     "GET /api/kobble/exploration": (_body, url) => {
       const exploration = explorationOf(
@@ -209,6 +235,8 @@ function readRoutes(
         runs: prototypes.runs(exploration.id),
         talk: talks.view(exploration.id),
         handingOff: handOffs.of(exploration.id),
+        personas: options.personas(),
+        missions: options.missions(),
       });
     },
   };
@@ -221,6 +249,7 @@ function buttonRoutes(
     talks: ExplorationTalks;
     prototypes: ExplorationPrototypes;
     handOffNow: HandOffNow;
+    personas: () => PersonasPlug | null;
   },
 ): Record<string, Route> {
   const { talks, prototypes } = on;
@@ -228,7 +257,7 @@ function buttonRoutes(
   const key = (body: unknown) => field(body, "key");
   return {
     "POST /api/kobble/explorations": button((body) => ({
-      exploration: newExploration(store(), body),
+      exploration: newExploration(store(), body, on.personas()),
     })),
     "POST /api/kobble/explorations/fresh": button(() => ({
       exploration: freshExploration(store()),

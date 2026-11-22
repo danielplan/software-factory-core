@@ -75,6 +75,12 @@ export type Cards = {
 };
 
 // What kind of work a card is, kept as a label ("type: bug").
+// The branch a card is built on: the same one a prototype of the card is
+// pushed to while planning (the plan skill), so the build continues it.
+export function branchOf(number: number): string {
+  return `factory/issue-${String(number)}`;
+}
+
 export const CARD_TYPES = ["bug", "feature", "improvement"] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 export const typeLabel = (type: CardType) => `type: ${type}`;

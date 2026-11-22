@@ -12,7 +12,6 @@ export type {
   CardView,
   CoachView,
   Draft,
-  GitHubStatus,
   IconName,
   IdeaView,
   KitView,
@@ -30,14 +29,15 @@ export type {
   PersonaColor,
   PersonaHat,
 } from "../../core/src/index.ts";
+export type { GitHubStatus } from "../../server/src/extensions/github/github.ts";
+export type { SignalsView } from "../../server/src/extensions/signals/views.ts";
+export type { SignalRow } from "../../server/src/kobble/signal-rows.ts";
+export type { MissionNow } from "../../server/src/plugs/missions.ts";
 export type {
-  MissionNow,
   PersonaPage as KobblePersonaPage,
   PersonaRow,
-  SignalRow,
-  SignalsView,
   TestPage,
-} from "../../server/src/extensions/signals/views.ts";
+} from "../../server/src/extensions/personas/views.ts";
 export type { PersonaTest } from "../../core/src/index.ts";
 export type { ReleasesView } from "../../server/src/extensions/releases/routes.ts";
 export type { FeedbackView } from "../../server/src/feedback/routes.ts";

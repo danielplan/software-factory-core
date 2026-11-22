@@ -7,10 +7,10 @@ import type { KobbleStore } from "@software-factory/core";
 import { z } from "zod";
 
 import type { Cards } from "../../cards/cards.ts";
+import { handOff, type SupportPlug } from "../../kobble/support-plug.ts";
+import type { IdeasPlug } from "../../plugs/ideas.ts";
 import { Refused } from "../../refused.ts";
 import { exploreSignal, fixSignal } from "./actions.ts";
-import { handOff, type SupportPlug } from "../../kobble/support-plug.ts";
-import { exploreAt } from "../explorations/support.ts";
 
 const GUIDE = `**Signals** (\`#signals\`): what came in from the live app and from people (bugs, feature requests, feedback). A new one they want dealt with (\`list_new_signals\`): to the builder when it is a fix, to Doodle when it needs thinking through; say which, and once they agree, \`send_signal\`.`;
 
@@ -18,11 +18,14 @@ export function signalsPlug(on: {
   store: () => KobbleStore;
   cards: () => Cards;
   isOn: (extension: string) => boolean;
+  // Explorations' plug: Doodle, while it is installed.
+  ideas: () => IdeasPlug | null;
   changed: (what: string) => void;
 }): SupportPlug {
+  const ideas = on.ideas();
   const to = [
     ...(on.isOn("factory") ? (["builder"] as const) : []),
-    ...(on.isOn("explorations") ? (["doodle"] as const) : []),
+    ...(ideas ? (["doodle"] as const) : []),
   ];
   return {
     extension: "signals",
@@ -52,12 +55,12 @@ export function signalsPlug(on: {
                   on.changed("signals");
                   return { said: "Handed to the builder.", to: "#build" };
                 }
-                const { exploration } = exploreSignal(on.store(), id);
+                const { exploration } = exploreSignal(on.store(), id, ideas);
                 on.changed("signals");
                 on.changed("explorations");
                 return {
                   said: "Handed to Doodle.",
-                  to: exploreAt(exploration.id),
+                  to: ideas?.address(exploration.id) ?? "#explore",
                 };
               },
             }),

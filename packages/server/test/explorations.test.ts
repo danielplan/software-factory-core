@@ -13,6 +13,7 @@ import { applyAct } from "../src/extensions/explorations/board-acts.ts";
 import type { ExplorationsView } from "../src/extensions/explorations/views.ts";
 import { inGit } from "./git-project.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
+import { plugsOf } from "./plugs.ts";
 
 // Explorations: the list, one exploration's canvas and the conversation
 // with the kobold (which changes the board with its tool), and the buttons
@@ -457,7 +458,14 @@ test("hand off writes handoff.md and the issue, with what was learned", async ()
         return Promise.resolve({ number: 51, url: "https://example.com/51" });
       },
     } as unknown as Cards;
-    const answer = await handOff(factory.store, "X-1", () => cards);
+    // The agreed prototype's persona tests come from Personas' plug.
+    const answer = await handOff(
+      factory.store,
+      "X-1",
+      () => cards,
+      undefined,
+      plugsOf(factory.store).missions,
+    );
     assert.deepEqual(answer, { issue: 51, url: "https://example.com/51" });
     const [issue] = made;
     assert.ok(issue);
@@ -504,6 +512,7 @@ test("hand off gives the card the written spec, with the mark of the agreed prot
         seen.push(input.branch ?? "", input.summary);
         return Promise.resolve(spec);
       },
+      plugsOf(factory.store).missions,
     );
     assert.equal(seen[0], "proto/X-1-b");
     assert.match(seen[1] ?? "", /\*\*The question:\*\*/);

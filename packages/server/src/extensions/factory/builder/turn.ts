@@ -10,7 +10,8 @@ import { randomUUID } from "node:crypto";
 
 import type { Claude, Mcp } from "@software-factory/core";
 
-import { branchOf, commitTurn } from "./branches.ts";
+import { commitTurn } from "./branches.ts";
+import { branchOf } from "../../../cards/cards.ts";
 import type { CodeHost } from "../../../code-host.ts";
 import type { BoardCard } from "./decide.ts";
 import { CARRY_ON, clashPrompt } from "./prompts.ts";

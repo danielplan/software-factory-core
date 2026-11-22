@@ -6,10 +6,10 @@ import {
   type BoardCard,
   decide,
   handedBack,
-  type Message,
   stuckOf,
   waitsForOwner,
 } from "../src/extensions/factory/builder/decide.ts";
+import { type Message } from "../src/code-host.ts";
 import {
   isFactory,
   linkRepositoryFiles,
@@ -19,8 +19,8 @@ import {
   stripMarker,
 } from "../src/extensions/factory/builder/protocol.ts";
 
-import { realCli } from "../src/extensions/github/github.ts";
-import { githubCodeHost } from "../src/code-host.ts";
+import { realCli } from "../src/github-cli.ts";
+import { githubCodeHost } from "../src/extensions/github/code-host.ts";
 
 // The board's rules: what happens next to each card, from its stage and the
 // notes in its thread; and how the factory's notes and an agent's status

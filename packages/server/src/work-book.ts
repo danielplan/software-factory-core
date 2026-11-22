@@ -27,7 +27,7 @@ import {
   cardCourse,
 } from "@software-factory/core";
 
-import type { Route } from "./plugs/extension.ts";
+import type { Route } from "./http.ts";
 import type { CardDetail, Cards } from "./cards/cards.ts";
 import { Refused } from "./refused.ts";
 

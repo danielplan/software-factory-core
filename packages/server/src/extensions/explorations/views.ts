@@ -15,6 +15,9 @@ import {
   type Thing,
 } from "@software-factory/core";
 
+import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { PersonasPlug } from "../../plugs/personas.ts";
+import type { BoardIdea } from "../../plugs/work.ts";
 import type { VersionRun } from "../../prototypes/mode.ts";
 
 import { completed } from "./board-things.ts";
@@ -48,8 +51,6 @@ export type ExplorationsView = {
   fromBoard: BoardIdea[];
 };
 
-export type BoardIdea = { number: number; title: string; url: string };
-
 // A prototype's last persona test, in short.
 export type TestResult = {
   id: string;
@@ -72,9 +73,11 @@ export type ExplorationPage = {
   handingOff: HandingOff | null;
 };
 
-function tagsOf(store: KobbleStore, ids: string[]): PersonaTag[] {
+// The personas an exploration is for, as Personas has them (none while it
+// is not installed).
+function tagsOf(personas: PersonasPlug | null, ids: string[]): PersonaTag[] {
   return ids.flatMap((id) => {
-    const persona = store.get("personas", id);
+    const persona = personas?.get(id) ?? null;
     return persona ? [{ id, name: persona.name, face: faceOf(persona) }] : [];
   });
 }
@@ -99,6 +102,7 @@ export function explorationsView(
   talk: (id: string) => TalkView,
   runs: (id: string) => VersionRun[] = () => [],
   ideas: BoardIdea[] = [],
+  personas: PersonasPlug | null = null,
 ): ExplorationsView {
   const linked = new Set(
     store
@@ -114,7 +118,7 @@ export function explorationsView(
       status: exploration.status,
       problem: exploration.problem,
       work: exploration.work,
-      personas: tagsOf(store, exploration.personas),
+      personas: tagsOf(personas, exploration.personas),
       signals: exploration.signals.length,
       things: board.things.map((thing) => ({
         id: thing.id,
@@ -141,16 +145,30 @@ export function explorationsView(
 export function explorationPage(
   store: KobbleStore,
   exploration: Exploration,
-  more: { runs: VersionRun[]; talk: TalkView; handingOff: HandingOff | null },
+  more: {
+    runs: VersionRun[];
+    talk: TalkView;
+    handingOff: HandingOff | null;
+    // Who it is for, and its prototypes' tests: Personas' plugs.
+    personas: PersonasPlug | null;
+    missions: MissionsPlug | null;
+  },
 ): ExplorationPage {
   const board = completed(exploration, store.board(exploration.id));
-  const tests = store.all("tests");
+  const tests =
+    more.missions?.of(
+      board.things.flatMap((made) =>
+        made.kind === "prototype" ? made.tests : [],
+      ),
+    ) ?? [];
 
   return {
     exploration,
-    personas: tagsOf(store, exploration.personas),
+    personas: tagsOf(more.personas, exploration.personas),
     heard: exploration.heard.map((one) => {
-      const persona = one.persona ? store.get("personas", one.persona) : null;
+      const persona = one.persona
+        ? (more.personas?.get(one.persona) ?? null)
+        : null;
       return {
         ...one,
         personaName: persona?.name ?? null,

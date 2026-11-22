@@ -16,7 +16,7 @@ import {
   languageChoice,
 } from "@software-factory/core";
 
-import type { Route } from "./plugs/extension.ts";
+import type { Route } from "./http.ts";
 import { Refused } from "./refused.ts";
 
 let shown: Language = "en";

@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/extensions/github/github.ts";
+import type { Cli } from "../src/github-cli.ts";
 import { githubAddOn } from "../src/extensions/github/index.ts";
 import {
   realShell,
@@ -20,11 +20,12 @@ import {
 import type { BoardCard } from "../src/extensions/factory/builder/decide.ts";
 import { readNote } from "../src/extensions/factory/builder/protocol.ts";
 import {
-  githubPullRequests,
   openOrUpdate,
-  type PullRequests,
   RESOLVE_ASK,
 } from "../src/extensions/factory/builder/pull-requests.ts";
+import { type PullRequests } from "../src/code-host.ts";
+import { githubPullRequests } from "../src/extensions/github/pull-requests.ts";
+import { slotFillers } from "../src/plugs/extension.ts";
 import { SeenPullRequests } from "../src/extensions/factory/builder/seen-pull-requests.ts";
 
 // The builder's pull requests through the GitHub CLI (a stand-in that
@@ -180,10 +181,12 @@ test("the board work is put together from a factory with a connected board, and 
     claude,
     available: { kits: [], extensions: [github.extension] },
     onChange: () => undefined,
+    codeHosts: slotFillers([github]).code,
+    boards: slotFillers([github]).tasks,
   };
   assert.equal(workFor({ ...settings, root, codeHosts: {} }), null);
 
-  const connected = new ConnectedWork({ ...settings, coach: { claude } });
+  const connected = new ConnectedWork(settings);
   connected.connect(root);
   assert.equal(connected.view(), null);
   assert.throws(() => connected.orRefuse(), /Connect a board first/);
@@ -197,11 +200,7 @@ test("the board work is put together from a factory with a connected board, and 
   );
   // A code host only some other extension could give: the builder cannot
   // work the board, and says why.
-  const elsewhere = new ConnectedWork({
-    ...settings,
-    coach: { claude },
-    codeHosts: {},
-  });
+  const elsewhere = new ConnectedWork({ ...settings, codeHosts: {} });
   elsewhere.connect(root);
   assert.throws(
     () => elsewhere.orRefuse(),
@@ -210,7 +209,6 @@ test("the board work is put together from a factory with a connected board, and 
   const nowhere = new ConnectedWork({
     ...settings,
     available: { kits: [], extensions: [] },
-    coach: { claude },
   });
   nowhere.connect(root);
   assert.throws(() => nowhere.orRefuse(), /Nothing says where the code lives/);

@@ -6,8 +6,9 @@ import { keptIn, withKept } from "@software-factory/core";
 
 import type { Stage, StageMap } from "../../api.ts";
 import { STAGES } from "../../api.ts";
-import { answer, ownerOf, statusOf } from "./board-setup.ts";
-import type { Cli } from "./github.ts";
+import { statusOf } from "./board-setup.ts";
+import { answer, ownerOf } from "../../github-cli.ts";
+import type { Cli } from "../../github-cli.ts";
 import { Refused } from "../../refused.ts";
 import type { Card, CardDetail, Cards, CardType } from "../../cards/cards.ts";
 import { blockedBy, relationsOf } from "./relations.ts";

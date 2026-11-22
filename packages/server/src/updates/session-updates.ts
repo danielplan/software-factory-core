@@ -69,7 +69,7 @@ export function updatesOf(
       },
       files: remoteWhatsNew,
       local: () => localWhatsNew(import.meta.dirname),
-      cards: () => session.work.view()?.cards ?? [],
+      cards: () => session.plugged.plug("work")?.view()?.cards ?? [],
       create: (title, body) => cards().create(title, body, "todo"),
     },
   });

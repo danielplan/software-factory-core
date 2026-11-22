@@ -2,8 +2,8 @@
 // "blocked by" another depends on it and waits for it; the other is
 // "blocking" it, so it is needed by it.
 
-import { answer } from "./board-setup.ts";
-import type { Cli } from "./github.ts";
+import { answer } from "../../github-cli.ts";
+import type { Cli } from "../../github-cli.ts";
 import type { CardDetail, Related } from "../../cards/cards.ts";
 
 const RELATED = "nodes { number title state }";

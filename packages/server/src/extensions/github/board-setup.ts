@@ -14,7 +14,7 @@ import { labelOf } from "../../connect/fields.ts";
 import { STAGE_COLUMNS, suggestStages } from "../../connect/stages.ts";
 import type { BoardAsked, TrackerSetup } from "../../connect/tracker-setup.ts";
 import { Refused } from "../../refused.ts";
-import { type Cli, type Ran, realCli } from "./github.ts";
+import { answer, type Cli, ownerOf, realCli } from "../../github-cli.ts";
 
 // A board as GitHub lists it.
 type Listed = { number: number; title: string; items: { totalCount: number } };
@@ -224,18 +224,8 @@ function optionInput(option: Omit<Option, "id"> & { id?: string }): string {
   return `{${id}name: ${name}, color: ${option.color}, description: ${about}}`;
 }
 
-export function answer(ran: Ran): string {
-  if (ran.code !== 0)
-    throw new Refused(ran.err.trim() || "GitHub did not answer.");
-  return ran.out;
-}
-
 function boardList(owner: string): string[] {
   return ["project", "list", "--owner", owner, "--format", "json"];
-}
-
-export function ownerOf(repository: string): string {
-  return repository.split("/")[0] ?? "";
 }
 
 // owner/name of the project's GitHub remote; none when it is elsewhere.

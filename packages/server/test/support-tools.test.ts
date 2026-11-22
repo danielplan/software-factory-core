@@ -7,7 +7,7 @@ import { KobbleStore } from "@software-factory/core";
 
 import type { SupportView } from "../src/kobble/support.ts";
 import { pretendClaude } from "./pretend-claude.ts";
-import { stage } from "./stage.ts";
+import { kobbleStage } from "./stage.ts";
 
 // New persona and New exploration open the support kobold's conversation:
 // it asks, says back what it will add, and adds it with its own tools.
@@ -44,14 +44,7 @@ test("the support kobold adds the persona and the exploration the team describes
     },
   ]);
   // With Kobble's own extensions, whose plugs Sprocket hears.
-  const staged = await stage(
-    pretend.claude,
-    {},
-    undefined,
-    [],
-    undefined,
-    true,
-  );
+  const staged = await kobbleStage(pretend.claude);
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
@@ -120,14 +113,7 @@ test("Sprocket hands work on to the other kobolds and takes the person there; it
     { calls: [], reply: "Looking at the signal." },
   ]);
   // With Kobble's own extensions, whose plugs Sprocket hears.
-  const staged = await stage(
-    pretend.claude,
-    {},
-    undefined,
-    [],
-    undefined,
-    true,
-  );
+  const staged = await kobbleStage(pretend.claude);
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,

@@ -14,7 +14,7 @@ import {
   usageSettings,
 } from "@software-factory/core";
 
-import type { Route } from "../plugs/extension.ts";
+import type { Route } from "../http.ts";
 import { Refused } from "../refused.ts";
 
 export type TeamChoices = { cards: number; usage: boolean };

@@ -6,18 +6,48 @@
 
 import { join } from "node:path";
 
-import {
-  type Extension,
-  readCompany,
-  run,
-  slotsOf,
-} from "@software-factory/core";
+import { type Extension, readCompany, slotsOf } from "@software-factory/core";
 
-import type { Cli } from "./extensions/github/github.ts";
-import {
-  githubPullRequests,
-  type PullRequests,
-} from "./extensions/factory/builder/pull-requests.ts";
+export type PullRequest = {
+  number: number;
+  url: string;
+  state: "OPEN" | "MERGED" | "CLOSED";
+  draft: boolean;
+  // GitHub says it clashes with the main branch (unknown counts as no).
+  conflicting?: boolean;
+};
+
+// Something said on a card or on its pull request.
+export type Message = {
+  author: string;
+  body: string;
+  at: string;
+  where: "card" | "pull request";
+};
+
+export type Opening = {
+  branch: string;
+  base: string;
+  title: string;
+  body: string;
+  draft: boolean;
+};
+
+export type PullRequests = {
+  baseBranch: () => Promise<string>;
+  find: (branch: string) => Promise<PullRequest | null>;
+  open: (opening: Opening) => Promise<PullRequest>;
+  // A new description, and ready for review or back to a draft.
+  // A new description (none: the description stays as it is) and whether
+  // it is a draft.
+  update: (
+    number: number,
+    body: string | null,
+    draft: boolean,
+  ) => Promise<void>;
+  comment: (number: number, text: string) => Promise<void>;
+  said: (number: number) => Promise<Message[]>;
+};
 
 export type CodeHost = PullRequests & {
   // Its name, in plain words: "GitHub".
@@ -32,17 +62,8 @@ export type CodeHost = PullRequests & {
 // A host's CodeHost for one repository ("owner/name" on GitHub).
 export type CodeHostOf = (repository: string) => CodeHost;
 
-const PICTURE = /\.(png|jpe?g|gif|webp|svg)$/i;
-
-export function githubCodeHost(cli: Cli, repository: string): CodeHost {
-  return {
-    ...githubPullRequests(cli, repository),
-    name: "GitHub",
-    originProblem: (folder) => githubOriginProblem(folder, repository),
-    fileLink: (branch, path) =>
-      `https://github.com/${repository}/blob/${branch}/${path}${PICTURE.test(path) ? "?raw=true" : ""}`,
-  };
-}
+// The code hosts, by the extension that fills the `code` slot with one.
+export type CodeHosts = Readonly<Record<string, CodeHostOf>>;
 
 // The code host of the extension in the factory's `code` slot, or why there
 // is none to push to.
@@ -64,27 +85,4 @@ export function codeHostFor(
       problem: `The code lives with ${inUse}, where the builder cannot push yet.`,
     };
   return host(repository);
-}
-
-// The repository the copy pushes to is not the board's (a fork, or the one
-// the project was cloned from, say), so the branch is pushed there and
-// GitHub never has it. Null when origin is that repository. Read as written,
-// before git's insteadOf.
-export async function githubOriginProblem(
-  folder: string,
-  repository: string,
-): Promise<string | null> {
-  const url = (
-    await run("git", [
-      "-C",
-      folder,
-      "config",
-      "--get",
-      "remote.origin.url",
-    ]).catch(() => "")
-  ).trim();
-  const named = /github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?\/?$/i.exec(url)?.[1];
-  if (named?.toLowerCase() === repository.toLowerCase()) return null;
-  const where = url ? "`" + url + "`" : "no origin";
-  return `The builder's copy pushes to ${where}, not to ${repository} on GitHub, so its branch and pull request would never reach the board. Point the project's origin at GitHub (\`git remote set-url origin https://github.com/${repository}.git\` in the project; its copies share it), then answer here or move the card back to To do.`;
 }

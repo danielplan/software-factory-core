@@ -6,42 +6,57 @@ import { test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
 
-import type { Cli } from "../src/extensions/github/github.ts";
-import { supportOf } from "../src/kobble/support.ts";
+import { KOBBLE_EXTENSIONS, KOBBLE_MODULES } from "../src/app/modules.ts";
+import { servePlugged } from "../src/app/plug-board.ts";
+import type { Cli } from "../src/github-cli.ts";
+import type { Host } from "../src/plugs/extension.ts";
 import { placeIn } from "../src/kobble/support-tools.ts";
 import { plugsGuide } from "../src/kobble/support-plug.ts";
+import { Refused } from "../src/refused.ts";
 
 // Extensions never talk to each other; they plug into Sprocket. A removed
 // extension takes its hand-offs and its words away, and nothing else breaks.
 
 const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
 
+// Kobble's own extensions served on the example company's records, with
+// these installed; nothing else is reached.
 function sprocket(installed: string[]) {
   const root = mkdtempSync(join(tmpdir(), "plug-"));
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
   });
   const store = () => new KobbleStore(root);
-  const support = supportOf(
-    {
+  const isOn = (id: string) => installed.includes(id);
+  const nothing = () => Promise.reject(new Error("Not in this test."));
+  const board = servePlugged(
+    KOBBLE_MODULES,
+    (_module, plug): Host => ({
       project: root,
+      factory: root,
       claude: { run: () => Promise.resolve({ ok: true, text: "" }) },
       cli: {} as Cli,
-      work: () => null,
-      answer: () => Promise.resolve(),
-      isOn: (id) => installed.includes(id),
-      supportGuides: () => [],
-    },
-    store,
-    () => undefined,
-    {
-      explorations: {
-        talks: { begin: () => Promise.resolve(), say: () => Promise.resolve() },
+      store,
+      records: store,
+      changed: () => undefined,
+      stateChanged: () => undefined,
+      isOn,
+      plug,
+      slots: { code: {}, tasks: {} },
+      cards: () => {
+        throw new Refused("No board here.");
       },
-      tests: { tests: { start: () => ({ persona: "noah" }) } },
-    },
+      apps: () => [],
+      app: nothing,
+      browser: nothing,
+      available: { kits: [], extensions: KOBBLE_EXTENSIONS },
+      watch: () => () => undefined,
+      connect: () => undefined,
+      installTool: nothing,
+    }),
+    isOn,
   );
-  return { support, store };
+  return { support: { tools: () => ({ plugs: board.support() }) }, store };
 }
 
 const handOffs = (installed: string[]) =>

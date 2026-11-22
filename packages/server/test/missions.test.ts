@@ -12,6 +12,7 @@ import {
 } from "../src/extensions/personas/persona-tests.ts";
 import { standIn } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
+import { plugsOf } from "./plugs.ts";
 
 // Missions (persona tests) before launch: several at once, a few at a
 // time, the step each persona is on as it goes, and the mission the kobold
@@ -61,6 +62,7 @@ test("several missions run at once, a few at a time; the others wait", async () 
     claude,
     cwd: folder,
     store: () => store,
+    signals: () => plugsOf(store).signals,
     app: () => Promise.resolve("http://localhost:5173"),
     browser: () => Promise.resolve({ url: "http://localhost:9", close() {} }),
     onChange: () => {},
@@ -98,6 +100,7 @@ test("the app two missions need at once is started once", async () => {
     claude: standIn([DIARY, '{"signals":[]}', DIARY, '{"signals":[]}']).claude,
     cwd: folder,
     store: () => store,
+    signals: () => plugsOf(store).signals,
     app: async () => {
       starts += 1;
       await opened;
@@ -132,18 +135,26 @@ test("the kobold suggests one mission for a persona, in one of the apps, until i
     "not an idea",
     JSON.stringify({ app: "elsewhere", mission: "Pay for the gloves." }),
   ]);
-  const staged = await stage(claude, {}, undefined, [], {
-    apps: () => [
-      { id: "shop", name: "Shop", does: "where customers order" },
-      {
-        id: "office",
-        name: "Back office",
-        does: "where the team keeps the shop",
-      },
-    ],
-    app: () => new Promise(() => {}),
-    browser: () => Promise.reject(new Error("none")),
-  });
+  const staged = await stage(
+    claude,
+    {},
+    undefined,
+    [],
+    {
+      apps: () => [
+        { id: "shop", name: "Shop", does: "where customers order" },
+        {
+          id: "office",
+          name: "Back office",
+          does: "where the team keeps the shop",
+        },
+      ],
+      app: () => new Promise(() => {}),
+      browser: () => Promise.reject(new Error("none")),
+    },
+    // Kobble's own extensions, Personas among them.
+    true,
+  );
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,

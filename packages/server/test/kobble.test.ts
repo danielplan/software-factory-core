@@ -1,17 +1,9 @@
 import assert from "node:assert/strict";
-import {
-  cpSync,
-  existsSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
-
-import { faceFrom, KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
 import type { Cards } from "../src/cards/cards.ts";
@@ -23,48 +15,16 @@ import {
   type FactoryView,
 } from "../src/extensions/factory/factory-view.ts";
 import {
-  type PersonaPage,
-  type PersonaRow,
   type SignalsView,
   signalsView,
 } from "../src/extensions/signals/views.ts";
+import { plugsOf } from "./plugs.ts";
+import { ACME, EXPORT, kobbleFactory } from "./kobble-factory.ts";
 import { stage } from "./stage.ts";
 
 // Kobble's Signals and Personas as the server serves them: the sync with
 // the live app (the example company's export as a file, and a stand-in live
 // app), and what the buttons change in the files.
-
-const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
-const EXPORT = join(ACME, "live-export.json");
-
-// A factory with the example company's Kobble files, and the live app set
-// in the project's .env when an address is given.
-async function kobbleFactory(live?: string) {
-  const staged = await stage();
-  const root = staged.session.createCompany({ name: "Acme", about: "" });
-  cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
-    recursive: true,
-  });
-  if (live)
-    writeFileSync(
-      join(staged.project, ".env"),
-      `KOBBLE_LIVE_URL=${live}\nKOBBLE_LIVE_TOKEN=secret\n`,
-    );
-  const read = async <T>(path: string) =>
-    (await (await fetch(`${staged.base}${path}`)).json()) as T;
-  const press = async (path: string, body: unknown = {}) => {
-    const response = await staged.post(path, body);
-    return {
-      status: response.status,
-      body: (await response.json()) as Record<string, unknown>,
-    };
-  };
-  const close = () => {
-    staged.session.close();
-    staged.server.close();
-  };
-  return { ...staged, root, read, press, close, store: new KobbleStore(root) };
-}
 
 test("before the live app is set up, sync is simply off", async () => {
   const factory = await kobbleFactory();
@@ -327,85 +287,6 @@ test("an exploration that is no longer open gets no more signals", async () => {
   }
 });
 
-test("personas: listed with their signals, one with all of theirs, a new one", async () => {
-  const factory = await kobbleFactory(pathToFileURL(EXPORT).href);
-  try {
-    await factory.press("/api/kobble/sync");
-    await factory.press("/api/kobble/signals/dismiss", { id: "S-0004" });
-    const { personas } = await factory.read<{ personas: PersonaRow[] }>(
-      "/api/kobble/personas",
-    );
-    assert.deepEqual(
-      personas.map((p) => [p.id, p.origin, p.signals]),
-      [
-        ["bruno", "developer", 2],
-        ["mia", "developer", 4],
-        ["noah", "usage", 1],
-      ],
-    );
-    // Each has a face: its own, or the one from its id.
-    assert.deepEqual(personas[1]?.face, { hat: "phones", color: "pink" });
-    const mia = await factory.read<PersonaPage>("/api/kobble/persona?id=mia");
-    assert.equal(mia.persona.name, "Mia");
-    assert.deepEqual(mia.signals[0]?.personaFace, {
-      hat: "phones",
-      color: "pink",
-    });
-    assert.deepEqual(
-      mia.signals.map((s) => [s.id, s.status]),
-      [
-        ["S-0011", "new"],
-        ["S-0004", "dismissed"],
-        ["S-0003", "new"],
-        ["S-0002", "new"],
-      ],
-    );
-    assert.deepEqual(
-      mia.tests.map((t) => t.id),
-      ["T-0003", "T-0002", "T-0001"],
-    );
-    const none = await fetch(`${factory.base}/api/kobble/persona?id=zoe`);
-    assert.equal(none.status, 409);
-
-    const added = await factory.press("/api/kobble/personas", {
-      name: "Gift Buyer",
-      place: "Vienna",
-      about: "Sends gifts early.",
-    });
-    assert.deepEqual(added.body.persona, {
-      id: "gift-buyer",
-      name: "Gift Buyer",
-      place: "Vienna",
-      about: "Sends gifts early.",
-      origin: "developer",
-      customers: [],
-      // Its kobold from what it is: a cap (nothing matches), the colour
-      // from its name.
-      face: faceFrom({ name: "Gift Buyer" }),
-    });
-    const twin = await factory.press("/api/kobble/personas", {
-      name: "Gift buyer",
-      face: { hat: "beret", color: "violet" },
-    });
-    assert.equal((twin.body.persona as { id: string }).id, "gift-buyer-2");
-    assert.deepEqual((twin.body.persona as { face: unknown }).face, {
-      hat: "beret",
-      color: "violet",
-    });
-    // The kobold's own floppy cap is never a persona's.
-    const flop = await factory.press("/api/kobble/personas", {
-      name: "Copy",
-      face: { hat: "flop", color: "blue" },
-    });
-    assert.equal(flop.status, 409);
-    const nameless = await factory.press("/api/kobble/personas", { name: " " });
-    assert.equal(nameless.status, 409);
-    assert.equal(nameless.body.error, "Say the persona's name.");
-  } finally {
-    factory.close();
-  }
-});
-
 test("a Kobble file that does not fit is refused with its name", async () => {
   const factory = await kobbleFactory();
   try {
@@ -487,7 +368,8 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       },
       coach: { on: false, working: null, also: [], steps: [] },
     } as WorkView;
-    const view = factoryView(factory.store, work);
+    const plugs = plugsOf(factory.store);
+    const view = factoryView(work, plugs);
     assert.deepEqual(
       view.columns.map((column) => [
         column.id,
@@ -518,11 +400,15 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
     assert.deepEqual(view.builder.now, { 51: "Running the checks" });
     assert.equal(columnOf("#41", work), "Done");
     assert.equal(columnOf("#5", work), null);
-    assert.deepEqual(factoryView(factory.store, null).connected, false);
+    assert.deepEqual(factoryView(null, plugs).connected, false);
     const signals = signalsView(
       factory.store,
       { connected: true, address: null, last: null, next: null, problem: null },
-      work,
+      {
+        personas: plugs.personas.all(),
+        missions: plugs.missions.now(),
+        column: (issue) => columnOf(issue, work),
+      },
     );
     assert.equal(
       signals.signals.find((s) => s.id === "S-0007")?.workColumn,

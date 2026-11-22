@@ -11,7 +11,7 @@ import { basename } from "node:path";
 import { run } from "@software-factory/core";
 
 import type { WorkView } from "../../api.ts";
-import { branchOf } from "./builder/branches.ts";
+import { branchOf } from "../../cards/cards.ts";
 import { isFactory, stripMarker } from "./builder/protocol.ts";
 import type { Cards } from "../../cards/cards.ts";
 import { Refused } from "../../refused.ts";

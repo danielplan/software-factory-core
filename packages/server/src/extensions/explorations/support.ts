@@ -5,6 +5,7 @@
 import type { KobbleStore } from "@software-factory/core";
 import { z } from "zod";
 
+import type { PersonasPlug } from "../../plugs/personas.ts";
 import { Refused } from "../../refused.ts";
 import { newExploration, startExploration } from "./actions.ts";
 import { handOff, type SupportPlug } from "../../kobble/support-plug.ts";
@@ -26,6 +27,8 @@ const GUIDE = `**Explorations** (\`#explore\`): an idea thought through with Doo
 
 type On = {
   store: () => KobbleStore;
+  // Personas' plug: the persona an idea is for must be there.
+  personas: () => PersonasPlug | null;
   talks: {
     begin: (id: string) => Promise<void>;
     say: (id: string, text: string) => Promise<void>;
@@ -72,7 +75,7 @@ function exploreWithDoodle(on: On) {
       "Hands a new idea to Doodle: a new exploration, started, where Doodle opens the conversation; takes the person there. Only once they agreed to the title and the problem.",
     input: idea,
     run: (args) => {
-      const made = newExploration(on.store(), args);
+      const made = newExploration(on.store(), args, on.personas());
       startExploration(on.store(), made.id);
       void on.talks.begin(made.id);
       on.changed("explorations");
@@ -88,7 +91,7 @@ function parkIdea(on: On) {
       "Parks an idea for later as an exploration waiting in Explorations › Waiting, without starting it. Only once the team agreed to what you will add.",
     input: idea,
     run: (args) => {
-      const made = newExploration(on.store(), args);
+      const made = newExploration(on.store(), args, on.personas());
       on.changed("explorations");
       return {
         said: `Added ${made.id} “${made.title}”, waiting in Explorations.`,

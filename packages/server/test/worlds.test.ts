@@ -16,7 +16,7 @@ import { checkRecordsHere } from "../src/check-command.ts";
 import type { ExplorationPage } from "../src/extensions/explorations/views.ts";
 import { inGit } from "./git-project.ts";
 import { pretendClaude } from "./pretend-claude.ts";
-import { stage } from "./stage.ts";
+import { kobbleStage } from "./stage.ts";
 
 // The made-up world an exploration's prototypes share: its address for
 // the prototypes (from other ports of this computer), the kobold's world
@@ -31,7 +31,8 @@ type Turn = Parameters<typeof pretendClaude>[0][number];
 // three situations; its prototypes write where the world answers.
 async function worldFactory(turns: Turn[] = []) {
   const pretend = pretendClaude(turns);
-  const staged = await stage(pretend.claude);
+  // With Kobble's own extensions, Explorations among them.
+  const staged = await kobbleStage(pretend.claude);
   const root = staged.session.createCompany({ name: "Acme", about: "" });
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,

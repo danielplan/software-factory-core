@@ -5,7 +5,7 @@
 // board. Which issues Kobble waits for "did it work?" about comes from the
 // records, once the server serves them.
 
-import type { Browser } from "../../personas/persona-tests.ts";
+import type { Browser } from "../../../kobble/browser.ts";
 import { basename, dirname, join } from "node:path";
 
 import {
@@ -16,9 +16,9 @@ import {
   Workspace,
 } from "@software-factory/core";
 
-import { type Cli, realCli } from "../../github/github.ts";
+import type { Cli } from "../../../github-cli.ts";
 import { Refused } from "../../../refused.ts";
-import { cardsFor } from "../../../cards/cards-for.ts";
+import { cardsFor, type TaskBoards } from "../../../cards/cards-for.ts";
 import { readBoard } from "../../../connect/board-file.ts";
 import { homeOf } from "../../../prototypes/copies.ts";
 import { BoardWork, EVERY_MS } from "./board-work.ts";
@@ -26,8 +26,7 @@ import { copyName, Jobs } from "./jobs.ts";
 import {
   type CodeHost,
   codeHostFor,
-  type CodeHostOf,
-  githubCodeHost,
+  type CodeHosts,
 } from "../../../code-host.ts";
 import {
   isRelevant,
@@ -39,9 +38,6 @@ import {
 // Reading the board while GitHub's signals come as they happen.
 const WITH_SIGNALS_MS = 10 * 60_000;
 
-// The code hosts, by the extension that fills the `code` slot with one.
-export type CodeHosts = Readonly<Record<string, CodeHostOf>>;
-
 export type WorkSettings = {
   // The factory's folder and the project around it.
   root: string;
@@ -52,8 +48,10 @@ export type WorkSettings = {
   onChange: () => void;
   waiting?: () => ReadonlySet<number>;
   browser?: () => Promise<Browser>;
-  // The code hosts, by the extension that fills the `code` slot with one.
+  // The code hosts, by the extension that fills the `code` slot with one,
+  // and the trackers' cards, by the one that fills the `tasks` slot.
   codeHosts: CodeHosts;
+  boards: TaskBoards;
 };
 
 export function workFor(
@@ -62,9 +60,9 @@ export function workFor(
   | { work: BoardWork; repository: string; codeHost: CodeHost }
   | { problem: string }
   | null {
-  const { root, project, cli, claude, available, onChange, waiting, browser } =
+  const { root, project, claude, available, onChange, waiting, browser } =
     settings;
-  const found = cardsFor(root, cli);
+  const found = cardsFor(root, settings.boards);
   if ("problem" in found) return null;
   const copies = join(dirname(project), `${basename(project)}-factory-copies`);
   const codeHost = codeHostFor(
@@ -112,7 +110,7 @@ export function workFor(
   return { work, repository: found.repository, codeHost };
 }
 
-// The session's board work: connected once a factory with a board opens,
+// The Factory's board work: connected once a factory with a board opens,
 // connected again when the board changes, stopped when the factory closes.
 export class ConnectedWork {
   private readonly settings: Omit<WorkSettings, "root">;
@@ -131,33 +129,8 @@ export class ConnectedWork {
   // served (the board may connect before).
   private waiting: () => ReadonlySet<number> = () => new Set();
 
-  // From the session's options: the project and the coaches' Claude Code;
-  // the GitHub CLI is the real one unless a test gives one.
-  constructor(options: {
-    project: string;
-    cli?: Cli;
-    coach: { claude: Claude; builderBrowser?: () => Promise<Browser> };
-    available: Available;
-    onChange: () => void;
-    // The code hosts, by the extension that fills the `code` slot; GitHub,
-    // through this CLI, when none are given.
-    codeHosts?: CodeHosts;
-  }) {
-    const cli = options.cli ?? realCli();
-    this.settings = {
-      project: options.project,
-      cli,
-      codeHosts: options.codeHosts ?? {
-        github: (repository) => githubCodeHost(cli, repository),
-      },
-      claude: options.coach.claude,
-      available: options.available,
-      onChange: options.onChange,
-      waiting: () => this.waiting(),
-      ...(options.coach.builderBrowser
-        ? { browser: options.coach.builderBrowser }
-        : {}),
-    };
+  constructor(settings: Omit<WorkSettings, "root" | "waiting">) {
+    this.settings = { ...settings, waiting: () => this.waiting() };
   }
 
   view() {

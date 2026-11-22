@@ -16,7 +16,7 @@ import {
 } from "@software-factory/core";
 import { join } from "node:path";
 
-import type { Route } from "../plugs/extension.ts";
+import type { Route } from "../http.ts";
 import { on } from "../asked.ts";
 import {
   KobbleReleases,

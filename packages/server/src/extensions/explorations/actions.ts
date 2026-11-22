@@ -14,6 +14,8 @@ import {
 import { z } from "zod";
 
 import type { Cards } from "../../cards/cards.ts";
+import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { SpecWriter } from "./spec-writer.ts";
 import { Refused } from "../../refused.ts";
 
@@ -47,16 +49,19 @@ const newSchema = z.object({
 });
 
 // New exploration: a team idea, no signal needed; it waits to be started.
+// The persona it is for, when one is named, must be there (Personas'
+// plug).
 export function newExploration(
   store: KobbleStore,
   body: unknown,
+  personas: PersonasPlug | null,
   now: Date = new Date(),
 ): Exploration {
   const parsed = newSchema.safeParse(body);
   if (!parsed.success)
     throw new Refused(parsed.error.issues.map((i) => i.message).join(" "));
   const { title, problem, persona, issue } = parsed.data;
-  if (persona && !store.get("personas", persona))
+  if (persona && !personas?.get(persona))
     throw new Refused(`There is no persona “${persona}”.`);
   const taken = issue
     ? store.all("explorations").find((one) => one.issue === issue)
@@ -83,7 +88,7 @@ export function parkIdea(
   on: { store: () => KobbleStore; onChange: () => void },
   idea: { title: string; problem: string },
 ): string {
-  const parked = newExploration(on.store(), idea);
+  const parked = newExploration(on.store(), idea, null);
   on.onChange();
   return `Parked ${parked.id} “${parked.title}”, waiting in Explorations.`;
 }
@@ -140,14 +145,15 @@ export async function handOff(
   // Writes the spec the card gets; the short summary when there is none or
   // it cannot.
   write?: SpecWriter,
+  // The agreed prototype's persona tests (Personas' plug); none while
+  // Personas is not installed.
+  missions?: MissionsPlug | null,
 ): Promise<{ issue: number; url: string }> {
   const exploration = open(store, id);
   const board = store.board(id);
   const agreed = prototypeToHandOff(board);
   const connected = cards();
-  const tests = store
-    .all("tests")
-    .filter((test) => agreed?.tests.includes(test.id) ?? false);
+  const tests = missions?.of(agreed?.tests ?? []) ?? [];
   const summary = handoffText(exploration, board, agreed, tests);
   const spec = await write?.({
     exploration,

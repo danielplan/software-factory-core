@@ -13,7 +13,7 @@ import {
   type StageOrder,
 } from "@software-factory/core";
 
-import type { Route } from "./plugs/extension.ts";
+import type { Route } from "./http.ts";
 import { Refused } from "./refused.ts";
 import type { Session } from "./session.ts";
 

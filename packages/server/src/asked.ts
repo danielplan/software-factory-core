@@ -16,6 +16,13 @@ export function field(body: unknown, key: string): string {
   return value;
 }
 
+// A text in the body, which may be empty.
+export function text(body: unknown, key: string): string {
+  const value = (body as Record<string, unknown> | null)?.[key];
+  if (typeof value !== "string") throw new Refused(`Say which ${key}.`);
+  return value;
+}
+
 export function optionalText(body: unknown, key: string): string | undefined {
   const value = (body as Record<string, unknown> | null)?.[key];
   return typeof value === "string" ? value : undefined;

@@ -9,7 +9,7 @@
 
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
-import type { Cli } from "../../github/github.ts";
+import type { Cli } from "../../../github-cli.ts";
 
 const REPOSITORY_EVENTS = [
   "issues",

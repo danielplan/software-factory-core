@@ -17,10 +17,11 @@ import {
   Jobs,
   type JobsOptions,
 } from "../src/extensions/factory/builder/jobs.ts";
-import type { Message } from "../src/extensions/factory/builder/decide.ts";
-import { type CodeHost, githubCodeHost } from "../src/code-host.ts";
-import type { PullRequest } from "../src/extensions/factory/builder/pull-requests.ts";
-import { realCli } from "../src/extensions/github/github.ts";
+import type { Message } from "../src/code-host.ts";
+import { type CodeHost } from "../src/code-host.ts";
+import { githubCodeHost } from "../src/extensions/github/code-host.ts";
+import type { PullRequest } from "../src/code-host.ts";
+import { realCli } from "../src/github-cli.ts";
 import {
   type Card,
   type Cards,

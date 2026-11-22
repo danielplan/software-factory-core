@@ -1,17 +1,25 @@
 // The GitHub board add-on: work tracked on a GitHub board (a project),
 // connected through the GitHub CLI on this computer, which keeps its own
-// sign-in.
+// sign-in. It fills the `tasks` slot (the board's cards, cards.ts) and the
+// `code` slot (branches and pull requests, code-host.ts).
 
 import { defineExtension } from "@software-factory/core";
 
 import { stagesOf, field, labelOf } from "../../connect/fields.ts";
 import { suggestStages } from "../../connect/stages.ts";
 import { Refused } from "../../refused.ts";
-import { githubCodeHost } from "../../code-host.ts";
-import type { AddOn, AddOnHost, Route } from "../../plugs/extension.ts";
-import { type Cli, GitHub, realCli } from "./github.ts";
+import { githubCodeHost } from "./code-host.ts";
+import {
+  addOnRoutes,
+  type ExtensionModule,
+  type Host,
+} from "../../plugs/extension.ts";
+import type { Route } from "../../http.ts";
+import { githubCards, type GitHubBoard } from "./cards.ts";
+import { GitHub } from "./github.ts";
+import { type Cli, realCli } from "../../github-cli.ts";
 
-export function githubAddOn(cli: Cli = realCli()): AddOn {
+export function githubAddOn(cli: Cli = realCli()): ExtensionModule {
   return {
     extension: defineExtension({
       id: "github",
@@ -22,12 +30,21 @@ export function githubAddOn(cli: Cli = realCli()): AddOn {
       // Where the code lives: the only filler of the slot today.
       fills: ["code"],
     }),
-    routes: (host) => routes(new GitHub(cli, host.changed), host),
+    serve: (host) => ({
+      routes: addOnRoutes(
+        "github",
+        routes(new GitHub(cli, host.stateChanged), host),
+      ),
+    }),
     codeHost: (repository) => githubCodeHost(cli, repository),
+    tasks: (entry) => {
+      const board = entry as GitHubBoard;
+      return { cards: githubCards(cli, board), repository: board.repository };
+    },
   };
 }
 
-function routes(github: GitHub, host: AddOnHost): Record<string, Route> {
+function routes(github: GitHub, host: Host): Record<string, Route> {
   return {
     "GET /status": () => github.status(),
     "POST /install": () => host.installTool("gh"),

@@ -18,25 +18,24 @@ import {
   type KobblePersona,
   type KobbleStore,
   type PersonaTest,
-  takeInFindings,
   type TestStep,
 } from "@software-factory/core";
 import { skillsFolder } from "@software-factory/skills";
 import { z } from "zod";
 
 import { Refused } from "../../refused.ts";
+import { type Browser, TestProblem } from "../../kobble/browser.ts";
+import type { SignalsPlug } from "../../plugs/signals.ts";
 import { inLanguage } from "../../language.ts";
-
-// A reason a test cannot go on, said in plain words.
-export class TestProblem extends Error {}
-
-export type Browser = { url: string; close: () => void };
 
 export type TestOptions = {
   claude: Claude;
   // The project, where the agents run (they read nothing in it).
   cwd: string;
   store: () => KobbleStore;
+  // Signals' plug, where the findings go; none while Signals is not
+  // installed, and then a test files nothing.
+  signals: () => SignalsPlug | null;
   // The address of the app under test, started on this computer: the
   // product (or the first with a web address) as it is now (main), or a
   // prototype's branch (in the world of the persona's situation, when it
@@ -270,21 +269,27 @@ export class PersonaTests {
       ].join("\n\n"),
     );
     const { signals } = answerOf(said, findingsSchema, "signals");
-    return takeInFindings(this.options.store(), {
-      persona: persona.id,
-      at: this.now(),
-      findings: signals.map((signal) => {
-        const step = signal.step ? steps[signal.step - 1] : undefined;
-        return {
-          type: signal.type,
-          text: signal.text,
-          step:
-            step && signal.step
-              ? { test: test.id, number: signal.step, did: step.did }
-              : null,
-        };
-      }),
-    }).map((signal) => signal.id);
+    const at = this.now();
+    const reported = signals.map((signal) => {
+      const step = signal.step ? steps[signal.step - 1] : undefined;
+      return {
+        type: signal.type,
+        source: "test" as const,
+        sourceId: null,
+        customer: null,
+        persona: persona.id,
+        at,
+        text: signal.text,
+        status: "new" as const,
+        ...(step && signal.step
+          ? { step: { test: test.id, number: signal.step, did: step.did } }
+          : {}),
+        to: null,
+      };
+    });
+    return (this.options.signals()?.report(reported) ?? []).map(
+      (signal) => signal.id,
+    );
   }
 
   private async ask(

@@ -1,23 +1,24 @@
 // The posts of the public feedback board arriving as signals: in a factory
 // that reads the board (`FACTORY_FEEDBACK_READS=yes` in `team.env`, the
 // makers' own), every open post that is not this person's own becomes an
-// ordinary signal with the source `feedback`, once. The kobold then matches
-// each new one to the persona of the product it fits best, with a short
-// reason; a post it is not sure about stays with none, and a person can
-// change or remove a match.
+// ordinary signal with the source `feedback`, once, through Signals' plug
+// (none arrive while Signals is not installed). The kobold then matches
+// each new one to the persona of the product it fits best (Personas'
+// plug), with a short reason; a post it is not sure about stays with none,
+// and a person can change or remove a match.
 
 import { randomUUID } from "node:crypto";
 
 import {
-  alreadyFor,
   type Claude,
   type KobbleSignal,
-  type KobbleStore,
   readSettings,
   TEAM_FILE,
 } from "@software-factory/core";
 import { z } from "zod";
 
+import type { PersonasPlug } from "../plugs/personas.ts";
+import type { NewSignal, SignalsPlug } from "../plugs/signals.ts";
 import type { FeedbackBoard, Post } from "./board.ts";
 
 export const READS_KEY = "FACTORY_FEEDBACK_READS";
@@ -40,7 +41,8 @@ const INSTRUCTIONS = `You match posts from a public feedback board to the person
 
 type Options = {
   board: FeedbackBoard;
-  store: () => KobbleStore | null;
+  signals: () => SignalsPlug | null;
+  personas: () => PersonasPlug | null;
   claude: Claude;
   // The factory's folder (its team.env says whether it reads the board) and
   // where the kobold works.
@@ -89,10 +91,10 @@ export class FeedbackArrivals {
   }
 
   private async once(): Promise<number> {
-    const store = this.options.store();
-    if (!store || !this.reads()) return 0;
+    const signals = this.options.signals();
+    if (!signals || !this.reads()) return 0;
     const own = new Set(this.options.board.sent().map((one) => one.number));
-    const known = new Set(store.all("signals").map((one) => one.sourceId));
+    const known = new Set(signals.all().map((one) => one.sourceId));
     const fresh = (await this.options.board.posts()).filter(
       (post) =>
         post.state !== "done" &&
@@ -100,19 +102,9 @@ export class FeedbackArrivals {
         !known.has(sourceIdOf(post.number)),
     );
     if (fresh.length === 0) return 0;
-    const added = fresh.map((post) => {
-      const signal = signalOf(store, post);
-      return store.put("signals", {
-        ...signal,
-        already: alreadyFor(
-          signal.text,
-          store.all("explorations"),
-          store.all("signals"),
-        ),
-      });
-    });
+    const added = signals.report(fresh.map(signalOf));
     this.options.onChange();
-    await this.match(store, added, fresh);
+    await this.match(signals, added, fresh);
     this.options.onChange();
     return added.length;
   }
@@ -120,11 +112,11 @@ export class FeedbackArrivals {
   // Asks the kobold which persona each new post fits; nothing is changed
   // when it cannot say.
   private async match(
-    store: KobbleStore,
+    signals: SignalsPlug,
     added: KobbleSignal[],
     posts: Post[],
   ): Promise<void> {
-    const personas = store.all("personas");
+    const personas = this.options.personas()?.all() ?? [];
     if (personas.length === 0) return;
     const result = await this.options.claude
       .run({
@@ -157,7 +149,7 @@ export class FeedbackArrivals {
       );
       const persona = personas.find((one) => one.id === match.persona);
       if (signal && persona)
-        store.put("signals", {
+        signals.change({
           ...signal,
           persona: persona.id,
           ...(match.why?.trim() ? { why: match.why.trim() } : {}),
@@ -183,9 +175,8 @@ function textOf(post: Post): string {
   return said && said !== post.title ? `${post.title}\n\n${said}` : post.title;
 }
 
-function signalOf(store: KobbleStore, post: Post): KobbleSignal {
+function signalOf(post: Post): NewSignal {
   return {
-    id: store.nextId("signals"),
     type: post.kind === "bug" ? "bug" : "request",
     source: "feedback",
     sourceId: sourceIdOf(post.number),
@@ -195,6 +186,5 @@ function signalOf(store: KobbleStore, post: Post): KobbleSignal {
     text: textOf(post),
     status: "new",
     to: null,
-    already: null,
   };
 }

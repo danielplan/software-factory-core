@@ -4,8 +4,9 @@
 // with the skills, not this code. The card's thread is the memory: each job
 // gets the whole conversation instead of a saved session.
 
-import { branchOf } from "./branches.ts";
-import { type BoardCard, type Message, reviewTimeline } from "./decide.ts";
+import { branchOf } from "../../../cards/cards.ts";
+import { type BoardCard, reviewTimeline } from "./decide.ts";
+import { type Message } from "../../../code-host.ts";
 import { isFactory, stripMarker } from "./protocol.ts";
 
 const GUIDE =

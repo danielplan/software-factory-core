@@ -3,12 +3,12 @@
 // notes in words), the pull request, and its type, which can be changed;
 // a card not wanted any more is deleted (closed, off the board).
 
-import type { Route } from "../../plugs/extension.ts";
-import type { Cli } from "../github/github.ts";
+import type { Route } from "../../http.ts";
 import { field } from "../../asked.ts";
-import { branchOf } from "./builder/branches.ts";
+import { branchOf } from "../../cards/cards.ts";
 import { type Note, readNote, stripMarker } from "./builder/protocol.ts";
-import { type PullRequests, RESOLVE_ASK } from "./builder/pull-requests.ts";
+import { RESOLVE_ASK } from "./builder/pull-requests.ts";
+import { type PullRequests } from "../../code-host.ts";
 import {
   aboutOf,
   CARD_TYPES,
@@ -17,7 +17,7 @@ import {
   planOf,
   typeOf,
 } from "../../cards/cards.ts";
-import { cardsFor } from "../../cards/cards-for.ts";
+import { cardsFor, type TaskBoards } from "../../cards/cards-for.ts";
 import { Refused } from "../../refused.ts";
 
 export type CardPanel = {
@@ -60,12 +60,13 @@ const STATUS: Partial<Record<Note, string>> = {
 
 export function factoryCardRoutes(
   factory: string,
-  cli: Cli,
+  // Where work is tracked: the trackers' cards (the `tasks` slot).
+  boards: TaskBoards,
   // Where the code lives: the card's pull request is there.
   codeHost: () => PullRequests,
 ): Record<string, Route> {
   const connected = () => {
-    const found = cardsFor(factory, cli);
+    const found = cardsFor(factory, boards);
     if ("problem" in found) throw new Refused(found.problem);
     return found;
   };

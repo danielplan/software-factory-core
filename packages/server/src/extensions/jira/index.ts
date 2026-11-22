@@ -7,10 +7,15 @@ import { defineExtension } from "@software-factory/core";
 import { stagesOf, field, labelOf } from "../../connect/fields.ts";
 import { suggestStages } from "../../connect/stages.ts";
 import { Refused } from "../../refused.ts";
-import type { AddOn, AddOnHost, Route } from "../../plugs/extension.ts";
+import {
+  addOnRoutes,
+  type ExtensionModule,
+  type Host,
+} from "../../plugs/extension.ts";
+import type { Route } from "../../http.ts";
 import { type Fetcher, jiraColumns, jiraProjects, siteOf } from "./jira.ts";
 
-export function jiraAddOn(fetcher: Fetcher = fetch): AddOn {
+export function jiraAddOn(fetcher: Fetcher = fetch): ExtensionModule {
   return {
     extension: defineExtension({
       id: "jira",
@@ -37,11 +42,11 @@ export function jiraAddOn(fetcher: Fetcher = fetch): AddOn {
         },
       ],
     }),
-    routes: (host) => routes(fetcher, host),
+    serve: (host) => ({ routes: addOnRoutes("jira", routes(fetcher, host)) }),
   };
 }
 
-function routes(fetcher: Fetcher, host: AddOnHost): Record<string, Route> {
+function routes(fetcher: Fetcher, host: Host): Record<string, Route> {
   return {
     "POST /projects": (body) => jiraProjects(fetcher, loginOf(body)),
     "POST /columns": async (body) => {

@@ -11,20 +11,12 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import {
-  type Claude,
-  FACTORY_FOLDER,
-  type KobbleStore,
-} from "@software-factory/core";
+import type { Claude } from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
-import type { Route } from "../plugs/extension.ts";
+import type { Route } from "../http.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
-import type { Cli } from "../extensions/github/github.ts";
-import { supportCards } from "../extensions/factory/card-look.ts";
-import { connectedCards } from "./connected-cards.ts";
-import { kobblePlugs, type Reach } from "./plugs/index.ts";
 import { plugsGuide, type SupportPlug } from "./support-plug.ts";
 import type { SupportTools } from "./support-tools.ts";
 import { inLanguage } from "../language.ts";
@@ -164,39 +156,4 @@ export function supportRoutes(support: SupportTalk): Record<string, Route> {
       return support.view();
     },
   };
-}
-
-// The support kobold for the factory's project, with the plugs of Kobble's
-// own extensions, heard while each is installed; its changes told as
-// "support".
-export function supportOf(
-  options: Omit<Parameters<typeof supportCards>[0], "cards"> & {
-    claude: Claude;
-    cli: Cli;
-    isOn: (extension: string) => boolean;
-    supportGuides: () => { title: string; file: string }[];
-  },
-  store: () => KobbleStore,
-  changed: (what: string) => void,
-  reach: Reach,
-): SupportTalk {
-  const board = () =>
-    connectedCards(join(options.project, FACTORY_FOLDER), options.cli);
-  const plugs = kobblePlugs({
-    ...reach,
-    store,
-    changed,
-    board,
-    cards: supportCards({ ...options, cards: board }),
-    isOn: options.isOn,
-  });
-  return new SupportTalk({
-    claude: options.claude,
-    project: options.project,
-    onChange: () => {
-      changed("support");
-    },
-    plugs: () => plugs().filter((plug) => options.isOn(plug.extension)),
-    guides: options.supportGuides,
-  });
 }

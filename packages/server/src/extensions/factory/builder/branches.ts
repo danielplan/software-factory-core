@@ -2,11 +2,7 @@
 
 import { run, stageAllButSettings } from "@software-factory/core";
 
-// The same branch a prototype of the card is pushed to while planning (the
-// plan skill), so the build continues it.
-export function branchOf(number: number): string {
-  return `factory/issue-${String(number)}`;
-}
+import { branchOf } from "../../../cards/cards.ts";
 
 // The commit the copy is on: a session that moved it did some work.
 export async function headOf(folder: string): Promise<string> {
