@@ -80,10 +80,39 @@ can see and choose, the Marketplace with its three tabs and the details
 dialog, install with its confirm, remove with its confirm and refusals,
 Factory always needed, pages leaving the sidebar.
 
-Step 2 (Home from blocks) is next: Arrange Home, Add a block, Reset layout,
-`factory/home.json`; the blocks the extensions already name are `status`,
-`waiting`, `loop`, `reviews` (Factory), `exploring`, `signals`. Read the
-prototype's `dashboard/home-blocks.tsx`, `dashboard/home-page.tsx` and the
-server's `home-layout.ts`. The motion CSS for it (`m-home-in`, `m-ring`) and
-`lib/use-flip.ts` (with `act` and `enter`) are already in. Step 3 not
-started.
+Step 2 (Home from blocks) is built and checked: Arrange Home on the title
+line; in arrange mode Reset layout (asks first), Add a block and Done, blocks
+with a grip, move up and down, Hide, and the dashed slot at the end; the Add
+dialog (installed extensions at the left, their blocks at the right, with a
+preview and Add or "On Home"); the new block follows the pointer to a drop
+line, with ↑ ↓ Enter and Esc for the keyboard; one Home for the team in
+`factory/home.json` (GET and POST `/api/home-layout`, `server/src/home-layout.ts`).
+Blocks: Factory's product line, what waits, the loop and open reviews;
+Explorations' ideas being explored; Signals' new signals. Only blocks of
+installed extensions show.
+
+![Home as it was, still the start](issue-27-extensions-and-marketplace/home-start.png)
+![Arranging Home](issue-27-extensions-and-marketplace/home-arranging.png)
+![Adding a block](issue-27-extensions-and-marketplace/home-add-block.png)
+![A block in hand, with its drop line](issue-27-extensions-and-marketplace/home-placing.png)
+![The block placed](issue-27-extensions-and-marketplace/home-placed.png)
+![Reset layout asks first](issue-27-extensions-and-marketplace/home-reset-asks.png)
+
+Decisions in step 2:
+
+- No file means Home starts with today's blocks (status, waiting, loop), the
+  others off Home: so no migration is needed, and nothing for a company to do.
+- The file keeps blocks by id and only checks their shape, so a block of a
+  removed extension stays in the file and returns with it; a block an
+  extension brings later is added off Home.
+- Differences from the prototype: no made-up "Failed check" block (from the
+  made-up Verification extension) and no made-up waiting items; the empty
+  states are real; blocks wait for the layout and for what they show, and
+  come in place with no motion on first load (the team's later change to the
+  prototype); the motion is only for what the person does (move, add, hide).
+  The words of the blocks and of arranging are in the catalogue
+  (`home.arrange`, `home.blockAbout`, `home.blockEmpty`, EN, IT, DE).
+- Not tried in the browser: dragging a block with the mouse (the move
+  buttons, hiding and the keyboard were); it is the prototype's code.
+
+Step 3 is not started.

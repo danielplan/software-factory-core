@@ -377,7 +377,14 @@ what it needs; removing one that another needs, or an always-needed one, is
 refused; a factory with a need missing does not start, and says why
 (`assembleFactory`). Kobble's own pieces are extensions too (Factory,
 Explorations, Signals, Personas, Releases: `server/src/add-ons/kobble.ts`),
-and the page of one that is removed leaves the sidebar. The first add-ons
+and the page of one that is removed leaves the sidebar. Home is built
+from the blocks the installed extensions bring (`brings.blocks`): the team
+arranges it with Arrange Home, and the arrangement is kept for everybody in
+`factory/home.json` (`server/src/home-layout.ts`, GET and POST
+`/api/home-layout`). With no file Home shows what it showed before it could be
+arranged (the product line, what waits, the loop); a block whose extension is
+removed leaves Home and returns in its place with it; a block an extension
+brings later starts off Home. The first add-ons
 are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
 shown as connections, not as extensions. What each adds:
 
