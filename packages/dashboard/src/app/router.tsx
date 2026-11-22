@@ -66,7 +66,36 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
   // Setting up fills the window, with nothing but the coach and the
   // canvas: the pages come once there is a factory.
   if (state.mode === "setup") return <GuidedSetup state={state} />;
+  // Prototype: the start of setting up, with a made-up folder (?state=).
+  if (window.location.hash.startsWith("#setup"))
+    return <GuidedSetup state={madeUpSetup(state)} />;
   return <FactoryDashboard state={state} />;
+}
+
+// A made-up setup that has not started, for the prototype's start screen.
+function madeUpSetup(state: FactoryState): Extract<State, { mode: "setup" }> {
+  return {
+    mode: "setup",
+    project: "/Users/you/projects/bakery-shop-ordering-and-delivery-app",
+    kits: state.kits,
+    jobs: [],
+    coach: {
+      messages: [],
+      writing: null,
+      activity: null,
+      working: false,
+      started: false,
+      problem: null,
+      draft: {
+        cards: [],
+        links: [],
+        places: {},
+        focus: { ids: [], areas: [], n: 0 },
+      },
+      phase: "plan",
+      made: false,
+    },
+  };
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {

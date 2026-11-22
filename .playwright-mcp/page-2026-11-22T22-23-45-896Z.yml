@@ -1,0 +1,69 @@
+- generic [ref=f2e4]:
+  - navigation "Setup steps" [ref=f2e5]:
+    - generic [ref=f2e6]: kobble
+    - paragraph [ref=f2e16]: Setting up bakery-shop-ordering-and-delivery-app
+    - list [ref=f2e17]:
+      - listitem [ref=f2e18]:
+        - button "0 Welcome The kobold reads" [disabled] [ref=f2e19]:
+          - generic [ref=f2e20]: "0"
+          - generic [ref=f2e21]:
+            - text: Welcome
+            - generic [ref=f2e22]: The kobold reads
+      - listitem [ref=f2e23]:
+        - button "1 Your product What it is, how far" [disabled] [ref=f2e24]:
+          - generic [ref=f2e25]: "1"
+          - generic [ref=f2e26]:
+            - text: Your product
+            - generic [ref=f2e27]: What it is, how far
+      - listitem [ref=f2e28]:
+        - button "2 Who it’s for The people you build for" [disabled] [ref=f2e29]:
+          - generic [ref=f2e30]: "2"
+          - generic [ref=f2e31]:
+            - text: Who it’s for
+            - generic [ref=f2e32]: The people you build for
+      - listitem [ref=f2e33]:
+        - button "3 Team and board Who works on it, where" [disabled] [ref=f2e34]:
+          - generic [ref=f2e35]: "3"
+          - generic [ref=f2e36]:
+            - text: Team and board
+            - generic [ref=f2e37]: Who works on it, where
+      - listitem [ref=f2e38]:
+        - button "4 How Kobble works Add-ons, the look" [disabled] [ref=f2e39]:
+          - generic [ref=f2e40]: "4"
+          - generic [ref=f2e41]:
+            - text: How Kobble works
+            - generic [ref=f2e42]: Add-ons, the look
+      - listitem [ref=f2e43]:
+        - button "5 Set up Kobble writes it all" [disabled] [ref=f2e44]:
+          - generic [ref=f2e45]: "5"
+          - generic [ref=f2e46]:
+            - text: Set up
+            - generic [ref=f2e47]: Kobble writes it all
+      - listitem [ref=f2e48]:
+        - button "6 First exploration Start with real work" [disabled] [ref=f2e49]:
+          - generic [ref=f2e50]: "6"
+          - generic [ref=f2e51]:
+            - text: First exploration
+            - generic [ref=f2e52]: Start with real work
+    - generic [ref=f2e53]:
+      - paragraph [ref=f2e54]: About 7 minutes. You can change all of it later in Settings and Personas.
+      - generic [ref=f2e66]:
+        - generic [ref=f2e67]: Sprocket
+        - generic [ref=f2e68]: Here to help
+  - main [ref=f2e69]:
+    - generic [ref=f2e72]:
+      - generic [ref=f2e82]:
+        - heading "I can’t tell what this folder is." [level=1] [ref=f2e83]
+        - paragraph [ref=f2e84]: Which one is it? I’ll set Kobble up the way that fits.
+      - generic [ref=f2e85]:
+        - generic [ref=f2e86]: /Users/you/projects/bakery-shop-ordering-and-delivery-app
+        - generic [ref=f2e92]: I found 14 documents (notes, a product brief) and no code.
+      - radiogroup "New or existing" [ref=f2e93]:
+        - radio "Something new Nothing built yet. I interview you, make your apps from the kits’ starters and build a first prototype." [ref=f2e94] [cursor=pointer]:
+          - generic [ref=f2e99]:
+            - generic [ref=f2e100]: Something new
+            - generic [ref=f2e101]: Nothing built yet. I interview you, make your apps from the kits’ starters and build a first prototype.
+        - radio "Something we have There is code already. I recognise your apps, check them, and bring over your old docs and backlog." [ref=f2e102] [cursor=pointer]:
+          - generic [ref=f2e114]:
+            - generic [ref=f2e115]: Something we have
+            - generic [ref=f2e116]: There is code already. I recognise your apps, check them, and bring over your old docs and backlog.

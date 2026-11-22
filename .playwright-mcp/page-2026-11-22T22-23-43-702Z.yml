@@ -1,0 +1,79 @@
+- generic [ref=f1e4]:
+  - navigation "Setup steps" [ref=f1e5]:
+    - generic [ref=f1e6]: kobble
+    - paragraph [ref=f1e16]: Setting up bakery-shop-ordering-and-delivery-app
+    - list [ref=f1e17]:
+      - listitem [ref=f1e18]:
+        - button "0 Welcome The kobold reads" [disabled] [ref=f1e19]:
+          - generic [ref=f1e20]: "0"
+          - generic [ref=f1e21]:
+            - text: Welcome
+            - generic [ref=f1e22]: The kobold reads
+      - listitem [ref=f1e23]:
+        - button "1 Your product What it is, how far" [disabled] [ref=f1e24]:
+          - generic [ref=f1e25]: "1"
+          - generic [ref=f1e26]:
+            - text: Your product
+            - generic [ref=f1e27]: What it is, how far
+      - listitem [ref=f1e28]:
+        - button "2 Who it’s for The people you build for" [disabled] [ref=f1e29]:
+          - generic [ref=f1e30]: "2"
+          - generic [ref=f1e31]:
+            - text: Who it’s for
+            - generic [ref=f1e32]: The people you build for
+      - listitem [ref=f1e33]:
+        - button "3 Team and board Who works on it, where" [disabled] [ref=f1e34]:
+          - generic [ref=f1e35]: "3"
+          - generic [ref=f1e36]:
+            - text: Team and board
+            - generic [ref=f1e37]: Who works on it, where
+      - listitem [ref=f1e38]:
+        - button "4 How Kobble works Add-ons, the look" [disabled] [ref=f1e39]:
+          - generic [ref=f1e40]: "4"
+          - generic [ref=f1e41]:
+            - text: How Kobble works
+            - generic [ref=f1e42]: Add-ons, the look
+      - listitem [ref=f1e43]:
+        - button "5 Set up Kobble writes it all" [disabled] [ref=f1e44]:
+          - generic [ref=f1e45]: "5"
+          - generic [ref=f1e46]:
+            - text: Set up
+            - generic [ref=f1e47]: Kobble writes it all
+      - listitem [ref=f1e48]:
+        - button "6 First exploration Start with real work" [disabled] [ref=f1e49]:
+          - generic [ref=f1e50]: "6"
+          - generic [ref=f1e51]:
+            - text: First exploration
+            - generic [ref=f1e52]: Start with real work
+    - generic [ref=f1e53]:
+      - paragraph [ref=f1e54]: About 7 minutes. You can change all of it later in Settings and Personas.
+      - generic [ref=f1e66]:
+        - generic [ref=f1e67]: Sprocket
+        - generic [ref=f1e68]: Here to help
+  - main [ref=f1e69]:
+    - generic [ref=f1e72]:
+      - generic [ref=f1e82]:
+        - heading "Let’s make something new." [level=1] [ref=f1e83]
+        - paragraph [ref=f1e84]:
+          - text: This folder looks new to me.
+          - button "Actually, we have code" [ref=f1e85] [cursor=pointer]
+      - generic [ref=f1e86]:
+        - generic [ref=f1e87]: /Users/you/projects/bakery-shop-ordering-and-delivery-app
+        - generic [ref=f1e93]: The folder is empty.
+      - list [ref=f1e94]:
+        - listitem [ref=f1e95]:
+          - generic [ref=f1e103]:
+            - generic [ref=f1e104]: "1."
+            - text: "A short interview: who it’s for and what it does"
+        - listitem [ref=f1e105]:
+          - generic [ref=f1e112]:
+            - generic [ref=f1e113]: "2."
+            - text: Your apps, made from the kits’ starters
+        - listitem [ref=f1e114]:
+          - generic [ref=f1e118]:
+            - generic [ref=f1e119]: "3."
+            - text: A first prototype you can click
+      - generic [ref=f1e130]:
+        - paragraph [ref=f1e131]: First question. Who is it for, and what is the one thing they should be able to do?
+        - paragraph [ref=f1e134]:
+          - generic [ref=f1e137]: Thanks, “Bakery owners who want to take orders online”. One moment, I’m thinking about my next question…

@@ -13,7 +13,7 @@ import { useKoboldName } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCoachCall } from "./coach/coach-call";
-import { CoachStart } from "./coach/coach-chat";
+import { StartChoice } from "./start-choice";
 
 import { KoboldSays } from "./kobold-says";
 import { Welcome } from "./welcome";
@@ -98,17 +98,7 @@ function Content({
 }>) {
   const t = useT();
   const { coach } = state;
-  if (!coach.started)
-    return (
-      <div className="grid justify-items-center gap-4 pt-16 text-center">
-        <KoboldHead size={88} />
-        <h1 className="text-2xl font-semibold tracking-[-0.015em]">
-          {t.setup.hi}
-        </h1>
-        <p className="max-w-[56ch] text-muted-foreground">{t.setup.tellMe}</p>
-        <CoachStart coach={coach} call={call} />
-      </div>
-    );
+  if (!coach.started) return <StartChoice />;
   if (step.id === "hello") return <Welcome coach={coach} />;
   const shownStep = stepIn(t, step);
   const says = <KoboldSays coach={coach} step={step} />;
