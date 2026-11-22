@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
+import { Markdown } from "@/components/markdown";
 
 import type { HomeInput } from "@/lib/home-view";
 
@@ -27,7 +28,7 @@ export function ExploringBlock({
             <span className="truncate text-[13px]">{row.title}</span>
             {row.line && (
               <span className="truncate text-xs text-muted-foreground">
-                {row.line}
+                <Markdown text={row.line} inline />
               </span>
             )}
           </a>

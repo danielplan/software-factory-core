@@ -34,6 +34,9 @@ extension brings later starts off Home.
 
 - Home never imports an extension: the page's app hands it the blocks each
   installed extension's module brings (`packages/dashboard/src/app/extensions.ts`).
+- A row's one-line preview of what a kobold, the builder or the live app
+  said (what waits, the exploring and signals blocks) is shown as Markdown
+  in one line (`<Markdown inline />`), never with its stars and marks.
 
 ## Where it lives
 

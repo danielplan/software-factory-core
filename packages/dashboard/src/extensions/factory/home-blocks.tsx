@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import type { AddOnView, FactoryState } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
+import { Markdown } from "@/components/markdown";
 import { StatusLight } from "@/components/status-light";
 import { Card } from "@/components/ui/card";
 
@@ -156,7 +157,7 @@ function WaitingRow({ item }: Readonly<{ item: WaitingItem }>) {
         </span>
         {item.about && (
           <span className="block truncate text-xs text-muted-foreground">
-            {item.about}
+            <Markdown text={item.about} inline />
           </span>
         )}
       </span>
