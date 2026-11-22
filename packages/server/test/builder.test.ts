@@ -587,3 +587,46 @@ test("the owner asks the builder about a stuck card: it answers on the card from
   assert.equal(prompts.length, 1);
   work.switch("build", false);
 });
+
+test("a reply that fails is said on the card once, not tried again on every reading", async () => {
+  const { copy } = await project();
+  const kept = new Map<number, Kept>([
+    [
+      32,
+      {
+        title: "Big",
+        stage: "backlog",
+        body: withPlan("", "The plan."),
+        labels: [STUCK_LABEL],
+        comments: [
+          {
+            author: "factory",
+            body: markComment("Which way?", "blocked"),
+            at: now(),
+            where: "card",
+          },
+        ],
+      },
+    ],
+  ]);
+  let tries = 0;
+  const claude = {
+    run: (options: { session?: { id: string } }) => {
+      tries++;
+      assert.ok(options.session?.id);
+      return Promise.reject(new Error("Claude Code is gone"));
+    },
+  };
+  const { work } = setUp(kept, claude, copy, []);
+  work.switch("build", true);
+  await settled(work);
+  await work.ask(32, "What is this about?");
+  await settled(work);
+  await work.refresh();
+  await settled(work);
+  assert.equal(tries, 1);
+  const last = kept.get(32)?.comments.at(-1)?.body ?? "";
+  assert.equal(readNote(last), "replied");
+  assert.match(last, /could not answer: Claude Code is gone/);
+  work.switch("build", false);
+});
