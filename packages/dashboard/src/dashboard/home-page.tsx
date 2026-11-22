@@ -10,6 +10,7 @@ import {
   FlaskConical,
   Inbox,
   Plus,
+  RotateCcw,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
@@ -77,6 +78,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const t = useT();
   const [arranging, setArranging] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [resetting, setResetting] = useState(false);
   // B: only the blocks of installed extensions are on offer.
   const { all } = useExtensions(state);
   const installed =
@@ -235,6 +237,19 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
           <>
             {arranging && (
               <Button
+                variant="ghost"
+                size="pill"
+                className="text-muted-foreground"
+                onClick={() => {
+                  setResetting(true);
+                }}
+              >
+                <RotateCcw aria-hidden />
+                Reset layout
+              </Button>
+            )}
+            {arranging && (
+              <Button
                 variant="ring"
                 size="pill"
                 onClick={() => {
@@ -250,6 +265,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
               onClick={() => {
                 setArranging(!arranging);
                 setAdding(false);
+                setResetting(false);
               }}
             />
           </>
@@ -261,6 +277,8 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
         installed={installed}
         adding={adding}
         onAdding={setAdding}
+        resetting={resetting}
+        onResetting={setResetting}
       />
     </>
   );

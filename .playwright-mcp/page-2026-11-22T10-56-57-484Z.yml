@@ -1,0 +1,131 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=1]: Home
+                - generic:
+                  - button: Reset layout
+                  - button: Add a block
+                  - button: Done
+              - paragraph: What waits for you, and where the work is.
+            - generic:
+              - generic:
+                - generic: Product statusFactory
+                - button [disabled]
+                - button
+                - button: Hide
+              - generic:
+                - generic: The product is stopped · Bolt is resting
+                - link:
+                  - /url: "#system"
+                  - text: System
+            - generic:
+              - generic:
+                - generic: Waiting for youFactory
+                - button
+                - button
+                - button: Hide
+              - generic:
+                - generic:
+                  - generic: Continue
+                  - generic:
+                    - generic: The basket is empty when people come back to pay
+                    - generic: B is agreed. You can hand it off.
+                  - link:
+                    - /url: "#explore/X-1"
+                    - text: Continue
+                - generic:
+                  - generic: Continue
+                  - generic:
+                    - generic: One invoice a month for businesses
+                    - generic: Does his accountant need one invoice, or is one payment enough?
+                  - link:
+                    - /url: "#explore/X-2"
+                    - text: Continue
+            - generic:
+              - generic:
+                - generic: The loopFactory
+                - button
+                - button [disabled]
+                - button: Hide
+              - generic:
+                - link:
+                  - /url: "#signals"
+                  - generic: Signals
+                  - generic: 0 new
+                - link:
+                  - /url: "#explore"
+                  - generic: Explorations
+                  - generic: 2 being explored
+                  - generic: The basket is empty when people come back to pay
+                  - generic: One invoice a month for businesses
+                - link:
+                  - /url: "#build"
+                  - generic: Factory
+                  - generic: 0 to build
+                - link:
+                  - /url: "#build"
+                  - generic: Done
+                  - generic: 0 merged
+            - button: Add a block
+        - region [ref=e277]:
+          - button [ref=e278] [cursor=pointer]:
+            - generic [ref=e213]: Ask Sprocket anything
+            - generic [ref=e214]: ⌘J
+  - dialog "Reset Home to Kobble's layout?" [ref=e280]:
+    - heading "Reset Home to Kobble's layout?" [level=2] [ref=e281]
+    - paragraph [ref=e282]: Your arrangement is lost for the whole team.
+    - generic [ref=e283]:
+      - button "Cancel" [active] [ref=e284] [cursor=pointer]
+      - button "Reset" [ref=e285] [cursor=pointer]
+    - button "Close" [ref=e286] [cursor=pointer]

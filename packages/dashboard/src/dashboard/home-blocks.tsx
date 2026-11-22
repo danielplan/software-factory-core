@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 
@@ -215,6 +216,8 @@ export function HomeBlocks({
   installed,
   adding,
   onAdding,
+  resetting,
+  onResetting,
 }: Readonly<{
   blocks: Record<BlockId, ReactNode>;
   editing: boolean;
@@ -222,6 +225,9 @@ export function HomeBlocks({
   // The "Add a block" dialog, opened from the page's header or the empty slot.
   adding: boolean;
   onAdding: (open: boolean) => void;
+  // The "Reset layout" question, opened from the page's header.
+  resetting: boolean;
+  onResetting: (open: boolean) => void;
 }>) {
   const [layout, change] = useLayout();
   const [dragging, setDragging] = useState<BlockId | null>(null);
@@ -321,19 +327,36 @@ export function HomeBlocks({
             <Plus aria-hidden className="size-4" />
             Add a block
           </button>
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className={button}
-              onClick={() => {
-                change(DEFAULT);
-              }}
-            >
-              Start again
-            </button>
-          </div>
         </>
       )}
+      <Dialog open={resetting && arranging} onOpenChange={onResetting}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogTitle>Reset Home to Kobble's layout?</DialogTitle>
+          <DialogDescription>
+            Your arrangement is lost for the whole team.
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ring"
+              size="pill"
+              onClick={() => {
+                onResetting(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="pill"
+              onClick={() => {
+                change(DEFAULT);
+                onResetting(false);
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <AddBlock
         layout={layout}
         change={change}
