@@ -22,8 +22,7 @@ The kits are in `packages/kits/`; the kit's type is `kitSchema` and `Kit` in
      check command, which the factory runs before a pull request;
    - `detect(folder)`: whether existing code is such a product, with its
      name, commands and port;
-   - `partsFor(product)`: the programs that run it (a part that needs a
-     backend gets the backend's address as `BACKEND_URL` from the core);
+   - `partsFor(product)`: the programs that run it;
    - `create(folder, name)`: how to make a new one, from its starter or the
      framework's own generator;
    - `mcp`: the tools its agents use (its documentation, its checks).
