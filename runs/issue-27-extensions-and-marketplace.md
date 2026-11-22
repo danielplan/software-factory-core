@@ -57,6 +57,33 @@ answer which of these are done, partly done or not started.
 - Kits are not extensions; their Marketplace cards come from `state.kits`
   and the products that use them.
 
+- The Marketplace address is `#extensions` (tabs `#extensions/connections`,
+  `#extensions/kits`); the old `#add-ons` and `#settings/add-ons` lead there.
+  The Add-ons tab of Settings is gone: an extension's settings are in its
+  details. Words: `i18n/areas/market-*.ts`, names and lines of Kobble's own
+  extensions by id.
+- The code connection is always GitHub, "In use": it is the only filler of
+  the slot today. The board cards say In use by `company.tracker`.
+- "Made by" for an extension: Kobble's when `core`, otherwise the team's;
+  kits say `madeBy` (all Kobble's until step 3 loads a team's own).
+- Installing asks first only when it brings others (as the prototype did).
+- Differences from the prototype: the tabs are links (`#extensions/…`), so a
+  reload stays on the tab; Switch to Jira asks, then goes to Settings ›
+  Connections to connect it; no made-up extensions (Voice, Verification,
+  Daily standup, Shopify theme) and no "Needs: GitHub CLI" line.
+
 ## Status
 
-Started: reading the prototype and the core's extension model.
+Step 1 is built and checked (tests, lint, types, dead code, docs; the
+screenshots are in `issue-27-extensions-and-marketplace/`): extensions you
+can see and choose, the Marketplace with its three tabs and the details
+dialog, install with its confirm, remove with its confirm and refusals,
+Factory always needed, pages leaving the sidebar.
+
+Step 2 (Home from blocks) is next: Arrange Home, Add a block, Reset layout,
+`factory/home.json`; the blocks the extensions already name are `status`,
+`waiting`, `loop`, `reviews` (Factory), `exploring`, `signals`. Read the
+prototype's `dashboard/home-blocks.tsx`, `dashboard/home-page.tsx` and the
+server's `home-layout.ts`. The motion CSS for it (`m-home-in`, `m-ring`) and
+`lib/use-flip.ts` (with `act` and `enter`) are already in. Step 3 not
+started.

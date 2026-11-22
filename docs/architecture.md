@@ -367,9 +367,19 @@ extension with the routes the server answers for it, at
 `/api/add-ons/<id>/…` and only while it is on; its page, if any, is in
 `packages/dashboard/src/add-ons/`. Built-in add-ons (`core: true`) are on
 unless the company file switches them off (`without`); others are switched
-on by name (`extensions`); the owner switches them in the dashboard's
-Settings (Add-ons), which also lists the kits. The first add-ons are where work is tracked: a
-GitHub board and Jira Cloud (`tracker: true`). What each adds:
+on by name (`extensions`); the owner installs and removes them in the
+dashboard's Marketplace, which also shows the connections (where the code and
+the tasks are) and the kits. An extension says what it **brings** (pages,
+Home blocks, kobolds, stages), what it **needs** (other extensions, by id),
+the **slots** it uses (`code`, `tasks`: the jobs the factory fills once for
+every extension) and whether it is **always** needed. Installing one brings
+what it needs; removing one that another needs, or an always-needed one, is
+refused; a factory with a need missing does not start, and says why
+(`assembleFactory`). Kobble's own pieces are extensions too (Factory,
+Explorations, Signals, Personas, Releases: `server/src/add-ons/kobble.ts`),
+and the page of one that is removed leaves the sidebar. The first add-ons
+are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
+shown as connections, not as extensions. What each adds:
 
 | Point                              | What                                                                                                              | Today                                                                                                        |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |

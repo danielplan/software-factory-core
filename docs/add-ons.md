@@ -2,7 +2,7 @@
 
 A company chooses which parts of the factory it uses. The kernel is always
 there; every ability beyond it is an add-on, switched on or off in
-`factory.json` and in the dashboard's Settings (Add-ons). Built-in add-ons
+`factory.json` and in the dashboard's Marketplace. Built-in add-ons
 (`core: true`) are on unless the company switches them off; the others are
 off until it switches them on. An add-on says what it needs, and
 `assembleFactory` refuses a factory where something it needs is missing.
@@ -22,7 +22,7 @@ the first company's factory; they come here written for any company (see
 | Running Claude Code (kept open between turns), working copies                                                     | yes                   |
 | The skills the agents follow and the knowledge base with its checks                                               | yes                   |
 | The setup coach on a map; Build and Open the factory                                                              | yes                   |
-| The add-ons in Settings                                                                                           | yes                   |
+| The Marketplace: extensions, connections and product kits                                                         | yes                   |
 | **The theme**: the dashboard takes the look of the company's own app (see below)                                  | to come               |
 | **Install, add, remove and upgrade** from the command line, on a branch of its own                                | to come               |
 | **Extension points for pages, agent tools and workflow steps**, so the add-ons below plug in like GitHub and Jira | to come, needed first |
