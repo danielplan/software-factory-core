@@ -1,6 +1,8 @@
 // The knowledge-base rules that no standard tool checks, inside every folder
-// named `context/` (the template, a factory from before 0.6.0) and inside the
-// knowledge base checked as such (a project's docs/):
+// named `context/` (the template, a factory from before 0.6.0), inside the
+// knowledge base checked as such (a project's docs/) and inside each folder
+// named as one (the core's own docs/, checked with the rest of its
+// repository):
 // - every page sits in a Diátaxis folder, and its "**Type:**" line matches
 //   the folder and says which question the page answers ("Answers:");
 // - decision records are MADR: NNNN-title.md, front matter, the three headings;
@@ -48,14 +50,18 @@ const OUTSIDE =
 // a screen or two (how-to/maintain-the-knowledge-base.md).
 export const LONG_PAGE_WORDS = 1200;
 
-// The knowledge base a page belongs to ("context", "company/context", or "."
-// when the folder checked is the knowledge base itself), and its path inside
-// it; null when the page is not in one.
+// The knowledge base a page belongs to ("context", "company/context", a
+// folder named as one, such as "docs", or "." when the folder checked is the
+// knowledge base itself), and its path inside it; null when the page is not
+// in one.
 export function placeInContext(
   file: string,
   whole = false,
+  bases: string[] = [],
 ): { base: string; inside: string } | null {
   if (whole) return { base: ".", inside: file };
+  const named = bases.find((base) => file.startsWith(`${base}/`));
+  if (named) return { base: named, inside: file.slice(named.length + 1) };
   const parts = file.split("/");
   const at = parts.indexOf("context");
   if (at < 0 || at === parts.length - 1) return null;
@@ -152,15 +158,17 @@ function lengthHint(file: string, text: string): Problem[] {
 }
 
 // pages: every Markdown file under the root checked, with its text; whole:
-// the root checked is a knowledge base itself (a project's docs/).
+// the root checked is a knowledge base itself (a project's docs/); bases: the
+// folders under the root that are knowledge bases, each keeping the shape.
 export function checkRules(
   pages: Map<string, string>,
   whole = false,
+  bases: string[] = [],
 ): Problem[] {
   const problems: Problem[] = [];
   const linked = linkedFiles(pages);
   for (const [file, text] of pages) {
-    const place = placeInContext(file, whole);
+    const place = placeInContext(file, whole, bases);
     if (posix.basename(file) === "BLUEPRINT.md")
       problems.push(...runHeadings(file, text));
     if (!place) continue;
@@ -175,8 +183,9 @@ export function checkRules(
       });
   }
   // The shape is kept by a project's knowledge base (its docs/, checked as
-  // a whole), not by a loose context folder.
+  // a whole or named), not by a loose context folder.
   if (whole) problems.push(...skeletonProblems(".", pages));
+  for (const base of bases) problems.push(...skeletonProblems(base, pages));
   return problems;
 }
 

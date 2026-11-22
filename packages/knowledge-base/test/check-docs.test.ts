@@ -168,3 +168,41 @@ test("a project's knowledge base keeps its shape: its index and every section's 
     "tutorials/index.md",
   ]);
 });
+
+test("a folder named as a knowledge base keeps its shape and its rules, while the rest of the repository only needs good links", async () => {
+  const root = repository({
+    "README.md": "# Read me\n\n[Docs](docs/index.md) [Loose](notes/loose.md)\n",
+    "notes/loose.md": "# Loose notes, without a type line\n",
+    "docs/index.md": `${INDEX}\n[Facts](reference/facts.md)\n`,
+    "docs/reference/facts.md": page("How-to"),
+    "docs/explanation/lonely.md": page("Explanation"),
+    "docs/sources/2026-01-01-brief.md": "# Brief\n\n`notes/gone.md`\n",
+  });
+  const found = (await checkDocs(root, { knowledgeBases: ["docs/"] })).map(
+    (p) => `${p.file}: ${p.message}`,
+  );
+  assert.ok(
+    found.includes(
+      'docs/reference/facts.md: Page in reference/ says "**Type:** How-to", expected "Reference"',
+    ),
+  );
+  assert.ok(
+    found.includes(
+      "docs/explanation/lonely.md: Orphan page: no other page links to it",
+    ),
+  );
+  assert.ok(
+    found.includes(
+      "docs/how-to/maintain-the-knowledge-base.md: Missing page of the knowledge base's shape: every knowledge base keeps its index and each section's index (take it from the template)",
+    ),
+  );
+  assert.ok(found.every((line) => line.startsWith("docs/")));
+  assert.ok(!found.some((line) => line.startsWith("docs/sources/")));
+});
+
+test("the template's knowledge base, named inside a repository, passes every check", async () => {
+  assert.deepEqual(
+    await checkDocs(TEMPLATE, { knowledgeBases: ["context"] }),
+    [],
+  );
+});
