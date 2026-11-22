@@ -360,6 +360,14 @@ export class Session {
     this.reload();
   }
 
+  // Every Home block any extension brings, installed or not, Kobble's or the
+  // team's: a block in Home's file that is none of these is gone for good.
+  blockIds(): string[] {
+    return this.known.extensions.flatMap(
+      (extension) => extension.brings.blocks,
+    );
+  }
+
   // The factory's files changed: read again; what runs keeps running.
   private reload(): void {
     const root = this.rootOrRefuse();

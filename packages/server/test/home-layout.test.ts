@@ -87,3 +87,23 @@ test("a file edited by hand into something unreadable starts Home again", async 
     layout: null,
   });
 });
+
+test("a block no extension brings any more is let go when Home is saved, one that is only not installed stays", async () => {
+  const project = mkdtempSync(join(tmpdir(), "home-layout-"));
+  made.push(project);
+  const routes = homeLayoutRoutes(
+    project,
+    () => {},
+    () => ["status", "checklist"],
+  );
+  const save = routes["POST /api/home-layout"];
+  const read = routes["GET /api/home-layout"];
+  assert.ok(save && read);
+  await save(
+    { order: ["status", "gone", "checklist"], hidden: ["gone", "checklist"] },
+    url,
+  );
+  assert.deepEqual(await read({}, url), {
+    layout: { order: ["status", "checklist"], hidden: ["checklist"] },
+  });
+});

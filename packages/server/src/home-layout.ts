@@ -4,7 +4,9 @@
 // /api/home-layout). Nothing there yet means nobody arranged Home: the page
 // shows the blocks it starts with. A block is named by its id, as the
 // extension that brings it names it; one whose extension is not installed is
-// kept in the file and simply not shown.
+// kept in the file and simply not shown, and comes back with it. One that no
+// extension brings at all any more (a team's extension whose folder is gone)
+// is let go when Home is next saved.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -46,6 +48,8 @@ function layoutIn(file: string): Layout | null {
 export function homeLayoutRoutes(
   project: string,
   changed: (what: string) => void,
+  // Every block any extension brings; without it nothing is let go.
+  known?: () => string[],
 ): Record<string, Route> {
   const folder = join(project, FACTORY_FOLDER);
   const file = join(folder, "home.json");
@@ -53,9 +57,13 @@ export function homeLayoutRoutes(
     "GET /api/home-layout": () => ({ layout: layoutIn(file) }),
     "POST /api/home-layout": (body) => {
       const { order, hidden } = (body ?? {}) as Record<string, unknown>;
-      const layout = { order: idsOf(order), hidden: idsOf(hidden) };
-      if (!layout.order || !layout.hidden)
+      const asked = { order: idsOf(order), hidden: idsOf(hidden) };
+      if (!asked.order || !asked.hidden)
         throw new Refused("That is not an arrangement of Home.");
+      const exists = new Set(known?.());
+      const kept = (ids: string[]) =>
+        known ? ids.filter((one) => exists.has(one)) : ids;
+      const layout = { order: kept(asked.order), hidden: kept(asked.hidden) };
       mkdirSync(folder, { recursive: true });
       writeFileSync(file, `${JSON.stringify(layout, null, 2)}\n`);
       changed("home");

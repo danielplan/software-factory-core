@@ -74,9 +74,14 @@ belongs to; an area the project has nothing for stays empty.
    may add their own here too. Real customers the owner names are cards
    too.
 3. **Team and board** (`Team and board`): the people in the history (by
-   name, never a role: everyone can do everything) and where work is
-   tracked. The factory works from a GitHub board: there is no board of its
-   own. When the code is not on GitHub yet, say the owner connects a board
+   name, never a role: everyone can do everything) and the factory's two
+   **slots**, named as the owner will see them in the Marketplace: **Your
+   code** (where the code lives: GitHub, the only one today, so nothing to
+   choose) and **Your tasks** (where work is tracked: a GitHub board or Jira
+   Cloud, the owner picks one). A slot is filled once, here: every extension
+   that uses it uses that same one, and a later swap applies to all of them.
+   Only Kobble defines slots; never promise one the Marketplace does not
+   show. The factory works from a board: there is no board of its own. When the code is not on GitHub yet, say the owner connects a board
    right after opening the factory.
    Your first message says where the code is on GitHub and lists the boards
    there, with their columns and cards. Set the board up with the owner
@@ -210,7 +215,7 @@ from the map:
    `brand.factory`; `brand.kobold` only when the team names the kobold.
    Without an app people see, write no theme.
 5. `configure` where work is tracked, add-ons, settings and tools to
-   install, but only what the owner agreed to. Where work is tracked is
+   install, but only what the owner agreed to. Filling **Your tasks** is
    `tracker`: `github` (a GitHub board) or
    `jira` (Jira Cloud); these come with the factory, nothing to switch on.
    For a GitHub board, `configure` with `board` too: its number, or `create`
