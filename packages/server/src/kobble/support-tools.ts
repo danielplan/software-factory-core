@@ -14,6 +14,8 @@ import { COACH_HEADER } from "../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../mcp.ts";
 import { addPersona } from "./actions.ts";
 import type { SupportCards } from "./card-look.ts";
+import { guideTools } from "./support-guide-tools.ts";
+import type { SupportHands } from "./support-hands.ts";
 import { newExploration } from "./explorations/actions.ts";
 
 export type SupportTools = {
@@ -23,6 +25,10 @@ export type SupportTools = {
   changed: (what: string) => void;
   // The cards on the Factory board: looked at, and a stuck one answered.
   cards: SupportCards;
+  // The other kobolds, to hand work on to (support-hands.ts).
+  hands: SupportHands;
+  // Takes the person to a place in Kobble (#explore/X-3).
+  go: (to: string) => void;
 };
 
 export function personasText(store: KobbleStore): string {
@@ -89,13 +95,15 @@ function serverFor(on: SupportTools): McpServer {
         return `Added ${exploration.id} “${exploration.title}”, waiting in Explorations.`;
       }),
   );
-  cardTools(server, on.cards);
+  cardTools(server, on);
+  guideTools(server, on);
   return server;
 }
 
 // A card the team asks about: looked at, and, on a stuck one, the team's
 // agreed answer sent to the builder.
-function cardTools(server: McpServer, cards: SupportCards): void {
+function cardTools(server: McpServer, on: SupportTools): void {
+  const { cards } = on;
   const number = z.number().int().positive().describe("The card's number.");
   server.registerTool(
     "look_at_card",
@@ -121,7 +129,12 @@ function cardTools(server: McpServer, cards: SupportCards): void {
           ),
       },
     },
-    (args) => toolAnswer(() => cards.answer(args.number, args.text)),
+    (args) =>
+      toolAnswer(async () => {
+        const sent = await cards.answer(args.number, args.text);
+        on.go("#build");
+        return sent;
+      }),
   );
 }
 

@@ -18,7 +18,7 @@ import {
 } from "@/lib/shell-view";
 import { useT } from "@/i18n/use-t";
 import { SprocketWindow } from "@/feedback/sprocket-window";
-import { useSupport } from "@/support/use-support";
+import { useSprocketMoves, useSupport } from "@/support/use-support";
 import { useSignals } from "@/signals/use-signals";
 
 import { Sidebar } from "./sidebar";
@@ -68,6 +68,7 @@ function useSidebarParts(state: FactoryState) {
   const { data: explorations } = useExplorations();
   const { data: signals } = useSignals();
   const support = useSupport();
+  useSprocketMoves();
   const overall = overallOf(state.parts, t);
   const products = state.parts.filter((part) => part.area === "products");
   const all = [

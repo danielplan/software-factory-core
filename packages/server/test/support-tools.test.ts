@@ -85,3 +85,77 @@ test("the support kobold adds the persona and the exploration the team describes
     staged.server.close();
   }
 });
+
+test("Sprocket hands work on to the other kobolds and takes the person there; it does nothing alone", async () => {
+  const pretend = pretendClaude([
+    {
+      calls: [
+        ["list_explorations", {}],
+        ["list_new_signals", {}],
+        [
+          "explore_with_doodle",
+          {
+            title: "Flour reminders",
+            problem: "Bakers run out of flour before they reorder.",
+          },
+        ],
+        ["go_to", { place: "#releases" }],
+        ["go_to", { place: "somewhere else" }],
+        ["tell_doodle", { exploration: "X-1", words: "Keep it to one tap." }],
+        ["send_signal", { id: "S-0002", to: "doodle" }],
+      ],
+      reply: "Handed on.",
+    },
+    // Doodle, opening the new exploration and hearing the passed-on words.
+    { calls: [], reply: "Here is the picture." },
+    { calls: [], reply: "One tap it is." },
+    { calls: [], reply: "Looking at the signal." },
+  ]);
+  const staged = await stage(pretend.claude);
+  const root = staged.session.createCompany({ name: "Acme", about: "" });
+  cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
+    recursive: true,
+  });
+  try {
+    await staged.post("/api/kobble/support", {
+      text: "I have an idea, and a word for Doodle.",
+      page: "home",
+    });
+    let view: SupportView;
+    for (;;) {
+      view = (await (
+        await fetch(`${staged.base}/api/kobble/support`)
+      ).json()) as SupportView;
+      if (view.writing === null && view.messages.length === 2) break;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    // Doodle's turns may end first: Sprocket's is the one with seven calls.
+    const answers = pretend.answers.find((one) => one.length === 7) ?? [];
+    assert.match(answers[0] ?? "", /X-1: /);
+    assert.match(answers[1] ?? "", /S-0002 /);
+    const store = new KobbleStore(root);
+    const idea = store
+      .all("explorations")
+      .find((one) => one.title === "Flour reminders");
+    assert.ok(idea);
+    // Started with Doodle, not parked.
+    assert.equal(idea.status, "exploring");
+    assert.match(
+      answers[2] ?? "",
+      /Handed to Doodle\. They are now at #explore\/X-/,
+    );
+    assert.match(answers[3] ?? "", /now at #releases/);
+    assert.match(answers[4] ?? "", /not a place in Kobble/);
+    assert.match(
+      answers[5] ?? "",
+      /Told Doodle\. They are now at #explore\/X-1/,
+    );
+    assert.equal(store.get("signals", "S-0002")?.status, "explored");
+    // The page follows each move once: the last one, counted.
+    assert.equal(view.went?.n, 4);
+    assert.match(view.went?.to ?? "", /^#explore\/X-\d+$/);
+  } finally {
+    staged.session.close();
+    staged.server.close();
+  }
+});

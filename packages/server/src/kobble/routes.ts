@@ -87,7 +87,7 @@ export function servedKobble(options: KobbleOptions) {
   });
   const changing = changingWith(changed);
   const { explorations, tests } = explorationsAndTests(options, store, changed);
-  const support = supportOf(options, store, changed);
+  const support = supportOf(options, store, changed, { explorations, tests });
   const routes: Record<string, Route> = {
     "GET /api/kobble/signals": () =>
       kept(() => signalsView(store(), sync.view(), options.work())),

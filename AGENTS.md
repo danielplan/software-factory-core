@@ -44,6 +44,11 @@ here reach every company with its next upgrade, so they are made with care.
   and open a pull request; never push to main directly. A product's release
   notes (the Releases page) are written from the pull requests merged since
   the last release, so work pushed straight to main ships unlisted.
+- **The docs follow the code.** A branch that changes code also brings the
+  docs in line (`docs/`, the README, `AGENTS.md`, a `BLUEPRINT.md`, the
+  skills' guides), or says why none need to change in a commit message line
+  `Docs: none, because …`; `npm run check:docs-follow` (part of verify)
+  fails otherwise.
 
 ## Layout
 

@@ -1,9 +1,9 @@
 // The support kobold: the one that is always there, at the bottom of every
 // page (the dashboard's support bar), for questions about Kobble and the
 // project. The same talk as the other kobolds (coach/talk.ts): it reads the
-// project and answers, and with its own tools (support-tools.ts) adds the
-// personas and explorations the team describes to it; it changes no file
-// of the project.
+// project and answers, takes the person to the right place, and hands work
+// on to the kobold whose job it is (support-hands.ts): it does nothing
+// alone, and changes no file of the project.
 // The conversation lives while the factory runs; New conversation starts
 // again.
 
@@ -23,6 +23,11 @@ import { Talk } from "../coach/talk.ts";
 import type { Cli } from "../add-ons/github/github.ts";
 import { type SupportCards, supportCards } from "./card-look.ts";
 import { connectedCards } from "./connected-cards.ts";
+import {
+  type HandsOn,
+  type SupportHands,
+  supportHands,
+} from "./support-hands.ts";
 import type { SupportTools } from "./support-tools.ts";
 import { inLanguage } from "../language.ts";
 
@@ -37,6 +42,9 @@ export type SupportView = {
   writing: string | null;
   activity: string | null;
   problem: string | null;
+  // Where it took the person last (an address in the page, #explore/X-3),
+  // counted, so the page moves there once.
+  went: { to: string; n: number } | null;
 };
 
 type SupportOptions = {
@@ -47,11 +55,13 @@ type SupportOptions = {
   store: () => KobbleStore;
   changed: (what: string) => void;
   cards: SupportCards;
+  hands: SupportHands;
 };
 
 export class SupportTalk {
   private talk: Talk;
   private toolsUrl = "";
+  private went: SupportView["went"] = null;
   private readonly options: SupportOptions;
 
   constructor(options: SupportOptions) {
@@ -72,6 +82,7 @@ export class SupportTalk {
       writing: this.talk.writing,
       activity: this.talk.activity,
       problem: this.talk.problem,
+      went: this.went,
     };
   }
 
@@ -107,6 +118,11 @@ export class SupportTalk {
       store: this.options.store,
       changed: this.options.changed,
       cards: this.options.cards,
+      hands: this.options.hands,
+      go: (to) => {
+        this.went = { to, n: (this.went?.n ?? 0) + 1 };
+        this.options.onChange();
+      },
     };
   }
 
@@ -155,11 +171,20 @@ export function supportOf(
   },
   store: () => KobbleStore,
   changed: (what: string) => void,
+  reach: {
+    explorations: { talks: HandsOn["talks"] };
+    tests: { tests: HandsOn["tests"] };
+  },
 ): SupportTalk {
-  const cards = supportCards({
-    ...options,
-    cards: () =>
-      connectedCards(join(options.project, FACTORY_FOLDER), options.cli),
+  const board = () =>
+    connectedCards(join(options.project, FACTORY_FOLDER), options.cli);
+  const cards = supportCards({ ...options, cards: board });
+  const hands = supportHands({
+    talks: reach.explorations.talks,
+    tests: reach.tests.tests,
+    store,
+    cards: board,
+    changed,
   });
   return new SupportTalk({
     claude: options.claude,
@@ -170,5 +195,6 @@ export function supportOf(
     store,
     changed,
     cards,
+    hands,
   });
 }
