@@ -1,4 +1,12 @@
-import { Code, Puzzle } from "lucide-react";
+import {
+  Code,
+  Columns3,
+  FlaskConical,
+  Inbox,
+  Puzzle,
+  Tag,
+  Users,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import {
   type SimpleIcon,
@@ -13,7 +21,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-// How an add-on or a kit looks in the store and wherever it is chosen: its
+// How an extension, a connection or a kit looks in the Marketplace and wherever it is chosen: its
 // logo and its colour, by id; anything else a puzzle piece. A logo in a dark
 // colour takes the text's colour, so it shows in both themes.
 type Look = { icon: ReactNode; colour: string };
@@ -21,6 +29,15 @@ type Look = { icon: ReactNode; colour: string };
 const INK = "var(--foreground)";
 
 const LOOKS: Record<string, Look | undefined> = {
+  // Kobble's own extensions: the colour of their page in the sidebar.
+  factory: { icon: <Columns3 aria-hidden />, colour: "var(--build)" },
+  explorations: {
+    icon: <FlaskConical aria-hidden />,
+    colour: "var(--explore)",
+  },
+  signals: { icon: <Inbox aria-hidden />, colour: "var(--understand)" },
+  personas: { icon: <Users aria-hidden />, colour: "var(--source-app)" },
+  releases: { icon: <Tag aria-hidden />, colour: "#8b5cf6" },
   github: { icon: <Logo icon={siGithub} />, colour: INK },
   jira: { icon: <Logo icon={siJira} />, colour: "#2684ff" },
   "expo-app": { icon: <Logo icon={siExpo} />, colour: INK },

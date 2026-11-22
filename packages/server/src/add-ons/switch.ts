@@ -66,7 +66,7 @@ export function switched(
     );
   if (extension.always)
     throw new Refused(`${extension.name} is always needed.`);
-  if (!on && company.tracker === extension.id)
+  if (company.tracker === extension.id)
     throw new Refused(
       `Work is tracked with ${extension.name}: choose another board first.`,
     );

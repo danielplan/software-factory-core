@@ -21,6 +21,7 @@ import { builder } from "./areas/builder.ts";
 import { feedback } from "./areas/feedback.ts";
 import { chat } from "./areas/chat.ts";
 import { releases } from "./areas/releases.ts";
+import { market } from "./areas/market.ts";
 
 const AREAS = {
   shell,
@@ -35,6 +36,7 @@ const AREAS = {
   explore,
   factory,
   releases,
+  market,
   builder,
   feedback,
   connect,

@@ -1,11 +1,10 @@
-// Settings' tabs (settings-tab.tsx): the sections grouped in six themes,
+// Settings' tabs (settings-tab.tsx): the sections grouped in five themes,
 // one tab shown at a time, at its own address (#settings/this-computer).
 
 export const SETTINGS_TABS = [
   "Connections",
   "AI models",
   "Updates",
-  "Add-ons",
   "This computer",
   "Advanced",
 ] as const;

@@ -6,6 +6,7 @@
 import type { ReactNode } from "react";
 
 import type { FactoryState } from "@/dashboard/dashboard";
+import { pagesLeftOut } from "@/lib/market-view";
 import { useExplorations } from "@/explorations/explorations-page";
 import type { Page } from "@/lib/routes";
 import {
@@ -76,6 +77,7 @@ function useSidebarParts(state: FactoryState) {
     ),
     kobold: koboldStatus(state.work, state.ideas, overall.words, all, t),
     light: overall.lit,
+    left: pagesLeftOut(state.addOns),
     product: {
       light: overallOf(products, t).lit,
       link: products.find((part) => part.link)?.link ?? null,

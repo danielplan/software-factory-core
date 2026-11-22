@@ -39,9 +39,6 @@ export function assembleFactory(
 ): Factory {
   const problems: string[] = [];
   const extensions = chosenExtensions(company, available, problems);
-  problems.push(
-    ...extensionProblems(available.extensions, extensions, company),
-  );
   const tracker = company.tracker;
   if (
     tracker !== "none" &&
@@ -106,11 +103,13 @@ function chosenExtensions(
   const named = (id: string) => available.extensions.some((e) => e.id === id);
   for (const id of [...company.extensions, ...company.without])
     if (!named(id)) problems.push(`there is no extension "${id}"`);
-  return available.extensions.filter((extension) =>
+  const chosen = available.extensions.filter((extension) =>
     extension.core
       ? !company.without.includes(extension.id)
       : company.extensions.includes(extension.id),
   );
+  problems.push(...extensionProblems(available.extensions, chosen, company));
+  return chosen;
 }
 
 // An extension whose needs are not installed, or that is always needed and

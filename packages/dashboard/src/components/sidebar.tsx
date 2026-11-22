@@ -4,6 +4,7 @@ import {
   House,
   Inbox,
   Menu,
+  Puzzle,
   Settings,
   Columns3,
   Tag,
@@ -99,6 +100,11 @@ function GroupLabel({ children }: Readonly<{ children: ReactNode }>) {
 
 const QUIET: Item[] = [
   {
+    page: "extensions",
+    icon: <Puzzle aria-hidden />,
+    color: "#667085",
+  },
+  {
     page: "settings",
     icon: <Settings aria-hidden />,
     color: "#667085",
@@ -118,6 +124,8 @@ type SidebarProps = Readonly<{
   // What each kobold does now (lib/kobolds.ts).
   doing: Doing;
   light: Light;
+  // The pages of extensions that are not installed: not in the sidebar.
+  left: Page[];
   // The product's light, and where it opens while it runs.
   product: { light: Light; link: string | null };
 }>;
@@ -162,7 +170,7 @@ export function Sidebar(props: SidebarProps) {
 }
 
 function Content(props: SidebarProps & { onGo?: () => void }) {
-  const { current, counts, doing, product, onGo } = props;
+  const { current, counts, doing, product, left, onGo } = props;
   const nav = useT().shell.nav;
   return (
     <>
@@ -176,7 +184,13 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
           </PageLink>
         ))}
       </nav>
-      <Pages current={current} counts={counts} doing={doing} onGo={onGo} />
+      <Pages
+        current={current}
+        counts={counts}
+        doing={doing}
+        left={left}
+        onGo={onGo}
+      />
       <div className="mt-auto grid gap-0.5 pt-4">
         <UpdateRow />
         <FeedbackRow current={current} />
@@ -254,17 +268,24 @@ function Pages({
   current,
   counts,
   doing,
+  left,
   onGo,
 }: Readonly<{
   current: Page;
   counts: Partial<Record<Page, number>>;
   doing: Doing;
+  left: Page[];
   onGo?: () => void;
 }>) {
   const t = useT().shell;
+  // A group whose pages are all left out is left out too.
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !left.includes(item.page)),
+  })).filter((group) => group.items.length > 0);
   return (
     <nav aria-label={t.nav.pages} className="grid gap-px">
-      {GROUPS.map((group, at) => (
+      {groups.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
           <GroupLabel>{t.groups[group.label]}</GroupLabel>
           {group.items.map((item) => (

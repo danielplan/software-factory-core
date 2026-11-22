@@ -16,6 +16,7 @@ export type {
   IconName,
   IdeaView,
   KitView,
+  ProductView,
   StageMap,
   State,
   WorkView,

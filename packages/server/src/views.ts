@@ -49,6 +49,7 @@ export function kitViews(kits: Kit[]): KitView[] {
     about: kit.about,
     kind: kit.kind,
     canCreate: kit.create !== null,
+    madeBy: "kobble",
     brings: [
       ...(kit.rules.length > 0 ? (["rules"] as const) : []),
       ...(kit.starter ? (["starter"] as const) : []),

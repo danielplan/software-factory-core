@@ -7,7 +7,9 @@ import { Shell } from "@/components/shell";
 import { ConnectPage } from "@/connect/connect-page";
 import { ExplorationPage } from "@/explorations/exploration-page";
 import { ExplorationsPage } from "@/explorations/explorations-page";
+import { MarketPage } from "@/extensions/market-page";
 import { FactoryPage } from "@/factory/factory-page";
+import { pagesLeftOut } from "@/lib/market-view";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
 import { ReleasesPage } from "@/releases/releases-page";
 import { PersonasPage } from "@/personas/personas-page";
@@ -43,6 +45,11 @@ function usePlace(): Place {
   return place;
 }
 
+// The page of an extension that is removed is not there: Home shows instead.
+function placeShown(place: Place, left: Place["page"][]): Place {
+  return left.includes(place.page) ? { page: "home", open: null } : place;
+}
+
 // The dashboard: before there is a company, only the setup page; once there
 // is a factory, its pages.
 export function Dashboard({ state }: Readonly<{ state: State }>) {
@@ -58,7 +65,7 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   // Just set up, connecting where work is tracked comes first.
   const { page, open } = state.onboarding
     ? { ...place, page: "connect" as const }
-    : place;
+    : placeShown(place, pagesLeftOut(state.addOns));
   return (
     <Shell
       state={state}
@@ -100,6 +107,8 @@ function PageBody({
       return <HomePage state={state} />;
     case "system":
       return <SystemPage state={state} />;
+    case "extensions":
+      return <MarketPage state={state} open={open} />;
     case "settings":
       return <SettingsTab state={state} open={open} />;
   }

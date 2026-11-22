@@ -13,6 +13,8 @@ export type KitView = {
   about: string;
   kind: string;
   canCreate: boolean;
+  // Who made it: Kobble ships every kit today; a team's own kit will say so.
+  madeBy: "kobble" | "team";
   // What it teaches the kobolds, by key: rules, a starter, checks, tools.
   brings: ("rules" | "starter" | "checks" | "tools")[];
 };
