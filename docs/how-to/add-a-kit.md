@@ -22,7 +22,12 @@ The kits are in `packages/kits/`; the kit's type is `kitSchema` and `Kit` in
      check command, which the factory runs before a pull request;
    - `detect(folder)`: whether existing code is such a product, with its
      name, commands and port;
-   - `partsFor(product)`: the programs that run it;
+   - `partsFor(product)`: the programs that run it, with what the launcher
+     needs to know: the address that answers once it is ready (`health`),
+     how long it may take (`startSeconds`), the settings file it cannot start
+     without (`needs`) and what to do when it stops (`help`). Read them from
+     the product's folder when only some products of the kind have them;
+     the start command is the one `detect` gives and the docs name;
    - `create(folder, name)`: how to make a new one, from its starter or the
      framework's own generator;
    - `mcp`: the tools its agents use (its documentation, its checks).
@@ -34,9 +39,14 @@ The kits are in `packages/kits/`; the kit's type is `kitSchema` and `Kit` in
    them.
 5. **A starter** (optional): a whole empty product in
    `packages/kits/starters/<kit>/` with the kit's standards, checks and, for
-   a screen, prototype mode with the shared world's hook and the check that
-   no prototype code reaches the real app. It is a product of its own with
-   its own `npm run verify`; the core's checks leave `starters/` out.
+   a screen, prototype mode with the shared world's hook, the check that no
+   prototype code reaches the real app and click-throughs of its journeys;
+   for a backend, the made-up world's folder with its check, its refusal
+   codes with their check, and a way to run its database on a computer
+   without one. It keeps every promise its kit's conventions make. It is a
+   product of its own with its own `npm run verify`, run in a copy outside
+   the repository (`npm install`, then `npm run verify`) after each change;
+   the core's checks leave `starters/` out.
 6. **Tests** in `packages/kits/test/`: it recognises its kind and refuses the
    others, its parts, its commands.
 7. **Docs:** list it in [how Kobble is built](../explanation/how-kobble-is-built.md#kits)

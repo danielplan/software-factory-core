@@ -31,7 +31,12 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
 
 A kit gives the prototype mode and the starter for a brand-new app. The React
 web app and Expo app starters have the prototype mode, the shared world's
-hook and a check that no prototype code reaches the real app.
+hook and a check that no prototype code reaches the real app; the React web
+app's also clicks through its built prototype with Playwright. The NestJS
+backend's starter keeps the made-up world: a `prototype-world/` folder of
+situations written as its tables, checked against its schema
+(`npm run check:world`) and written into its test database by its
+integration tests.
 
 ## Made-up worlds
 
