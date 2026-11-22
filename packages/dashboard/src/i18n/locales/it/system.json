@@ -1,0 +1,59 @@
+{
+  "about": "Di cosa è fatto il tuo prodotto e come si collegano le sue parti. Avviale, fermale e aprile da qui.",
+  "startAll": "Avvia tutto",
+  "stopAll": "Ferma tutto",
+  "didNotWork": "Non ha funzionato",
+  "yourProduct": "Il tuo prodotto",
+  "noPartsBefore": "Ancora nessuna parte da avviare: arrivano con la tua prima idea, nella pagina",
+  "noPartsAfter": ".",
+  "programs": "I programmi della fabbrica",
+  "mapLabel": "Come si collegano le parti",
+  "mapLegend": "Ogni linea unisce una parte a una parte che ne ha bisogno, con la freccia su quella che ne ha bisogno. Punta una parte per vedere solo le sue linee.",
+  "types": {
+    "screen": {
+      "label": "Schermo",
+      "means": "ciò che le persone aprono, una pagina web o un'app"
+    },
+    "backend": {
+      "label": "Backend",
+      "means": "lavora dietro gli schermi"
+    },
+    "data": {
+      "label": "Dati",
+      "means": "dove si conservano i dati"
+    },
+    "outside": {
+      "label": "Servizio esterno",
+      "means": "gestito da altri, come i pagamenti"
+    }
+  },
+  "headline": {
+    "none": "Ancora nessuna parte da avviare: arrivano con la tua prima idea.",
+    "problem_one": "Una parte non è partita: la scheda dice perché e cosa fare.",
+    "problem_other": "{{count}} parti non sono partite: la scheda dice perché e cosa fare.",
+    "problem_many": "{{count}} parti non sono partite: la scheda dice perché e cosa fare.",
+    "starting": "Avvio il tuo prodotto…",
+    "running": "È tutto in funzione: aprilo per provarlo.",
+    "some": "Alcune parti sono in funzione: avvia le altre per provare tutto.",
+    "stopped": "Il tuo prodotto non è in funzione. Avvialo per provarlo su questo computer."
+  },
+  "part": {
+    "starting": "In avvio · {{step}}",
+    "outside": "In funzione, avviato fuori dalla fabbrica",
+    "withOthers": "Funziona insieme ai prodotti che lo usano",
+    "open": "Apri",
+    "details": "Dettagli tecnici",
+    "tryAgain": "Riprova",
+    "start": "Avvia",
+    "restart": "Riavvia",
+    "stop": "Ferma"
+  },
+  "problems": {
+    "portElsewhere": "L'indirizzo {{port}} è usato da un programma di un'altra cartella",
+    "waiting": "{{part}} aspetta {{missing}}",
+    "settingsMissing": "Manca il file delle impostazioni {{file}}",
+    "portUsed": "L'indirizzo {{port}} è usato da un altro programma",
+    "stepFailed": "\"{{step}}\" non ha funzionato per {{part}}",
+    "noAnswer": "{{part}} non ha risposto entro {{seconds}} secondi"
+  }
+}

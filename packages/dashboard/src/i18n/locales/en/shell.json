@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "factory": "The factory",
+    "pages": "Pages"
+  },
+  "pages": {
+    "home": "Home",
+    "system": "System",
+    "signals": "Signals",
+    "explore": "Explorations",
+    "build": "Factory",
+    "releases": "Releases",
+    "personas": "Personas",
+    "extensions": "Marketplace",
+    "settings": "Settings",
+    "team": "Your team"
+  },
+  "groups": {
+    "work": "Work",
+    "customers": "Customers",
+    "team": "Your team"
+  },
+  "openMenu": "Open the menu",
+  "menu": "Pages",
+  "open": "Open",
+  "lights": {
+    "running": "Running",
+    "stopped": "Stopped",
+    "starting": "Starting",
+    "problem": "Problem"
+  },
+  "overall": {
+    "problem": "Something needs you",
+    "starting": "Starting",
+    "running": "All running",
+    "some": "{{running}} of {{shown}} running"
+  },
+  "kobold": {
+    "building": "Kobold is building",
+    "busy": "Kobold is {{what}}",
+    "thinking": "Kobold is thinking",
+    "resting": "Kobold is resting",
+    "quiet": "All quiet · {{light}}",
+    "idle": "Idle",
+    "answering": "Answering a question",
+    "buildingCard": "Building #{{number}} · {{title}}",
+    "working": "{{name}} is working: {{now}}"
+  },
+  "jobs": {
+    "support": "Answers your questions, on every page",
+    "explorer": "Thinks explorations through and makes prototypes",
+    "builder": "Builds the agreed cards on the Factory board",
+    "tester": "Uses the app as one of your personas",
+    "sorter": "Sorts the signals that come in"
+  },
+  "closed": "The factory's window seems closed. Start it again with software-factory.",
+  "opening": "Opening the factory…",
+  "misfit": "Something in the factory's files does not fit"
+}

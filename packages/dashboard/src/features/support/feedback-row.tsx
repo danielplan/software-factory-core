@@ -4,27 +4,27 @@
 // was sent shows on the Signals page, under Feedback.
 
 import { Flag, MessageSquareHeart, TriangleAlert, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Tile } from "@/components/layout/sidebar-links";
 import type { Page } from "@/lib/routes";
-import { useT } from "@/i18n/use-t";
 
 import { type CaughtError, putAway, useFreshError } from "./factory-errors";
 import { invite, reportError } from "./tell-kobold";
 
 export function FeedbackRow({ current }: Readonly<{ current: Page }>) {
-  const all = useT();
-  const t = all.feedback;
+  const all = useTranslation().t;
+  const t = all;
   const fresh = useFreshError();
-  const page = all.shell.pages[current];
+  const page = all(`shell.pages.${current}`);
   return (
     <>
       {fresh && (
         <ErrorNotice
           error={fresh}
           onReport={() => {
-            reportError(fresh, page, t.report);
+            reportError(fresh, page, t("feedback.report"));
           }}
         />
       )}
@@ -38,7 +38,7 @@ export function FeedbackRow({ current }: Readonly<{ current: Page }>) {
 }
 
 function SendRow({ onClick }: Readonly<{ onClick: () => void }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <button
       type="button"
@@ -48,7 +48,7 @@ function SendRow({ onClick }: Readonly<{ onClick: () => void }>) {
       <Tile color="#667085">
         <MessageSquareHeart aria-hidden />
       </Tile>
-      {t.row}
+      {t("feedback.row")}
     </button>
   );
 }
@@ -58,16 +58,16 @@ function ErrorNotice({
   error,
   onReport,
 }: Readonly<{ error: CaughtError; onReport: () => void }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <div className="mb-2 grid gap-2 rounded-[10px] border border-destructive/30 bg-destructive/5 p-3">
       <span className="flex items-start gap-2 text-[13px] leading-snug font-medium text-sidebar-strong [&_svg]:mt-0.5 [&_svg]:size-[14px] [&_svg]:flex-none">
         <TriangleAlert aria-hidden className="text-destructive" />
-        <span className="flex-1">{t.hit}</span>
+        <span className="flex-1">{t("feedback.hit")}</span>
         <button
           type="button"
-          aria-label={t.notNow}
-          title={t.notNow}
+          aria-label={t("feedback.notNow")}
+          title={t("feedback.notNow")}
           onClick={putAway}
           className="text-sidebar-muted hover:text-sidebar-strong"
         >
@@ -84,7 +84,7 @@ function ErrorNotice({
         onClick={onReport}
       >
         <Flag aria-hidden />
-        {t.report}
+        {t("feedback.report")}
       </Button>
     </div>
   );

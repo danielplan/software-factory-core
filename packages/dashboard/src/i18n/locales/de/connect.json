@@ -1,0 +1,70 @@
+{
+  "didNotWork": "Das hat nicht geklappt",
+  "trackerLabel": "Wo die Arbeit verwaltet wird",
+  "page": {
+    "title": "Wo soll die Fabrik ihre Arbeit führen?",
+    "about": "Die Ideen, auf die ihr euch einigt, werden zu Karten auf dem Board eures Teams, und die Fabrik baut von dort aus. Verbinde das Board, von dem sie arbeitet.",
+    "goToBoard": "Zum Board"
+  },
+  "connected": {
+    "tracked": "Deine Arbeit wird verfolgt auf ",
+    "to": "Verbunden mit ",
+    "all": ", all ihre Arbeit.",
+    "labelled": ", die Arbeit mit dem Label „{{label}}\".",
+    "stagesLabel": "Phasen und Spalten"
+  },
+  "stages": {
+    "draft": "Entwurf",
+    "backlog": "Backlog",
+    "todo": "Zu erledigen",
+    "doing": "In Arbeit",
+    "review": "Prüfen",
+    "done": "Erledigt"
+  },
+  "pick": {
+    "choose": "{{label}} wählen…",
+    "work": "Arbeit, die die Fabrik übernimmt",
+    "every": {
+      "cards": "Jede Karte auf dem Board",
+      "issues": "Jedes Issue auf dem Board"
+    },
+    "only": {
+      "cards": "Nur Karten mit dem Label „factory\"",
+      "issues": "Nur Issues mit dem Label „factory\""
+    },
+    "notOnBoard": "Nicht auf diesem Board",
+    "whichColumn": "Welche Spalte welche ist",
+    "matched": "Nach den Namen der Spalten zugeordnet; ändere, was falsch ist.",
+    "columnFor": "Spalte für {{stage}}"
+  },
+  "github": {
+    "cli": "Die GitHub-CLI auf diesem Computer",
+    "install": "Installieren",
+    "board": "Dein Board",
+    "boardConnected": "Dein Board, verbunden",
+    "signedInAs": "Angemeldet als {{login}}",
+    "signIn": "Bei GitHub anmelden",
+    "signInWith": "Mit GitHub anmelden",
+    "typeCode": "Gib diesen Code im Browserfenster ein, das sich geöffnet hat:",
+    "notSignedIn": "Nicht angemeldet",
+    "allow": "Der Fabrik erlauben, Boards zu lesen",
+    "repository": "Repository",
+    "boardPick": "Board"
+  },
+  "jira": {
+    "login": "Dein Jira und ein Token",
+    "project": "Dein Projekt",
+    "projectPick": "Projekt",
+    "site": "Website",
+    "siteHelp": "Zum Beispiel acme.atlassian.net.",
+    "email": "Deine E-Mail",
+    "emailHelp": "Die, mit der du dich bei Jira anmeldest.",
+    "token": "API-Token",
+    "tokenHelp": "Nur auf diesem Computer gespeichert.",
+    "createToken": "Ein API-Token erstellen",
+    "check": "Prüfen"
+  },
+  "checking": "Prüfe…",
+  "connect": "Verbinden",
+  "noColumn": "· keine Spalte"
+}

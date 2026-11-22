@@ -1,16 +1,16 @@
 import { FlaskConical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { SignalRow } from "@/api/client";
 
 import { Chevron } from "@/components/page-bits";
 import { alreadyLine } from "@/lib/signals-view";
-import { useT } from "@/i18n/use-t";
 
 // The one plain line about work that exists already: an exploration (it
 // opens it) or a fix.
 export function Already({ signal }: Readonly<{ signal: SignalRow }>) {
-  const t = useT();
-  const line = alreadyLine(signal, t.words);
+  const t = useTranslation().t;
+  const line = alreadyLine(signal, t);
   if (!line) return null;
   const words = (
     <span className="flex-1">

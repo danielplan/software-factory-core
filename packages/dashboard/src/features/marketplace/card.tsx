@@ -4,9 +4,10 @@
 
 import { Check, Users } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { IconTile } from "@/components/add-on-looks";
-import { useT } from "@/i18n/use-t";
+
 import type { Thing } from "@/lib/market-view";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ export function Card({
   // Being removed: it fades out.
   leaving?: boolean;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const inside = thing.state !== null;
   const products = thing.usedBy?.kind === "products" ? thing.usedBy.names : [];
   return (
@@ -47,7 +48,7 @@ export function Card({
       <button
         type="button"
         onClick={onOpen}
-        aria-label={t.open(thing.name)}
+        aria-label={t("market.open", { name: thing.name })}
         className="absolute inset-0 rounded-xl"
       />
       <div className="grid gap-3">
@@ -78,8 +79,8 @@ function Badge({
   state: NonNullable<Thing["state"]>;
   fresh: boolean;
 }>) {
-  const t = useT().market;
-  const label = t.states[state];
+  const t = useTranslation().t;
+  const label = t(`market.states.${state}`);
   return (
     <span
       data-flip={
@@ -106,11 +107,11 @@ function Badge({
 
 // The team's own: made by them, with the people icon.
 function MadeByTeam() {
-  const t = useT().market;
+  const t = useTranslation().t;
   return (
     <span className="flex items-center gap-1 text-xs text-muted-foreground">
       <Users aria-hidden className="size-3" />
-      {t.madeByTeam}
+      {t("market.madeByTeam")}
     </span>
   );
 }

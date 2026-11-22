@@ -2,6 +2,7 @@
 // its icon and its colour, so the canvas and the list read at a glance.
 // And how far an exploration is, from what its board holds.
 
+import type { TFunction } from "i18next";
 import {
   CircleAlert,
   GitFork,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 
 import type { Thing } from "./board/nodes";
-import { ENGLISH, type Messages } from "../../i18n/messages.ts";
+import { ENGLISH } from "../../i18n/messages.ts";
 
 export const KINDS: Record<Thing["kind"], { Icon: LucideIcon; tint: string }> =
   {
@@ -52,21 +53,21 @@ export function whereItIs(
     status: string;
     things: { kind: Thing["kind"]; agreed: boolean }[];
   },
-  m: Messages["explore"]["where"] = ENGLISH.explore.where,
+  m: TFunction = ENGLISH,
 ): { text: string; kind: Thing["kind"] } {
   const count = (kind: Thing["kind"]) =>
     row.things.filter((thing) => thing.kind === kind).length;
   if (row.status === "handed-off")
-    return { text: m.handedOff, kind: "prototype" };
+    return { text: m("explore.where.handedOff"), kind: "prototype" };
   if (row.things.some((t) => t.kind === "prototype" && t.agreed))
-    return { text: m.agreed, kind: "prototype" };
+    return { text: m("explore.where.agreed"), kind: "prototype" };
   const prototypes = count("prototype");
   if (prototypes > 0)
     return {
-      text: m.toTry(prototypes),
+      text: m("explore.where.toTry", { count: prototypes }),
       kind: "prototype",
     };
   const choices = count("choice");
-  if (choices > 0) return { text: m.choosing, kind: "choice" };
-  return { text: m.understanding, kind: "problem" };
+  if (choices > 0) return { text: m("explore.where.choosing"), kind: "choice" };
+  return { text: m("explore.where.understanding"), kind: "problem" };
 }

@@ -54,7 +54,7 @@ company's own extension is a description instead: see
    their sidebar rows), its Home blocks and its settings sections (see
    [the extension module](../reference/extension-module.md#the-pages-module)),
    and add it to the list in `packages/dashboard/src/app/extensions.ts`.
-3. Put every word in a new area in `packages/dashboard/src/i18n/areas/`, in
+3. Put every word in a new area in `packages/dashboard/src/i18n/locales/`, in
    English, Italian and German: see [languages](../reference/languages.md).
 4. Use the pieces in [the design system](../reference/design-system.md).
 

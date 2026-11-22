@@ -3,9 +3,9 @@
 // drop it; a picture the server refuses says why for a few seconds.
 
 import { type RefObject, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
-import { useT } from "@/i18n/use-t";
 
 const SHOWN_MS = 6000;
 
@@ -34,14 +34,14 @@ export function usePictureDrop(
 ) {
   const [dropping, setDropping] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
-  const words = useT().explore.board;
+  const words = useTranslation().t;
   const add = useCallback(
     (file: File | null, title: string) => {
       if (!file) {
-        setRefused(words.onlyPictures);
+        setRefused(words("explore.board.onlyPictures"));
         return;
       }
-      read(file, words.pictureUnreadable)
+      read(file, words("explore.board.pictureUnreadable"))
         .then((data) =>
           post("/api/kobble/explorations/picture", {
             id: exploration,
@@ -55,7 +55,7 @@ export function usePictureDrop(
     },
     [exploration, words],
   );
-  usePaste(add, words.pasted);
+  usePaste(add, words("explore.board.pasted"));
   useDrop(area, add, setDropping);
   useEffect(() => {
     if (!refused) return;

@@ -6,23 +6,31 @@
 // the catalogue by id; an extension it does not know (a team's own) shows
 // the name and line of its own definition.
 
+import type { TFunction } from "i18next";
 import type { AddOnView, KitView, ProductView } from "../api/client.ts";
 import type { Messages } from "../i18n/messages.ts";
 import { KOBOLDS } from "./kobolds.ts";
 
-export type Words = Messages["market"];
-type Shell = Messages["shell"];
+export type Words = TFunction;
+type Shell = TFunction;
 
 // What a lookup by id finds, or nothing (never something every object has).
 function found<T>(map: Record<string, T>, id: string): T | undefined {
   return Object.hasOwn(map, id) ? map[id] : undefined;
 }
 
+// Kobble's own extensions have their name and line in the words, by id.
+const ownWords = (words: Words, addOn: AddOnView) =>
+  found<{ name: string; about: string }>(
+    words("market.extensions", { returnObjects: true }),
+    addOn.id,
+  );
+
 export const nameOf = (words: Words, addOn: AddOnView): string =>
-  found<{ name: string }>(words.extensions, addOn.id)?.name ?? addOn.name;
+  ownWords(words, addOn)?.name ?? addOn.name;
 
 export const lineOf = (words: Words, addOn: AddOnView): string =>
-  found<{ about: string }>(words.extensions, addOn.id)?.about ?? addOn.about;
+  ownWords(words, addOn)?.about ?? addOn.about;
 
 export type Maker = "kobble" | "team";
 
@@ -83,14 +91,16 @@ export function removing(
   list: (items: string[]) => string,
 ): string[] {
   const goes = [
-    addOn.brings.pages.length > 0 && words.its.page,
-    addOn.brings.blocks.length > 0 && words.its.blocks,
-    addOn.brings.kobolds.length > 0 && words.its.kobolds,
+    addOn.brings.pages.length > 0 && words("market.its.page"),
+    addOn.brings.blocks.length > 0 && words("market.its.blocks"),
+    addOn.brings.kobolds.length > 0 && words("market.its.kobolds"),
   ].filter((one) => one !== false);
-  const stays = found<string>(words.staysIn, addOn.id) ?? words.staysOther;
+  const stays =
+    found<string>(words("market.staysIn", { returnObjects: true }), addOn.id) ??
+    words("market.staysOther");
   return [
-    ...(goes.length > 0 ? [words.goes(list(goes))] : []),
-    words.stays(stays),
+    ...(goes.length > 0 ? [words("market.goes", { what: list(goes) })] : []),
+    words("market.stays", { what: stays }),
   ];
 }
 
@@ -103,17 +113,17 @@ export function refusal(
 ): string | null {
   const needing = neededBy(addOns, addOn.id);
   if (needing.length === 0) return null;
-  return words.neededBy(
-    list(needing.map((one) => nameOf(words, one))),
-    nameOf(words, addOn),
-    needing.length > 1,
-  );
+  return words("market.neededBy", {
+    names: list(needing.map((one) => nameOf(words, one))),
+    name: nameOf(words, addOn),
+    context: needing.length > 1 ? "several" : undefined,
+  });
 }
 
 // The line under an always-needed one, in place of Remove.
 export const alwaysLine = (words: Words, id: string): string => {
-  const why = found<string>(words.why, id);
-  return why === undefined ? words.always : words.alwaysBecause(why);
+  const why = found(words("market.why", { returnObjects: true }), id);
+  return why ? words("market.alwaysBecause", { why }) : words("market.always");
 };
 
 // ---- The details of one thing: an extension, a connection or a kit ----
@@ -163,21 +173,25 @@ export function brought(
     (id: string) =>
       found(map, id) ?? own.find((one) => one.id === id)?.name ?? id;
   const { screens } = addOn;
+  const named = (key: "market.blocks" | "market.stages") =>
+    words(key, { returnObjects: true });
   const rows = [
     {
-      label: words.brings.page(pages.length),
-      names: pages.map(nameIn(shell.pages, screens.pages)),
+      label: words("market.brings.page", { count: pages.length }),
+      names: pages.map(
+        nameIn(shell("shell.pages", { returnObjects: true }), screens.pages),
+      ),
     },
     {
-      label: words.brings.blocks,
-      names: blocks.map(nameIn(words.blocks, screens.blocks)),
+      label: words("market.brings.blocks"),
+      names: blocks.map(nameIn(named("market.blocks"), screens.blocks)),
     },
     {
-      label: words.brings.stage(stages.length),
-      names: stages.map(nameIn(words.stages, screens.stages)),
+      label: words("market.brings.stage", { count: stages.length }),
+      names: stages.map(nameIn(named("market.stages"), screens.stages)),
     },
     {
-      label: words.brings.kobold(kobolds.length),
+      label: words("market.brings.kobold", { count: kobolds.length }),
       names: kobolds.map(
         (id) => KOBOLDS.find((kobold) => kobold.id === id)?.name ?? id,
       ),
@@ -197,7 +211,7 @@ export function extensionThing(
     return one ? [link(words, one)] : [];
   });
   const slots = addOn.slots.map((slot) => ({
-    label: words.slots[slot as keyof Words["slots"]],
+    label: words(`market.slots.${slot as keyof Messages["market"]["slots"]}`),
     to: "connections",
   }));
   return {
@@ -229,13 +243,12 @@ export function codeThing(
 ): Thing {
   const by =
     filler === "github" ? undefined : addOns.find((a) => a.id === filler);
-  const own = words.connections.code;
   return {
     key: `code:${filler}`,
     kind: "connection",
     look: filler,
-    name: by ? nameOf(words, by) : own.name,
-    about: by ? lineOf(words, by) : own.line,
+    name: by ? nameOf(words, by) : words("market.connections.code.name"),
+    about: by ? lineOf(words, by) : words("market.connections.code.line"),
     maker: "kobble",
     state: "inUse",
     brings: [],
@@ -321,7 +334,7 @@ export function kitThing(
     brings: [
       {
         label: "",
-        names: kit.brings.map((one) => words.kitBrings[one]),
+        names: kit.brings.map((one) => words(`market.kitBrings.${one}`)),
       },
     ],
     needs: [],

@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryState } from "@/api/client";
 import { ConnectedBoard } from "@/components/connected-board";
@@ -9,7 +10,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useT } from "@/i18n/use-t";
 
 import { TrackerChoice } from "./connect-page";
 import { trackersOf } from "./trackers";
@@ -18,12 +18,15 @@ import { trackersOf } from "./trackers";
 // on the page; what was connected, once done.
 export function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
   const [done, setDone] = useState<string | null>(null);
-  const t = useT().settings;
+  const t = useTranslation().t;
   const now =
     state.addOns.find((addOn) => addOn.id === state.company.tracker)?.name ??
-    t.tracker.none;
+    t("settings.tracker.none");
   return (
-    <Topic title={t.sections.tracker} about={t.tracker.about(now)}>
+    <Topic
+      title={t("settings.sections.tracker")}
+      about={t("settings.tracker.about", { now })}
+    >
       <ConnectedBoard state={state} />
       {state.company.tracker === "none" ? (
         <TrackerChoice
@@ -34,7 +37,7 @@ export function TrackerCard({ state }: Readonly<{ state: FactoryState }>) {
       ) : (
         <Collapsible className="grid gap-4">
           <CollapsibleTrigger className="group flex items-center gap-1.5 justify-self-start text-[13px] font-medium">
-            {t.tracker.change}
+            {t("settings.tracker.change")}
             <ChevronDown
               className="size-4 transition group-data-[state=open]:rotate-180"
               aria-hidden

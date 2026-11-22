@@ -18,8 +18,8 @@ import {
 } from "../src/lib/market-view.ts";
 import { installedModules, type PageModule } from "../src/lib/page-module.ts";
 
-const words = messagesIn("en").market;
-const shell = messagesIn("en").shell;
+const words = messagesIn("en");
+const shell = messagesIn("en");
 const list = (items: string[]) => items.join(" and ");
 
 const none = { pages: [], blocks: [], kobolds: [], stages: [] };

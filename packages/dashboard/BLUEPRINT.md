@@ -43,7 +43,8 @@ src/hooks/              general hooks (the voice's in hooks/voice/)
 src/lib/                general logic without screens (the voice's calls,
                         speech and hearing in lib/voice/); what an
                         extension brings to the page (page-module.ts)
-src/i18n/               the words, in three languages
+src/i18n/               the words, in three languages, through i18next
+                        (locales/<language>/<area>.json)
 src/features/<area>/    one per core area: home, system, settings,
                         marketplace, setup, support (Sprocket and the
                         feedback it takes), updates, connect (where work
@@ -74,11 +75,6 @@ kit's table instead.
 Code written before Kobble was held to its kit. Each line is to be moved to
 the kit's library, one card at a time; nothing new is added to it.
 
-- **Texts and languages:** a typed catalogue of its own
-  (`src/i18n/`, `area(en, it, de)` and `useT()`), not i18next with
-  react-i18next; its checks (`test/i18n.test.ts`,
-  `test/words-in-catalogue.test.ts`) move to i18next's resources and
-  eslint-plugin-i18next with it. First to move.
 - **Pages and addresses:** written by hand on `location.hash`
   (`src/app/router.tsx`), not React Router.
 - **Data from the server:** fetched by hand (`src/api/client.ts`,

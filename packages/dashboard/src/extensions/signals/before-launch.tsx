@@ -7,6 +7,7 @@
 
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Face, MissionNow, PersonaRow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -18,7 +19,6 @@ import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 import { ConnectSignals } from "./empty";
 import { missionWords } from "@/lib/signals-view";
-import { useT } from "@/i18n/use-t";
 
 // Before launch: the personas on a mission now, or (with no signal yet)
 // the empty page; then the line about connecting the live app, which opens
@@ -52,34 +52,34 @@ function ConnectLater({
   more,
   onConnect,
 }: Readonly<{ app: string; more: boolean; onConnect: () => void }>) {
-  const t = useT().signals.before;
+  const t = useTranslation().t;
   return (
     <p className="mx-1 mt-2 text-[12.5px] text-muted-foreground">
       {more && (
         <>
           <a href={personaHash()} className="font-semibold text-blue">
-            {t.sendMore}
+            {t("signals.before.sendMore")}
           </a>{" "}
-          {t.toImprove}{" "}
+          {t("signals.before.toImprove")}{" "}
         </>
       )}
-      {t.afterLaunch}{" "}
+      {t("signals.before.afterLaunch")}{" "}
       <button
         type="button"
         onClick={onConnect}
         className="font-semibold text-blue"
       >
-        {t.connectApp(app)}
+        {t("signals.before.connectApp", { app })}
       </button>{" "}
-      {t.toHear}
+      {t("signals.before.toHear")}
     </p>
   );
 }
 
 function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
-    <section aria-label={t.signals.before.onMission} className={CARD}>
+    <section aria-label={t("signals.before.onMission")} className={CARD}>
       {missions.map((mission) => (
         <a
           key={mission.id}
@@ -89,7 +89,7 @@ function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
           <PersonaFace face={mission.face} size={26} />
           <span className="font-semibold">{mission.name}</span>
           <span aria-live="polite" className="truncate text-muted-foreground">
-            {t.signals.before.onMission} · {missionWords(mission, t.words)}
+            {t("signals.before.onMission")} · {missionWords(mission, t)}
           </span>
         </a>
       ))}
@@ -111,7 +111,7 @@ function NoCustomersYet() {
   const faces = data?.personas.length
     ? data.personas.slice(0, 4).map((persona) => persona.face)
     : STAND_INS;
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       className={cn(
@@ -121,12 +121,12 @@ function NoCustomersYet() {
     >
       <FacesAndScreen faces={faces} />
       <p className="mt-2 max-w-[400px] text-[15.5px] text-foreground-2">
-        {t.signals.before.noCustomers}
+        {t("signals.before.noCustomers")}
       </p>
       <Button asChild size="pill" className="mt-1.5">
         <a href={personaHash()}>
           <Send aria-hidden strokeWidth={2} className="size-[15px]" />
-          {t.signals.before.send}
+          {t("signals.before.send")}
         </a>
       </Button>
     </div>

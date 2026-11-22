@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryState, State } from "@/api/client";
 import type { ExtensionPage } from "@/lib/page-module";
@@ -13,7 +14,6 @@ import { GuidedSetup } from "@/features/setup/guided-setup";
 
 import { HomePage } from "@/features/home/home-page";
 import { SystemPage } from "@/features/system/system-page";
-import { useT } from "@/i18n/use-t";
 
 import { blocksOf, pagesOf } from "./extensions";
 import { SettingsPage } from "./settings-page";
@@ -76,7 +76,7 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 }
 
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const place = usePlace();
   const pages = pagesOf(state);
   // Just set up, connecting where work is tracked comes first.
@@ -93,7 +93,10 @@ function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
       fill={extension?.fills?.(open) ?? false}
     >
       {state.problems.length > 0 && (
-        <ProblemBox title={t.shell.misfit} text={state.problems.join(" · ")} />
+        <ProblemBox
+          title={t("shell.misfit")}
+          text={state.problems.join(" · ")}
+        />
       )}
       <PageBody state={state} page={page} open={open} extension={extension} />
     </Shell>

@@ -16,6 +16,7 @@ import {
   ReactFlowProvider,
 } from "@xyflow/react";
 import { useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,6 @@ import {
 import { useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
-import { useT } from "@/i18n/use-t";
 
 const NODE_TYPES: NodeTypes = {
   problem: ProblemNode,
@@ -71,7 +71,7 @@ export function Board(props: BoardProps) {
 }
 
 function Canvas({ page, attached, onPick }: BoardProps) {
-  const t = useT();
+  const t = useTranslation().t;
   const pointed = page.talk.pointed;
   const marks = useMemo(
     () => ({ pointed: pointed?.thing ?? null, attached }),
@@ -124,7 +124,7 @@ function Canvas({ page, attached, onPick }: BoardProps) {
         edgesFocusable={false}
         minZoom={0.15}
         maxZoom={2}
-        aria-label={t.explore.board.label}
+        aria-label={t("explore.board.label")}
         style={COLOURS}
       >
         <Background gap={16} />

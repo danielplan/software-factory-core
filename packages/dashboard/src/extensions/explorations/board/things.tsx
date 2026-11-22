@@ -8,6 +8,7 @@
 
 import type { NodeProps } from "@xyflow/react";
 import { Check, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { PersonaFace } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
@@ -16,15 +17,16 @@ import { Markdown } from "@/components/markdown";
 import { useDiagram } from "./diagram";
 import { Frame, useBoardDo } from "./frame";
 import type { ThingNode } from "./nodes";
-import { useT } from "@/i18n/use-t";
 
 export function ProblemNode({ data }: NodeProps<ThingNode>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { exploration, personas } = data.page;
   return (
     <Frame data={data} tone="note">
       <div className="text-[13.5px] leading-[1.45]">
-        <Markdown text={exploration.problem || t.explore.board.problemHere} />
+        <Markdown
+          text={exploration.problem || t("explore.board.problemHere")}
+        />
       </div>
       {personas.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -74,7 +76,7 @@ export function NoteNode({ data }: NodeProps<ThingNode>) {
 }
 
 export function ChoiceNode({ data }: NodeProps<ThingNode>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   if (thing.kind !== "choice") return null;
@@ -133,18 +135,18 @@ export function ChoiceNode({ data }: NodeProps<ThingNode>) {
                 </span>
                 {thing.recommended === option.key && (
                   <span
-                    title={t.explore.board.recommendsThis}
+                    title={t("explore.board.recommendsThis")}
                     className="inline-flex items-center gap-1 text-[11px] font-medium text-wash-foreground"
                   >
                     <Sparkles aria-hidden className="size-3 flex-none" />
-                    {t.explore.board.recommended}
+                    {t("explore.board.recommended")}
                   </span>
                 )}
               </span>
             </button>
             {made.has(option.key) && (
               <span className="flex-none text-[11px] font-medium text-muted-foreground">
-                {t.explore.kinds.prototype}
+                {t("explore.kinds.prototype")}
               </span>
             )}
           </div>

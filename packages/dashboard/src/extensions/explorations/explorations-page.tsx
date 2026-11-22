@@ -4,8 +4,10 @@
 // dropped, which opens. New exploration opens a fresh canvas at once, where
 // the team says its idea to the kobold.
 
+import type { TFunction } from "i18next";
 import { ChevronDown, ChevronUp, Lightbulb, Plus, Radar } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   type ExplorationRow,
@@ -25,11 +27,9 @@ import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
 import { explorationHash, Waiting } from "./waiting-row";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 export function ExplorationsPage() {
-  const t = useT();
+  const t = useTranslation().t;
   const { data, problem } = useExplorations();
   const [refused, setRefused] = useState<string | null>(null);
   const adding = () => {
@@ -45,16 +45,20 @@ export function ExplorationsPage() {
   return (
     <>
       <Head
-        title={t.shell.pages.explore}
+        title={t("shell.pages.explore")}
         right={
           <Button size="pill" onClick={adding}>
             <Plus aria-hidden strokeWidth={2.2} />
-            {t.explore.newExploration}
+            {t("explore.newExploration")}
           </Button>
         }
       />
-      {problem && <ProblemBox title={t.explore.cannotReadAll} text={problem} />}
-      {refused && <ProblemBox title={t.explore.cannotStart} text={refused} />}
+      {problem && (
+        <ProblemBox title={t("explore.cannotReadAll")} text={problem} />
+      )}
+      {refused && (
+        <ProblemBox title={t("explore.cannotStart")} text={refused} />
+      )}
       {data &&
         (isEmpty(data) ? <NothingYet onOwn={adding} /> : <Lists view={data} />)}
     </>
@@ -83,7 +87,7 @@ function isEmpty(view: ExplorationsView): boolean {
 }
 
 // A board in small, for the picture of what an exploration is.
-function exampleOf(e: Messages["explore"]["example"]): ExplorationRow {
+function exampleOf(e: TFunction): ExplorationRow {
   return {
     id: "X-0",
     title: "",
@@ -97,11 +101,26 @@ function exampleOf(e: Messages["explore"]["example"]): ExplorationRow {
         id: "problem",
         kind: "problem",
         agreed: false,
-        label: e.problem,
+        label: e("explore.example.problem"),
       },
-      { id: "choice", kind: "choice", agreed: false, label: e.choice },
-      { id: "a", kind: "prototype", agreed: false, label: e.a },
-      { id: "b", kind: "prototype", agreed: true, label: e.b },
+      {
+        id: "choice",
+        kind: "choice",
+        agreed: false,
+        label: e("explore.example.choice"),
+      },
+      {
+        id: "a",
+        kind: "prototype",
+        agreed: false,
+        label: e("explore.example.a"),
+      },
+      {
+        id: "b",
+        kind: "prototype",
+        agreed: true,
+        label: e("explore.example.b"),
+      },
     ],
     links: [
       { from: "problem", to: "choice" },
@@ -116,7 +135,7 @@ function exampleOf(e: Messages["explore"]["example"]): ExplorationRow {
 // Before anything is explored: what an exploration is, and two ways to
 // start one.
 function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       className={cn(
@@ -125,35 +144,35 @@ function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
       )}
     >
       <div className="flex flex-col gap-3">
-        <div className="text-base font-semibold">{t.explore.nothingYet}</div>
+        <div className="text-base font-semibold">{t("explore.nothingYet")}</div>
         <p className="max-w-[440px] text-[14.5px] text-foreground-2">
-          {t.explore.whatItIs}
+          {t("explore.whatItIs")}
         </p>
         <div className="mt-1.5 flex flex-wrap gap-2.5">
           <Button asChild size="pill">
             <a href="#signals">
               <Radar aria-hidden />
-              {t.explore.exploreSignal}
+              {t("explore.exploreSignal")}
             </a>
           </Button>
           <Button variant="ring" size="pill" onClick={onOwn}>
             <Lightbulb aria-hidden />
-            {t.explore.ownIdea}
+            {t("explore.ownIdea")}
           </Button>
         </div>
       </div>
       <div className="opacity-90">
-        <Preview row={exampleOf(t.explore.example)} />
+        <Preview row={exampleOf(t)} />
       </div>
     </div>
   );
 }
 
 function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <>
-      <Sub title={t.explore.beingExplored} n={view.exploring.length} />
+      <Sub title={t("explore.beingExplored")} n={view.exploring.length} />
       {view.exploring.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
           {view.exploring.map((row) => (
@@ -163,11 +182,11 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
       )}
       {view.exploring.length === 0 && (
         <p className="text-[13px] text-muted-foreground">
-          {t.explore.nothingExplored}
+          {t("explore.nothingExplored")}
         </p>
       )}
       <Sub
-        title={t.explore.waiting}
+        title={t("explore.waiting")}
         n={view.waiting.length + view.fromBoard.length}
       />
       <div className={CARD}>
@@ -179,7 +198,7 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
         ))}
         {view.waiting.length + view.fromBoard.length === 0 && (
           <p className="p-[18px] text-center text-muted-foreground">
-            {t.explore.nothingWaiting}
+            {t("explore.nothingWaiting")}
           </p>
         )}
       </div>
@@ -191,8 +210,8 @@ function Lists({ view }: Readonly<{ view: ExplorationsView }>) {
 // One being explored: the board as it really is, in small, where it is
 // in its colour, and the kobold's question; a click opens it.
 function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
-  const t = useT();
-  const where = whereItIs(row, t.explore.where);
+  const t = useTranslation().t;
+  const where = whereItIs(row, t);
   const { tint } = KINDS[where.kind];
   return (
     <a
@@ -228,7 +247,7 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
 }
 
 function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [open, setOpen] = useState(false);
   const handed = rows.filter((row) => row.status === "handed-off").length;
   return (
@@ -240,7 +259,7 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
         }}
         className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-muted-foreground"
       >
-        {t.explore.doneLine(handed, rows.length - handed)}
+        {t("explore.doneLine", { handed, dropped: rows.length - handed })}
         {open ? (
           <ChevronUp aria-hidden className="size-4" />
         ) : (
@@ -257,7 +276,7 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
             >
               <span className="flex-1">{row.title}</span>
               <span className="text-[12.5px] text-muted-foreground">
-                {row.work ? `#${String(row.work)}` : t.explore.dropped}
+                {row.work ? `#${String(row.work)}` : t("explore.dropped")}
               </span>
               <Chevron />
             </a>

@@ -2,6 +2,7 @@
 // small preview of a board, as a whiteboard.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { ExplorationRow, Face } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -11,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { KINDS } from "./kinds";
 import { spread } from "@/lib/layout";
 import { areaOf } from "./view";
-import { useT } from "@/i18n/use-t";
 
 export function Faces({
   personas,
@@ -35,7 +35,7 @@ export function Faces({
 const MINI = { width: 150, height: 40 };
 
 export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
-  const t = useT().explore;
+  const t = useTranslation().t;
   const places = useMiniPlaces(row);
   const area = areaOf([...places.values()], MINI);
   const shown = row.things.filter((thing) => places.has(thing.id));
@@ -76,7 +76,7 @@ export function Preview({ row }: Readonly<{ row: ExplorationRow }>) {
       )}
       {row.things.length < 2 && (
         <div className="absolute top-1/2 right-6 grid h-[38px] w-[110px] -translate-y-1/2 place-items-center rounded-lg border-[1.5px] border-dashed border-[#d3d7e0] text-[10.5px] text-faint">
-          {t.waysComeHere}
+          {t("explore.waysComeHere")}
         </div>
       )}
     </div>

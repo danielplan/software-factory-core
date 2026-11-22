@@ -5,11 +5,12 @@
 
 import { Plus, RotateCcw } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PageHead } from "@/components/layout/page-head";
 import { Button } from "@/components/ui/button";
 import { Confirm } from "@/components/confirm";
-import { useT } from "@/i18n/use-t";
+
 import { offeredOf, START } from "@/lib/home-layout";
 import { waitingOf } from "@/lib/home-view";
 import type { HomeBlocks as ExtensionBlocks } from "@/lib/page-module";
@@ -26,7 +27,7 @@ export function HomePage({
   state,
   featureBlocks,
 }: Readonly<{ state: FactoryState; featureBlocks: ExtensionBlocks }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { layout, change, loaded, problemKeeping } = useHomeLayout(
     state.addOns,
   );
@@ -37,7 +38,7 @@ export function HomePage({
   // Blocks are shown once what they show is read, so none of them grows or
   // moves after it appears.
   const ready = loaded && read;
-  const waiting = waitingOf(input, t.home);
+  const waiting = waitingOf(input, t);
   const { addOns } = state;
   const blocks: Record<string, ReactNode> = {
     ...featureBlocks({ state, input, waiting }),
@@ -56,8 +57,8 @@ export function HomePage({
   return (
     <>
       <PageHead
-        title={t.shell.pages.home}
-        about={t.home.about}
+        title={t("shell.pages.home")}
+        about={t("home.about")}
         actions={
           <ArrangeActions
             arranging={arranging}
@@ -77,7 +78,7 @@ export function HomePage({
       />
       {problemKeeping && (
         <p role="alert" className="text-[13px] text-destructive">
-          {t.home.arrange.notKept}
+          {t("home.arrange.notKept")}
         </p>
       )}
       {ready && (
@@ -118,7 +119,7 @@ function ArrangeActions({
   onAdd: () => void;
   onToggle: () => void;
 }>) {
-  const t = useT().home.arrange;
+  const t = useTranslation().t;
   return (
     <>
       {arranging && (
@@ -129,13 +130,13 @@ function ArrangeActions({
           onClick={onReset}
         >
           <RotateCcw aria-hidden />
-          {t.reset}
+          {t("home.arrange.reset")}
         </Button>
       )}
       {arranging && (
         <Button variant="ring" size="pill" onClick={onAdd}>
           <Plus aria-hidden />
-          {t.add}
+          {t("home.arrange.add")}
         </Button>
       )}
       <ArrangeButton editing={arranging} onClick={onToggle} />
@@ -149,15 +150,15 @@ function ResetHome({
   onReset,
   onClose,
 }: Readonly<{ open: boolean; onReset: () => void; onClose: () => void }>) {
-  const t = useT().home.arrange;
+  const t = useTranslation().t;
   return (
     <Confirm
       question={
         open
           ? {
-              title: t.resetTitle,
-              lines: [t.resetText],
-              yes: t.resetYes,
+              title: t("home.arrange.resetTitle"),
+              lines: [t("home.arrange.resetText")],
+              yes: t("home.arrange.resetYes"),
               onYes: onReset,
             }
           : null

@@ -1,0 +1,68 @@
+{
+  "types": {
+    "bug": "Fehler",
+    "request": "Funktionswunsch",
+    "feedback": "Rückmeldung",
+    "idea": "Idee",
+    "question": "Offene Frage"
+  },
+  "sources": {
+    "app": "In der App",
+    "usage": "Nutzung",
+    "errors": "Fehler",
+    "test": "Mission",
+    "feedback": "Feedback-Board"
+  },
+  "someone": "Jemand",
+  "explore": "Erkunden",
+  "addTo": "Zu {{id}} hinzufügen",
+  "alreadyExplored": "Schon erkundet in",
+  "alreadyFixed": "Schon behoben in",
+  "ago": {
+    "now": "gerade eben",
+    "minutes": "vor {{n}} Min.",
+    "hours": "vor {{n}} Std.",
+    "yesterday": "gestern",
+    "days": "vor {{n}} Tagen"
+  },
+  "sync": {
+    "notConnected": "Nicht mit der Live-App verbunden",
+    "notYet": "Noch nicht mit der Live-App abgeglichen · alle 30 Min.",
+    "synced": "Mit der Live-App abgeglichen {{ago}} · alle 30 Min."
+  },
+  "signalCount_one": "1 Signal",
+  "signalCount_other": "{{count}} Signale",
+  "origin": {
+    "usage": "In der Nutzung gefunden",
+    "developer": "Von dir angelegt"
+  },
+  "status": {
+    "explored": "Erkundet in {{to}}",
+    "fixed": "Behoben in {{to}}",
+    "sentToFix": "Zum Beheben geschickt",
+    "new": "Neu",
+    "dismissed": "Verworfen"
+  },
+  "mission": {
+    "queued": "Wartet, bis es dran ist",
+    "opening": "Öffne die App…"
+  },
+  "step": "Bei Schritt {{number}}: {{did}}",
+  "tests": {
+    "queued": "Wartet",
+    "running": "Auf Mission",
+    "done": "Erledigt",
+    "failed": "Fehlgeschlagen"
+  },
+  "lookAgain": {
+    "soon": "Der Kobold schaut bald wieder.",
+    "minute": "Der Kobold schaut in einer Minute wieder.",
+    "minutes": "Der Kobold schaut in {{n}} Minuten wieder."
+  },
+  "done": {
+    "fixed": "{{id}} ist im Zu erledigen der Fabrik",
+    "dismissed": "Verworfen",
+    "added": "Zu {{id}} hinzugefügt",
+    "waiting": "{{id}} wartet in Erkundungen"
+  }
+}

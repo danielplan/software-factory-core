@@ -1,0 +1,36 @@
+{
+  "problems": {
+    "unsupported": "Questo browser non supporta la scheda grafica (WebGPU), quindi il modello vocale non può funzionare qui. Apri la fabbrica in un Chrome o Edge aggiornato.",
+    "stalled": "La preparazione è ferma da 30 secondi senza che succeda niente. Controlla la connessione a internet, poi riprova.",
+    "blocked": "Il browser non ha il permesso di usare il microfono. Clicca l'icona a sinistra della barra degli indirizzi, consenti il microfono, poi premi di nuovo Parla.",
+    "no-microphone": "Nessun microfono trovato. Collegane uno o collega le cuffie, poi premi di nuovo Parla.",
+    "microphone-busy": "Il microfono è usato da un altro programma. Chiudilo (una chiamata, un registratore), poi premi di nuovo Parla.",
+    "microphone-failed": "Il microfono si è aperto, ma il suo suono non si è potuto leggere. Ricarica la pagina e premi di nuovo Parla.",
+    "download": "Non sono riuscito a scaricare il modello vocale. Controlla la connessione a internet, poi riprova.",
+    "voice-failed": "La voce del coach non si è potuta riprodurre, quindi non sentirai le sue risposte. Controlla che altoparlanti o cuffie siano accesi, poi premi di nuovo Parla.",
+    "not-sent": "Le tue parole non sono partite. Ripetile, per favore."
+  },
+  "noVoice": "In questo browser non c'è una voce in {{language}}, quindi le risposte non possono essere lette ad alta voce. Aggiungine una nelle impostazioni vocali del computer, o scegli un'altra lingua.",
+  "loading": "Mi preparo, non parlare ancora: carico il modello vocale {{model}}… {{percent}}",
+  "downloading": "Scarico il modello vocale {{model}}, solo la prima volta: {{percent}} ({{loaded}} di {{total}} MB)",
+  "preparing": "Mi preparo, non parlare ancora: carico il modello vocale…",
+  "writing": "Scrivo quello che hai detto…",
+  "listening": "Ti ascolto. Vai pure.",
+  "thinking": "Ricevuto. Ci lavoro…",
+  "speaking": "Sto parlando… di' “stop” per interrompere.",
+  "quietly": "Un breve suono viene trascritto in silenzio.",
+  "orb": {
+    "preparing": "Mi preparo…",
+    "listening": "Ascolto",
+    "writing": "Lo scrivo…",
+    "thinking": "Ci penso…",
+    "speaking": "Parlo"
+  },
+  "yourVoice": "La tua voce",
+  "beingHeard": "Quello che sento",
+  "youSpeak": "La lingua che parli",
+  "gettingModel": "Prendo il modello vocale",
+  "tryAgain": "Riprova",
+  "close": "Chiudi",
+  "endCall": "Termina la chiamata"
+}

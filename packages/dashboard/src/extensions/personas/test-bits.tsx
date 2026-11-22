@@ -1,14 +1,15 @@
 // A mission's status as a small round icon, and as a chip.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { PersonaTest } from "@/api/client";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 type Status = PersonaTest["status"];
 
 const GREY = "#9a9fad";
+const LINE = "var(--line-soft)";
 
 export function StatusIcon({
   status,
@@ -21,7 +22,7 @@ export function StatusIcon({
     queued: ring(GREY),
     running: (
       <>
-        {ring("var(--line-soft)")}
+        {ring(LINE)}
         <path
           d="M8 2 A6 6 0 0 1 14 8"
           fill="none"
@@ -70,11 +71,11 @@ export function StatusIcon({
 }
 
 export function StatusChip({ status }: Readonly<{ status: Status }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <span className="inline-flex h-[22px] items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-foreground-2 shadow-[inset_0_0_0_1px_var(--line-soft)]">
       <StatusIcon status={status} size={12} />
-      {t.words.tests[status]}
+      {t(`words.tests.${status}`)}
     </span>
   );
 }

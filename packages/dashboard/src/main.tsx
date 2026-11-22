@@ -3,6 +3,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "@/app/app";
+import { chosenLocale } from "@/i18n/locale";
+import { i18n } from "@/i18n/messages";
 import { LanguageProvider } from "@/i18n/use-t";
 import { followLogo, THEME_LOADED } from "@/lib/brand";
 import { lightOnly } from "@/lib/light-only";
@@ -43,6 +45,9 @@ theme.addEventListener("load", () => {
 });
 document.head.append(theme);
 followChoice();
+
+// The browser's language until the owner's choice is read.
+void i18n.changeLanguage(chosenLocale("browser", navigator.languages));
 
 const root = document.getElementById("root");
 if (!root) throw new Error("index.html has no element with the id root.");

@@ -3,9 +3,8 @@
 // variants; the one picked goes into the address (?state=<name>), so the app
 // shows it. The first segment is the data it opens with.
 
-import { useT } from "@/i18n/use-t";
-
 import { Segment, SwitchRow } from "./prototype-switches";
+import { useTranslation } from "react-i18next";
 
 export function States({
   states,
@@ -16,23 +15,24 @@ export function States({
   shown: string;
   onPick: (state: string) => void;
 }>) {
-  const t = useT().explore.board;
+  const t = useTranslation().t;
   if (states.length === 0) return null;
   return (
-    <SwitchRow label={t.data} role="group">
-      {[["", t.usualState], ...states.map((name) => [name, name])].map(
-        ([name = "", label]) => (
-          <Segment
-            key={name || "usual"}
-            on={shown === name}
-            onPick={() => {
-              onPick(name);
-            }}
-          >
-            {label}
-          </Segment>
-        ),
-      )}
+    <SwitchRow label={t("explore.board.data")} role="group">
+      {[
+        ["", t("explore.board.usualState")],
+        ...states.map((name) => [name, name]),
+      ].map(([name = "", label]) => (
+        <Segment
+          key={name || "usual"}
+          on={shown === name}
+          onPick={() => {
+            onPick(name);
+          }}
+        >
+          {label}
+        </Segment>
+      ))}
     </SwitchRow>
   );
 }

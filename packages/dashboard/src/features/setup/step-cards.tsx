@@ -5,6 +5,7 @@
 // to pick from. Every card can be taken off or asked about.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Card, messageOf, post } from "@/api/client";
 
@@ -21,7 +22,6 @@ import { isLook, TheLook } from "./the-look";
 import { FirstExploration } from "./first-exploration";
 import { HowFar } from "./how-far";
 import { TeamTiles } from "./team-tiles";
-import { useT } from "@/i18n/use-t";
 
 export function StepCards({
   cards,
@@ -70,7 +70,7 @@ function Body({
   acts: CardActs;
   onProblem: (problem: string | null) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (stepId === "product") return <Product cards={cards} acts={acts} />;
   if (stepId === "people")
     return (
@@ -87,10 +87,10 @@ function Body({
   if (stepId === "how")
     return (
       <>
-        <Section title={t.setup.cards.forEveryone} />
+        <Section title={t("setup.cards.forEveryone")} />
         <TeamTiles />
         {cards.some((c) => !isLook(c)) && (
-          <Section title={t.setup.cards.addOns} />
+          <Section title={t("setup.cards.addOns")} />
         )}
         <Grid>
           {cards
@@ -99,7 +99,10 @@ function Body({
               <Tile key={card.id} card={card} acts={acts} />
             ))}
         </Grid>
-        <Section title={t.setup.cards.look} note={t.setup.cards.lookNote} />
+        <Section
+          title={t("setup.cards.look")}
+          note={t("setup.cards.lookNote")}
+        />
         <TheLook cards={cards} area={area} />
       </>
     );
@@ -113,7 +116,7 @@ function Body({
 }
 
 function Product({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const howReal = cards.find(isHowReal);
   const apps = cards.filter(isApp);
   const rest = cards.filter((card) => card !== howReal && !isApp(card));
@@ -121,22 +124,22 @@ function Product({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
     <>
       {howReal && <HowFar card={howReal} />}
       <Section
-        title={t.setup.cards.apps}
-        note={t.setup.cards.appsNote(apps.length)}
+        title={t("setup.cards.apps")}
+        note={t("setup.cards.appsNote", { n: apps.length })}
       />
       <Grid>
         {apps.map((card) => (
           <Tile key={card.id} card={card} acts={acts} app />
         ))}
       </Grid>
-      {rest.length > 0 && <Section title={t.setup.cards.alsoHere} />}
+      {rest.length > 0 && <Section title={t("setup.cards.alsoHere")} />}
       {rest.length > 0 && <Rows cards={rest} acts={acts} />}
     </>
   );
 }
 
 function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const people = cards.filter(isPerson);
   const rest = cards.filter((card) => !isPerson(card));
   return (
@@ -151,15 +154,15 @@ function Team({ cards, acts }: Readonly<{ cards: Card[]; acts: CardActs }>) {
           />
         ))}
         <p className="border-t border-border-soft px-[18px] py-3 text-right text-[12.5px] text-muted-foreground">
-          {t.setup.cards.everyone}
+          {t("setup.cards.everyone")}
         </p>
       </div>
-      {rest.length > 0 && <Section title={t.setup.cards.board} />}
+      {rest.length > 0 && <Section title={t("setup.cards.board")} />}
       {rest.map((card) => (
         <BoardCard key={card.id} card={card} acts={acts} />
       ))}
       <p className="flex gap-2.5 rounded-[14px] bg-wash px-3.5 py-3 text-[13px] text-wash-foreground">
-        {t.setup.cards.building}
+        {t("setup.cards.building")}
       </p>
     </>
   );

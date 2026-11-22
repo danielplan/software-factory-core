@@ -3,10 +3,11 @@
 // first). The server does the change; the page follows its state.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type AddOnView, messageOf, post } from "@/api/client";
 import { listIn } from "@/i18n/format";
-import { useLocale, useT } from "@/i18n/use-t";
+import { useLocale } from "@/i18n/use-t";
 import type { Locale } from "@/i18n/locale";
 import { installPlan, nameOf, type Words } from "@/lib/market-view";
 
@@ -23,21 +24,21 @@ function installQuestion(
   const names = plan.map((one) => nameOf(t, one));
   const needed = names.slice(0, -1);
   return {
-    title: t.installTitle(listIn(locale, names)),
+    title: t("market.installTitle", { names: listIn(locale, names) }),
     lines: [
-      t.installText(
-        names.at(-1) ?? "",
-        listIn(locale, needed),
-        needed.length > 1,
-      ),
+      t("market.installText", {
+        name: names.at(-1) ?? "",
+        needs: listIn(locale, needed),
+        context: needed.length > 1 ? "several" : undefined,
+      }),
     ],
-    yes: t.installBoth(listIn(locale, names)),
+    yes: t("market.installBoth", { names: listIn(locale, names) }),
     onYes: go,
   };
 }
 
 export function useMarket(addOns: AddOnView[]) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const locale = useLocale();
   const [question, setQuestion] = useState<Question | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -74,9 +75,12 @@ export function useMarket(addOns: AddOnView[]) {
   // Switching board: asks, then goes to where the new one is connected.
   const switchBoard = (from: AddOnView, to: AddOnView) => {
     setQuestion({
-      title: t.connections.switchTitle(nameOf(t, from), nameOf(t, to)),
-      lines: [t.connections.switchText(nameOf(t, to))],
-      yes: t.connections.switchGo,
+      title: t("market.connections.switchTitle", {
+        from: nameOf(t, from),
+        to: nameOf(t, to),
+      }),
+      lines: [t("market.connections.switchText", { to: nameOf(t, to) })],
+      yes: t("market.connections.switchGo"),
       onYes: () => {
         window.location.hash = "#settings/connections";
       },

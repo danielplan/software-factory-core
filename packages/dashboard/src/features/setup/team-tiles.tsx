@@ -4,6 +4,7 @@
 
 import { Layers, LineChart } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
 import { Switch } from "@/components/ui/switch";
@@ -11,10 +12,9 @@ import { type Read, useRead } from "@/api/use-read";
 import { cn } from "@/lib/utils";
 
 import type { TeamChoices } from "../../../../server/src/coach/setup-team.ts";
-import { useT } from "@/i18n/use-t";
 
 export function TeamTiles() {
-  const t = useT();
+  const t = useTranslation().t;
   const { data } = useRead("/api/setup/team") as Read<TeamChoices>;
   const [shown, show] = useState<TeamChoices | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -35,8 +35,8 @@ export function TeamTiles() {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3">
         <Tile
           icon={<Layers className="size-[17px]" aria-hidden />}
-          title={t.setup.team.cards}
-          text={t.setup.team.cardsText}
+          title={t("setup.team.cards")}
+          text={t("setup.team.cardsText")}
         >
           <div className="flex w-fit gap-0.5 rounded-[14px] bg-[#eceef2] p-1">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -59,12 +59,12 @@ export function TeamTiles() {
         </Tile>
         <Tile
           icon={<LineChart className="size-[17px]" aria-hidden />}
-          title={t.setup.team.usage}
-          text={t.setup.team.usageText}
+          title={t("setup.team.usage")}
+          text={t("setup.team.usageText")}
           end={
             <Switch
               checked={now.usage}
-              aria-label={t.setup.team.usage}
+              aria-label={t("setup.team.usage")}
               onCheckedChange={(on) => {
                 save({ usage: on });
               }}

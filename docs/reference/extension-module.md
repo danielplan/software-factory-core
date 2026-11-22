@@ -15,7 +15,7 @@ the declaration's schema is `extensionSchema` in
 | ------ | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Server | `packages/server/src/extensions/<id>/`              | `index.ts`: `extension` and `serve(host)`                                              |
 | Page   | `packages/dashboard/src/extensions/<id>/`           | `index.tsx`: its pages, Home blocks, settings sections and sidebar rows (`PageModule`) |
-| Words  | `packages/dashboard/src/i18n/areas/`                | its name, line and every word it shows                                                 |
+| Words  | `packages/dashboard/src/i18n/locales/`              | its name, line and every word it shows                                                 |
 | Tests  | `packages/server/test/`, `packages/dashboard/test/` | its tests, one subject per file                                                        |
 
 An add-on that needs a stand-in in the tests (the GitHub CLI, Jira's

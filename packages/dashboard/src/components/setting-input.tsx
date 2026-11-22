@@ -1,9 +1,10 @@
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
+
 import type { GroupView } from "@/api/client";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
-import type { Messages } from "@/i18n/messages";
-import { useT } from "@/i18n/use-t";
 
 // A secret the server says is set; its value is never sent to the page.
 const SECRET_SET = "(set)";
@@ -24,7 +25,7 @@ export function SettingInput({
   problem: string | undefined;
   onType: (value: string) => void;
 }>) {
-  const t = useT().settings.form;
+  const t = useTranslation().t;
   const { label, help, shown } = describe(field, typed, t);
   return (
     <Field id={id} label={label} help={help} {...(problem ? { problem } : {})}>
@@ -55,16 +56,12 @@ export function SettingInput({
 
 // A setting's label and help, and what its box shows: a secret that is set
 // says so, and its box stays empty until a new one is typed.
-function describe(
-  field: SettingView,
-  typed: string | undefined,
-  t: Messages["settings"]["form"],
-) {
+function describe(field: SettingView, typed: string | undefined, t: TFunction) {
   const secret = field.kind === "secret";
   const set = secret && field.value === SECRET_SET;
   return {
-    label: set ? t.set(field.label) : field.label,
-    help: set ? t.replace(field.help) : field.help,
+    label: set ? t("settings.form.set", { label: field.label }) : field.label,
+    help: set ? t("settings.form.replace", { help: field.help }) : field.help,
     shown: typed ?? (secret ? "" : (field.value ?? "")),
   };
 }

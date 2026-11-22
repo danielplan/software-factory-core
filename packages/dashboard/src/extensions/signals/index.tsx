@@ -41,7 +41,7 @@ export const signals: PageModule = {
   }),
   settings: (t) => [
     {
-      name: t.settings.sections.liveApp,
+      name: t("settings.sections.liveApp"),
       tab: "Connections",
       body: <LiveAppCard />,
     },

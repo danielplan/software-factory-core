@@ -1,0 +1,36 @@
+{
+  "problems": {
+    "unsupported": "Dieser Browser unterstützt die Grafikkarte nicht (WebGPU), deshalb kann das Sprachmodell hier nicht laufen. Öffne die Fabrik in einem aktuellen Chrome oder Edge.",
+    "stalled": "Die Vorbereitung hängt seit 30 Sekunden, ohne dass etwas passiert. Prüfe die Internetverbindung, dann versuch es nochmal.",
+    "blocked": "Der Browser darf das Mikrofon nicht benutzen. Klick auf das Symbol links in der Adressleiste, erlaube das Mikrofon, dann drück nochmal auf Sprechen.",
+    "no-microphone": "Kein Mikrofon gefunden. Steck eins ein oder verbinde dein Headset, dann drück nochmal auf Sprechen.",
+    "microphone-busy": "Das Mikrofon wird von einem anderen Programm benutzt. Schließ es (ein Anruf, ein Rekorder), dann drück nochmal auf Sprechen.",
+    "microphone-failed": "Das Mikrofon ist offen, aber sein Ton konnte nicht gelesen werden. Lade die Seite neu und drück nochmal auf Sprechen.",
+    "download": "Das Sprachmodell konnte nicht heruntergeladen werden. Prüfe die Internetverbindung, dann versuch es nochmal.",
+    "voice-failed": "Die Stimme des Coachs konnte nicht abgespielt werden, du hörst also seine Antworten nicht. Prüfe, ob Lautsprecher oder Kopfhörer an sind, dann drück nochmal auf Sprechen.",
+    "not-sent": "Deine Worte konnten nicht gesendet werden. Sag sie bitte nochmal."
+  },
+  "noVoice": "In diesem Browser gibt es keine Stimme für {{language}}, deshalb können die Antworten nicht vorgelesen werden. Füge eine in den Spracheinstellungen des Computers hinzu, oder wähle eine andere Sprache.",
+  "loading": "Bereite mich vor, sprich noch nicht: lade das Sprachmodell {{model}}… {{percent}}",
+  "downloading": "Lade das Sprachmodell {{model}} herunter, nur beim ersten Mal: {{percent}} ({{loaded}} von {{total}} MB)",
+  "preparing": "Bereite mich vor, sprich noch nicht: lade das Sprachmodell…",
+  "writing": "Schreibe auf, was du gesagt hast…",
+  "listening": "Ich höre zu. Leg los.",
+  "thinking": "Verstanden. Ich arbeite daran…",
+  "speaking": "Ich spreche… sag „stop\", um zu unterbrechen.",
+  "quietly": "Ein kurzes Geräusch wird leise aufgeschrieben.",
+  "orb": {
+    "preparing": "Bereite mich vor…",
+    "listening": "Höre zu",
+    "writing": "Schreibe es auf…",
+    "thinking": "Denke nach…",
+    "speaking": "Spreche"
+  },
+  "yourVoice": "Deine Stimme",
+  "beingHeard": "Was ich höre",
+  "youSpeak": "Die Sprache, die du sprichst",
+  "gettingModel": "Hole das Sprachmodell",
+  "tryAgain": "Nochmal versuchen",
+  "close": "Schließen",
+  "endCall": "Gespräch beenden"
+}

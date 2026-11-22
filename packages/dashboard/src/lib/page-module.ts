@@ -6,10 +6,10 @@
 // not mounted at all. Extensions never import each other or a core area:
 // they plug in here, and the core shows what they bring.
 
+import type { TFunction } from "i18next";
 import type { ComponentType, ReactNode } from "react";
 
 import type { FactoryState } from "../api/client.ts";
-import type { Messages } from "../i18n/messages.ts";
 import type { HomeInput, WaitingItem } from "./home-view.ts";
 import type { Page } from "./routes.ts";
 import type { SettingsTabName } from "./settings-tabs.ts";
@@ -64,7 +64,7 @@ export type PageModule = {
   id: string;
   pages: ExtensionPage[];
   blocks?: HomeBlocks;
-  settings?: (words: Messages) => SettingsSection[];
+  settings?: (words: TFunction) => SettingsSection[];
 };
 
 // The modules of the installed extensions, in the order given.

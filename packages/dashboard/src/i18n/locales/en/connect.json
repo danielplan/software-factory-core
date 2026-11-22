@@ -1,0 +1,70 @@
+{
+  "didNotWork": "That did not work",
+  "trackerLabel": "Where work is tracked",
+  "page": {
+    "title": "Where should the factory keep its work?",
+    "about": "The ideas you agree to become cards on your team's board, and the factory builds from there. Connect the board it works from.",
+    "goToBoard": "Go to the board"
+  },
+  "connected": {
+    "tracked": "Your work is tracked on ",
+    "to": "Connected to ",
+    "all": ", all of its work.",
+    "labelled": ", the work labelled “{{label}}”.",
+    "stagesLabel": "Stages and columns"
+  },
+  "stages": {
+    "draft": "Draft",
+    "backlog": "Backlog",
+    "todo": "To do",
+    "doing": "In progress",
+    "review": "Review",
+    "done": "Done"
+  },
+  "pick": {
+    "choose": "Choose the {{label, lowercase}}…",
+    "work": "Work the factory takes in",
+    "every": {
+      "cards": "Every card on the board",
+      "issues": "Every issue on the board"
+    },
+    "only": {
+      "cards": "Only cards labelled “factory”",
+      "issues": "Only issues labelled “factory”"
+    },
+    "notOnBoard": "Not on this board",
+    "whichColumn": "Which column is which",
+    "matched": "Matched from the columns' names; change any that is wrong.",
+    "columnFor": "Column for {{stage}}"
+  },
+  "github": {
+    "cli": "The GitHub CLI on this computer",
+    "install": "Install it",
+    "board": "Your board",
+    "boardConnected": "Your board, connected",
+    "signedInAs": "Signed in as {{login}}",
+    "signIn": "Sign in to GitHub",
+    "signInWith": "Sign in with GitHub",
+    "typeCode": "Type this code in the browser window that opened:",
+    "notSignedIn": "Not signed in",
+    "allow": "Allow the factory to read boards",
+    "repository": "Repository",
+    "boardPick": "Board"
+  },
+  "jira": {
+    "login": "Your Jira and a token",
+    "project": "Your project",
+    "projectPick": "Project",
+    "site": "Site",
+    "siteHelp": "For example acme.atlassian.net.",
+    "email": "Your email",
+    "emailHelp": "The one you sign in to Jira with.",
+    "token": "API token",
+    "tokenHelp": "Kept only on this computer.",
+    "createToken": "Create an API token",
+    "check": "Check"
+  },
+  "checking": "Checking…",
+  "connect": "Connect",
+  "noColumn": "· no column"
+}

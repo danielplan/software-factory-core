@@ -8,6 +8,7 @@
 
 import { ChevronLeft, FlaskConical, Wrench, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   messageOf,
@@ -46,7 +47,6 @@ import {
   syncLine,
   whoOf,
 } from "@/lib/signals-view";
-import { useT } from "@/i18n/use-t";
 
 export function SignalsPage({
   open,
@@ -54,26 +54,26 @@ export function SignalsPage({
 }: Readonly<{ open: string | null; app: string }>) {
   const { data, problem } = useSignals();
   const [said, say] = useState<string | null>(null);
-  const t = useT();
+  const t = useTranslation().t;
   const now = new Date();
   return (
     <>
       <Head
-        title={t.shell.pages.signals}
+        title={t("shell.pages.signals")}
         right={
           data?.sync.connected ? (
             <>
               <span className="text-[12.5px] text-muted-foreground">
-                {syncLine(data.sync, now, t.words)}
+                {syncLine(data.sync, now, t)}
               </span>
               <SyncNow onSaid={say} />
             </>
           ) : undefined
         }
       />
-      {problem && <ProblemBox title={t.signals.cannotRead} text={problem} />}
+      {problem && <ProblemBox title={t("signals.cannotRead")} text={problem} />}
       {data?.sync.problem && (
-        <ProblemBox title={t.signals.syncFailed} text={data.sync.problem} />
+        <ProblemBox title={t("signals.syncFailed")} text={data.sync.problem} />
       )}
       {data && (
         <Shown data={data} app={app} open={open} now={now} onSaid={say} />
@@ -149,7 +149,7 @@ function Board({
   now: Date;
   onSaid: (said: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   // One list, newest first: the signals and what this person sent, mixed by
   // time.
   const all: Listed[] = [...sent, ...signals].sort(
@@ -168,7 +168,7 @@ function Board({
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue lg:hidden"
         >
           <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
-          {t.shell.pages.signals}
+          {t("shell.pages.signals")}
         </a>
         {shown && isSent(shown) && <SentDetail one={shown} />}
         {shown && !isSent(shown) ? (
@@ -190,7 +190,7 @@ function Board({
                 "p-[50px] text-center text-[13px] text-muted-foreground",
               )}
             >
-              {t.signals.noneNew}
+              {t("signals.noneNew")}
             </p>
           )
         )}
@@ -211,12 +211,12 @@ function SignalDetail({
   onFailed: (said: string) => void;
 }>) {
   const [busy, setBusy] = useState<Act | null>(null);
-  const t = useT();
+  const t = useTranslation().t;
   const act = (what: Act) => {
     setBusy(what);
     post(`/api/kobble/signals/${what}`, { id: signal.id }).then(
       (answer) => {
-        onDone(doneWords(what, signal, answer, t.words));
+        onDone(doneWords(what, signal, answer, t));
       },
       (error: unknown) => {
         setBusy(null);
@@ -244,17 +244,15 @@ function SignalDetail({
   );
   return (
     <article
-      aria-label={t.signals.signal(signal.id)}
+      aria-label={t("signals.signal", { id: signal.id })}
       className={cn(CARD, "px-7 py-[26px] max-sm:px-5")}
     >
       <header className="flex items-center gap-2.5">
         <FaceOf face={signal.personaFace} size={36} />
         <span className="grid min-w-0 flex-1">
-          <span className="truncate font-semibold">
-            {whoOf(signal, t.words)}
-          </span>
+          <span className="truncate font-semibold">{whoOf(signal, t)}</span>
           <span className="text-[12.5px] text-muted-foreground">
-            {t.words.sources[signal.source]} · {agoOf(signal.at, now, t.words)}
+            {t(`words.sources.${signal.source}`)} · {agoOf(signal.at, now, t)}
           </span>
         </span>
         <TypeChip type={signal.type} />
@@ -266,13 +264,9 @@ function SignalDetail({
       {signal.source === "feedback" && <FeedbackExtras signal={signal} />}
       <Already signal={signal} />
       <div className="flex flex-wrap gap-2.5">
-        {button("fix", t.signals.fix, primary === "fix")}
-        {button(
-          "explore",
-          exploreWords(signal, t.words),
-          primary === "explore",
-        )}
-        {button("dismiss", t.signals.dismiss, false)}
+        {button("fix", t("signals.fix"), primary === "fix")}
+        {button("explore", exploreWords(signal, t), primary === "explore")}
+        {button("dismiss", t("signals.dismiss"), false)}
       </div>
     </article>
   );

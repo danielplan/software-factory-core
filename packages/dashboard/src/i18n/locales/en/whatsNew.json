@@ -1,0 +1,23 @@
+{
+  "about": "What each version of Kobble changed for you. New versions arrive by themselves.",
+  "youAre": "You're on Kobble {{version}}",
+  "offline": "couldn't check for newer versions just now",
+  "checked": "checked {{when}}",
+  "tryAgain": "Try again",
+  "trying": "Checking…",
+  "onItsWay": "Kobble {{version}} is on its way",
+  "arrives": "Arriving by itself",
+  "noWords": "Its changes can't be read just now.",
+  "yours": "You're here",
+  "more": "More",
+  "less": "Less",
+  "releases": "Releases of Kobble",
+  "changesOf": "What changed in Kobble {{version}}",
+  "empty": "There are no words about releases on this computer yet.",
+  "problem": "What's new could not be read on this computer.",
+  "kinds": {
+    "New": "New",
+    "Changed": "Changed",
+    "Fixed": "Fixed"
+  }
+}

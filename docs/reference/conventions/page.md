@@ -21,7 +21,7 @@ promises, folders, extra libraries and what still differs from the kit.
 | shadcn's pieces, as generated                                   | `packages/dashboard/src/components/ui/`                        |
 | the shell's pieces (sidebar, page head)                         | `packages/dashboard/src/components/layout/`                    |
 | a general hook, or logic without screens                        | `packages/dashboard/src/hooks/`, `packages/dashboard/src/lib/` |
-| a word on a screen                                              | `packages/dashboard/src/i18n/areas/`                           |
+| a word on a screen                                              | `packages/dashboard/src/i18n/locales/<language>/`              |
 | putting the areas together: routes, the installed extensions    | `packages/dashboard/src/app/`                                  |
 
 ## Rules
@@ -33,7 +33,7 @@ promises, folders, extra libraries and what still differs from the kit.
   imports the extensions, mounting the installed ones. What two share moves
   to a shared folder. Checked by `npm run check:borders:dashboard`
   (`packages/dashboard/.dependency-cruiser.cjs`).
-- **Every word in three languages**, through `useT()`: see
+- **Every word in three languages**, through i18next (`useTranslation()`): see
   [languages](../languages.md).
 - **The look:** the variables and pieces in [the design system](../design-system.md);
   every button has an icon; every state holds.

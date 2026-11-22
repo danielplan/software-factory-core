@@ -4,10 +4,11 @@
 // connected, otherwise Switch to it, with its question first.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import {
   boardAction,
   boardThing,
@@ -35,11 +36,14 @@ export function ConnectionsTab({
   onOpen: (key: string) => void;
   onSwitch: (from: AddOnView, to: AddOnView) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   const code = codeThing(t, addOns, codeBy ?? undefined);
   return (
     <div className="grid gap-8">
-      <Group title={t.connections.code.title} about={t.connections.code.about}>
+      <Group
+        title={t("market.connections.code.title")}
+        about={t("market.connections.code.about")}
+      >
         <Card
           thing={code}
           action={null}
@@ -49,8 +53,8 @@ export function ConnectionsTab({
         />
       </Group>
       <Group
-        title={t.connections.tasks.title}
-        about={t.connections.tasks.about}
+        title={t("market.connections.tasks.title")}
+        about={t("market.connections.tasks.about")}
       >
         {boards.map((board) => {
           const thing: Thing = boardThing(t, addOns, board, tracker);
@@ -87,16 +91,19 @@ export function BoardButton({
   board: AddOnView;
   onSwitch: (from: AddOnView, to: AddOnView) => void;
 }>) {
-  const t = useT().market;
+  const t = useTranslation().t;
   if (action.kind === "none") return null;
   if (action.kind === "connect")
     return (
       <Button asChild size="pill">
-        <a href="#settings/connections">{t.connections.connect}</a>
+        <a href="#settings/connections">{t("market.connections.connect")}</a>
       </Button>
     );
   const short = (
-    t.connections.switchShort as Record<string, string | undefined>
+    t("market.connections.switchShort", { returnObjects: true }) as Record<
+      string,
+      string | undefined
+    >
   )[board.id];
   return (
     <Button
@@ -106,7 +113,7 @@ export function BoardButton({
         onSwitch(action.from, action.to);
       }}
     >
-      {t.connections.switchTo(short ?? board.name)}
+      {t("market.connections.switchTo", { name: short ?? board.name })}
     </Button>
   );
 }

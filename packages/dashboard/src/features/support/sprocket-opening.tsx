@@ -1,11 +1,13 @@
 // Sprocket's window before any talk: one short line, one suggestion (a
 // waiting error, else what fits this page) and the three starting choices.
 
+import type { TFunction } from "i18next";
 import { Bug, CircleHelp, Lightbulb, TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { post } from "@/api/client";
-import { useT } from "@/i18n/use-t";
+
 import type { Page } from "@/lib/routes";
 
 import {
@@ -43,7 +45,7 @@ const CHOICES = [
   { choice: "ask", icon: CircleHelp },
 ] as const;
 
-type Feedback = ReturnType<typeof useT>["feedback"];
+type Feedback = TFunction;
 
 const short = (text: string) => {
   const up = text.charAt(0).toUpperCase() + text.slice(1);
@@ -65,7 +67,7 @@ function suggestionFor(
   errors: CaughtError[],
   words: Feedback,
 ): Suggestion {
-  const w = words.window;
+  const w = words;
   if (fresh)
     return {
       key: "error",
@@ -74,16 +76,16 @@ function suggestionFor(
         <>
           <span className="truncate">{short(fresh.text)}</span>
           <span className="flex-none text-muted-foreground">
-            · {w.reportIt}
+            · {w("feedback.window.reportIt")}
           </span>
         </>
       ),
       go: () => {
-        reportError(fresh, thread.page, words.report);
+        reportError(fresh, thread.page, words("feedback.report"));
       },
     };
   const kind = HERE[page];
-  const here = w.here[page];
+  const here = w(`feedback.window.here.${page}`, { returnObjects: true });
   return {
     key: "here",
     icon: <span className="size-1.5 rounded-full bg-[#8b8ff0]" />,
@@ -102,14 +104,14 @@ export function Opening({
   page,
   thread,
 }: Readonly<{ page: Page; thread: Thread }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const fresh = useFreshError();
   const errors = useCaughtErrors();
-  const suggestions = [suggestionFor(page, thread, fresh, errors, t.feedback)];
+  const suggestions = [suggestionFor(page, thread, fresh, errors, t)];
   return (
     <div className="flex flex-none flex-col gap-3 px-4 pt-1 pb-4">
       <p className="text-[14px] leading-snug motion-safe:animate-rise">
-        {t.feedback.window.howCanIHelp}
+        {t("feedback.window.howCanIHelp")}
       </p>
       <ul className="grid gap-1.5">
         {suggestions.map((one, at) => (
@@ -145,7 +147,7 @@ export function Opening({
             className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[12px] text-foreground-2 transition-colors hover:border-[#c7cbfb] hover:bg-[#8b8ff0]/8 [&_svg]:size-3"
           >
             <Icon aria-hidden className="text-muted-foreground" />
-            {t.feedback.window.choices[choice]}
+            {t(`feedback.window.choices.${choice}`)}
           </button>
         ))}
       </div>

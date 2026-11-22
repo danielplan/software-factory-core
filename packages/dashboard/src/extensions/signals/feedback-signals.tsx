@@ -4,6 +4,7 @@
 // in a factory that reads it are ordinary signals (feedback-extras.tsx).
 
 import { ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
 import {
@@ -15,7 +16,6 @@ import {
 } from "@/api/feedback-board";
 import { StatePill } from "./state-pill";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { BoardIcon, StateBar } from "./feedback-extras";
 import { CARD, TypeChip } from "@/components/page-bits";
@@ -53,7 +53,7 @@ export function SentItem({
   picked,
   href,
 }: Readonly<{ one: SentSignal; picked: boolean; href: string }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <a
       href={href}
@@ -66,7 +66,7 @@ export function SentItem({
       <BoardIcon size={34} />
       <span className="grid min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className="truncate font-semibold">{t.feedback.you}</span>
+          <span className="truncate font-semibold">{t("feedback.you")}</span>
           <span className="ml-auto">
             <TypeChip type={typeOf(one.kind)} />
           </span>
@@ -75,7 +75,7 @@ export function SentItem({
           {one.title}
         </span>
         <span className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
-          {t.words.sources.feedback}
+          {t("words.sources.feedback")}
           <StatePill state={one.state} />
         </span>
       </span>
@@ -86,7 +86,7 @@ export function SentItem({
 // A sent post picked: what it says, where it stands, a link to it on the
 // board.
 export function SentDetail({ one }: Readonly<{ one: SentSignal }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const board = useBoardName();
   return (
     <article
@@ -96,9 +96,9 @@ export function SentDetail({ one }: Readonly<{ one: SentSignal }>) {
       <header className="flex items-center gap-2.5">
         <BoardIcon size={36} />
         <span className="grid min-w-0 flex-1">
-          <span className="truncate font-semibold">{t.feedback.you}</span>
+          <span className="truncate font-semibold">{t("feedback.you")}</span>
           <span className="text-[12.5px] text-muted-foreground">
-            {t.words.sources.feedback}
+            {t("words.sources.feedback")}
           </span>
         </span>
         <TypeChip type={typeOf(one.kind)} />
@@ -135,7 +135,7 @@ export function Filter({
   count: number;
   onPick: (feedback: boolean) => void;
 }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const chip = (on: boolean, words: string, pick: boolean) => (
     <button
       type="button"
@@ -155,8 +155,12 @@ export function Filter({
   );
   return (
     <div className="flex items-center gap-1.5">
-      {chip(!feedback, t.filterAll, false)}
-      {chip(feedback, `${t.filterFeedback} · ${String(count)}`, true)}
+      {chip(!feedback, t("feedback.filterAll"), false)}
+      {chip(
+        feedback,
+        `${t("feedback.filterFeedback")} · ${String(count)}`,
+        true,
+      )}
     </div>
   );
 }

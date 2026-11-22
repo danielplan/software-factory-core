@@ -11,13 +11,13 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { createContext, use } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryCard } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { TypeChip } from "@/components/card-type";
 import { ConflictBox, ResolvingLine } from "./conflict-box";
-import { useT } from "@/i18n/use-t";
 
 // A card on the board: it rises in after the ones above it, lifts under the
 // pointer, and a click opens it beside the board (card-panel.tsx). While it
@@ -27,7 +27,7 @@ export function Card({
   at,
   now,
 }: Readonly<{ card: FactoryCard; at: number; now: string | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const open = use(OpenCard);
   const building = now !== null;
   return (
@@ -59,7 +59,7 @@ export function Card({
         {building && (
           <span className="ml-auto inline-flex items-center gap-1 font-medium text-blue">
             <LoaderCircle aria-hidden className="size-3 animate-spin" />
-            {t.factory.card.building}
+            {t("factory.card.building")}
           </span>
         )}
       </span>
@@ -73,7 +73,7 @@ export function Card({
             strokeWidth={2}
             className="size-3 flex-none"
           />
-          {t.factory.card.hintWithBuilder}
+          {t("factory.card.hintWithBuilder")}
         </span>
       )}
       {now && (
@@ -89,7 +89,7 @@ export function Card({
           <TypeChip type={card.type ?? null} />
           {card.fix && (
             <span className="inline-flex h-[22px] items-center rounded-md bg-type-bug/10 px-2.5 text-xs font-medium text-type-bug">
-              {t.factory.card.fix}
+              {t("factory.card.fix")}
             </span>
           )}
         </span>
@@ -142,14 +142,14 @@ function PullRequestLink({
   url,
   state,
 }: Readonly<{ url: string | null; state: PrLook | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (!url) return null;
   return (
     <a
       href={url}
       target="_blank"
       rel="noreferrer"
-      title={state ? t.factory.prStates[state] : undefined}
+      title={state ? t(`factory.prStates.${state}`) : undefined}
       onClick={(event) => {
         event.stopPropagation();
       }}
@@ -159,7 +159,7 @@ function PullRequestLink({
       )}
     >
       <GitPullRequest aria-hidden className="size-3.5" />
-      {t.factory.panel.pullRequest}
+      {t("factory.panel.pullRequest")}
       <ArrowUpRight aria-hidden className="size-3 opacity-60" />
     </a>
   );
@@ -168,16 +168,16 @@ function PullRequestLink({
 // The exploration a card was handed off from, as one quiet line; nothing
 // when the card has its title already.
 function Origin({ card }: Readonly<{ card: FactoryCard }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (!card.from || card.from.title === card.title) return null;
   return (
     <span
-      title={t.factory.card.from(card.from.title)}
+      title={t("factory.card.from", { title: card.from.title })}
       className="flex w-full min-w-0 items-center gap-1.5 text-xs text-muted-foreground"
     >
       <FlaskConical aria-hidden strokeWidth={2} className="size-3 flex-none" />
       <span className="truncate">
-        {t.factory.card.fromShort(card.from.title)}
+        {t("factory.card.fromShort", { title: card.from.title })}
       </span>
     </span>
   );

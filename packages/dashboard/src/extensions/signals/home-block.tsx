@@ -1,20 +1,22 @@
 // Signals' block on Home: what the live app reported. The app hands it to
 // Home (app/home-blocks.tsx).
 
+import { useTranslation } from "react-i18next";
+
 import type { AddOnView } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
-import { useT } from "@/i18n/use-t";
+
 import type { HomeInput } from "@/lib/home-view";
 
 export function SignalsBlock({
   input,
   addOns,
 }: Readonly<{ input: HomeInput; addOns: AddOnView[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <BlockCard id="signals" addOns={addOns}>
       {input.signals.length === 0 ? (
-        <BlockEmpty line={t.home.blockEmpty.signals} />
+        <BlockEmpty line={t("home.blockEmpty.signals")} />
       ) : (
         input.signals.slice(0, 3).map((signal) => (
           <a

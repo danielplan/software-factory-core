@@ -87,9 +87,8 @@ the extensions.
 The layout is in place; some parts still differ, and each list only shrinks.
 The blueprints keep the lists; the main ones:
 
-- The page writes its own word catalogue, routing on `location.hash` and
-  fetching by hand, where the kit uses i18next, React Router and TanStack
-  Query. It has no component tests yet.
+- The page routes on `location.hash` and fetches by hand, where the kit
+  uses React Router and TanStack Query. It has no component tests yet.
 - The server's routes are written by hand on `node:http`, each body read
   field by field, not a router with a zod schema per body.
 - The page imports some of the server's types by relative path, not through

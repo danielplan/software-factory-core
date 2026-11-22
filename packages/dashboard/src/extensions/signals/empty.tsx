@@ -6,6 +6,7 @@
 
 import { Eye, Plug } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   CORE_VERSION,
@@ -22,7 +23,14 @@ import { type Read, useRead } from "@/api/use-read";
 
 import { CARD, TypeChip } from "@/components/page-bits";
 import { lookAgainWords, statusWords, whoOf } from "@/lib/signals-view";
-import { useT } from "@/i18n/use-t";
+
+// The pretend signals of the empty list: their type and how wide their line is.
+const GHOSTS = [
+  ["bug", 62],
+  ["request", 74],
+  ["feedback", 55],
+  ["request", 68],
+] as const;
 
 const READS = ["bug", "request", "feedback"] as const;
 
@@ -60,23 +68,16 @@ function Field({
 }
 
 export function ConnectSignals({ app }: Readonly<{ app: string }>) {
-  const t = useT().signals;
+  const t = useTranslation().t;
   return (
     <div className="grid items-start gap-4 lg:grid-cols-2">
       <ConnectCard app={app} />
       <div>
         <div className="mx-1 mt-1 mb-2.5 text-[12.5px] text-muted-foreground">
-          {t.connect.seeHere}
+          {t("signals.connect.seeHere")}
         </div>
         <div className={CARD}>
-          {(
-            [
-              ["bug", 62],
-              ["request", 74],
-              ["feedback", 55],
-              ["request", 68],
-            ] as const
-          ).map(([type, width], at) => (
+          {GHOSTS.map(([type, width], at) => (
             <GhostRow key={at} type={type} width={width} />
           ))}
         </div>
@@ -90,7 +91,7 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const t = useT().signals.connect;
+  const t = useTranslation().t;
   return (
     <form
       className={cn(CARD, "flex flex-col gap-4 px-7 py-[26px]")}
@@ -110,22 +111,24 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
       <div className="flex items-center gap-3.5">
         <KoboldHead size={48} />
         <div>
-          <div className="text-[15px] font-semibold">{t.title}</div>
+          <div className="text-[15px] font-semibold">
+            {t("signals.connect.title")}
+          </div>
           <div className="text-[13.5px] text-muted-foreground">
-            {t.reads(app)}
+            {t("signals.connect.reads", { app })}
           </div>
         </div>
       </div>
       <Reads />
       <Field
-        label={t.address}
+        label={t("signals.connect.address")}
         placeholder="https://your-app/api/kobble/export"
         value={url}
         onChange={setUrl}
       />
       <Field
-        label={t.token}
-        placeholder={t.tokenHint}
+        label={t("signals.connect.token")}
+        placeholder={t("signals.connect.tokenHint")}
         value={token}
         secret
         onChange={setToken}
@@ -142,9 +145,11 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
           disabled={busy || !url.trim() || !token.trim()}
         >
           <Plug aria-hidden />
-          {busy ? t.checking : t.connect}
+          {busy ? t("signals.connect.checking") : t("signals.connect.connect")}
         </Button>
-        <span className="text-[12.5px] text-muted-foreground">{t.saved}</span>
+        <span className="text-[12.5px] text-muted-foreground">
+          {t("signals.connect.saved")}
+        </span>
       </div>
       <Privacy app={app} />
     </form>
@@ -153,13 +158,13 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
 
 // What Kobble reads, as the three kinds of signal.
 function Reads() {
-  const t = useT().signals;
+  const t = useTranslation().t;
   return (
     <div className="flex flex-col gap-2.5 text-[13px] text-foreground-2">
       {READS.map((type) => (
         <div key={type} className="flex items-center gap-2.5">
           <TypeChip type={type} />
-          <span>{t.reads[type]}</span>
+          <span>{t(`signals.reads.${type}`)}</span>
         </div>
       ))}
     </div>
@@ -167,17 +172,17 @@ function Reads() {
 }
 
 function Privacy({ app }: Readonly<{ app: string }>) {
-  const t = useT().signals.connect;
+  const t = useTranslation().t;
   return (
     <div className="border-t border-border-soft pt-3.5 text-[13px] text-muted-foreground">
-      {t.privacy(app)}{" "}
+      {t("signals.connect.privacy", { app })}{" "}
       <a
         href={HOW}
         target="_blank"
         rel="noreferrer"
         className="font-semibold text-blue"
       >
-        {t.how}
+        {t("signals.connect.how")}
       </a>
     </div>
   );
@@ -214,7 +219,7 @@ export function AllQuiet({
   now,
 }: Readonly<{ app: string; sync: SyncView; now: Date }>) {
   const [handled, setHandled] = useState(false);
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <>
       <div
@@ -225,10 +230,10 @@ export function AllQuiet({
       >
         <KoboldHead size={64} />
         <div className="mt-1.5 text-[15px] font-semibold">
-          {t.signals.quietTitle}
+          {t("signals.quietTitle")}
         </div>
         <div className="max-w-[420px] text-[13px] text-muted-foreground">
-          {t.signals.quiet.none(app)} {lookAgainWords(sync.next, now, t.words)}
+          {t("signals.quiet.none", { app })} {lookAgainWords(sync.next, now, t)}
         </div>
         <Button
           variant="ring"
@@ -239,7 +244,7 @@ export function AllQuiet({
           }}
         >
           <Eye aria-hidden />
-          {handled ? t.signals.quiet.hide : t.signals.quiet.see}
+          {handled ? t("signals.quiet.hide") : t("signals.quiet.see")}
         </Button>
       </div>
       {handled && <Handled />}
@@ -251,13 +256,13 @@ function Handled() {
   const { data } = useRead("/api/kobble/handled") as Read<{
     signals: SignalRow[];
   }>;
-  const t = useT();
+  const t = useTranslation().t;
   if (!data) return null;
   return (
     <div className={CARD}>
       {data.signals.length === 0 && (
         <p className="p-[50px] text-center text-muted-foreground">
-          {t.signals.quiet.nothingHandled}
+          {t("signals.quiet.nothingHandled")}
         </p>
       )}
       {data.signals.map((signal) => (
@@ -268,7 +273,7 @@ function Handled() {
           <span className="grid min-w-0 flex-1">
             <span className="truncate">{signal.text}</span>
             <span className="text-[12.5px] text-muted-foreground">
-              {whoOf(signal, t.words)} · {statusWords(signal, t.words)}
+              {whoOf(signal, t)} · {statusWords(signal, t)}
             </span>
           </span>
           <TypeChip type={signal.type} />

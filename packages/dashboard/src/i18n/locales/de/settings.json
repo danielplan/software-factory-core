@@ -1,0 +1,57 @@
+{
+  "about": "Wie die Fabrik hier arbeitet: wo die Arbeit verfolgt wird, die Reihenfolge der Arbeit, Updates und die Einstellungen ihrer Teile.",
+  "tabs": {
+    "connections": "Verbindungen",
+    "stages": "Stufen",
+    "models": "KI-Modelle",
+    "updates": "Updates",
+    "computer": "Dieser Computer",
+    "advanced": "Erweitert"
+  },
+  "sections": {
+    "language": "Sprache",
+    "stages": "Die Reihenfolge der Arbeit",
+    "tracker": "Wo die Arbeit verfolgt wird",
+    "liveApp": "Die Live-App",
+    "updates": "Updates",
+    "whatsNew": "Neu in Kobble",
+    "programs": "Die Programme der Fabrik",
+    "computer": "Dieser Computer"
+  },
+  "stages": {
+    "about": "Die Arbeit durchläuft diese Stufen, eine nach der anderen. Jede kommt von einer Erweiterung, die ihren Platz vorschlägt. Verschiebe jede Stufe dorthin, wo dein Team sie haben will.",
+    "by": "Von {{n}}",
+    "moveUp": "Früher",
+    "moveDown": "Später",
+    "clash": "{{a}} und {{b}} passen an dieselbe Stelle. Was kommt zuerst?",
+    "first": "Zuerst {{n}}",
+    "none": "Noch keine Stufe.",
+    "notKept": "Die Reihenfolge konnte nicht gespeichert werden."
+  },
+  "language": {
+    "about": "Die Sprache, die Kobble und seine Kobolde auf diesem Computer sprechen.",
+    "browser": "Wie der Browser ({{name}})"
+  },
+  "updatesAbout": "Zusammengeführte Arbeit kommt von GitHub auf diesen Computer; neue Versionen von Kobble kommen als Karte für den Baumeister.",
+  "computerAbout": "Für alle, die kein Terminal benutzen.",
+  "tracker": {
+    "none": "Noch kein Board verbunden",
+    "about": "Jetzt: {{now}}. Wo die Ideen, auf die ihr euch einigt, zu Arbeit zum Bauen werden.",
+    "change": "Ändern, wo die Arbeit verfolgt wird"
+  },
+  "liveApp": {
+    "about": "Wo Kobble liest, was in deiner App passiert, alle 30 Minuten.",
+    "readsFrom": "Liest von",
+    "disconnect": "Trennen",
+    "notConnected": "Nicht verbunden. Verbinde sie unter"
+  },
+  "form": {
+    "notSaved": "Nicht gespeichert",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "restartToCount": " Es gilt nach einem Neustart:",
+    "restart": "{{name}} neu starten",
+    "set": "{{label}} (gesetzt)",
+    "replace": "{{help}} Gib einen neuen ein, um ihn zu ersetzen."
+  }
+}

@@ -8,6 +8,7 @@
 
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   get,
@@ -23,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
 import { Mission } from "./mission-list";
-import { useT } from "@/i18n/use-t";
 
 const TITLE = "mt-7 mb-3 text-[17px] font-semibold tracking-[-0.01em]";
 
@@ -43,19 +43,19 @@ export const send = (
 export function PersonaMissions({
   page,
 }: Readonly<{ page: KobblePersonaPage }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { persona, tests, signals } = page;
   const busy = tests.some(
     (test) => test.status === "queued" || test.status === "running",
   );
   return (
     <div className="mb-8">
-      <h2 className={TITLE}>{t.personas.missions.send}</h2>
+      <h2 className={TITLE}>{t("personas.missions.send")}</h2>
       <NextMission persona={persona.id} name={persona.name} busy={busy} />
-      <h2 className={TITLE}>{t.personas.missions.title}</h2>
+      <h2 className={TITLE}>{t("personas.missions.title")}</h2>
       {tests.length === 0 ? (
         <p className="text-[14px] text-muted-foreground">
-          {t.personas.missions.none(persona.name)}
+          {t("personas.missions.none", { name: persona.name })}
         </p>
       ) : (
         <div className={CARD}>
@@ -104,7 +104,7 @@ function NextMission({
   name,
   busy,
 }: Readonly<{ persona: string; name: string; busy: boolean }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { idea, problem, tryAgain } = useIdea(persona);
   // The words as changed here; none while they are the kobold's.
   const [words, setWords] = useState<string | null>(null);
@@ -116,7 +116,7 @@ function NextMission({
   const task = (words ?? idea?.task ?? "").trim();
   return (
     <section
-      aria-label={t.personas.missions.send}
+      aria-label={t("personas.missions.send")}
       className={cn(CARD, "grid gap-3 px-6 py-5")}
     >
       {idea ? (
@@ -171,7 +171,7 @@ function SendRow({
   onSend: () => void;
   onChange: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -182,8 +182,8 @@ function SendRow({
       >
         <Send aria-hidden strokeWidth={2} className="size-[15px]" />
         {busy
-          ? t.personas.missions.isOn(name)
-          : t.personas.missions.sendName(name)}
+          ? t("personas.missions.isOn", { name })
+          : t("personas.missions.sendName", { name })}
       </Button>
       {changing !== null && (
         <button
@@ -191,7 +191,9 @@ function SendRow({
           onClick={onChange}
           className="text-[13px] font-semibold text-blue"
         >
-          {changing ? t.personas.missions.done : t.personas.missions.change}
+          {changing
+            ? t("personas.missions.done")
+            : t("personas.missions.change")}
         </button>
       )}
     </div>
@@ -225,7 +227,7 @@ function NoIdeaYet({
   problem,
   onAgain,
 }: Readonly<{ name: string; problem: string | null; onAgain: () => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return problem ? (
     <p role="alert" className="text-[13px] text-destructive">
       {problem}{" "}
@@ -234,13 +236,13 @@ function NoIdeaYet({
         onClick={onAgain}
         className="font-semibold text-blue"
       >
-        {t.personas.missions.tryAgain}
+        {t("personas.missions.tryAgain")}
       </button>
     </p>
   ) : (
     <p className="flex items-center gap-2 text-[14px] text-muted-foreground">
       <KoboldHead size={22} />
-      {t.personas.missions.thinking(name)}
+      {t("personas.missions.thinking", { name })}
     </p>
   );
 }
@@ -259,28 +261,28 @@ function IdeaWords({
   changing: boolean;
   onWords: (words: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <>
       {words === null && (
         <span
-          title={t.personas.missions.suggestedBy(name)}
+          title={t("personas.missions.suggestedBy", { name })}
           className="flex items-center gap-2"
         >
           <KoboldHead size={22} />
           <span className="inline-flex h-[22px] items-center rounded-full bg-blue/10 px-2.5 text-[12px] font-medium text-blue">
-            {t.personas.missions.suggested}
+            {t("personas.missions.suggested")}
           </span>
           {idea.app && (
             <span className="text-[12.5px] text-muted-foreground">
-              {t.personas.missions.inApp(idea.app)}
+              {t("personas.missions.inApp", { app: idea.app })}
             </span>
           )}
         </span>
       )}
       {changing ? (
         <textarea
-          aria-label={t.personas.missions.theMission}
+          aria-label={t("personas.missions.theMission")}
           value={words ?? idea.task}
           rows={3}
           autoFocus

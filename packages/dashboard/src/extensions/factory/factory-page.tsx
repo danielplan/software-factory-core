@@ -7,8 +7,10 @@
 // cards it got stuck on (Stuck). Without a board, the page says so and
 // leads to connecting one.
 
+import type { TFunction } from "i18next";
 import { ArrowUpRight, LoaderCircle, Plug, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   type FactoryState,
@@ -30,11 +32,9 @@ import { CardPanel } from "./card-panel";
 import { COLUMN_COLOURS, ColumnIcon } from "./column-icon";
 import { StuckList } from "./stuck-cards";
 import { WaitingCards } from "./waiting-card";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { data, problem } = useFactoryView(state);
   const [said, say] = useState<string | null>(null);
   const [open, setOpen] = useState<number | null>(null);
@@ -65,14 +65,14 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <>
       <PageHead
-        title={t.shell.pages.build}
+        title={t("shell.pages.build")}
         actions={
           data?.connected ? (
             <Builder view={data} press={press} href={href} />
           ) : undefined
         }
       />
-      {shown && <ProblemBox title={t.factory.didNotWork} text={shown} />}
+      {shown && <ProblemBox title={t("factory.didNotWork")} text={shown} />}
       <OpenCard value={setOpen}>
         {data && <Board view={without(data, gone)} />}
       </OpenCard>
@@ -118,13 +118,13 @@ function without(view: FactoryView, gone: number[]): FactoryView {
 
 // What waits for the owner, then the columns.
 function Board({ view }: Readonly<{ view: FactoryView }>) {
-  const t = useT();
+  const t = useTranslation().t;
   // Connected, but not read yet (just started): no empty columns meanwhile.
   if (view.connected && view.read === null)
     return (
       <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
         <LoaderCircle aria-hidden className="size-4 animate-spin" />
-        {t.factory.reading}
+        {t("factory.reading")}
       </p>
     );
   return (
@@ -159,14 +159,14 @@ function Column({
   column: FactoryView["columns"][number];
   now: FactoryView["builder"]["now"];
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [all, setAll] = useState(false);
   const colour = COLUMN_COLOURS[column.id];
   const cut = column.id === "done" && !all && column.cards.length > DONE_SHOWN;
   const cards = cut ? column.cards.slice(0, DONE_SHOWN) : column.cards;
   return (
     <section
-      aria-label={t.factory.columns[column.id]}
+      aria-label={t(`factory.columns.${column.id}`)}
       className="flex min-h-0 flex-col rounded-xl border"
       style={{
         backgroundColor: `color-mix(in srgb, ${colour} 6%, #fafafa)`,
@@ -176,7 +176,9 @@ function Column({
       <header className="grid gap-0.5 px-3.5 pt-3 pb-2.5">
         <h2 className="flex items-center gap-2 text-[13px] font-semibold">
           <ColumnIcon column={column.id} />
-          <span style={{ color: colour }}>{t.factory.columns[column.id]}</span>
+          <span style={{ color: colour }}>
+            {t(`factory.columns.${column.id}`)}
+          </span>
           <span
             className="ml-auto grid h-5 min-w-5 place-items-center rounded-md px-1.5 text-[11px] font-semibold"
             style={{
@@ -188,7 +190,7 @@ function Column({
           </span>
         </h2>
         <p className="pl-[23px] text-xs text-muted-foreground">
-          {t.factory.means[column.id]}
+          {t(`factory.means.${column.id}`)}
         </p>
       </header>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2 pb-2">
@@ -202,7 +204,7 @@ function Column({
         ))}
         {column.cards.length === 0 && (
           <p className="rounded-lg border border-dashed border-current/15 px-3 py-4 text-center text-xs text-faint">
-            {t.factory.nothingHere}
+            {t("factory.nothingHere")}
           </p>
         )}
         {cut && (
@@ -213,7 +215,7 @@ function Column({
             }}
             className="rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-card hover:text-foreground"
           >
-            {t.factory.showAll(column.cards.length)}
+            {t("factory.showAll", { n: column.cards.length })}
           </button>
         )}
       </div>
@@ -232,7 +234,7 @@ function Builder({
   press: (path: string, body?: object) => void;
   href: string | null;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [reading, setReading] = useState(false);
   return (
     <>
@@ -249,7 +251,7 @@ function Builder({
             className="size-3.5 flex-none animate-spin text-blue"
           />
         )}
-        {builderWords(view.builder, t.factory.builder)}
+        {builderWords(view.builder, t)}
       </label>
       <Button
         variant="ring"
@@ -267,12 +269,12 @@ function Builder({
           strokeWidth={2}
           className={cn("size-[15px]", reading && "animate-spin")}
         />
-        {t.factory.readAgain}
+        {t("factory.readAgain")}
       </Button>
       {href && (
         <Button asChild variant="ring" size="pill">
           <a href={href} target="_blank" rel="noreferrer">
-            {t.factory.openOnGitHub}{" "}
+            {t("factory.openOnGitHub")}{" "}
             <ArrowUpRight aria-hidden className="size-4" />
           </a>
         </Button>
@@ -281,28 +283,26 @@ function Builder({
   );
 }
 
-function builderWords(
-  builder: FactoryView["builder"],
-  m: Messages["factory"]["builder"],
-): string {
-  if (builder.working) return m.building(builder.working);
-  return builder.on ? m.on : m.off;
+function builderWords(builder: FactoryView["builder"], m: TFunction): string {
+  if (builder.working)
+    return m("factory.builder.building", { what: builder.working });
+  return builder.on ? m("factory.builder.on") : m("factory.builder.off");
 }
 
 function NotConnected() {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className={`${CARD} grid justify-items-start gap-3 px-6 py-6`}>
       <p className="text-[15px] font-semibold">
-        {t.factory.notConnected.title}
+        {t("factory.notConnected.title")}
       </p>
       <p className="max-w-prose text-[13px] text-muted-foreground">
-        {t.factory.notConnected.text}
+        {t("factory.notConnected.text")}
       </p>
       <Button asChild size="pill" className="mt-1">
         <a href="#connect">
           <Plug aria-hidden />
-          {t.factory.notConnected.connect}
+          {t("factory.notConnected.connect")}
         </a>
       </Button>
     </div>

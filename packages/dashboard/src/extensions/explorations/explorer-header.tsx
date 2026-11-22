@@ -1,30 +1,30 @@
 // Who talks in an exploration: the explorer kobold, on a tile of its
 // colour, with its name and what it does now.
 
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
+
 import type { ExplorationPage } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 // What the explorer does now, in a few words: answering or a step of its
 // work; nothing when it waits. A prototype being made shows on its card on
 // the board, with what the maker does, not here a second time.
-function doingOf(
-  page: ExplorationPage,
-  says: Messages["explore"]["talk"],
-): string | null {
+function doingOf(page: ExplorationPage, says: TFunction): string | null {
   const { talk } = page;
   if (talk.writing === null) return null;
-  return talk.writing ? says.talking : (talk.activity ?? says.thinking);
+  return talk.writing
+    ? says("explore.talk.talking")
+    : (talk.activity ?? says("explore.talk.thinking"));
 }
 
 // Who talks here: the explorer kobold on a tile of its colour, its name and
 // what it does now; while it works it bobs and its line breathes.
 export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
   const explorer = KOBOLDS.find((kobold) => kobold.id === "explorer");
-  const t = useT().explore.talk;
+  const t = useTranslation().t;
   const doing = doingOf(page, t);
   const color = explorer?.color ?? "#e9a23b";
   return (
@@ -51,7 +51,9 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
           <span className="text-[15px] font-semibold tracking-[-0.01em]">
             {explorer?.name}
           </span>
-          <span className="text-[11.5px] text-faint">{t.yourExplorer}</span>
+          <span className="text-[11.5px] text-faint">
+            {t("explore.talk.yourExplorer")}
+          </span>
         </span>
         <span
           className={cn(
@@ -60,7 +62,7 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
           )}
           style={doing ? { color } : undefined}
         >
-          {doing ?? t.role}
+          {doing ?? t("explore.talk.role")}
         </span>
       </span>
     </div>

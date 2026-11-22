@@ -4,6 +4,7 @@
 
 import { ExternalLink, MessageSquareHeart } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, type PersonaRow, post, type SignalRow } from "@/api/client";
 import {
@@ -17,17 +18,16 @@ import {
 import { StatePill } from "./state-pill";
 import { type Read, useRead } from "@/api/use-read";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { FaceOf } from "@/components/page-bits";
 
 const STEPS: State[] = ["sent", "seen", "planned", "done"];
 
 export function BoardIcon({ size = 34 }: Readonly<{ size?: number }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <span
-      title={t.words.sources.feedback}
+      title={t("words.sources.feedback")}
       style={{ width: size, height: size }}
       className="grid flex-none place-items-center rounded-full bg-[#8b8ff0]/12 text-[#6366d8]"
     >
@@ -77,11 +77,11 @@ function useStateOf(signal: Pick<SignalRow, "sourceId">): State {
 export function FeedbackLine({
   signal,
 }: Readonly<{ signal: Pick<SignalRow, "sourceId"> }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const state = useStateOf(signal);
   return (
     <span className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
-      {t.words.sources.feedback}
+      {t("words.sources.feedback")}
       <StatePill state={state} />
     </span>
   );
@@ -100,7 +100,7 @@ const LINK =
 // Who the kobold thinks wrote it, and why; Change picks another persona,
 // Remove leaves it with none (and, with none, the personas to pick from).
 function PersonaLine({ signal }: Readonly<{ signal: SignalRow }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const personas = usePersonas();
   const [picking, setPicking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -116,9 +116,11 @@ function PersonaLine({ signal }: Readonly<{ signal: SignalRow }>) {
     );
   };
   const name = signal.personaName;
-  let said = t.personaUnsure;
+  let said = t("feedback.personaUnsure");
   if (name)
-    said = signal.why ? t.personaSure(name, signal.why) : t.personaPicked(name);
+    said = signal.why
+      ? t("feedback.personaSure", { name, why: signal.why })
+      : t("feedback.personaPicked", { name });
   return (
     <div className="mb-[22px] grid gap-3 rounded-[12px] bg-surface px-4 py-3.5">
       <p className="text-[13px] leading-normal text-foreground-2">{said}</p>
@@ -131,7 +133,7 @@ function PersonaLine({ signal }: Readonly<{ signal: SignalRow }>) {
               setPicking(!picking);
             }}
           >
-            {t.change}
+            {t("feedback.change")}
           </button>
           <button
             type="button"
@@ -140,7 +142,7 @@ function PersonaLine({ signal }: Readonly<{ signal: SignalRow }>) {
               set(null);
             }}
           >
-            {t.remove}
+            {t("feedback.remove")}
           </button>
         </span>
       )}
@@ -171,7 +173,7 @@ function PersonaLine({ signal }: Readonly<{ signal: SignalRow }>) {
 // In the picked signal, between its words and its buttons: how many teams
 // want it, the persona, where it stands and the link to the post.
 export function FeedbackExtras({ signal }: Readonly<{ signal: SignalRow }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const board = useBoardName();
   const posts = useOnBoard();
   const number = numberOf(signal);
@@ -181,7 +183,7 @@ export function FeedbackExtras({ signal }: Readonly<{ signal: SignalRow }>) {
     <>
       {thumbs > 0 && (
         <p className="mb-4 text-[13px] text-muted-foreground">
-          {t.teamsWant(thumbs)}
+          {t("feedback.teamsWant", { count: thumbs })}
         </p>
       )}
       <PersonaLine signal={signal} />

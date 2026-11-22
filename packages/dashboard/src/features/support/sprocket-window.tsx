@@ -7,11 +7,12 @@
 
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { post } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { onAskSupport } from "@/lib/ask-support";
@@ -70,7 +71,7 @@ function useWindowKeys(
 }
 
 export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
-  const where = useT().shell.pages[page];
+  const where = useTranslation().t(`shell.pages.${page}`);
   const [open, setOpen] = useState(false);
   const thread = useThread();
   useWindowKeys(page, where, thread !== null, setOpen);
@@ -127,7 +128,7 @@ export function SprocketWindow({ page }: Readonly<{ page: Page }>) {
 
 // The closed window: the "Ask Sprocket anything" bar.
 function Bar({ onOpen }: Readonly<{ onOpen: () => void }>) {
-  const all = useT();
+  const all = useTranslation().t;
   const working = useSupport()?.writing != null;
   return (
     <button
@@ -138,8 +139,8 @@ function Bar({ onOpen }: Readonly<{ onOpen: () => void }>) {
       <KoboldHead size={22} className={cn(working && "animate-breathe")} />
       <span className="flex-1 truncate">
         {working
-          ? all.support.answering("Sprocket")
-          : all.support.ask("Sprocket")}
+          ? all("support.answering", { name: "Sprocket" })
+          : all("support.ask", { name: "Sprocket" })}
       </span>
       <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
         ⌘J
@@ -155,7 +156,7 @@ function Header({
   onNew,
   onClose,
 }: Readonly<{ begun: boolean; onNew: () => void; onClose: () => void }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <header className="flex flex-none items-center gap-2 py-3 pr-2.5 pl-4">
       <KoboldHead size={22} />
@@ -167,13 +168,13 @@ function Header({
           onClick={onNew}
           className="px-1.5 text-[12px] text-muted-foreground hover:text-foreground hover:underline"
         >
-          {t.window.startOver}
+          {t("feedback.window.startOver")}
         </button>
       )}
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={t.close}
+        aria-label={t("feedback.close")}
         onClick={onClose}
       >
         <X aria-hidden className="size-4" />

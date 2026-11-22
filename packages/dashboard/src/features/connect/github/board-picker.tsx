@@ -4,13 +4,13 @@
 
 import { KeyRound, Plug } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Board, get, messageOf, post, type StageMap } from "@/api/client";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { Pick, WhichWork } from "../pick";
 import { type Columns, StageMapping } from "../stage-map";
-import { useT } from "@/i18n/use-t";
 
 export const SMALL = "h-9 justify-self-start px-3 text-[13px]";
 
@@ -24,7 +24,7 @@ export function BoardPicker({
   onAllow: () => void;
   onDone: (message: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const choice = useBoardChoice(connected);
   const { repository, board, label, stages } = choice;
   const [checking, setChecking] = useState(false);
@@ -77,11 +77,11 @@ export function BoardPicker({
         />
       )}
       <WhichWork value={label} onPick={choice.setLabel} noun="cards" />
-      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
+      {problem && <ProblemBox title={t("connect.didNotWork")} text={problem} />}
       {problem?.includes("allow it") && (
         <Button variant="outline" className={SMALL} onClick={onAllow}>
           <KeyRound aria-hidden />
-          {t.connect.github.allow}
+          {t("connect.github.allow")}
         </Button>
       )}
       <Button
@@ -90,7 +90,7 @@ export function BoardPicker({
         onClick={() => void connect()}
       >
         <Plug aria-hidden />
-        {checking ? t.connect.checking : t.connect.connect}
+        {checking ? t("connect.checking") : t("connect.connect")}
       </Button>
     </div>
   );
@@ -112,17 +112,17 @@ function RepositoryAndBoard({
   onRepository: (value: string) => void;
   onBoard: (value: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <Pick
-        label={t.connect.github.repository}
+        label={t("connect.github.repository")}
         value={repository}
         options={repositories.map((one) => ({ value: one, label: one }))}
         onPick={onRepository}
       />
       <Pick
-        label={t.connect.github.boardPick}
+        label={t("connect.github.boardPick")}
         value={board}
         options={boards.map((one) => ({
           value: String(one.number),

@@ -1,4 +1,5 @@
 import { use, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type CoachView, messageOf, post } from "@/api/client";
 import { ProblemBox } from "@/components/layout/problem-box";
@@ -7,7 +8,6 @@ import type { VoiceCall } from "@/lib/voice/voice-call";
 
 import { Answer } from "./answer-box";
 import { CoachRouteContext } from "./route";
-import { useT } from "@/i18n/use-t";
 
 type Attached = { id: string; name: string };
 
@@ -35,21 +35,23 @@ export function CoachStart({
   coach,
   call,
 }: Readonly<{ coach: CoachView; call: VoiceCall }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { say, problem } = useSay([], () => undefined);
   return (
     <section
-      aria-label={t.setup.coach.label}
+      aria-label={t("setup.coach.label")}
       className="grid w-full max-w-[640px] animate-pop gap-3"
     >
       <Answer
         call={call}
         coach={coach}
         onSay={say}
-        placeholder={t.setup.coach.build}
+        placeholder={t("setup.coach.build")}
         className="glow-ring p-3 pl-5 text-base shadow-big"
       />
-      {problem && <ProblemBox title={t.setup.coach.couldNot} text={problem} />}
+      {problem && (
+        <ProblemBox title={t("setup.coach.couldNot")} text={problem} />
+      )}
     </section>
   );
 }

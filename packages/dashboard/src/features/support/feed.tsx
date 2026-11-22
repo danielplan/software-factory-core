@@ -1,10 +1,11 @@
 // The conversation: Sprocket's lines type in after a moment of thinking,
 // the person's own lines, and the quick replies under the last one.
 
+import type { TFunction } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
-import { useT } from "@/i18n/use-t";
 
 import { Thinking } from "./chips";
 import { useOnBoard } from "@/api/feedback-board";
@@ -17,7 +18,7 @@ const typed = new Set<number>();
 
 type KoboldSaid = Extract<Line, { from: "kobold" }>;
 
-type Words = ReturnType<typeof useT>["feedback"];
+type Words = TFunction;
 
 // The lines that say the same every time.
 const PLAIN = ["askError", "draft", "added", "cleaned"] as const;
@@ -39,16 +40,19 @@ function saidWith(
       return thread.lines.some(
         (one) => one.from === "kobold" && one.say === "startBug",
       )
-        ? t.window.askBugAfterSorry
-        : t.chat.askBug;
+        ? t("feedback.window.askBugAfterSorry")
+        : t("feedback.chat.askBug");
     case "similar":
-      return t.window.similar(thumbs, thread.kind === "bug");
+      return t("feedback.window.similar", {
+        teams: thumbs,
+        context: thread.kind === "bug" ? "bug" : undefined,
+      });
     case "thumbed":
-      return t.window.thumbed(n);
+      return t("feedback.window.thumbed", { n });
     case "posted":
-      return t.window.posted(n);
+      return t("feedback.window.posted", { n });
     case "moved":
-      return t.chat.moved[line.state ?? "sent"](n);
+      return t(`feedback.chat.moved.${line.state ?? "sent"}`, { n });
     default:
       return null;
   }
@@ -61,18 +65,18 @@ function wordsOf(
   thumbs: number,
   t: Words,
 ): string {
-  if (isPlain(line.say)) return t.window.lines[line.say];
+  if (isPlain(line.say)) return t(`feedback.window.lines.${line.say}`);
   const said = saidWith(line, thread, thumbs, t);
   if (said) return said;
   switch (line.say) {
     case "startBug":
     case "startWish":
     case "startAsk":
-      return t.window.starts[line.say].line;
+      return t(`feedback.window.starts.${line.say}.line`);
     case "invite":
     case "askWish":
     case "askAgain":
-      return t.chat[line.say];
+      return t(`feedback.chat.${line.say}`);
     default:
       return "";
   }
@@ -118,7 +122,7 @@ function KoboldLine({
   onGrow: () => void;
   onDone: () => void;
 }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   const n = line.number ?? 0;
   const onBoard = useOnBoard().find((one) => one.number === n);
   const text = wordsOf(line, thread, onBoard?.thumbs ?? 0, t);

@@ -21,7 +21,7 @@ export function UpdatesCard() {
   const { data } = useRead("/api/updates") as Read<UpdatesView>;
   const [problem, setProblem] = useState<string | null>(null);
   const { locale } = useLanguage();
-  const m = messagesIn(locale).updates;
+  const m = messagesIn(locale);
   if (!data) return null;
   const summary = updatesSummary(data, { m, locale });
   const press = (path: string, body: object = {}) => {
@@ -44,7 +44,7 @@ export function UpdatesCard() {
             }}
           >
             <Download aria-hidden />
-            {m.update}
+            {m("updates.update")}
           </Button>
         )}
         <Button
@@ -55,7 +55,7 @@ export function UpdatesCard() {
             press("/api/updates/look");
           }}
         >
-          <RefreshCw aria-hidden className="size-4" /> {m.lookAgain}
+          <RefreshCw aria-hidden className="size-4" /> {m("updates.lookAgain")}
         </Button>
         <label className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
           <Switch
@@ -64,7 +64,7 @@ export function UpdatesCard() {
               press("/api/updates/by-itself", { on });
             }}
           />
-          {m.byItself}
+          {m("updates.byItself")}
         </label>
       </div>
       {summary.text && (
@@ -97,17 +97,19 @@ export function UpdatesCard() {
 // double-click, for owners who do not use a terminal.
 export function DesktopStart() {
   const [said, say] = useState<string | null>(null);
-  const m = messagesIn(useLanguage().locale).updates.desktop;
+  const m = messagesIn(useLanguage().locale);
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <span className="min-w-0 flex-1 text-[15px]">{said ?? m.say}</span>
+      <span className="min-w-0 flex-1 text-[15px]">
+        {said ?? m("updates.desktop.say")}
+      </span>
       <Button
         size="pill"
         variant="ring"
         onClick={() => {
           post<{ file: string }>("/api/desktop-start").then(
             ({ file }) => {
-              say(m.put(file));
+              say(m("updates.desktop.put", { file }));
             },
             (error: unknown) => {
               say(messageOf(error));
@@ -116,7 +118,7 @@ export function DesktopStart() {
         }}
       >
         <Monitor aria-hidden />
-        {m.button}
+        {m("updates.desktop.button")}
       </Button>
     </div>
   );

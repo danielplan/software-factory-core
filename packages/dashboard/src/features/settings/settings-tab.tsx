@@ -7,11 +7,12 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PageHead } from "@/components/layout/page-head";
 import { Tile } from "@/components/layout/sidebar-links";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
+
 import type { SettingsSection } from "@/lib/page-module";
 import type { Messages } from "@/i18n/messages";
 
@@ -35,15 +36,15 @@ export function SettingsTab({
   open,
   sections,
 }: Readonly<{ open: string | null; sections: SettingsSection[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const tabs = tabsOf(sections);
   const shown = shownTab(tabs, open);
   return (
     <div className="grid gap-5">
-      <PageHead title={t.shell.pages.settings} about={t.settings.about} />
+      <PageHead title={t("shell.pages.settings")} about={t("settings.about")} />
       <div className="grid items-start gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
         <nav
-          aria-label={t.shell.pages.settings}
+          aria-label={t("shell.pages.settings")}
           className="flex flex-wrap gap-1 lg:sticky lg:top-6 lg:grid"
         >
           {tabs.map((tab) => (
@@ -107,7 +108,7 @@ function TabLink({
   name,
   chosen,
 }: Readonly<{ name: SettingsTabName; chosen: boolean }>) {
-  const t = useT().settings;
+  const t = useTranslation().t;
   return (
     <a
       href={tabHash(name)}
@@ -121,7 +122,7 @@ function TabLink({
       <Tile color={chosen ? LOOKS[name].color : "var(--sidebar-muted)"}>
         {LOOKS[name].icon}
       </Tile>
-      {t.tabs[LOOKS[name].word]}
+      {t(`settings.tabs.${LOOKS[name].word}`)}
     </a>
   );
 }

@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "overview": "Überblick",
+    "factory": "Die Fabrik",
+    "pages": "Seiten"
+  },
+  "pages": {
+    "home": "Start",
+    "system": "System",
+    "signals": "Signale",
+    "explore": "Erkundungen",
+    "build": "Fabrik",
+    "releases": "Releases",
+    "personas": "Personas",
+    "extensions": "Marktplatz",
+    "settings": "Einstellungen",
+    "team": "Dein Team"
+  },
+  "groups": {
+    "work": "Arbeit",
+    "customers": "Kunden",
+    "team": "Dein Team"
+  },
+  "openMenu": "Menü öffnen",
+  "menu": "Seiten",
+  "open": "Öffnen",
+  "lights": {
+    "running": "Läuft",
+    "stopped": "Gestoppt",
+    "starting": "Startet",
+    "problem": "Problem"
+  },
+  "overall": {
+    "problem": "Etwas braucht dich",
+    "starting": "Startet",
+    "running": "Alles läuft",
+    "some": "{{running}} von {{shown}} laufen"
+  },
+  "kobold": {
+    "building": "Der Kobold baut",
+    "busy": "Der Kobold: {{what}}",
+    "thinking": "Der Kobold denkt nach",
+    "resting": "Der Kobold ruht",
+    "quiet": "Alles ruhig · {{light}}",
+    "idle": "Frei",
+    "answering": "Beantwortet eine Frage",
+    "buildingCard": "Baut #{{number}} · {{title}}",
+    "working": "{{name}} arbeitet: {{now}}"
+  },
+  "jobs": {
+    "support": "Beantwortet deine Fragen, auf jeder Seite",
+    "explorer": "Denkt Erkundungen durch und baut Prototypen",
+    "builder": "Baut die vereinbarten Karten auf dem Board der Fabrik",
+    "tester": "Nutzt die App als eine deiner Personas",
+    "sorter": "Sortiert die eingehenden Signale"
+  },
+  "closed": "Das Fenster der Fabrik scheint geschlossen. Starte sie neu mit software-factory.",
+  "opening": "Die Fabrik öffnet sich…",
+  "misfit": "Etwas in den Dateien der Fabrik passt nicht"
+}

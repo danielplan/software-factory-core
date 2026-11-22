@@ -1,9 +1,10 @@
 // A feedback post's state on the board, as a tinted pill: sent, seen,
 // planned or done.
 
+import { useTranslation } from "react-i18next";
+
 import type { State } from "@/api/feedback-board";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 const PILL: Record<State, string> = {
   sent: "bg-surface text-muted-foreground",
@@ -13,16 +14,16 @@ const PILL: Record<State, string> = {
 };
 
 export function StatePill({ state }: Readonly<{ state: State }>) {
-  const t = useT().feedback;
+  const t = useTranslation().t;
   return (
     <span
-      title={t.stateHelp[state]}
+      title={t(`feedback.stateHelp.${state}`)}
       className={cn(
         "flex-none rounded-md px-1.5 py-0.5 text-[11px] font-medium",
         PILL[state],
       )}
     >
-      {t.states[state]}
+      {t(`feedback.states.${state}`)}
     </span>
   );
 }

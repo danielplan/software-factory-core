@@ -3,10 +3,11 @@
 // or where the layout puts it; each arrow an edge with its short label, green
 // into an agreed prototype. Plain rules, so they are checked.
 
+import type { TFunction } from "i18next";
 import type { Edge, Node } from "@xyflow/react";
 
 import type { ExplorationPage } from "../../../api/client.ts";
-import { ENGLISH, type Messages } from "../../../i18n/messages.ts";
+import { ENGLISH } from "../../../i18n/messages.ts";
 
 export type Thing = ExplorationPage["board"]["things"][number];
 
@@ -108,15 +109,12 @@ export function edgesOf(page: ExplorationPage): Edge[] {
 }
 
 // A thing's name in a few words, for the chips of what is attached.
-export function nameOf(
-  thing: Thing,
-  kinds: Messages["explore"]["kinds"] = ENGLISH.explore.kinds,
-): string {
+export function nameOf(thing: Thing, kinds: TFunction = ENGLISH): string {
   switch (thing.kind) {
     case "problem":
-      return kinds.problem;
+      return kinds("explore.kinds.problem");
     case "heard":
-      return kinds.heard;
+      return kinds("explore.kinds.heard");
     case "note":
       return thing.text;
     case "prototype":

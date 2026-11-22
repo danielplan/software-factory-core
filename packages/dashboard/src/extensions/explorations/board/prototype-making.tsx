@@ -5,6 +5,7 @@
 // Motion only when the computer allows it.
 
 import { type CSSProperties, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { VersionRun } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
@@ -12,7 +13,6 @@ import { MAKER } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
 import { SCREEN } from "./prototype-screen";
-import { useT } from "@/i18n/use-t";
 
 // The pieces of the page, in the order they appear.
 const PIECES = [
@@ -92,7 +92,7 @@ function Page() {
 // what the kobold does now and its clock.
 export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   const clock = clockOf(run.since, useNow());
-  const t = useT().explore.board;
+  const t = useTranslation().t;
   if (!(run.state === "running" && run.url)) return null;
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
@@ -103,10 +103,10 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
         className="flex-none motion-safe:animate-bob"
       />
       <span className="flex-none font-medium">
-        {t.building(MAKER.name, run.version)}
+        {t("explore.board.building", { name: MAKER.name, key: run.version })}
       </span>
       <span key={run.activity} className="truncate motion-safe:animate-pop">
-        {run.activity ?? t.atWork}
+        {run.activity ?? t("explore.board.atWork")}
       </span>
       {clock && (
         <span className="ml-auto flex-none text-muted-foreground tabular-nums">
@@ -118,13 +118,13 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
 }
 
 export function Making({ run }: Readonly<{ run: VersionRun }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const clock = clockOf(run.since, useNow());
   return (
     <div className="grid gap-2.5">
       <Page />
       <div className="flex items-center gap-2 text-xs font-medium text-blue">
-        {t.explore.board.building(MAKER.name, run.version)}
+        {t("explore.board.building", { name: MAKER.name, key: run.version })}
         {clock && (
           <span className="ml-auto font-normal text-muted-foreground tabular-nums">
             {clock}

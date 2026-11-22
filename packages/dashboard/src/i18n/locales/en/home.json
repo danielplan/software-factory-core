@@ -1,0 +1,73 @@
+{
+  "about": "What waits for you, and where the work is.",
+  "nothingWaits": "Nothing waits for you. The kobolds are on it.",
+  "kinds": {
+    "Review": "Review",
+    "Answer": "Answer",
+    "Continue": "Continue",
+    "Sort": "Sort"
+  },
+  "openPullRequest": "Open",
+  "review": {
+    "built": "Built, and its pull request waits for your review",
+    "waits": "Waits for your review"
+  },
+  "asks": "The builder stopped and asks you",
+  "newSignals_one": "1 new signal",
+  "newSignals_other": "{{count}} new signals",
+  "stages": {
+    "newSignals": "new",
+    "exploring": "being explored",
+    "toBuild": "to build",
+    "toBuildAndReview": "to build · {{review}} to review",
+    "done": "Done",
+    "merged": "merged",
+    "pieces_one": "piece of work",
+    "pieces_other": "pieces of work"
+  },
+  "arrange": {
+    "arrange": "Arrange Home",
+    "done": "Done",
+    "reset": "Reset layout",
+    "add": "Add a block",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "drag": "Drag to move",
+    "hide": "Hide",
+    "place": "Place it here",
+    "holding": "Click to place · Esc to cancel · ↑ ↓ and Enter",
+    "resetTitle": "Reset Home to Kobble's layout?",
+    "resetText": "Your arrangement is lost for the whole team.",
+    "resetYes": "Reset",
+    "addTitle": "Add a block to Home",
+    "offering": "Extensions that offer blocks",
+    "addOne": "Add",
+    "onHome": "On Home",
+    "nothingOffered": "No installed extension offers a block.",
+    "preview": "What {{name}} looks like",
+    "notKept": "Your arrangement could not be kept. Is the factory still open?"
+  },
+  "blockAbout": {
+    "status": "How the product is doing, in a line",
+    "waiting": "Everything that waits for you, with a button for each",
+    "loop": "From what came in to what is done, in four stages",
+    "exploring": "The ideas being explored, and what is next for each",
+    "signals": "What the live app reported that is new",
+    "reviews": "The cards in review, on whichever board they live"
+  },
+  "blockEmpty": {
+    "exploring": "Nothing is being explored.",
+    "signals": "No new signals.",
+    "reviews": "No pull request waits for your review."
+  },
+  "line": {
+    "building": "Bolt is building {{card}}",
+    "resting": "Bolt is resting",
+    "none": "No product to run yet",
+    "problem": "Something needs you on System",
+    "starting": "Starting the product",
+    "running": "The product is running",
+    "stopped": "The product is stopped",
+    "some": "{{running}} of {{shown}} parts are running"
+  }
+}

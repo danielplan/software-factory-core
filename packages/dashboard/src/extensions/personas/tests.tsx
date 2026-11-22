@@ -3,7 +3,9 @@
 // that happened) and the signals it found. Missions run on this computer,
 // never on the live app.
 
+import type { TFunction } from "i18next";
 import { ChevronLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { PersonaTest, TestPage } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -17,23 +19,21 @@ import { Markdown } from "@/components/markdown";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
-function whenOf(test: PersonaTest, t: Messages): string {
-  if (test.status === "queued") return t.personas.run.waitingTurn;
-  return test.started ? agoOf(test.started, new Date(), t.words) : "";
+function whenOf(test: PersonaTest, t: TFunction): string {
+  if (test.status === "queued") return t("personas.run.waitingTurn");
+  return test.started ? agoOf(test.started, new Date(), t) : "";
 }
 
 export function TestRun({ id }: Readonly<{ id: string }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { data, problem } = useRead(
     `/api/kobble/test?id=${encodeURIComponent(id)}`,
   ) as Read<TestPage>;
   return (
     <div>
       {problem && (
-        <ProblemBox title={t.personas.run.cannotRead} text={problem} />
+        <ProblemBox title={t("personas.run.cannotRead")} text={problem} />
       )}
       {data && <RunBody page={data} />}
     </div>
@@ -43,7 +43,7 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
 const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
 
 function RunBody({ page }: Readonly<{ page: TestPage }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { test, persona } = page;
   return (
     <>
@@ -70,37 +70,39 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
             className="inline-flex h-[34px] items-center gap-[7px] rounded-full bg-card pr-3.5 pl-1.5 text-[13px] font-medium text-foreground-2 shadow-card"
           >
             <PersonaFace face={persona.face} size={24} />
-            {t.personas.run.as(persona.name)}
+            {t("personas.run.as", { name: persona.name })}
           </a>
           <span className="inline-flex h-[34px] items-center rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground-2 shadow-card">
             {test.on === "main"
-              ? t.personas.run.onMain
-              : t.personas.run.onPrototype}
+              ? t("personas.run.onMain")
+              : t("personas.run.onPrototype")}
           </span>
         </div>
       </div>
       {test.problem && (
         <div className="mt-4">
           <ProblemBox
-            title={t.personas.run.couldNotFinish}
+            title={t("personas.run.couldNotFinish")}
             text={test.problem}
           />
         </div>
       )}
-      <h2 className={TITLE}>{t.personas.run.whatDid}</h2>
+      <h2 className={TITLE}>{t("personas.run.whatDid")}</h2>
       <Steps test={test} />
-      <h2 className={TITLE}>{t.personas.run.whatFound(persona.name)}</h2>
+      <h2 className={TITLE}>
+        {t("personas.run.whatFound", { name: persona.name })}
+      </h2>
       <div className={CARD}>
         {page.signals.length === 0 && (
           <p className="p-[50px] text-center text-muted-foreground">
-            {t.personas.run.noneYet}
+            {t("personas.run.noneYet")}
           </p>
         )}
         {page.signals.map((signal) => (
           <SignalLine
             key={signal.id}
             signal={signal}
-            where={stepWords(signal, t.words)}
+            where={stepWords(signal, t)}
           />
         ))}
       </div>
@@ -109,7 +111,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
 }
 
 function Steps({ test }: Readonly<{ test: PersonaTest }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const working = test.status === "running" || test.status === "queued";
   return (
     <div className={CARD}>
@@ -123,7 +125,8 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
               <Markdown text={step.did} inline />
             </span>
             <span className="text-[12.5px] text-muted-foreground">
-              {t.personas.run.expected} <Markdown text={step.expected} inline />
+              {t("personas.run.expected")}{" "}
+              <Markdown text={step.expected} inline />
               {step.note && (
                 <>
                   {" · "}
@@ -141,8 +144,8 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
             )}
           >
             {step.asExpected
-              ? t.personas.run.asExpected
-              : t.personas.run.surprised}
+              ? t("personas.run.asExpected")
+              : t("personas.run.surprised")}
           </span>
         </div>
       ))}
@@ -151,14 +154,14 @@ function Steps({ test }: Readonly<{ test: PersonaTest }>) {
           <StatusIcon status={test.status} />
           <span className="text-[12.5px] text-muted-foreground">
             {test.status === "queued"
-              ? t.personas.run.waitingForTurn
-              : (test.doing ?? t.personas.run.opening)}
+              ? t("personas.run.waitingForTurn")
+              : (test.doing ?? t("personas.run.opening"))}
           </span>
         </div>
       )}
       {!working && test.steps.length === 0 && (
         <p className="p-[50px] text-center text-muted-foreground">
-          {t.personas.run.noSteps}
+          {t("personas.run.noSteps")}
         </p>
       )}
     </div>

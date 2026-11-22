@@ -13,12 +13,13 @@ import {
   Puzzle,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView, FactoryState } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
 import { StatusLight } from "@/components/status-light";
 import { Card } from "@/components/ui/card";
-import { useT } from "@/i18n/use-t";
+
 import {
   type HomeInput,
   loopOf,
@@ -28,6 +29,9 @@ import {
 } from "@/lib/home-view";
 import { nameOf } from "@/lib/market-view";
 import { overallOf } from "@/lib/shell-view";
+
+// A link that opens outside the factory, in a tab of its own.
+const OUTSIDE = { target: "_blank", rel: "noreferrer" } as const;
 
 const KIND_COLOUR: Record<WaitingItem["kind"], string> = {
   Review: "var(--build)",
@@ -47,10 +51,10 @@ const STAGE_LOOK: Record<string, { icon: ReactNode; colour: string }> = {
 const OTHER_LOOK = { icon: <Puzzle aria-hidden />, colour: "#8b5cf6" };
 
 export function StatusBlock({ state }: Readonly<{ state: FactoryState }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const products = state.parts.filter((part) => part.area === "products");
   const shown = products.filter((part) => part.light !== "none");
-  const product = overallOf(products, t.shell).lit;
+  const product = overallOf(products, t).lit;
   const building = state.work?.builder.working;
   return (
     <div className="flex flex-wrap items-center gap-2.5 text-[13px] text-foreground-2">
@@ -63,11 +67,11 @@ export function StatusBlock({ state }: Readonly<{ state: FactoryState }>) {
             shown: shown.length,
           },
           building ? `#${String(building.number)} ${building.title}` : null,
-          t.home,
+          t,
         )}
       </span>
       <a href="#system" className="font-medium text-blue hover:underline">
-        {t.shell.pages.system}
+        {t("shell.pages.system")}
       </a>
     </div>
   );
@@ -76,11 +80,11 @@ export function StatusBlock({ state }: Readonly<{ state: FactoryState }>) {
 export function WaitingBlock({
   waiting,
 }: Readonly<{ waiting: WaitingItem[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <Card className="gap-0 py-0 shadow-soft">
       {waiting.length === 0 ? (
-        <BlockEmpty line={t.home.nothingWaits} />
+        <BlockEmpty line={t("home.nothingWaits")} />
       ) : (
         waiting.map((item) => <WaitingRow key={item.id} item={item} />)
       )}
@@ -92,16 +96,16 @@ export function LoopBlock({
   input,
   state,
 }: Readonly<{ input: HomeInput; state: FactoryState }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const order = state.stages.order.map((place) => {
     const owner = state.addOns.find((addOn) => addOn.id === place.by);
     return {
       ...place,
-      by: owner ? nameOf(t.market, owner) : place.by,
+      by: owner ? nameOf(t, owner) : place.by,
       own: owner?.builtIn ?? false,
     };
   });
-  const stages = loopOf(input, t.home, t.shell.pages, order);
+  const stages = loopOf(input, t, t, order);
   return (
     <Card
       className="grid gap-0 overflow-hidden py-0 shadow-soft sm:grid-cols-2 lg:[grid-template-columns:repeat(var(--stages),minmax(0,1fr))]"
@@ -118,12 +122,12 @@ export function ReviewsBlock({
   waiting,
   addOns,
 }: Readonly<{ waiting: WaitingItem[]; addOns: AddOnView[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const reviews = waiting.filter((item) => item.kind === "Review");
   return (
     <BlockCard id="reviews" addOns={addOns}>
       {reviews.length === 0 ? (
-        <BlockEmpty line={t.home.blockEmpty.reviews} />
+        <BlockEmpty line={t("home.blockEmpty.reviews")} />
       ) : (
         reviews.map((item) => <WaitingRow key={item.id} item={item} />)
       )}
@@ -132,14 +136,14 @@ export function ReviewsBlock({
 }
 
 function WaitingRow({ item }: Readonly<{ item: WaitingItem }>) {
-  const t = useT().home;
+  const t = useTranslation().t;
   return (
     <div className="grid grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 border-t border-line-soft px-4 py-2.5 first:border-t-0">
       <span
         className="text-xs font-medium"
         style={{ color: KIND_COLOUR[item.kind] }}
       >
-        {t.kinds[item.kind]}
+        {t(`home.kinds.${item.kind}`)}
       </span>
       <span className="min-w-0">
         <span className="block truncate text-[13px]">
@@ -158,10 +162,12 @@ function WaitingRow({ item }: Readonly<{ item: WaitingItem }>) {
       </span>
       <a
         href={item.href}
-        {...(item.outside ? { target: "_blank", rel: "noreferrer" } : {})}
+        {...(item.outside ? OUTSIDE : {})}
         className="inline-flex h-7 items-center gap-1 rounded-lg border border-border px-2.5 text-xs hover:bg-hover"
       >
-        {item.kind === "Review" ? t.openPullRequest : t.kinds[item.kind]}
+        {item.kind === "Review"
+          ? t("home.openPullRequest")
+          : t(`home.kinds.${item.kind}`)}
         {item.outside ? (
           <ExternalLink aria-hidden className="size-3" />
         ) : (

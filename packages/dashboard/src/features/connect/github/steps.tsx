@@ -1,5 +1,6 @@
 import { Download, LogIn } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   type Board,
@@ -14,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Step } from "../step";
 
 import { BoardPicker, SMALL } from "./board-picker";
-import { useT } from "@/i18n/use-t";
 
 // GitHub through its CLI: installed, signed in (a code to type in the
 // browser), a repository and a board picked from lists, then checked.
@@ -26,13 +26,13 @@ export function GitHubSteps({
   // The board connected now: its step is done, and picking starts there.
   connected?: Board[string];
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { status, problem, act } = useGitHub();
   if (!status) return null;
   return (
     <section className="grid gap-5 rounded-xl bg-card p-6 shadow-soft">
       <ol className="grid gap-5">
-        <Step n={1} title={t.connect.github.cli} done={status.cli}>
+        <Step n={1} title={t("connect.github.cli")} done={status.cli}>
           {!status.cli && (
             <Button
               variant="outline"
@@ -42,7 +42,7 @@ export function GitHubSteps({
               }}
             >
               <Download aria-hidden />
-              {t.connect.github.install}
+              {t("connect.github.install")}
             </Button>
           )}
         </Step>
@@ -50,7 +50,9 @@ export function GitHubSteps({
         <Step
           n={3}
           title={
-            connected ? t.connect.github.boardConnected : t.connect.github.board
+            connected
+              ? t("connect.github.boardConnected")
+              : t("connect.github.board")
           }
           done={Boolean(connected)}
         >
@@ -65,7 +67,7 @@ export function GitHubSteps({
           )}
         </Step>
       </ol>
-      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
+      {problem && <ProblemBox title={t("connect.didNotWork")} text={problem} />}
     </section>
   );
 }
@@ -103,15 +105,15 @@ function useGitHub() {
 }
 
 function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const signing = status.signingIn;
   return (
     <Step
       n={2}
       title={
         status.login
-          ? t.connect.github.signedInAs(status.login)
-          : t.connect.github.signIn
+          ? t("connect.github.signedInAs", { login: status.login })
+          : t("connect.github.signIn")
       }
       done={status.login !== null}
     >
@@ -123,13 +125,13 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
           }}
         >
           <LogIn aria-hidden />
-          {t.connect.github.signInWith}
+          {t("connect.github.signInWith")}
         </Button>
       )}
       {signing?.code && (
         <div className="grid gap-1 rounded-xl bg-surface-2 p-4">
           <span className="text-[13px] text-muted-foreground">
-            {t.connect.github.typeCode}
+            {t("connect.github.typeCode")}
           </span>
           <span className="text-2xl font-semibold tracking-[0.12em] tabular-nums">
             {signing.code}
@@ -138,7 +140,7 @@ function SignIn({ status, act }: Readonly<{ status: GitHubStatus; act: Act }>) {
       )}
       {signing?.problem && (
         <ProblemBox
-          title={t.connect.github.notSignedIn}
+          title={t("connect.github.notSignedIn")}
           text={signing.problem}
         />
       )}

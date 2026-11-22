@@ -1,0 +1,57 @@
+{
+  "about": "Come lavora qui la fabbrica: dove si traccia il lavoro, l'ordine del lavoro, aggiornamenti e le impostazioni delle sue parti.",
+  "tabs": {
+    "connections": "Collegamenti",
+    "stages": "Fasi",
+    "models": "Modelli AI",
+    "updates": "Aggiornamenti",
+    "computer": "Questo computer",
+    "advanced": "Avanzate"
+  },
+  "sections": {
+    "language": "Lingua",
+    "stages": "L'ordine del lavoro",
+    "tracker": "Dove si traccia il lavoro",
+    "liveApp": "L'app dal vivo",
+    "updates": "Aggiornamenti",
+    "whatsNew": "Novità in Kobble",
+    "programs": "I programmi della fabbrica",
+    "computer": "Questo computer"
+  },
+  "stages": {
+    "about": "Il lavoro attraversa queste fasi, una dopo l'altra. Ognuna viene da un'estensione, che suggerisce dove sta. Sposta ogni fase dove il tuo team la vuole.",
+    "by": "Da {{n}}",
+    "moveUp": "Sposta prima",
+    "moveDown": "Sposta dopo",
+    "clash": "{{a}} e {{b}} stanno bene nello stesso posto. Quale viene prima?",
+    "first": "Prima {{n}}",
+    "none": "Ancora nessuna fase.",
+    "notKept": "Non è stato possibile salvare l'ordine."
+  },
+  "language": {
+    "about": "La lingua che Kobble e i suoi kobold parlano su questo computer.",
+    "browser": "Come il browser ({{name}})"
+  },
+  "updatesAbout": "Il lavoro unito arriva su questo computer da GitHub; le nuove versioni di Kobble arrivano come scheda per il costruttore.",
+  "computerAbout": "Per chi non usa un terminale.",
+  "tracker": {
+    "none": "Ancora nessuna bacheca collegata",
+    "about": "Ora: {{now}}. Dove le idee su cui siete d'accordo diventano lavoro da costruire.",
+    "change": "Cambia dove si traccia il lavoro"
+  },
+  "liveApp": {
+    "about": "Dove Kobble legge cosa succede nella tua app, ogni 30 minuti.",
+    "readsFrom": "Legge da",
+    "disconnect": "Scollega",
+    "notConnected": "Non collegata. Collegala in"
+  },
+  "form": {
+    "notSaved": "Non salvato",
+    "save": "Salva",
+    "saved": "Salvato.",
+    "restartToCount": " Vale dopo il riavvio:",
+    "restart": "Riavvia {{name}}",
+    "set": "{{label}} (impostato)",
+    "replace": "{{help}} Scrivine uno nuovo per sostituirlo."
+  }
+}

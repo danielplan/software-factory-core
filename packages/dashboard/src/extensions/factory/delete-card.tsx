@@ -5,9 +5,9 @@
 
 import { Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
 
 export function DeleteCard({
   number,
@@ -18,14 +18,14 @@ export function DeleteCard({
   building: boolean;
   onDelete: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [asking, setAsking] = useState(false);
   return (
     <footer className="mt-auto flex items-center gap-2 border-t border-border-soft px-5 py-3.5">
       {asking ? (
         <>
           <span className="flex-1 text-[13px] text-foreground-2">
-            {t.factory.remove.ask(number)}
+            {t("factory.remove.ask", { number })}
           </span>
           <Button
             variant="ghost"
@@ -35,7 +35,7 @@ export function DeleteCard({
             }}
           >
             <X aria-hidden />
-            {t.factory.remove.cancel}
+            {t("factory.remove.cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -44,7 +44,7 @@ export function DeleteCard({
             onClick={onDelete}
           >
             <Trash2 aria-hidden />
-            {t.factory.remove.delete}
+            {t("factory.remove.delete")}
           </Button>
         </>
       ) : (
@@ -53,13 +53,13 @@ export function DeleteCard({
           size="pill"
           className="text-muted-foreground hover:text-destructive"
           disabled={building}
-          title={building ? t.factory.remove.builderOnIt : undefined}
+          title={building ? t("factory.remove.builderOnIt") : undefined}
           onClick={() => {
             setAsking(true);
           }}
         >
           <Trash2 aria-hidden className="size-4" />{" "}
-          {t.factory.remove.deleteCard}
+          {t("factory.remove.deleteCard")}
         </Button>
       )}
     </footer>

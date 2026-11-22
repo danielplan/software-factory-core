@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { Popover } from "radix-ui";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { PartView } from "@/api/client";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 
 type PartType = NonNullable<PartView["type"]>;
@@ -32,7 +33,9 @@ const LOOK: Record<PartType, { icon: LucideIcon; look: string }> = {
 // A small coloured tag saying what type of part it is. Pointing at it,
 // focusing it or tapping it tells what that type means; only this tag's.
 export function TypeTag({ type }: Readonly<{ type: PartType }>) {
-  const { label, means } = useT().system.types[type];
+  const t = useTranslation().t;
+  const label = t(`system.types.${type}.label`);
+  const means = t(`system.types.${type}.means`);
   const { icon: Icon, look } = LOOK[type];
   const [open, setOpen] = useState(false);
   return (

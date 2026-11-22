@@ -4,8 +4,10 @@
 // backdrop closes it. A card not wanted any more is deleted at its foot,
 // after a second click: closed as not planned and taken off the board.
 
+import type { TFunction } from "i18next";
 import { ArrowUpRight, GitPullRequest, SquareTerminal, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { get, messageOf, post } from "@/api/client";
 import { AgentTrace } from "@/components/agent-trace";
@@ -16,8 +18,7 @@ import { cn } from "@/lib/utils";
 import type { CardPanel as Panel } from "../../../../server/src/extensions/factory/factory-card.ts";
 import { type CardType, TypePicker } from "@/components/card-type";
 import { DeleteCard } from "./delete-card";
-import { useLocale, useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
+import { useLocale } from "@/i18n/use-t";
 import { momentIn } from "@/i18n/format";
 
 export function CardPanel({
@@ -35,7 +36,7 @@ export function CardPanel({
   onClose: () => void;
   onDelete: () => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [panel, setPanel] = useState<Panel | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   // The card, or what the builder does on it (while it builds).
@@ -72,12 +73,12 @@ export function CardPanel({
     <div className="fixed inset-0 z-40 flex justify-end">
       <button
         type="button"
-        aria-label={t.factory.panel.close}
+        aria-label={t("factory.panel.close")}
         className="absolute inset-0 bg-[rgb(20_24_36/0.18)]"
         onClick={onClose}
       />
       <aside
-        aria-label={t.factory.panel.cardLabel(number)}
+        aria-label={t("factory.panel.cardLabel", { number })}
         className="relative flex h-full w-[460px] max-w-full animate-slide-in flex-col overflow-y-auto bg-card shadow-[-12px_0_40px_-16px_rgb(20_24_36/0.25)]"
       >
         <PanelHead number={number} url={panel?.url ?? null} onClose={onClose} />
@@ -109,7 +110,7 @@ function PanelHead({
   url,
   onClose,
 }: Readonly<{ number: number; url: string | null; onClose: () => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <header className="flex items-center gap-2 border-b border-border-soft px-5 py-3.5">
       <span className="text-[13px] text-muted-foreground">#{number}</span>
@@ -121,13 +122,13 @@ function PanelHead({
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary"
         >
-          {t.factory.openOnGitHub}{" "}
+          {t("factory.openOnGitHub")}{" "}
           <ArrowUpRight className="size-3.5" aria-hidden />
         </a>
       )}
       <button
         type="button"
-        aria-label={t.factory.panel.close}
+        aria-label={t("factory.panel.close")}
         className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-ground"
         onClick={onClose}
       >
@@ -147,10 +148,10 @@ function Tabs({
   onTab: (tab: "card" | "trace") => void;
   steps: string[];
 }>) {
-  const t = useT().builder.trace;
+  const t = useTranslation().t;
   const tabs = [
-    { id: "card" as const, name: t.card },
-    { id: "trace" as const, name: t.tab(steps.length) },
+    { id: "card" as const, name: t("builder.trace.card") },
+    { id: "trace" as const, name: t("builder.trace.tab", { n: steps.length }) },
   ];
   return (
     <div
@@ -218,7 +219,7 @@ function Body({
   panel,
   onPick,
 }: Readonly<{ panel: Panel; onPick: (type: CardType | null) => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div className="grid gap-6 px-5 py-5">
       <div className="grid gap-3">
@@ -230,9 +231,11 @@ function Body({
       </div>
       {panel.pullRequest && <PullRequest pr={panel.pullRequest} />}
       {panel.about && (
-        <Section title={t.factory.panel.asksFor} text={panel.about} />
+        <Section title={t("factory.panel.asksFor")} text={panel.about} />
       )}
-      {panel.plan && <Section title={t.factory.panel.plan} text={panel.plan} />}
+      {panel.plan && (
+        <Section title={t("factory.panel.plan")} text={panel.plan} />
+      )}
       <Conversation said={panel.said} />
     </div>
   );
@@ -241,8 +244,8 @@ function Body({
 function PullRequest({
   pr,
 }: Readonly<{ pr: NonNullable<Panel["pullRequest"]> }>) {
-  const t = useT();
-  const state = prStateOf(pr, t.factory.panel);
+  const t = useTranslation().t;
+  const state = prStateOf(pr, t);
   return (
     <a
       href={pr.url}
@@ -252,7 +255,7 @@ function PullRequest({
     >
       <GitPullRequest className="size-5 text-primary" aria-hidden />
       <span className="flex-1 font-semibold">
-        {t.factory.panel.pullRequest}
+        {t("factory.panel.pullRequest")}
       </span>
       <span className="rounded-full bg-wash px-2.5 py-0.5 text-xs font-medium text-wash-foreground">
         {state}
@@ -276,12 +279,12 @@ function Section({ title, text }: Readonly<{ title: string; text: string }>) {
 
 function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
   const locale = useLocale();
-  const t = useT();
+  const t = useTranslation().t;
   if (said.length === 0) return null;
   return (
     <section className="grid gap-3">
       <h3 className="text-[13px] font-semibold text-muted-foreground">
-        {t.factory.panel.conversation}
+        {t("factory.panel.conversation")}
       </h3>
       {said.map((one, at) => (
         <div
@@ -305,9 +308,9 @@ function Conversation({ said }: Readonly<{ said: Panel["said"] }>) {
 
 function prStateOf(
   pr: NonNullable<Panel["pullRequest"]>,
-  m: Messages["factory"]["panel"],
+  m: TFunction,
 ): string {
-  if (pr.state === "MERGED") return m.merged;
-  if (pr.state !== "OPEN") return m.closed;
-  return pr.draft ? m.draft : m.open;
+  if (pr.state === "MERGED") return m("factory.panel.merged");
+  if (pr.state !== "OPEN") return m("factory.panel.closed");
+  return pr.draft ? m("factory.panel.draft") : m("factory.panel.open");
 }

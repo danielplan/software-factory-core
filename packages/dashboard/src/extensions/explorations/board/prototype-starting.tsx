@@ -3,18 +3,20 @@
 // how long it has taken, over the sketch of its page, which pulses.
 
 import { LoaderCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { VersionRun } from "@/api/client";
-import { useT } from "@/i18n/use-t";
 
 import { clockOf, useNow } from "./prototype-making";
 
 export function Starting({ run }: Readonly<{ run: VersionRun }>) {
-  const t = useT().explore.board;
+  const t = useTranslation().t;
   const clock = clockOf(run.start?.since ?? null, useNow());
   const step =
     run.start?.line ??
-    (run.start?.step === "command" ? t.runningStart : t.preparingCopy);
+    (run.start?.step === "command"
+      ? t("explore.board.runningStart")
+      : t("explore.board.preparingCopy"));
   return (
     <div
       role="status"
@@ -22,7 +24,7 @@ export function Starting({ run }: Readonly<{ run: VersionRun }>) {
     >
       <span className="flex items-center gap-2 text-[13px] font-medium">
         <LoaderCircle aria-hidden className="size-4 animate-spin text-blue" />
-        {t.startingTitle}
+        {t("explore.board.startingTitle")}
         {clock && (
           <span className="ml-auto text-xs font-normal text-muted-foreground tabular-nums">
             {clock}

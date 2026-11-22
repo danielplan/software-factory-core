@@ -4,12 +4,12 @@
 
 import { GitMerge, LoaderCircle, TriangleAlert } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
-import { useT } from "@/i18n/use-t";
 
 export function ConflictBox({ number }: Readonly<{ number: number }>) {
-  const t = useT().factory.conflict;
+  const t = useTranslation().t;
   const [state, setState] = useState<"idle" | "asking" | "asked">("idle");
   const [problem, setProblem] = useState<string | null>(null);
   const resolve = () => {
@@ -42,7 +42,9 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
           strokeWidth={2}
           className="size-3 flex-none"
         />
-        {state === "asked" ? t.asked : t.clashes}
+        {state === "asked"
+          ? t("factory.conflict.asked")
+          : t("factory.conflict.clashes")}
         {state !== "asked" && (
           <button
             type="button"
@@ -55,7 +57,7 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
             ) : (
               <GitMerge aria-hidden strokeWidth={2} className="size-3" />
             )}
-            {t.resolve}
+            {t("factory.conflict.resolve")}
           </button>
         )}
       </span>
@@ -66,11 +68,11 @@ export function ConflictBox({ number }: Readonly<{ number: number }>) {
 
 // A card whose clash the builder was asked to settle: what happens now.
 export function ResolvingLine() {
-  const t = useT().factory.conflict;
+  const t = useTranslation().t;
   return (
     <span className="flex w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1.5 text-xs leading-snug text-muted-foreground">
       <GitMerge aria-hidden strokeWidth={2} className="size-3 flex-none" />
-      {t.resolving}
+      {t("factory.conflict.resolving")}
     </span>
   );
 }

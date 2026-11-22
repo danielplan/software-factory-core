@@ -4,10 +4,10 @@
 
 import { Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
 
 export function RemoveRow({
   path,
@@ -23,15 +23,15 @@ export function RemoveRow({
   onGone: (gone: boolean) => void;
   onProblem: (problem: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [asking, setAsking] = useState(false);
   if (!asking)
     return (
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={t.explore.delete}
-        title={t.explore.delete}
+        aria-label={t("explore.delete")}
+        title={t("explore.delete")}
         className="text-muted-foreground hover:text-destructive"
         onClick={() => {
           setAsking(true);
@@ -51,7 +51,7 @@ export function RemoveRow({
         }}
       >
         <X aria-hidden />
-        {t.explore.cancel}
+        {t("explore.cancel")}
       </Button>
       <Button
         variant="destructive"
@@ -66,7 +66,7 @@ export function RemoveRow({
         }}
       >
         <Trash2 aria-hidden />
-        {t.explore.delete}
+        {t("explore.delete")}
       </Button>
     </span>
   );

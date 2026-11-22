@@ -1,20 +1,22 @@
 // Explorations' block on Home: the ideas being explored. The app hands it
 // to Home (app/home-blocks.tsx).
 
+import { useTranslation } from "react-i18next";
+
 import type { AddOnView } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
-import { useT } from "@/i18n/use-t";
+
 import type { HomeInput } from "@/lib/home-view";
 
 export function ExploringBlock({
   input,
   addOns,
 }: Readonly<{ input: HomeInput; addOns: AddOnView[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <BlockCard id="exploring" addOns={addOns}>
       {input.exploring.length === 0 ? (
-        <BlockEmpty line={t.home.blockEmpty.exploring} />
+        <BlockEmpty line={t("home.blockEmpty.exploring")} />
       ) : (
         input.exploring.slice(0, 4).map((row) => (
           <a

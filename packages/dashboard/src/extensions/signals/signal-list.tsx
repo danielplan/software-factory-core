@@ -3,10 +3,11 @@
 // also says where it stands. What this person sent to the board is in the
 // list too, mixed in by time.
 
+import { useTranslation } from "react-i18next";
+
 import type { SignalRow } from "@/api/client";
 import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { CARD, FaceOf, SourceIcon, TypeChip } from "@/components/page-bits";
 import { FeedbackLine } from "./feedback-extras";
@@ -25,12 +26,12 @@ export function SignalList({
   all,
   shown,
 }: Readonly<{ all: Listed[]; shown: string | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
-    <nav aria-label={t.signals.newSignals} className={cn(CARD, "grid")}>
+    <nav aria-label={t("signals.newSignals")} className={cn(CARD, "grid")}>
       {all.length === 0 && (
         <p className="p-[50px] text-center text-[13px] text-muted-foreground">
-          {t.signals.noneNew}
+          {t("signals.noneNew")}
         </p>
       )}
       {all.map((one) =>
@@ -55,7 +56,7 @@ function Item({
   signal,
   picked,
 }: Readonly<{ signal: SignalRow; picked: boolean }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const board = signal.source === "feedback";
   return (
     <a
@@ -80,8 +81,8 @@ function Item({
             )}
           >
             {board && !signal.personaName
-              ? t.feedback.noPersona
-              : whoOf(signal, t.words)}
+              ? t("feedback.noPersona")
+              : whoOf(signal, t)}
           </span>
           <span className="ml-auto">
             <TypeChip type={signal.type} />

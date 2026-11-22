@@ -1,0 +1,42 @@
+{
+  "trace": {
+    "card": "Karte",
+    "tab": "Verlauf · {{n}}",
+    "steps_one": "1 Schritt",
+    "steps_other": "{{count}} Schritte",
+    "live": " · live",
+    "nothingYet": "Noch nichts."
+  },
+  "stuck": {
+    "title": "Festgefahren",
+    "count_one": "1 Karte, die der Baumeister nicht fertigstellen konnte",
+    "count_other": "{{count}} Karten, die der Baumeister nicht fertigstellen konnte",
+    "seeCard": "Die ganze Karte ansehen",
+    "answerOn": "Dem Baumeister auf Karte #{{n}} antworten",
+    "placeholder": "Antworte dem Baumeister, gib ihm einen Hinweis oder frag Sprocket",
+    "sending": "Wird gesendet…",
+    "send": "Senden und neu versuchen lassen",
+    "continue": "Weiter",
+    "carryOn": "Mach dort weiter, wo du aufgehört hast.",
+    "ask": "Sprocket fragen",
+    "askAbout": "Karte #{{n}} „{{title}}“ steckt fest. Was ist los, und was soll ich tun?",
+    "askAbout_asked": "Karte #{{n}} „{{title}}“ steckt fest. {{question}}",
+    "hintIfAny": "Ein Hinweis für die nächsten Sitzungen, wenn du willst",
+    "pick": "Eine Antwort wählen",
+    "suggested": "Vorgeschlagen"
+  },
+  "why": {
+    "checksFailed": "Die Prüfungen blieben nach drei Versuchen rot.",
+    "failed": "Der Baumeister konnte sie nicht fertigstellen.",
+    "outOfSessions": "Er hat seine drei Sitzungen gebraucht und ist noch nicht fertig. Weiter gibt ihm drei weitere.",
+    "asks": "Der Baumeister fragt: {{question}}",
+    "stopped": "Der Baumeister hat angehalten und fragt dich."
+  },
+  "since": {
+    "justNow": "Gerade festgefahren",
+    "minutes": "Seit {{n}} Min. festgefahren",
+    "hours": "Seit {{n}} Std. festgefahren",
+    "days_one": "Seit 1 Tag festgefahren",
+    "days_other": "Seit {{count}} Tagen festgefahren"
+  }
+}

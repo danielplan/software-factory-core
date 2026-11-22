@@ -2,6 +2,7 @@
 // line saying why; it folds open to show its notes.
 
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { ReleasesView } from "@/api/client";
 import { Markdown } from "@/components/markdown";
@@ -11,21 +12,23 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { dayIn } from "@/i18n/format";
-import { useLocale, useT } from "@/i18n/use-t";
+import { useLocale } from "@/i18n/use-t";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
 type Past = Extract<ReleasesView, { connected: true }>["past"][number];
 
 export function PastReleases({ past }: Readonly<{ past: Past[] }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   return (
     <section className="mt-6 grid gap-3" aria-labelledby="past-releases">
       <h2 id="past-releases" className="text-[15px] font-semibold">
-        {t.past}
+        {t("releases.past")}
       </h2>
       {past.length === 0 ? (
-        <p className="text-[13px] text-muted-foreground">{t.noPast}</p>
+        <p className="text-[13px] text-muted-foreground">
+          {t("releases.noPast")}
+        </p>
       ) : (
         <div className={cn(CARD, "divide-y divide-border")}>
           {past.map((release) => (
@@ -38,12 +41,12 @@ export function PastReleases({ past }: Readonly<{ past: Past[] }>) {
 }
 
 function PastRelease({ release }: Readonly<{ release: Past }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   const locale = useLocale();
   return (
     <Collapsible className="group">
       <CollapsibleTrigger
-        aria-label={t.showNotes(release.number)}
+        aria-label={t("releases.showNotes", { number: release.number })}
         className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-left text-[13px] hover:bg-accent/50"
       >
         <ChevronRight
@@ -68,7 +71,7 @@ function PastRelease({ release }: Readonly<{ release: Past }>) {
         {release.notes.trim() ? (
           <Markdown text={release.notes} />
         ) : (
-          <p className="text-muted-foreground">{t.noNotes}</p>
+          <p className="text-muted-foreground">{t("releases.noNotes")}</p>
         )}
       </CollapsibleContent>
     </Collapsible>

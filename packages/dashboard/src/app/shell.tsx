@@ -4,6 +4,7 @@
 // needs the room, and its own bar leads back.
 
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { FactoryState } from "@/api/client";
 import { teamPagesOf } from "@/lib/screens";
@@ -11,7 +12,7 @@ import { useExplorations } from "@/api/use-explorations";
 import type { Page } from "@/lib/routes";
 import type { ExtensionPage } from "@/lib/page-module";
 import { koboldsDoing, koboldStatus, overallOf } from "@/lib/shell-view";
-import { useT } from "@/i18n/use-t";
+
 import { FeedbackRow } from "@/features/support/feedback-row";
 import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
@@ -69,7 +70,7 @@ export function Shell({
 // What the sidebar shows: the installed extensions' pages, each with what
 // it counts, the kobold's status and light, and what each kobold does now.
 function useSidebarParts(state: FactoryState, pages: ExtensionPage[]) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   const exploring = pages.some((page) => page.id === "explore");
   const { data: explorations } = useExplorations(exploring);
   const support = useSupport();

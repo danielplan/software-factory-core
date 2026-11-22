@@ -4,8 +4,9 @@
 // factory's light. Kept apart from the
 // components so it is checked on its own.
 
+import type { TFunction } from "i18next";
 import type { IdeaView, Light, PartView, WorkView } from "../api/client.ts";
-import { ENGLISH, type Messages } from "../i18n/messages.ts";
+import { ENGLISH } from "../i18n/messages.ts";
 import type { KoboldId } from "./kobolds.ts";
 
 // The Factory board's count in the sidebar: agreed work not done yet (To
@@ -22,11 +23,11 @@ export function openCardsOf(work: WorkView | null): number {
 }
 
 // The whole factory's light, and what it means in words.
-type Words = Messages["shell"];
+type Words = TFunction;
 
 export function overallOf(
   parts: PartView[],
-  m: Words = ENGLISH.shell,
+  m: Words = ENGLISH,
 ): {
   lit: Light;
   words: string;
@@ -34,14 +35,14 @@ export function overallOf(
   const shown = parts.filter((part) => part.light !== "none");
   const running = shown.filter((part) => part.light === "running").length;
   if (shown.some((part) => part.light === "problem"))
-    return { lit: "problem", words: m.overall.problem };
+    return { lit: "problem", words: m("shell.overall.problem") };
   if (shown.some((part) => part.light === "starting"))
-    return { lit: "starting", words: m.overall.starting };
+    return { lit: "starting", words: m("shell.overall.starting") };
   if (shown.length > 0 && running === shown.length)
-    return { lit: "running", words: m.overall.running };
+    return { lit: "running", words: m("shell.overall.running") };
   return {
     lit: "stopped",
-    words: m.overall.some(running, shown.length),
+    words: m("shell.overall.some", { running, shown: shown.length }),
   };
 }
 
@@ -56,40 +57,41 @@ export function koboldStatus(
   ideas: IdeaView[],
   quiet: string,
   explorations: { title: string; busy: string | null }[] = [],
-  m: Words = ENGLISH.shell,
+  m: Words = ENGLISH,
 ): KoboldStatus {
   const building = work?.builder.working;
   if (building)
-    return { busy: true, title: m.kobold.building, detail: building.title };
+    return {
+      busy: true,
+      title: m("shell.kobold.building"),
+      detail: building.title,
+    };
   const exploring = explorations.find((one) => one.busy);
   if (exploring?.busy)
     return {
       busy: true,
-      title: m.kobold.busy(
-        `${exploring.busy.charAt(0).toLowerCase()}${exploring.busy.slice(1)}`,
-      ),
+      title: m("shell.kobold.busy", {
+        what: `${exploring.busy.charAt(0).toLowerCase()}${exploring.busy.slice(1)}`,
+      }),
       detail: exploring.title,
     };
   const thinking = ideas.find((one) => one.working);
   if (thinking)
     return {
       busy: true,
-      title: m.kobold.thinking,
+      title: m("shell.kobold.thinking"),
       detail: thinking.title,
     };
   return {
     busy: false,
-    title: m.kobold.resting,
-    detail: m.kobold.quiet(quiet),
+    title: m("shell.kobold.resting"),
+    detail: m("shell.kobold.quiet", { light: quiet }),
   };
 }
 
 // The short line under the kobold's name: what it is doing, or Idle.
-export function koboldLine(
-  kobold: KoboldStatus,
-  m: Words = ENGLISH.shell,
-): string {
-  if (!kobold.busy) return m.kobold.idle;
+export function koboldLine(kobold: KoboldStatus, m: Words = ENGLISH): string {
+  if (!kobold.busy) return m("shell.kobold.idle");
   const doing = kobold.title.replace(/^Kobold is /, "");
   return doing.charAt(0).toUpperCase() + doing.slice(1);
 }
@@ -100,14 +102,17 @@ export function koboldsDoing(
   work: WorkView | null,
   explorations: { title: string; busy: string | null }[],
   answering: boolean,
-  m: Words = ENGLISH.shell,
+  m: Words = ENGLISH,
 ): Partial<Record<KoboldId, string>> {
   const doing: Partial<Record<KoboldId, string>> = {};
-  if (answering) doing.support = m.kobold.answering;
+  if (answering) doing.support = m("shell.kobold.answering");
   const exploring = explorations.find((one) => one.busy);
   if (exploring?.busy) doing.explorer = `${exploring.busy}: ${exploring.title}`;
   const building = work?.builder.working;
   if (building)
-    doing.builder = m.kobold.buildingCard(building.number, building.title);
+    doing.builder = m("shell.kobold.buildingCard", {
+      number: building.number,
+      title: building.title,
+    });
   return doing;
 }

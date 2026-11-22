@@ -2,13 +2,15 @@
 // it is on; done, what it found (bug, idea, open question), each at its
 // step and linking to Signals; failed, why.
 
+import { useTranslation } from "react-i18next";
+
 import type { PersonaTest, SignalRow } from "@/api/client";
 import { Markdown } from "@/components/markdown";
 import { personaHash } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { TypeChip } from "@/components/page-bits";
 import { missionWords, stepWords } from "@/lib/signals-view";
-import { useLocale, useT } from "@/i18n/use-t";
+import { useLocale } from "@/i18n/use-t";
 import { momentIn } from "@/i18n/format";
 
 export function Mission({
@@ -17,7 +19,7 @@ export function Mission({
   found,
 }: Readonly<{ test: PersonaTest; persona: string; found: SignalRow[] }>) {
   const locale = useLocale();
-  const t = useT();
+  const t = useTranslation().t;
   const going = test.status === "queued" || test.status === "running";
   return (
     <div
@@ -40,7 +42,7 @@ export function Mission({
           )}
         >
           {going
-            ? t.personas.onMission
+            ? t("personas.onMission")
             : momentIn(
                 locale,
                 new Date(test.started ?? test.ended ?? 0).toISOString(),
@@ -49,17 +51,14 @@ export function Mission({
       </span>
       {going && (
         <p aria-live="polite" className="text-[13px] text-foreground-2">
-          {missionWords(
-            { status: test.status, doing: test.doing ?? null },
-            t.words,
-          )}
+          {missionWords({ status: test.status, doing: test.doing ?? null }, t)}
         </p>
       )}
       {test.status === "failed" && (
         <p className="text-[13px] text-muted-foreground">
-          {t.personas.missions.couldNotFinish(
-            test.problem ?? t.personas.missions.noReason,
-          )}
+          {t("personas.missions.couldNotFinish", {
+            why: test.problem ?? t("personas.missions.noReason"),
+          })}
         </p>
       )}
       {test.status === "done" && <Found found={found} />}
@@ -68,11 +67,11 @@ export function Mission({
 }
 
 function Found({ found }: Readonly<{ found: SignalRow[] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (found.length === 0)
     return (
       <span className="text-[13px] text-muted-foreground">
-        {t.personas.missions.nothingFound}
+        {t("personas.missions.nothingFound")}
       </span>
     );
   return (
@@ -92,7 +91,7 @@ function Found({ found }: Readonly<{ found: SignalRow[] }>) {
                 </span>
                 {signal.step && (
                   <span className="text-[12px] text-muted-foreground">
-                    {stepWords(signal, t.words)}
+                    {stepWords(signal, t)}
                   </span>
                 )}
               </span>

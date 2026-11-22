@@ -6,9 +6,11 @@
 // variant differs, what odd thing happened, and its last persona test.
 // Agreeing (the badge on its bar) agrees to the variant shown.
 
+import type { TFunction } from "i18next";
 import type { NodeProps } from "@xyflow/react";
 import { Check, Play } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { TestResult, VersionRun } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -21,34 +23,32 @@ import { States } from "./prototype-states";
 import { Segment, ShownVariant, SwitchRow } from "./prototype-switches";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
-import { useT } from "@/i18n/use-t";
-import type { Messages } from "@/i18n/messages";
 
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
-function stateWords(
-  run: VersionRun | undefined,
-  t: Messages["explore"],
-): string | null {
+function stateWords(run: VersionRun | undefined, t: TFunction): string | null {
   if (!run) return null;
-  if (run.state === "starting") return t.starting;
-  if (run.state === "failed") return run.problem ?? t.board.stopped;
+  if (run.state === "starting") return t("explore.starting");
+  if (run.state === "failed") return run.problem ?? t("explore.board.stopped");
   // Running or stopped: what is odd about it (not shared with the team).
   return run.problem;
 }
 
 function testWords(
   test: TestResult,
-  b: Messages["explore"]["board"],
+  b: TFunction,
 ): { words: string; dot: string } {
   if (test.status === "done")
     return {
-      words: b.stepsAsExpected(test.asExpected, test.steps),
+      words: b("explore.board.stepsAsExpected", {
+        good: test.asExpected,
+        all: test.steps,
+      }),
       dot: test.asExpected === test.steps ? "bg-success" : "bg-destructive",
     };
   if (test.status === "failed")
-    return { words: b.testUnfinished, dot: "bg-faint" };
-  return { words: b.testing, dot: "bg-blue" };
+    return { words: b("explore.board.testUnfinished"), dot: "bg-faint" };
+  return { words: b("explore.board.testing"), dot: "bg-blue" };
 }
 
 // The screen: the running app, or a sketch of one with Start in its middle
@@ -66,7 +66,7 @@ function Screen({
   start: (() => void) | null;
   making?: boolean;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   if (run?.state === "running" && run.url)
     return <LiveScreen url={run.url} title={title} making={making} />;
   const starting = run?.state === "starting";
@@ -82,7 +82,8 @@ function Screen({
           className="nodrag absolute z-10 gap-2 shadow-[0_8px_24px_-10px_rgb(20_24_36/0.45)]"
           onClick={start}
         >
-          <Play aria-hidden className="size-4 fill-current" /> {t.explore.start}
+          <Play aria-hidden className="size-4 fill-current" />{" "}
+          {t("explore.start")}
         </Button>
       )}
       <div
@@ -168,7 +169,7 @@ function shownOf(
 }
 
 export function PrototypeNode({ data }: NodeProps<ThingNode>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
   const [picked, pick] = useState<string | null>(null);
@@ -216,10 +217,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
             : null
         }
       />
-      <About
-        words={stateWords(run, t.explore)}
-        test={page.tests[thing.key] ?? null}
-      />
+      <About words={stateWords(run, t)} test={page.tests[thing.key] ?? null} />
     </Frame>
   );
 }
@@ -232,8 +230,8 @@ function About({
   words: string | null;
   test: TestResult | null;
 }>) {
-  const t = useT();
-  const result = test ? testWords(test, t.explore.board) : null;
+  const t = useTranslation().t;
+  const result = test ? testWords(test, t) : null;
   return (
     <>
       {words && <div className="text-xs text-foreground-2">{words}</div>}
@@ -267,7 +265,7 @@ function Variants({
   agreed: string | undefined;
   onPick: (key: string) => void;
 }>) {
-  const b = useT().explore.board;
+  const b = useTranslation().t;
   const [all, showAll] = useState(false);
   const archived = agreed !== undefined && !all;
   const listed = archived
@@ -275,7 +273,7 @@ function Variants({
     : variants;
   const others = variants.length - 1;
   return (
-    <SwitchRow label={b.variant} role="tablist">
+    <SwitchRow label={b("explore.board.variant")} role="tablist">
       {listed.map((one) => (
         <Segment
           key={one.key}
@@ -297,7 +295,11 @@ function Variants({
       {agreed !== undefined && others > 0 && (
         <Segment
           on={false}
-          title={archived ? b.showArchived(others) : b.hideArchived}
+          title={
+            archived
+              ? b("explore.board.showArchived", { n: others })
+              : b("explore.board.hideArchived")
+          }
           onPick={() => {
             showAll(archived);
           }}

@@ -3,6 +3,7 @@
 
 import { Lightbulb, Play } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type ExplorationsView, messageOf, post } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { ROW } from "@/components/page-bits";
 
 import { RemoveRow } from "./remove-row";
-import { useT } from "@/i18n/use-t";
 
 // An idea in the board's Backlog: not agreed work, so it waits here.
 // Starting it makes an exploration of it; handing that off fills in this
@@ -19,7 +19,7 @@ import { useT } from "@/i18n/use-t";
 export function FromBoard({
   idea,
 }: Readonly<{ idea: ExplorationsView["fromBoard"][number] }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
@@ -55,7 +55,7 @@ export function FromBoard({
           >
             #{idea.number}
           </a>{" "}
-          · {t.explore.fromBacklog}
+          · {t("explore.fromBacklog")}
         </span>
         {problem && (
           <span role="alert" className="text-[12.5px] text-destructive">
@@ -70,12 +70,12 @@ export function FromBoard({
         onClick={() => void start()}
       >
         <Play aria-hidden />
-        {busy ? t.explore.starting : t.explore.start}
+        {busy ? t("explore.starting") : t("explore.start")}
       </Button>
       <RemoveRow
         path="/api/kobble/factory/delete"
         body={{ number: idea.number }}
-        what={t.explore.closeOnGitHub}
+        what={t("explore.closeOnGitHub")}
         onGone={setGone}
         onProblem={setProblem}
       />

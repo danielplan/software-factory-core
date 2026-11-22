@@ -1,5 +1,6 @@
 import { ExternalLink, KeyRound, Plug, Search } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post, type StageMap } from "@/api/client";
 import { Field } from "@/components/field";
@@ -10,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Step } from "../step";
 import { Pick, WhichWork } from "../pick";
 import { type Columns, StageMapping } from "../stage-map";
-import { useT } from "@/i18n/use-t";
 
 type Login = { site: string; email: string; token: string };
 type Projects = { name: string; projects: { key: string; name: string }[] };
@@ -20,7 +20,7 @@ type Projects = { name: string; projects: { key: string; name: string }[] };
 export function JiraSteps({
   onDone,
 }: Readonly<{ onDone: (message: string) => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [login, setLogin] = useState<Login>({ site: "", email: "", token: "" });
   const [found, setFound] = useState<Projects | null>(null);
   const { busy, problem, run } = useRun();
@@ -31,8 +31,8 @@ export function JiraSteps({
           n={1}
           title={
             found
-              ? t.connect.github.signedInAs(found.name)
-              : t.connect.jira.login
+              ? t("connect.github.signedInAs", { login: found.name })
+              : t("connect.jira.login")
           }
           done={found !== null}
         >
@@ -56,11 +56,11 @@ export function JiraSteps({
               }
             >
               <Search aria-hidden />
-              {busy ? t.connect.checking : t.connect.jira.check}
+              {busy ? t("connect.checking") : t("connect.jira.check")}
             </Button>
           )}
         </Step>
-        <Step n={2} title={t.connect.jira.project} done={false}>
+        <Step n={2} title={t("connect.jira.project")} done={false}>
           {found && (
             <ProjectStep
               login={login}
@@ -72,7 +72,7 @@ export function JiraSteps({
           )}
         </Step>
       </ol>
-      {problem && <ProblemBox title={t.connect.didNotWork} text={problem} />}
+      {problem && <ProblemBox title={t("connect.didNotWork")} text={problem} />}
     </section>
   );
 }
@@ -92,7 +92,7 @@ function ProjectStep({
   run: (step: () => Promise<void>) => Promise<void>;
   onDone: (message: string) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [project, setProject] = useState("");
   const [label, setLabel] = useState("*");
   const [columns, setColumns] = useState<Columns | null>(null);
@@ -112,7 +112,7 @@ function ProjectStep({
   return (
     <div className="grid gap-3">
       <Pick
-        label={t.connect.jira.projectPick}
+        label={t("connect.jira.projectPick")}
         value={project}
         options={found.projects.map((one) => ({
           value: one.key,
@@ -142,7 +142,7 @@ function ProjectStep({
         }
       >
         <Plug aria-hidden />
-        {t.connect.connect}
+        {t("connect.connect")}
       </Button>
     </div>
   );
@@ -152,7 +152,7 @@ function LoginFields({
   login,
   onLogin,
 }: Readonly<{ login: Login; onLogin: (login: Login) => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const type =
     (key: keyof Login) => (event: React.ChangeEvent<HTMLInputElement>) => {
       onLogin({ ...login, [key]: event.target.value });
@@ -162,23 +162,23 @@ function LoginFields({
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
           id="jira-site"
-          label={t.connect.jira.site}
-          help={t.connect.jira.siteHelp}
+          label={t("connect.jira.site")}
+          help={t("connect.jira.siteHelp")}
         >
           <Input id="jira-site" value={login.site} onChange={type("site")} />
         </Field>
         <Field
           id="jira-email"
-          label={t.connect.jira.email}
-          help={t.connect.jira.emailHelp}
+          label={t("connect.jira.email")}
+          help={t("connect.jira.emailHelp")}
         >
           <Input id="jira-email" value={login.email} onChange={type("email")} />
         </Field>
       </div>
       <Field
         id="jira-token"
-        label={t.connect.jira.token}
-        help={t.connect.jira.tokenHelp}
+        label={t("connect.jira.token")}
+        help={t("connect.jira.tokenHelp")}
       >
         <Input
           id="jira-token"
@@ -195,7 +195,7 @@ function LoginFields({
         className="inline-flex w-fit items-center gap-1.5 text-[13px] underline underline-offset-2"
       >
         <KeyRound className="size-4" aria-hidden />
-        {t.connect.jira.createToken}
+        {t("connect.jira.createToken")}
         <ExternalLink className="size-3.5 text-muted-foreground" aria-hidden />
       </a>
     </>

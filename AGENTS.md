@@ -38,7 +38,7 @@ here reach every company with its next upgrade, so they are made with care.
   listed in the blueprint and only shrinks.
 - Simple, clear and consistent language in code, comments and docs. The people
   who use a factory are not developers, but are curious and capable.
-- **Every word the dashboard shows goes through its words** (`packages/dashboard/src/i18n/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The test `packages/dashboard/test/words-in-catalogue.test.ts` fails on words written straight into a screen.
+- **Every word the dashboard shows goes through its words** (i18next, `packages/dashboard/src/i18n/locales/`), in English, Italian and German, screen-reader labels and tooltips too: see [languages](docs/reference/languages.md). The lint rule `i18next/no-literal-string` fails on words written straight into a screen.
 - Never loosen a check or add a lint-disabling comment without asking.
 - **Work reaches main through a pull request.** Commit on a branch, push it
   and open a pull request; never push to main directly. A product's release

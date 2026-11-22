@@ -1,0 +1,56 @@
+{
+  "changes_one": "1 change",
+  "changes_other": "{{count}} changes",
+  "more": "and {{count}} more",
+  "taking": "Taking the new version from GitHub…",
+  "restartNote": "The products that run start again with it.",
+  "blockedTitle": "New version on GitHub ({{changes}}), but this folder cannot take it yet",
+  "blockedText": "Nothing was changed, because {{reason}}. Save or undo those changes (or ask Claude to tidy up this folder), then press Look again.",
+  "newTitle": "New version on GitHub: {{changes}}",
+  "newText": "Update takes it now; the products that run start again with it.",
+  "looking": "Looking on GitHub…",
+  "looked": " · looked at {{time}}",
+  "offline": "GitHub could not be reached{{looked}}",
+  "updatedAt": " · updated at {{time}}",
+  "upToDate": "Up to date with GitHub{{looked}}{{updated}}",
+  "row": {
+    "updating": "Updating…",
+    "takingChanges": "Taking the changes from GitHub",
+    "cantYet": "Can't update yet",
+    "ready_one": "1 change ready",
+    "ready_other": "{{count}} changes ready",
+    "release": "Kobble {{version}} is out",
+    "preparing": "Being prepared in #{{number}}",
+    "prepare": "Prepare the upgrade for the team",
+    "updated": "Updated",
+    "updatedText": "{{changes}}, everything started again"
+  },
+  "release": {
+    "out": "Kobble {{version}} is out",
+    "beingPrepared": "The builder prepares the upgrade on the board. Once its pull request is merged, every computer takes it with its next update.",
+    "canPrepare": "The builder can prepare the upgrade as a card: the new version, its migrations and the checks, as a pull request for the team to merge.",
+    "openCard": "Open #{{number}}",
+    "prepare": "Prepare the upgrade"
+  },
+  "lookAgain": "Look again",
+  "updateNow": "Update now",
+  "update": "Update",
+  "byItself": "Update by itself",
+  "desktop": {
+    "say": "Open the factory with a double-click from the desktop.",
+    "put": "Put on the desktop: {{file}}",
+    "button": "Put a start on the desktop"
+  },
+  "steps": {
+    "install": "Installing what the changes need",
+    "factory": "Starting the factory again on the new Kobble",
+    "products": "Starting the products again"
+  },
+  "reasons": {
+    "branch": "this folder is on the branch \"{{branch}}\", not on {{main}}",
+    "changed": "{{count}} file(s) in this folder were changed by hand and are not saved in git",
+    "own": "this folder has {{count}} saved change(s) of its own that are not on GitHub",
+    "overwrite": "files here that git does not keep would be overwritten by the new version",
+    "git": "git could not move this folder forward"
+  }
+}

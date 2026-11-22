@@ -3,17 +3,18 @@
 
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 
 export function SyncNow({
   onSaid,
 }: Readonly<{ onSaid: (said: string) => void }>) {
   const [busy, setBusy] = useState(false);
-  const t = useT().signals;
+  const t = useTranslation().t;
   return (
     <Button
       variant="ring"
@@ -24,7 +25,11 @@ export function SyncNow({
         post<{ added: number }>("/api/kobble/sync")
           .then(
             ({ added }) => {
-              onSaid(added === 0 ? t.syncedNothing : t.syncedNew(added));
+              onSaid(
+                added === 0
+                  ? t("signals.syncedNothing")
+                  : t("signals.syncedNew", { n: added }),
+              );
             },
             (error: unknown) => {
               onSaid(messageOf(error));
@@ -40,7 +45,7 @@ export function SyncNow({
         strokeWidth={2}
         className={cn("size-[15px]", busy && "animate-spin")}
       />
-      {t.syncNow}
+      {t("signals.syncNow")}
     </Button>
   );
 }

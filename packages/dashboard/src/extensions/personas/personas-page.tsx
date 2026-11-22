@@ -8,6 +8,7 @@
 // it. A mission's own page is #personas/<id>/tests/<mission>.
 
 import { ChevronLeft, Pencil, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { Face, KobblePersonaPage, PersonaRow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
@@ -25,7 +26,6 @@ import { PersonaMissions } from "./missions";
 import { SendEveryone } from "./send-everyone";
 import { SignalLine } from "./signal-line";
 import { TestRun } from "./tests";
-import { useT } from "@/i18n/use-t";
 
 export function PersonasPage({ open }: Readonly<{ open: string | null }>) {
   if (!open) return <PersonaList />;
@@ -35,17 +35,17 @@ export function PersonasPage({ open }: Readonly<{ open: string | null }>) {
 }
 
 function PersonaList() {
-  const t = useT();
+  const t = useTranslation().t;
   const { data, problem } = useRead("/api/kobble/personas") as Read<{
     personas: PersonaRow[];
   }>;
   const adding = () => {
-    askSupport(t.personas.askNew);
+    askSupport(t("personas.askNew"));
   };
   return (
     <>
       <Head
-        title={t.shell.pages.personas}
+        title={t("shell.pages.personas")}
         right={
           <>
             {data && data.personas.length > 0 && (
@@ -57,16 +57,18 @@ function PersonaList() {
               onClick={adding}
             >
               <Plus aria-hidden strokeWidth={2.2} />
-              {t.personas.newPersona}
+              {t("personas.newPersona")}
             </Button>
           </>
         }
       />
-      {problem && <ProblemBox title={t.personas.cannotRead} text={problem} />}
+      {problem && (
+        <ProblemBox title={t("personas.cannotRead")} text={problem} />
+      )}
       {data && data.personas.length === 0 && <NoPersonas onNew={adding} />}
       {data && data.personas.length > 0 && (
         <nav
-          aria-label={t.shell.pages.personas}
+          aria-label={t("shell.pages.personas")}
           className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
         >
           {data.personas.map((persona) => (
@@ -88,7 +90,7 @@ const FACES: { face: Face; fade: number }[] = [
 // Before there is any persona: a few faces, what personas are for, and
 // New persona.
 function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <div
       className={cn(
@@ -103,13 +105,13 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
           </span>
         ))}
       </div>
-      <div className="text-base font-semibold">{t.personas.whoFor}</div>
+      <div className="text-base font-semibold">{t("personas.whoFor")}</div>
       <p className="max-w-[460px] text-[14.5px] text-foreground-2">
-        {t.personas.whoForText}
+        {t("personas.whoForText")}
       </p>
       <Button size="pill" className="mt-2" onClick={onNew}>
         <Plus aria-hidden strokeWidth={2.2} />
-        {t.personas.newPersona}
+        {t("personas.newPersona")}
       </Button>
     </div>
   );
@@ -118,7 +120,7 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
 // A persona's card: who they are, read only, and a quiet line while they
 // are on a mission. The whole card opens the persona's page.
 function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
-  const t = useT();
+  const t = useTranslation().t;
   return (
     <a
       href={personaHash(persona.id)}
@@ -145,13 +147,13 @@ function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
           <Markdown text={persona.about} inline />
         ) : (
           <span className="text-muted-foreground">
-            {t.personas.noDescription}
+            {t("personas.noDescription")}
           </span>
         )}
       </span>
       {persona.onMission && (
         <span className="text-[12.5px] font-semibold text-blue">
-          {t.personas.onMission}
+          {t("personas.onMission")}
         </span>
       )}
     </a>
@@ -159,7 +161,7 @@ function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
 }
 
 function PersonaView({ id }: Readonly<{ id: string }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { data, problem } = useRead(
     `/api/kobble/persona?id=${encodeURIComponent(id)}`,
   ) as Read<KobblePersonaPage>;
@@ -170,10 +172,10 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
         className="mb-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
       >
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
-        {t.shell.pages.personas}
+        {t("shell.pages.personas")}
       </a>
       {problem && (
-        <ProblemBox title={t.personas.oneCannotRead} text={problem} />
+        <ProblemBox title={t("personas.oneCannotRead")} text={problem} />
       )}
       {data && <PersonaBody page={data} />}
     </div>
@@ -183,7 +185,7 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
 // Who the persona is, their missions, and, once there are any (after
 // launch), the signals from real customers like them.
 function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const { persona } = page;
   const customers = page.signals.filter((signal) => signal.source !== "test");
   return (
@@ -195,7 +197,7 @@ function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
             {persona.name}
           </h1>
           <span className="text-[12.5px] text-muted-foreground">
-            {[persona.place, originWords(persona.origin, t.words).toLowerCase()]
+            {[persona.place, originWords(persona.origin, t).toLowerCase()]
               .filter(Boolean)
               .join(" · ")}
           </span>
@@ -209,17 +211,17 @@ function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
           variant="ring"
           size="pill"
           disabled
-          title={t.personas.comingLater}
+          title={t("personas.comingLater")}
         >
           <Pencil aria-hidden strokeWidth={2} className="size-[15px]" />
-          {t.personas.edit}
+          {t("personas.edit")}
         </Button>
       </div>
       <PersonaMissions page={page} />
       {customers.length > 0 && (
         <>
           <h2 className="mt-7 mb-3 text-[17px] font-semibold tracking-[-0.01em]">
-            {t.personas.fromCustomers}
+            {t("personas.fromCustomers")}
           </h2>
           <div className={CARD}>
             {customers.map((signal) => (

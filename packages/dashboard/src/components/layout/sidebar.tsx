@@ -1,5 +1,6 @@
 import { Boxes, House, Menu, Puzzle, Settings } from "lucide-react";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Light, ShownView } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
@@ -17,7 +18,6 @@ import { useFactoryName, useLogo } from "@/lib/brand";
 import type { SidebarGroup } from "@/lib/page-module";
 import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
-import { useT } from "@/i18n/use-t";
 
 import { type Item, PageLink, ProductState } from "./sidebar-links";
 import { GroupLabel, TeamPages } from "./team-pages";
@@ -86,7 +86,7 @@ type SidebarProps = Readonly<{
 export function Sidebar(props: SidebarProps) {
   const [open, setOpen] = useState(false);
   const { kobold, light } = props;
-  const t = useT().shell;
+  const t = useTranslation().t;
   return (
     <>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col gap-0.5 overflow-y-auto border-r border-sidebar-border bg-sidebar text-sidebar-strong px-3 pt-4 pb-3 md:flex">
@@ -95,12 +95,16 @@ export function Sidebar(props: SidebarProps) {
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-2 border-b border-sidebar-border bg-sidebar text-sidebar-strong px-2 md:hidden">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={t.openMenu}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("shell.openMenu")}
+            >
               <Menu aria-hidden />
             </Button>
           </DialogTrigger>
           <DialogContent className="top-0 left-0 flex h-full w-[264px] max-w-[85vw] translate-x-0 translate-y-0 flex-col gap-0.5 rounded-none border-0 bg-sidebar text-sidebar-strong px-4 pt-[22px] pb-4 data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 sm:max-w-[85vw]">
-            <DialogTitle className="sr-only">{t.menu}</DialogTitle>
+            <DialogTitle className="sr-only">{t("shell.menu")}</DialogTitle>
             <Content
               {...props}
               onGo={() => {
@@ -121,13 +125,13 @@ export function Sidebar(props: SidebarProps) {
 function Content(props: SidebarProps & { onGo?: () => void }) {
   const { current, pages, doing, product, onGo } = props;
   const { team, open } = props;
-  const nav = useT().shell.nav;
+  const nav = useTranslation().t;
   return (
     <>
       <span className="px-2 pb-4">
         <Wordmark name={props.name} size="big" />
       </span>
-      <nav aria-label={nav.overview} className="grid gap-px pb-4">
+      <nav aria-label={nav("shell.nav.overview")} className="grid gap-px pb-4">
         {TOP.map((item) => (
           <PageLink key={item.page} item={item} current={current} onGo={onGo}>
             {item.page === "system" && <ProductState product={product} />}
@@ -142,7 +146,7 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
       />
       <div className="mt-auto grid gap-0.5 pt-4">
         {props.rows}
-        <nav aria-label={nav.factory} className="grid gap-0.5">
+        <nav aria-label={nav("shell.nav.factory")} className="grid gap-0.5">
           {QUIET.map((item) => (
             <PageLink
               key={item.page}
@@ -223,17 +227,17 @@ function Pages({
   doing: Doing;
   onGo?: () => void;
 }>) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   // A group with none of the installed pages is left out.
   const groups = GROUPS.map((label) => ({
     label,
     items: pages.filter((page) => page.group === label),
   })).filter((group) => group.items.length > 0);
   return (
-    <nav aria-label={t.nav.pages} className="grid gap-px">
+    <nav aria-label={t("shell.nav.pages")} className="grid gap-px">
       {groups.map((group, at) => (
         <div key={group.label} className={cn("grid gap-px", at > 0 && "pt-4")}>
-          <GroupLabel>{t.groups[group.label]}</GroupLabel>
+          <GroupLabel>{t(`shell.groups.${group.label}`)}</GroupLabel>
           {group.items.map((item) => (
             <PageLink key={item.page} item={item} current={current} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">

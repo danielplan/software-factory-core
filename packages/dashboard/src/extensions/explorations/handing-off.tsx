@@ -5,11 +5,12 @@
 // does.
 
 import { Pencil } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useT } from "@/i18n/use-t";
+
 import { KOBOLDS } from "@/lib/kobolds";
 
 import { clockOf, useNow } from "./board/prototype-making";
@@ -19,9 +20,9 @@ type Handing = NonNullable<ExplorationPage["handingOff"]>;
 const STAGES: Handing["stage"][] = ["spec", "card", "prototypes"];
 
 export function HandingOff({ handing }: Readonly<{ handing: Handing }>) {
-  const t = useT().explore;
+  const t = useTranslation().t;
   const clock = clockOf(handing.since, useNow());
-  const step = t.handOffStages[handing.stage];
+  const step = t(`explore.handOffStages.${handing.stage}`);
   const at = STAGES.indexOf(handing.stage) + 1;
   return (
     <Dialog open>
@@ -43,7 +44,7 @@ export function HandingOff({ handing }: Readonly<{ handing: Handing }>) {
           {step}
         </DialogTitle>
         <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
-          {t.handOffStep(at, STAGES.length)}
+          {t("explore.handOffStep", { n: at, of: STAGES.length })}
           {clock && <span>· {clock}</span>}
         </span>
       </DialogContent>

@@ -4,6 +4,7 @@
 
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { type Card, type CoachView, messageOf, post } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
@@ -11,13 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/markdown";
 
 import { cardsIn, type Step } from "./steps";
-import { useT } from "@/i18n/use-t";
 
 export function KoboldSays({
   coach,
   step,
 }: Readonly<{ coach: CoachView; step: Step }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const open = cardsIn(coach.draft, step.area).filter(
     (card) => card.tone === "question" && !card.confirmed,
   );
@@ -28,9 +28,13 @@ export function KoboldSays({
         {open.length === 0 ? (
           <p>
             {coach.working
-              ? t.setup.says.changing
-              : (((t.setup.says as Record<string, unknown>)[step.id] as
-                  string | undefined) ?? "")}
+              ? t("setup.says.changing")
+              : (((
+                  t("setup.says", { returnObjects: true }) as Record<
+                    string,
+                    unknown
+                  >
+                )[step.id] as string | undefined) ?? "")}
           </p>
         ) : (
           open.map((card) => <Question key={card.id} card={card} step={step} />)
@@ -42,7 +46,7 @@ export function KoboldSays({
 
 // One of the kobold's questions, answered in place.
 function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [answer, setAnswer] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const send = () => {
@@ -74,9 +78,9 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
       </p>
       <div className="flex gap-2">
         <input
-          aria-label={t.setup.says.answerOn(card.title)}
+          aria-label={t("setup.says.answerOn", { title: card.title })}
           className="h-9 min-w-0 flex-1 rounded-xl bg-ground px-3 text-[13.5px] outline-none"
-          placeholder={t.setup.says.yourAnswer}
+          placeholder={t("setup.says.yourAnswer")}
           value={answer}
           onChange={(event) => {
             setAnswer(event.target.value);
@@ -84,7 +88,7 @@ function Question({ card, step }: Readonly<{ card: Card; step: Step }>) {
         />
         <Button type="submit" size="pill-sm" disabled={!answer.trim()}>
           <Send aria-hidden />
-          {t.setup.says.answer}
+          {t("setup.says.answer")}
         </Button>
       </div>
       {problem && <p className="text-[13px] text-destructive">{problem}</p>}

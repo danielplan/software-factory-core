@@ -3,10 +3,11 @@
 
 import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Light } from "@/api/client";
 import { StatusLight } from "@/components/status-light";
-import { useT } from "@/i18n/use-t";
+
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ export function PageLink({
   quiet?: boolean;
   children?: ReactNode;
 }>) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   return (
     <a
       href={`#${item.page}`}
@@ -43,7 +44,7 @@ export function PageLink({
       )}
     >
       <Tile color={item.color}>{item.icon}</Tile>
-      {t.pages[item.page]}
+      {t(`shell.pages.${item.page}`)}
       {children}
     </a>
   );
@@ -53,7 +54,7 @@ export function PageLink({
 export function ProductState({
   product,
 }: Readonly<{ product: { light: Light; link: string | null } }>) {
-  const t = useT().shell;
+  const t = useTranslation().t;
   if (product.light === "running" && product.link)
     return (
       <span
@@ -70,13 +71,13 @@ export function ProductState({
           window.open(product.link ?? "", "_blank", "noreferrer");
         }}
       >
-        {t.open} <ExternalLink aria-hidden />
+        {t("shell.open")} <ExternalLink aria-hidden />
       </span>
     );
   if (product.light === "none" || product.light === "running") return null;
   return (
     <span className="ml-auto flex items-center gap-2 text-xs text-sidebar-muted">
-      {t.lights[product.light]}
+      {t(`shell.lights.${product.light}`)}
       <StatusLight light={product.light} />
     </span>
   );

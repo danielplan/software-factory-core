@@ -4,6 +4,7 @@
 
 import { Check, Plus } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { IconTile } from "@/components/add-on-looks";
@@ -13,7 +14,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useT } from "@/i18n/use-t";
+
 import type { Layout } from "@/lib/home-layout";
 import { blockAbout, blockName } from "@/lib/screens";
 import { nameOf } from "@/lib/market-view";
@@ -40,7 +41,7 @@ export function AddBlock({
   // Add: the dialog closes and the block is placed by hand.
   onPick: (id: string, x: number, y: number) => void;
 }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const [chosen, setChosen] = useState("");
   const first = offeredBy[0]?.addOn.id ?? "";
   const picked = offeredBy.some(({ addOn }) => addOn.id === chosen)
@@ -51,19 +52,19 @@ export function AddBlock({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="grid max-h-[85vh] gap-0 overflow-hidden p-0 sm:max-w-[760px]">
         <DialogTitle className="px-5 pt-4 pb-3 text-[15px] font-semibold">
-          {t.home.arrange.addTitle}
+          {t("home.arrange.addTitle")}
         </DialogTitle>
         <DialogDescription className="sr-only">
-          {t.home.arrange.offering}
+          {t("home.arrange.offering")}
         </DialogDescription>
         {offeredBy.length === 0 ? (
           <p className="border-t border-border-soft px-5 py-10 text-center text-[13px] text-muted-foreground">
-            {t.home.arrange.nothingOffered}
+            {t("home.arrange.nothingOffered")}
           </p>
         ) : (
           <div className="grid min-h-[360px] grid-cols-[210px_minmax(0,1fr)] border-t border-border-soft">
             <nav
-              aria-label={t.home.arrange.offering}
+              aria-label={t("home.arrange.offering")}
               className="grid content-start gap-0.5 border-r border-border-soft p-2"
             >
               {offeredBy.map(({ addOn }) => (
@@ -80,9 +81,7 @@ export function AddBlock({
                   }
                 >
                   <IconTile id={addOn.id} />
-                  <span className="min-w-0 truncate">
-                    {nameOf(t.market, addOn)}
-                  </span>
+                  <span className="min-w-0 truncate">{nameOf(t, addOn)}</span>
                 </button>
               ))}
             </nav>
@@ -115,21 +114,29 @@ function BlockOffer({
   on: boolean;
   onPick: (id: string, x: number, y: number) => void;
 }>) {
-  const t = useT();
-  const name = blockName(t.market.blocks, addOns, id);
+  const t = useTranslation().t;
+  const name = blockName(
+    t("market.blocks", { returnObjects: true }),
+    addOns,
+    id,
+  );
   return (
     <div className="grid gap-2.5 rounded-xl border border-border p-3">
       <div className="flex items-start gap-3">
         <span className="min-w-0 flex-1">
           <span className="block text-[13px] font-medium">{name}</span>
           <span className="block text-xs text-muted-foreground">
-            {blockAbout(t.home.blockAbout, addOns, id)}
+            {blockAbout(
+              t("home.blockAbout", { returnObjects: true }),
+              addOns,
+              id,
+            )}
           </span>
         </span>
         {on ? (
           <span className="inline-flex h-7 items-center gap-1 text-xs text-muted-foreground">
             <Check aria-hidden className="size-3" />
-            {t.home.arrange.onHome}
+            {t("home.arrange.onHome")}
           </span>
         ) : (
           <button
@@ -140,13 +147,13 @@ function BlockOffer({
             }}
           >
             <Plus aria-hidden className="size-3" />
-            {t.home.arrange.addOne}
+            {t("home.arrange.addOne")}
           </button>
         )}
       </div>
       <div
         role="img"
-        aria-label={t.home.arrange.preview(name)}
+        aria-label={t("home.arrange.preview", { name })}
         className="rounded-lg bg-surface p-2.5"
       >
         <BlockPreview id={id} />

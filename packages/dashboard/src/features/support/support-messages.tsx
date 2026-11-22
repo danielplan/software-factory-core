@@ -2,15 +2,16 @@
 // answer as it is written.
 
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
-import { useT } from "@/i18n/use-t";
+
 import type { SupportView } from "./use-support";
 
 export function Messages({
   support,
 }: Readonly<{ support: SupportView | null }>) {
-  const t = useT();
+  const t = useTranslation().t;
   const end = useRef<HTMLDivElement>(null);
   const count = support?.messages.length ?? 0;
   const writing = support?.writing;
@@ -38,7 +39,7 @@ export function Messages({
           {writing ? (
             <Markdown text={writing} />
           ) : (
-            (support?.activity ?? t.support.thinking)
+            (support?.activity ?? t("support.thinking"))
           )}
         </div>
       )}

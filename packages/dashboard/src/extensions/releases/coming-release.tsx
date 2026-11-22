@@ -3,48 +3,57 @@
 // before); once prepared, Release now at the top right, the number
 // suggested (Change turns it into a field) and why.
 
+import type { TFunction } from "i18next";
 import { LoaderCircle, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { messageOf, post, type ReleasesView } from "@/api/client";
 import { TypeChip } from "@/components/card-type";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useT } from "@/i18n/use-t";
+
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
-import type { Messages } from "@/i18n/messages";
-
 import { problemWith, type Why, whyOf } from "./view";
 
-type Words = Messages["releases"];
+type Words = TFunction;
 
 type Connected = Extract<ReleasesView, { connected: true }>;
 
 type Suggested = { next: string | null; why: string | null };
 
 export function ComingRelease({ view }: Readonly<{ view: Connected }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   const { coming, last } = view;
   const at = useComingRelease(view);
   const nothing = coming.merged.length === 0;
   return (
     <section className="grid gap-3" aria-labelledby="coming-release">
-      {at.said && <ProblemBox title={t.didNotWork} text={at.said} />}
+      {at.said && (
+        <ProblemBox title={t("releases.didNotWork")} text={at.said} />
+      )}
       <div className={cn(CARD, "grid gap-4 p-5")}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h2 id="coming-release" className="text-[15px] font-semibold">
-            {t.coming}
+            {t("releases.coming")}
           </h2>
           <ReleaseButton at={at} nothing={nothing} />
         </div>
         {nothing && (
-          <p className="text-[13px] text-muted-foreground">{t.nothing(last)}</p>
+          <p className="text-[13px] text-muted-foreground">
+            {t("releases.nothing", {
+              last,
+              context: last ? "since" : undefined,
+            })}
+          </p>
         )}
         {!nothing && at.suggested === null && (
-          <p className="text-[13px] text-muted-foreground">{t.prepareAbout}</p>
+          <p className="text-[13px] text-muted-foreground">
+            {t("releases.prepareAbout")}
+          </p>
         )}
         {!nothing && at.suggested !== null && (
           <NumberLine
@@ -119,7 +128,7 @@ function ReleaseButton({
   at,
   nothing,
 }: Readonly<{ at: ReturnType<typeof useComingRelease>; nothing: boolean }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   const spinner = <LoaderCircle aria-hidden className="animate-spin" />;
   if (at.suggested === null)
     return (
@@ -130,7 +139,7 @@ function ReleaseButton({
         onClick={at.prepare}
       >
         {at.working ? spinner : <Sparkles aria-hidden />}
-        {at.working ? t.preparing : t.prepare}
+        {at.working ? t("releases.preparing") : t("releases.prepare")}
       </Button>
     );
   return (
@@ -141,7 +150,9 @@ function ReleaseButton({
       onClick={at.release}
     >
       {at.working && spinner}
-      {at.working ? t.releasing : t.releaseNow(at.number)}
+      {at.working
+        ? t("releases.releasing")
+        : t("releases.releaseNow", { number: at.number })}
     </Button>
   );
 }
@@ -161,13 +172,13 @@ function NumberLine({
   last: string | null;
   view: Connected;
 }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   const why = whyOf(view);
   const reason = reasonText(why, t);
   return (
     <div className="grid gap-1.5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
-        <span className="font-medium">{t.next}</span>
+        <span className="font-medium">{t("releases.next")}</span>
         {typed === null ? (
           <>
             <span className="font-mono text-[15px] font-semibold">
@@ -180,14 +191,14 @@ function NumberLine({
                 onType(suggested);
               }}
             >
-              {t.change}
+              {t("releases.change")}
             </button>
           </>
         ) : (
           <>
             <Input
               value={typed}
-              aria-label={t.numberLabel}
+              aria-label={t("releases.numberLabel")}
               aria-invalid={problem !== null}
               className="h-8 w-28 font-mono"
               autoFocus
@@ -197,13 +208,15 @@ function NumberLine({
             />
             <button
               type="button"
-              aria-label={t.useSuggestedLabel(suggested)}
+              aria-label={t("releases.useSuggestedLabel", {
+                number: suggested,
+              })}
               className="text-xs font-medium text-primary underline-offset-4 hover:underline"
               onClick={() => {
                 onType(null);
               }}
             >
-              {t.useSuggested(suggested)}
+              {t("releases.useSuggested", { number: suggested })}
             </button>
           </>
         )}
@@ -212,8 +225,8 @@ function NumberLine({
       {typed !== null && problem !== null && (
         <p role="alert" className="text-xs text-destructive">
           {problem === "not-a-number" || last === null
-            ? t.notANumber
-            : t.notHigher(last)}
+            ? t("releases.notANumber")
+            : t("releases.notHigher", { last })}
         </p>
       )}
     </div>
@@ -224,11 +237,15 @@ function Merged({
   merged,
   last,
 }: Readonly<{ merged: Connected["coming"]["merged"]; last: string | null }>) {
-  const t = useT().releases;
+  const t = useTranslation().t;
   return (
     <div className="grid gap-2">
       <h3 className="text-[13px] font-medium">
-        {t.merged(merged.length, last)}
+        {t("releases.merged", {
+          count: merged.length,
+          last,
+          context: last ? "since" : undefined,
+        })}
       </h3>
       <ul className="grid gap-1.5">
         {merged.map((one) => (
@@ -242,8 +259,8 @@ function Merged({
               href={one.url}
               target="_blank"
               rel="noreferrer"
-              title={t.openPullRequest(one.number)}
-              aria-label={t.openPullRequest(one.number)}
+              title={t("releases.openPullRequest", { number: one.number })}
+              aria-label={t("releases.openPullRequest", { number: one.number })}
               className="font-medium text-muted-foreground underline-offset-2 hover:underline"
             >
               {`#${String(one.number)}`}
@@ -256,8 +273,8 @@ function Merged({
 }
 
 const REASONS = {
-  first: (t: Words) => t.first,
-  unknown: (t: Words) => t.whyUnknown,
+  first: (t: Words) => t("releases.first"),
+  unknown: (t: Words) => t("releases.whyUnknown"),
   nothing: () => null,
 };
 

@@ -34,8 +34,11 @@ const ready = (over: Partial<Ready["coming"]>, last: string | null): Ready => ({
 
 test("the page is in the menu's address list and has its words", () => {
   assert.deepEqual(placeOf("#releases"), { page: "releases", open: null });
-  assert.equal(ENGLISH.shell.pages.releases, "Releases");
-  assert.equal(ENGLISH.releases.releaseNow("1.4.3"), "Release 1.4.3");
+  assert.equal(ENGLISH("shell.pages.releases"), "Releases");
+  assert.equal(
+    ENGLISH("releases.releaseNow", { number: "1.4.3" }),
+    "Release 1.4.3",
+  );
 });
 
 test("the page is loading, in a problem, without a repository, or ready", () => {
