@@ -52,6 +52,9 @@ The routes: `GET /api/releases`, `POST /api/releases/prepare`,
 
 Checked by tests: the numbers and the notes (`release-numbers.test.ts`,
 `releases.test.ts`). Not checked: the kobold's judgement on real merged
-work, and a real release on a team's repository. Releases reads GitHub
-through the GitHub CLI directly, not through the `code` slot yet (see
+work, and a real release on a team's repository. Releases declares the
+slots it uses, `code` and `tasks` (its repository is the one the board
+names); `extension-slots.test.ts` checks that each of Kobble's extensions
+reaches only the slots it declares. It reads GitHub through the GitHub CLI
+directly, not through the `code` slot yet (see
 [the server's blueprint](../../../packages/server/BLUEPRINT.md)).
