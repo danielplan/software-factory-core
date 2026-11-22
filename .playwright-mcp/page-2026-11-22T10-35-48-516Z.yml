@@ -1,0 +1,98 @@
+- generic [ref=e64]:
+  - complementary [ref=e65]:
+    - generic [ref=e66]: Acme
+    - navigation "Overview" [ref=e78]:
+      - link "Home" [ref=e79] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e84] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e96]:
+          - text: Stopped
+          - img "Stopped" [ref=e97]
+    - navigation "Pages" [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]: Work
+        - link "Signals Sieve" [ref=e101] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e107]': Sieve
+        - link "Explorations Doodle 2" [ref=e120] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e124]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e125]': Doodle
+            - generic [ref=e137]: "2"
+        - link "Factory Bolt" [ref=e138] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e143]': Bolt
+        - link "Releases" [ref=e157] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e162]:
+        - generic [ref=e163]: Customers
+        - link "Personas Mimic" [ref=e164] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e172]': Mimic
+    - generic [ref=e183]:
+      - button "Send feedback" [ref=e184] [cursor=pointer]
+      - navigation "The factory" [ref=e189]:
+        - link "Extensions" [ref=e190] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e194] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e199]:
+    - generic [ref=e201]:
+      - generic [ref=e202]:
+        - heading "Extensions" [level=1] [ref=e205]
+        - paragraph [ref=e206]: What your factory can do. Install what you need; the kobold can write your own.
+      - tablist "Marketplace" [ref=e207]:
+        - tab "Extensions" [ref=e208] [cursor=pointer]
+        - tab "Connections" [selected] [ref=e209] [cursor=pointer]
+      - generic [ref=e210]:
+        - region "Where the code lives" [ref=e211]:
+          - generic [ref=e212]:
+            - heading "Where the code lives" [level=2] [ref=e213]
+            - paragraph [ref=e214]: The service your extensions always need.
+          - article "GitHub" [ref=e216]:
+            - button "Open GitHub" [ref=e217] [cursor=pointer]
+            - generic [ref=e218]:
+              - generic [ref=e219]:
+                - generic [ref=e223]: GitHub
+                - generic [ref=e225]:
+                  - text: Connected
+                  - img "Connected" [ref=e226]
+              - paragraph [ref=e229]: Your code and its pull requests, through the GitHub CLI.
+              - paragraph [ref=e230]: "Always needed: code and pull requests"
+        - region "Where cards live" [ref=e231]:
+          - generic [ref=e232]:
+            - heading "Where cards live" [level=2] [ref=e233]
+            - paragraph [ref=e234]: "Pick one: the Factory works the cards there."
+          - generic [ref=e235]:
+            - article "GitHub board" [ref=e236]:
+              - button "Open GitHub board" [ref=e237] [cursor=pointer]
+              - generic [ref=e238]:
+                - generic [ref=e239]:
+                  - generic [ref=e243]: GitHub board
+                  - generic [ref=e245]:
+                    - text: In use
+                    - img "In use" [ref=e246]
+                - paragraph [ref=e249]: Work tracked on a GitHub board, through the GitHub CLI.
+            - article "Jira Cloud" [ref=e250]:
+              - button "Open Jira Cloud" [ref=e251] [cursor=pointer]
+              - generic [ref=e252]:
+                - generic [ref=e253]: Jira Cloud
+                - paragraph [ref=e259]: Work tracked in a Jira Cloud project, with an API token.
+              - button "Switch to Jira" [ref=e261] [cursor=pointer]
+        - region "Where the team chats" [ref=e262]:
+          - generic [ref=e263]:
+            - heading "Where the team chats" [level=2] [ref=e264]
+            - paragraph [ref=e265]: For notes and questions from the kobolds.
+          - generic [ref=e267]:
+            - generic [ref=e268]: Slack
+            - text: Comes later.
+  - region "Sprocket" [ref=e269]:
+    - button "Ask Sprocket anything ⌘J" [ref=e270] [cursor=pointer]:
+      - generic [ref=e16]: Ask Sprocket anything
+      - generic [ref=e17]: ⌘J

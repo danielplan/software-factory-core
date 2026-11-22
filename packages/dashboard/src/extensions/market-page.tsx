@@ -57,6 +57,16 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
     (filter !== "Installed" || trackers.some((e) => e.on)) &&
     trackers.some((e) => matches.includes(e));
   const opened = all.find((e) => e.id === openId) ?? null;
+  // The code host: GitHub itself, always needed, connected, no switch.
+  const github = trackers.find((e) => e.id === "github");
+  const codeHost: Ext | null = github
+    ? {
+        ...github,
+        name: "GitHub",
+        about: "Your code and its pull requests, through the GitHub CLI.",
+        on: true,
+      }
+    : null;
   const install = (ext: Ext) => {
     const also = missingFor(ext, all);
     if (also.length > 0) setAsking({ ext, also });
@@ -92,16 +102,36 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         </div>
       )}
       {VARIANT === "B" && tab === "Connections" ? (
-        <TrackerGroup
-          title="Connections"
-          about="The outside services your extensions use. More, like Slack, come later."
-          trackers={trackers}
-          onOpen={setOpenId}
-          onMove={(from, to) => {
-            setMoving({ from, to });
-          }}
-          later="Slack"
-        />
+        <div className="grid gap-8">
+          <Group title="Where the code lives" about="The service your extensions always need.">
+            {codeHost && (
+              <Card
+                ext={codeHost}
+                label="Connected"
+                note="Always needed: code and pull requests"
+                onOpen={() => {
+                  setOpenId("github");
+                }}
+                action={null}
+              />
+            )}
+          </Group>
+          <TrackerGroup
+            title="Where cards live"
+            about="Pick one: the Factory works the cards there."
+            trackers={trackers}
+            onOpen={setOpenId}
+            onMove={(from, to) => {
+              setMoving({ from, to });
+            }}
+          />
+          <Group title="Where the team chats" about="For notes and questions from the kobolds.">
+            <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
+              <span className="font-semibold">Slack</span>
+              Comes later.
+            </div>
+          </Group>
+        </div>
       ) : (
         <>
       <div className="flex flex-wrap items-center gap-3">
@@ -213,6 +243,10 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
           setOpenId(null);
           setMoving({ from, to });
         }}
+        onConnections={() => {
+          setOpenId(null);
+          setTab("Connections");
+        }}
         onRemove={(e) => {
           turn(e.id, false);
         }}
@@ -309,7 +343,7 @@ function Card({
   note?: string;
   // What to press; none once it is in.
   action: React.ReactNode;
-  label?: "Installed" | "In use";
+  label?: "Installed" | "In use" | "Connected";
 }>) {
   return (
     <article
@@ -336,7 +370,7 @@ function Card({
           </div>
           {ext.on && (
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-success">
-              {label === "In use" && label}
+              {label !== "Installed" && label}
               <span
                 role="img"
                 aria-label={label}
@@ -389,6 +423,23 @@ function TrackerAction({
   );
 }
 
+// A group of services that do one job, with its title and line.
+function Group({
+  title,
+  about,
+  children,
+}: Readonly<{ title: string; about: string; children: React.ReactNode }>) {
+  return (
+    <section aria-label={title} className="grid gap-3">
+      <div className="grid gap-0.5 px-1">
+        <h2 className="text-[15px] font-semibold">{title}</h2>
+        <p className="text-[13px] text-muted-foreground">{about}</p>
+      </div>
+      <div className="grid items-stretch gap-4 sm:grid-cols-2">{children}</div>
+    </section>
+  );
+}
+
 // The boards the Factory can work the cards on: pick one.
 function TrackerGroup({
   title,
@@ -396,15 +447,12 @@ function TrackerGroup({
   trackers,
   onOpen,
   onMove,
-  later,
 }: Readonly<{
   title: string;
   about: string;
   trackers: Ext[];
   onOpen: (id: string) => void;
   onMove: (from: Ext, to: Ext) => void;
-  // A service that comes later, shown quietly.
-  later?: string;
 }>) {
   return (
     <section aria-label={title} className="grid gap-3">
@@ -424,12 +472,6 @@ function TrackerGroup({
             action={<TrackerAction ext={ext} trackers={trackers} onMove={onMove} />}
           />
         ))}
-        {later && (
-          <div className="grid content-center gap-1 rounded-xl border border-dashed border-border p-4 text-[13px] text-muted-foreground">
-            <span className="font-semibold">{later}</span>
-            Comes later.
-          </div>
-        )}
       </div>
     </section>
   );
@@ -461,6 +503,7 @@ function Details({
   onClose,
   onInstall,
   onMove,
+  onConnections,
   onRemove,
 }: Readonly<{
   ext: Ext | null;
@@ -469,6 +512,7 @@ function Details({
   onClose: () => void;
   onInstall: (e: Ext) => void;
   onMove: (from: Ext, to: Ext) => void;
+  onConnections: () => void;
   onRemove: (e: Ext) => void;
 }>) {
   const [refused, setRefused] = useState<string | null>(null);
@@ -540,10 +584,22 @@ function Details({
               </Part>
             )}
             <Part title="What it needs">
-              {ext.needs.length === 0 ? (
-                <span className="text-[13px]">Nothing</span>
-              ) : (
+              {ext.needs.length > 0 ? (
                 <Needs ext={ext} />
+              ) : (
+                VARIANT !== "B" && <span className="text-[13px]">Nothing</span>
+              )}
+              {VARIANT === "B" && (
+                <p className="text-[13px]">
+                  Needs:{" "}
+                  <button
+                    type="button"
+                    onClick={onConnections}
+                    className="text-blue hover:underline"
+                  >
+                    where the code lives, where cards live
+                  </button>
+                </p>
               )}
             </Part>
             <Part title="What needs it">
