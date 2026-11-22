@@ -78,7 +78,12 @@ dependency-cruiser:
   kind of record that is also the source of the types; a failed refresh shows
   as an error, never as an empty list.
 - **Style with Tailwind classes on the element;** the theme file holds only
-  fonts, tokens and global rules in `@layer base`.
+  fonts, tokens and global rules in `@layer base`. `cn` knows the theme's
+  own type sizes (tailwind-merge would take them for colours otherwise): a
+  new size in the theme goes into its list too.
+- **The server is reached at `/api/...`** on the app's own address: in
+  development Vite sends it on to `BACKEND_URL` unchanged, and a backend made
+  with the NestJS kit answers under `/api`.
 - **No text written into a screen** when the app has translations: every word
   a person reads is a key in the translation files.
 - **Errors from codes:** the server refuses with a code; the app shows its
@@ -102,14 +107,20 @@ with the owner's agreement. Inline lint-disabling comments are refused.
 
 - **Vitest** with **Testing Library** for components, with the server
   pretended by **MSW**.
-- **Playwright** click-throughs against a pretend server for whole journeys.
+- **Playwright** click-throughs for whole journeys (`e2e/`,
+  `npm run test:e2e`): the real build, with every `/api` request answered by
+  the same pretend backend inside the browser, and the built prototype with
+  its service worker. Each journey gets its click-through; they run before a
+  change to a journey is handed over. They need a browser
+  (`npx playwright install --only-shell chromium` once), so `npm run verify`
+  leaves them out.
 
 ## The starter
 
 A new React web app starts as a copy of the kit's starter
 (`starters/react-web-app` in the kits): one home page, a tiny API client, the
-checks above in `npm run verify`, a `BLUEPRINT.md` and a prototype mode. Keep
-to its folders and keep its checks.
+checks above in `npm run verify`, Playwright click-throughs, a `BLUEPRINT.md`
+and a prototype mode. Keep to its folders and keep its checks.
 
 ## Prototype mode
 
@@ -117,14 +128,17 @@ The prototype is the real app in the browser against a pretend backend
 (`prototype/`, served by MSW's service worker), with made-up data from the
 situations in `prototype/situations.ts`, or from the factory's shared world
 when the prototype starts with `FACTORY_WORLD_URL` (see the starter's
-README). `npm run prototype` builds it, `npm run prototype:live` runs it.
+README). `npm run prototype` builds it (for `/`, into `dist-prototype/`,
+unless `--base` and `--out` say otherwise), `npm run prototype:live` runs it
+(on port 5180 unless `--port` says otherwise).
 
 - **No prototype code in the real app.** `src/` reaches `prototype/` only
   through the one dynamic `import()` in `src/main.tsx`, behind the
   `prototype` mode, so the real build drops it; MSW's worker lives outside
   `public/`. `npm run check:prototypes`, part of `npm run verify` after the
   build, fails when the real build names the prototype or holds the worker.
-- **One pretend backend** for the tests and the prototype: a new request of
-  the app gets its answer there, refusals included.
+- **One pretend backend** for the tests, the click-throughs and the
+  prototype: a new request of the app gets its answer there, refusals
+  included.
 - Something a browser cannot do is faked in the prototype mode, never in the
   real app.

@@ -73,8 +73,9 @@ web app, NestJS backend, TypeScript package, and other code for anything
 else. The React web app, Expo app and NestJS backend kits have starters of their
 own; the SvelteKit and TypeScript package kits use the framework's
 generator. A product can give a working copy its own environment (its own
-ports and database, `copyEnv` in its `product.json`); the kits do not give
-one yet. Kobble itself is built with its own kits. See
+ports and database, `copyEnv` in its `product.json`): the NestJS backend's
+starter takes a copy's own database as `DATABASE_NAME`, and gives each
+copy's tests a database of their own. Kobble itself is built with its own kits. See
 [add a kit](../how-to/add-a-kit.md).
 
 ## A team's own extensions

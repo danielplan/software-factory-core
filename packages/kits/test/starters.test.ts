@@ -72,6 +72,46 @@ test("the starters with a prototype mode check that the real app has none of it"
   }
 });
 
+test("the web app starter has click-throughs and a folder for shared hooks", () => {
+  const folder = reactWebApp.starter ?? "";
+  assert.match(scriptsOf(folder)["test:e2e"] ?? "", /playwright test/);
+  for (const file of ["playwright.config.ts", "e2e", "src/hooks"])
+    assert.ok(existsSync(join(folder, file)), file);
+});
+
+test("the backend starter checks its codes, its coverage and its made-up world", () => {
+  const folder = nestjsBackend.starter ?? "";
+  const scripts = scriptsOf(folder);
+  for (const check of ["codes:check", "test:coverage", "db:check"])
+    assert.match(scripts.verify ?? "", new RegExp(check), check);
+  assert.ok(scripts["check:world"]);
+  assert.ok(scripts.start?.startsWith("npm run migrate"));
+  for (const file of [
+    "compose.yaml",
+    "error-codes.json",
+    "prototype-world/normal-day.json",
+    "src/common/access.guard.ts",
+    "src/database/health.controller.ts",
+  ])
+    assert.ok(existsSync(join(folder, file)), file);
+  // The kit reads the starter's own launch settings from its folder.
+  const part = nestjsBackend.partsFor({
+    id: "orders",
+    name: "Orders",
+    kind: nestjsBackend.kind,
+    code: ".",
+    about: "",
+    users: [],
+    commands: {},
+    dependsOn: [],
+    copyEnv: {},
+    folder,
+    home: folder,
+  })[0]!;
+  assert.equal(part.health, "/health");
+  assert.deepEqual(part.needs, [join(folder, ".env")]);
+});
+
 test("the kits without a starter make a product with the framework's own", () => {
   assert.equal(sveltekitApp.starter, undefined);
   assert.equal(typescriptPackage.starter, undefined);

@@ -114,12 +114,19 @@ test("the name and the commands come from the package.json", () => {
   });
   assert.deepEqual(nestjsBackend.detect(folderWith(server)), {
     name: "Orders api",
-    commands: { start: "npm run start:dev", verify: "npm run verify" },
+    commands: { start: "npm start", verify: "npm run verify" },
+  });
+  // Only a development start: that one; no start at all: none.
+  const devOnly = folderWith({
+    scripts: { "start:dev": "nest start --watch", "check:world": "x" },
+    dependencies: { "@nestjs/core": "11" },
+  });
+  assert.deepEqual(nestjsBackend.detect(devOnly)?.commands, {
+    start: "npm run start:dev",
+    checkWorld: "npm run check:world",
   });
   const plainServer = folderWith({ dependencies: { "@nestjs/core": "11" } });
-  assert.deepEqual(nestjsBackend.detect(plainServer)?.commands, {
-    start: "npm start",
-  });
+  assert.deepEqual(nestjsBackend.detect(plainServer)?.commands, {});
   const app = folderWith(phone);
   const found = expoApp.detect(app);
   // Without a name in the package.json, the folder's name.
@@ -204,6 +211,9 @@ test("each kit runs a product as one valid part, on the product's port or its ow
   assert.deepEqual(server.run, ["npm", "run", "start:dev"]);
   assert.deepEqual(server.env, { PORT: "3100" });
   assert.equal(server.health, undefined);
+  assert.equal(server.needs, undefined);
+  assert.equal(server.startSeconds, 180);
+  assert.match(server.help?.text ?? "", /database/);
   assert.deepEqual(nestjsBackend.partsFor(productOf(nestjsBackend))[0]?.run, [
     "npm",
     "start",
@@ -219,6 +229,23 @@ test("each kit runs a product as one valid part, on the product's port or its ow
   ]);
   assert.deepEqual(phoneApp.env, { BROWSER: "none", CI: "1" });
   assert.equal(phoneApp.startSeconds, 240);
+});
+
+test("a backend with a health route and settings is waited for, and needs its .env", () => {
+  const folder = folderWithFiles({
+    ".env.example": "DATABASE_URL=\n",
+    "src/database/health.controller.ts": '@Public()\n  @Get("/health")\n',
+    "src/shop/shop.controller.ts": '@Get("items")\n',
+  });
+  const part = nestjsBackend.partsFor(productOf(nestjsBackend, { folder }))[0]!;
+  assert.equal(part.health, "/health");
+  assert.deepEqual(part.needs, [join(folder, ".env")]);
+  // Its own folder holds no health route: the open port counts.
+  const without = folderWithFiles({ "src/shop/shop.controller.ts": "" });
+  const [plain] = nestjsBackend.partsFor(
+    productOf(nestjsBackend, { folder: without }),
+  );
+  assert.equal(plain?.health, undefined);
 });
 
 test("the kits with a starter finish its copy by installing its packages", () => {

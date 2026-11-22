@@ -13,8 +13,10 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: ["src/main.ts"],
       reporter: ["text-summary"],
-      // The coverage floor; raise it as tests are added, lower it only with the owner's agreement.
-      thresholds: { statements: 87, branches: 73, functions: 93, lines: 89 },
+      // The coverage floor, checked by `npm run verify` (without the database) and
+      // `npm run test:integration`; raise it as tests are added, lower it only with the
+      // owner's agreement.
+      thresholds: { statements: 98, branches: 90, functions: 96, lines: 98 },
     },
   },
 });

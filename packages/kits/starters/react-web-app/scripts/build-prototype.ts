@@ -3,27 +3,30 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { build } from "vite";
 
-// npm run prototype -- --base /prototype/new-web-app/ --out <folder>
+// npm run prototype [-- --base /prototype/new-web-app/ --out <folder>]
 // Builds the app in prototype mode (the pretend backend in MSW's service
 // worker, the situations in prototype/situations.ts) as static files in
-// <folder>, to be served at <base>, with index.html for unknown paths.
-// The folder is emptied first. With FACTORY_WORLD_URL set, the pretend
-// backend uses the factory's shared world instead (see the README).
+// <folder> (dist-prototype/ when not given), to be served at <base> ("/" when
+// not given), with index.html for unknown paths. The folder is emptied
+// first. With FACTORY_WORLD_URL set, the pretend backend uses the factory's
+// shared world instead (see the README).
 
-const { values } = parseArgs({
-  options: { base: { type: "string" }, out: { type: "string" } },
-});
-if (!values.base || !values.out) {
-  process.stderr.write(
-    "Usage: npm run prototype -- --base <url path> --out <folder>\n",
-  );
+const usage =
+  "Usage: npm run prototype [-- --base <url path>] [--out <folder>]\n";
+let values: { base?: string; out?: string };
+try {
+  ({ values } = parseArgs({
+    options: { base: { type: "string" }, out: { type: "string" } },
+  }));
+} catch (error) {
+  process.stderr.write(`${(error as Error).message}\n${usage}`);
   process.exit(1);
 }
 
-const parts = values.base.split("/").filter(Boolean);
-const base = parts.length > 0 ? `/${parts.join("/")}/` : "/";
-const out = resolve(values.out);
 const root = resolve(import.meta.dirname, "..");
+const parts = (values.base ?? "/").split("/").filter(Boolean);
+const base = parts.length > 0 ? `/${parts.join("/")}/` : "/";
+const out = resolve(values.out ?? join(root, "dist-prototype"));
 // Vite hands VITE_ settings to the page.
 process.env.VITE_FACTORY_WORLD_URL = process.env.FACTORY_WORLD_URL ?? "";
 
