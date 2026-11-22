@@ -37,7 +37,9 @@ A batch of features is not a reason for a minor.
    `Fixed`; Markdown is fine inside). No instructions: upgrading is automatic.
    Settings › Updates › What's new in Kobble shows them; `npm run release`
    refuses to publish while a language has no section for the version.
-4. `npm run verify`, commit, and tag the commit on main `v<version>`.
+4. `npm run verify`, commit on a branch and open a pull request (work reaches
+   main only through one); once it is merged, tag its merge commit on main
+   `v<version>`.
 5. `npm run release -- --push`: builds the core as one package (compiled to
    JavaScript, its own packages bundled in it, the dashboard built, the three
    what's-new files beside the README), commits
