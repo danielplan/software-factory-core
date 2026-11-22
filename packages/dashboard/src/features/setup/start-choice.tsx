@@ -75,16 +75,26 @@ const FOLDERS: Record<string, Folder> = {
   },
 };
 
-export function StartChoice() {
+// Where the start is: the variant, the made-up folder and the path settled
+// so far. Held by the setup page, so its steps on the left follow the path.
+export function useStart() {
   const variant = variantOfVisit();
   const state = stateOfVisit() ?? "empty";
   const folder = FOLDERS[state] ?? FOLDERS.empty;
   const [chosen, setChosen] = useState<Path | null>(null);
-  if (state === "loading") return <Looking />;
   // Where each variant starts without asking.
-  const auto =
-    variant === "B" || (variant === "C" && folder.sure) ? folder.guess : null;
-  const path = chosen ?? auto;
+  const byItself =
+    variant === "B" || (variant === "C" && folder.sure);
+  const auto = byItself ? folder.guess : null;
+  const path = state === "loading" ? null : (chosen ?? auto);
+  return { state, folder, variant, byItself, path, setChosen };
+}
+
+export type Start = ReturnType<typeof useStart>;
+
+export function StartChoice({ start }: Readonly<{ start: Start }>) {
+  const { state, folder, variant, byItself, path, setChosen } = start;
+  if (state === "loading") return <Looking />;
   if (!path)
     return (
       <Question
@@ -98,9 +108,10 @@ export function StartChoice() {
       key={path}
       path={path}
       folder={folder}
-      // Variant B only: the folder decided, a small link says otherwise.
+      // When it started by itself (B always, C when the folder is clear):
+      // a small link says otherwise.
       switchTo={
-        variant === "B"
+        byItself
           ? () => {
               setChosen(path === "new" ? "existing" : "new");
             }

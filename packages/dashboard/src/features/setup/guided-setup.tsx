@@ -13,7 +13,8 @@ import { useKoboldName } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCoachCall } from "./coach/coach-call";
-import { StartChoice } from "./start-choice";
+import { type Start, StartChoice, useStart } from "./start-choice";
+import { startSteps } from "./start-steps";
 
 import { KoboldSays } from "./kobold-says";
 import { Welcome } from "./welcome";
@@ -38,6 +39,9 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
   const [at, setAt] = useState(fromHash);
   // Only the first prompt of a project without code is said (or typed).
   const call = useCoachCall(coach, [], () => undefined);
+  // Before the first answer: the path (new or existing) is settled here, and
+  // the steps on the left follow it; before that, only the welcome.
+  const start = useStart();
   const last = steps.length - 1;
   const setupAt = steps.findIndex((s) => s.id === "setup");
   // While Kobble is set up, its step; after that, the first exploration may
@@ -58,8 +62,8 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
       <Rail
         project={state.project}
         working={coach.working}
-        steps={steps}
-        at={shown}
+        steps={coach.started ? steps : startSteps(start.path)}
+        at={coach.started ? shown : 0}
         reach={coach.started ? reach : -1}
         onGo={go}
       />
@@ -72,6 +76,7 @@ export function GuidedSetup({ state }: Readonly<{ state: SetupState }>) {
               n={shown}
               of={last}
               call={call}
+              start={start}
             />
           </div>
         </div>
@@ -89,16 +94,18 @@ function Content({
   n,
   of,
   call,
+  start,
 }: Readonly<{
   state: SetupState;
   step: Step;
   n: number;
   of: number;
   call: ReturnType<typeof useCoachCall>;
+  start: Start;
 }>) {
   const t = useT();
   const { coach } = state;
-  if (!coach.started) return <StartChoice />;
+  if (!coach.started) return <StartChoice start={start} />;
   if (step.id === "hello") return <Welcome coach={coach} />;
   const shownStep = stepIn(t, step);
   const says = <KoboldSays coach={coach} step={step} />;
