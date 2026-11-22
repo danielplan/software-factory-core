@@ -1,0 +1,99 @@
+- generic [ref=e86]:
+  - complementary [ref=e87]:
+    - generic [ref=e88]: Acme
+    - navigation "Overview" [ref=e100]:
+      - link "Home" [ref=e101] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e106] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e118]:
+          - text: Stopped
+          - img "Stopped" [ref=e119]
+    - navigation "Pages" [ref=e120]:
+      - generic [ref=e121]:
+        - generic [ref=e122]: Work
+        - link "Signals Sieve" [ref=e123] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e129]': Sieve
+        - link "Explorations Doodle 2" [ref=e142] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e146]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e147]': Doodle
+            - generic [ref=e159]: "2"
+        - link "Factory Bolt" [ref=e160] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e165]': Bolt
+        - link "Releases" [ref=e179] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e184]:
+        - generic [ref=e185]: Customers
+        - link "Personas Mimic" [ref=e186] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e194]': Mimic
+    - generic [ref=e205]:
+      - button "Send feedback" [ref=e206] [cursor=pointer]
+      - navigation "The factory" [ref=e211]:
+        - link "Marketplace" [ref=e212] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e216] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e221]:
+    - generic [ref=e222]:
+      - generic [ref=e223]:
+        - generic [ref=e224]:
+          - heading "Home" [level=1] [ref=e226]
+          - button "Arrange Home" [ref=e228] [cursor=pointer]
+        - paragraph [ref=e229]: What waits for you, and where the work is.
+      - generic [ref=e231]:
+        - img "Stopped" [ref=e232]
+        - generic [ref=e233]: The product is stopped · Bolt is resting
+        - link "System" [ref=e234] [cursor=pointer]:
+          - /url: "#system"
+      - generic [ref=e236]:
+        - generic [ref=e237]:
+          - generic [ref=e238]: Review
+          - generic [ref=e239]:
+            - generic [ref=e240]: Retry the sync when the live app is slow#58
+            - generic [ref=e241]: Made-up example
+          - link "Open" [ref=e242] [cursor=pointer]:
+            - /url: "#build"
+        - generic [ref=e245]:
+          - generic [ref=e246]: Review
+          - generic [ref=e247]:
+            - generic [ref=e248]: Show the kobold's trace in a card's panel on the Factory page#61
+            - generic [ref=e249]: Made-up example
+          - link "Open" [ref=e250] [cursor=pointer]:
+            - /url: "#build"
+        - generic [ref=e253]:
+          - generic [ref=e254]: Answer
+          - generic [ref=e255]:
+            - generic [ref=e256]: Which board should the new add-on read?#63
+            - generic [ref=e257]: Made-up example
+          - link "Answer" [ref=e258] [cursor=pointer]:
+            - /url: "#build"
+      - generic [ref=e262]:
+        - link "Signals 0 new" [ref=e263] [cursor=pointer]:
+          - /url: "#signals"
+          - generic [ref=e264]: Signals
+          - generic [ref=e269]: 0 new
+        - link "Explorations 0 being explored" [ref=e270] [cursor=pointer]:
+          - /url: "#explore"
+          - generic [ref=e271]: Explorations
+          - generic [ref=e275]: 0 being explored
+        - link "Factory 0 to build" [ref=e276] [cursor=pointer]:
+          - /url: "#build"
+          - generic [ref=e277]: Factory
+          - generic [ref=e281]: 0 to build
+        - link "Done 0 merged" [ref=e282] [cursor=pointer]:
+          - /url: "#build"
+          - generic [ref=e283]: Done
+          - generic [ref=e288]: 0 merged
+  - region "Sprocket" [ref=e289]:
+    - button "Ask Sprocket anything ⌘J" [ref=e290] [cursor=pointer]:
+      - generic [ref=e16]: Ask Sprocket anything
+      - generic [ref=e17]: ⌘J

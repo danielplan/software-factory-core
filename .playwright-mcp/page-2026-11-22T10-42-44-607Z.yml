@@ -1,0 +1,171 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab [selected]: Extensions
+                - tab: Connections
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "3"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "5"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=e5]:
+          - button [ref=e6] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog "Signals" [active] [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e26]:
+        - heading "Signals" [level=2] [ref=e27]
+        - generic [ref=e28]: Kobble
+      - paragraph [ref=e29]: "What the live app reports: bugs, wishes and how it is used."
+      - generic [ref=e30]:
+        - heading "What it adds" [level=3] [ref=e31]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]: Pages
+            - generic [ref=e35]: Signals
+          - generic [ref=e41]:
+            - generic [ref=e42]: Kobolds
+            - generic [ref=e43]: Sieve
+          - generic [ref=e45]:
+            - generic [ref=e46]: Stages
+            - generic [ref=e47]: Signals
+      - generic [ref=e72]:
+        - heading "Home blocks" [level=3] [ref=e73]
+        - generic [ref=e74]: New signals
+        - paragraph [ref=e76]: They are in Home's “Add a block” while it is installed.
+      - generic [ref=e53]:
+        - heading "What it needs" [level=3] [ref=e77]
+        - paragraph [ref=e78]:
+          - text: "Needs:"
+          - button "where the code lives, where cards live" [ref=e79] [cursor=pointer]
+      - generic [ref=e56]:
+        - heading "What needs it" [level=3] [ref=e80]
+        - generic [ref=e58]: Nothing installed needs it.
+      - generic [ref=e81]:
+        - heading "Settings" [level=3] [ref=e82]
+        - generic [ref=e83]: Install it to see its settings.
+      - button "Install" [ref=e85] [cursor=pointer]
+    - button "Close" [ref=e61] [cursor=pointer]

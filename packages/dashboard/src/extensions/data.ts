@@ -149,7 +149,7 @@ const MADE_UP: MadeUp[] = [
     about: "A short page each morning: what moved yesterday, what waits today.",
     adds: {
       pages: ["Standup"],
-      blocks: ["Standup summary"],
+      blocks: [],
       kobolds: ["Standup kobold"],
     },
     stages: ["Signals", "Factory"],
@@ -161,7 +161,7 @@ const MADE_UP: MadeUp[] = [
     ],
     changes: [
       "Written by Doodle from “a morning page for the team” · 12 Nov",
-      "You asked for a summary block on Home · 14 Nov",
+      "You asked for a short summary of yesterday · 14 Nov",
     ],
   }),
 ];

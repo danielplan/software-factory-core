@@ -28,7 +28,8 @@ import { overallOf } from "@/lib/shell-view";
 import { useT } from "@/i18n/use-t";
 import { useSignals } from "@/signals/use-signals";
 
-import { MADE_STATE } from "@/lib/prototype-flags";
+import { useExtensions } from "@/extensions/data";
+import { MADE_STATE, VARIANT } from "@/lib/prototype-flags";
 
 import type { FactoryState } from "./dashboard";
 import { ArrangeButton, type BlockId, HomeBlocks } from "./home-blocks";
@@ -73,6 +74,10 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
   const { data: signals } = useSignals();
   const t = useT();
   const [arranging, setArranging] = useState(false);
+  // B: only the blocks of installed extensions are on offer.
+  const { all } = useExtensions(state);
+  const installed =
+    VARIANT === "B" ? new Set(all.filter((e) => e.on).map((e) => e.id)) : null;
   const input: HomeInput = {
     work: state.work,
     signals: signals?.signals ?? [],
@@ -232,7 +237,7 @@ export function HomePage({ state }: Readonly<{ state: FactoryState }>) {
           />
         }
       />
-      <HomeBlocks blocks={blocks} editing={arranging} />
+      <HomeBlocks blocks={blocks} editing={arranging} installed={installed} />
     </>
   );
 }

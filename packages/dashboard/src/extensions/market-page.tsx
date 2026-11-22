@@ -524,6 +524,7 @@ function Details({
   onRemove: (e: Ext) => void;
 }>) {
   const [refused, setRefused] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   // In A the boards are a setting of Factory, not extensions that need it.
   const needing = (ext ? neededBy(ext, all) : []).filter(
     (e) => VARIANT !== "A" || !e.tracker,
@@ -554,8 +555,22 @@ function Details({
             </div>
             <DialogDescription>{ext.about}</DialogDescription>
             <Part title="What it adds">
-              <Adds ext={ext} />
+              <Adds ext={ext} skip={VARIANT === "B" ? "Home blocks" : undefined} />
             </Part>
+            {VARIANT === "B" && ext.adds.blocks.length > 0 && (
+              <Part title="Home blocks">
+                <div className="flex flex-wrap gap-1.5">
+                  {ext.adds.blocks.map((b) => (
+                    <span key={b} className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs">
+                      {b}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  They are in Home's “Add a block” while it is installed.
+                </p>
+              </Part>
+            )}
             {VARIANT === "A" && ext.id === "factory" && (
               <Part title="Add-ons">
                 <p className="text-xs text-muted-foreground">
@@ -658,6 +673,10 @@ function Details({
                     onMove={onMove}
                   />
                 )
+              ) : ext.id === "factory" ? (
+                <span className="text-[13px] text-muted-foreground">
+                  Always needed: it builds everything
+                </span>
               ) : ext.on ? (
                 <Button
                   variant="ring"
@@ -670,7 +689,7 @@ function Details({
                       return;
                     }
                     setRefused(null);
-                    onRemove(ext);
+                    setConfirming(true);
                   }}
                 >
                   Remove
@@ -688,8 +707,55 @@ function Details({
           </div>
         )}
       </DialogContent>
+      <Dialog open={confirming} onOpenChange={setConfirming}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogTitle>Remove {ext?.name}?</DialogTitle>
+          <DialogDescription>
+            {ext && goesOf(ext)}
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ring"
+              size="pill"
+              onClick={() => {
+                setConfirming(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="pill"
+              onClick={() => {
+                setConfirming(false);
+                if (ext) onRemove(ext);
+              }}
+            >
+              Remove
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
+}
+
+// What goes when it is removed, and what stays in the factory's files.
+const STAYS: Record<string, string> = {
+  explorations: "its explorations",
+  signals: "its signals",
+  personas: "its personas and their missions",
+  releases: "its releases",
+};
+
+function goesOf(ext: Ext): string {
+  const goes = [
+    ext.adds.pages.length > 0 && "page",
+    ext.adds.blocks.length > 0 && "Home blocks",
+    ext.adds.kobolds.length > 0 && "kobold",
+  ].filter((x): x is string => x !== false);
+  const verb = goes.length > 1 || goes[0] === "Home blocks" ? "go" : "goes";
+  const list = goes.length > 1 ? `${goes.slice(0, -1).join(", ")} and ${goes[goes.length - 1]}` : (goes[0] ?? "");
+  return `Its ${list} ${verb}; ${STAYS[ext.id] ?? "what it made"} stay${STAYS[ext.id] ? "" : "s"} in the factory's files.`;
 }
 
 function Part({

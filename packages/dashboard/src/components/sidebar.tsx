@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { VARIANT } from "@/lib/prototype-flags";
 import type { Page } from "@/lib/routes";
 import { useFactoryName, useLogo } from "@/lib/brand";
 import type { KoboldStatus } from "@/lib/shell-view";
@@ -102,7 +103,8 @@ const QUIET: Item[] = [
   {
     page: "extensions",
     icon: <Puzzle aria-hidden />,
-    color: "var(--explore)",
+    // B: the Marketplace, grey like Send feedback and Settings.
+    color: VARIANT === "B" ? "#667085" : "var(--explore)",
   },
   {
     page: "settings",

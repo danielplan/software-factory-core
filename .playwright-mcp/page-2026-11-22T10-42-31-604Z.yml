@@ -1,0 +1,179 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Marketplace
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Marketplace
+                - paragraph: What your factory can do, and the services it works with.
+              - tablist:
+                - tab [selected]: Extensions
+                - tab: Connections
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=e5]:
+          - button [ref=e6] [cursor=pointer]:
+            - generic [ref=e16]: Ask Sprocket anything
+            - generic [ref=e17]: ⌘J
+  - dialog [aria-hidden]:
+    - generic:
+      - generic:
+        - generic:
+          - heading [level=2]: Signals
+          - generic: Kobble
+      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+      - generic:
+        - heading [level=3]: What it adds
+        - generic:
+          - generic:
+            - generic: Pages
+            - generic: Signals
+          - generic:
+            - generic: Kobolds
+            - generic: Sieve
+          - generic:
+            - generic: Stages
+            - generic: Signals
+      - generic:
+        - heading [level=3]: Home blocks
+        - generic: New signals
+        - paragraph: They are in Home's “Add a block” while it is installed.
+      - generic:
+        - heading [level=3]: What it needs
+        - paragraph:
+          - text: "Needs:"
+          - button: where the code lives, where cards live
+      - generic:
+        - heading [level=3]: What needs it
+        - generic: Nothing installed needs it.
+      - generic:
+        - heading [level=3]: Settings
+        - generic: It has no settings.
+      - generic:
+        - button: Remove
+    - button:
+      - generic: Close
+  - dialog "Remove Signals?" [ref=e64]:
+    - heading "Remove Signals?" [level=2] [ref=e65]
+    - paragraph [ref=e66]: Its page, Home blocks and kobold go; its signals stay in the factory's files.
+    - generic [ref=e67]:
+      - button "Cancel" [active] [ref=e68] [cursor=pointer]
+      - button "Remove" [ref=e69] [cursor=pointer]
+    - button "Close" [ref=e70] [cursor=pointer]

@@ -36,7 +36,14 @@ export type BlockId =
   | "reviews"
   | "failed";
 
-type BlockInfo = { id: BlockId; name: string; from: string; about: string };
+// `ext` is the extension that brings the block.
+type BlockInfo = {
+  id: BlockId;
+  name: string;
+  from: string;
+  ext: string;
+  about: string;
+};
 
 // The blocks the extensions offer, by the extension that offers them.
 export const BLOCKS: BlockInfo[] = [
@@ -44,42 +51,49 @@ export const BLOCKS: BlockInfo[] = [
     id: "status",
     name: "Product status",
     from: "Factory",
+    ext: "factory",
     about: "How the product is doing, in a line",
   },
   {
     id: "waiting",
     name: "Waiting for you",
     from: "Factory",
+    ext: "factory",
     about: "Everything that waits for you, with a button for each",
   },
   {
     id: "loop",
     name: "The loop",
     from: "Factory",
+    ext: "factory",
     about: "From what came in to what is done, in four stages",
   },
   {
     id: "exploring",
     name: "Being explored",
     from: "Explorations",
+    ext: "explorations",
     about: "The ideas the team is exploring, and what is next for each",
   },
   {
     id: "signals",
     name: "New signals",
     from: "Signals",
+    ext: "signals",
     about: "What the live app reported since you last looked",
   },
   {
     id: "reviews",
     name: "Open reviews",
     from: "GitHub board",
+    ext: "github",
     about: "Pull requests waiting for your review",
   },
   {
     id: "failed",
     name: "Failed check",
-    from: "Checks",
+    from: "Verification",
+    ext: "verification",
     about: "Checks that failed on a pull request",
   },
 ];
@@ -143,7 +157,14 @@ function useLayout() {
   return [layout, change] as const;
 }
 
-const visibleOf = (l: Layout) => l.order.filter((id) => !l.hidden.includes(id));
+// Blocks of an extension that is not installed are not offered (null: all are).
+type Installed = Set<string> | null;
+
+const offeredOf = (id: BlockId, installed: Installed) =>
+  !installed || installed.has(BLOCKS.find((b) => b.id === id)?.ext ?? "");
+
+const visibleOf = (l: Layout, installed: Installed) =>
+  l.order.filter((id) => !l.hidden.includes(id) && offeredOf(id, installed));
 
 function moveBefore(order: BlockId[], id: BlockId, target: BlockId) {
   if (id === target) return order;
@@ -152,8 +173,13 @@ function moveBefore(order: BlockId[], id: BlockId, target: BlockId) {
   return rest;
 }
 
-function nudge(l: Layout, id: BlockId, by: -1 | 1): Layout {
-  const shown = visibleOf(l);
+function nudge(
+  l: Layout,
+  id: BlockId,
+  by: -1 | 1,
+  installed: Installed,
+): Layout {
+  const shown = visibleOf(l, installed);
   const next = shown[shown.indexOf(id) + by];
   if (!next) return l;
   const order = [...l.order];
@@ -187,11 +213,16 @@ export function ArrangeButton({
 export function HomeBlocks({
   blocks,
   editing,
-}: Readonly<{ blocks: Record<BlockId, ReactNode>; editing: boolean }>) {
+  installed,
+}: Readonly<{
+  blocks: Record<BlockId, ReactNode>;
+  editing: boolean;
+  installed: Installed;
+}>) {
   const [layout, change] = useLayout();
   const [dragging, setDragging] = useState<BlockId | null>(null);
   const [over, setOver] = useState<BlockId | null>(null);
-  const shown = visibleOf(layout);
+  const shown = visibleOf(layout, installed);
   const arranging = editing;
   return (
     <>
@@ -246,7 +277,7 @@ export function HomeBlocks({
                 aria-label="Move up"
                 disabled={at === 0}
                 className={button + " disabled:opacity-40"}
-                onClick={() => change(nudge(layout, id, -1))}
+                onClick={() => change(nudge(layout, id, -1, installed))}
               >
                 <ArrowUp aria-hidden className="size-3" />
               </button>
@@ -255,7 +286,7 @@ export function HomeBlocks({
                 aria-label="Move down"
                 disabled={at === shown.length - 1}
                 className={button + " disabled:opacity-40"}
-                onClick={() => change(nudge(layout, id, 1))}
+                onClick={() => change(nudge(layout, id, 1, installed))}
               >
                 <ArrowDown aria-hidden className="size-3" />
               </button>
@@ -276,7 +307,7 @@ export function HomeBlocks({
       ))}
       {arranging && (
         <div className="flex items-center justify-between gap-2">
-          <AddBlock layout={layout} change={change} />
+          <AddBlock layout={layout} change={change} installed={installed} />
           <button
             type="button"
             className={button}
@@ -412,10 +443,17 @@ function ExtIcon({ name }: Readonly<{ name: string }>) {
 function AddBlock({
   layout,
   change,
-}: Readonly<{ layout: Layout; change: (l: Layout) => void }>) {
-  const from = [...new Set(BLOCKS.map((b) => b.from))];
-  const [picked, setPicked] = useState(from[0] ?? "");
-  const mine = BLOCKS.filter((b) => b.from === picked);
+  installed,
+}: Readonly<{
+  layout: Layout;
+  change: (l: Layout) => void;
+  installed: Installed;
+}>) {
+  const offered = BLOCKS.filter((b) => offeredOf(b.id, installed));
+  const from = [...new Set(offered.map((b) => b.from))];
+  const [chosen, setPicked] = useState(from[0] ?? "");
+  const picked = from.includes(chosen) ? chosen : (from[0] ?? "");
+  const mine = offered.filter((b) => b.from === picked);
   return (
     <Dialog>
       <DialogTrigger asChild>

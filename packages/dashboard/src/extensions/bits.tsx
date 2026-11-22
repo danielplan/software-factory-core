@@ -78,8 +78,11 @@ function Row({
   );
 }
 
-export function Adds({ ext }: Readonly<{ ext: Ext }>) {
-  const adds = addsOf(ext);
+export function Adds({
+  ext,
+  skip,
+}: Readonly<{ ext: Ext; skip?: string }>) {
+  const adds = addsOf(ext).filter((one) => one.kind !== skip);
   if (adds.length === 0)
     return <span className="text-xs text-muted-foreground">Adds nothing yet</span>;
   return (
