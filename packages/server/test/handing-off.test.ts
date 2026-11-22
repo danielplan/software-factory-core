@@ -4,9 +4,9 @@ import { test } from "node:test";
 import type { KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
-import { HandOffs } from "../src/kobble/explorations/handing-off.ts";
-import { MakerDesk } from "../src/kobble/explorations/maker-desk.ts";
-import { factoryView } from "../src/kobble/factory-view.ts";
+import { HandOffs } from "../src/extensions/explorations/handing-off.ts";
+import { MakerDesk } from "../src/extensions/explorations/maker-desk.ts";
+import { factoryView } from "../src/extensions/factory/factory-view.ts";
 
 // What the team sees while work is under way: a hand-off's stages and the
 // spec writer's steps; a clash with main only as a problem in Review; and a

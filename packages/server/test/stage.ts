@@ -16,14 +16,14 @@ import {
 import { templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/skills";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
-import { githubAddOn } from "../src/add-ons/github/index.ts";
-import type { Fetcher } from "../src/add-ons/jira/jira.ts";
-import { jiraAddOn } from "../src/add-ons/jira/index.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import type { Fetcher } from "../src/extensions/jira/jira.ts";
+import { jiraAddOn } from "../src/extensions/jira/index.ts";
 import type { Installable } from "../src/installables.ts";
-import { PAGE_HEADER, startServer } from "../src/server.ts";
+import { PAGE_HEADER, startServer } from "../src/app/server.ts";
 import { Session } from "../src/session.ts";
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
 
 export const web = defineKit({
   id: "web-kit",

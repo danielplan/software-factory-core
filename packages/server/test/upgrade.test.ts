@@ -24,8 +24,8 @@ import {
   templateFolder,
 } from "@software-factory/knowledge-base";
 
-import { githubAddOn } from "../src/add-ons/github/index.ts";
-import { jiraAddOn } from "../src/add-ons/jira/index.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { jiraAddOn } from "../src/extensions/jira/index.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
 import { MIGRATIONS } from "../src/upgrade/migrations.ts";
 import { upgradeFactory } from "../src/upgrade/upgrade.ts";

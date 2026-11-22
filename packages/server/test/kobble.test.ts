@@ -15,19 +15,19 @@ import { faceFrom, KobbleStore } from "@software-factory/core";
 
 import type { CardView, WorkView } from "../src/api.ts";
 import type { Cards } from "../src/cards/cards.ts";
-import { fixSignal } from "../src/kobble/actions.ts";
+import { fixSignal } from "../src/extensions/signals/actions.ts";
 import {
   boardIdeas,
   columnOf,
   factoryView,
   type FactoryView,
-} from "../src/kobble/factory-view.ts";
+} from "../src/extensions/factory/factory-view.ts";
 import {
   type PersonaPage,
   type PersonaRow,
   type SignalsView,
   signalsView,
-} from "../src/kobble/views.ts";
+} from "../src/extensions/signals/views.ts";
 import { stage } from "./stage.ts";
 
 // Kobble's Signals and Personas as the server serves them: the sync with

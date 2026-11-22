@@ -4,7 +4,7 @@ import { test } from "node:test";
 import type { Board, KobbleStore } from "@software-factory/core";
 
 import type { Cards } from "../src/cards/cards.ts";
-import { handOff } from "../src/kobble/explorations/actions.ts";
+import { handOff } from "../src/extensions/explorations/actions.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 
 // What is handed off: an idea that changes no screen goes without a

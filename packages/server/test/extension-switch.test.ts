@@ -3,9 +3,9 @@ import { test } from "node:test";
 
 import { companySchema, assembleFactory } from "@software-factory/core";
 
-import { githubAddOn } from "../src/add-ons/github/index.ts";
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
-import { switched, toInstall } from "../src/add-ons/switch.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
+import { switched, toInstall } from "../src/extension-switch.ts";
 import { Refused } from "../src/refused.ts";
 
 // Kobble's own extensions: installed unless removed, one brings what it

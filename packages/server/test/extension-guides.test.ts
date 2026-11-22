@@ -4,9 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { extensionsReport } from "../src/builder/checks.ts";
-import { guidesFor, withGuides } from "../src/builder/extension-guides.ts";
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { extensionsReport } from "../src/extensions/factory/builder/checks.ts";
+import { guidesFor, withGuides } from "../src/extension-guides.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
 
 // A team's extensions add to the builder's instructions, and a branch that
 // changes them is checked before it becomes a pull request.

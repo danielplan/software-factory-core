@@ -5,7 +5,10 @@ import { test } from "node:test";
 
 import { type Claude, run } from "@software-factory/core";
 
-import { markComment, readNote } from "../src/builder/protocol.ts";
+import {
+  markComment,
+  readNote,
+} from "../src/extensions/factory/builder/protocol.ts";
 import { withPlan } from "../src/cards/cards.ts";
 import {
   type Kept,

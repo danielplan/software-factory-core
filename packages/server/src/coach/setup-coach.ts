@@ -7,7 +7,7 @@
 // anything. One turn at a time; the owner sees the reply while it is
 // written and what the coach is doing.
 
-import type { Browser } from "../kobble/persona-tests.ts";
+import type { Browser } from "../extensions/personas/persona-tests.ts";
 import { readdirSync } from "node:fs";
 
 import type { Claude, Kit } from "@software-factory/core";

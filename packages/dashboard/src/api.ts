@@ -37,27 +37,27 @@ export type {
   SignalRow,
   SignalsView,
   TestPage,
-} from "../../server/src/kobble/views.ts";
+} from "../../server/src/extensions/signals/views.ts";
 export type { PersonaTest } from "../../core/src/index.ts";
-export type { ReleasesView } from "../../server/src/releases/routes.ts";
+export type { ReleasesView } from "../../server/src/extensions/releases/routes.ts";
 export type { FeedbackView } from "../../server/src/feedback/routes.ts";
 export type {
   Kind as FeedbackKind,
   Post as FeedbackPost,
   State as FeedbackState,
 } from "../../server/src/feedback/board.ts";
-export type { SyncView } from "../../server/src/kobble/sync.ts";
-export type { MissionIdea } from "../../server/src/kobble/mission-ideas.ts";
+export type { SyncView } from "../../server/src/extensions/signals/sync.ts";
+export type { MissionIdea } from "../../server/src/extensions/personas/mission-ideas.ts";
 export type {
   FactoryCard,
   FactoryView,
-} from "../../server/src/kobble/factory-view.ts";
+} from "../../server/src/extensions/factory/factory-view.ts";
 export type {
   ExplorationPage,
   ExplorationRow,
   ExplorationsView,
   TestResult,
-} from "../../server/src/kobble/explorations/views.ts";
+} from "../../server/src/extensions/explorations/views.ts";
 export type { VersionRun } from "../../server/src/prototypes/mode.ts";
 export type { Light, PartView } from "../../launcher/src/index.ts";
 

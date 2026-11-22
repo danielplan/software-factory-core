@@ -12,7 +12,7 @@ import { parseArgs } from "node:util";
 import { findFactory } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
-import { type Cli, realCli } from "../add-ons/github/github.ts";
+import { type Cli, realCli } from "../extensions/github/github.ts";
 import { Refused } from "../refused.ts";
 import {
   type Card,

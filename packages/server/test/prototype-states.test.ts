@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { statesIn } from "../src/kobble/explorations/versions.ts";
+import { statesIn } from "../src/extensions/explorations/versions.ts";
 
 // The states a maker said each variant can be shown in.
 

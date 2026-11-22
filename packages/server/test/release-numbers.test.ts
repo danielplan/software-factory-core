@@ -7,8 +7,8 @@ import {
   lastNumber,
   nextNumber,
   numberOfTag,
-} from "../src/releases/numbers.ts";
-import { type Merged, notesOf } from "../src/releases/notes.ts";
+} from "../src/extensions/releases/numbers.ts";
+import { type Merged, notesOf } from "../src/extensions/releases/notes.ts";
 
 test("with nothing to act on the last number goes up, new things included", () => {
   assert.equal(nextNumber("1.4.2", false), "1.4.3");

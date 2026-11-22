@@ -2,8 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { withPlan } from "../src/cards/cards.ts";
-import { waitsForOwner } from "../src/builder/decide.ts";
-import { markComment, readAsk, stripMarker } from "../src/builder/protocol.ts";
+import { waitsForOwner } from "../src/extensions/factory/builder/decide.ts";
+import {
+  markComment,
+  readAsk,
+  stripMarker,
+} from "../src/extensions/factory/builder/protocol.ts";
 import {
   type Kept,
   pretendClaude,

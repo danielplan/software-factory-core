@@ -13,7 +13,7 @@ import { after, test } from "node:test";
 import { FACTORY_FOLDER } from "@software-factory/core";
 
 import { chosenStages, stagesRoutes, stagesView } from "../src/stages.ts";
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
 import { stage } from "./stage.ts";
 
 const made: string[] = [];

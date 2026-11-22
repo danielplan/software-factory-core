@@ -4,7 +4,7 @@ import { test } from "node:test";
 import {
   recordsNamedReport,
   recordsNotNamed,
-} from "../src/builder/record-named.ts";
+} from "../src/extensions/factory/builder/record-named.ts";
 
 // Before a pull request: a record the branch adds is named after its card.
 

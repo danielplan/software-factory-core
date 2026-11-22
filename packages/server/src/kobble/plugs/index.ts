@@ -4,13 +4,13 @@
 import type { KobbleStore } from "@software-factory/core";
 
 import type { Cards } from "../../cards/cards.ts";
-import type { SupportCards } from "../card-look.ts";
+import type { SupportCards } from "../../extensions/factory/card-look.ts";
 import type { SupportPlug } from "../support-plug.ts";
-import { explorationsPlug } from "./explorations.ts";
-import { factoryPlug } from "./factory.ts";
-import { personasPlug } from "./personas.ts";
-import { releasesPlug } from "./releases.ts";
-import { signalsPlug } from "./signals.ts";
+import { explorationsPlug } from "../../extensions/explorations/support.ts";
+import { factoryPlug } from "../../extensions/factory/support.ts";
+import { personasPlug } from "../../extensions/personas/support.ts";
+import { releasesPlug } from "../../extensions/releases/support.ts";
+import { signalsPlug } from "../../extensions/signals/support.ts";
 
 // What the plugs reach of Kobble: Doodle's talks and the tester.
 export type Reach = {

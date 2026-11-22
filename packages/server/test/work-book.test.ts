@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { keptIn, type Moved } from "@software-factory/core";
 
 import type { Cards } from "../src/cards/cards.ts";
-import { githubCards } from "../src/cards/github-cards.ts";
+import { githubCards } from "../src/extensions/github/cards.ts";
 import { workRoutes } from "../src/work-book.ts";
 import { BOARD, pretendGitHub } from "./pretend-github.ts";
 

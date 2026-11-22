@@ -6,7 +6,10 @@ import { test } from "node:test";
 
 import { type Claude, KobbleStore } from "@software-factory/core";
 
-import { PersonaTests, stepNow } from "../src/kobble/persona-tests.ts";
+import {
+  PersonaTests,
+  stepNow,
+} from "../src/extensions/personas/persona-tests.ts";
 import { standIn } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
 

@@ -6,7 +6,7 @@ import { after, test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
 import { FeedbackArrivals } from "../src/feedback/arrivals.ts";
 import { boardOf, FeedbackBoard } from "../src/feedback/board.ts";
 import { feedbackRoutes } from "../src/feedback/routes.ts";

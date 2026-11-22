@@ -1,0 +1,85 @@
+// Personas' plug into Sprocket: the personas there are, a new one the team
+// describes, and a mission handed to the tester. Heard only while Personas
+// is installed.
+
+import type { KobbleStore } from "@software-factory/core";
+import { z } from "zod";
+
+import { addPersona } from "../signals/actions.ts";
+import { handOff, type SupportPlug } from "../../kobble/support-plug.ts";
+
+export function personasText(store: KobbleStore): string {
+  const personas = store.all("personas");
+  if (personas.length === 0) return "No personas yet.";
+  return personas
+    .map((one) => `- ${one.id}: ${one.name}, ${one.place}. ${one.about}`)
+    .join("\n");
+}
+
+const GUIDE = `**Personas** (\`#personas\`): the real customers the product is for. Before launch the team sends them on missions: the tester kobold uses the app as them, and what they run into comes back as signals. A new persona: ask, one short question at a time, who they are, where they work or live and what they need from the app; say back name, place and two or three sentences, and \`add_persona\` once they agree. A mission: say back the persona and what they try, and once they agree, \`send_on_mission\` hands it to the tester and takes them to the persona's tests.`;
+
+export function personasPlug(on: {
+  store: () => KobbleStore;
+  tests: { start: (body: unknown) => { persona: string } };
+  changed: (what: string) => void;
+}): SupportPlug {
+  return {
+    extension: "personas",
+    pages: ["personas"],
+    guide: GUIDE,
+    handOffs: [
+      listPersonas(on.store),
+      handOff({
+        name: "add_persona",
+        description:
+          "Adds a persona: a real kind of customer the team described. Only once the team agreed to what you will add.",
+        input: {
+          name: z.string().min(1).describe("A first name, or a role."),
+          place: z
+            .string()
+            .describe("Where they work or live, a few words (Bakery, Milan)."),
+          about: z
+            .string()
+            .describe(
+              "Who they are and what they need from the app, two or three sentences.",
+            ),
+        },
+        run: (args) => {
+          const persona = addPersona(on.store(), args);
+          on.changed("personas");
+          return {
+            said: `Added ${persona.name} (${persona.id}): #personas/${persona.id}`,
+          };
+        },
+      }),
+      handOff({
+        name: "send_on_mission",
+        description:
+          "Hands a persona's mission to the tester, who uses the app as that persona; takes the person to the persona's tests. Only once they agreed to the mission.",
+        input: {
+          persona: z.string().describe("A persona's id from list_personas."),
+          task: z
+            .string()
+            .min(1)
+            .describe("What the persona tries, in a sentence or two."),
+        },
+        run: ({ persona, task }) => {
+          const test = on.tests.start({ persona, task });
+          on.changed("tests");
+          return {
+            said: "Handed to the tester.",
+            to: `#personas/${encodeURIComponent(test.persona)}/tests`,
+          };
+        },
+      }),
+    ],
+  };
+}
+
+function listPersonas(store: () => KobbleStore) {
+  return handOff({
+    name: "list_personas",
+    description: "The personas there are: id, name, where, who they are.",
+    run: () => ({ said: personasText(store()) }),
+  });
+}

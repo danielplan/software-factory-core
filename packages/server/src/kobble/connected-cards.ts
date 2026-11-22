@@ -1,7 +1,7 @@
 // The connected board's cards, for Kobble's buttons and Sprocket; refused
 // with how to connect one when there is none.
 
-import type { Cli } from "../add-ons/github/github.ts";
+import type { Cli } from "../extensions/github/github.ts";
 import type { Cards } from "../cards/cards.ts";
 import { cardsFor, NO_BOARD } from "../cards/cards-for.ts";
 import { Refused } from "../refused.ts";

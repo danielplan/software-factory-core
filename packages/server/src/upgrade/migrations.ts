@@ -22,7 +22,7 @@ import {
 
 import { GIT } from "@software-factory/knowledge-base";
 
-import { trackedWith } from "../add-ons/switch.ts";
+import { trackedWith } from "../extension-switch.ts";
 import { moveOut } from "./move-out.ts";
 import { Refused } from "../refused.ts";
 import { knowledgeShape } from "./knowledge-shape.ts";

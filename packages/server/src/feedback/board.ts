@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-import type { Cli } from "../add-ons/github/github.ts";
+import type { Cli } from "../extensions/github/github.ts";
 import { Refused } from "../refused.ts";
 
 export const KINDS = ["bug", "wish"] as const;

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { clockOf, usageLimitUntil } from "../src/builder/usage-limit.ts";
+import {
+  clockOf,
+  usageLimitUntil,
+} from "../src/extensions/factory/builder/usage-limit.ts";
 
 const now = new Date("2026-11-18T15:00:00Z"); // 16:00 in Rome
 
@@ -44,9 +47,10 @@ test("the older time stamp, an unknown reset, and other errors", () => {
 });
 
 test("a paused card waits until the reset, or until the owner writes", async () => {
-  const { decide } = await import("../src/builder/decide.ts");
+  const { decide } =
+    await import("../src/extensions/factory/builder/decide.ts");
   const { markComment, pausedComment, stripMarker } =
-    await import("../src/builder/protocol.ts");
+    await import("../src/extensions/factory/builder/protocol.ts");
   const until = new Date("2026-11-18T18:52:00Z");
   const paused = pausedComment("Paused.", until);
   assert.equal(stripMarker(paused), "Paused.");

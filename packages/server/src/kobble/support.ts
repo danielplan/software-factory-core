@@ -18,11 +18,11 @@ import {
 } from "@software-factory/core";
 import { guidesFolder } from "@software-factory/skills";
 
-import type { Route } from "../add-ons/add-on.ts";
+import type { Route } from "../plugs/extension.ts";
 import { field, optionalText } from "../asked.ts";
 import { Talk } from "../coach/talk.ts";
-import type { Cli } from "../add-ons/github/github.ts";
-import { supportCards } from "./card-look.ts";
+import type { Cli } from "../extensions/github/github.ts";
+import { supportCards } from "../extensions/factory/card-look.ts";
 import { connectedCards } from "./connected-cards.ts";
 import { kobblePlugs, type Reach } from "./plugs/index.ts";
 import { plugsGuide, type SupportPlug } from "./support-plug.ts";

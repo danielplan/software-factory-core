@@ -21,7 +21,7 @@ import { checkKnowledge } from "../knowledge-check.ts";
 import type { SetupProduct } from "../api.ts";
 import type { Board } from "../connect/board-file.ts";
 import type { BoardAsked, TrackerSetup } from "../connect/tracker-setup.ts";
-import { trackedWith } from "../add-ons/switch.ts";
+import { trackedWith } from "../extension-switch.ts";
 import { Refused } from "../refused.ts";
 import { themeProblems } from "../theme-check.ts";
 

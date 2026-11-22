@@ -6,9 +6,9 @@ import { test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
 
-import { PersonaTests } from "../src/kobble/persona-tests.ts";
+import { PersonaTests } from "../src/extensions/personas/persona-tests.ts";
 import { standIn } from "./pretend-claude.ts";
-import type { TestPage } from "../src/kobble/views.ts";
+import type { TestPage } from "../src/extensions/signals/views.ts";
 import { stage } from "./stage.ts";
 
 // Persona tests: the persona agent uses the app through a browser only and

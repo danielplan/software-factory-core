@@ -6,19 +6,26 @@ import { test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
-import { githubAddOn } from "../src/add-ons/github/index.ts";
-import { realShell, runChecks, shownOutput } from "../src/builder/checks.ts";
-import { ConnectedWork, workFor } from "../src/builder/connect-work.ts";
-import type { BoardCard } from "../src/builder/decide.ts";
-import { readNote } from "../src/builder/protocol.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import {
+  realShell,
+  runChecks,
+  shownOutput,
+} from "../src/extensions/factory/builder/checks.ts";
+import {
+  ConnectedWork,
+  workFor,
+} from "../src/extensions/factory/builder/connect-work.ts";
+import type { BoardCard } from "../src/extensions/factory/builder/decide.ts";
+import { readNote } from "../src/extensions/factory/builder/protocol.ts";
 import {
   githubPullRequests,
   openOrUpdate,
   type PullRequests,
   RESOLVE_ASK,
-} from "../src/builder/pull-requests.ts";
-import { SeenPullRequests } from "../src/builder/seen-pull-requests.ts";
+} from "../src/extensions/factory/builder/pull-requests.ts";
+import { SeenPullRequests } from "../src/extensions/factory/builder/seen-pull-requests.ts";
 
 // The builder's pull requests through the GitHub CLI (a stand-in that
 // answers what GitHub would and remembers what it was asked), the checks

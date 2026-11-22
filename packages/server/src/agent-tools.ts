@@ -10,11 +10,11 @@ import { answerTools } from "./coach/setup-tools.ts";
 import {
   answerBoardTools,
   type BoardTools,
-} from "./kobble/explorations/board-tools.ts";
+} from "./extensions/explorations/board-tools.ts";
 import {
   answerMakerTools,
   type MakerTools,
-} from "./kobble/explorations/maker-tools.ts";
+} from "./extensions/explorations/maker-tools.ts";
 import {
   answerSupportTools,
   type SupportTools,

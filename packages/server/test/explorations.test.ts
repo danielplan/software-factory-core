@@ -8,9 +8,9 @@ import { GIT } from "@software-factory/knowledge-base";
 
 import type { Cards } from "../src/cards/cards.ts";
 
-import { handOff } from "../src/kobble/explorations/actions.ts";
-import { applyAct } from "../src/kobble/explorations/board-acts.ts";
-import type { ExplorationsView } from "../src/kobble/explorations/views.ts";
+import { handOff } from "../src/extensions/explorations/actions.ts";
+import { applyAct } from "../src/extensions/explorations/board-acts.ts";
+import type { ExplorationsView } from "../src/extensions/explorations/views.ts";
 import { inGit } from "./git-project.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 

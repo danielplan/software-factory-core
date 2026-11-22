@@ -11,12 +11,16 @@ import {
 } from "@software-factory/core";
 
 import type { Stage } from "../src/api.ts";
-import { BoardWork } from "../src/builder/board-work.ts";
-import { copyName, Jobs, type JobsOptions } from "../src/builder/jobs.ts";
-import type { Message } from "../src/builder/decide.ts";
-import { type CodeHost, githubCodeHost } from "../src/builder/code-host.ts";
-import type { PullRequest } from "../src/builder/pull-requests.ts";
-import { realCli } from "../src/add-ons/github/github.ts";
+import { BoardWork } from "../src/extensions/factory/builder/board-work.ts";
+import {
+  copyName,
+  Jobs,
+  type JobsOptions,
+} from "../src/extensions/factory/builder/jobs.ts";
+import type { Message } from "../src/extensions/factory/builder/decide.ts";
+import { type CodeHost, githubCodeHost } from "../src/code-host.ts";
+import type { PullRequest } from "../src/extensions/factory/builder/pull-requests.ts";
+import { realCli } from "../src/extensions/github/github.ts";
 import {
   type Card,
   type Cards,

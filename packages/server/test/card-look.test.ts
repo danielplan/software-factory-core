@@ -6,9 +6,9 @@ import { test } from "node:test";
 import { run } from "@software-factory/core";
 
 import type { WorkView } from "../src/api.ts";
-import { markComment } from "../src/builder/protocol.ts";
+import { markComment } from "../src/extensions/factory/builder/protocol.ts";
 import type { Cards, CardDetail } from "../src/cards/cards.ts";
-import { cardLook, supportCards } from "../src/kobble/card-look.ts";
+import { cardLook, supportCards } from "../src/extensions/factory/card-look.ts";
 import { project } from "./builder-stage.ts";
 
 // What Sprocket sees of a card: the card, its conversation and its branch;

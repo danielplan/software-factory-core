@@ -7,10 +7,10 @@ import { test } from "node:test";
 
 import { GIT } from "@software-factory/knowledge-base";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
 import { planOf, stageNamed, withPlan } from "../src/cards/cards.ts";
 import { cardCommand } from "../src/cards/command.ts";
-import { githubCards } from "../src/cards/github-cards.ts";
+import { githubCards } from "../src/extensions/github/cards.ts";
 import { BOARD, pretendGitHub } from "./pretend-github.ts";
 
 // The board's cards for the coding agents: listed, shown, moved, made, and

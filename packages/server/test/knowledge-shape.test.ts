@@ -12,7 +12,7 @@ import { test } from "node:test";
 
 import { templateFolder } from "@software-factory/knowledge-base";
 
-import { knowledgeReport } from "../src/builder/checks.ts";
+import { knowledgeReport } from "../src/extensions/factory/builder/checks.ts";
 import { knowledgeShape } from "../src/upgrade/knowledge-shape.ts";
 
 // The knowledge base keeps its shape: the upgrade puts back the pages of it

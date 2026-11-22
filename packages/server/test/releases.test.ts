@@ -6,9 +6,12 @@ import { after, test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
 import { Refused } from "../src/refused.ts";
-import { releasesRoutes, type ReleasesView } from "../src/releases/routes.ts";
+import {
+  releasesRoutes,
+  type ReleasesView,
+} from "../src/extensions/releases/routes.ts";
 
 // The Releases page's routes with a stand-in GitHub CLI and a stand-in
 // kobold: the coming release (no kobold asked until the team prepares it),

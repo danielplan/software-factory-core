@@ -11,8 +11,8 @@ import {
   RELEASE_SOURCE,
 } from "@software-factory/core";
 
-import type { Route } from "../add-ons/add-on.ts";
-import type { Cli } from "../add-ons/github/github.ts";
+import type { Route } from "../plugs/extension.ts";
+import type { Cli } from "../extensions/github/github.ts";
 import { field } from "../asked.ts";
 import { Refused } from "../refused.ts";
 import { FeedbackArrivals } from "./arrivals.ts";

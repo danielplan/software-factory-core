@@ -6,8 +6,8 @@
 import { KobbleStore } from "@software-factory/core";
 
 import { type Draft, SETUP_AREAS } from "../api.ts";
-import { addPersona } from "../kobble/actions.ts";
-import { newExploration } from "../kobble/explorations/actions.ts";
+import { addPersona } from "../extensions/signals/actions.ts";
+import { newExploration } from "../extensions/explorations/actions.ts";
 
 export function recordsFromSetup(
   root: string,

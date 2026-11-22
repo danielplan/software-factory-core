@@ -2,7 +2,7 @@
 // one plain line, and for how long. Kept apart from the page so it is
 // checked on its own.
 
-import type { FactoryView } from "../../../server/src/kobble/factory-view.ts";
+import type { FactoryView } from "../../../server/src/extensions/factory/factory-view.ts";
 import { ENGLISH, type Messages } from "../i18n/messages.ts";
 
 export type Stuck = FactoryView["stuck"][number];

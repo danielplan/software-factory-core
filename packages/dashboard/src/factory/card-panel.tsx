@@ -13,7 +13,7 @@ import { KoboldHead } from "@/components/kobold-face";
 import { Markdown } from "@/components/markdown";
 import { cn } from "@/lib/utils";
 
-import type { CardPanel as Panel } from "../../../server/src/kobble/factory-card.ts";
+import type { CardPanel as Panel } from "../../../server/src/extensions/factory/factory-card.ts";
 import { type CardType, TypePicker } from "./card-type";
 import { DeleteCard } from "./delete-card";
 import { useLocale, useT } from "@/i18n/use-t";

@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import type { Claude } from "@software-factory/core";
 
-import { specWriter } from "../src/kobble/explorations/spec-writer.ts";
+import { specWriter } from "../src/extensions/explorations/spec-writer.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 
 // The spec written at hand-off: a short card from what was planned, without

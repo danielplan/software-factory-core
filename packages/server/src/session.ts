@@ -44,8 +44,11 @@ import { addOns, type Installable } from "./installables.ts";
 import { Refused, refuseAny } from "./refused.ts";
 import { readBoard, saveBoard } from "./connect/board-file.ts";
 import { factoryView, kitViews } from "./views.ts";
-import { switched, trackedWith } from "./add-ons/switch.ts";
-import { type CodeHosts, ConnectedWork } from "./builder/connect-work.ts";
+import { switched, trackedWith } from "./extension-switch.ts";
+import {
+  type CodeHosts,
+  ConnectedWork,
+} from "./extensions/factory/builder/connect-work.ts";
 import { withModelChoice } from "./model-choice.ts";
 import { writeCompany, writeProducts } from "./write-factory.ts";
 

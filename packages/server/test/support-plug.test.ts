@@ -6,7 +6,7 @@ import { test } from "node:test";
 
 import { KobbleStore } from "@software-factory/core";
 
-import type { Cli } from "../src/add-ons/github/github.ts";
+import type { Cli } from "../src/extensions/github/github.ts";
 import { supportOf } from "../src/kobble/support.ts";
 import { placeIn } from "../src/kobble/support-tools.ts";
 import { plugsGuide } from "../src/kobble/support-plug.ts";

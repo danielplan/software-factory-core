@@ -2,7 +2,7 @@
 // starts it): the commands that answer and end, or the project's factory
 // on this computer.
 
-import { playwrightBrowser } from "../src/kobble/test-setup.ts";
+import { playwrightBrowser } from "../src/kobble/browser.ts";
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -18,13 +18,13 @@ import { prototypeCommand } from "../src/prototypes/command.ts";
 import { topCommand } from "../src/top-commands.ts";
 import { computerTools } from "../src/installables.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
-import { startServer } from "../src/server.ts";
+import { startServer } from "../src/app/server.ts";
 import { Session } from "../src/session.ts";
-import { githubSetup } from "../src/add-ons/github/board-setup.ts";
-import { codeHostsOf } from "../src/add-ons/add-on.ts";
-import { githubAddOn } from "../src/add-ons/github/index.ts";
-import { jiraAddOn } from "../src/add-ons/jira/index.ts";
-import { KOBBLE_EXTENSIONS } from "../src/add-ons/kobble.ts";
+import { githubSetup } from "../src/extensions/github/board-setup.ts";
+import { codeHostsOf } from "../src/plugs/extension.ts";
+import { githubAddOn } from "../src/extensions/github/index.ts";
+import { jiraAddOn } from "../src/extensions/jira/index.ts";
+import { KOBBLE_EXTENSIONS } from "../src/app/modules.ts";
 
 // The parts that ran before the factory started again on a new Kobble.
 const RESUME = "SOFTWARE_FACTORY_RESUME";

@@ -9,7 +9,7 @@ import {
   type Message,
   stuckOf,
   waitsForOwner,
-} from "../src/builder/decide.ts";
+} from "../src/extensions/factory/builder/decide.ts";
 import {
   isFactory,
   linkRepositoryFiles,
@@ -17,10 +17,10 @@ import {
   readNote,
   readStatusLine,
   stripMarker,
-} from "../src/builder/protocol.ts";
+} from "../src/extensions/factory/builder/protocol.ts";
 
-import { realCli } from "../src/add-ons/github/github.ts";
-import { githubCodeHost } from "../src/builder/code-host.ts";
+import { realCli } from "../src/extensions/github/github.ts";
+import { githubCodeHost } from "../src/code-host.ts";
 
 // The board's rules: what happens next to each card, from its stage and the
 // notes in its thread; and how the factory's notes and an agent's status

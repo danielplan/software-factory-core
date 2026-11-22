@@ -6,10 +6,10 @@ import { join } from "node:path";
 
 import { readCompany } from "@software-factory/core";
 
-import type { Cli } from "../add-ons/github/github.ts";
+import type { Cli } from "../extensions/github/github.ts";
 import { readBoard } from "../connect/board-file.ts";
 import type { Cards } from "./cards.ts";
-import { githubCards, type GitHubBoard } from "./github-cards.ts";
+import { githubCards, type GitHubBoard } from "../extensions/github/cards.ts";
 
 export type Connected = { cards: Cards; repository: string };
 

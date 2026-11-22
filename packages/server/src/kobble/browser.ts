@@ -1,0 +1,130 @@
+// What a persona test runs on: the product as the factory starts it on
+// this computer (the launcher, with the kit's command and port), and a
+// browser for the persona agent: Playwright's MCP server, the browser
+// Claude Code's own Playwright integration uses, started headless and
+// without a saved profile, over HTTP on a free port.
+
+import { spawn } from "node:child_process";
+import { type AddressInfo, createServer } from "node:net";
+
+import type { Launcher } from "@software-factory/launcher";
+
+import type { App } from "../extensions/personas/mission-ideas.ts";
+import {
+  type Browser,
+  TestProblem,
+} from "../extensions/personas/persona-tests.ts";
+import { NPX } from "./programs.ts";
+
+// The version used; npx keeps it once fetched.
+const PLAYWRIGHT_MCP = "@playwright/mcp@0.0.85";
+const READY_MS = 60_000;
+
+// The products the factory starts with a web address: the apps a persona
+// can be sent into. None while the launcher cannot be read.
+export function appsOf(launcher: () => Launcher): App[] {
+  try {
+    return webApps(launcher).map((part) => ({
+      id: part.id,
+      name: part.name,
+      does: part.does,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const webApps = (launcher: () => Launcher) =>
+  launcher()
+    .state()
+    .filter((part) => part.area === "products" && part.link);
+
+// The address of the product (or the first with a web address), started
+// when it is not running yet.
+export async function appAddress(
+  launcher: () => Launcher,
+  product: string | null = null,
+): Promise<string> {
+  const apps = webApps(launcher);
+  const app = product ? apps.find((part) => part.id === product) : apps[0];
+  if (!app?.link)
+    throw new TestProblem(
+      product
+        ? `Missions need the app “${product}”, and the factory has no app by that name.`
+        : "Missions need an app the factory starts with a web address; there is none.",
+    );
+  if (app.light !== "running") {
+    await launcher().start(app.id);
+    const now = launcher()
+      .state()
+      .find((part) => part.id === app.id);
+    if (now?.light !== "running") {
+      const why = now?.problem ? `: ${now.problem.title}` : ".";
+      throw new TestProblem(
+        `Missions need ${app.name} running on this computer, and it did not start${why}`,
+      );
+    }
+  }
+  return app.link;
+}
+
+export async function playwrightBrowser(): Promise<Browser> {
+  const port = await freePort();
+  const child = spawn(
+    NPX,
+    [
+      "--yes",
+      PLAYWRIGHT_MCP,
+      "--headless",
+      "--isolated",
+      "--port",
+      String(port),
+    ],
+    { stdio: "ignore" },
+  );
+  const close = () => {
+    child.kill();
+  };
+  const url = `http://localhost:${String(port)}/mcp`;
+  const failed = new Promise<never>((_, reject) => {
+    child.once("error", (error) => {
+      reject(error);
+    });
+    child.once("exit", () => {
+      reject(new Error("it stopped"));
+    });
+  });
+  try {
+    await Promise.race([answering(url), failed]);
+  } catch (error) {
+    close();
+    throw new TestProblem(
+      `Missions need a browser (Playwright's MCP server, via npx ${PLAYWRIGHT_MCP}) and it did not start: ${error instanceof Error ? error.message : String(error)}.`,
+    );
+  }
+  return { url, close };
+}
+
+async function answering(url: string): Promise<void> {
+  const until = Date.now() + READY_MS;
+  while (Date.now() < until) {
+    try {
+      await fetch(url, { signal: AbortSignal.timeout(2_000) });
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+  throw new Error("it did not answer within a minute");
+}
+
+// A port nobody uses now: the system picks one, and it is given back.
+async function freePort(): Promise<number> {
+  const probe = createServer();
+  await new Promise<void>((done, fail) => {
+    probe.once("error", fail).listen({ port: 0, host: "127.0.0.1" }, done);
+  });
+  const { port } = probe.address() as AddressInfo;
+  await new Promise((done) => probe.close(done));
+  return port;
+}

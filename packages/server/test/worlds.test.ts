@@ -13,7 +13,7 @@ import { test } from "node:test";
 import { KobbleStore, type World } from "@software-factory/core";
 
 import { checkRecordsHere } from "../src/check-command.ts";
-import type { ExplorationPage } from "../src/kobble/explorations/views.ts";
+import type { ExplorationPage } from "../src/extensions/explorations/views.ts";
 import { inGit } from "./git-project.ts";
 import { pretendClaude } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";

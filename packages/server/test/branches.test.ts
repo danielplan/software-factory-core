@@ -7,8 +7,11 @@ import { test } from "node:test";
 
 import { GIT } from "@software-factory/knowledge-base";
 
-import { commitLeft, pushBranch } from "../src/builder/branches.ts";
-import { githubOriginProblem as originProblem } from "../src/builder/code-host.ts";
+import {
+  commitLeft,
+  pushBranch,
+} from "../src/extensions/factory/builder/branches.ts";
+import { githubOriginProblem as originProblem } from "../src/code-host.ts";
 
 // The builder's work goes on the card's branch: a settings file left over
 // (an untracked .env.test) is nothing to commit, so the work still goes.

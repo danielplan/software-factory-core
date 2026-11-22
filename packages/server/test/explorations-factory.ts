@@ -7,7 +7,7 @@ import { join } from "node:path";
 
 import { KobbleStore } from "@software-factory/core";
 
-import type { ExplorationPage } from "../src/kobble/explorations/views.ts";
+import type { ExplorationPage } from "../src/extensions/explorations/views.ts";
 import { pretendClaude } from "./pretend-claude.ts";
 import { stage } from "./stage.ts";
 
