@@ -153,7 +153,7 @@ briefly, from there; the factory links to it.
 When the map holds your product, who it is for, the team and board and
 how Kobble works, and the owner agreed to what the factory
 builds, `draw` with `ready` and say so: the button **Set up Kobble**
-then appears below the chat. If the owner asks to build before that, say
+then appears on the Set up step. If the owner asks to build before that, say
 what is still missing in a sentence, or offer it anyway if they insist.
 
 ## Build it
@@ -182,8 +182,8 @@ from the map:
    `factory/theme.css` so the factory looks like part of the same family.
    Take the app's own colours, fonts, corners and shadows as they are, from
    its colour variables, its Tailwind theme and its design guide: never
-   shift a brand colour. What keeps the factory its own is its orb, its
-   layout and its name, never the app's mascot. Set on `:root`, and again
+   shift a brand colour. What keeps the factory its own is its kobolds,
+   its layout and its name, never the app's mascot. Set on `:root`, and again
    inside `@media (prefers-color-scheme: dark) { :root { … } }`, as plain
    colours (`#rrggbb`): `--ground`, `--background`, `--surface`,
    `--surface-2`, `--foreground`, `--card`, `--card-foreground`, `--popover`,
@@ -227,7 +227,7 @@ from the map:
    runs them again.
 
 Then tell the owner in two sentences what you built, and that they can
-press **Open Kobble**.
+pick where to start, or look around first.
 
 ## When the owner talks
 
@@ -239,7 +239,7 @@ it.
   with one question.
 - Write for the ear: no lists, tables, headings, file paths or links; say
   choices one after the other, with your recommendation. Keep the details on
-  the canvas.
+  the steps.
 - What they said was written down by a speech model: expect the odd
   misheard word, read for the meaning, and ask when something important is
   unclear.

@@ -16,18 +16,23 @@ repository and installs a released version of this core there.
 - **Collect signals.** Write down what customers say, connect your live app,
   or send AI personas into your apps on missions. They report the bugs,
   ideas and open questions they run into.
-- **Explore an idea before building it.** Talk an idea through with the
-  explorer. It draws the problem, the choices and their options on a canvas,
-  and has each option made as a **prototype in your real app**, with variants
-  you can switch between and click through.
+- **Explore an idea before building it.** Talk an idea through with Doodle,
+  the explorer. It draws the problem, the choices and their options on a
+  whiteboard, and Tinker, its maker, builds them as a **prototype in your
+  real app**, with variants you can switch between and click through.
 - **Hand the chosen version to the builder.** The agreed variant becomes a
-  card with a written spec on your GitHub board. The builder takes it from
-  To do, builds it test-first in its own working copy, runs your checks and
-  opens a pull request for you to review.
+  card with a short spec in To do on your GitHub board: that is the
+  go-ahead. The builder builds it test-first in its own working copy, runs
+  your checks, pushes only work that passes them and opens a pull request
+  for you to review. When it gets stuck, it says why and waits for your
+  hint.
 - **See and run your product.** System shows the parts your product is made
   of, how they connect, and lets you start, stop and open them.
-- **Ask for help anywhere.** Sprocket, the support assistant at the bottom of
-  every page, answers questions and adds explorations and personas for you.
+- **Release your product.** The Releases page turns what was merged into a
+  numbered release, with notes written from the pull requests.
+- **Ask for help anywhere.** Sprocket, the support kobold at the bottom of
+  every page, answers questions, adds explorations and personas for you,
+  explains a stuck card and passes your answer on to the builder.
 - **Stay up to date.** Kobble takes merged work from GitHub by itself and
   offers each new Kobble release as a card for the builder.
 
@@ -49,7 +54,7 @@ release:
 
 ```json
 "devDependencies": {
-  "software-factory": "github:danielplan/software-factory-core#release-0.13.2"
+  "software-factory": "github:danielplan/software-factory-core#release-0.14.0"
 }
 ```
 
@@ -78,18 +83,19 @@ Other commands:
        ▲            each product describes itself in a product.json
        │
   EXTENSIONS        Signals, Explorations and prototypes, the Factory board and
-  AND KITS          its builder, Home, System, Personas; add-ons you choose
-                    (GitHub or Jira, voice, updates, made-up data for prototypes);
-                    kits for each kind of product (React, SvelteKit, Expo,
-                    NestJS, TypeScript packages, any other code)
+  AND KITS          its builder, Personas, Releases; where work is tracked
+                    (GitHub or Jira); your team's own extensions; kits for each
+                    kind of product (React, SvelteKit, Expo, NestJS,
+                    TypeScript packages, any other code)
        │
   CORE              products, settings, parts, the AI agents (Claude Code),
-                    working copies, skills, the knowledge base and its checks
+                    working copies, skills, the knowledge base and its checks,
+                    Home, System, Sprocket, voice, updates
 ```
 
-The core is the same for every company. Extensions and kits are versioned
-here, and each company picks the ones it uses. Your products stay in your
-repository.
+The core is the same for every company. Extensions and kits ship with it,
+and each company picks the ones it uses in the Marketplace. Your products
+stay in your repository.
 
 More detail:
 
