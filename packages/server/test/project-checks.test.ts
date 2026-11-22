@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -17,7 +18,7 @@ import {
   defineKit,
   releaseOf,
 } from "@software-factory/core";
-import { templateFolder } from "@software-factory/knowledge-base";
+import { GIT, templateFolder } from "@software-factory/knowledge-base";
 import { templatesFolder } from "@software-factory/skills";
 
 import { addProjectChecks } from "../src/project-checks.ts";
@@ -25,6 +26,7 @@ import {
   checkFormatHere,
   type Shell,
   verifyHere,
+  verifyPushed,
 } from "../src/verify-command.ts";
 import { writeCompany } from "../src/write-factory.ts";
 
@@ -63,7 +65,7 @@ test("a new project gets a package.json with its checks, the core pinned, and gi
   const hooks = readFileSync(join(project, "lefthook.yml"), "utf8");
   assert.match(hooks, /software-factory check-format \{staged_files\}/);
   assert.match(hooks, /software-factory check-docs/);
-  assert.match(hooks, /software-factory verify \{push_files\}/);
+  assert.match(hooks, /software-factory verify --pushed\n {6}use_stdin: true/);
   assert.equal(
     readFileSync(join(project, ".gitignore"), "utf8"),
     "node_modules/\n",
@@ -202,4 +204,47 @@ test("the checks run for real, in the product's folder, and a failing one fails 
     1,
   );
   assert.match(lines.join("\n"), /✗ app:/);
+});
+
+test("before a push, verify checks only the products the commits no remote has yet change", () => {
+  const { project } = factoryWithProducts();
+  const git = (...args: string[]) =>
+    execFileSync(GIT, args, { cwd: project, encoding: "utf8" }).trim();
+  const remote = mkdtempSync(join(tmpdir(), "remote-"));
+  execFileSync(GIT, ["init", "-q", "--bare", remote]);
+  git("init", "-q", "-b", "main");
+  git("config", "user.email", "factory@example.com");
+  git("config", "user.name", "Factory");
+  git("add", "-A");
+  git("commit", "-qm", "The products");
+  git("remote", "add", "origin", remote);
+  git("push", "-q", "origin", "main");
+  git("switch", "-qc", "change");
+  writeFileSync(join(project, "app", "page.ts"), "export {};\n");
+  git("add", "-A");
+  git("commit", "-qm", "A page");
+  const sha = git("rev-parse", "HEAD");
+  const zeros = "0".repeat(40);
+  const pushed = said((out, shell) =>
+    verifyPushed(
+      project,
+      `refs/heads/change ${sha} refs/heads/change ${zeros}\n`,
+      [kit],
+      out,
+      shell,
+    ),
+  );
+  assert.equal(pushed.code, 0);
+  assert.deepEqual(pushed.ran, ["app: npm run verify"]);
+  // A branch deleted, or nothing pushed: nothing to check.
+  const deleted = said((out, shell) =>
+    verifyPushed(
+      project,
+      `(delete) ${zeros} refs/heads/old ${sha}\n`,
+      [kit],
+      out,
+      shell,
+    ),
+  );
+  assert.deepEqual([deleted.code, deleted.ran], [0, []]);
 });

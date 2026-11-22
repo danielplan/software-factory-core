@@ -51,8 +51,9 @@ hooks that `npm install` at the top sets up:
 - **before a commit:** `software-factory check-format` on the staged files,
   which runs the `format:check` of each product they are in, and
   `software-factory check-docs` when a page changed;
-- **before a push:** `software-factory verify` on the pushed files, which
-  runs the `verify` command of each product they are in.
+- **before a push:** `software-factory verify --pushed`, which runs the
+  `verify` command of each product changed by the pushed commits no remote
+  has yet (a new branch counts only its own).
 
 A project that has a `package.json` keeps its own (the core is only pinned
 in it), and one with git hooks of its own (lefthook's settings, husky) gets

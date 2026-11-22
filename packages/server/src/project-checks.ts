@@ -52,9 +52,11 @@ pre-commit:
 
 pre-push:
   jobs:
-    # The verify command of each product the pushed commits change.
+    # The verify command of each product the pushed commits change (git
+    # says which commits on the standard input).
     - name: verify
-      run: npx --no-install software-factory verify {push_files}
+      run: npx --no-install software-factory verify --pushed
+      use_stdin: true
 `;
 
 // True when the checks were added: the project had no package.json.
