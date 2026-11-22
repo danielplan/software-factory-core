@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { messagesIn } from "../src/i18n/messages.ts";
-import { moveStage, settle, stageName } from "../src/lib/stages-view.ts";
+import {
+  moveStage,
+  settle,
+  stageName,
+} from "../src/features/settings/stages-view.ts";
 
 test("a stage moves a place earlier or later, and stays at the ends", () => {
   const order = ["a", "b", "c"];

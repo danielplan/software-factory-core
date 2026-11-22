@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import type { WorkView } from "../src/api.ts";
-import { reasonOf, type Stuck, stuckFor } from "../src/factory/stuck-view.ts";
+import type { WorkView } from "../src/api/client.ts";
+import { reasonOf, type Stuck, stuckFor } from "../src/lib/stuck-view.ts";
 import { waitingOf } from "../src/lib/home-view.ts";
 
 const stuck = (over: Partial<Stuck>): Stuck => ({

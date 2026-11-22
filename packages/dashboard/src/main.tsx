@@ -2,7 +2,7 @@ import "@fontsource-variable/inter";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { App } from "@/app";
+import { App } from "@/app/app";
 import { LanguageProvider } from "@/i18n/use-t";
 import { followLogo, THEME_LOADED } from "@/lib/brand";
 import { lightOnly } from "@/lib/light-only";

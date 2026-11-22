@@ -4,7 +4,7 @@
 // the tester who plays a persona, and the sorter of what comes in. The support kobold carries the factory's
 // kobold name (lib/brand.ts).
 
-import type { PersonaHat } from "@/api";
+import type { PersonaHat } from "@/api/client";
 import type { Page } from "@/lib/routes";
 
 export type KoboldId = "support" | "explorer" | "builder" | "tester" | "sorter";

@@ -13,7 +13,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 export const KOBOLD_NAME = "Sprocket";
 
 // The names the company gave (factory.json's brand), once the factory's
-// state is known (app.tsx).
+// state is known (app/app.tsx).
 type Names = { factory: string | null; own: string | null; kobold: string };
 let names: Names = { factory: null, own: null, kobold: KOBOLD_NAME };
 const listeners = new Set<() => void>();

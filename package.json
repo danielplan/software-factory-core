@@ -22,8 +22,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:docs": "node packages/knowledge-base/bin/check-docs.ts . --leave-out factory",
+    "check:borders:dashboard": "depcruise --config packages/dashboard/.dependency-cruiser.cjs packages/dashboard/src",
     "check:records": "node packages/server/bin/software-factory.ts check examples/acme",
-    "verify": "npm run build -w @software-factory/dashboard && npm run format:check && npm run lint && npm run typecheck && npm run deadcode && npm run duplicates && npm run check:borders:server && npm run test:coverage && npm run check:records && npm run check:docs && npm run check:docs-follow",
+    "verify": "npm run build -w @software-factory/dashboard && npm run format:check && npm run lint && npm run typecheck && npm run deadcode && npm run duplicates && npm run check:borders:server && npm run check:borders:dashboard && npm run test:coverage && npm run check:records && npm run check:docs && npm run check:docs-follow",
     "release": "node scripts/publish-release.mjs",
     "check:docs-follow": "node scripts/docs-follow.mjs"
   },
