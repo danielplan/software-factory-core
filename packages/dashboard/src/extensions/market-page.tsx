@@ -75,8 +75,12 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
   return (
     <div className="grid gap-5">
       <PageHead
-        title="Extensions"
-        about="What your factory can do. Install what you need; the kobold can write your own."
+        title={VARIANT === "B" ? "Marketplace" : "Extensions"}
+        about={
+          VARIANT === "B"
+            ? "What your factory can do, and the services it works with."
+            : "What your factory can do. Install what you need; the kobold can write your own."
+        }
       />
       {VARIANT === "B" && (
         <div role="tablist" aria-label="Marketplace" className="flex gap-1 border-b border-border-soft">

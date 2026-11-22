@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import type { Light } from "@/api";
 import { StatusLight } from "@/components/status-light";
 import { useT } from "@/i18n/use-t";
+import { VARIANT } from "@/lib/prototype-flags";
 import type { Page } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,9 @@ export function PageLink({
       )}
     >
       <Tile color={item.color}>{item.icon}</Tile>
-      {t.pages[item.page]}
+      {item.page === "extensions" && VARIANT === "B"
+        ? "Marketplace"
+        : t.pages[item.page]}
       {children}
     </a>
   );
