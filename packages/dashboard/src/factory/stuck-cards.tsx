@@ -7,7 +7,7 @@
 // conversation, and the card goes to To do, where it says "Your hint is with
 // the builder".
 
-import { ArrowUpRight, Check, CircleAlert, Send } from "lucide-react";
+import { ArrowUpRight, Check, CircleAlert, Play, Send } from "lucide-react";
 import { useState } from "react";
 
 import { messageOf, post } from "@/api";
@@ -78,10 +78,15 @@ function StuckCard({
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const said = hint.trim();
+  // Out of sessions, not stuck on anything: Continue needs no words, a hint
+  // goes with it when written.
+  const carryOn = one.note === "out-of-sessions";
+  const sent = said || (carryOn ? t.stuck.carryOn : "");
+  const label = carryOn ? t.stuck.continue : t.stuck.send;
   const send = () => {
     setSending(true);
     setProblem(null);
-    post("/api/work/answer", { number: one.number, text: said }).then(
+    post("/api/work/answer", { number: one.number, text: sent }).then(
       onSent,
       (error: unknown) => {
         setSending(false);
@@ -120,7 +125,7 @@ function StuckCard({
       )}
       <textarea
         aria-label={t.stuck.answerOn(one.number)}
-        placeholder={t.stuck.placeholder}
+        placeholder={carryOn ? t.stuck.hintIfAny : t.stuck.placeholder}
         value={hint}
         onChange={(event) => {
           write(event.target.value);
@@ -132,11 +137,15 @@ function StuckCard({
       <Button
         size="pill-sm"
         className="self-start"
-        disabled={!said || sending}
+        disabled={!sent || sending}
         onClick={send}
       >
-        <Send aria-hidden className="size-3.5" />
-        {sending ? t.stuck.sending : t.stuck.send}
+        {carryOn ? (
+          <Play aria-hidden className="size-3.5" />
+        ) : (
+          <Send aria-hidden className="size-3.5" />
+        )}
+        {sending ? t.stuck.sending : label}
       </Button>
     </article>
   );

@@ -16,6 +16,7 @@ export function reasonOf(
 ): string {
   if (stuck.note === "checks-failed") return m.checksFailed;
   if (stuck.note === "failed") return m.failed;
+  if (stuck.note === "out-of-sessions") return m.outOfSessions;
   if (stuck.ask) return m.asks(stuck.ask.question);
   const first =
     stuck.text

@@ -459,7 +459,7 @@ test("a builder still not finished after 3 sessions is stopped with a draft and 
   assert.equal(card.stage, "backlog");
   assert.equal(prs.made.length, 1);
   assert.equal(prs.made[0]?.draft, true);
-  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "failed");
+  assert.equal(readNote(card.comments.at(-1)?.body ?? ""), "out-of-sessions");
   assert.match(card.comments.at(-1)?.body ?? "", /3 sessions were not enough/);
   work.switch("build", false);
 });

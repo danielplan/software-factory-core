@@ -145,7 +145,7 @@ export class Jobs {
         ),
     });
     if (gaveUp !== null) {
-      await this.giveUp(card, at, gaveUp, "failed", null);
+      await this.giveUp(card, at, gaveUp.text, gaveUp.note, null);
       return;
     }
     if (answer.status === "blocked") {

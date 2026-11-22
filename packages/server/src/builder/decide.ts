@@ -205,8 +205,8 @@ const OWNING_NOTES: readonly Note[] = NOTES.filter(
 );
 
 // The builder gave up: the checks still red after its rounds of fixing, or
-// it could not finish.
-const GAVE_UP: readonly Note[] = ["checks-failed", "failed"];
+// it could not finish, or it used its sessions and is not finished yet.
+const GAVE_UP: readonly Note[] = ["checks-failed", "failed", "out-of-sessions"];
 
 // A card handed back with the owner's hint: in To do, after the builder's
 // question or giving up, with a comment from the owner since.
