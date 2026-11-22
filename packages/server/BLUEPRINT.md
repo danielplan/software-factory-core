@@ -93,8 +93,8 @@ added to it.
   body read field by field (`src/asked.ts`), not a router with a zod
   schema for every body.
 - **Types for the page:** the page imports some of the server's types by
-  relative path (`packages/dashboard/src/api.ts`), not through a package
-  export.
+  relative path (`packages/dashboard/src/api/client.ts` and a few
+  features), not through a package export.
 - **GitHub outside the slots:** the board's cards (`tasks`) and branches
   and pull requests (`code`) come through the slots, but the GitHub CLI
   (`src/github-cli.ts`) is also run directly by the core's feedback board,

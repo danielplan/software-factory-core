@@ -6,7 +6,7 @@
 // the dashboard built, the skills, their templates and guides, the
 // knowledge base's template and the kits' rules and starters. Its own `bin` is the
 // software-factory command. The folder is then committed to the release
-// branch and tagged release-<version> (docs/releasing.md).
+// branch and tagged release-<version> (docs/how-to/make-a-release.md).
 
 import { execFileSync } from "node:child_process";
 import {

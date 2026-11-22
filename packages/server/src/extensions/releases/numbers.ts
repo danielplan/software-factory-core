@@ -2,7 +2,7 @@
 // follows on from the last. Most releases raise only the last number, new
 // things included; the middle number goes up only when people have to do
 // something, or something they relied on changes or goes away (the same rule
-// the core follows, docs/releasing.md). The first number is never raised by
+// the core follows, docs/reference/versions.md). The first number is never raised by
 // the kobold: the team types it when it wants to.
 
 import { Refused } from "../../refused.ts";

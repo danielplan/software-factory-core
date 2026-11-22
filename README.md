@@ -97,12 +97,14 @@ The core is the same for every company. Extensions and kits ship with it,
 and each company picks the ones it uses in the Marketplace. Your products
 stay in your repository.
 
-More detail:
+More detail is in Kobble's [knowledge base](docs/index.md):
 
-- [Architecture](docs/architecture.md): how the core is built and extended.
-- [Add-ons](docs/add-ons.md): what a company can switch on.
-- [Design system](docs/reference/design-system.md): how the page looks and
-  how its languages work.
+- [What Kobble is](docs/explanation/what-kobble-is.md): how work flows from
+  signals to releases.
+- [How Kobble is built](docs/explanation/how-kobble-is-built.md): the core,
+  extensions, add-ons and kits.
+- [Features](docs/reference/features/index.md): one page per area of Kobble.
+- [Design system](docs/reference/design-system.md): how the page looks.
 
 ## Versions
 
@@ -111,7 +113,8 @@ Kobble is at `0.x`. A release you can take without doing anything is a patch
 something from you, such as a migration or a new setting, is a minor
 (`0.14.0`), and `npx software-factory upgrade` says what to do. What each
 version brought is in the commits between its `v<version>` tag and the one
-before; [releasing](docs/releasing.md) says how a version is made.
+before; [versions](docs/reference/versions.md) has the rule, and
+[make a release](docs/how-to/make-a-release.md) says how a version is made.
 
 ## Working on Kobble
 
@@ -133,7 +136,9 @@ a release.
 
 Before you push, `npm run verify` runs every check (build, format, lint,
 types, dead code, duplicates, tests with coverage, the docs). The git hooks
-run it for you. [AGENTS.md](AGENTS.md) has the conventions.
+run it for you. [AGENTS.md](AGENTS.md) has the conventions, and
+[your first change to Kobble](docs/tutorials/first-change-to-kobble.md)
+walks through one.
 
 | Folder                     | What is in it                                                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |

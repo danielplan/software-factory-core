@@ -4,7 +4,7 @@
   React web app kit's rules (`npx software-factory rules dashboard`, or
   `packages/kits/rules/react-web-app/`), like any product a factory makes.
 - **Promises:** every word it shows is in English, Italian and German (see
-  [the design system's languages](../../docs/reference/design-system.md#languages));
+  [languages](../../docs/reference/languages.md));
   it uses only the libraries the kit's table and the table below name.
 - **Checks:** the core's `npm run verify` at the top of the repository;
   the import rules below with it (`npm run check:borders:dashboard`).
