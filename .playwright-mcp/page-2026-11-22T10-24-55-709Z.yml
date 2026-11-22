@@ -1,0 +1,178 @@
+- generic:
+  - generic [aria-hidden]:
+    - generic:
+      - generic:
+        - complementary:
+          - generic: Acme
+          - navigation:
+            - link:
+              - /url: "#home"
+              - text: Home
+            - link:
+              - /url: "#system"
+              - text: System
+              - generic: Stopped
+          - navigation:
+            - generic:
+              - generic: Work
+              - link:
+                - /url: "#signals"
+                - text: Signals
+                - generic: Sieve
+              - link:
+                - /url: "#explore"
+                - text: Explorations
+                - generic:
+                  - generic: Doodle
+                  - generic: "2"
+              - link:
+                - /url: "#build"
+                - text: Factory
+                - generic: Bolt
+              - link:
+                - /url: "#releases"
+                - text: Releases
+            - generic:
+              - generic: Customers
+              - link:
+                - /url: "#personas"
+                - text: Personas
+                - generic: Mimic
+          - generic:
+            - button: Send feedback
+            - navigation:
+              - link:
+                - /url: "#extensions"
+                - text: Extensions
+              - link:
+                - /url: "#settings"
+                - text: Settings
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Extensions
+                - paragraph: What your factory can do. Install what you need; the kobold can write your own.
+              - generic:
+                - generic:
+                  - textbox:
+                    - /placeholder: Search extensions
+                - group:
+                  - button [pressed]: All
+                  - button: Installed
+                  - button: Kobble's
+                  - button: Your team's
+              - region:
+                - heading [level=2]:
+                  - text: Installed
+                  - generic: "4"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Factory
+                      - paragraph: The board where work is built, from to do to done.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Explorations
+                      - paragraph: Explore an idea with the kobold before anything is built.
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Signals
+                      - paragraph: "What the live app reports: bugs, wishes and how it is used."
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Releases
+                      - paragraph: Numbers and notes for each release of your product.
+              - region:
+                - heading [level=2]:
+                  - text: Available
+                  - generic: "6"
+                - generic:
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Personas
+                      - paragraph: Made-up customers who use the app and tell you what breaks.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: GitHub board
+                      - paragraph: Work tracked on a GitHub board, through the GitHub CLI.
+                    - generic:
+                      - link:
+                        - /url: "#settings/connections"
+                        - text: Use instead
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Jira Cloud
+                      - paragraph: Work tracked in a Jira Cloud project, with an API token.
+                    - generic:
+                      - link:
+                        - /url: "#settings/connections"
+                        - text: Use instead
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Voice
+                      - paragraph: Talk to the kobolds and hear them answer.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic: Verification
+                      - paragraph: Sends a persona through a change before it is merged.
+                    - generic:
+                      - button: Install
+                  - article:
+                    - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: Daily standup
+                          - generic: Your team
+                      - paragraph: "A short page each morning: what moved yesterday, what waits today."
+                    - generic:
+                      - button: Install
+        - region [ref=f1e5]:
+          - button [ref=f1e6] [cursor=pointer]:
+            - generic [ref=f1e16]: Ask Sprocket anything
+            - generic [ref=f1e17]: ⌘J
+  - dialog "GitHub board" [ref=f1e19]:
+    - generic [ref=f1e20]:
+      - generic [ref=f1e25]:
+        - heading "GitHub board" [level=2] [ref=f1e26]
+        - generic [ref=f1e27]: Kobble
+      - paragraph [ref=f1e28]: Work tracked on a GitHub board, through the GitHub CLI.
+      - generic [ref=f1e29]:
+        - heading "What it adds" [level=3] [ref=f1e30]
+        - generic [ref=f1e31]:
+          - generic [ref=f1e32]:
+            - generic [ref=f1e33]: Home blocks
+            - generic [ref=f1e34]: Open reviews
+          - generic [ref=f1e36]:
+            - generic [ref=f1e37]: Stages
+            - generic [ref=f1e38]: Factory
+      - generic [ref=f1e40]:
+        - heading "What it needs" [level=3] [ref=f1e41]
+        - generic [ref=f1e42]:
+          - generic [ref=f1e43]: Needs
+          - generic [ref=f1e44]: Factory, The GitHub CLI, signed in
+      - generic [ref=f1e46]:
+        - heading "What needs it" [level=3] [ref=f1e47]
+        - generic [ref=f1e48]: Nothing installed needs it.
+      - generic [ref=f1e49]:
+        - heading "Settings" [level=3] [ref=f1e50]
+        - generic [ref=f1e51]: Install it to see its settings.
+      - link "Use instead" [ref=f1e53] [cursor=pointer]:
+        - /url: "#settings/connections"
+    - button "Close" [active] [ref=f1e54] [cursor=pointer]

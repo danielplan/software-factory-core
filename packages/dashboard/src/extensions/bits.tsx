@@ -12,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { IconTile } from "@/add-ons/looks";
+import { lookOf } from "@/add-ons/looks";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
@@ -38,15 +38,17 @@ const LOOKS: Record<string, { icon: React.ReactNode; color: string }> = {
   explorations: { icon: <FlaskConical aria-hidden />, color: "var(--explore)" },
   signals: { icon: <Inbox aria-hidden />, color: "var(--understand)" },
   personas: { icon: <Users aria-hidden />, color: "var(--source-app)" },
-  releases: { icon: <Tag aria-hidden />, color: "var(--build)" },
-  voice: { icon: <Mic aria-hidden />, color: "var(--source-usage)" },
-  verification: { icon: <ShieldCheck aria-hidden />, color: "var(--source-test)" },
-  standup: { icon: <Sunrise aria-hidden />, color: "#e9a23b" },
+  releases: { icon: <Tag aria-hidden />, color: "#8b5cf6" },
+  voice: { icon: <Mic aria-hidden />, color: "#0f7f8c" },
+  verification: { icon: <ShieldCheck aria-hidden />, color: "#f0603a" },
+  standup: { icon: <Sunrise aria-hidden />, color: "#7fb800" },
+  github: { icon: lookOf("github").icon, color: "#6366f1" },
+  jira: { icon: lookOf("jira").icon, color: "#0ea5e9" },
 };
 
 export function Logo({ ext, big = false }: Readonly<{ ext: Ext; big?: boolean }>) {
-  const own = LOOKS[ext.id];
-  if (!own) return <IconTile id={ext.id} big={big} />;
+  const own = LOOKS[ext.id] ?? lookOf(ext.id);
+  const color = "color" in own ? own.color : own.colour;
   return (
     <span
       aria-hidden
@@ -55,8 +57,8 @@ export function Logo({ ext, big = false }: Readonly<{ ext: Ext; big?: boolean }>
         big ? "size-12 rounded-xl [&_svg]:size-6" : "size-8 rounded-lg [&_svg]:size-4",
       )}
       style={{
-        color: own.color,
-        backgroundColor: `color-mix(in oklab, ${own.color} 13%, transparent)`,
+        color,
+        backgroundColor: `color-mix(in oklab, ${color} 13%, transparent)`,
       }}
     >
       {own.icon}
