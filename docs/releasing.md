@@ -56,7 +56,7 @@ Setting up the factory pins the core in the project's `package.json`:
 
 ```json
 "devDependencies": {
-  "software-factory": "github:danielplan/software-factory-core#release-0.3.0"
+  "software-factory": "github:danielplan/software-factory-core#release-0.14.0"
 }
 ```
 
@@ -65,7 +65,7 @@ and runs `npx software-factory` (the factory, `card …`, `upgrade`). To move
 to a newer release: change the tag, `npm install`, then
 `npx software-factory upgrade` (the `upgrade-factory` skill does all
 of it). A project without a `package.json` installs the same release
-globally: `npm install -g github:danielplan/software-factory-core#release-0.3.0`.
+globally: `npm install -g github:danielplan/software-factory-core#release-0.14.0`.
 
 Working on the core itself, `npm link` in `packages/server` puts this
 working copy's `software-factory` on the computer instead.

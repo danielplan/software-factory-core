@@ -7,55 +7,59 @@ included, plugs in the same way.
 
 ## The layers
 
-| Layer                      | Who owns it                              | What                                                                                                                                                                                         | Where                                                                                         |
-| -------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice                                                                      | `packages/core`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard/src/voice` |
-| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company switches one off: Explore (ideas) and prototypes, Build (the board with its coach and builder), Home and System (what waits, the product's parts) | to come                                                                                       |
-| **Add-ons**                | the maintainer, or a company for its own | chosen per company: made-up worlds                                                                                                                                                           | to come                                                                                       |
-| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package                                                                                      | to come                                                                                       |
-| **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                                                                       | the company's repository                                                                      |
+| Layer                      | Who owns it                              | What                                                                                                                                                                                                 | Where                                                                                                  |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Core**                   | the maintainer                           | loading products and extensions, parts, settings, running agents, working copies, the method, the knowledge base, voice, Home, System, Sprocket, updates                                             | `packages/core`, `packages/server`, `packages/skills`, `packages/knowledge-base`, `packages/dashboard` |
+| **Core extensions**        | the maintainer                           | shipped with the core, on unless a company removes one in the Marketplace: Factory (the board and its builder, always needed), Explorations (Doodle and its prototypes), Signals, Personas, Releases | `packages/server/src/add-ons/kobble.ts`, their pages in `packages/dashboard/src`                       |
+| **Add-ons**                | the maintainer, or a company for its own | chosen per company: where work is tracked (a GitHub board, Jira Cloud); a team's own extensions, described in its factory folder                                                                     | `packages/server/src/add-ons/`, `packages/core/src/extensions/team.ts`                                 |
+| **Kits**                   | the maintainer                           | one per kind of product: Expo app, React web app, SvelteKit web app, NestJS backend, TypeScript package, other code                                                                                  | `packages/kits`                                                                                        |
+| **Products and knowledge** | the company                              | its apps and services, `docs/`, `runs/`, its own rules                                                                                                                                               | the company's repository                                                                               |
 
 The rule for any piece: if it would be true for a different company, it is
 core, an extension or a kit; otherwise it is the company's.
 
 ## Setting up a factory
 
-One command, run in the project (`npx software-factory`, to come), opens
-the dashboard in the browser. Where the project has no factory yet, it
-starts with setting up: one conversation and one map, in two steps.
+One command, run in the project (`npx software-factory`), opens the
+dashboard in the browser. Where the project has no factory yet, it starts
+with setting up, one step at a time (`packages/dashboard/src/setup-guided/`).
 **The setup coach** (Claude Code on this computer, signed in with the
 owner's own account, following the skills package's
-`packages/skills/guides/setup-coach.md`) first plans the factory with the
-owner. It explores the code with its own tools (never `.env` files) and
-draws how the system works on the map with one tool of its own, `draw`:
-small cards framed in areas, joined by arrows, with pictures from the
-project, the parts and who uses them, the main workflows, and inside them
-what the code cannot say (how real it is, what must never happen, the
-project's words, what is still open), one area at a time, each card a
-guess until the owner agrees. The owner moves or removes cards, and
-changes one by clicking it and telling the coach. When the owner presses
-**Build the factory**, the coach may write in the project and builds it
-itself: the factory's own settings through its other tool, `configure`
-(the project, which makes the folder; its products; the tracker, add-ons,
-settings and tools to install from `packages/server/src/installables.ts`,
-only as the owner agreed), checked as they are saved, and the blueprints
-and knowledge pages with its own tools, until the factory's checks find
-nothing. The owner then presses **Open the factory**. Right after, the dashboard guides
+`packages/skills/guides/setup-coach.md`) hears what the owner wants,
+explores the code with its own tools (never `.env` files) and fills in the
+steps with what it found: Your product, Who it's for, Team and board, How
+Kobble works, Bring over (only when there is something to bring) and,
+unseen by the owner, what each product must keep. Each step holds a few
+small cards, each a guess until the owner agrees; behind them is one map
+the coach draws with a tool of its own, `draw`, an area per step. There is
+no chat: the owner confirms a card, corrects its words in place, takes it
+off, adds people, and answers the coach's questions, which wait as cards on
+their step. When the owner presses **Set up Kobble**, the coach may write
+in the project and builds the factory itself: the factory's own settings
+through its other tool, `configure` (the project, which makes the folder;
+its products; the tracker, add-ons, settings and tools to install from
+`packages/server/src/installables.ts`, only as the owner agreed), checked as
+they are saved, and the blueprints, knowledge pages and theme with its own
+tools, until the factory's checks find nothing. The people in Who it's for
+become personas, and the starting points the coach found become
+explorations waiting (`packages/server/src/coach/setup-records.ts`); the
+last step offers one to start with (**Open it**), or **Look around first**. Right after, the dashboard guides
 connecting where work is tracked: a GitHub board through the GitHub CLI on
 this computer, or Jira Cloud with an API token, each checked before it is
 saved (the GitHub and Jira add-ons, `packages/server/src/add-ons/`). In a new project
 (`software-factory new <name>`), the plan starts from what the owner wants
-to build. The owner can talk instead of typing: voice is part of
-the core (`packages/dashboard/src/voice/`). Two speech models run in the
-browser (Whisper): a quick one shows their words while they speak, an
-accurate one writes the sentence as soon as they pause; the coach's answer is read
-out loud as it is written (Piper, also in the browser), and saying "stop"
+to build. The owner can talk instead of typing, to the setup coach's first
+question and to Doodle in an exploration: voice is part of the core
+(`packages/dashboard/src/voice/`). Two speech models run in the browser
+(Whisper): a quick one shows their words while they speak, an accurate one
+writes the sentence as soon as they pause; the kobold's answer is read out
+loud as it is written (Piper, also in the browser), and saying "stop"
 interrupts it. Nothing said leaves the computer except the written words
-sent to the coach. There are two kinds of start:
+sent to the kobold. There are two kinds of start:
 
 - **Start something new** (greenfield): the company (the coach interviews the
   owner and writes the first knowledge pages), the first product (its kit
-  creates it with the framework's own starter), where work is tracked, and the
+  creates it from the kit's starter, or with the framework's own), where work is tracked, and the
   dashboard with the product running.
 - **Bring an existing codebase** (brownfield): point at folders or
   repositories; each kit recognises its kind of product and the commands that
@@ -63,7 +67,7 @@ sent to the coach. There are two kinds of start:
   is changed: an agent drafts each product's blueprint and the knowledge pages
   from the code as it is, for the owner to review, and the product's own ways
   become its rules where they differ from the kit's. Trust grows step by step:
-  ideas and plans first, then builds as pull requests checked by the
+  explorations first, then builds as pull requests checked by the
   company's existing CI.
 
 **The factory lives in the project**, in its `factory/` folder, kept in the
@@ -79,7 +83,9 @@ which git keeps (the factory's `.gitignore` says `!team.env`, for projects
 that ignore `*.env`). What must not be shared stays out of git
 (`factory/.gitignore`): each person's own settings with their secrets
 (`settings/`: tokens, the AI models, where the usage log is kept, Updates by
-itself) and the agents' working copies (`copies/`). Settings saved in
+itself). The agents' working copies are not in the project at all: they sit
+next to it, the builder's in `<project>-factory-copies/` and the prototypes'
+in `<project>-prototypes/`. Settings saved in
 `settings/factory.env` before 0.12.0 that are the team's are still read from
 there, and move to `team.env` when the factory opens or the group is saved
 (a setting group's `formerly`). The command finds the factory from anywhere
@@ -93,13 +99,12 @@ thought through outside the factory, in explorations) (`STAGES`
 in `packages/server/src/api.ts`). Connecting a board picks the label of
 the work the factory takes in and matches its columns to these stages; the
 factory's `board.json` keeps all of it, and only Jira's API token is kept
-in the settings. Both trackers ship with the core; the builder works GitHub boards for now. In
-Jira, issues move with the company's own workflow's transitions,
-the coaching happens in the issue's comments, and the factory checks for
-changed issues every minute (Jira's webhooks need a public address, and the
-factory runs on this computer). **Where the code lives** (branches and pull
-requests) is GitHub for now; GitLab or Bitbucket can be added as other code
-hosts later.
+in the settings. Both trackers ship with the core, but only a GitHub board
+is worked today: the factory reads its cards, and the builder takes them
+(`packages/server/src/cards/cards-for.ts`). Jira can be connected, with its
+columns matched to the stages, but no card is read from it yet. **Where the
+code lives** (branches and pull requests) is the `code` slot, GitHub today
+(see [Extension points](#extension-points)).
 
 ## A company's factory folder
 
@@ -113,14 +118,17 @@ acme/                    the project, one repository
 └─ factory/              its factory
    ├─ AGENTS.md          the agents' ground rules and workflow
    ├─ factory.json       the company: its kits, add-ons and products' folders
-   ├─ ideas/             the ideas shaped with the idea coach, one file each
    ├─ board.json         the connected board: label, a column per stage
    ├─ setup.json         the setup conversation and its map, kept
    ├─ team.env           the team's settings, in git
+   ├─ home.json          how the team arranged Home (when it did)
+   ├─ stages.json        the order of stages the team chose (when it did)
+   ├─ theme.css          the look of the company's app (when it has one)
+   ├─ extensions/        the team's own extensions, one folder each
    ├─ runs/              its history
    ├─ kobble/            explorations, personas, tests, one file each, in git;
    │                     its signals/ stay on this computer (not in git)
-   └─ settings/, copies/ secrets and working copies, not in git
+   └─ settings/          each person's settings and secrets, not in git
 ```
 
 Each product describes itself next to its code (`shop/product.json`: kind,
@@ -136,6 +144,26 @@ the pages it already had (from 0.6.0; before, `factory/context/` and
 The core never names a product. It reads each product's description (see
 `productSchema` in `packages/core/src/products/product.ts`) and the company
 file (`companySchema` in `packages/core/src/company/company.ts`).
+
+## The kobolds
+
+Kobble's agents are kobolds, each brought by an extension (`brings.kobolds`)
+and each a Claude Code run on this computer with its own guide and tools:
+
+- **Sprocket**, the support kobold, at the bottom of every page (see
+  [Sprocket](#sprocket-the-support-kobold));
+- **Doodle**, the explorer, who thinks an exploration through with the team
+  on its whiteboard, and **Tinker**, Doodle's maker, who builds its
+  prototype (see [Explorations](#kobbles-files));
+- **Bolt**, the builder, who builds the cards in To do (see
+  [the add-ons](add-ons.md#what-each-brings));
+- **Mimic**, the tester, who plays a persona on a mission;
+- **Sieve**, the sorter, who sorts the signals that come in.
+
+Their names and hats are in `packages/dashboard/src/lib/kobolds.ts`; the
+setup coach and the spec writer at hand-off work without a face. There is no
+planner: work is thought through in explorations, and a card in To do is
+the go-ahead.
 
 ## Kobble's files
 
@@ -166,8 +194,9 @@ becomes at most one signal, typed by its kind; its persona is the one whose
 customers include the event's anonymous customer. Then a plain rule looks
 for work that exists already (`packages/core/src/kobble/already.ts`): an
 open exploration that covers at least half of the signal's content words,
-or a fixed signal that says nearly the same. The kobold takes this over
-later.
+or a fixed signal that says nearly the same. The sorter, the kobold the
+Signals extension brings, is to take this over; today it only matches the
+feedback board's posts to personas (see [the feedback board](#the-feedback-board)).
 
 On the Signals page each signal gets **Fix** (a GitHub issue on the
 connected board, in To do, with the signal's id in a hidden mark
@@ -208,67 +237,111 @@ mission now come with the signals (`missions` in `GET /api/kobble/signals`)
 and each persona says whether it is on one (`onMission`).
 
 **Explorations** (`#explore`) are where the team works out what to build
-for a problem, with the kobold
-(`packages/server/src/kobble/explorations/`). Each has one board, a real
-canvas (React Flow, laid out left to right along its arrows with ELK, pan
-and zoom), kept in `explorations/X-1/board.json`: its things (the problem,
-what we heard, notes, choices with options A, B, C, prototypes, diagrams in
-Mermaid, pictures a person pasted or dropped in, kept in `pictures/`), the
-arrows between them with short labels, the places people dragged things
-to, and whether each is a sketch or agreed. A board in the first shape
-(a question, options, prototypes and notes in lists) is read as things and
-arrows (`packages/core/src/kobble/board-shape.ts`). The conversation with
-the kobold is in `conversation.md`, with Claude Code's conversation id to
-go on with it; it is the idea coach's talk (`coach/talk.ts`) with the
-board's tools over MCP (`board-tools.ts`: look at the board, add notes,
-diagrams and choices, change and remove things, link and unlink, point at
-a thing, mark it agreed or a sketch). Its guide is
-`packages/skills/guides/exploration-coach.md`. People move things, switch
-sketch and agreed, choose an option, add pictures and click things to
-attach them to what they type next; the kobold hears what they did with
-their next words. The kobold makes a choice's prototype itself
-(`prototypes.ts`, `making.ts`): one prototype on its branch
-`proto/X-<n>-<key>`, in a copy of the code next to the project, holding the
-options as **variants**, which the board switches outside the app through
-the page address (`?variant=B`, `versions.ts`). It runs while it is made
-(the maker's edits show as they happen) and starts again once they are
-done; it opens on the page the change is on (`opens`). The maker has its
-own tool over MCP (`maker-tools.ts`, `look_at_prototype`) to photograph it
-running, and is made to look once when it did not (`looks.ts`); the kobold
-reviews the pictures. The branch is pushed to origin once committed, so a
-teammate's computer opens it from origin's branch (when it cannot be
-pushed, or there is no origin, the board says it is only on this
-computer); **Open** runs it with the project's `prototype.start` command,
-one at a time, and the board shows it live;
-**Test** starts a persona test on that branch, as the exploration's first
-persona. **Hand off** writes `handoff.md` and makes a GitHub issue on the
-connected board with the problem, the agreed prototype's branch and what
-was learned; the exploration keeps the issue's number as `work`. The
+for a problem, with **Doodle**, the explorer kobold
+(`packages/server/src/kobble/explorations/`). An exploration starts from a
+signal, from a sentence, from Sprocket, from setup's starting points, or
+from an open card in the board's Backlog, which waits in Explorations until
+someone explores it. Each has one board, a **whiteboard** to think on
+(React Flow, pan and zoom), kept in `explorations/X-1/board.json`: its
+things (the problem, what we heard, notes, choices with options A, B, C,
+the prototype, diagrams in Mermaid, pictures a person pasted or dropped in,
+kept in `pictures/`), the arrows between them with short labels, the places
+people dragged things to, and whether each is a sketch or agreed. There is
+no order to follow: ELK spreads the things in two directions, those joined
+by an arrow near each other, around what a person placed. A board in an
+earlier shape is read as things and arrows
+(`packages/core/src/kobble/board-shape.ts`). The conversation with Doodle
+is in `conversation.md`, with Claude Code's conversation id to go on with
+it; it is the same talk as the other kobolds' (`coach/talk.ts`), thinking
+before it answers (Settings › AI models, Thinking before talking), with
+the board's tools over MCP (`board-tools.ts`: look at the board, add notes,
+diagrams and choices, change and remove things, link and unlink, point at a
+thing, mark it agreed or a sketch, choose an option, park another idea as
+an exploration of its own). Its guide is
+`packages/skills/guides/exploration-coach.md`: one living picture changed
+in place, decisions folded into it, open points as "?", few notes. People
+move things, switch sketch and agreed, choose an option, add pictures and
+click things to attach them to what they type next; Doodle hears what they
+did with their next words. Words sent while it answers join that answer,
+and Stop ends it.
+
+**Prototypes** are made by **Tinker**, Doodle's maker
+(`prototypes.ts`, `making.ts`, with the `explore` skill). Doodle starts one
+itself (`make_prototype`), with no button: an exploration has one
+prototype, on its branch `proto/X-<n>-<key>`, in its own copy of the code
+in `<project>-prototypes/`, holding the options as **variants** (four at
+most), which the board switches outside the app through the page address
+(`?variant=B`, `versions.ts`); each variant may show its states too (empty,
+loading, a problem, many items: `?state=<name>`). Doodle asks for a change
+(`change_prototype`), another way (`another_way`) or, once the team picks
+one variant, new variants refining it (`dig_deeper`). Tinker reads the
+product's design system, keeps one conversation per prototype, adds the
+made-up data the change needs, looks at pictures of what it made and clicks
+once through it; it runs no rounds of checks. The prototype runs while it
+is made (Tinker's edits show as they happen) and starts again once they are
+done; it opens on the page the change is on (`opens`). Tinker has its own
+tool over MCP (`maker-tools.ts`, `look_at_prototype`) to photograph it
+running, and is made to look once when it did not (`looks.ts`); Doodle
+reviews the pictures and Tinker's own words for the team. The branch is
+pushed to origin once committed, so a teammate's computer opens it from
+origin's branch (when it cannot be pushed, or there is no origin, the board
+says it is only on this computer); **Open** runs it with the product's
+prototype command, one at a time, and the board shows it live; **Test**
+starts a persona test on that branch, as the exploration's first persona.
+
+**Hand off** (`hand_off`, on the team's yes) needs the prototype agreed,
+with its variant; an idea that changes no screen needs no prototype, only
+its choices, notes or diagrams agreed. A spec writer (`spec-writer.ts`,
+guide `packages/skills/guides/handoff-spec.md`) writes the card from the
+conversation, the board and the agreed prototype, without reading the code:
+a short card in the plan's four steps, what nobody discussed marked
+_Proposed_. The card goes to To do on the connected board (the go-ahead to
+build it), `handoff.md` keeps a copy, the exploration keeps the card's
+number as `work` and closes, and the prototype's copy is removed (its
+branch stays, and the builder starts from its code and look). The page
+shows each step of the hand-off while it runs (`handing-off.ts`). The
 routes are under `/api/kobble/explorations` (`GET` the list,
-`GET /api/kobble/exploration?id=…`, `POST` new, `/start`, `/say`, `/board`,
-`/picture`, `/make`, `/open`, `/test`, `/hand-off`, `/drop`).
+`GET /api/kobble/exploration?id=…`, `POST` new, `/start`, `/say`, `/stop`,
+`/fresh`, `/board`, `/picture`, `/make`, `/open`, `/test`, `/hand-off`,
+`/drop`).
 Each change is told on the page's stream as a `kobble-changed` event.
 `software-factory check` also checks these files and what they name.
 
 **The Factory board** (`#build`, `GET /api/kobble/factory`,
-`packages/server/src/kobble/factory-view.ts`) shows the connected GitHub
-board's cards, as the builder last read them, in four columns: To do (with
-the board's Backlog), Building, Review and Done. A card says
-where it came from: an exploration whose `work` is its number, with the
-agreed prototype, or a fixed signal. The builder and its switch work as
-before.
+`packages/server/src/kobble/factory-view.ts`) shows the agreed work on the
+connected GitHub board, as the builder last read it, in four columns: To
+do, Building (the board's In progress), Review and Done. The board's
+Backlog is not agreed work: its open cards wait in Explorations, and the
+cards the builder got stuck on show in **Stuck**, above the columns. A card
+in To do is the go-ahead: there is no planning stage in the factory. A
+card says where it came from (an exploration whose `work` is its number,
+with the agreed prototype, or a fixed signal) and opens in a panel with its
+type, its plan, its pull request, the conversation with the factory, the
+builder's steps (its trace) and Delete. A card whose pull request clashes
+with main has **Resolve**, which sends it back to the builder to bring main
+in. The builder's switch is at the top.
 
 **The builder keeps to its own cards** (`packages/server/src/builder/decide.ts`).
 A card in In progress is the builder's only when its start (the note
 `started`) is the factory's last word on it; a card a person moved there is
-left to them. When the builder asks a question, cannot finish, or the checks
-stay red after three rounds, it says why on the card, gives it the label
-`factory: stuck` and moves it to Backlog. There it is not a new idea: the
-Factory page shows it in **Stuck**, above the columns, with the builder's
+left to them. A build is up to three sessions in a row
+(`builder/sessions.ts`): a session that ends unfinished, with nothing
+blocking it, is followed by the next, and a short note on the card says how
+far it is; two sessions in a row that add no commit end it.
+
+**Stuck cards.** When the builder asks a question, cannot finish, the checks
+stay red after three rounds, or it used its three sessions with the work
+not finished, it says why on the card, gives it the label `factory: stuck`
+and moves it to Backlog. There it is not a new idea: the Factory page shows
+it in **Stuck**, with why in one line and for how long, the builder's
 suggested answers and a box for a hint; sending posts the hint as a comment
-and moves the card to To do ("Your hint is with the builder"). Moving it to
-To do on the board hands it back the same way. A card's branch is freed only
-from the factory's own copies (`<project>-factory-copies/` and
+and moves the card to To do ("Your hint is with the builder"). Out of
+sessions is not a failure: it has its own note, and its button is
+**Continue**, a hint optional. **Ask Sprocket** opens Sprocket's
+conversation about the card (see [Sprocket](#sprocket-the-support-kobold)).
+Moving the card to To do on the board hands it back the same way.
+
+A card's branch is freed only from the factory's own copies (`<project>-factory-copies/` and
 `<project>-prototypes/`, `CopySettings.ownCopies`); open in any other copy,
 the builder leaves the card to the person working there, with the note
 `by-hand`.
@@ -276,6 +349,23 @@ A copy that lost its link to git (git's own folder for it is gone) is remade
 at the start of the next turn: its folder is moved to `kept/` beside the
 copies, uncommitted work included, never deleted, and the project forgets it
 (`git worktree prune`) before a new copy is added.
+
+## Sprocket, the support kobold
+
+**Sprocket** is always there, at the bottom of every page ("Ask Sprocket
+anything"), for questions about Kobble and the project
+(`packages/server/src/kobble/support.ts`, guide
+`packages/skills/guides/support-kobold.md`). It is the same talk as the
+other kobolds, reads the project and changes no file of it. Its own tools
+over MCP (`support-tools.ts`) add the personas and explorations the team
+describes to it (New persona and New exploration open its conversation
+instead of a form), look at a card on the Factory board (`look_at_card`:
+its text, column and conversation, and on its branch the commits, the
+changed files and the run file; `card-look.ts`), and send the team's agreed
+answer to the builder on a stuck card (`answer_card`, as Send on the
+Factory page does). The conversation lives while the factory runs; New
+conversation starts again (`GET /api/kobble/support`, `POST
+/api/kobble/support`, `/new`, `/stop`).
 
 ## The feedback board
 
@@ -287,8 +377,9 @@ own GitHub sign-in, the GitHub CLI's, as the factory's board does.
 
 The dashboard side is Sprocket's window (`packages/dashboard/src/feedback/`):
 "Ask Sprocket anything", "Send feedback" in the sidebar and "Report this
-error" all open the same window. A wish or something wrong is told in words;
-the kobold (a short script in the browser, not a model) asks one or two
+error" all open the same window. A question goes to Sprocket; a wish or
+something wrong is told in words, and the feedback side (a short script in
+the browser, not a model, `tell-kobold.ts`) asks one or two
 questions, offers a 👍 on a similar post, and writes the post live in a card:
 title, what happened, and what goes along (version, page, the errors the
 factory caught). What looks like the team's data in it (repositories, quoted
@@ -481,18 +572,19 @@ share the project's branches, so Sprocket's `look_at_card` reads it there).
 The first add-ons are where work is tracked: a GitHub board and Jira Cloud (`tracker: true`),
 shown as connections, not as extensions. What each adds:
 
-| Point                              | What                                                                                                              | Today                                                                                                        |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Parts                              | programs the factory starts, watches and stops                                                                    | extensions add their own; a kit makes the parts for each product of its kind (`partsFor`)                    |
-| Settings groups                    | a topic, its `.env` file, its fields; shown on the Settings page                                                  | extensions                                                                                                   |
-| Guides                             | Markdown joined to an agent's instructions (the coach, the prototype maker, the builder)                          | extensions and kits                                                                                          |
-| Commands                           | the usual commands for a kind of product; a product's own win                                                     | kits                                                                                                         |
-| Rules                              | conventions and lessons for a kind of product                                                                     | kits                                                                                                         |
-| MCP servers                        | the tools agents use on a kind of product (its documentation, its checks), written into the project's `.mcp.json` | kits                                                                                                         |
-| Pages, agent tools, workflow steps | the dashboard's pages, the coach's tools, the builder's steps                                                     | to come, with the core extensions                                                                            |
-| Trackers                           | where work is tracked: a GitHub board, Jira Cloud                                                                 | add-ons (`tracker: true`, routes, connecting steps); the builder works GitHub boards (`server/src/builder/`) |
-| Code hosts                         | where branches and pull requests go: GitHub                                                                       | the add-on in the `code` slot gives its `codeHost` (`server/src/builder/code-host.ts`); GitHub today         |
-| Detection                          | a kit recognises its kind of product in existing code                                                             | to come, with the setup page                                                                                 |
+| Point                               | What                                                                                                              | Today                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Parts                               | programs the factory starts, watches and stops                                                                    | extensions add their own; a kit makes the parts for each product of its kind (`partsFor`)                    |
+| Settings groups                     | a topic, its `.env` file, its fields; shown on the Settings page                                                  | extensions                                                                                                   |
+| Guides                              | Markdown joined to an agent's instructions (the coaches, the prototype maker, the builder)                        | extensions and kits                                                                                          |
+| Commands                            | the usual commands for a kind of product; a product's own win                                                     | kits                                                                                                         |
+| Rules                               | conventions and lessons for a kind of product                                                                     | kits                                                                                                         |
+| MCP servers                         | the tools agents use on a kind of product (its documentation, its checks), written into the project's `.mcp.json` | kits                                                                                                         |
+| Pages, Home blocks, kobolds, stages | what an extension brings to the sidebar, Home and the order of work                                               | extensions (`brings`, `stages`); a team's own pages and blocks are described, not coded                      |
+| Agent tools                         | the kobolds' own tools                                                                                            | to come                                                                                                      |
+| Trackers                            | where work is tracked: a GitHub board, Jira Cloud                                                                 | add-ons (`tracker: true`, routes, connecting steps); the builder works GitHub boards (`server/src/builder/`) |
+| Code hosts                          | where branches and pull requests go: GitHub                                                                       | the add-on in the `code` slot gives its `codeHost` (`server/src/builder/code-host.ts`); GitHub today         |
+| Detection                           | a kit recognises its kind of product in existing code                                                             | kits (`detect`, `packages/core/src/setup/detect.ts`)                                                         |
 
 Which add-ons the core ships, what each needs, and the order they come in:
 [the add-ons](add-ons.md).
@@ -515,8 +607,9 @@ has no kit, a part listed twice, a dependency that is not there.
   It says what it did and what it leaves to the owner; the owner reviews the
   changes and commits them. A company never edits the core; it uses an
   extension point, or asks for a change here.
-- **Extensions and kits:** each has its own version and release notes, and is
-  switched on or off in `factory.json`. A kit's rules are read-only in the
+- **Extensions and kits:** they come with the core, at its version, and
+  each is switched on or off in `factory.json` (through the Marketplace); a
+  team's own extensions change through pull requests like its code. A kit's rules are read-only in the
   company; the company and each product add their own on top, and where they
   differ, the product's rule wins, with the reason written down.
 - **Their own work:** products, knowledge and own rules change through normal
