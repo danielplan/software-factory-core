@@ -324,7 +324,7 @@ function Interview() {
     <>
       <Plan
         items={[
-          { icon: MousePointerClick, text: "A short interview: who it’s for and what it does" },
+          { icon: MousePointerClick, text: "The idea in a sentence, whose problem, what’s out of scope" },
           { icon: PackageCheck, text: "Your apps, made from the kits’ starters" },
           { icon: Play, text: "A first prototype you can click" },
         ]}
@@ -333,8 +333,8 @@ function Interview() {
         <KoboldHead size={40} />
         <div className="grid min-w-0 flex-1 gap-3 rounded-[4px_16px_16px_16px] bg-card px-4 py-3 text-[14.5px] leading-relaxed shadow-card">
           <p>
-            <b className="font-semibold">First question.</b> Who is it for, and
-            what is the one thing they should be able to do?
+            <b className="font-semibold">First question.</b> What’s your idea,
+            in one sentence?
           </p>
           {sent === null ? (
             <form
