@@ -14,11 +14,13 @@ import {
   Plus,
   X,
 } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { get, onKobbleChanged, post } from "@/api";
 
 import { IconTile } from "@/add-ons/looks";
+import { useFlip } from "@/lib/use-flip";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -232,102 +234,228 @@ export function HomeBlocks({
   const [layout, change] = useLayout();
   const [dragging, setDragging] = useState<BlockId | null>(null);
   const [over, setOver] = useState<BlockId | null>(null);
+  // Calm motion: blocks slide to their new place and a new one fades in; a
+  // hidden one collapses away; a placed one gets a ring that fades.
+  const root = useRef<HTMLDivElement>(null);
+  useFlip(root, true);
+  const [leaving, setLeaving] = useState<BlockId | null>(null);
+  const [lit, setLit] = useState<BlockId | null>(null);
+  // Placing a block just added: it follows the pointer until it is put down.
+  const [placing, setPlacing] = useState<{ id: BlockId; x: number; y: number } | null>(null);
+  const [dropAt, setDropAt] = useState(0);
   const shown = visibleOf(layout, installed);
   const arranging = editing;
+  const now = useRef({ layout, installed, shown: shown.length, drop: 0 });
+  now.current = { ...now.current, layout, installed, shown: shown.length };
+  const pick = (id: BlockId, x: number, y: number) => {
+    now.current.drop = shown.length;
+    setDropAt(shown.length);
+    setPlacing({ id, x, y });
+    onAdding(false);
+  };
+  const placingId = placing?.id ?? null;
+  useEffect(() => {
+    if (!placingId) return;
+    const place = (at: number) => {
+      change(placeAt(now.current.layout, placingId, at, now.current.installed));
+      setPlacing(null);
+      setLit(placingId);
+      setTimeout(() => {
+        setLit(null);
+      }, 1500);
+    };
+    const nearest = (y: number) => {
+      let at = 0;
+      for (const el of document.querySelectorAll<HTMLElement>("[data-block]")) {
+        const r = el.getBoundingClientRect();
+        if (r.top + r.height / 2 < y) at += 1;
+      }
+      return at;
+    };
+    const move = (e: PointerEvent) => {
+      setPlacing((p) => (p ? { ...p, x: e.clientX, y: e.clientY } : p));
+      now.current.drop = nearest(e.clientY);
+      setDropAt(now.current.drop);
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        setPlacing(null);
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const next = now.current.drop + (e.key === "ArrowUp" ? -1 : 1);
+        now.current.drop = Math.max(0, Math.min(now.current.shown, next));
+        setDropAt(now.current.drop);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        place(now.current.drop);
+      }
+    };
+    const click = () => {
+      place(now.current.drop);
+    };
+    // The click that chose Add is over before the next one can place it.
+    const later = setTimeout(() => {
+      window.addEventListener("click", click);
+    }, 0);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("keydown", key, true);
+    document.body.style.cursor = "grabbing";
+    return () => {
+      clearTimeout(later);
+      window.removeEventListener("click", click);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("keydown", key, true);
+      document.body.style.cursor = "";
+    };
+  }, [placingId, change]);
+  // Leaving arrange mode puts a block still in hand away.
+  useEffect(() => {
+    if (!arranging) setPlacing(null);
+  }, [arranging]);
+  // A block just placed is scrolled into view.
+  useEffect(() => {
+    if (!lit) return;
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-block="${lit}"]`)
+        ?.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "nearest" });
+    });
+  }, [lit]);
+  const hide = (id: BlockId) => {
+    setLeaving(id);
+    setTimeout(() => {
+      change({ ...layout, hidden: [...layout.hidden, id] });
+      setLeaving(null);
+    }, 200);
+  };
   return (
     <>
-      {shown.map((id, at) => (
-        <div
-          key={id}
-          draggable={arranging}
-          onDragStart={() => setDragging(id)}
-          onDragEnd={() => {
-            setDragging(null);
-            setOver(null);
-          }}
-          onDragOver={(e) => {
-            if (!arranging || !dragging) return;
-            e.preventDefault();
-            setOver(id);
-          }}
-          onDrop={() => {
-            if (dragging)
-              change({
-                ...layout,
-                order: moveBefore(layout.order, dragging, id),
-              });
-            setDragging(null);
-            setOver(null);
-          }}
-          className={
-            "grid gap-2" +
-            (arranging
-              ? " rounded-xl border border-dashed border-border p-2 [&_[data-block-title]]:hidden" +
-                (over === id && dragging !== id ? " bg-surface" : "") +
-                (dragging === id ? " opacity-50" : "")
-              : "")
-          }
-        >
-          {arranging && (
-            <div className="flex items-center gap-2 text-xs">
-              <GripVertical
-                aria-hidden
-                className="size-4 cursor-grab text-muted-foreground"
-              />
-              <span className="min-w-0 flex-1 truncate font-medium">
-                {nameOf(id)}
-                {(
-                  <span className="ml-2 font-normal text-muted-foreground">
-                    {fromOf(id)}
+      <div ref={root} className="contents">
+        {shown.map((id, at) => (
+          <div
+            key={id}
+            data-block={id}
+            data-flip={id}
+            draggable={arranging && !placing}
+            onDragStart={() => setDragging(id)}
+            onDragEnd={() => {
+              setDragging(null);
+              setOver(null);
+            }}
+            onDragOver={(e) => {
+              if (!arranging || !dragging) return;
+              e.preventDefault();
+              setOver(id);
+            }}
+            onDrop={() => {
+              if (dragging)
+                change({
+                  ...layout,
+                  order: moveBefore(layout.order, dragging, id),
+                });
+              setDragging(null);
+              setOver(null);
+            }}
+            className={cn(
+              "relative grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+              leaving === id ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr]",
+              lit === id && "m-ring rounded-xl",
+            )}
+          >
+            {placing && <DropLine on={dropAt === at} where="top" />}
+            {placing && at === shown.length - 1 && (
+              <DropLine on={dropAt === shown.length} where="bottom" />
+            )}
+            <div
+              className={cn(
+                "grid min-h-0 gap-2",
+                leaving === id && "overflow-hidden",
+                arranging &&
+                  "rounded-xl border border-dashed border-border p-2 [&_[data-block-title]]:hidden",
+                arranging && over === id && dragging !== id && "bg-surface",
+                arranging && dragging === id && "opacity-50",
+              )}
+            >
+              {arranging && (
+                <div className="flex items-center gap-2 text-xs">
+                  <GripVertical
+                    aria-hidden
+                    className="size-4 cursor-grab text-muted-foreground"
+                  />
+                  <span className="min-w-0 flex-1 truncate font-medium">
+                    {nameOf(id)}
+                    <span className="ml-2 font-normal text-muted-foreground">
+                      {fromOf(id)}
+                    </span>
                   </span>
-                )}
-              </span>
-              <button
-                type="button"
-                aria-label="Move up"
-                disabled={at === 0}
-                className={button + " disabled:opacity-40"}
-                onClick={() => change(nudge(layout, id, -1, installed))}
-              >
-                <ArrowUp aria-hidden className="size-3" />
-              </button>
-              <button
-                type="button"
-                aria-label="Move down"
-                disabled={at === shown.length - 1}
-                className={button + " disabled:opacity-40"}
-                onClick={() => change(nudge(layout, id, 1, installed))}
-              >
-                <ArrowDown aria-hidden className="size-3" />
-              </button>
-              <button
-                type="button"
-                className={button}
-                onClick={() =>
-                  change({ ...layout, hidden: [...layout.hidden, id] })
-                }
-              >
-                <X aria-hidden className="size-3" />
-                Hide
-              </button>
+                  <button
+                    type="button"
+                    aria-label="Move up"
+                    disabled={at === 0}
+                    className={button + " disabled:opacity-40"}
+                    onClick={() => change(nudge(layout, id, -1, installed))}
+                  >
+                    <ArrowUp aria-hidden className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Move down"
+                    disabled={at === shown.length - 1}
+                    className={button + " disabled:opacity-40"}
+                    onClick={() => change(nudge(layout, id, 1, installed))}
+                  >
+                    <ArrowDown aria-hidden className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className={button}
+                    onClick={() => {
+                      hide(id);
+                    }}
+                  >
+                    <X aria-hidden className="size-3" />
+                    Hide
+                  </button>
+                </div>
+              )}
+              {blocks[id]}
             </div>
-          )}
-          {blocks[id]}
-        </div>
-      ))}
-      {arranging && (
-        <>
+          </div>
+        ))}
+        {arranging && (
           <button
             type="button"
+            data-flip="slot"
             onClick={() => {
-              onAdding(true);
+              if (!placing) onAdding(true);
             }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-6 text-[13px] text-muted-foreground hover:bg-surface hover:text-foreground"
+            className={cn(
+              "flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-6 text-[13px] transition-colors duration-150",
+              placing && dropAt === shown.length
+                ? "border-blue bg-blue/5 text-blue"
+                : "border-border text-muted-foreground hover:bg-surface hover:text-foreground",
+            )}
           >
             <Plus aria-hidden className="size-4" />
-            Add a block
+            {placing ? "Place it here" : "Add a block"}
           </button>
-        </>
+        )}
+      </div>
+      {placing && (
+        <div
+          aria-hidden
+          className="m-rise pointer-events-none fixed z-[60] grid w-56 gap-0.5 rounded-xl border border-border bg-card px-3 py-2 shadow-lg"
+          style={{ left: placing.x + 14, top: placing.y + 14, rotate: "1.5deg" }}
+        >
+          <span className="text-[13px] font-medium">{nameOf(placing.id)}</span>
+          <span className="text-[11px] text-muted-foreground">
+            Click to place · Esc to cancel · ↑ ↓ and Enter
+          </span>
+        </div>
       )}
       <Dialog open={resetting && arranging} onOpenChange={onResetting}>
         <DialogContent className="sm:max-w-[440px]">
@@ -359,13 +487,48 @@ export function HomeBlocks({
       </Dialog>
       <AddBlock
         layout={layout}
-        change={change}
         installed={installed}
-        open={adding && arranging}
+        open={adding && arranging && !placing}
         onOpenChange={onAdding}
+        onPick={pick}
       />
     </>
   );
+}
+
+// A thin line between blocks while one is being placed; the nearest is lit.
+function DropLine({
+  on,
+  where,
+}: Readonly<{ on: boolean; where: "top" | "bottom" }>) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute inset-x-0 z-10 h-0.5 rounded-full transition-colors duration-150",
+        where === "top" ? "-top-[11px]" : "-bottom-[11px]",
+        on ? "bg-blue" : "bg-blue/20",
+      )}
+    />
+  );
+}
+
+// Where a block goes among the ones shown (at counts them from the top).
+function placeAt(
+  l: Layout,
+  id: BlockId,
+  at: number,
+  installed: Installed,
+): Layout {
+  const rest = l.order.filter((x) => x !== id);
+  const seen = rest.filter((x) => !l.hidden.includes(x) && offeredOf(x, installed));
+  const order = [...rest];
+  const next = seen[at];
+  const last = seen[seen.length - 1];
+  if (next) order.splice(rest.indexOf(next), 0, id);
+  else if (last) order.splice(rest.indexOf(last) + 1, 0, id);
+  else order.push(id);
+  return { order, hidden: l.hidden.filter((x) => x !== id) };
 }
 
 // What a block looks like, drawn small.
@@ -487,16 +650,17 @@ function ExtIcon({ name }: Readonly<{ name: string }>) {
 // blocks of the one picked at the right, each with a small preview.
 function AddBlock({
   layout,
-  change,
   installed,
   open,
   onOpenChange,
+  onPick,
 }: Readonly<{
   layout: Layout;
-  change: (l: Layout) => void;
   installed: Installed;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // Add: the dialog closes and the block is placed by hand.
+  onPick: (id: BlockId, x: number, y: number) => void;
 }>) {
   const offered = BLOCKS.filter((b) => offeredOf(b.id, installed));
   const from = [...new Set(offered.map((b) => b.from))];
@@ -556,11 +720,8 @@ function AddBlock({
                       <button
                         type="button"
                         className={button}
-                        onClick={() => {
-                          change({
-                            ...layout,
-                            hidden: layout.hidden.filter((x) => x !== b.id),
-                          });
+                        onClick={(e) => {
+                          onPick(b.id, e.clientX, e.clientY);
                         }}
                       >
                         <Plus aria-hidden className="size-3" />

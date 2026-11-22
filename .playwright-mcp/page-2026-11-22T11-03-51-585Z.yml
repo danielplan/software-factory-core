@@ -1,0 +1,92 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Marketplace" [ref=e131] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e135] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e140]:
+    - generic [ref=e475]:
+      - generic [ref=e476]:
+        - heading "Marketplace" [level=1] [ref=e479]
+        - paragraph [ref=e480]: What your factory can do, and the services it works with.
+      - tablist "Marketplace" [ref=e481]:
+        - tab "Extensions" [ref=e483] [cursor=pointer]
+        - tab "Connections" [active] [selected] [ref=e486] [cursor=pointer]
+        - tab "Product kits" [ref=e489] [cursor=pointer]
+      - generic [ref=e638]:
+        - region "Your code" [ref=e639]:
+          - generic [ref=e640]:
+            - heading "Your code" [level=2] [ref=e641]
+            - paragraph [ref=e642]: Branches and pull requests. Pick one.
+          - article "GitHub" [ref=e644]:
+            - button "Open GitHub" [ref=e645] [cursor=pointer]
+            - generic [ref=e646]:
+              - generic [ref=e647]:
+                - generic [ref=e651]: GitHub
+                - generic [ref=e654]:
+                  - text: In use
+                  - img "In use" [ref=e655]
+              - paragraph [ref=e658]: Your code and its pull requests, through the GitHub CLI.
+              - paragraph [ref=e659]: Branches and pull requests
+        - region "Your tasks" [ref=e660]:
+          - generic [ref=e661]:
+            - heading "Your tasks" [level=2] [ref=e662]
+            - paragraph [ref=e663]: Where the Factory's cards are kept. Pick one.
+          - generic [ref=e664]:
+            - article "GitHub board" [ref=e665]:
+              - button "Open GitHub board" [ref=e666] [cursor=pointer]
+              - generic [ref=e667]:
+                - generic [ref=e668]:
+                  - generic [ref=e672]: GitHub board
+                  - generic [ref=e675]:
+                    - text: In use
+                    - img "In use" [ref=e676]
+                - paragraph [ref=e679]: Work tracked on a GitHub board, through the GitHub CLI.
+            - article "Jira Cloud" [ref=e680]:
+              - button "Open Jira Cloud" [ref=e681] [cursor=pointer]
+              - generic [ref=e682]:
+                - generic [ref=e683]: Jira Cloud
+                - paragraph [ref=e690]: Work tracked in a Jira Cloud project, with an API token.
+              - button "Switch to Jira" [ref=e692] [cursor=pointer]
+  - region "Sprocket" [ref=e472]:
+    - button "Ask Sprocket anything ⌘J" [ref=e473] [cursor=pointer]:
+      - generic [ref=e229]: Ask Sprocket anything
+      - generic [ref=e230]: ⌘J

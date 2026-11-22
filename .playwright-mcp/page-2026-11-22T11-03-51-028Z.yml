@@ -1,0 +1,128 @@
+- generic [ref=e5]:
+  - complementary [ref=e6]:
+    - generic [ref=e7]: Acme
+    - navigation "Overview" [ref=e19]:
+      - link "Home" [ref=e20] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e25] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e37]:
+          - text: Stopped
+          - img "Stopped" [ref=e38]
+    - navigation "Pages" [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: Work
+        - link "Signals Sieve" [ref=e42] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e48]': Sieve
+        - link "Explorations Doodle 2" [ref=e61] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e65]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e66]': Doodle
+            - generic [ref=e78]: "2"
+        - link "Factory Bolt" [ref=e79] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e84]': Bolt
+        - link "Releases" [ref=e98] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e103]:
+        - generic [ref=e104]: Customers
+        - link "Personas Mimic" [ref=e105] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e113]': Mimic
+    - generic [ref=e124]:
+      - button "Send feedback" [ref=e125] [cursor=pointer]
+      - navigation "The factory" [ref=e130]:
+        - link "Marketplace" [active] [ref=e131] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e135] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e140]:
+    - generic [ref=e475]:
+      - generic [ref=e476]:
+        - heading "Marketplace" [level=1] [ref=e479]
+        - paragraph [ref=e480]: What your factory can do, and the services it works with.
+      - tablist "Marketplace" [ref=e481]:
+        - tab "Extensions" [selected] [ref=e483] [cursor=pointer]
+        - tab "Connections" [ref=e486] [cursor=pointer]
+        - tab "Product kits" [ref=e489] [cursor=pointer]
+      - generic [ref=e494]:
+        - textbox "Search extensions" [ref=e496]
+        - group "Filter" [ref=e497]:
+          - button "All" [pressed] [ref=e498] [cursor=pointer]
+          - button "Installed" [ref=e499] [cursor=pointer]
+          - button "Kobble's" [ref=e500] [cursor=pointer]
+          - button "Your team's" [ref=e501] [cursor=pointer]
+      - region "Installed" [ref=e502]:
+        - heading "Installed 4" [level=2] [ref=e503]:
+          - text: Installed
+          - generic [ref=e504]: "4"
+        - generic [ref=e505]:
+          - article "Factory" [ref=e506]:
+            - button "Open Factory" [ref=e507] [cursor=pointer]
+            - generic [ref=e508]:
+              - generic [ref=e509]:
+                - generic [ref=e513]: Factory
+                - img "Installed" [ref=e517]
+              - paragraph [ref=e520]: The board where work is built, from to do to done.
+          - article "Explorations" [ref=e521]:
+            - button "Open Explorations" [ref=e522] [cursor=pointer]
+            - generic [ref=e523]:
+              - generic [ref=e524]:
+                - generic [ref=e528]: Explorations
+                - img "Installed" [ref=e532]
+              - paragraph [ref=e535]: Explore an idea with the kobold before anything is built.
+          - article "Signals" [ref=e536]:
+            - button "Open Signals" [ref=e537] [cursor=pointer]
+            - generic [ref=e538]:
+              - generic [ref=e539]:
+                - generic [ref=e544]: Signals
+                - img "Installed" [ref=e548]
+              - paragraph [ref=e551]: "What the live app reports: bugs, wishes and how it is used."
+          - article "Releases" [ref=e552]:
+            - button "Open Releases" [ref=e553] [cursor=pointer]
+            - generic [ref=e554]:
+              - generic [ref=e555]:
+                - generic [ref=e560]: Releases
+                - img "Installed" [ref=e564]
+              - paragraph [ref=e567]: Numbers and notes for each release of your product.
+      - region "Available" [ref=e568]:
+        - heading "Available 4" [level=2] [ref=e569]:
+          - text: Available
+          - generic [ref=e570]: "4"
+        - generic [ref=e571]:
+          - article "Personas" [ref=e572]:
+            - button "Open Personas" [ref=e573] [cursor=pointer]
+            - generic [ref=e574]:
+              - generic [ref=e575]: Personas
+              - paragraph [ref=e585]: Made-up customers who use the app and tell you what breaks.
+            - button "Install" [ref=e587] [cursor=pointer]
+          - article "Voice" [ref=e588]:
+            - button "Open Voice" [ref=e589] [cursor=pointer]
+            - generic [ref=e590]:
+              - generic [ref=e591]: Voice
+              - paragraph [ref=e599]: Talk to the kobolds and hear them answer.
+            - button "Install" [ref=e601] [cursor=pointer]
+          - article "Verification" [ref=e602]:
+            - button "Open Verification" [ref=e603] [cursor=pointer]
+            - generic [ref=e604]:
+              - generic [ref=e605]: Verification
+              - paragraph [ref=e613]: Sends a persona through a change before it is merged.
+            - button "Install" [ref=e615] [cursor=pointer]
+          - article "Daily standup" [ref=e616]:
+            - button "Open Daily standup" [ref=e617] [cursor=pointer]
+            - generic [ref=e618]:
+              - generic [ref=e626]:
+                - generic [ref=e627]: Daily standup
+                - generic [ref=e629]: Made by your team
+              - paragraph [ref=e635]: "A short page each morning: what moved yesterday, what waits today."
+            - button "Install" [ref=e637] [cursor=pointer]
+  - region "Sprocket" [ref=e472]:
+    - button "Ask Sprocket anything ⌘J" [ref=e473] [cursor=pointer]:
+      - generic [ref=e229]: Ask Sprocket anything
+      - generic [ref=e230]: ⌘J

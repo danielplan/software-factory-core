@@ -13,7 +13,7 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import { PageHead } from "@/components/page-head";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import type { FactoryState } from "@/dashboard/dashboard";
 import { GroupForm } from "@/dashboard/settings-card";
 import { FIELD } from "@/lib/field-style";
 import { VARIANT } from "@/lib/prototype-flags";
+import { useFlip } from "@/lib/use-flip";
 import { cn } from "@/lib/utils";
 
 import { Adds, Logo, Maker, Needs } from "./bits";
@@ -52,6 +53,20 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
   const [tab, setTab] = useState<"Extensions" | "Connections" | "Product kits">("Extensions");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
+  // Calm motion: the one just installed, the one on its way out, the tab
+  // marker, and things sliding into their new place.
+  const [fresh, setFresh] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState<string | null>(null);
+  const tabs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [marker, setMarker] = useState<{ left: number; width: number } | null>(
+    null,
+  );
+  const page = useRef<HTMLDivElement>(null);
+  useFlip(page);
+  useLayoutEffect(() => {
+    const at = tabs.current[tab];
+    if (at) setMarker({ left: at.offsetLeft, width: at.offsetWidth });
+  }, [tab]);
   const [openId, setOpenId] = useState<string | null>(null);
   // Installing one that needs others not installed yet: asks first.
   const [asking, setAsking] = useState<{ ext: Ext; also: Ext[] } | null>(null);
@@ -84,13 +99,22 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         on: true,
       }
     : null;
+  const justInstalled = (id: string) => {
+    setFresh(id);
+    setTimeout(() => {
+      setFresh(null);
+    }, 900);
+  };
   const install = (ext: Ext) => {
     const also = missingFor(ext, all);
     if (also.length > 0) setAsking({ ext, also });
-    else turn(ext.id, true);
+    else {
+      turn(ext.id, true);
+      justInstalled(ext.id);
+    }
   };
   return (
-    <div className="grid gap-5">
+    <div ref={page} className="grid gap-5">
       <PageHead
         title={VARIANT === "B" ? "Marketplace" : "Extensions"}
         about={
@@ -103,11 +127,19 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         <div
           role="tablist"
           aria-label="Marketplace"
-          className="inline-flex w-fit gap-1 rounded-xl bg-surface-2 p-1"
+          className="relative inline-flex w-fit gap-1 rounded-xl bg-surface-2 p-1"
         >
+          <span
+            aria-hidden
+            className="absolute top-1 bottom-1 rounded-lg bg-card shadow-current transition-[left,width] duration-200 ease-out motion-reduce:transition-none"
+            style={marker ? { left: marker.left, width: marker.width } : { display: "none" }}
+          />
           {TABS.map(({ name, icon }) => (
             <button
               key={name}
+              ref={(el) => {
+                tabs.current[name] = el;
+              }}
               type="button"
               role="tab"
               aria-selected={tab === name}
@@ -115,9 +147,9 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                 setTab(name);
               }}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium [&_svg]:size-3.5",
+                "relative inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-colors duration-200 [&_svg]:size-3.5",
                 tab === name
-                  ? "bg-card text-foreground shadow-current"
+                  ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -221,7 +253,7 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                   {list.length}
                 </span>
               </h2>
-              <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="m-stagger grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {list.map((ext) => (
                   <Card
                     key={ext.id}
@@ -231,6 +263,8 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
                         ? `Add-on: ${trackers.find((t) => t.on)?.name ?? "none yet"}`
                         : undefined
                     }
+                    fresh={fresh === ext.id}
+                    leaving={leaving === ext.id}
                     onOpen={() => {
                       setOpenId(ext.id);
                     }}
@@ -271,7 +305,13 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
         }}
         onOpen={setOpenId}
         onRemove={(e) => {
-          turn(e.id, false);
+          // The card fades out first; the rest close up as it goes.
+          setOpenId(null);
+          setLeaving(e.id);
+          setTimeout(() => {
+            turn(e.id, false);
+            setLeaving(null);
+          }, 200);
         }}
       />
       <Dialog
@@ -339,7 +379,10 @@ export function MarketPage({ state }: Readonly<{ state: FactoryState }>) {
               size="pill"
               onClick={() => {
                 if (asking)
-                  for (const e of [...asking.also, asking.ext]) turn(e.id, true);
+                  for (const e of [...asking.also, asking.ext]) {
+                    turn(e.id, true);
+                    justInstalled(e.id);
+                  }
                 setAsking(null);
               }}
             >
@@ -360,10 +403,16 @@ function Card({
   note,
   usedBy,
   badge,
+  fresh = false,
+  leaving = false,
   label = "Installed",
 }: Readonly<{
   ext: Ext;
   onOpen: () => void;
+  // Just installed: it turns green and its check pops in.
+  fresh?: boolean;
+  // Being removed: it fades out.
+  leaving?: boolean;
   // A small line under the one-liner.
   note?: string;
   // The products that use it (a kit), as chips in the card's foot.
@@ -374,11 +423,16 @@ function Card({
   action: React.ReactNode;
   label?: "Installed" | "In use" | "Connected" | "Pre-installed";
 }>) {
+  // GitHub as the code host and GitHub as the board are two cards.
+  const flipId = ext.name === "GitHub" ? "github-code" : ext.id;
   return (
     <article
       aria-label={ext.name}
+      data-flip={flipId}
       className={cn(
-        "relative grid content-between gap-3.5 rounded-xl p-4 transition-shadow hover:shadow-card",
+        "relative grid content-between gap-3.5 rounded-xl p-4 transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        fresh ? "m-tint" : "m-rise",
+        leaving && "m-leave",
         ext.on
           ? "bg-success/[0.07] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--success)_22%,transparent)]"
           : "bg-card shadow-soft",
@@ -410,12 +464,22 @@ function Card({
             )}
           </div>
           {ext.on && (
-            <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-success">
+            <span
+              data-flip={
+                label === "In use"
+                  ? `inuse-${flipId === "github-code" ? "code" : "cards"}`
+                  : undefined
+              }
+              className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-success"
+            >
               {label !== "Installed" && label}
               <span
                 role="img"
                 aria-label={label}
-                className="grid size-5 flex-none place-items-center rounded-full bg-success text-white"
+                className={cn(
+                  "grid size-5 flex-none place-items-center rounded-full bg-success text-white",
+                  fresh && "m-pop",
+                )}
               >
                 <Check aria-hidden className="size-3" strokeWidth={3} />
               </span>
@@ -481,7 +545,7 @@ function Group({
         <h2 className="text-[15px] font-semibold">{title}</h2>
         <p className="text-[13px] text-muted-foreground">{about}</p>
       </div>
-      <div className="grid items-stretch gap-4 sm:grid-cols-2">{children}</div>
+      <div className="m-stagger grid items-stretch gap-4 sm:grid-cols-2">{children}</div>
     </section>
   );
 }
@@ -506,7 +570,7 @@ function TrackerGroup({
         <h2 className="text-[15px] font-semibold">{title}</h2>
         <p className="text-[13px] text-muted-foreground">{about}</p>
       </div>
-      <div className="grid items-stretch gap-4 sm:grid-cols-2">
+      <div className="m-stagger grid items-stretch gap-4 sm:grid-cols-2">
         {trackers.map((ext) => (
           <Card
             key={ext.id}
@@ -815,7 +879,7 @@ function KitsTab({ onOpen }: Readonly<{ onOpen: (id: string) => void }>) {
         Kobble comes with these kits. Each teaches the kobolds one kind of
         product.
       </p>
-      <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="m-stagger grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {KITS.map((k) => (
           <Card
             key={k.id}
