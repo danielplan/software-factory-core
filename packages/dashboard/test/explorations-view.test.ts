@@ -30,7 +30,8 @@ const pageWith = (
   status: string,
   things: { kind: string; key?: string; agreed: boolean }[],
   runs: { version: string; state: string }[],
-) => ({ exploration: { status }, board: { things }, runs }) as never;
+  canRun = true,
+) => ({ exploration: { status }, board: { things }, runs, canRun }) as never;
 
 test("the agreed prototype starts, otherwise the newest, when none runs", () => {
   const a = { kind: "prototype", key: "A", agreed: false };
@@ -52,4 +53,9 @@ test("the agreed prototype starts, otherwise the newest, when none runs", () => 
   );
   assert.equal(toStart(pageWith("handed-off", [a], [])), null);
   assert.equal(toStart(pageWith("exploring", [], [])), null);
+});
+
+test("nothing starts by itself where a prototype cannot run", () => {
+  const a = { kind: "prototype", key: "A", agreed: true };
+  assert.equal(toStart(pageWith("exploring", [a], [], false)), null);
 });

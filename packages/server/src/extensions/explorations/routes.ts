@@ -233,6 +233,7 @@ function readRoutes(
       );
       return explorationPage(store(), exploration, {
         runs: prototypes.runs(exploration.id),
+        canRun: prototypes.mode.canStart(),
         talk: talks.view(exploration.id),
         handingOff: handOffs.of(exploration.id),
         personas: options.personas(),

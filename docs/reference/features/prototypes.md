@@ -24,6 +24,10 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
   team.
 - The prototype runs while it is made, starts again once Tinker is done, and
   opens on the page the change is on.
+- Opening an exploration starts its prototype by itself (the agreed one,
+  otherwise the newest) when none runs, only where the project names a
+  prototype start command (`canRun` on the exploration's page); without one
+  nothing is asked, and **Open** says why it cannot run.
 - The branch is pushed to origin once committed, so a teammate's computer
   opens it too; when it cannot be, the board says it is only on this
   computer. **Open** runs it with the product's prototype command, one at a
