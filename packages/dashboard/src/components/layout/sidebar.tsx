@@ -1,15 +1,4 @@
-import {
-  Boxes,
-  FlaskConical,
-  House,
-  Inbox,
-  Menu,
-  Puzzle,
-  Settings,
-  Columns3,
-  Tag,
-  Users,
-} from "lucide-react";
+import { Boxes, House, Menu, Puzzle, Settings } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import type { Light, ShownView } from "@/api/client";
@@ -25,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Page } from "@/lib/routes";
 import { useFactoryName, useLogo } from "@/lib/brand";
+import type { SidebarGroup } from "@/lib/page-module";
 import type { KoboldStatus } from "@/lib/shell-view";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
@@ -33,11 +23,12 @@ import { type Item, PageLink, ProductState } from "./sidebar-links";
 import { GroupLabel, TeamPages } from "./team-pages";
 
 // Home and System at the top (System with the product's light, or Open when
-// it runs), then the pages in labelled groups: the work, from what came in
-// to what is built (Signals, Explorations, the Factory board, Releases), then the
-// customers (the personas). Explorations is still the page "explore" and
-// the Factory board the page "build". At the bottom, updates when they need
-// the owner and Send feedback (the rows the app puts in), and Settings.
+// it runs), then the installed extensions' pages in labelled groups: the
+// work, from what came in to what is built (Signals, Explorations, the
+// Factory board, Releases), then the customers (the personas). Explorations
+// is still the page "explore" and the Factory board the page "build". At
+// the bottom, updates when they need the owner and Send feedback (the rows
+// the app puts in), the Marketplace and Settings.
 const TOP: Item[] = [
   {
     page: "home",
@@ -51,43 +42,7 @@ const TOP: Item[] = [
   },
 ];
 
-const GROUPS: { label: "work" | "customers"; items: Item[] }[] = [
-  {
-    label: "work",
-    items: [
-      {
-        page: "signals",
-        icon: <Inbox aria-hidden />,
-        color: "var(--understand)",
-      },
-      {
-        page: "explore",
-        icon: <FlaskConical aria-hidden />,
-        color: "var(--explore)",
-      },
-      {
-        page: "build",
-        icon: <Columns3 aria-hidden />,
-        color: "var(--build)",
-      },
-      {
-        page: "releases",
-        icon: <Tag aria-hidden />,
-        color: "var(--build)",
-      },
-    ],
-  },
-  {
-    label: "customers",
-    items: [
-      {
-        page: "personas",
-        icon: <Users aria-hidden />,
-        color: "var(--source-app)",
-      },
-    ],
-  },
-];
+const GROUPS: SidebarGroup[] = ["work", "customers"];
 
 const QUIET: Item[] = [
   {
@@ -102,9 +57,6 @@ const QUIET: Item[] = [
   },
 ];
 
-// The pages whose count is something waiting for you, shown as a badge.
-const BADGED = new Set<Page>(["signals"]);
-
 type SidebarProps = Readonly<{
   // The project's name (factory.json), in its wordmark font when its theme
   // gives one; Kobble's own name without one.
@@ -112,13 +64,12 @@ type SidebarProps = Readonly<{
   current: Page;
   // What is open in the page: for a team's page, which one.
   open: string | null;
-  counts: Partial<Record<Page, number>>;
+  // The installed extensions' pages, each with what it counts beside it.
+  pages: (Item & { group: SidebarGroup; count?: ReactNode })[];
   kobold: KoboldStatus;
   // What each kobold does now (lib/kobolds.ts).
   doing: Doing;
   light: Light;
-  // The pages of extensions that are not installed: not in the sidebar.
-  left: Page[];
   // The pages the team's own extensions bring, in a group of their own.
   team: ShownView[];
   // The product's light, and where it opens while it runs.
@@ -168,7 +119,7 @@ export function Sidebar(props: SidebarProps) {
 }
 
 function Content(props: SidebarProps & { onGo?: () => void }) {
-  const { current, counts, doing, product, left, onGo } = props;
+  const { current, pages, doing, product, onGo } = props;
   const { team, open } = props;
   const nav = useT().shell.nav;
   return (
@@ -183,13 +134,7 @@ function Content(props: SidebarProps & { onGo?: () => void }) {
           </PageLink>
         ))}
       </nav>
-      <Pages
-        current={current}
-        counts={counts}
-        doing={doing}
-        left={left}
-        onGo={onGo}
-      />
+      <Pages current={current} pages={pages} doing={doing} onGo={onGo} />
       <TeamPages
         pages={team}
         current={current === "team" ? open : null}
@@ -269,22 +214,20 @@ function Wordmark({
 
 function Pages({
   current,
-  counts,
+  pages,
   doing,
-  left,
   onGo,
 }: Readonly<{
   current: Page;
-  counts: Partial<Record<Page, number>>;
+  pages: SidebarProps["pages"];
   doing: Doing;
-  left: Page[];
   onGo?: () => void;
 }>) {
   const t = useT().shell;
-  // A group whose pages are all left out is left out too.
-  const groups = GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => !left.includes(item.page)),
+  // A group with none of the installed pages is left out.
+  const groups = GROUPS.map((label) => ({
+    label,
+    items: pages.filter((page) => page.group === label),
   })).filter((group) => group.items.length > 0);
   return (
     <nav aria-label={t.nav.pages} className="grid gap-px">
@@ -295,23 +238,12 @@ function Pages({
             <PageLink key={item.page} item={item} current={current} onGo={onGo}>
               <span className="ml-auto flex items-center gap-2">
                 <PageKobold page={item.page} doing={doing} />
-                <Count page={item.page} n={counts[item.page]} />
+                {item.count}
               </span>
             </PageLink>
           ))}
         </div>
       ))}
     </nav>
-  );
-}
-
-function Count({ page, n }: Readonly<{ page: Page; n: number | undefined }>) {
-  if (n === undefined) return null;
-  return BADGED.has(page) ? (
-    <span className="ml-auto grid h-[18px] min-w-[18px] place-items-center rounded-md bg-wash px-1.5 text-[11px] font-medium text-wash-foreground">
-      {n}
-    </span>
-  ) : (
-    <span className="ml-auto text-xs text-sidebar-muted">{n}</span>
   );
 }

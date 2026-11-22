@@ -1,30 +1,27 @@
-// Settings, put together from the cards each feature brings: where work is
-// tracked (Connect), the live app (Signals), the stages, updates and
-// what's new (Updates), the language, the start on this computer, the
-// factory's own programs (System) and each settings group no extension
-// has. The settings page (features/settings) shows them in its tabs.
+// Settings, put together from the cards each area brings: where work is
+// tracked (Connect), the sections of the installed extensions (the live
+// app, from Signals), the stages, updates and what's new (Updates), the
+// language, the start on this computer, the factory's own programs (System)
+// and each settings group no extension has. The settings page
+// (features/settings) shows them in its tabs.
 
 import type { ReactNode } from "react";
 
 import type { FactoryState } from "@/api/client";
 import { GroupCard, Section, Topic } from "@/components/settings-card";
+import type { SettingsSection } from "@/lib/page-module";
 import { TrackerCard } from "@/features/connect/tracker-card";
 import { LanguageCard } from "@/features/settings/language-card";
-import {
-  type SettingsSection,
-  SettingsTab,
-} from "@/features/settings/settings-tab";
-import {
-  GROUP_TABS,
-  type SettingsTabName,
-} from "@/features/settings/settings-tabs";
+import { SettingsTab } from "@/features/settings/settings-tab";
+import { GROUP_TABS, type SettingsTabName } from "@/lib/settings-tabs";
 import { StagesCard } from "@/features/settings/stages-card";
-import { LiveAppCard } from "@/features/signals/live-app-card";
 import { FactoryPrograms } from "@/features/system/system-page";
 import { DesktopStart, UpdatesCard } from "@/features/updates/updates-card";
 import { WhatsNew } from "@/features/updates/whats-new";
 import type { Messages } from "@/i18n/messages";
 import { useT } from "@/i18n/use-t";
+
+import { installedOf } from "./extensions";
 
 export function SettingsPage({
   state,
@@ -34,7 +31,10 @@ export function SettingsPage({
   return (
     <SettingsTab
       open={open}
-      sections={sectionsOf(state, t.settings, t.whatsNew.about)}
+      sections={[
+        ...sectionsOf(state, t.settings, t.whatsNew.about),
+        ...installedOf(state).flatMap((module) => module.settings?.(t) ?? []),
+      ]}
     />
   );
 }
@@ -58,7 +58,6 @@ function sectionsOf(
   ): SettingsSection => ({ name, tab, body });
   return [
     section(n.tracker, "Connections", <TrackerCard state={state} />),
-    section(n.liveApp, "Connections", <LiveAppCard />),
     section(n.stages, "Stages", <StagesCard state={state} />),
     section(
       n.updates,

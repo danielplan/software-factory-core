@@ -64,7 +64,8 @@ here reach every company with its next upgrade, so they are made with care.
 - `packages/server/`: the local server and the `software-factory` command:
   core modules, `src/extensions/<id>/` and `src/app/` (its `BLUEPRINT.md`).
 - `packages/dashboard/`: Kobble's page, a React web app: shared folders,
-  `src/features/<area>/` and `src/app/` (its `BLUEPRINT.md`).
+  `src/features/<area>/` (the core's areas), `src/extensions/<id>/` (one
+  module per extension, as on the server) and `src/app/` (its `BLUEPRINT.md`).
 - `packages/kits/`: one kit per kind of product, with its rules and starter.
 - `packages/launcher/`: starts, watches and stops a product's parts.
 - `packages/skills/`: the skills, as the files agents read (`skills/`), their guides and templates.

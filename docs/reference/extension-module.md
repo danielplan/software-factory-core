@@ -11,12 +11,12 @@ the declaration's schema is `extensionSchema` in
 
 ## The folder
 
-| Half   | Where                                               | What                                      |
-| ------ | --------------------------------------------------- | ----------------------------------------- |
-| Server | `packages/server/src/extensions/<id>/`              | `index.ts`: `extension` and `serve(host)` |
-| Page   | `packages/dashboard/src/features/<id>/`             | its page, its Home blocks, its cards      |
-| Words  | `packages/dashboard/src/i18n/areas/`                | its name, line and every word it shows    |
-| Tests  | `packages/server/test/`, `packages/dashboard/test/` | its tests, one subject per file           |
+| Half   | Where                                               | What                                                                                   |
+| ------ | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Server | `packages/server/src/extensions/<id>/`              | `index.ts`: `extension` and `serve(host)`                                              |
+| Page   | `packages/dashboard/src/extensions/<id>/`           | `index.tsx`: its pages, Home blocks, settings sections and sidebar rows (`PageModule`) |
+| Words  | `packages/dashboard/src/i18n/areas/`                | its name, line and every word it shows                                                 |
+| Tests  | `packages/server/test/`, `packages/dashboard/test/` | its tests, one subject per file                                                        |
 
 An add-on that needs a stand-in in the tests (the GitHub CLI, Jira's
 fetch) exports a function that makes the module, such as `githubAddOn(cli)`.
@@ -74,3 +74,19 @@ opening and closing), `connect` (track work here from now on) and
 starts, and answers its routes, runs its work and hears its plugs only while
 it is installed. Removing it in the Marketplace stops its work and takes all
 of it away.
+
+## The page's module
+
+The page has the same shape: `packages/dashboard/src/extensions/<id>/index.tsx`
+exports the extension's `PageModule` (`packages/dashboard/src/lib/page-module.ts`).
+
+| Field      | What                                                                                                                                   |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`       | the extension's id, as the server names it                                                                                             |
+| `pages`    | its pages, each by its address (`#<id>`), with its sidebar row (group, icon, colour, what it counts) and whether it `fills` the window |
+| `blocks`   | its Home blocks, by block id, drawn from what Home has read                                                                            |
+| `settings` | its sections in Settings, each with its tab                                                                                            |
+
+`packages/dashboard/src/app/extensions.ts` lists the modules and puts
+together only the installed ones (the factory state's extensions that are
+on): a removed extension's page code is not mounted at all.

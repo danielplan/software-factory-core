@@ -11,26 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Confirm } from "@/components/confirm";
 import { useT } from "@/i18n/use-t";
 import { offeredOf, START } from "@/lib/home-layout";
-import { type HomeInput, type WaitingItem, waitingOf } from "@/lib/home-view";
+import { waitingOf } from "@/lib/home-view";
+import type { HomeBlocks as ExtensionBlocks } from "@/lib/page-module";
 
 import type { FactoryState } from "@/api/client";
 import { ArrangeButton, HomeBlocks } from "./home-blocks";
 import { TeamBlock } from "./team-block";
 import { useHomeInput, useHomeLayout } from "./use-home-layout";
 
-// The blocks the features bring, each by its id, drawn from what Home has
-// read. The app hands them to Home (app/home-blocks.tsx), so Home never
-// imports another feature; it shows those of the installed extensions.
-export type FeatureBlocks = (read: {
-  state: FactoryState;
-  input: HomeInput;
-  waiting: WaitingItem[];
-}) => Record<string, ReactNode>;
-
+// The blocks the installed extensions bring (featureBlocks), each by its id,
+// are drawn from what Home has read. The app hands them to Home
+// (app/extensions.ts), so Home never imports an extension.
 export function HomePage({
   state,
   featureBlocks,
-}: Readonly<{ state: FactoryState; featureBlocks: FeatureBlocks }>) {
+}: Readonly<{ state: FactoryState; featureBlocks: ExtensionBlocks }>) {
   const t = useT();
   const { layout, change, loaded, problemKeeping } = useHomeLayout(
     state.addOns,

@@ -60,7 +60,7 @@ Sprocket can also send a signal on, to the builder or to Doodle.
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The extension    | `packages/server/src/extensions/signals/`: `sync.ts` and `live-source.ts` (the live app), `actions.ts` (Fix, Explore, Dismiss), `index.ts` (its plug) |
 | Taking events in | `packages/core/src/kobble/take-in.ts`, `packages/core/src/kobble/live.ts` (the export's schema)                                                       |
-| The page         | `packages/dashboard/src/features/signals/`                                                                                                            |
+| The page         | `packages/dashboard/src/extensions/signals/`                                                                                                          |
 
 ## Checked and not checked
 

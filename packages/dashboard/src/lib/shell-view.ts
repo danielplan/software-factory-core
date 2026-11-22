@@ -7,30 +7,18 @@
 import type { IdeaView, Light, PartView, WorkView } from "../api/client.ts";
 import { ENGLISH, type Messages } from "../i18n/messages.ts";
 import type { KoboldId } from "./kobolds.ts";
-import type { Page } from "./routes.ts";
 
-// Only real numbers, and only when there is something to count: the new
-// signals, the explorations being explored, and the board's tickets not
-// yet in the app.
-export function countsOf(
-  exploring: number,
-  work: WorkView | null,
-  fresh = 0,
-): Partial<Record<Page, number>> {
-  // Agreed work not done yet (To do, In progress, Review); ideas in the
-  // Backlog count as waiting explorations, not as the factory's work.
-  const open = (work?.cards ?? []).filter(
+// The Factory board's count in the sidebar: agreed work not done yet (To
+// do, In progress, Review); ideas in the Backlog count as waiting
+// explorations, not as the factory's work.
+export function openCardsOf(work: WorkView | null): number {
+  return (work?.cards ?? []).filter(
     (card) =>
       !card.closed &&
       (card.stage === "todo" ||
         card.stage === "doing" ||
         card.stage === "review"),
   ).length;
-  return {
-    ...(fresh > 0 ? { signals: fresh } : {}),
-    ...(exploring > 0 ? { explore: exploring } : {}),
-    ...(open > 0 ? { build: open } : {}),
-  };
 }
 
 // The whole factory's light, and what it means in words.

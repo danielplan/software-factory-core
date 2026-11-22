@@ -47,10 +47,13 @@ company's own extension is a description instead: see
 
 ## 4. The page
 
-1. Make `packages/dashboard/src/features/<id>/` with its page and any Home
-   block. It imports only shared folders, never another feature.
-2. Hand its page to the router and its blocks to Home in
-   `packages/dashboard/src/app/` (`router.tsx`, `home-blocks.tsx`).
+1. Make `packages/dashboard/src/extensions/<id>/` with its page and any Home
+   block. It imports only shared folders, never another extension or a
+   core feature.
+2. Write its `index.tsx`: the `PageModule` with its pages (by address, with
+   their sidebar rows), its Home blocks and its settings sections (see
+   [the extension module](../reference/extension-module.md#the-pages-module)),
+   and add it to the list in `packages/dashboard/src/app/extensions.ts`.
 3. Put every word in a new area in `packages/dashboard/src/i18n/areas/`, in
    English, Italian and German: see [languages](../reference/languages.md).
 4. Use the pieces in [the design system](../reference/design-system.md).
@@ -61,7 +64,8 @@ company's own extension is a description instead: see
    `packages/dashboard/test/`, each one subject per file. Include one that
    runs it while another extension it uses is not installed.
 2. Run `npm run check:borders:server` and `npm run check:borders:dashboard`:
-   no extension imports another, no feature imports another.
+   no extension imports another, no feature imports another, and only the
+   page's `app/` imports an extension.
 3. A setting it needs goes in its declaration's `settings`; a change a
    company would make by hand gets a migration.
 

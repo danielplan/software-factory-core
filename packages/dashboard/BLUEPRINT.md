@@ -13,16 +13,23 @@
 
 The kit's folders, after Bulletproof React: shared folders, one folder per
 area, and `app/` that puts them together. Code flows one way, shared
-folders → features → app, checked by dependency-cruiser
-(`.dependency-cruiser.cjs`, the kit's rules).
+folders → features and extensions → app, checked by dependency-cruiser
+(`.dependency-cruiser.cjs`, the kit's rules and Kobble's own).
+
+Kobble's own rule, beside the kit's: **its extensions are modules**, as on
+the server. Each one is a folder `src/extensions/<id>/` whose `index.tsx`
+exports its module (`PageModule`, `src/lib/page-module.ts`): its pages by
+address with their sidebar rows, its Home blocks and its settings sections.
+`app/extensions.ts` lists them and puts together only the installed ones,
+so a removed extension's page code is not mounted at all. The `index.tsx`
+is the module's declaration, not a barrel: it re-exports nothing.
 
 ```text
 src/main.tsx            the start: the company's theme, then the app
 src/app/                the app, the frame around the pages (shell.tsx),
-                        the pages by address (router.tsx), and what it puts
-                        together: the blocks each feature brings to Home
-                        (home-blocks.tsx), the cards each brings to
-                        Settings (settings-page.tsx), the sidebar's rows
+                        the pages by address (router.tsx), the installed
+                        extensions' modules (extensions.ts), and Settings
+                        put together (settings-page.tsx)
 src/api/                talking to the server: the requests and the types
                         of its answers (client.ts), reading what a page
                         shows (use-read.ts and the hooks on it), the
@@ -34,19 +41,21 @@ src/components/         pieces several areas share: the kobolds' faces,
                         voice's screens (voice/) …
 src/hooks/              general hooks (the voice's in hooks/voice/)
 src/lib/                general logic without screens (the voice's calls,
-                        speech and hearing in lib/voice/)
+                        speech and hearing in lib/voice/); what an
+                        extension brings to the page (page-module.ts)
 src/i18n/               the words, in three languages
-src/features/<area>/    one per extension: factory, explorations, signals,
-                        personas, releases; one per core area: home,
-                        system, settings, marketplace, setup, support
-                        (Sprocket and the feedback it takes), updates,
-                        connect (where work is tracked, with the GitHub
-                        and Jira steps)
+src/features/<area>/    one per core area: home, system, settings,
+                        marketplace, setup, support (Sprocket and the
+                        feedback it takes), updates, connect (where work
+                        is tracked, with the GitHub and Jira steps)
+src/extensions/<id>/    one per extension: factory, explorations, signals,
+                        personas, releases; index.tsx is its module
 ```
 
-A feature never imports another: Home gets the blocks the features bring
-from `app/home-blocks.tsx`, and Settings its cards from
-`app/settings-page.tsx`. What two areas share moves to a shared folder.
+A feature never imports another, the core never imports an extension, and
+an extension never imports another or a core feature: Home gets the blocks
+the installed extensions bring, Settings their sections and the sidebar
+their rows, all from `app/`. What two areas share moves to a shared folder.
 
 ## Libraries
 

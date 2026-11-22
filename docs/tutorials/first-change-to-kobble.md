@@ -30,9 +30,9 @@ To see Kobble run on its own factory:
    brought by the Releases extension, at `#releases`. Its
    [page](../reference/features/releases.md) names the folders: the server's
    `packages/server/src/extensions/releases/` and the page's
-   `packages/dashboard/src/features/releases/`.
+   `packages/dashboard/src/extensions/releases/`.
 2. The line under a page's title is a word on a screen, so it lives in the
-   page's catalogue. `packages/dashboard/src/features/releases/releases-page.tsx`
+   page's catalogue. `packages/dashboard/src/extensions/releases/releases-page.tsx`
    draws it with `PageHead` and `t.releases.about`; the words are in
    `packages/dashboard/src/i18n/areas/releases.ts`.
 3. Read [the page's conventions](../reference/conventions/page.md) and

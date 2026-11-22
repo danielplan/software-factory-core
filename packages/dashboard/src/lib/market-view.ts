@@ -9,7 +9,6 @@
 import type { AddOnView, KitView, ProductView } from "../api/client.ts";
 import type { Messages } from "../i18n/messages.ts";
 import { KOBOLDS } from "./kobolds.ts";
-import type { Page } from "./routes.ts";
 
 export type Words = Messages["market"];
 type Shell = Messages["shell"];
@@ -75,19 +74,6 @@ export function installPlan(addOns: AddOnView[], id: string): AddOnView[] {
 // The installed extensions that need this one.
 export const neededBy = (addOns: AddOnView[], id: string): AddOnView[] =>
   extensionsOf(addOns).filter((one) => one.on && one.needs.includes(id));
-
-// The pages of extensions that are not installed: they leave the sidebar
-// (a page nothing brings stays: Home, System, the Marketplace, Settings).
-export function pagesLeftOut(addOns: AddOnView[]): Page[] {
-  const brought = (on: boolean) =>
-    new Set(
-      addOns
-        .filter((addOn) => addOn.on === on)
-        .flatMap((addOn) => addOn.brings.pages),
-    );
-  const kept = brought(true);
-  return [...brought(false)].filter((page): page is Page => !kept.has(page));
-}
 
 // What goes when it is removed (its page, Home blocks and kobold) and what
 // stays in the factory's files, in a sentence each.

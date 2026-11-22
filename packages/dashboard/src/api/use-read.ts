@@ -7,14 +7,15 @@ import { get, messageOf, onKobbleChanged } from "@/api/client";
 
 export type Read<T> = { data: T | null; problem: string | null };
 
-// The records at this path; typed by the hooks below.
-export function useRead(path: string): Read<unknown> {
-  const [read, setRead] = useState<Read<unknown> & { path: string }>({
+// The records at this path (none for null); typed by the hooks below.
+export function useRead(path: string | null): Read<unknown> {
+  const [read, setRead] = useState<Read<unknown> & { path: string | null }>({
     path,
     data: null,
     problem: null,
   });
   useEffect(() => {
+    if (path === null) return;
     let current = true;
     const load = () => {
       get<unknown>(path).then(

@@ -12,6 +12,7 @@ import { PageHead } from "@/components/layout/page-head";
 import { Tile } from "@/components/layout/sidebar-links";
 import { cn } from "@/lib/utils";
 import { useT } from "@/i18n/use-t";
+import type { SettingsSection } from "@/lib/page-module";
 import type { Messages } from "@/i18n/messages";
 
 import {
@@ -19,7 +20,7 @@ import {
   shownTab,
   tabHash,
   tabsOf,
-} from "./settings-tabs";
+} from "@/lib/settings-tabs";
 
 // The factory's settings, in six tabs at the side; only the chosen one
 // shows, at its own address (#settings/updates). Connections: where work
@@ -124,10 +125,3 @@ function TabLink({
     </a>
   );
 }
-
-// One section of the settings: its name, its tab and what it shows.
-export type SettingsSection = {
-  name: string;
-  tab: SettingsTabName;
-  body: ReactNode;
-};

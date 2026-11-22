@@ -76,7 +76,7 @@ The page shows each step of the hand-off while it runs.
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | The extension   | `packages/server/src/extensions/explorations/`: `board-tools.ts`, `talks.ts`, `spec-writer.ts`, `handing-off.ts`, `ideas.ts` (its plug) |
 | The board shape | `packages/core/src/kobble/board-shape.ts`                                                                                               |
-| The page        | `packages/dashboard/src/features/explorations/` (the board in `board/`)                                                                 |
+| The page        | `packages/dashboard/src/extensions/explorations/` (the board in `board/`)                                                               |
 | The guides      | `packages/skills/guides/exploration-coach.md` (Doodle), `packages/skills/guides/handoff-spec.md` (the card)                             |
 | The files       | `factory/kobble/explorations/X-<n>/`: `exploration.json`, `board.json`, `conversation.md`, `pictures/`, `handoff.md`                    |
 

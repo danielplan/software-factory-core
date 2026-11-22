@@ -1,27 +1,21 @@
 import { useEffect, useState } from "react";
 
 import type { FactoryState, State } from "@/api/client";
+import type { ExtensionPage } from "@/lib/page-module";
 import { trackersOf } from "@/features/connect/trackers";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { ConnectPage } from "@/features/connect/connect-page";
-import { ExplorationPage } from "@/features/explorations/exploration-page";
-import { ExplorationsPage } from "@/features/explorations/explorations-page";
 import { MarketPage } from "@/features/marketplace/market-page";
 import { TeamPage } from "@/components/screen-view";
-import { FactoryPage } from "@/features/factory/factory-page";
-import { pagesLeftOut } from "@/lib/market-view";
 import { screenOf } from "@/lib/screens";
 import { movedHash, type Place, placeOf } from "@/lib/routes";
-import { ReleasesPage } from "@/features/releases/releases-page";
-import { PersonasPage } from "@/features/personas/personas-page";
 import { GuidedSetup } from "@/features/setup/guided-setup";
-import { SignalsPage } from "@/features/signals/signals-page";
 
 import { HomePage } from "@/features/home/home-page";
 import { SystemPage } from "@/features/system/system-page";
 import { useT } from "@/i18n/use-t";
 
-import { featureBlocks } from "./home-blocks";
+import { blocksOf, pagesOf } from "./extensions";
 import { SettingsPage } from "./settings-page";
 import { Shell } from "./shell";
 
@@ -47,17 +41,29 @@ function usePlace(): Place {
   return place;
 }
 
+// The pages of the core, always there; an extension's are there only while
+// it is installed.
+const CORE_PAGES = new Set<Place["page"]>([
+  "home",
+  "system",
+  "extensions",
+  "settings",
+  "connect",
+]);
+
 // The page of an extension that is removed is not there: Home shows instead.
 function placeShown(
   place: Place,
-  left: Place["page"][],
+  pages: ExtensionPage[],
   addOns: FactoryState["addOns"],
 ): Place {
-  const gone =
-    left.includes(place.page) ||
+  const there =
+    CORE_PAGES.has(place.page) ||
+    pages.some((page) => page.id === place.page) ||
     (place.page === "team" &&
-      !(place.open && screenOf(addOns, "pages", place.open, true)));
-  return gone ? { page: "home", open: null } : place;
+      place.open !== null &&
+      screenOf(addOns, "pages", place.open, true) !== undefined);
+  return there ? place : { page: "home", open: null };
 }
 
 // The dashboard: before there is a company, only the setup page; once there
@@ -72,60 +78,54 @@ export function Dashboard({ state }: Readonly<{ state: State }>) {
 function FactoryDashboard({ state }: Readonly<{ state: FactoryState }>) {
   const t = useT();
   const place = usePlace();
+  const pages = pagesOf(state);
   // Just set up, connecting where work is tracked comes first.
   const { page, open } = state.onboarding
     ? { ...place, page: "connect" as const }
-    : placeShown(place, pagesLeftOut(state.addOns), state.addOns);
+    : placeShown(place, pages, state.addOns);
+  const extension = pages.find((one) => one.id === page);
   return (
     <Shell
       state={state}
+      pages={pages}
       current={page === "connect" ? "settings" : page}
       open={open}
-      // An exploration fills the whole window.
-      fill={page === "explore" && open !== null}
+      fill={extension?.fills?.(open) ?? false}
     >
       {state.problems.length > 0 && (
         <ProblemBox title={t.shell.misfit} text={state.problems.join(" · ")} />
       )}
-      {page === "team" ? (
-        <TeamPageOf state={state} id={open} />
-      ) : (
-        <PageBody state={state} page={page} open={open} />
-      )}
+      <PageBody state={state} page={page} open={open} extension={extension} />
     </Shell>
   );
 }
 
+// The page shown: an installed extension's, a team's own, or the core's.
 function PageBody({
   state,
   page,
   open,
+  extension,
 }: Readonly<{
   state: FactoryState;
-  page: Exclude<Place["page"], "team">;
+  page: Place["page"];
   open: string | null;
+  extension: ExtensionPage | undefined;
 }>) {
+  if (extension) return <extension.Page state={state} open={open} />;
   switch (page) {
+    case "team":
+      return <TeamPageOf state={state} id={open} />;
     case "connect":
       return <ConnectPage trackers={trackersOf(state.addOns)} />;
-    case "signals":
-      return <SignalsPage open={open} app={state.company.name} />;
-    case "personas":
-      return <PersonasPage open={open} />;
-    case "explore":
-      return open ? <ExplorationPage id={open} /> : <ExplorationsPage />;
-    case "build":
-      return <FactoryPage state={state} />;
-    case "releases":
-      return <ReleasesPage />;
-    case "home":
-      return <HomePage state={state} featureBlocks={featureBlocks} />;
     case "system":
       return <SystemPage state={state} />;
     case "extensions":
       return <MarketPage state={state} open={open} />;
     case "settings":
       return <SettingsPage state={state} open={open} />;
+    default:
+      return <HomePage state={state} featureBlocks={blocksOf(state)} />;
   }
 }
 
