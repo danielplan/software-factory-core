@@ -6,8 +6,9 @@
 
 import type { TFunction } from "i18next";
 import { ChevronDown, ChevronUp, Lightbulb, Plus, Radar } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import {
   type ExplorationRow,
@@ -28,8 +29,21 @@ import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
 import { explorationHash, Waiting } from "./waiting-row";
 
+// Prototype: opening Explorations goes straight to the made-up exploration
+// with its empty board, once per visit, so the Explorations link still works
+// afterwards.
+function useGoToMadeUp(): void {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (sessionStorage.getItem("prototype-went")) return;
+    sessionStorage.setItem("prototype-went", "1");
+    void navigate("/explore/X-0", { replace: true });
+  }, [navigate]);
+}
+
 export function ExplorationsPage() {
   const t = useTranslation().t;
+  useGoToMadeUp();
   const { data, problem } = useExplorations();
   const [refused, setRefused] = useState<string | null>(null);
   const adding = () => {
