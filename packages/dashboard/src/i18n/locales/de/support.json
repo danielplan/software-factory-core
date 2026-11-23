@@ -6,5 +6,11 @@
   "close": "Schließen",
   "empty": "Frag, wie Kobble funktioniert, wo etwas ist, oder alles über dein Produkt.",
   "thinking": "Denkt nach…",
-  "question": "Stell eine Frage"
+  "question": "Stell eine Frage",
+  "persona": {
+    "label": "Neue Persona",
+    "add": "{{name}} hinzufügen",
+    "change": "Etwas ändern",
+    "yes": "Ja, füge {{name}} hinzu."
+  }
 }

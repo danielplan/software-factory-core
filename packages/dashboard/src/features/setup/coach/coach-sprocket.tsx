@@ -42,6 +42,7 @@ export function CoachSprocket({
       window.removeEventListener("keydown", key);
     };
   }, []);
+  const { say } = useSay([], () => undefined);
   const status = statusOf(coach);
   const doing = status ? t(`setup.status.${status}`) : null;
   return (
@@ -60,6 +61,7 @@ export function CoachSprocket({
             }))}
             writing={coach.working ? (coach.writing ?? "") : null}
             status={doing ?? ""}
+            onSay={say}
           />
           <Box coach={coach} call={call} />
         </div>

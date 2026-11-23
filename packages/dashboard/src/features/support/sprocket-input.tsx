@@ -22,7 +22,7 @@ export function AskFeed({
   const support = useSupport();
   const startAsk = useTranslation().t;
   if (support && (support.messages.length > 0 || support.writing !== null))
-    return <Said support={support} />;
+    return <Said support={support} page={page} />;
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-end gap-2.5 px-4 pt-3 pb-2 text-[13px]">
       {thread.thinking ? (
@@ -51,7 +51,10 @@ export function AskFeed({
 }
 
 // What the support kobold and the person said so far.
-function Said({ support }: Readonly<{ support: SupportView }>) {
+function Said({
+  support,
+  page,
+}: Readonly<{ support: SupportView; page: Page }>) {
   const t = useTranslation().t;
   return (
     <Messages
@@ -61,6 +64,9 @@ function Said({ support }: Readonly<{ support: SupportView }>) {
       }))}
       writing={support.writing}
       status={support.activity ?? t("support.thinking")}
+      onSay={(text) => {
+        void post("/api/kobble/support", { text, page }).catch(() => undefined);
+      }}
     />
   );
 }

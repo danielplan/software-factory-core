@@ -6,5 +6,11 @@
   "close": "Chiudi",
   "empty": "Chiedi come funziona Kobble, dove si trova qualcosa, o qualsiasi cosa sul tuo prodotto.",
   "thinking": "Ci penso…",
-  "question": "Fai una domanda"
+  "question": "Fai una domanda",
+  "persona": {
+    "label": "Nuova persona",
+    "add": "Aggiungi {{name}}",
+    "change": "Cambia qualcosa",
+    "yes": "Sì, aggiungi {{name}}."
+  }
 }
