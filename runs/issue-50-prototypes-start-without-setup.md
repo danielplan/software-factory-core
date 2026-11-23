@@ -59,12 +59,29 @@ Decisions (cheap to change, so decided here):
 
 ## Status
 
-in progress: server, page, words, tests and docs built; checks and
-screenshots remain.
+done: server, page, words, tests, docs and screenshots.
 
 ## Result
 
-(to fill in)
+Full verify steps run once: format, lint, typecheck, dead code, copy-paste,
+borders, 650 tests (all pass, coverage 96.95 % lines / 90.33 % branches),
+records and docs checks.
+
+Tried in the browser on a demo project with no start command, with a pretend
+`claude` that answers Tinker's turns (the real Tinker was not run):
+
+![Before Start: no red box, Start as usual](issue-50-prototypes-start-without-setup/01-before-start.png)
+![Start pressed: Tinker works out the start](issue-50-prototypes-start-without-setup/02-working-out-start.png)
+![The first prototype carries the line](issue-50-prototypes-start-without-setup/03-line-on-first-prototype.png)
+![The second prototype runs with no line](issue-50-prototypes-start-without-setup/04-second-prototype-no-line.png)
+![Tinker could not: the calm box with Try again](issue-50-prototypes-start-without-setup/05-calm-box-try-again.png)
+
+Try again, with Tinker now able, started the prototype and showed the line.
+Not checked: Tinker's real judgement on a real project; the page side by
+side with the prototype's `?variant=D` (the prototype's made-up start is not
+in the build). Differences from the prototype: its made-up screen and start
+are replaced by the real run; the line stays only while the prototype
+starts or runs.
 
 ## Later
 
