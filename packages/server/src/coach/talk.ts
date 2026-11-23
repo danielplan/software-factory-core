@@ -35,6 +35,27 @@ const TOOL_PREFIX = "Using mcp__setup__";
 // (those are in the reply being written).
 const SHOWN = /^(Reading|Searching|Looking)/;
 
+// How far a turn got, from what Claude Code reported: it starts reading what
+// it was given (0), goes on to look through the code when it reports
+// reading or searching (1), and draws when it uses its drawing tool (2). A
+// step is reached by a report, never by time.
+export type Step = 0 | 1 | 2;
+// The tools that put something on the map or board: the coach's `draw`, and
+// the explorer's (explorations/board-tools.ts).
+const DRAWING_TOOLS = [
+  "draw",
+  "add_note",
+  "add_diagram",
+  "add_choice",
+  "change_thing",
+  "link",
+  "make_prototype",
+].map((name) => TOOL_PREFIX + name);
+function stepOf(line: string): Step {
+  if (DRAWING_TOOLS.includes(line)) return 2;
+  return SHOWN.test(line) ? 1 : 0;
+}
+
 // What a turn may do: its tools, what it may not touch, its instructions.
 export type TurnRights = Pick<
   RunOptions,
@@ -48,6 +69,8 @@ export class Talk {
   writing: string | null = null;
   activity: string | null = null;
   problem: string | null = null;
+  // The step the turn is at (kept after the turn, so a stop shows where).
+  step: Step = 0;
   private conversation: string;
   private started: boolean;
   // Words said while the coach answered that could not go into its turn:
@@ -63,11 +86,14 @@ export class Talk {
   private claude: Claude;
   private cwd: string;
   private changed: () => void;
+  private who: string;
 
   constructor(options: {
     claude: Claude;
     cwd: string;
     onChange: () => void;
+    // Who stops in the words of a failed turn ("The coach" by default).
+    who?: string;
     // A conversation to go on with, kept from before; `started` when it is
     // known whether Claude Code has it (otherwise: once the coach answered).
     kept?: {
@@ -80,6 +106,7 @@ export class Talk {
     this.claude = options.claude;
     this.cwd = options.cwd;
     this.changed = options.onChange;
+    this.who = options.who ?? "The coach";
     this.conversation = options.kept?.conversation ?? randomUUID();
     // Going on with a conversation once the coach has answered in it.
     this.started =
@@ -141,6 +168,16 @@ export class Talk {
     return null;
   }
 
+  // The owner's last words taken back, when nothing came after them (the
+  // answer failed), to say them again; null when there are none.
+  takeBack(): string | null {
+    const last = this.messages.at(-1);
+    if (this.working || last?.from !== "owner") return null;
+    this.messages = this.messages.slice(0, -1);
+    this.changed();
+    return last.text;
+  }
+
   // The owner pressed Stop: the turn ends, what the coach had written so far
   // stays, and nothing said meanwhile is answered. False with no turn.
   stop(): boolean {
@@ -162,6 +199,7 @@ export class Talk {
     this.writing = "";
     this.activity = null;
     this.problem = null;
+    this.step = 0;
     this.last = { spokenIn, rights };
     this.changed();
     const result = await this.claude.run(this.turn(text, spokenIn, rights));
@@ -181,7 +219,8 @@ export class Talk {
     const reply = stopped ? soFar.trim() : result.text.trim();
     if ((result.ok || stopped) && reply)
       this.messages = [...this.messages, { from: "coach", text: reply }];
-    if (!result.ok && !stopped) this.problem = problemOf(result.error ?? "");
+    if (!result.ok && !stopped)
+      this.problem = problemOf(result.error ?? "", this.who);
     this.writing = null;
     this.activity = null;
     this.changed();
@@ -253,6 +292,7 @@ export class Talk {
         this.changed();
       },
       onActivity: (line: string) => {
+        this.step = Math.max(this.step, stepOf(line)) as Step;
         const shown = plain(line);
         if (!shown) return;
         this.activity = shown;

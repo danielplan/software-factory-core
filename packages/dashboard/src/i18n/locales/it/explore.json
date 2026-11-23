@@ -68,6 +68,36 @@
     "thinking": "Ci penso…",
     "takeOff": "Toglilo"
   },
+  "reading": {
+    "title": "{{name}} sta leggendo",
+    "stopped": "{{name}} si è fermato",
+    "hint": "Non si disegna nulla finché non ha letto.",
+    "noneDrawn": "Non è stato disegnato nulla.",
+    "stoppedAt": "{{step}}: fermato",
+    "tryAgain": "Riprova",
+    "steps": {
+      "page": {
+        "doing": "Lettura della pagina",
+        "done": "Pagina letta"
+      },
+      "code": {
+        "doing": "Esame del codice",
+        "done": "Codice esaminato"
+      },
+      "draw": {
+        "doing": "Disegno della lavagna",
+        "done": "Lavagna disegnata"
+      }
+    }
+  },
+  "stopped": {
+    "signedOut": "Claude Code non ha effettuato l’accesso",
+    "signedOutHow": "Esegui claude una volta in un terminale per accedere, poi riprova",
+    "missing": "Claude Code non è su questo computer",
+    "missingHow": "Installalo da claude.com/code e accedi, poi riprova",
+    "other": "L’esploratore si è fermato: {{reason}}",
+    "noReason": "L’esploratore si è fermato: nessun motivo indicato"
+  },
   "more": "+{{n}} altri",
   "waysComeHere": "qui arrivano le strade",
   "fromBacklog": "un'idea dal Backlog della bacheca",

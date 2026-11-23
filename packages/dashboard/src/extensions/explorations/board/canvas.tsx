@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils";
 import { useBoardDo } from "./frame";
 import type { ThingNode } from "./nodes";
 import { PrototypeNode } from "./prototype-node";
+import { ReadingBoard } from "./reading-board";
+import { readsTheBoard } from "./reading";
 import {
   ChoiceNode,
   DiagramNode,
@@ -98,6 +100,14 @@ function Canvas({ page, attached, onPick }: BoardProps) {
         >
           {pictures.refused}
         </p>
+      )}
+      {readsTheBoard(page) && (
+        <ReadingBoard
+          talk={page.talk}
+          onTryAgain={() => {
+            act("again", {});
+          }}
+        />
       )}
       <ReactFlow<ThingNode>
         nodes={nodes}

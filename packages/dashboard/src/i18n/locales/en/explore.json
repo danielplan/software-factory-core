@@ -67,6 +67,36 @@
     "thinking": "Thinking…",
     "takeOff": "Take it off"
   },
+  "reading": {
+    "title": "{{name}} is reading",
+    "stopped": "{{name}} stopped",
+    "hint": "Nothing is drawn until it has read.",
+    "noneDrawn": "Nothing was drawn.",
+    "stoppedAt": "{{step}}: stopped",
+    "tryAgain": "Try again",
+    "steps": {
+      "page": {
+        "doing": "Reading the page",
+        "done": "Read the page"
+      },
+      "code": {
+        "doing": "Looking at the code",
+        "done": "Looked at the code"
+      },
+      "draw": {
+        "doing": "Drawing the board",
+        "done": "Drew the board"
+      }
+    }
+  },
+  "stopped": {
+    "signedOut": "Claude Code is not signed in",
+    "signedOutHow": "Run claude once in a terminal to sign in, then try again",
+    "missing": "Claude Code is not on this computer",
+    "missingHow": "Install it from claude.com/code and sign in, then try again",
+    "other": "The explorer stopped: {{reason}}",
+    "noReason": "The explorer stopped: no reason given"
+  },
   "more": "+{{n}} more",
   "waysComeHere": "ways come here",
   "fromBacklog": "an idea from the board's Backlog",

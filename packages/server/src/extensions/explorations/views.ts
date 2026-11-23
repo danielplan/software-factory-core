@@ -21,7 +21,7 @@ import type { BoardIdea } from "../../plugs/work.ts";
 import type { VersionRun } from "../../prototypes/mode.ts";
 
 import { completed } from "./board-things.ts";
-import type { TalkView } from "./talks.ts";
+import type { TalkView } from "./talk-view.ts";
 
 type PersonaTag = { id: string; name: string; face: Face };
 

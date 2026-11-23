@@ -1,5 +1,6 @@
 // The conversation with the kobold about an exploration: what the person
-// says (also while it answers: it joins that answer) and Stop.
+// says (also while it answers: it joins that answer), Stop, and Try again after
+// the explorer stopped.
 
 import type { KobbleStore } from "@software-factory/core";
 
@@ -24,6 +25,9 @@ export function talkRoutes(
         spokenIn(body),
       );
     }),
+    "POST /api/kobble/explorations/again": button((body) => {
+      void again(talks, id(body));
+    }),
     "POST /api/kobble/explorations/stop": button((body) => {
       talks.talk(id(body)).stop();
     }),
@@ -34,4 +38,15 @@ export function talkRoutes(
 function spokenIn(body: unknown): string | undefined {
   const value = (body as { spokenIn?: unknown } | null)?.spokenIn;
   return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+// Try again after the explorer stopped: the person's last words said again
+// (taken back first, so the chat has them once), or, when there were none,
+// the explorer's first look.
+async function again(talks: ExplorationTalks, id: string): Promise<void> {
+  const talk = talks.talk(id);
+  if (talk.working || talk.problem === null) return;
+  const words = talk.takeBack();
+  if (words === null) await talks.begin(id);
+  else await talks.say(id, words);
 }

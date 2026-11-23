@@ -12,6 +12,7 @@ import { type ExplorationPage, messageOf, post } from "@/api/client";
 import { ChatSend } from "@/components/chat-send";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
+import { stopWords } from "@/i18n/server-texts";
 
 import { showsVoice } from "@/lib/voice/call";
 import { useVoiceCall } from "@/hooks/voice/use-voice-call";
@@ -235,11 +236,26 @@ function Messages({
       )}
       {talk.writing !== null && <Writing talk={talk} />}
       {(talk.problem ?? refused) && (
-        <p role="alert" className="text-xs text-destructive">
-          {talk.problem ?? refused}
-        </p>
+        <Problem problem={talk.problem} refused={refused} />
       )}
     </div>
+  );
+}
+
+// Why the kobold could not answer, in the language shown, or why what the
+// person did was refused.
+function Problem({
+  problem,
+  refused,
+}: Readonly<{ problem: string | null; refused: string | null }>) {
+  const t = useTranslation().t;
+  const words = problem
+    ? stopWords(problem, t)
+    : { reason: refused ?? "", how: "" };
+  return (
+    <p role="alert" className="text-xs text-destructive">
+      {problem ? `${words.reason}. ${words.how}`.trim() : words.reason}
+    </p>
   );
 }
 
