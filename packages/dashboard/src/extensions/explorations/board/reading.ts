@@ -9,11 +9,11 @@ export const STEPS = ["page", "code", "draw"] as const;
 
 export type StepState = "done" | "active" | "stopped" | "waiting";
 
-// Whether the card shows: an empty board, while the explorer answers or
-// once it stopped.
+// Whether the card shows: a board with nothing the explorer drew on it (the
+// problem is always there), while the explorer answers or once it stopped.
 export function readsTheBoard(page: ExplorationPage): boolean {
   return (
-    page.board.things.length === 0 &&
+    page.board.things.every((thing) => thing.kind === "problem") &&
     page.exploration.status !== "waiting" &&
     (page.talk.writing !== null || page.talk.problem !== null)
   );

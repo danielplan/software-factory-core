@@ -21,7 +21,13 @@ const pageWith = (
 ) =>
   ({
     exploration: { status },
-    board: { things: Array.from({ length: things }) },
+    // The problem is always on the board; the explorer draws the rest.
+    board: {
+      things: [
+        { kind: "problem" },
+        ...Array.from({ length: things }, () => ({ kind: "note" })),
+      ],
+    },
     talk,
   }) as never;
 
@@ -101,12 +107,13 @@ test("the reason is in plain words in each language, with the way out apart", ()
 });
 
 test("the card never says anything about time, in any language", () => {
-  const TIME =
-    /\d|\b(seconds?|minutes?|usually|secondi?|minuti?|di solito|sekunden?|minuten?|normalerweise)\b/i;
+  const TIME = /\d|\b(seconds?|minutes?|usually|secondi?|minuti?|di solito)\b/i;
+  const GERMAN_TIME = /\b(sekunden?|minuten?|normalerweise)\b/i;
   for (const locale of LOCALES) {
     const reading = resources[locale].translation.explore.reading;
     const texts = JSON.stringify(reading).replaceAll(/\{\{\w+\}\}/g, "");
     assert.doesNotMatch(texts, TIME, locale);
+    assert.doesNotMatch(texts, GERMAN_TIME, locale);
   }
   assert.equal(STEPS.length, 3);
 });

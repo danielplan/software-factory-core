@@ -50,9 +50,16 @@ const DRAWING_TOOLS = [
   "change_thing",
   "link",
   "make_prototype",
-].map((name) => TOOL_PREFIX + name);
+];
+// The coach's tool a line names: "Using add choice (setup)", as Claude Code's
+// events are put into words (core's activity.ts), or its full name.
+function toolOf(line: string): string | null {
+  if (line.startsWith(TOOL_PREFIX)) return line.slice(TOOL_PREFIX.length);
+  const named = /^Using (.+) \(setup\)$/.exec(line);
+  return named ? (named[1] ?? "").replaceAll(" ", "_") : null;
+}
 function stepOf(line: string): Step {
-  if (DRAWING_TOOLS.includes(line)) return 2;
+  if (DRAWING_TOOLS.includes(toolOf(line) ?? "")) return 2;
   return SHOWN.test(line) ? 1 : 0;
 }
 

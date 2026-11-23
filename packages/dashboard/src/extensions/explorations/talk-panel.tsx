@@ -254,7 +254,9 @@ function Problem({
     : { reason: refused ?? "", how: "" };
   return (
     <p role="alert" className="text-xs text-destructive">
-      {problem ? `${words.reason}. ${words.how}`.trim() : words.reason}
+      {problem
+        ? [words.reason, words.how].filter(Boolean).join(". ") + "."
+        : words.reason}
     </p>
   );
 }

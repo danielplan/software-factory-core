@@ -36,13 +36,13 @@ test("a step is reached when the explorer reports it, not before, and never goes
   const turn = talk.answer("Hello", undefined, RIGHTS);
   assert.equal(talk.step, 0);
   held.report("Getting started");
-  held.report("Using mcp__setup__look_at_board");
+  held.report("Using look at board (setup)");
   assert.equal(talk.step, 0);
   held.report("Reading src/pay.ts");
   assert.equal(talk.step, 1);
   held.report("Searching for “card”");
   assert.equal(talk.step, 1);
-  held.report("Using mcp__setup__add_choice");
+  held.report("Using add choice (setup)");
   assert.equal(talk.step, 2);
   held.report("Reading src/pay.ts");
   assert.equal(talk.step, 2);

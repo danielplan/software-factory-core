@@ -54,8 +54,36 @@ Decisions (cheap to change, decided here):
 
 ## Status
 
-in progress
+done
 
 ## Result
 
+Looked at in the browser on this copy's own ports, with a pretend Claude
+Code (a script that prints what the real one prints) so the steps and the
+stops could be made to happen:
+
+![Reading the page](issue-49-reading-card/1-reading-page.png)
+![Looking at the code, ticked after the first read](issue-49-reading-card/2-reading-code.png)
+![Drawing the board](issue-49-reading-card/3-reading-drawing.png)
+![Stopped, no reason given](issue-49-reading-card/4-stopped-no-reason.png)
+![Stopped, Claude Code not signed in](issue-49-reading-card/5-stopped-signed-out.png)
+
+- Found by looking: the board always holds the problem note, so "empty"
+  means "nothing but the problem" (`readsTheBoard`); the prototype's made-up
+  exploration had no things at all.
+- Found by looking: Claude Code's MCP tools reach the talk as "Using add
+  choice (setup)", not as the full tool name, so the steps read both forms.
+- Try again worked: the steps started over and the owner's words stayed once
+  in the chat.
+- Differences from the prototype: the card's words come from the
+  translations; the reason line wraps "Try again" to a second line when the
+  reason is long (as in the prototype); the chat shows the reason with what
+  to do next, translated.
+- Not looked at: a real Claude Code (it was a pretend one), the card in
+  Italian and German on screen (the words are tested), a board that fills
+  after the card (the pretend explorer does not draw).
+
 ## Later
+
+- The coach's tool lines (`TOOL_LINES` in `coach/talk.ts`) match the full
+  tool name, which Claude Code's events never carry, so they never show.
