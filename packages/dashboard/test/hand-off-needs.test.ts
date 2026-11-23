@@ -42,3 +42,18 @@ test("without a prototype, something agreed is needed", () => {
   assert.equal(handOffMissing([]), "something");
   assert.equal(handOffMissing([thing({ kind: "note", agreed: true })]), null);
 });
+
+test("a prototype never made is left out, as the server leaves it out", () => {
+  const unmade = ["A"];
+  assert.equal(
+    handOffMissing(
+      [prototype({ agreed: false }), thing({ kind: "note", agreed: true })],
+      unmade,
+    ),
+    null,
+  );
+  assert.equal(
+    handOffMissing([prototype({ agreed: false })], unmade),
+    "something",
+  );
+});

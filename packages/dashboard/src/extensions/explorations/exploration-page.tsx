@@ -134,8 +134,9 @@ function HandOffButton({
   );
   const key = agreed?.kind === "prototype" ? agreed.key : "";
   // What the board still lacks, said next to the button: a switched-off
-  // button shows no tooltip, so the words are on the page.
-  const missing = handOffMissing(board.things);
+  // button shows no tooltip, so the words are on the page. Prototypes never
+  // made are left out, as the server leaves them out.
+  const missing = handOffMissing(board.things, page.unmade);
   const busy = pending === "hand-off" || page.handingOff !== null;
   const handOffWords = key
     ? t("explore.handOff", { key })

@@ -19,12 +19,16 @@ import { Refused } from "../../refused.ts";
 import { type Act, applyAct } from "./board-acts.ts";
 import { boardText, completed } from "./board-things.ts";
 import type { BoardTools } from "./board-tools.ts";
-import { type MadeReport, reviewWords } from "./made.ts";
+import {
+  failedNote,
+  failedWords,
+  type MadeReport,
+  reviewWords,
+} from "./made.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
-import type { ChangeStart } from "./prototypes.ts";
 import { inLanguage } from "../../language.ts";
-import type { Way } from "./deeper.ts";
+import type { Makers } from "./makers.ts";
 import { explorationOf, parkIdea, renameExploration } from "./actions.ts";
 
 const RIGHTS = {
@@ -52,28 +56,6 @@ type TalksOptions = {
   // The made-up worlds the explorations' prototypes share.
   worlds: ExplorationWorlds;
   onChange: () => void;
-};
-
-type Makers = {
-  // What the exploration's prototypes being made do now.
-  making: (id: string) => string[];
-  make: (id: string, choice: string, options: string[], opens?: string) => void;
-  // A prototype changed in its copy (now, or once its maker is done);
-  // another way added as a variant (its letter).
-  change: (id: string, prototype: string, change: string) => ChangeStart;
-  another: (id: string, prototype: string, way: Way) => string;
-  // The kept variant as the base, new ones refining it (their letters).
-  deeper: (
-    id: string,
-    prototype: string,
-    keep: string,
-    ways: Way[],
-  ) => string[];
-  // Hands the exploration off, as the Hand off button does.
-  handOff: (id: string) => Promise<string>;
-  // A thing taken off the board, when a prototype: refused while its maker
-  // is on it; else what runs of it stops.
-  release: (id: string, thing: string) => void;
 };
 
 export class ExplorationTalks {
@@ -163,6 +145,14 @@ export class ExplorationTalks {
     const times = (this.pointed.get(id)?.times ?? 0) + 1;
     this.pointed.set(id, { thing: made.thing, times });
     void this.answer(id, talk, reviewWords(key, made));
+  }
+
+  // A prototype could not be made: heard at once, or with the next turn
+  // while the kobold is answering.
+  failed(id: string, key: string, why: string): void {
+    const talk = this.talk(id);
+    if (talk.working) this.personDid(id, failedNote(key, why));
+    else void this.answer(id, talk, failedWords(key, why));
   }
 
   personDid(id: string, words: string): void {
