@@ -5,6 +5,7 @@
 
 import type { Board, Exploration } from "@software-factory/core";
 
+import { CARRY_ON } from "./cut-off.ts";
 import type { ChangeStart } from "./prototypes.ts";
 
 type Made = Extract<Board["things"][number], { kind: "prototype" }>;
@@ -51,10 +52,11 @@ export function askFor(
   exploration: Exploration,
   board: Board,
   made: Made,
-  more: { change: string | undefined; maps: string },
+  more: { change: string | undefined; resumed?: boolean; maps: string },
 ): string {
   const { key, branch } = made;
   return [
+    more.resumed ? CARRY_ON : "",
     more.change
       ? `Change prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${branch}, where it is already made). The change: ${more.change}. Keep what works; change what is asked.`
       : `Make prototype ${key} of the exploration “${exploration.title}”, as the explore skill says, in this copy of the code (on the branch ${branch}).`,

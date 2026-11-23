@@ -57,6 +57,11 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
 - When a prototype cannot be made, Doodle is told why at once and says so
   in plain words, never that Tinker is still on it, and offers to make it
   again or hand off from the agreed picture.
+- A restart of the factory while Tinker is at work does not lose the
+  prototype: what Tinker was asked and its conversation are saved beside
+  the copy as it starts, and when the factory starts again it picks Tinker
+  up in the same copy and conversation, told to look at its uncommitted
+  edits and carry on (`cut-off.ts`).
 - The branch is pushed to origin once committed, so a teammate's computer
   opens it too; when it cannot be, the board says it is only on this
   computer. **Open** runs it with the product's prototype command, one at a
@@ -101,7 +106,7 @@ at the world and change it (`look_at_world`, `world_rows`, `change_world`,
 
 | Part       | Where                                                                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tinker     | `packages/server/src/extensions/explorations/`: `prototypes.ts`, `making.ts`, `maker-tools.ts`, `looks.ts`, `versions.ts`, `starting-up.ts`, `start-setup.ts`                  |
+| Tinker     | `packages/server/src/extensions/explorations/`: `prototypes.ts`, `making.ts`, `cut-off.ts`, `maker-tools.ts`, `looks.ts`, `versions.ts`, `starting-up.ts`, `start-setup.ts`    |
 | The worlds | `packages/server/src/extensions/explorations/`: `worlds.ts`, `world-tools.ts`, `world-route.ts`; `packages/core/src/kobble/world.ts`, `packages/core/src/kobble/situations.ts` |
 | The copies | `packages/server/src/prototypes/`                                                                                                                                              |
 | The skill  | `packages/skills/skills/explore/SKILL.md`                                                                                                                                      |
@@ -110,5 +115,5 @@ at the world and change it (`look_at_world`, `world_rows`, `change_world`,
 ## Checked and not checked
 
 Checked by tests: prototypes, their copies and states, versions, digging
-deeper, worlds. Not checked by a test: how good a prototype looks; Tinker
+deeper, worlds, picking up a maker after a restart. Not checked by a test: how good a prototype looks; Tinker
 looks at its pictures and Doodle reviews them.

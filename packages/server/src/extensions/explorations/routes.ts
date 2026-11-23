@@ -61,6 +61,8 @@ export function servedExplorations(options: Options) {
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
   toldOfPrototypes(prototypes, talks);
+  // A restart while a maker was at work: it carries on.
+  prototypes.pickUpCutOff();
   // Handed off, by the button or the kobold: the spec written (each step
   // shown on the page), the card made, the prototypes stopped.
   const handOffs = new HandOffs(options.onChange);
