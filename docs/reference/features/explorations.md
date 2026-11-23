@@ -39,6 +39,24 @@ and click things to attach them to what they type next; Doodle hears what
 they did with their next words. Words sent while it answers join that
 answer, and **Stop** ends it.
 
+## While Doodle reads
+
+On an empty board, while Doodle answers, the board shows a **reading card**
+in the middle: three steps (reading the page, looking at the code, drawing),
+each ticked off when Doodle actually reports it. The server says which step
+the turn is at (`talk.step`, from `coach/talk.ts`): reading or searching
+moves it to looking at the code, using a drawing tool to drawing. Nothing
+is timed, and the card says nothing about how long it takes. The card goes
+when the board has something on it, and shows only on an empty board.
+
+When Doodle really stops (Claude Code failed or was cut off), the card puts
+a red cross on the step it stopped at and says why in a red line, in plain
+words and in the language shown (`stopWords` in `i18n/server-texts.ts`; the
+chat says the same), with a small **Try again** link at its end. The link
+(`POST /api/kobble/explorations/again`) takes the person's last words back
+and says them again, so the steps start over and the chat has them once; with
+no words yet it is Doodle's first look again.
+
 ## The prototype
 
 When the idea changes a screen, Doodle asks **Tinker**, its maker, for a
