@@ -26,11 +26,12 @@ is the module's declaration, not a barrel: it re-exports nothing.
 
 ```text
 src/main.tsx            the start: the company's theme, then the app
-src/app/                the app, the frame around the pages (shell.tsx),
-                        the pages by address (router.tsx, React Router
-                        on the address after the #), the installed
-                        extensions' modules (extensions.ts), and Settings
-                        put together (settings-page.tsx)
+src/app/                the app, the factory's frame around its pages
+                        (factory-shell.tsx), the pages by address
+                        (router.tsx, React Router on the address after
+                        the #), the installed extensions' modules
+                        (extensions.ts), and Settings put together
+                        (settings-page.tsx)
 src/api/                talking to the server: the requests (client.ts),
                         reading through TanStack Query (query.ts), the
                         factory's state and its stream of changes
@@ -38,7 +39,9 @@ src/api/                talking to the server: the requests (client.ts),
                         server answers with, the source of its type
                         (schemas/), the feedback board
 src/components/ui/      shadcn's pieces, as generated
-src/components/layout/  the sidebar, the page's head, a problem's box
+src/components/layout/  the frame every page sits in, setup's too
+                        (shell.tsx), the sidebar, the page's head,
+                        Sprocket's bar, a problem's box
 src/components/         pieces several areas share: the kobolds' faces,
                         Markdown, a block on Home, a settings card, the
                         voice's screens (voice/) …
@@ -80,7 +83,9 @@ the kit's library, one card at a time; nothing new is added to it.
 
 - **Forms:** the forms with fields (the live app's address and token, a
   persona added in setup, an answer to the coach's question) use
-  react-hook-form with zod; the chat boxes (Doodle's talk panel, the
+  react-hook-form with zod, their schemas in `src/lib/forms.ts`: a field
+  that does not hold says why under it (`FieldProblem`) once something was
+  typed in it; the chat boxes (Doodle's talk panel, the
   coach's answer box, Sprocket's box, an answer on a stuck card) still keep
   their text in component state, as voice, attachments and quick picks
   write into it too.

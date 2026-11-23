@@ -1,7 +1,7 @@
-// The frame around every page of the dashboard: the white sidebar, and
-// beside it the page on the grey ground, at most 1120px wide, its buttons
-// in its own header. An exploration fills the whole window: its canvas
-// needs the room, and its own bar leads back.
+// The factory's frame: the shared frame (components/layout/shell.tsx) with
+// the factory's rows in the sidebar, its light on a phone, and Sprocket's
+// window. An exploration fills the whole window: its canvas needs the
+// room, and its own bar leads back.
 
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,9 +18,12 @@ import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
 import { UpdateRow } from "@/features/updates/update-row";
 
+import { FactoryNav } from "@/components/layout/factory-nav";
+import { Shell } from "@/components/layout/shell";
 import { Sidebar } from "@/components/layout/sidebar";
+import { StatusLight } from "@/components/status-light";
 
-export function Shell({
+export function FactoryShell({
   state,
   pages,
   current,
@@ -37,33 +40,40 @@ export function Shell({
   fill?: boolean;
   children: ReactNode;
 }>) {
-  const sidebar = useSidebarParts(state, pages);
-  if (fill)
-    return <main className="min-h-dvh min-w-0 bg-ground">{children}</main>;
+  const { kobold, light, ...rows } = useSidebarParts(state, pages);
   return (
-    <div className="flex min-h-dvh bg-ground max-md:pt-14 md:pl-56">
-      <Sidebar
-        name={state.company.name || null}
-        current={current}
-        open={open}
-        {...sidebar}
-        rows={
-          <>
-            <UpdateRow />
-            <FeedbackRow current={current} />
-          </>
-        }
-      />
-      <main className="min-w-0 flex-1">
-        <div
-          key={current}
-          className="mx-auto grid max-w-[1120px] content-start gap-4 px-4 pt-6 pb-28 motion-safe:animate-rise sm:px-10 sm:pt-[34px]"
+    <Shell
+      shown={current}
+      fill={fill}
+      sidebar={
+        <Sidebar
+          name={state.company.name || null}
+          status={
+            <span title={kobold.detail} className="ml-auto flex px-3">
+              <StatusLight light={light} />
+            </span>
+          }
         >
-          {children}
-        </div>
-      </main>
-      <SprocketWindow page={current} />
-    </div>
+          {(onGo) => (
+            <FactoryNav
+              current={current}
+              open={open}
+              onGo={onGo}
+              {...rows}
+              rows={
+                <>
+                  <UpdateRow />
+                  <FeedbackRow current={current} />
+                </>
+              }
+            />
+          )}
+        </Sidebar>
+      }
+      sprocket={<SprocketWindow page={current} />}
+    >
+      {children}
+    </Shell>
   );
 }
 

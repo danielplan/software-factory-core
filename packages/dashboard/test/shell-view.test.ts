@@ -162,6 +162,33 @@ test("setting up is done only once the kobold has finished, not when the folder 
   assert.equal(setUpDone({ made: true, working: false }), true);
 });
 
+test("Sprocket's bar says in plain words what it does while Kobble is set up", async () => {
+  const { statusOf } = await import("../src/features/setup/steps.ts");
+  const empty = {
+    cards: [],
+    links: [],
+    places: {},
+    focus: { ids: [], areas: [], n: 0 },
+  };
+  const drawn = {
+    ...empty,
+    cards: [{ id: "c1", title: "A shop", confirmed: false }],
+  };
+  assert.equal(statusOf({ working: false, phase: "plan", draft: empty }), null);
+  assert.equal(
+    statusOf({ working: true, phase: "plan", draft: empty }),
+    "reading",
+  );
+  assert.equal(
+    statusOf({ working: true, phase: "plan", draft: drawn }),
+    "changing",
+  );
+  assert.equal(
+    statusOf({ working: true, phase: "build", draft: drawn }),
+    "building",
+  );
+});
+
 test("the kobold's card says when it makes a prototype or thinks in an exploration", () => {
   assert.deepEqual(
     koboldStatus(null, [], "All running", [

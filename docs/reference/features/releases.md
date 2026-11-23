@@ -67,5 +67,8 @@ The routes: `GET /api/releases`, `POST /api/releases/prepare`,
 Checked by tests: the numbers, the notes and their shape
 (`release-numbers.test.ts`, `releases.test.ts`, `release-notes.test.ts`).
 Not checked: the kobold's judgement and its notes and translations on real
-merged work, and a real release on a team's repository. Releases reaches
-GitHub only through the code host of the `code` slot.
+merged work, and a real release on a team's repository. Releases declares
+the slots it uses, `code` and `tasks` (its repository is the one the board
+names); `extension-slots.test.ts` checks that each of Kobble's extensions
+reaches only the slots it declares. Releases reaches GitHub only through the
+code host of the `code` slot.

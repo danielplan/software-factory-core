@@ -67,6 +67,9 @@ export type ExplorationPage = {
   heard: (Heard & { personaName: string | null; personaFace: Face | null })[];
   board: Board;
   runs: VersionRun[];
+  // Whether a prototype can run here (the project names a start command):
+  // without one, the board does not start its prototype by itself.
+  canRun: boolean;
   tests: Record<string, TestResult | null>;
   talk: TalkView;
   // Being handed off: since when, and what the spec writer does now.
@@ -147,6 +150,7 @@ export function explorationPage(
   exploration: Exploration,
   more: {
     runs: VersionRun[];
+    canRun: boolean;
     talk: TalkView;
     handingOff: HandingOff | null;
     // Who it is for, and its prototypes' tests: Personas' plugs.
@@ -177,6 +181,7 @@ export function explorationPage(
     }),
     board,
     runs: more.runs,
+    canRun: more.canRun,
     tests: Object.fromEntries(
       board.things.flatMap((made) => {
         if (made.kind !== "prototype") return [];

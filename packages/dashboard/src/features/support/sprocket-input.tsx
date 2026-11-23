@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 
 import { post } from "@/api/client";
 import { ChatSend } from "@/components/chat-send";
+import { Messages } from "@/components/layout/sprocket-messages";
 
+import type { SupportView } from "@/api/schemas/support";
 import type { Page } from "@/lib/routes";
 import { useSupport } from "./use-support";
 
 import { useCaughtErrors } from "./factory-errors";
 import { Chips, Thinking } from "./kobold-chat";
-import { Messages } from "./support-messages";
 import { askMode, looksLikeFeedback, say, type Thread } from "./tell-kobold";
 
 // A question: the support kobold's own conversation.
@@ -20,8 +21,8 @@ export function AskFeed({
 }: Readonly<{ thread: Thread; page: Page }>) {
   const support = useSupport();
   const startAsk = useTranslation().t;
-  const asked = (support?.messages.length ?? 0) > 0 || support?.writing != null;
-  if (asked) return <Messages support={support} />;
+  if (support && (support.messages.length > 0 || support.writing !== null))
+    return <Said support={support} />;
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-end gap-2.5 px-4 pt-3 pb-2 text-[13px]">
       {thread.thinking ? (
@@ -46,6 +47,21 @@ export function AskFeed({
         )
       )}
     </div>
+  );
+}
+
+// What the support kobold and the person said so far.
+function Said({ support }: Readonly<{ support: SupportView }>) {
+  const t = useTranslation().t;
+  return (
+    <Messages
+      messages={support.messages.map((message) => ({
+        mine: message.from === "you",
+        text: message.text,
+      }))}
+      writing={support.writing}
+      status={support.activity ?? t("support.thinking")}
+    />
   );
 }
 

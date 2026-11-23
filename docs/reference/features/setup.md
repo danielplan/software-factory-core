@@ -17,10 +17,22 @@ product must keep.
 
 Each step holds a few small cards, each a guess until the owner agrees;
 behind them is one map the coach draws with its tool `draw`, an area per
-step. There is no chat: the owner confirms a card, corrects its words in
-place, takes it off, adds people, and answers the coach's questions, which
-wait as cards on their step. The owner can talk instead of typing (see
-[voice](voice.md)).
+step. The owner confirms a card, corrects its words in place, takes it
+off, adds people, and answers the coach's questions, which wait as cards on
+their step. The owner can talk instead of typing (see [voice](voice.md)).
+
+## How it looks
+
+Setting up sits in Kobble's own frame, the one every page has: the same
+sidebar, with the project's name at the top and the steps as its rows (a
+step's number in its tile, a check once it is behind, the step shown lit; a
+step not reached yet cannot be opened); each step's title and one line
+under it, with its buttons on the right (Back, and Let's go, Continue, Set
+up Kobble or Open it); and Sprocket's bar at the bottom. The setup coach is
+Sprocket: while it works, the bar says what it does in plain words (Reading
+your project, Changing the cards, Setting up Kobble); opened, it holds what
+the owner and Sprocket said, with a box to answer in or Talk. The step is
+in the address (`#step-3`), so a reload stays there.
 
 When the owner presses **Set up Kobble**, the coach builds the factory with
 its other tool, `configure`: the project's factory folder, its products, the
@@ -106,16 +118,17 @@ description would make the folder, and the starter would never be copied.
 
 ## Where it lives
 
-| Part                | Where                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| The coach           | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)      |
-| What it may install | `packages/server/src/installables.ts`                                                              |
-| Making products     | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                   |
-| The project's files | `packages/server/src/project-files.ts`, `packages/server/src/verify-command.ts`                    |
-| Finding products    | `packages/core/src/setup/detect.ts`, each kit's `detect`                                           |
-| Its guide           | `packages/skills/guides/setup-coach.md`                                                            |
-| The page            | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/` |
-| The files           | `factory/setup.json` (the setup conversation and its map)                                          |
+| Part                | Where                                                                                                                                           |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| The coach           | `packages/server/src/coach/` (`setup-coach.ts`, `configure.ts`, `map.ts`, `setup-records.ts`)                                                   |
+| What it may install | `packages/server/src/installables.ts`                                                                                                           |
+| Making products     | `packages/server/src/create-products.ts`, `packages/server/src/write-factory.ts`                                                                |
+| The project's files | `packages/server/src/project-files.ts`, `packages/server/src/verify-command.ts`                                                                 |
+| Finding products    | `packages/core/src/setup/detect.ts`, each kit's `detect`                                                                                        |
+| Its guide           | `packages/skills/guides/setup-coach.md`                                                                                                         |
+| The page            | `packages/dashboard/src/features/setup/`, connecting in `packages/dashboard/src/features/connect/`                                              |
+| Its frame           | `packages/dashboard/src/components/layout/` (`shell.tsx`, `sidebar.tsx`, `page-head.tsx`, `sprocket-dock.tsx`), shared with the factory's pages |
+| The files           | `factory/setup.json` (the setup conversation and its map)                                                                                       |
 
 ## Checked and not checked
 

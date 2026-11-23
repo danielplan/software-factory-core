@@ -15,6 +15,8 @@ export const extension = defineExtension({
   about: "Numbers and notes for each release.",
   core: true,
   needs: ["factory"],
+  // The release is made where the code lives; the repository is the one
+  // the board where work is tracked names.
   slots: ["code", "tasks"],
   brings: { pages: ["releases"] },
   stages: [{ id: "release", name: "Release", after: ["done"] }],

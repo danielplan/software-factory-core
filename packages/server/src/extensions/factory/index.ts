@@ -15,6 +15,7 @@ import { type Route, send } from "../../http.ts";
 import { kept } from "../../kobble/records.ts";
 import type { Host, Served } from "../../plugs/extension.ts";
 import type { WorkPlug } from "../../plugs/work.ts";
+import { baseBranchFor } from "../../base-branch.ts";
 import { Refused } from "../../refused.ts";
 import { ConnectedWork } from "./builder/connect-work.ts";
 import { WEBHOOK_PATH } from "./builder/signals.ts";
@@ -88,6 +89,7 @@ export function serve(host: Host): Served {
           cards: host.cards,
           work: () => work.view(),
           answer: offer.answer,
+          baseBranch: () => baseBranchFor(host.project, work.hostOrNull()),
         }),
       ),
     // Where GitHub's signals come (gh webhook forward).

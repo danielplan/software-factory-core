@@ -251,6 +251,11 @@ test("a prototype is told where its world is, and opened for a persona starts in
       ).runs.find((run) => run.version === "C")?.making;
     while (await state())
       await new Promise((resolve) => setTimeout(resolve, 20));
+    // It names a start command: the board may start its prototype.
+    const page = (await (
+      await fetch(`${factory.base}/api/kobble/exploration?id=X-1`)
+    ).json()) as ExplorationPage;
+    assert.equal(page.canRun, true);
     const opened = await factory.post("/api/kobble/explorations/open", {
       id: "X-1",
       key: "C",

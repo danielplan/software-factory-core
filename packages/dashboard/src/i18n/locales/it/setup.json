@@ -1,42 +1,35 @@
 {
-  "hi": "Ciao, sono il tuo kobold.",
   "tellMe": "Dimmi cosa vuoi costruire, e preparo Kobble con te.",
   "reading": "Sto leggendo il tuo progetto…",
-  "read": "Ho letto il tuo progetto, così devi solo confermare cosa ho trovato. Vediamolo insieme.",
-  "stepOf": "Passo {{n}} di {{of}}",
-  "whereStart": "Da dove cominciamo?",
+  "status": {
+    "reading": "Leggo il tuo progetto…",
+    "building": "Preparo Kobble…",
+    "changing": "Cambio le schede…"
+  },
   "steps": {
     "hello": {
-      "name": "Benvenuto",
-      "hint": "Il kobold legge"
+      "name": "Benvenuto"
     },
     "product": {
-      "name": "Il tuo prodotto",
-      "hint": "Cos'è, a che punto è"
+      "name": "Il tuo prodotto"
     },
     "people": {
-      "name": "Per chi è",
-      "hint": "Le persone per cui costruisci"
+      "name": "Per chi è"
     },
     "team": {
-      "name": "Team e bacheca",
-      "hint": "Chi ci lavora, dove"
+      "name": "Team e bacheca"
     },
     "how": {
-      "name": "Come lavora Kobble",
-      "hint": "Componenti aggiuntivi, l'aspetto"
+      "name": "Come lavora Kobble"
     },
     "bring": {
-      "name": "Porta con te",
-      "hint": "Quello che hai già"
+      "name": "Porta con te"
     },
     "setup": {
-      "name": "Prepara",
-      "hint": "Kobble scrive tutto"
+      "name": "Prepara"
     },
     "start": {
-      "name": "Prima esplorazione",
-      "hint": "Comincia con lavoro vero"
+      "name": "Prima esplorazione"
     }
   },
   "leads": {
@@ -44,7 +37,7 @@
     "product": "Cos'è il tuo prodotto, le sue parti, e a che punto è arrivato.",
     "people": "Le persone per cui costruisci. Kobble mette alla prova le idee con loro, quindi devono essere vere. Aggiungi le tue.",
     "team": "Chi ci lavora, e dove si traccia il lavoro. Tutti possono fare tutto.",
-    "how": "Le parti di Kobble adatte al vostro modo di lavorare. Puoi cambiarle più avanti in Impostazioni.",
+    "how": "Le estensioni adatte al vostro modo di lavorare, e l’aspetto. Puoi cambiarle più avanti in Impostazioni.",
     "bring": "Quello che hai già, e cosa succede con esso.",
     "start": "Scegline una e Kobble la apre con la lavagna già avviata. Oppure prima dai un'occhiata in giro."
   },
@@ -61,23 +54,14 @@
     "yourAnswer": "La tua risposta",
     "answer": "Rispondi"
   },
-  "rail": {
-    "label": "Passi della preparazione",
-    "settingUp": "Preparo",
-    "minutes": "Circa 7 minuti. Puoi cambiare tutto più avanti in Impostazioni e Personas.",
-    "working": "Al lavoro…",
-    "help": "Qui per aiutarti",
-    "back": "Indietro",
-    "nextWrites": "Poi Kobble scrive tutto questo nel tuo repository.",
-    "canChange": "Puoi cambiarlo più avanti."
-  },
-  "bar": {
+  "actions": {
     "continue": "Continua",
     "go": "Andiamo",
     "pickStart": "Scegli da dove cominciare",
     "setUp": "Prepara Kobble",
     "open": "Aprila",
-    "look": "Prima do un'occhiata"
+    "look": "Prima do un'occhiata",
+    "back": "Indietro"
   },
   "found": {
     "reading": "Leggo…",
@@ -96,10 +80,9 @@
     "guess": "la mia ipotesi"
   },
   "connected": "Collegato",
-  "now": "Ora: {{activity}}",
   "cards": {
     "forEveryone": "Per tutti",
-    "addOns": "Componenti aggiuntivi",
+    "addOns": "Estensioni",
     "look": "L'aspetto",
     "lookNote": "per tutti",
     "apps": "App che ho trovato",
@@ -144,7 +127,7 @@
   },
   "building": {
     "title": "Preparo Kobble",
-    "lead": "Il kobold scrive nel tuo repository tutto quello che abbiamo visto. Ci vogliono alcuni minuti."
+    "lead": "Sprocket scrive nel tuo repository tutto quello che abbiamo visto. Ci vogliono alcuni minuti."
   },
   "before": {
     "title": "Prepara",
@@ -159,13 +142,14 @@
     "start": "Avvio {{n}} esplorazioni"
   },
   "coach": {
-    "answer": "Rispondi al coach…",
-    "answerLabel": "Rispondi al coach",
+    "answer": "Rispondi a Sprocket…",
+    "answerLabel": "Rispondi a Sprocket",
     "talk": "Parla",
     "talkTitle": "Parla invece di scrivere",
     "send": "Invia",
-    "label": "Il coach",
+    "label": "Sprocket",
     "build": "Cosa vuoi costruire?",
-    "couldNot": "Il coach non è riuscito a rispondere"
-  }
+    "couldNot": "Sprocket non è riuscito a rispondere"
+  },
+  "stepsLabel": "Passi della preparazione"
 }

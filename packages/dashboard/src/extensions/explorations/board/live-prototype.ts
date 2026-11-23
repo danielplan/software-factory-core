@@ -2,8 +2,9 @@
 // its prototype (the agreed one, otherwise the newest) when none runs, so
 // the canvas shows the real screen, not a placeholder. Once per page visit;
 // a prototype that failed or that someone stopped on purpose stays as it is
-// until Open. Starting by itself is quiet: when it cannot (a project
-// without a start command), Start stays, and pressing it says why.
+// until Open. Starting by itself is quiet: in a project without a start
+// command it is not asked for at all (the page says canRun: false), Start
+// stays, and pressing it says why.
 
 import { useEffect, useRef } from "react";
 

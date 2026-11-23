@@ -33,6 +33,8 @@ export function supportCards(options: {
   cards: () => Cards;
   work: () => WorkView | null;
   answer: (number: number, text: string) => Promise<void>;
+  // The branch the card's work goes into (base-branch.ts).
+  baseBranch: () => Promise<string>;
 }): SupportCards {
   const stuckOne = (number: number) =>
     options.work()?.stuck?.find((one) => one.number === number);
@@ -41,7 +43,7 @@ export function supportCards(options: {
       cardLook(
         number,
         options.cards(),
-        options.project,
+        { project: options.project, baseBranch: options.baseBranch },
         stuckOne(number)?.since ?? null,
       ),
     answer: async (number, text) => {
@@ -55,10 +57,13 @@ export function supportCards(options: {
   };
 }
 
+// Where the card's work is: the project, and the branch its work goes into.
+type Where = { project: string; baseBranch: () => Promise<string> };
+
 export async function cardLook(
   number: number,
   cards: Cards,
-  project: string,
+  place: Where,
   stuckSince: string | null,
 ): Promise<string> {
   const card = await cards.show(number);
@@ -74,20 +79,21 @@ export async function cardLook(
     `${card.url} · column: ${card.column}${where}`,
     `## The card\n\n${clip(card.body.trim() || "(no text)")}`,
     `## The conversation${olderLeftOut(shown.length, earlier)}\n\n${said.join("\n\n") || "(no comments)"}`,
-    await branchLook(project, number),
+    await branchLook(place, number),
   ].join("\n\n");
 }
 
-async function branchLook(project: string, number: number): Promise<string> {
+async function branchLook(
+  { project, baseBranch }: Where,
+  number: number,
+): Promise<string> {
   const branch = branchOf(number);
   const git = (...args: string[]) => run("git", ["-C", project, ...args]);
   const found = await branchRef(git, branch);
   if (!found)
     return `## The branch\n\n\`${branch}\` has nothing yet: the builder has not committed any work.`;
   const { ref: remote, where } = found;
-  const base = await git("rev-parse", "--abbrev-ref", "origin/HEAD")
-    .then((name) => name.trim())
-    .catch(() => "origin/main");
+  const base = `origin/${await baseBranch()}`;
   const commits = await git(
     "log",
     "--oneline",

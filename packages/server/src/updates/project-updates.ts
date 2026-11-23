@@ -1,13 +1,17 @@
-// Updates: brings the newest main from GitHub into the owner's folder, so
-// merged work runs on their computer without anyone typing `git pull`: from
-// the Update button in the sidebar, and by itself every few minutes when the
-// owner switched "Update by itself" on (Settings › Updates). It only moves
-// the folder forward when nothing can be lost (on main, no changed files, no
-// commits of its own); otherwise it says why in plain words. Either way, what
-// comes after (installing, upgrading the factory, restarting what runs) is
-// part of the update, so an update by itself finishes the same as a press.
+// Updates: brings the newest of the project's base branch (main, or
+// whatever the remote names its default: base-branch.ts) from GitHub into
+// the owner's folder, so merged work runs on their computer without anyone
+// typing `git pull`: from the Update button in the sidebar, and by itself
+// every few minutes when the owner switched "Update by itself" on (Settings
+// › Updates). It only moves the folder forward when nothing can be lost (on
+// that branch, no changed files, no commits of its own); otherwise it says
+// why in plain words. Either way, what comes after (installing, upgrading
+// the factory, restarting what runs) is part of the update, so an update by
+// itself finishes the same as a press.
 
 import { run } from "@software-factory/core";
+
+import { baseBranchFrom } from "../base-branch.ts";
 
 export type UpdatesState = {
   // The owner's "Update by itself" switch, kept per computer.
@@ -49,7 +53,10 @@ const SHOWN_FILES = 10;
 
 export class ProjectUpdates {
   private readonly git: Git;
-  private readonly branch: string;
+  // The branch it follows: the one given, else the project's base branch
+  // (base-branch.ts), found at the first look.
+  private readonly given: string | null;
+  private branch = "";
   private readonly choice: Choice;
   private current: UpdatesState;
   private listeners = new Set<(state: UpdatesState) => void>();
@@ -64,7 +71,7 @@ export class ProjectUpdates {
     after?: AfterUpdate;
   }) {
     this.git = options.git ?? gitIn(options.root);
-    this.branch = options.branch ?? "main";
+    this.given = options.branch ?? null;
     this.choice = options.choice ?? { read: () => false, write: () => {} };
     this.after = options.after ?? (() => Promise.resolve());
     this.current = {
@@ -100,7 +107,7 @@ export class ProjectUpdates {
     }
   }
 
-  // Takes the newest main when nothing can be lost.
+  // Takes the newest of the base branch when nothing can be lost.
   async update(): Promise<Outcome> {
     if (this.current.updating)
       return { kind: "not-updated", reason: "an update is already running" };
@@ -133,6 +140,12 @@ export class ProjectUpdates {
   }
 
   private async lookNow(): Promise<boolean> {
+    this.branch ||=
+      this.given ??
+      (await baseBranchFrom(async (args) => {
+        const answer = await this.git(args);
+        return answer.ok ? answer.log.join("\n") : null;
+      }));
     const fetched = await this.git(["fetch", "--quiet", "origin", this.branch]);
     const lastLookAt = new Date().toISOString();
     if (!fetched.ok) {

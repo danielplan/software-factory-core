@@ -14,9 +14,11 @@ slot with its own code host.
 ## Steps
 
 1. **Read the contract.** `CodeHost` in `packages/server/src/code-host.ts`:
-   find, open and update a pull request, comment on one, check that the copy
-   pushes there, link a file on a branch, and its `releases`: list the tags
-   and the releases, the pull requests merged since a tag, make a release.
+   say the base branch work goes into (`baseBranch`), find, open and update
+   a pull request, comment on one, check that the copy pushes there, link a
+   file on a branch, and its `releases`: list the tags and the releases, the
+   pull requests merged since a tag, make a release. Where no code host is at
+   hand, the base branch comes from git (`packages/server/src/base-branch.ts`).
    GitHub's is `packages/server/src/extensions/github/code-host.ts` (its
    releases in `releases.ts` beside it).
 2. **Make the add-on.** `packages/server/src/extensions/<id>/index.ts` (say `gitlab`), after

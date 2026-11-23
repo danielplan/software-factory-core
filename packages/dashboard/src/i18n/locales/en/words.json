@@ -64,5 +64,9 @@
     "dismissed": "Dismissed",
     "added": "Added to {{id}}",
     "waiting": "{{id}} is waiting in Explorations"
+  },
+  "form": {
+    "needed": "Write something here.",
+    "address": "Write a web address, such as https://your-app/api/kobble/export."
   }
 }

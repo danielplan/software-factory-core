@@ -7,9 +7,12 @@
 import { Eye, Plug } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { type UseFormRegisterReturn, useForm } from "react-hook-form";
+import {
+  type FieldError,
+  type UseFormRegisterReturn,
+  useForm,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import {
   CORE_VERSION,
@@ -19,8 +22,10 @@ import {
   type SignalRow,
   type SyncView,
 } from "@/api/client";
+import { FieldProblem } from "@/components/field-problem";
 import { KoboldHead } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
+import { connectSchema, markOf } from "@/lib/forms";
 import { cn } from "@/lib/utils";
 import { useRead } from "@/api/query";
 import { handledSchema } from "@/api/schemas/signals";
@@ -45,24 +50,32 @@ function Field({
   label,
   placeholder,
   field,
+  state,
   secret = false,
 }: Readonly<{
   label: string;
   placeholder: string;
   field: UseFormRegisterReturn;
+  // Whether it holds, to say why not under it.
+  state: { error?: FieldError; isDirty: boolean };
   secret?: boolean;
 }>) {
+  const problem = `${field.name}-problem`;
   return (
-    <label className="flex flex-col gap-1.5 text-[13px] text-muted-foreground">
-      {label}
-      <input
-        type={secret ? "password" : "text"}
-        autoComplete="off"
-        placeholder={placeholder}
-        {...field}
-        className="h-10 rounded-xl border border-border bg-card px-3 text-[13px] text-foreground outline-none placeholder:text-faint focus-visible:ring-[3px] focus-visible:ring-ring/30"
-      />
-    </label>
+    <div className="flex flex-col gap-1.5">
+      <label className="flex flex-col gap-1.5 text-[13px] text-muted-foreground">
+        {label}
+        <input
+          type={secret ? "password" : "text"}
+          autoComplete="off"
+          placeholder={placeholder}
+          {...markOf(state, problem)}
+          {...field}
+          className="h-10 rounded-xl border border-border bg-card px-3 text-[13px] text-foreground outline-none placeholder:text-faint focus-visible:ring-[3px] focus-visible:ring-ring/30 aria-invalid:border-destructive"
+        />
+      </label>
+      <FieldProblem id={problem} field={state} />
+    </div>
   );
 }
 
@@ -85,17 +98,11 @@ export function ConnectSignals({ app }: Readonly<{ app: string }>) {
   );
 }
 
-// The live app's address and its token, both needed.
-const connectSchema = z.object({
-  url: z.string().trim().min(1),
-  token: z.string().trim().min(1),
-});
-
 function ConnectCard({ app }: Readonly<{ app: string }>) {
   const form = useForm({
     resolver: zodResolver(connectSchema),
     defaultValues: { url: "", token: "" },
-    mode: "onChange",
+    mode: "onTouched",
   });
   const { isSubmitting: busy, isValid } = form.formState;
   const [problem, setProblem] = useState<string | null>(null);
@@ -127,11 +134,13 @@ function ConnectCard({ app }: Readonly<{ app: string }>) {
         label={t("signals.connect.address")}
         placeholder="https://your-app/api/kobble/export"
         field={form.register("url")}
+        state={form.getFieldState("url", form.formState)}
       />
       <Field
         label={t("signals.connect.token")}
         placeholder={t("signals.connect.tokenHint")}
         field={form.register("token")}
+        state={form.getFieldState("token", form.formState)}
         secret
       />
       {problem && (

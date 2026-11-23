@@ -64,5 +64,9 @@
     "dismissed": "Verworfen",
     "added": "Zu {{id}} hinzugefügt",
     "waiting": "{{id}} wartet in Erkundungen"
+  },
+  "form": {
+    "needed": "Schreib hier etwas hinein.",
+    "address": "Schreib eine Webadresse, etwa https://your-app/api/kobble/export."
   }
 }

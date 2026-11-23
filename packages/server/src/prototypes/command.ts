@@ -11,13 +11,13 @@ import { dirname, join } from "node:path";
 
 import { type Company, findFactory } from "@software-factory/core";
 
+import { baseBranchOf } from "../base-branch.ts";
 import { Refused } from "../refused.ts";
 import {
   cardCopy,
   companyOf,
   git,
   homeOf,
-  mainBranch,
   NO_START,
   type PrototypeCopy,
   shellWord,
@@ -123,8 +123,8 @@ function linesFor(home: string, name: string): string[] {
 }
 
 // Makes a card's copy when it is not there: the card's branch when it
-// exists, otherwise a new one from the project's main branch.
-function ensureCardCopy({ project, copy, out }: Context): void {
+// exists, otherwise a new one from the project's base branch.
+async function ensureCardCopy({ project, copy, out }: Context): Promise<void> {
   if (existsSync(copy.folder)) return;
   mkdirSync(dirname(copy.folder), { recursive: true });
   const known = git(project, ["branch", "--list", copy.branch]).trim() !== "";
@@ -132,7 +132,7 @@ function ensureCardCopy({ project, copy, out }: Context): void {
     out(`Copying the branch ${copy.branch} to ${copy.folder}`);
     git(project, ["worktree", "add", copy.folder, copy.branch]);
   } else {
-    const base = mainBranch(project);
+    const base = await baseBranchOf(project);
     out(`A new branch ${copy.branch} from ${base}, copied to ${copy.folder}`);
     git(project, ["worktree", "add", "-b", copy.branch, copy.folder, base]);
   }
@@ -140,7 +140,7 @@ function ensureCardCopy({ project, copy, out }: Context): void {
 
 async function start(context: Context, options: string[]): Promise<number> {
   const { company, copy, out, project } = context;
-  if (copy.env.FACTORY_CARD) ensureCardCopy(context);
+  if (copy.env.FACTORY_CARD) await ensureCardCopy(context);
   else if (!existsSync(copy.folder)) {
     out(`Copying ${copy.name} to ${copy.folder}, on ${copy.branch}`);
     await versionWorkspace(project, copy);

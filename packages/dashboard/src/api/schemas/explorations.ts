@@ -140,6 +140,7 @@ export const explorationPageSchema = z.object({
   heard: z.array(heardSchema),
   board: boardSchema,
   runs: z.array(versionRunSchema),
+  canRun: z.boolean(),
   tests: z.record(z.string(), testResultSchema.nullable()),
   talk: talkSchema,
   handingOff: handingOffSchema.nullable(),
