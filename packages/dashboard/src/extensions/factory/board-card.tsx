@@ -17,6 +17,7 @@ import type { FactoryCard } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { TypeChip } from "@/components/card-type";
+import { Hello } from "@/components/meet/hello";
 import { ConflictBox, ResolvingLine } from "./conflict-box";
 
 // A card on the board: it rises in after the ones above it, lifts under the
@@ -66,6 +67,7 @@ export function Card({
       <span className="text-[13px] leading-[1.35] font-medium">
         {card.title}
       </span>
+      {building && <Hello id="builder" />}
       {card.hint && !building && (
         <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
           <MessageCircle

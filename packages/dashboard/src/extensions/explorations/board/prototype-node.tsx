@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { Frame, useBoardDo } from "./frame";
+import { withTinkerAtWork } from "@/components/meet/meet";
 import { Making, MakingLine } from "./prototype-making";
 import { Starting } from "./prototype-starting";
 import { States } from "./prototype-states";
@@ -179,7 +180,11 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const [state, setState] = useState("");
   if (thing.kind !== "prototype") return null;
   const { variants, variant, agreed } = variantsOf(thing, picked);
-  const run = page.runs.find((one) => one.version === thing.key);
+  const run = withTinkerAtWork(
+    page.runs.find((one) => one.version === thing.key),
+    thing.key,
+    page.runs,
+  );
   const open = ["waiting", "exploring"].includes(page.exploration.status);
   const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);

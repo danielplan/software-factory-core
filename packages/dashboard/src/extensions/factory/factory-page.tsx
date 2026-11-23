@@ -23,6 +23,7 @@ import { type Read, useRead } from "@/api/query";
 import { type FactoryView, factoryViewSchema } from "@/api/schemas/factory";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
+import { withBoltAtWork } from "@/components/meet/meet";
 
 import { Card, OpenCard } from "./board-card";
 import { CardPanel } from "./card-panel";
@@ -71,7 +72,7 @@ export function FactoryPage({ state }: Readonly<{ state: FactoryState }>) {
       />
       {shown && <ProblemBox title={t("factory.didNotWork")} text={shown} />}
       <OpenCard value={setOpen}>
-        {data && <Board view={without(data, gone)} />}
+        {data && <Board view={withBoltAtWork(without(data, gone))} />}
       </OpenCard>
       {open !== null && (
         <CardPanel

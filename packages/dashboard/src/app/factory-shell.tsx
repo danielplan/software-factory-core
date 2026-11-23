@@ -18,6 +18,7 @@ import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
 import { UpdateRow } from "@/features/updates/update-row";
 
+import { TeamPanel } from "@/components/meet/team-panel";
 import { FactoryNav } from "@/components/layout/factory-nav";
 import { Shell } from "@/components/layout/shell";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -42,38 +43,41 @@ export function FactoryShell({
 }>) {
   const { kobold, light, ...rows } = useSidebarParts(state, pages);
   return (
-    <Shell
-      shown={current}
-      fill={fill}
-      sidebar={
-        <Sidebar
-          name={state.company.name || null}
-          status={
-            <span title={kobold.detail} className="ml-auto flex px-3">
-              <StatusLight light={light} />
-            </span>
-          }
-        >
-          {(onGo) => (
-            <FactoryNav
-              current={current}
-              open={open}
-              onGo={onGo}
-              {...rows}
-              rows={
-                <>
-                  <UpdateRow />
-                  <FeedbackRow current={current} />
-                </>
-              }
-            />
-          )}
-        </Sidebar>
-      }
-      sprocket={<SprocketWindow page={current} />}
-    >
-      {children}
-    </Shell>
+    <>
+      <TeamPanel doing={rows.doing} />
+      <Shell
+        shown={current}
+        fill={fill}
+        sidebar={
+          <Sidebar
+            name={state.company.name || null}
+            status={
+              <span title={kobold.detail} className="ml-auto flex px-3">
+                <StatusLight light={light} />
+              </span>
+            }
+          >
+            {(onGo) => (
+              <FactoryNav
+                current={current}
+                open={open}
+                onGo={onGo}
+                {...rows}
+                rows={
+                  <>
+                    <UpdateRow />
+                    <FeedbackRow current={current} />
+                  </>
+                }
+              />
+            )}
+          </Sidebar>
+        }
+        sprocket={<SprocketWindow page={current} />}
+      >
+        {children}
+      </Shell>
+    </>
   );
 }
 

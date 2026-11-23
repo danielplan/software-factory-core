@@ -9,6 +9,9 @@ import { useTranslation } from "react-i18next";
 
 import type { VersionRun } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
+import { Hello } from "@/components/meet/hello";
+import { reportTinker } from "@/components/meet/meet";
+import { Face } from "@/components/meet/team-panel";
 import { MAKER } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +71,9 @@ function Page() {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent motion-safe:animate-sweep" />
       <div className="absolute right-3 bottom-2">
         <div className="relative motion-safe:animate-hop">
-          <KoboldHead size={34} hat={MAKER.hat} color={MAKER.color} />
+          <Face id="maker">
+            <KoboldHead size={34} hat={MAKER.hat} color={MAKER.color} />
+          </Face>
           {SPARKS.map((spark) => (
             <span
               key={spark.delay}
@@ -93,33 +98,53 @@ function Page() {
 export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   const clock = clockOf(run.since, useNow());
   const t = useTranslation().t;
+  useTinkerNow(run);
   if (!(run.state === "running" && run.url)) return null;
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
-      <KoboldHead
-        size={20}
-        hat={MAKER.hat}
-        color={MAKER.color}
-        className="flex-none motion-safe:animate-bob"
-      />
-      <span className="flex-none font-medium">
-        {t("explore.board.building", { name: MAKER.name, key: run.version })}
-      </span>
-      <span key={run.activity} className="truncate motion-safe:animate-pop">
-        {run.activity ?? t("explore.board.atWork")}
-      </span>
-      {clock && (
-        <span className="ml-auto flex-none text-muted-foreground tabular-nums">
-          {clock}
+    <>
+      <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
+        <Face id="maker" className="flex-none">
+          <KoboldHead
+            size={20}
+            hat={MAKER.hat}
+            color={MAKER.color}
+            className="flex-none motion-safe:animate-bob"
+          />
+        </Face>
+        <span className="flex-none font-medium">
+          {t("explore.board.building", { name: MAKER.name, key: run.version })}
         </span>
-      )}
-    </div>
+        <span key={run.activity} className="truncate motion-safe:animate-pop">
+          {run.activity ?? t("explore.board.atWork")}
+        </span>
+        {clock && (
+          <span className="ml-auto flex-none text-muted-foreground tabular-nums">
+            {clock}
+          </span>
+        )}
+      </div>
+      <Hello id="maker" />
+    </>
   );
+}
+
+// What Tinker does now, for the team panel, while this card makes a version.
+function useTinkerNow(run: VersionRun) {
+  const line = run.making
+    ? `Version ${run.version}: ${run.activity ?? "at work"}`
+    : null;
+  useEffect(() => {
+    reportTinker(line);
+    return () => {
+      reportTinker(null);
+    };
+  }, [line]);
 }
 
 export function Making({ run }: Readonly<{ run: VersionRun }>) {
   const t = useTranslation().t;
   const clock = clockOf(run.since, useNow());
+  useTinkerNow(run);
   return (
     <div className="grid gap-2.5">
       <Page />
@@ -139,6 +164,7 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
           {run.activity}
         </p>
       )}
+      <Hello id="maker" />
     </div>
   );
 }
