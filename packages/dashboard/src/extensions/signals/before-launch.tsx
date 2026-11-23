@@ -5,6 +5,7 @@
 // mission now, each with the step it is on. Connecting the live app is a
 // line for after launch, which opens how to connect it.
 
+import { Link } from "react-router";
 import { Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import type { Face, MissionNow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
-import { personaHash } from "@/lib/routes";
+import { personaPath } from "@/lib/routes";
 import { useRead } from "@/api/query";
 import { personasSchema } from "@/api/schemas/personas";
 import { cn } from "@/lib/utils";
@@ -58,9 +59,9 @@ function ConnectLater({
     <p className="mx-1 mt-2 text-[12.5px] text-muted-foreground">
       {more && (
         <>
-          <a href={personaHash()} className="font-semibold text-blue">
+          <Link to={personaPath()} className="font-semibold text-blue">
             {t("signals.before.sendMore")}
-          </a>{" "}
+          </Link>{" "}
           {t("signals.before.toImprove")}{" "}
         </>
       )}
@@ -82,9 +83,9 @@ function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
   return (
     <section aria-label={t("signals.before.onMission")} className={CARD}>
       {missions.map((mission) => (
-        <a
+        <Link
           key={mission.id}
-          href={personaHash(mission.persona)}
+          to={personaPath(mission.persona)}
           className="flex items-center gap-3 border-t border-border-soft px-5 py-3 text-[13px] text-foreground-2 first:border-t-0 hover:bg-surface"
         >
           <PersonaFace face={mission.face} size={26} />
@@ -92,7 +93,7 @@ function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
           <span aria-live="polite" className="truncate text-muted-foreground">
             {t("signals.before.onMission")} · {missionWords(mission, t)}
           </span>
-        </a>
+        </Link>
       ))}
     </section>
   );
@@ -123,10 +124,10 @@ function NoCustomersYet() {
         {t("signals.before.noCustomers")}
       </p>
       <Button asChild size="pill" className="mt-1.5">
-        <a href={personaHash()}>
+        <Link to={personaPath()}>
           <Send aria-hidden strokeWidth={2} className="size-[15px]" />
           {t("signals.before.send")}
-        </a>
+        </Link>
       </Button>
     </div>
   );

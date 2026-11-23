@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { messageOf, post, type AddOnView, type Board } from "@/api/client";
 import { lookOf } from "@/components/add-on-looks";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 // once done, the way to the board.
 export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const [done, setDone] = useState<string | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6 pt-[8vh]">
@@ -28,7 +30,7 @@ export function ConnectPage({ trackers }: Readonly<{ trackers: AddOnView[] }>) {
           <Button
             className="h-10 justify-self-start px-4"
             onClick={() => {
-              window.location.hash = "build";
+              void navigate("/build");
             }}
           >
             <ArrowRight aria-hidden />

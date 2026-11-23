@@ -7,6 +7,7 @@ import type { TFunction } from "i18next";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { messageOf, post, type State } from "@/api/client";
 import { getChecked } from "@/api/query";
@@ -30,6 +31,7 @@ export function StepActions({
   onGo: (n: number) => void;
 }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const { coach } = state;
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -53,6 +55,9 @@ export function StepActions({
       onGo(at + 1);
     },
     run,
+    go: (to) => {
+      void navigate(to);
+    },
   });
   if (!main) return null;
   return (
@@ -88,15 +93,19 @@ function mainOf(
     t: TFunction;
     next: () => void;
     run: (work: () => Promise<unknown>) => void;
+    go: (to: string) => void;
   },
 ): { label: string; act: () => void } | null {
-  const { t, next, run } = acts;
+  const { t, next, run, go } = acts;
   if (step.id === "hello") return { label: t("setup.actions.go"), act: next };
   if (step.id === "start")
     return {
       label: picked ? t("setup.actions.open") : t("setup.actions.look"),
       act: () => {
-        run(() => openKobble(picked));
+        run(async () => {
+          const to = await openKobble(picked);
+          if (to) go(to);
+        });
       },
     };
   if (step.id !== "setup")
@@ -112,11 +121,12 @@ function mainOf(
   };
 }
 
-// Opens Kobble; with a starting point picked, its exploration is started
-// and opened, with Sprocket's first look at it under way.
-async function openKobble(picked: string | null): Promise<void> {
+// Opens Kobble; with a starting point picked, its exploration is started,
+// with Sprocket's first look at it under way, and where it is returned to
+// open.
+async function openKobble(picked: string | null): Promise<string | null> {
   await post("/api/setup/open");
-  if (!picked) return;
+  if (!picked) return null;
   const list = await getChecked(
     "/api/kobble/explorations",
     explorationsViewSchema,
@@ -124,7 +134,7 @@ async function openKobble(picked: string | null): Promise<void> {
   const found = [...list.waiting, ...list.exploring].find(
     (row) => row.title.toLowerCase() === picked.toLowerCase(),
   );
-  if (!found) return;
+  if (!found) return null;
   await post("/api/kobble/explorations/start", { id: found.id });
-  location.hash = `#explore/${encodeURIComponent(found.id)}`;
+  return `/explore/${encodeURIComponent(found.id)}`;
 }

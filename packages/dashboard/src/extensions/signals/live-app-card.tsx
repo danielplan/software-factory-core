@@ -2,6 +2,7 @@
 // export's address, never the token), and Disconnect, which takes both out
 // of the project's .env. Connecting is on the Signals page.
 
+import { Link } from "react-router";
 import { Unplug } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -46,9 +47,9 @@ export function LiveAppCard() {
       ) : (
         <p className="text-[13px] text-muted-foreground">
           {t("settings.liveApp.notConnected")}{" "}
-          <a href="#signals" className="font-semibold text-blue">
+          <Link to="/signals" className="font-semibold text-blue">
             {t("shell.pages.signals")}
-          </a>
+          </Link>
           .
         </p>
       )}

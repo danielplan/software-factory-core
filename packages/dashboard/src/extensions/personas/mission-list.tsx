@@ -2,11 +2,12 @@
 // it is on; done, what it found (bug, idea, open question), each at its
 // step and linking to Signals; failed, why.
 
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 
 import type { PersonaTest, SignalRow } from "@/api/client";
 import { Markdown } from "@/components/markdown";
-import { personaHash } from "@/lib/routes";
+import { personaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { TypeChip } from "@/components/page-bits";
 import { missionWords, stepWords } from "@/lib/signals-view";
@@ -29,12 +30,12 @@ export function Mission({
       )}
     >
       <span className="flex items-baseline gap-3">
-        <a
-          href={personaHash(persona, { test: test.id })}
+        <Link
+          to={personaPath(persona, { test: test.id })}
           className="flex-1 text-[14.5px] hover:underline"
         >
           <Markdown text={test.task} inline />
-        </a>
+        </Link>
         <span
           className={cn(
             "flex-none text-[12.5px]",
@@ -80,8 +81,8 @@ function Found({ found }: Readonly<{ found: SignalRow[] }>) {
         .sort((a, b) => (a.step?.number ?? 0) - (b.step?.number ?? 0))
         .map((signal) => (
           <li key={signal.id}>
-            <a
-              href={`#signals/${encodeURIComponent(signal.id)}`}
+            <Link
+              to={`/signals/${encodeURIComponent(signal.id)}`}
               className="group -mx-2 flex items-start gap-2.5 rounded-[10px] px-2 py-1.5 hover:bg-surface"
             >
               <TypeChip type={signal.type} />
@@ -95,7 +96,7 @@ function Found({ found }: Readonly<{ found: SignalRow[] }>) {
                   </span>
                 )}
               </span>
-            </a>
+            </Link>
           </li>
         ))}
     </ul>

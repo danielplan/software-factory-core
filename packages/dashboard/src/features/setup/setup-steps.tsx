@@ -30,7 +30,7 @@ export function SetupSteps({
       {steps.map((step, n) => (
         <SidebarLink
           key={step.id}
-          href={`#step-${String(n)}`}
+          to={`/step-${String(n)}`}
           label={nameOf(t, step)}
           color={n < at ? "#12a594" : "var(--primary)"}
           icon={

@@ -4,6 +4,7 @@
 import { Lightbulb, Play } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { type ExplorationsView, messageOf, post } from "@/api/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { ROW } from "@/components/page-bits";
 
 import { RemoveRow } from "./remove-row";
+import { explorationPath } from "./waiting-row";
 
 // An idea in the board's Backlog: not agreed work, so it waits here.
 // Starting it makes an exploration of it; handing that off fills in this
@@ -20,6 +22,7 @@ export function FromBoard({
   idea,
 }: Readonly<{ idea: ExplorationsView["fromBoard"][number] }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
@@ -32,7 +35,7 @@ export function FromBoard({
         { title: idea.title, issue: idea.number },
       );
       await post("/api/kobble/explorations/start", { id: exploration.id });
-      window.location.hash = `explore/${exploration.id}`;
+      void navigate(explorationPath(exploration.id));
     } catch (error: unknown) {
       setBusy(false);
       setProblem(messageOf(error));
