@@ -8,6 +8,7 @@ import type { TFunction } from "i18next";
 import type { IdeaView, Light, PartView, WorkView } from "../api/client.ts";
 import { ENGLISH } from "../i18n/messages.ts";
 import type { KoboldId } from "./kobolds.ts";
+import { builtLast, exploredLast, type Now } from "./meet-view.ts";
 
 // The Factory board's count in the sidebar: agreed work not done yet (To
 // do, In progress, Review); ideas in the Backlog count as waiting
@@ -115,4 +116,19 @@ export function koboldsDoing(
       title: building.title,
     });
   return doing;
+}
+
+// What the kobolds the frame knows about did last (the others' extensions
+// say it): the card Bolt built, the exploration Doodle thought through.
+export function koboldsLast(
+  work: WorkView | null,
+  explorations: { title: string }[],
+  m: Words = ENGLISH,
+): Now {
+  const last: Now = {};
+  const built = builtLast(work, m);
+  if (built) last.builder = built;
+  const explored = exploredLast(explorations, m);
+  if (explored) last.explorer = explored;
+  return last;
 }

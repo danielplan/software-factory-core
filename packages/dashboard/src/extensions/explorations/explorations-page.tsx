@@ -131,6 +131,7 @@ function exampleOf(e: TFunction): ExplorationRow {
     ],
     line: null,
     busy: null,
+    making: null,
   };
 }
 

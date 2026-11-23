@@ -11,6 +11,8 @@ import type { Page } from "@/lib/routes";
 import type { SidebarGroup } from "@/lib/page-module";
 import { cn } from "@/lib/utils";
 
+import { KoboldGroup } from "@/components/meet/kobold-group";
+
 import { type Item, PageLink, ProductState } from "./sidebar-links";
 import { GroupLabel, TeamPages } from "./team-pages";
 
@@ -86,6 +88,7 @@ export function FactoryNav(props: FactoryNavProps) {
         current={current === "team" ? open : null}
         onGo={onGo}
       />
+      <KoboldGroup now={doing} onGo={onGo} />
       <div className="mt-auto grid gap-0.5 pt-4">
         {props.rows}
         <nav aria-label={nav("shell.nav.factory")} className="grid gap-0.5">

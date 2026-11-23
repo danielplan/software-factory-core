@@ -1,0 +1,71 @@
+{
+  "title": "Your kobolds",
+  "intro": "The team that works for you. Click a kobold to meet it.",
+  "meet": "Meet your kobolds",
+  "meetName": "Meet {{name}} and the team",
+  "resting": "Resting",
+  "supervisor": "looks after the team and answers you, on every page",
+  "roles": {
+    "support": "your support kobold",
+    "explorer": "your explorer",
+    "maker": "Doodle's helper",
+    "builder": "the builder",
+    "tester": "plays your personas",
+    "sorter": "sorts what comes in"
+  },
+  "jobs": {
+    "support": "Answers your questions and takes your feedback",
+    "explorer": "Thinks your ideas through and tells the story behind each one",
+    "maker": "Doodle's helper: makes the versions you try",
+    "builder": "Builds the cards you agreed on, one by one",
+    "tester": "Uses your app as one of your personas and tells what went wrong",
+    "sorter": "Sorts what comes in: bugs, requests and feedback"
+  },
+  "where": {
+    "support": "Every page, in the bar at the bottom",
+    "explorer": "Explorations, on the board and in the talk beside it",
+    "maker": "Explorations, on each version's card",
+    "builder": "Factory, on the card it works on",
+    "tester": "Personas, on a mission",
+    "sorter": "Signals, as they arrive"
+  },
+  "card": {
+    "of": "{{name}}'s card",
+    "worksAt": "Works at:",
+    "now": "Now",
+    "lastDid": "Last did",
+    "nothingYet": "Nothing to tell yet.",
+    "close": "Close card"
+  },
+  "soon": {
+    "minutes_one": "about {{count}} min",
+    "minutes_other": "about {{count}} min",
+    "longer": "a little longer"
+  },
+  "tag": {
+    "maker": "Making variant {{version}} to try · {{soon}} · nothing to do until it's ready",
+    "builder": "Building card #{{number}} · nothing to do, it asks here if it gets stuck",
+    "builderAt": "Building card #{{number}}: {{activity}} · nothing to do, it asks here if it gets stuck",
+    "testerQueued": "Waiting its turn to play {{persona}} · nothing to do, what it finds shows below",
+    "testerRunning": "Playing {{persona}} on this mission, step {{step}} · nothing to do, what it finds shows below",
+    "testerDone_one": "Played {{persona}} on this mission: {{count}} step · nothing to do, what it finds shows below",
+    "testerDone_other": "Played {{persona}} on this mission: {{count}} steps · nothing to do, what it finds shows below",
+    "sorter_one": "Sorting {{count}} new signal · nothing to do, pick one below",
+    "sorter_other": "Sorting {{count}} new signals · nothing to do, pick one below",
+    "sorterQuiet": "Watching for what comes in · nothing to do until one arrives"
+  },
+  "now": {
+    "maker": "Version {{version}}: {{activity}}",
+    "makerAtWork": "Version {{version}}: at work",
+    "tester": "Playing {{persona}} on a mission",
+    "testers_one": "Playing {{count}} missions",
+    "testers_other": "Playing {{count}} missions",
+    "sorter_one": "Sorting {{count}} new signal",
+    "sorter_other": "Sorting {{count}} new signals"
+  },
+  "last": {
+    "builder": "Built card #{{number}}, “{{title}}”",
+    "explorer": "Thought through “{{title}}”",
+    "maker": "Made prototype “{{label}}”"
+  }
+}

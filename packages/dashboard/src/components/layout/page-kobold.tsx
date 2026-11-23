@@ -5,12 +5,12 @@
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
-import { type KoboldId, KOBOLDS } from "@/lib/kobolds";
+import { KOBOLDS, type TeamId } from "@/lib/kobolds";
 import type { Page } from "@/lib/routes";
 
 import { cn } from "@/lib/utils";
 
-export type Doing = Partial<Record<KoboldId, string>>;
+export type Doing = Partial<Record<TeamId, string>>;
 
 export function PageKobold({
   page,

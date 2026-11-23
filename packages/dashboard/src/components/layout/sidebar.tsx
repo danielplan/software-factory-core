@@ -3,6 +3,7 @@ import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
+import { Face } from "@/components/meet/face";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -84,7 +85,12 @@ function splitName(
 function Mark({ big }: Readonly<{ big: boolean }>) {
   const logo = useLogo();
   if (logo === "none") return null;
-  if (!logo) return <KoboldHead size={big ? 32 : 26} />;
+  if (!logo)
+    return (
+      <Face id="support">
+        <KoboldHead size={big ? 32 : 26} />
+      </Face>
+    );
   return (
     <img
       src={logo}

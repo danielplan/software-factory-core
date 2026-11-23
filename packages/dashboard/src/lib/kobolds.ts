@@ -63,3 +63,35 @@ export const KOBOLDS: Kobold[] = [
     page: "signals",
   },
 ];
+
+// Everybody the page lets you meet: the kobolds above and Doodle's helper,
+// in the order the sidebar's "Your kobolds" lists them (Tinker under Doodle).
+export type TeamId = KoboldId | "maker";
+
+export type Member = {
+  id: TeamId;
+  name: string;
+  hat: PersonaHat | "flop";
+  color: string;
+  // Where it works; none for the support kobold.
+  page: Page | null;
+};
+
+const byId = (id: KoboldId): Kobold => {
+  const found = KOBOLDS.find((kobold) => kobold.id === id);
+  if (!found) throw new Error(`no kobold ${id}`);
+  return found;
+};
+
+export const TEAM: Member[] = [
+  byId("support"),
+  byId("explorer"),
+  { id: "maker", ...MAKER, page: "explore" },
+  byId("builder"),
+  byId("tester"),
+  byId("sorter"),
+];
+
+export function memberOf(id: TeamId): Member {
+  return TEAM.find((one) => one.id === id) ?? byId("support");
+}

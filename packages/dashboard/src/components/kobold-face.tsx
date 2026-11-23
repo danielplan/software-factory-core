@@ -23,7 +23,17 @@ export const FACE_COLORS: Record<
   slate: { bg: "#eef1f5", skin: "#cfd7e2", fg: "#3b4a5e" },
 };
 
-function Eye({ x }: Readonly<{ x: number }>) {
+function Eye({ x, asleep = false }: Readonly<{ x: number; asleep?: boolean }>) {
+  if (asleep)
+    return (
+      <path
+        d={`M${String(x - 2.6)} 28.6 Q${String(x)} 31.6 ${String(x + 2.6)} 28.6`}
+        fill="none"
+        stroke={INK}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+    );
   return (
     <>
       <circle cx={x} cy={29} r={2.5} fill={INK} />
@@ -32,7 +42,10 @@ function Eye({ x }: Readonly<{ x: number }>) {
   );
 }
 
-function Head({ skin }: Readonly<{ skin: string }>) {
+function Head({
+  skin,
+  asleep = false,
+}: Readonly<{ skin: string; asleep?: boolean }>) {
   return (
     <>
       <path d="M12 22 Q2.5 21 1 35 Q8.5 34.5 13.5 29.5 Z" fill={skin} />
@@ -41,8 +54,8 @@ function Head({ skin }: Readonly<{ skin: string }>) {
         d="M10 28 Q10 17 22 17 Q34 17 34 28 Q34 39 22 39 Q10 39 10 28 Z"
         fill={skin}
       />
-      <Eye x={17.3} />
-      <Eye x={26.7} />
+      <Eye x={17.3} asleep={asleep} />
+      <Eye x={26.7} asleep={asleep} />
     </>
   );
 }
@@ -166,11 +179,17 @@ export function KoboldHead({
   className,
   hat = "flop",
   color = "#3156d8",
+  asleep = false,
+  fadeHat = false,
 }: Readonly<{
   size?: number;
   className?: string;
   hat?: PersonaHat | "flop";
   color?: string;
+  // Eyes closed: a resting kobold.
+  asleep?: boolean;
+  // A new hat fades in instead of cutting in (a kobold that changes hats).
+  fadeHat?: boolean;
 }>) {
   return (
     <svg
@@ -180,8 +199,13 @@ export function KoboldHead({
       aria-hidden
       className={cn("flex-none overflow-visible", className)}
     >
-      <Head skin="#c6d3ff" />
-      <Hat hat={hat} color={color} />
+      <Head skin="#c6d3ff" asleep={asleep} />
+      <g
+        key={fadeHat ? hat : "own"}
+        className={fadeHat ? "meet-hat" : undefined}
+      >
+        <Hat hat={hat} color={color} />
+      </g>
     </svg>
   );
 }

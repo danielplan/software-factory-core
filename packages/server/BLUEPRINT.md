@@ -77,12 +77,13 @@ and `tests` to Personas. Everyone else goes through its plug and copes with
 
 ## Libraries
 
-| Job                             | Library                                               | Why                                                      |
-| ------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| Schemas and their types         | **zod** (`zod`)                                       | the TypeScript package kit's: one schema, check and type |
-| The kobolds' tools              | **MCP SDK** (`@modelcontextprotocol/sdk`)             | the standard way Claude Code reaches tools               |
-| A theme's colours and its CSS   | **culori** (`culori`), **PostCSS** (`postcss`)        | reading colours and contrast, and parsing CSS            |
-| The core, kits and their checks | the repository's own packages (`@software-factory/*`) | the factory's core, shared with every company            |
+| Job                              | Library                                               | Why                                                      |
+| -------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| Schemas and their types          | **zod** (`zod`)                                       | the TypeScript package kit's: one schema, check and type |
+| The kobolds' tools               | **MCP SDK** (`@modelcontextprotocol/sdk`)             | the standard way Claude Code reaches tools               |
+| A theme's colours and its CSS    | **culori** (`culori`), **PostCSS** (`postcss`)        | reading colours and contrast, and parsing CSS            |
+| The core, kits and their checks  | the repository's own packages (`@software-factory/*`) | the factory's core, shared with every company            |
+| A QR code for the page's address | **uqr** (`uqr`)                                       | small, no dependencies, draws the code as plain data     |
 
 ## Where it still differs
 

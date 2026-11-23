@@ -39,6 +39,10 @@ export type ExtensionPage = {
   // The page fills the whole window, without the sidebar (an exploration
   // that is open).
   fills?: (open: string | null) => boolean;
+  // Draws nothing: reports what the extension's kobolds do now and did last
+  // (useReport, lib/meet.ts), for the sidebar's "Your kobolds" and the panel.
+  // The frame shows it on every page, so extensions never ask each other.
+  Watch?: ComponentType<Readonly<{ state: FactoryState }>>;
 };
 
 // What Home has read, for the blocks to draw from.

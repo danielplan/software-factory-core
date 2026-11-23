@@ -18,7 +18,7 @@ repository and installs a released version of this core there.
   ideas and open questions they run into.
 - **Explore an idea before building it.** Talk an idea through with Doodle,
   the explorer. It draws the problem, the choices and their options on a
-  whiteboard, and Tinker, its maker, builds them as a **prototype in your
+  whiteboard, and Tinker, its helper, builds them as a **prototype in your
   real app**, with variants you can switch between and click through.
 - **Hand the chosen version to the builder.** The agreed variant becomes a
   card with a short spec in To do on your GitHub board: that is the

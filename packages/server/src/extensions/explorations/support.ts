@@ -23,7 +23,7 @@ const idea = {
 
 export const exploreAt = (id: string) => `#explore/${encodeURIComponent(id)}`;
 
-const GUIDE = `**Explorations** (\`#explore\`): an idea thought through with Doodle, the explorer kobold, on a whiteboard; Tinker, Doodle's maker, builds prototypes of it, and the one the team agrees on is handed off to the Factory as a card. A new idea or feature request (also a team's own extension, when Kobble cannot do something): say back the title and the problem, and once they agree, \`explore_with_doodle\` starts it with Doodle and takes them there. An idea only to keep for later: \`add_exploration\` parks it in Explorations › Waiting. Something to tell Doodle about an exploration there is (find it with \`list_explorations\`): \`tell_doodle\`. A prototype is asked for with Doodle, in the exploration.`;
+const GUIDE = `**Explorations** (\`#explore\`): an idea thought through with Doodle, the explorer kobold, on a whiteboard; Tinker, Doodle's helper, builds prototypes of it, and the one the team agrees on is handed off to the Factory as a card. A new idea or feature request (also a team's own extension, when Kobble cannot do something): say back the title and the problem, and once they agree, \`explore_with_doodle\` starts it with Doodle and takes them there. An idea only to keep for later: \`add_exploration\` parks it in Explorations › Waiting. Something to tell Doodle about an exploration there is (find it with \`list_explorations\`): \`tell_doodle\`. A prototype is asked for with Doodle, in the exploration.`;
 
 type On = {
   store: () => KobbleStore;

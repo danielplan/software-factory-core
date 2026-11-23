@@ -28,7 +28,7 @@ flowchart LR
    board, and what made-up customers find on their missions. Each signal is
    a bug, an idea or a question. See [Signals](../reference/features/signals.md).
 2. **Explorations.** The team thinks an idea through with **Doodle**, the
-   explorer, on a whiteboard. **Tinker**, Doodle's maker, builds it as a
+   explorer, on a whiteboard. **Tinker**, Doodle's helper, builds it as a
    prototype in the real app, with variants to click through. When the team
    agrees on one, Doodle hands it off. See
    [Explorations](../reference/features/explorations.md).

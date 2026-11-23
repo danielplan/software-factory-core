@@ -21,6 +21,8 @@ import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
+import { NameTag } from "@/components/meet/name-tag";
+import { sorterTag } from "@/lib/meet-view";
 
 import { Already } from "./already";
 import { FeedbackExtras } from "./feedback-extras";
@@ -72,6 +74,7 @@ export function SignalsPage({
           ) : undefined
         }
       />
+      {data && <NameTag id="sorter" line={sorterTag(data.signals.length, t)} />}
       {problem && <ProblemBox title={t("signals.cannotRead")} text={problem} />}
       {data?.sync.problem && (
         <ProblemBox title={t("signals.syncFailed")} text={data.sync.problem} />

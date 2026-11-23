@@ -66,6 +66,13 @@ const explorationRowSchema = z.object({
   links: z.array(z.object({ from: z.string(), to: z.string() })),
   line: z.string().nullable(),
   busy: z.string().nullable(),
+  making: z
+    .object({
+      version: z.string(),
+      doing: z.enum(DOING_KINDS).nullable(),
+      since: z.string().nullable(),
+    })
+    .nullable(),
 }) satisfies z.ZodType<ServedRow>;
 
 // An idea in the board's Backlog nobody explores yet.

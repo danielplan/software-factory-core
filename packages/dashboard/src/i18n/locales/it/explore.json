@@ -128,8 +128,6 @@
     "showArchived": "Mostra le altre {{n}} varianti, archiviate da quando una è concordata",
     "hideArchived": "Archivia di nuovo le altre varianti",
     "usualState": "normale",
-    "building": "{{name}} sta costruendo {{key}}:",
-    "atWork": "il kobold è al lavoro",
     "stillMade": "Ancora in lavorazione: puoi usarlo, e cambia mentre il kobold lavora",
     "startingTitle": "Avvio del prototipo",
     "preparingCopy": "Preparo la sua copia del codice",
