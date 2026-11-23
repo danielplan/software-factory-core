@@ -63,22 +63,22 @@ const DRAWING: [RegExp, string][] = [
 ];
 
 function readingWords(path: string): string {
-  if (/product\.json$/.test(path)) return "Reading the product's description";
-  if (/design-system/.test(path)) return "Reading how the product looks";
-  if (/architecture/.test(path)) return "Reading how the product is built";
-  if (/\.md$/.test(path)) return "Reading what the team has written down";
-  if (/\.(tsx?|css)$/.test(path)) return "Reading how a screen is made";
-  return "Reading one of the product's files";
+  if (/product\.json$/.test(path)) return "Getting to know the product";
+  if (/design-system/.test(path)) return "Looking at how the product looks";
+  if (/architecture/.test(path)) return "Learning how the product is put together";
+  if (/\.md$/.test(path)) return "Reading the team's notes";
+  if (/\.(tsx?|css)$/.test(path)) return "Looking at how a screen is made";
+  return "Looking at the product";
 }
 
 function lookingWords(glob: string): string {
-  if (/product\.json/.test(glob)) return "Finding the product's descriptions";
-  if (/\.md/.test(glob)) return "Finding what the team has written down";
-  if (/\.tsx?/.test(glob)) return "Finding where the screens are made";
-  return "Finding the right files";
+  if (/product\.json/.test(glob)) return "Finding out what the product is";
+  if (/\.md/.test(glob)) return "Finding the team's notes";
+  if (/\.tsx?/.test(glob)) return "Finding the screens";
+  return "Looking around the product";
 }
 
-// A raw step as a few plain words; null when there is nothing to say.
+// A raw step as a few everyday words; null when there is nothing to say.
 export function plainWords(raw: string): string | null {
   const drawn = DRAWING.find(([pattern]) => pattern.test(raw));
   if (drawn && /^(Using|Drawing)/.test(raw)) return drawn[1];
@@ -86,19 +86,22 @@ export function plainWords(raw: string): string | null {
   if (reading) return readingWords(reading[1] ?? "");
   const finding = /^Looking for files (.+)$/.exec(raw);
   if (finding) return lookingWords(finding[1] ?? "");
-  const searching = /^Searching for “(.+?)…?”$/.exec(raw);
-  if (searching) {
-    const word = searching[1] ?? "";
-    return /^[\p{L}\d' -]{2,24}$/u.test(word)
-      ? `Searching the product for “${word}”`
-      : "Searching the product";
-  }
-  if (/^Looking through/.test(raw)) return "Looking around the project";
+  if (/^Searching for/.test(raw)) return "Looking for where this happens";
+  if (/^Looking through/.test(raw)) return "Looking around the product";
   if (/^Looking up/.test(raw)) return "Looking something up";
-  if (/^Asking a helper/.test(raw)) return "Asking a helper to look into it";
+  if (/^Asking a helper/.test(raw)) return "Asking a helper";
   if (/^Getting started/.test(raw)) return "Getting ready";
   return null;
 }
+
+// The reading card's stages and subtitle in variant A: the same everyday
+// words as the chat and the header.
+export const A_STAGES = [
+  { doing: "Reading your idea", done: "Read your idea" },
+  { doing: "Learning how the product works", done: "Learned how the product works" },
+  { doing: "Drawing on the board", done: "Drew on the board" },
+] as const;
+export const A_HINT = "It draws once it understands your idea";
 
 // --- C: its own words ------------------------------------------------------
 

@@ -12,7 +12,7 @@ import { stopWords } from "@/i18n/server-texts";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
-import { useDoing } from "../doing";
+import { A_HINT, A_STAGES, useDoing, VARIANT } from "../doing";
 import { STEPS, type StepState, stepStates } from "./reading";
 
 type Talk = ExplorationPage["talk"];
@@ -54,9 +54,11 @@ export function ReadingBoard({
               )}
             </span>
             <span className="text-xs text-muted-foreground">
-              {t(
-                stopped ? "explore.reading.noneDrawn" : "explore.reading.hint",
-              )}
+              {stopped
+                ? t("explore.reading.noneDrawn")
+                : VARIANT === "A"
+                  ? A_HINT
+                  : t("explore.reading.hint")}
             </span>
           </span>
         </div>
@@ -107,7 +109,10 @@ function StepRow({
   const done = state === "done";
   const working = state === "active";
   const stoppedHere = state === "stopped";
-  const words = t(`explore.reading.steps.${step}.${done ? "done" : "doing"}`);
+  const mine = VARIANT === "A" ? A_STAGES[STEPS.indexOf(step)] : undefined;
+  const words =
+    mine?.[done ? "done" : "doing"] ??
+    t(`explore.reading.steps.${step}.${done ? "done" : "doing"}`);
   return (
     <li className="flex items-start gap-2.5 text-[13px]">
       <StepMark state={state} color={color} />
