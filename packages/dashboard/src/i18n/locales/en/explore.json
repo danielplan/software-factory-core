@@ -115,8 +115,9 @@
     "mine": {
       "label": "Add to the board",
       "pen": "Pen",
-      "penHint": "Pen: draw on the board, on top of a thing to stick to it (Esc to stop)",
+      "penHint": "Pen: draw on a card, the mark sticks to it and stays inside it (Esc to stop)",
       "penOn": "Pen on · Esc to stop",
+      "drawOnCard": "Draw on a card",
       "note": "Note",
       "noteHint": "Note: write a line of your own, click where it goes (or double-click the board)",
       "noteHere": "Click on the board to write a note",

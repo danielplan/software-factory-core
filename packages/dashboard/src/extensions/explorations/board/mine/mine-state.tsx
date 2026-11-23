@@ -22,12 +22,12 @@ import { boardState } from "./variant";
 export type Point = readonly [number, number];
 
 type Taken = { taken: boolean };
-// A drawing. On a thing: its points are relative to the thing's corner.
+// A drawing, always on a card: its points are relative to the card's corner.
 export type Mark = Taken & {
   id: string;
   kind: "mark";
   points: Point[];
-  on: string | null;
+  on: string;
 };
 export type NoteItem = Taken & {
   id: string;
@@ -94,16 +94,16 @@ let count = 0;
 const idOf = (kind: string) =>
   `${kind}-${Date.now().toString(36)}${String(count++)}`;
 
-// A wobbly loop round a box, as drawn by hand.
-function loopAround(width: number, height: number): Point[] {
+// A wobbly loop drawn by hand, inside a box (a card's edges).
+function loopIn(width: number, height: number): Point[] {
   const out: Point[] = [];
   const steps = 48;
   for (let i = 0; i <= steps + 6; i++) {
     const a = (i / steps) * Math.PI * 2 - Math.PI / 2;
     const wobble = 1 + Math.sin(i * 1.7) * 0.012 + i * 0.0015;
     out.push([
-      width / 2 + (width / 2 + 14) * Math.cos(a) * wobble,
-      height / 2 + (height / 2 + 12) * Math.sin(a) * wobble,
+      width / 2 + (width / 2 - 10) * Math.cos(a) * wobble,
+      height / 2 + (height / 2 - 8) * Math.sin(a) * wobble,
     ]);
   }
   return out;
@@ -123,7 +123,6 @@ export function MineProvider({
   const [kept, setKept] = useState(() => load(key));
   const [selected, select] = useState<string | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const spoken = useRef(said);
   useEffect(() => {
     spoken.current = said;
@@ -131,12 +130,6 @@ export function MineProvider({
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(kept));
   }, [key, kept]);
-  useEffect(() => {
-    const pending = timers.current;
-    return () => {
-      pending.forEach(clearTimeout);
-    };
-  }, []);
 
   const change = useCallback((edit: (items: Item[]) => Item[]) => {
     setKept((now) => ({ ...now, items: edit(now.items) }));
@@ -148,14 +141,6 @@ export function MineProvider({
       change((items) => [...items, { ...item, id, taken: false } as Item]);
       const after = spoken.current;
       setLines((lines) => [...lines, { id, kind: item.kind, about, after }]);
-      // Doodle takes it in a moment after it is placed.
-      timers.current.push(
-        setTimeout(() => {
-          change((items) =>
-            items.map((one) => (one.id === id ? { ...one, taken: true } : one)),
-          );
-        }, 1800),
-      );
       return id;
     },
     [change],
@@ -197,9 +182,9 @@ export function MineProvider({
           kind: "mark",
           on: around.id,
           taken: true,
-          points: loopAround(
+          points: loopIn(
             around.measured?.width ?? around.width ?? 260,
-            Math.min(around.measured?.height ?? 120, 120),
+            around.measured?.height ?? 120,
           ),
         },
         {

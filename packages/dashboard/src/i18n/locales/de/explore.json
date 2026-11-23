@@ -115,8 +115,9 @@
     "mine": {
       "label": "Zum Board hinzufügen",
       "pen": "Stift",
-      "penHint": "Stift: auf dem Board zeichnen, auf einem Element beginnen, um daran zu haften (Esc zum Beenden)",
+      "penHint": "Stift: auf einer Karte zeichnen, das Zeichen haftet daran und bleibt darin (Esc zum Beenden)",
       "penOn": "Stift an · Esc zum Beenden",
+      "drawOnCard": "Auf einer Karte zeichnen",
       "note": "Notiz",
       "noteHint": "Notiz: eine eigene Zeile schreiben, dorthin klicken, wo sie hin soll (oder das Board doppelt anklicken)",
       "noteHere": "Auf das Board klicken, um eine Notiz zu schreiben",

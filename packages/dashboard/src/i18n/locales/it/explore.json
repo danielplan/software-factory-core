@@ -116,8 +116,9 @@
     "mine": {
       "label": "Aggiungi alla lavagna",
       "pen": "Penna",
-      "penHint": "Penna: disegna sulla lavagna, sopra un elemento per attaccarti a lui (Esc per smettere)",
+      "penHint": "Penna: disegna su una scheda, il segno resta attaccato e dentro di essa (Esc per smettere)",
       "penOn": "Penna attiva · Esc per smettere",
+      "drawOnCard": "Disegna su una scheda",
       "note": "Nota",
       "noteHint": "Nota: scrivi una riga tua, clicca dove va (o fai doppio clic sulla lavagna)",
       "noteHere": "Clicca sulla lavagna per scrivere una nota",

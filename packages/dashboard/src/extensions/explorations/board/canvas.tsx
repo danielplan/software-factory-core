@@ -39,8 +39,8 @@ import { useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
 import { AddToolbar } from "./mine/add-toolbar";
-import { MineLayer, type Tool, ToolLayer } from "./mine/mine-layer";
-import { type Point, useMine } from "./mine/mine-state";
+import { type Drawing, MineLayer, type Tool, ToolLayer } from "./mine/mine-layer";
+import { useMine } from "./mine/mine-state";
 import { addressOf, previewOf } from "./mine/preview";
 import { boardState } from "./mine/variant";
 
@@ -201,7 +201,7 @@ function useAdding(
   const { screenToFlowPosition } = useReactFlow();
   const [tool, setTool] = useState<Tool>(null);
   const [writing, setWriting] = useState<{ x: number; y: number } | null>(null);
-  const [drawing, setDrawing] = useState<Point[] | null>(null);
+  const [drawing, setDrawing] = useState<Drawing | null>(null);
   const { seed, seeded } = mine;
 
   // The made-up drawing and note, taken in already, once the board is laid out.
