@@ -68,28 +68,27 @@
     "yourExplorer": "dein Erkunder",
     "talking": "Spricht mit dir",
     "outLoud": "Laut sprechen",
-    "thinking": "Denkt nach…",
     "takeOff": "Abnehmen"
   },
   "reading": {
     "title": "{{name}} liest",
     "stopped": "{{name}} hat angehalten",
-    "hint": "Es wird nichts gezeichnet, bis gelesen ist.",
+    "hint": "Es wird gezeichnet, sobald die Idee verstanden ist",
     "noneDrawn": "Es wurde nichts gezeichnet.",
     "stoppedAt": "{{step}}: angehalten",
     "tryAgain": "Nochmal versuchen",
     "steps": {
-      "page": {
-        "doing": "Die Seite lesen",
-        "done": "Seite gelesen"
+      "idea": {
+        "doing": "Deine Idee lesen",
+        "done": "Idee gelesen"
       },
-      "code": {
-        "doing": "Den Code ansehen",
-        "done": "Code angesehen"
+      "product": {
+        "doing": "Lernen, wie das Produkt funktioniert",
+        "done": "Gelernt, wie das Produkt funktioniert"
       },
-      "draw": {
-        "doing": "Das Board zeichnen",
-        "done": "Board gezeichnet"
+      "board": {
+        "doing": "Auf dem Board zeichnen",
+        "done": "Auf dem Board gezeichnet"
       }
     }
   },
@@ -137,5 +136,39 @@
     "couldNotTitle": "{{name}} konnte deine App nicht starten.",
     "couldNotNoReason": "{{name}} hat mehrere Wege versucht, deine App zu starten, aber keiner hat geklappt.",
     "tryAgain": "Nochmal versuchen"
+  },
+  "doing": {
+    "start": "Sich bereit machen",
+    "read-settings": "Das Produkt kennenlernen",
+    "read-design": "Ansehen, wie das Produkt aussieht",
+    "read-structure": "Lernen, wie das Produkt aufgebaut ist",
+    "read-notes": "Die Notizen des Teams lesen",
+    "read-screen": "Ansehen, wie ein Bildschirm gemacht ist",
+    "read-other": "Das Produkt ansehen",
+    "find-settings": "Herausfinden, was das Produkt ist",
+    "find-notes": "Die Notizen des Teams suchen",
+    "find-screens": "Die Bildschirme suchen",
+    "search": "Suchen, wo das passiert",
+    "look-around": "Sich im Produkt umsehen",
+    "look-up": "Etwas nachschlagen",
+    "helper": "Einen Helfer fragen",
+    "unknown": "Sich im Produkt umsehen",
+    "draw": "Auf dem Board zeichnen",
+    "draw-note": "Eine Notiz aufs Board schreiben",
+    "draw-choice": "Eine Wahl zeichnen",
+    "draw-diagram": "Ein Schaubild zeichnen",
+    "draw-change": "Etwas auf dem Board ändern",
+    "draw-link": "Zwei Dinge mit einem Pfeil verbinden",
+    "draw-prototype": "Einen Prototyp starten",
+    "edit": "Den Prototyp ändern",
+    "write": "Den Prototyp ergänzen",
+    "test": "Ausprobieren, ob es funktioniert",
+    "check": "Die eigene Arbeit prüfen",
+    "install": "Holen, was gebraucht wird",
+    "build": "Alles zusammensetzen",
+    "browser": "Es im Browser ansehen",
+    "git": "Die Arbeit sichern",
+    "plan": "Die nächsten Schritte planen",
+    "run": "Daran arbeiten"
   }
 }

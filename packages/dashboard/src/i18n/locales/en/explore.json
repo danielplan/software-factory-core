@@ -68,28 +68,27 @@
     "yourExplorer": "your explorer",
     "talking": "Talking with you",
     "outLoud": "Talk out loud",
-    "thinking": "Thinking…",
     "takeOff": "Take it off"
   },
   "reading": {
     "title": "{{name}} is reading",
     "stopped": "{{name}} stopped",
-    "hint": "Nothing is drawn until it has read.",
+    "hint": "It draws once it understands your idea",
     "noneDrawn": "Nothing was drawn.",
     "stoppedAt": "{{step}}: stopped",
     "tryAgain": "Try again",
     "steps": {
-      "page": {
-        "doing": "Reading the page",
-        "done": "Read the page"
+      "idea": {
+        "doing": "Reading your idea",
+        "done": "Read your idea"
       },
-      "code": {
-        "doing": "Looking at the code",
-        "done": "Looked at the code"
+      "product": {
+        "doing": "Learning how the product works",
+        "done": "Learned how the product works"
       },
-      "draw": {
-        "doing": "Drawing the board",
-        "done": "Drew the board"
+      "board": {
+        "doing": "Drawing on the board",
+        "done": "Drew on the board"
       }
     }
   },
@@ -137,5 +136,39 @@
     "couldNotTitle": "{{name}} could not get your app to start.",
     "couldNotNoReason": "{{name}} tried a few ways to start your app, but none of them came up.",
     "tryAgain": "Try again"
+  },
+  "doing": {
+    "start": "Getting ready",
+    "read-settings": "Getting to know the product",
+    "read-design": "Looking at how the product looks",
+    "read-structure": "Learning how the product is put together",
+    "read-notes": "Reading the team's notes",
+    "read-screen": "Looking at how a screen is made",
+    "read-other": "Looking at the product",
+    "find-settings": "Finding out what the product is",
+    "find-notes": "Finding the team's notes",
+    "find-screens": "Finding the screens",
+    "search": "Looking for where this happens",
+    "look-around": "Looking around the product",
+    "look-up": "Looking something up",
+    "helper": "Asking a helper",
+    "unknown": "Looking around the product",
+    "draw": "Drawing on the board",
+    "draw-note": "Writing a note on the board",
+    "draw-choice": "Drawing a choice",
+    "draw-diagram": "Drawing a diagram",
+    "draw-change": "Changing something on the board",
+    "draw-link": "Joining two things with an arrow",
+    "draw-prototype": "Starting a prototype",
+    "edit": "Changing the prototype",
+    "write": "Adding to the prototype",
+    "test": "Trying that it works",
+    "check": "Checking its work",
+    "install": "Getting what it needs",
+    "build": "Putting it together",
+    "browser": "Looking at it in the browser",
+    "git": "Saving its work",
+    "plan": "Planning its next steps",
+    "run": "Working on it"
   }
 }

@@ -198,6 +198,13 @@ export {
 export { run } from "./processes.ts";
 export { alreadyFor, titleOf } from "./kobble/already.ts";
 export {
+  DOING_KINDS,
+  doingOf,
+  type DoingKind,
+  type Stage,
+  stageOf,
+} from "./kobble/doing.ts";
+export {
   type Face,
   faceFor,
   faceFrom,

@@ -13,6 +13,8 @@ import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 import { createInterface } from "node:readline";
 
+import type { DoingKind } from "@software-factory/core";
+
 import { Refused } from "../refused.ts";
 import {
   companyOf,
@@ -33,9 +35,11 @@ export type VersionRun = {
   making: boolean;
   // Where it runs, once the start command said so.
   url: string | null;
-  // What the kobold is doing while it makes it, in a few words, and since
-  // when it makes it.
+  // What the kobold is doing while it makes it, in a few words (for the
+  // kobold who talks with the team), the kind of that action (for the page,
+  // which words it), and since when it makes it.
   activity: string | null;
+  doing: DoingKind | null;
   since: string | null;
   // What the kobold did while it made it, oldest first: its trace.
   steps: string[];
@@ -104,6 +108,7 @@ export class PrototypeMode {
         making: false,
         url: null,
         activity: null,
+        doing: null,
         since: null,
         steps: [],
         problem: null,

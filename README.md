@@ -69,6 +69,11 @@ Kobble opens at <http://localhost:4300>. The first time, a setup coach reads
 your code, finds your products and sets up the factory with you. Everything
 it keeps lives in your project, in `factory/`.
 
+Your iPad or phone on the same network can open it too: **Open on your
+iPad** at the bottom of the sidebar shows a QR code (the terminal prints the
+link as well). Open it there once and the device stays let in; devices
+without its key are turned away. `--local` keeps it on this computer only.
+
 Other commands:
 
 - `npx software-factory upgrade` brings the factory to the release you pinned.

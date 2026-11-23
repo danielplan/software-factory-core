@@ -8,6 +8,7 @@ import {
   PERSONA_COLORS,
   PERSONA_HATS,
 } from "../../../../core/src/kobble/face.ts";
+import { DOING_KINDS } from "../../../../core/src/kobble/doing.ts";
 import {
   boardSchema,
   explorationSchema,
@@ -68,7 +69,7 @@ const explorationRowSchema = z.object({
   making: z
     .object({
       version: z.string(),
-      activity: z.string().nullable(),
+      doing: z.enum(DOING_KINDS).nullable(),
       since: z.string().nullable(),
     })
     .nullable(),
@@ -105,6 +106,7 @@ const versionRunSchema = z.object({
   making: z.boolean(),
   url: z.string().nullable(),
   activity: z.string().nullable(),
+  doing: z.enum(DOING_KINDS).nullable(),
   since: z.string().nullable(),
   steps: z.array(z.string()),
   problem: z.string().nullable(),
@@ -124,7 +126,7 @@ const talkSchema = z.object({
     z.object({ from: z.enum(["kobold", "you"]), text: z.string() }),
   ),
   writing: z.string().nullable(),
-  activity: z.string().nullable(),
+  doing: z.enum(DOING_KINDS).nullable(),
   step: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   problem: z.string().nullable(),
   pointed: z.object({ thing: z.string(), times: z.number() }).nullable(),

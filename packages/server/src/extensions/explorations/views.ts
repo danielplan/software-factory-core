@@ -6,6 +6,7 @@
 import type { HandingOff } from "./handing-off.ts";
 import {
   type Board,
+  type DoingKind,
   type Exploration,
   type Face,
   faceOf,
@@ -44,7 +45,7 @@ export type ExplorationRow = Pick<
   // (the sidebar's "Your kobolds" shows Tinker while it works), or null.
   making: {
     version: string;
-    activity: string | null;
+    doing: DoingKind | null;
     since: string | null;
   } | null;
 };
@@ -276,13 +277,13 @@ function linksAsWords(text: string): string {
 function makingOf(runs: VersionRun[]): ExplorationRow["making"] {
   const run = runs.find((one) => one.making);
   if (!run) return null;
-  return { version: run.version, activity: run.activity, since: run.since };
+  return { version: run.version, doing: run.doing, since: run.since };
 }
 
 // What the kobold is busy with in one exploration.
 function busyWith(talk: TalkView, runs: VersionRun[]): string | null {
   const making = runs.find((run) => run.making);
   if (making) return `Making prototype ${making.version}`;
-  if (talk.writing !== null || talk.activity !== null) return "Thinking";
+  if (talk.writing !== null || talk.doing !== null) return "Thinking";
   return null;
 }

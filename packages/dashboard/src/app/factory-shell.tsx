@@ -18,6 +18,7 @@ import {
   overallOf,
 } from "@/lib/shell-view";
 
+import { DeviceRow } from "@/features/devices/device-row";
 import { FeedbackRow } from "@/features/support/feedback-row";
 import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
@@ -75,6 +76,7 @@ export function FactoryShell({
                 rows={
                   <>
                     <UpdateRow />
+                    <DeviceRow />
                     <FeedbackRow current={current} />
                   </>
                 }

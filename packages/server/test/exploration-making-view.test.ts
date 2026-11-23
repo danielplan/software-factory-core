@@ -18,6 +18,7 @@ test("the list says which version Tinker makes in an exploration, for the sideba
       making: false,
       url: null,
       activity: null,
+      doing: null,
       since: null,
       steps: [],
       problem: null,
@@ -29,6 +30,7 @@ test("the list says which version Tinker makes in an exploration, for the sideba
       messages: [],
       writing: null,
       activity: null,
+      doing: null,
       step: 0 as const,
       problem: null,
       pointed: null,
@@ -44,6 +46,7 @@ test("the list says which version Tinker makes in an exploration, for the sideba
                 version: "B",
                 making: true,
                 activity: "Putting the basket back",
+                doing: "search",
                 since: "2026-11-23T10:00:00Z",
               }),
             ]
@@ -52,7 +55,7 @@ test("the list says which version Tinker makes in an exploration, for the sideba
     const [x1, x2] = view.exploring;
     assert.deepEqual(x1?.making, {
       version: "B",
-      activity: "Putting the basket back",
+      doing: "search",
       since: "2026-11-23T10:00:00Z",
     });
     assert.equal(x2?.making, null);

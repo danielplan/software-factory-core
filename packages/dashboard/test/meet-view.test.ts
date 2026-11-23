@@ -97,11 +97,11 @@ test("Sieve's tag counts the signals it sorts, or watches", () => {
 
 test("the live line of each kobold, and none when it rests", () => {
   assert.equal(
-    makerNow({ version: "A", activity: "Making the basket page" }, en),
-    "Version A: Making the basket page",
+    makerNow({ version: "A", doing: "search" }, en),
+    "Version A: Looking for where this happens",
   );
   assert.equal(
-    makerNow({ version: "A", activity: null }, en),
+    makerNow({ version: "A", doing: null }, en),
     "Version A: at work",
   );
   assert.equal(makerNow(null, en), null);
@@ -214,8 +214,8 @@ test("every line is written in all three languages", () => {
     (m: typeof en) => testerTag({ status: "done", steps: 2 }, "Mia", m),
     (m: typeof en) => sorterTag(2, m),
     (m: typeof en) => sorterTag(0, m),
-    (m: typeof en) => makerNow({ version: "A", activity: "x" }, m),
-    (m: typeof en) => makerNow({ version: "A", activity: null }, m),
+    (m: typeof en) => makerNow({ version: "A", doing: "search" }, m),
+    (m: typeof en) => makerNow({ version: "A", doing: null }, m),
     (m: typeof en) => testerNow(["Mia"], m),
     (m: typeof en) => testerNow(["Mia", "Omar"], m),
     (m: typeof en) => sorterNow(2, m),

@@ -6,6 +6,7 @@
 import type { TFunction } from "i18next";
 
 import type { ExplorationRow, WorkView } from "../api/client.ts";
+import type { DoingKind } from "../../../core/src/kobble/doing.ts";
 import { ENGLISH } from "../i18n/messages.ts";
 import { type Member, TEAM, type TeamId } from "./kobolds.ts";
 
@@ -83,14 +84,14 @@ export function sorterTag(count: number, m: Words = ENGLISH): string {
 // line rests.
 
 export function makerNow(
-  making: { version: string; activity: string | null } | null,
+  making: { version: string; doing: DoingKind | null } | null,
   m: Words = ENGLISH,
 ): string | null {
   if (!making) return null;
-  return making.activity
+  return making.doing
     ? m("meet.now.maker", {
         version: making.version,
-        activity: making.activity,
+        activity: m(`explore.doing.${making.doing}`),
       })
     : m("meet.now.makerAtWork", { version: making.version });
 }
