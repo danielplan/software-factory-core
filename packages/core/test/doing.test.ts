@@ -62,12 +62,11 @@ test("an action that fits no kind is unknown, and the kobold's own words are not
 });
 
 test("the stage moves on the first read or search and on the first drawing", () => {
+  const reading = /^(read-|find-)|^(search|look-around|look-up)$/;
   for (const kind of DOING_KINDS) {
-    const expected = /^(draw)/.test(kind)
-      ? 2
-      : /^(read-|find-)|^(search|look-around|look-up)$/.test(kind)
-        ? 1
-        : 0;
+    let expected = 0;
+    if (kind.startsWith("draw")) expected = 2;
+    else if (reading.test(kind)) expected = 1;
     assert.equal(stageOf(kind), expected, kind);
   }
   assert.equal(stageOf("start"), 0);

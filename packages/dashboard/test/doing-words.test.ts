@@ -21,7 +21,11 @@ test("every kind of action has words in every language, in everyday words", () =
       string,
       string
     >;
-    assert.deepEqual(Object.keys(words).sort(), [...DOING_KINDS].sort());
+    const alphabetical = (a: string, b: string) => a.localeCompare(b);
+    assert.deepEqual(
+      Object.keys(words).sort(alphabetical),
+      [...DOING_KINDS].sort(alphabetical),
+    );
     for (const kind of DOING_KINDS) {
       assert.ok(words[kind]?.trim(), `${locale} ${kind}`);
       assert.doesNotMatch(
