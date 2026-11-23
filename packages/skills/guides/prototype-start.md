@@ -18,7 +18,9 @@ person you work for is not a developer and is never asked for anything.
 ## What the command must do
 
 - **Start what is missing first.** Install the packages when they are not
-  there (`npm install`, or the project's own way), then start the app.
+  there, or not installed from the copy's own lock file yet (`npm install`,
+  or the project's own way), then start the app. Packages taken from the
+  project's folder can be older than the copy and miss what it needs.
 - **Print one line when the page answers**: `FACTORY_URL=http://localhost:<port>`.
   Until then it prints nothing like it. The factory waits for that line and
   then opens the address to check that it answers.

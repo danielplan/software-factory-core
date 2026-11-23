@@ -39,6 +39,11 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
   what it printed, three tries in all. Logins, passwords and outside
   services are never the reason: Tinker makes them up. No person is asked
   for anything.
+- Kobble's own start (`scripts/kobble-prototype.mjs`) clones the packages
+  from the project's folder, then runs `npm install` in the copy whenever
+  they were not installed from the copy's lock file yet: the project's
+  checkout can be older than the prototype's copy, and the page would fail
+  on a package only the copy needs.
 - The prototype it was set up for carries one calm line, "Tinker set up how
   to start your app, for the whole team." (`startSetUp` on its board
   thing); later prototypes do not. When Tinker cannot get the app to start,
