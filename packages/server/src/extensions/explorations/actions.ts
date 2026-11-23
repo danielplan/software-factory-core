@@ -173,13 +173,14 @@ export async function handOff(
   const text = `${spec ?? summary}\n\n<!-- factory:kobble exploration=${exploration.id} prototype=${agreed?.key ?? "none"} -->`;
   // Handed off agreed: straight to To do, the go-ahead to build it. An
   // exploration of a Backlog issue fills in that issue instead.
-  const card = await handedOffCard(connected, exploration, text);
+  const card = await handedOffCard(store, connected, exploration, text);
   store.saveHandoff(
     id,
     `# ${exploration.title}\n\n${text}\n\nHanded off as #${String(card.number)}.\n`,
   );
+  // Read again: the issue was remembered on it while the card was made.
   store.put("explorations", {
-    ...exploration,
+    ...explorationOf(store, id),
     status: "handed-off",
     work: card.number,
   });
@@ -232,12 +233,25 @@ function agreedOf(made: Made | undefined): string {
   return made ? `${made.key}/${chosenVariant(made)?.key ?? ""}` : "";
 }
 
+// The card of a hand-off. The issue is remembered on the exploration (its
+// `issue`, as for one that started from a Backlog issue) the moment it is
+// made, before it goes on the board, so a hand-off that fails in between
+// carries on with that issue when tried again, never making a second one.
+// The issue stays on the exploration after the hand-off, as the card it is.
 async function handedOffCard(
+  store: KobbleStore,
   cards: Cards,
   exploration: Exploration,
   text: string,
 ): Promise<{ number: number; url: string }> {
-  if (!exploration.issue) return cards.create(exploration.title, text, "todo");
+  if (!exploration.issue)
+    return cards.create(exploration.title, text, "todo", (made) => {
+      store.put("explorations", {
+        ...explorationOf(store, exploration.id),
+        issue: made.number,
+      });
+    });
+  await cards.bring(exploration.issue);
   await cards.writePlan(exploration.issue, text);
   await cards.move(exploration.issue, "todo");
   const { url } = await cards.show(exploration.issue);

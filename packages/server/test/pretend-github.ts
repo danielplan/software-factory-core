@@ -25,7 +25,19 @@ export const BOARD = {
   stages: STAGES,
 };
 
-export function pretendGitHub() {
+// How the board takes in a new issue. By default only when asked to (`gh
+// project item-add`). A board with a workflow that adds new issues by itself
+// has them as items already, so adding is answered with "already exists";
+// `showsAfter` is how many reads of the board go by before the item shows
+// (never, when Infinity). `addFails` is what the first adding is answered
+// with instead, for a failure between making an issue and adding it.
+export type Taking = {
+  addsItself?: boolean;
+  showsAfter?: number;
+  addFails?: string;
+};
+
+export function pretendGitHub(taking: Taking = {}) {
   const issues = new Map([
     [3, { title: "Invoices in euros", body: "As written.", column: "Backlog" }],
   ]);
@@ -38,15 +50,27 @@ export function pretendGitHub() {
   // The labels of each issue, and the labels GitHub has been asked to make.
   const labels = new Map<number, string[]>();
   const made = new Set<string>();
+  // Issues not on the board yet, and the reads of the board each waits for
+  // before it shows; the issues made and the times adding was asked for.
+  const off = new Set<number>();
+  const showsIn = new Map<number, number>();
+  const asked = { issues: [] as number[], adds: 0 };
+  let failAdd = taking.addFails;
   const says = (out: unknown) =>
     Promise.resolve({
       code: 0,
       out: typeof out === "string" ? out : JSON.stringify(out),
       err: "",
     });
+  const shown = (number: number) => {
+    const left = showsIn.get(number) ?? 0;
+    if (left > 0) showsIn.set(number, left - 1);
+    return left <= 0;
+  };
   const items = () => [
     ...[...issues]
-      .filter(([number]) => !removed.has(number))
+      .filter(([number]) => !removed.has(number) && !off.has(number))
+      .filter(([number]) => shown(number))
       .map(([number, issue]) => ({
         id: `item-${String(number)}`,
         fieldValueByName: { name: issue.column },
@@ -117,6 +141,34 @@ export function pretendGitHub() {
       : { field: { id: "F1", options: OPTIONS } };
     return says({ data: { repositoryOwner: { projectV2: project } } });
   };
+  // A new issue: on the board only when adding it is asked for, unless the
+  // board adds new issues by itself.
+  const makeIssue = (title: string, body: string) => {
+    const fresh = 9 + asked.issues.length;
+    asked.issues.push(fresh);
+    issues.set(fresh, { title, body, column: "" });
+    if (taking.addsItself) showsIn.set(fresh, taking.showsAfter ?? 0);
+    else off.add(fresh);
+    return says(`https://github.com/acme/shop/issues/${String(fresh)}\n`);
+  };
+  // Adding an issue to the board, as taking says it is answered.
+  const addItem = (args: string[]) => {
+    asked.adds++;
+    const number = Number(/issues\/(\d+)/.exec(args.join(" "))?.[1]);
+    if (failAdd) {
+      const err = failAdd;
+      failAdd = undefined;
+      return Promise.resolve({ code: 1, out: "", err });
+    }
+    if (taking.addsItself)
+      return Promise.resolve({
+        code: 1,
+        out: "",
+        err: "GraphQL: Content already exists in this project (addProjectV2ItemById)\n",
+      });
+    off.delete(number);
+    return says(JSON.stringify({ id: `item-${String(number)}` }));
+  };
   // An issue: read, edited, commented on, made.
   const issue = (args: string[]) => {
     const [, verb, number] = args;
@@ -125,6 +177,7 @@ export function pretendGitHub() {
     if (verb === "view" && found)
       return says({
         body: found.body,
+        url: `https://github.com/acme/shop/issues/${String(number)}`,
         comments: [{ author: { login: "ana" }, body: "Euros only?" }],
       });
     if (verb === "edit" && found) {
@@ -138,14 +191,7 @@ export function pretendGitHub() {
     }
     if (verb === "comment") said.push(`#${String(number)}: ${value("--body")}`);
     if (verb === "close") closed.add(Number(number));
-    if (verb === "create") {
-      issues.set(9, {
-        title: value("--title"),
-        body: value("--body"),
-        column: "",
-      });
-      return says("https://github.com/acme/shop/issues/9\n");
-    }
+    if (verb === "create") return makeIssue(value("--title"), value("--body"));
     return says("");
   };
   const run = (args: string[]) => {
@@ -173,8 +219,7 @@ export function pretendGitHub() {
       removed.add(Number(/item-(\d+)/.exec(args.join(" "))?.[1]));
       return says("{}");
     }
-    if (first === "project" && second === "item-add")
-      return says(JSON.stringify({ id: "item-9" }));
+    if (first === "project" && second === "item-add") return addItem(args);
     return Promise.resolve({
       code: 1,
       out: "",
@@ -185,5 +230,5 @@ export function pretendGitHub() {
     run,
     start: () => ({ answer: () => {}, done: Promise.resolve(1) }),
   };
-  return { cli, issues, said, closed, removed, labels, made };
+  return { cli, issues, said, closed, removed, labels, made, asked };
 }

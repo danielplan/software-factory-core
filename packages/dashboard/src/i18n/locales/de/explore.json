@@ -36,6 +36,7 @@
     "something": "Noch nichts ist beschlossen: einigt euch zuerst auf eine Wahl oder eine Notiz auf dem Board."
   },
   "handingOff": "Übergebe…",
+  "handOffNotOnBoard": "Das Issue #{{number}} wurde angelegt, steht nach dem Warten aber nicht auf dem Board: GitHub hat es nicht hinzugefügt. Fügt es von Hand zum Board hinzu, oder übergebt noch einmal: Es geht mit diesem Issue weiter.",
   "handOffStep": "Schritt {{n}} von {{of}}",
   "handOffStages": {
     "spec": "Schreibe die Spezifikation",

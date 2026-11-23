@@ -106,7 +106,15 @@ choices and notes go instead.
 2. It reads the board again before the card is made, and refuses when the
    agreement changed.
 3. The card goes to **To do** on the team's board, through the `tasks` slot:
-   the go-ahead to build. `handoff.md` keeps a copy.
+   the go-ahead to build. `handoff.md` keeps a copy. The issue is made and
+   remembered on the exploration (its `issue`) at once, then added to the
+   board. A board that adds new issues by itself answers that the content
+   exists: that is accepted, and the card is looked for on the board, every
+   2 seconds, for about 30. When it never shows, the hand-off says so and
+   gives the issue's number. Handing off again carries on with the remembered
+   issue, adding it to the board first if it is missing, so no second issue
+   is made. The same step makes every card the factory creates, so all of
+   them take in such a board.
 4. The exploration keeps the card's number and closes. The prototype's copy
    is removed; its branch stays, and the builder starts from its code and
    look ([decision 0003](../../decisions/0003-build-from-the-agreed-prototype.md)).
@@ -139,6 +147,8 @@ The routes are under `/api/kobble/explorations` and
 ## Checked and not checked
 
 Checked by tests: explorations and their versions, the board's acts, the
-hand-off and its refusals (`explorations-handoff.test.ts`), the spec
+hand-off and its refusals (`explorations-handoff.test.ts`), the card step
+against a board that adds issues by itself, late or never, and a hand-off
+tried again (`card-create.test.ts`), the spec
 writer, the ideas plug. Not checked by a test: what Doodle draws; that is
 its guide's job.

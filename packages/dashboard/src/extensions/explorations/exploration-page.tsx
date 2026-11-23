@@ -9,6 +9,7 @@ import { Archive, ChevronLeft, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { handOffProblem } from "@/i18n/server-texts";
 import { type ExplorationPage as Page, messageOf, post } from "@/api/client";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,10 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
           <div className="relative flex min-h-0 min-w-0 flex-1">
             {said && (
               <div className="absolute inset-x-4 top-4 z-10 rounded-xl bg-card shadow-card">
-                <ProblemBox title={t("explore.didNotWork")} text={said} />
+                <ProblemBox
+                  title={t("explore.didNotWork")}
+                  text={handOffProblem(said, t)}
+                />
               </div>
             )}
             <Board

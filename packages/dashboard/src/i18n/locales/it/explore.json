@@ -36,6 +36,7 @@
     "something": "Non c'è ancora nulla di concordato: accordatevi prima su una scelta o una nota della bacheca."
   },
   "handingOff": "Consegno…",
+  "handOffNotOnBoard": "L'issue #{{number}} è stata creata, ma dopo l'attesa non è sulla bacheca: GitHub non l'ha aggiunta. Aggiungetela a mano alla bacheca, oppure consegnate di nuovo: si prosegue con quell'issue.",
   "handOffStep": "Passo {{n}} di {{of}}",
   "handOffStages": {
     "spec": "Scrivo la specifica",

@@ -5,6 +5,7 @@ import { chosenLocale, isChoice, LOCALES } from "../src/i18n/locale.ts";
 import { messagesIn } from "../src/i18n/messages.ts";
 import { resources } from "../src/i18n/resources.ts";
 import {
+  handOffProblem,
   problemTitle,
   updateReason,
   updateStep,
@@ -128,6 +129,14 @@ test("the server's words are said again in the language shown, with what they na
     problemTitle("Something new and unknown", it),
     "Something new and unknown",
   );
+  assert.match(
+    handOffProblem(
+      "Issue #12 was made, but it is not on the board after waiting for GitHub to add it. Add it to the board by hand, or hand off again: it carries on with that issue.",
+      it,
+    ),
+    /^L'issue #12 è stata creata/,
+  );
+  assert.equal(handOffProblem("GitHub is down", it), "GitHub is down");
   assert.equal(
     updateStep("Starting the products again", it),
     "Riavvio i prodotti",

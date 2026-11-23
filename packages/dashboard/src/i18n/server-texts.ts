@@ -112,3 +112,15 @@ export function stopWords(
   }
   return { reason: problem.replace(/\.$/, ""), how: "" };
 }
+
+// Why a hand-off did not work, as the server says it (the card made but not
+// on the board after waiting, github/on-board.ts). Anything else stays as
+// the server wrote it.
+export function handOffProblem(problem: string, t: TFunction): string {
+  const found = /^Issue #(\d+) was made, but it is not on the board/.exec(
+    problem,
+  );
+  return found
+    ? t("explore.handOffNotOnBoard", { number: found[1] ?? "" })
+    : problem;
+}
