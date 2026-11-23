@@ -40,6 +40,18 @@ and click things to attach them to what they type next; Doodle hears what
 they did with their next words. Words sent while it answers join that
 answer, and **Stop** ends it.
 
+## What Doodle did, in the chat
+
+Doodle's words keep the steps it took between them, where they happened:
+each a small grey line in the language shown ("Asked Tinker to change the
+prototype", "Looked at the board"), three or more in a row folded into one
+line ("4 steps") that opens. They show while Doodle works and stay
+afterwards. The server keeps them in its words as `<!-- step: name -->`
+(`coach/kept-steps.ts`; Markdown shows nothing of them elsewhere, the voice
+leaves them out); the page words each step by its name (`explore.steps`). A
+turn Kobble starts itself opens with what started it, as its first step
+("Tinker finished the prototype").
+
 ## While Doodle reads
 
 On an empty board, while Doodle answers, the board shows a **reading card**

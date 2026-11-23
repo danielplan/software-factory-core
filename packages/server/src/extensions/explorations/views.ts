@@ -21,6 +21,7 @@ import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { BoardIdea } from "../../plugs/work.ts";
 import type { VersionRun } from "../../prototypes/mode.ts";
 
+import { STEP_MARK } from "../../coach/kept-steps.ts";
 import { completed } from "./board-things.ts";
 import type { TalkView } from "./talk-view.ts";
 
@@ -104,7 +105,9 @@ function lineOf(board: Board, talk: TalkView): string | null {
   );
   if (agreed?.kind === "prototype")
     return `${agreed.key} is agreed. You can hand it off.`;
-  const said = talk.messages.findLast((m) => m.from === "kobold")?.text ?? "";
+  const said = (
+    talk.messages.findLast((m) => m.from === "kobold")?.text ?? ""
+  ).replace(new RegExp(STEP_MARK, "g"), "");
   const question = said
     .split(/(?<=[.!?])\s+/)
     .findLast((sentence) => sentence.trim().endsWith("?"));
