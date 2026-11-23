@@ -68,7 +68,7 @@ export function SprocketBar({
             event.stopPropagation();
             openTeam("support");
           }}
-          className="flex-none cursor-pointer rounded-lg p-0.5 ring-1 ring-foreground/15 hover:ring-2 hover:ring-blue/60"
+          className="flex-none cursor-pointer rounded-lg p-0.5 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
         >
           <KoboldHead size={34} className={cn(working && "animate-breathe")} />
         </span>

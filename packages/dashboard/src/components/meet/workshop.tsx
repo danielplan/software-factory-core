@@ -185,14 +185,7 @@ function Figure({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <span
-        key={hat}
-        className={cn(
-          "block",
-          !working && "meet-doze origin-bottom",
-          hat !== member.hat && "motion-safe:animate-pop",
-        )}
-      >
+      <span className={cn("block", !working && "meet-doze origin-bottom")}>
         <KoboldHead
           size={size}
           hat={hat}
@@ -235,14 +228,27 @@ function Now({
   );
 }
 
-// Lit: the kobold you came from, shown by a soft glow around its face and
+// Lit: the kobold you came from, shown by a faint light behind its face and
 // its name in blue, never a frame.
-function glow(member: Member, lit: boolean) {
-  return lit
-    ? {
-        filter: `drop-shadow(0 0 7px ${member.color}) drop-shadow(0 0 2px ${member.color})`,
-      }
-    : undefined;
+function Lit({
+  member,
+  lit,
+  children,
+}: Readonly<{ member: Member; lit: boolean; children: ReactNode }>) {
+  return (
+    <span className="relative grid place-items-center transition-transform duration-150 group-hover:-translate-y-0.5">
+      {lit && (
+        <span
+          aria-hidden
+          className="absolute -inset-4 rounded-full"
+          style={{
+            background: `radial-gradient(closest-side, ${member.color}26, transparent)`,
+          }}
+        />
+      )}
+      <span className="relative">{children}</span>
+    </span>
+  );
 }
 
 function Station({
@@ -268,12 +274,9 @@ function Station({
       aria-current={lit ? "true" : undefined}
       className="group grid min-w-0 cursor-pointer content-start justify-items-center gap-0.5 rounded-lg px-1.5 pt-3 pb-2.5 text-center focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
     >
-      <span
-        className="transition-transform duration-150 group-hover:-translate-y-0.5"
-        style={glow(member, lit)}
-      >
+      <Lit member={member} lit={lit}>
         <Figure member={member} working={now !== null} size={size} />
-      </span>
+      </Lit>
       <span
         className={cn(
           "mt-2 text-[14px] font-semibold group-hover:underline group-hover:underline-offset-4",
@@ -298,7 +301,7 @@ function Card({
   return (
     <section
       aria-label={`${member.name}'s card`}
-      className="meet-in relative flex min-w-0 gap-3.5 rounded-2xl bg-surface-2/70 p-4 pr-10"
+      className="meet-in relative flex min-w-0 gap-3.5 rounded-2xl bg-card p-4 pr-10"
     >
       <KoboldHead size={48} hat={member.hat} color={member.color} />
       <div className="grid min-w-0 gap-1 text-[13px] leading-snug">
@@ -366,12 +369,9 @@ function Supervisor({
       aria-current={lit ? "true" : undefined}
       className="group flex min-w-0 cursor-pointer flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-lg px-5 py-2 text-left focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
     >
-      <span
-        className="transition-transform duration-150 group-hover:-translate-y-0.5"
-        style={glow(member, lit)}
-      >
+      <Lit member={member} lit={lit}>
         <Figure member={member} working={now !== null} size={84} />
-      </span>
+      </Lit>
       <span className="grid min-w-0 flex-1 gap-0.5 sm:min-w-[260px] sm:max-w-[560px]">
         <span
           className={cn(
@@ -409,28 +409,30 @@ export function Workshop({
     />
   );
   return (
-    <div className="grid min-h-0 gap-3 overflow-y-auto bg-card px-6 pt-2 pb-6">
-      <Supervisor
-        now={now.support ?? null}
-        lit={focus === "support"}
-        open={picked === "support"}
-        onPick={() => {
-          toggle("support");
-        }}
-      />
-      <div className="grid grid-cols-2 items-start gap-1 md:grid-cols-5">
-        {STATIONS.map((id) => (
-          <Station
-            key={id}
-            member={memberOf(id)}
-            now={now[id] ?? null}
-            lit={focus === id}
-            open={picked === id}
-            onPick={() => {
-              toggle(id);
-            }}
-          />
-        ))}
+    <div className="grid min-h-0 gap-4 overflow-y-auto bg-ground px-6 pt-5 pb-6">
+      <div className="grid gap-2 rounded-2xl bg-surface-2/60 px-3 pt-3 pb-3">
+        <Supervisor
+          now={now.support ?? null}
+          lit={focus === "support"}
+          open={picked === "support"}
+          onPick={() => {
+            toggle("support");
+          }}
+        />
+        <div className="grid grid-cols-2 items-start gap-1 md:grid-cols-5">
+          {STATIONS.map((id) => (
+            <Station
+              key={id}
+              member={memberOf(id)}
+              now={now[id] ?? null}
+              lit={focus === id}
+              open={picked === id}
+              onPick={() => {
+                toggle(id);
+              }}
+            />
+          ))}
+        </div>
       </div>
       {cards}
     </div>

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
-import { VARIANT } from "@/components/meet/meet";
+import { HAS_PANEL, VARIANT } from "@/components/meet/meet";
 import { Face } from "@/components/meet/team-panel";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
             "relative grid flex-none place-items-center rounded-[13px]",
             big ? "size-14" : "size-11",
           )}
-          style={{ background: `${color}24` }}
+          style={HAS_PANEL ? undefined : { background: `${color}24` }}
         >
           <KoboldHead
             size={big ? 44 : 34}

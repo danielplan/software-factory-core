@@ -39,7 +39,7 @@ export function Face({
       aria-label={`Meet ${memberOf(id).name} and the team`}
       title="Meet your kobolds"
       className={cn(
-        "cursor-pointer rounded-lg p-0.5 ring-1 ring-foreground/15 transition-shadow duration-150 hover:ring-2 hover:ring-blue/60 focus-visible:ring-2 focus-visible:ring-blue/60 focus-visible:outline-none",
+        "cursor-pointer rounded-lg p-0.5 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none",
         className,
       )}
       onClick={(event) => {
