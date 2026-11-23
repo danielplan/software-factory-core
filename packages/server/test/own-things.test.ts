@@ -294,7 +294,7 @@ test("only pages on the open web are read for a preview", () => {
   for (const closed of [
     plain("localhost:3000/"),
     plain("127.0.0.1/"),
-    plain("192.168.0.4/admin"),
+    plain("192.168.0.4/settings"),
     plain("[::1]/"),
     plain("printer.local/"),
     plain("intranet/"),

@@ -83,10 +83,10 @@ Decisions:
   of it (the transform stayed the same); it did move once when Doodle itself
   changed the diagram.
 
-![the toolbar on the board](runs/issue-60-add-your-own-things/3-board-toolbar.png)
-![a sketch, a mark on a card and a note](runs/issue-60-add-your-own-things/4-drawn.png)
-![after a reload, taken in, links and pictures](runs/issue-60-add-your-own-things/6-after-reload.png)
-![a link with its preview, a sketch card dragged](runs/issue-60-add-your-own-things/7-link-preview-drag.png)
+![the toolbar on the board](issue-60-add-your-own-things/3-board-toolbar.png)
+![a sketch, a mark on a card and a note](issue-60-add-your-own-things/4-drawn.png)
+![after a reload, taken in, links and pictures](issue-60-add-your-own-things/6-after-reload.png)
+![a link with its preview, a sketch card dragged](issue-60-add-your-own-things/7-link-preview-drag.png)
 
 ## Not checked
 
