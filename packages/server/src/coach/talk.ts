@@ -6,7 +6,15 @@
 
 import { randomUUID } from "node:crypto";
 
-import type { Claude, ClaudeResult, RunOptions } from "@software-factory/core";
+import {
+  type Claude,
+  type ClaudeResult,
+  type DoingKind,
+  doingOf,
+  type RunOptions,
+  type Stage,
+  stageOf,
+} from "@software-factory/core";
 
 import type { ChangeDraft, CoachMessage, Draft } from "../api.ts";
 import { Refused } from "../refused.ts";
@@ -36,32 +44,10 @@ const TOOL_PREFIX = "Using mcp__setup__";
 const SHOWN = /^(Reading|Searching|Looking)/;
 
 // How far a turn got, from what Claude Code reported: it starts reading what
-// it was given (0), goes on to look through the code when it reports
+// it was given (0), goes on to learn how the product works when it reports
 // reading or searching (1), and draws when it uses its drawing tool (2). A
 // step is reached by a report, never by time.
-export type Step = 0 | 1 | 2;
-// The tools that put something on the map or board: the coach's `draw`, and
-// the explorer's (explorations/board-tools.ts).
-const DRAWING_TOOLS = [
-  "draw",
-  "add_note",
-  "add_diagram",
-  "add_choice",
-  "change_thing",
-  "link",
-  "make_prototype",
-];
-// The coach's tool a line names: "Using add choice (setup)", as Claude Code's
-// events are put into words (core's activity.ts), or its full name.
-function toolOf(line: string): string | null {
-  if (line.startsWith(TOOL_PREFIX)) return line.slice(TOOL_PREFIX.length);
-  const named = /^Using (.+) \(setup\)$/.exec(line);
-  return named ? (named[1] ?? "").replaceAll(" ", "_") : null;
-}
-function stepOf(line: string): Step {
-  if (DRAWING_TOOLS.includes(toolOf(line) ?? "")) return 2;
-  return SHOWN.test(line) ? 1 : 0;
-}
+export type Step = Stage;
 
 // What a turn may do: its tools, what it may not touch, its instructions.
 export type TurnRights = Pick<
@@ -75,6 +61,9 @@ export class Talk {
   map: Draft;
   writing: string | null = null;
   activity: string | null = null;
+  // The kind of the last action it reported (what the page puts in words);
+  // "start" until it reports one.
+  doing: DoingKind | null = null;
   problem: string | null = null;
   // The step the turn is at (kept after the turn, so a stop shows where).
   step: Step = 0;
@@ -205,6 +194,7 @@ export class Talk {
   ): Promise<boolean> {
     this.writing = "";
     this.activity = null;
+    this.doing = "start";
     this.problem = null;
     this.step = 0;
     this.last = { spokenIn, rights };
@@ -230,6 +220,7 @@ export class Talk {
       this.problem = problemOf(result.error ?? "", this.who);
     this.writing = null;
     this.activity = null;
+    this.doing = null;
     this.changed();
   }
 
@@ -299,11 +290,14 @@ export class Talk {
         this.changed();
       },
       onActivity: (line: string) => {
-        this.step = Math.max(this.step, stepOf(line)) as Step;
+        const kind = doingOf(line);
+        if (kind) {
+          this.step = Math.max(this.step, stageOf(kind)) as Step;
+          this.doing = kind;
+        }
         const shown = plain(line);
-        if (!shown) return;
-        this.activity = shown;
-        this.changed();
+        if (shown) this.activity = shown;
+        if (kind || shown) this.changed();
       },
     };
   }

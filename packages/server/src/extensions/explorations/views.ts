@@ -268,6 +268,6 @@ function linksAsWords(text: string): string {
 function busyWith(talk: TalkView, runs: VersionRun[]): string | null {
   const making = runs.find((run) => run.making);
   if (making) return `Making prototype ${making.version}`;
-  if (talk.writing !== null || talk.activity !== null) return "Thinking";
+  if (talk.writing !== null || talk.doing !== null) return "Thinking";
   return null;
 }

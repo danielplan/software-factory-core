@@ -69,28 +69,27 @@
     "yourExplorer": "il tuo esploratore",
     "talking": "Sta parlando con te",
     "outLoud": "Parla a voce",
-    "thinking": "Ci penso…",
     "takeOff": "Toglilo"
   },
   "reading": {
     "title": "{{name}} sta leggendo",
     "stopped": "{{name}} si è fermato",
-    "hint": "Non si disegna nulla finché non ha letto.",
+    "hint": "Disegna quando ha capito la tua idea",
     "noneDrawn": "Non è stato disegnato nulla.",
     "stoppedAt": "{{step}}: fermato",
     "tryAgain": "Riprova",
     "steps": {
-      "page": {
-        "doing": "Lettura della pagina",
-        "done": "Pagina letta"
+      "idea": {
+        "doing": "Leggere la tua idea",
+        "done": "Idea letta"
       },
-      "code": {
-        "doing": "Esame del codice",
-        "done": "Codice esaminato"
+      "product": {
+        "doing": "Capire come funziona il prodotto",
+        "done": "Capito come funziona il prodotto"
       },
-      "draw": {
-        "doing": "Disegno della lavagna",
-        "done": "Lavagna disegnata"
+      "board": {
+        "doing": "Disegnare sulla lavagna",
+        "done": "Disegnato sulla lavagna"
       }
     }
   },
@@ -140,5 +139,39 @@
     "couldNotTitle": "{{name}} non è riuscito ad avviare la tua app.",
     "couldNotNoReason": "{{name}} ha provato diversi modi per avviare la tua app, ma nessuno ha funzionato.",
     "tryAgain": "Riprova"
+  },
+  "doing": {
+    "start": "Prepararsi",
+    "read-settings": "Conoscere il prodotto",
+    "read-design": "Guardare l'aspetto del prodotto",
+    "read-structure": "Capire come è costruito il prodotto",
+    "read-notes": "Leggere gli appunti del team",
+    "read-screen": "Guardare come è fatta una schermata",
+    "read-other": "Guardare il prodotto",
+    "find-settings": "Scoprire cos'è il prodotto",
+    "find-notes": "Cercare gli appunti del team",
+    "find-screens": "Cercare le schermate",
+    "search": "Cercare dove succede questo",
+    "look-around": "Guardarsi intorno nel prodotto",
+    "look-up": "Cercare un'informazione",
+    "helper": "Chiedere aiuto a un assistente",
+    "unknown": "Guardarsi intorno nel prodotto",
+    "draw": "Disegnare sulla lavagna",
+    "draw-note": "Scrivere una nota sulla lavagna",
+    "draw-choice": "Disegnare una scelta",
+    "draw-diagram": "Disegnare uno schema",
+    "draw-change": "Cambiare qualcosa sulla lavagna",
+    "draw-link": "Collegare due cose con una freccia",
+    "draw-prototype": "Avviare un prototipo",
+    "edit": "Cambiare il prototipo",
+    "write": "Aggiungere al prototipo",
+    "test": "Provare che funzioni",
+    "check": "Controllare il lavoro",
+    "install": "Prendere ciò che serve",
+    "build": "Mettere insieme i pezzi",
+    "browser": "Guardarlo nel browser",
+    "git": "Salvare il lavoro",
+    "plan": "Pianificare i prossimi passi",
+    "run": "Lavorarci su"
   }
 }
