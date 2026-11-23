@@ -139,7 +139,23 @@ function recommendedOf(
   return letter;
 }
 
+// What a person adds themselves (a prototype is made for them, and stays the
+// kobold's to take off).
+const THEIRS = new Set(["note", "picture", "link", "sketch", "mark"]);
+
+// What a person put on the board is theirs: the kobold may move it, never
+// change or remove it.
+function theirs(board: Board, act: Act): void {
+  if (act.act !== "change" && act.act !== "remove") return;
+  const thing = thingOf(board, act.id);
+  if (thing.by === "person" && THEIRS.has(thing.kind))
+    throw new Refused(
+      `${act.id} is the team's own: you may move it, never change or remove it.`,
+    );
+}
+
 export function applyAct(board: Board, act: Act, by: By): Done {
+  if (by === "kobold") theirs(board, act);
   switch (act.act) {
     case "note":
       return added(

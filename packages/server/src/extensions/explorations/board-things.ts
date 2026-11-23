@@ -51,7 +51,10 @@ export function withoutThing(board: Board, id: string): Board {
       `Prototype ${thing.key} is agreed: mark it a sketch first, once the team says it is not to be built.`,
     );
   return {
-    things: board.things.filter((one) => one.id !== id),
+    // A card takes its marks with it.
+    things: board.things.filter(
+      (one) => one.id !== id && !(one.kind === "mark" && one.on === id),
+    ),
     links: board.links.filter((one) => one.from !== id && one.to !== id),
   };
 }
@@ -144,9 +147,30 @@ export function completed(exploration: Exploration, board: Board): Board {
   return { ...board, things: [...fixed, ...board.things] };
 }
 
-function line(thing: Thing, exploration: Exploration): string {
+// A picture's file, as the kobold is told to read it.
+const seeing = (exploration: Exploration, file: string) =>
+  `read factory/kobble/explorations/${exploration.id}/pictures/${file} to see it`;
+
+// What the team's marks on a card come to for the kobold: how many, and the
+// card as last drawn.
+function markLine(
+  head: string,
+  marks: Extract<Thing, { kind: "mark" }>[],
+  exploration: Exploration,
+): string {
+  const image = marks.findLast((one) => one.image)?.image;
+  const count = `${String(marks.length)} pen mark${marks.length === 1 ? "" : "s"} on ${marks[0]?.on ?? ""}`;
+  return `${head}: ${count}${image ? ` (${seeing(exploration, image)}: the marks alone, drawn at the card's size and place)` : ""}`;
+}
+
+function line(
+  thing: Thing,
+  exploration: Exploration,
+  all: Thing[] = [],
+): string {
   const state = thing.agreed ? "agreed" : "sketch";
-  const head = `- ${thing.id} (${thing.kind}, ${state})`;
+  const whose = thing.by === "person" ? ", the team's own" : "";
+  const head = `- ${thing.id} (${thing.kind}, ${state}${whose})`;
   switch (thing.kind) {
     case "problem":
       return `${head}: ${exploration.problem || "not said yet"}`;
@@ -167,7 +191,20 @@ function line(thing: Thing, exploration: Exploration): string {
     case "diagram":
       return `${head}: ${thing.title}`;
     case "picture":
-      return `${head}: ${thing.title} (read factory/kobble/explorations/${exploration.id}/pictures/${thing.image} to see it)`;
+      return `${head}: ${thing.title} (${seeing(exploration, thing.image)})`;
+    case "link":
+      return `${head}: ${thing.title}, on ${thing.site}, ${thing.url}${thing.preview ? ` (its preview: ${seeing(exploration, thing.preview)})` : ""}`;
+    case "sketch":
+      return `${head}: a drawing${thing.image ? ` (${seeing(exploration, thing.image)})` : ""}`;
+    case "mark":
+      return markLine(
+        head,
+        all.filter(
+          (one): one is typeof thing =>
+            one.kind === "mark" && one.on === thing.on,
+        ),
+        exploration,
+      );
   }
 }
 
@@ -182,13 +219,26 @@ function versionWords(made: Extract<Thing, { kind: "prototype" }>): string {
   return ["; variants:", ...lines].join("\n");
 }
 
+// A sketch card's marks are told with the card, and the marks on any other
+// card in one line (the first of them).
+function hidden(thing: Thing, at: number, things: Thing[]): boolean {
+  if (thing.kind !== "mark") return false;
+  const card = things.find((one) => one.id === thing.on);
+  if (card?.kind === "sketch") return true;
+  return (
+    things.findIndex((one) => one.kind === "mark" && one.on === thing.on) !== at
+  );
+}
+
 // The board in short lines, as the kobold reads it.
 export function boardText(exploration: Exploration, board: Board): string {
   const full = completed(exploration, board);
   return [
     `${exploration.id} · ${exploration.title} (${exploration.status})`,
     "Things:",
-    ...full.things.map((thing) => line(thing, exploration)),
+    ...full.things
+      .filter((thing, at) => !hidden(thing, at, full.things))
+      .map((thing) => line(thing, exploration, full.things)),
     "Arrows:",
     ...full.links.map(
       (one) =>

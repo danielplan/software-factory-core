@@ -57,6 +57,9 @@ export class ExplorationTalks {
   >();
   // What people did on a board since the kobold last heard, by exploration.
   private readonly done = new Map<string, string[]>();
+  // The things of theirs among them, to be marked taken in once the kobold
+  // has answered with them in front of it.
+  private readonly hearing = new Map<string, string[]>();
   private toolsUrl = "";
   private readonly options: TalksOptions;
   constructor(options: TalksOptions) {
@@ -132,8 +135,22 @@ export class ExplorationTalks {
     else void this.answer(id, talk, failedWords(key, why));
   }
 
-  personDid(id: string, words: string): void {
-    this.done.set(id, [...(this.done.get(id) ?? []), words]);
+  // `things`: what they put on the board by it, taken in once heard.
+  personDid(id: string, words: string, things: string[] = []): void {
+    const so = this.done.get(id) ?? [];
+    this.done.set(id, so.includes(words) ? so : [...so, words]);
+    if (things.length > 0)
+      this.hearing.set(id, [...(this.hearing.get(id) ?? []), ...things]);
+  }
+
+  // Something a person put on the board that the kobold hears at once, said
+  // as their own words; it is taken in once the kobold has answered. While
+  // it is still answering, it hears it with the next words.
+  sayNow(id: string, words: string, things: string[]): void {
+    this.hearing.set(id, [...(this.hearing.get(id) ?? []), ...things]);
+    void this.say(id, words).catch(() => {
+      this.personDid(id, `said: ${words}`);
+    });
   }
 
   // A person's words, with the things they attached from the board; the
@@ -252,6 +269,8 @@ export class ExplorationTalks {
     const did = this.done.get(id) ?? [];
     const making = this.maker?.making(id) ?? [];
     this.done.delete(id);
+    const heardThings = this.hearing.get(id) ?? [];
+    this.hearing.delete(id);
     const prompt = [
       said,
       ...(did.length > 0
@@ -271,7 +290,7 @@ export class ExplorationTalks {
       "",
       "(Think it through first, as your guide says: what is really asked, what you checked, the ways and what breaks them, what is missing, where the exploration goes next. Then answer in at most 60 words, in short Markdown: what changed in a line, a short list when there is more than one point, then one question on its own line.)",
     ].join("\n");
-    await talk.answer(prompt, spokenIn, {
+    const answered = await talk.answer(prompt, spokenIn, {
       ...RIGHTS,
       instructions: inLanguage(
         [
@@ -280,6 +299,24 @@ export class ExplorationTalks {
         ].join("\n\n"),
       ),
     });
+    if (answered) this.takenIn(id, heardThings);
+    else if (heardThings.length > 0) {
+      // Not heard: it hears them again with the next words.
+      this.done.set(id, [...did, ...(this.done.get(id) ?? [])]);
+      this.hearing.set(id, [...heardThings, ...(this.hearing.get(id) ?? [])]);
+    }
+  }
+
+  // What the kobold has acted on is marked taken in; never before.
+  private takenIn(id: string, things: string[]): void {
+    if (things.length === 0) return;
+    const store = this.options.store();
+    const board = store.board(id);
+    const fresh = board.things.map((one) =>
+      things.includes(one.id) ? { ...one, taken: true } : one,
+    );
+    store.saveBoard(id, { ...board, things: fresh });
+    this.options.onChange();
   }
 
   // The conversation about an exploration (its Stop, for one).

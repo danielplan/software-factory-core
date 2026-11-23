@@ -126,12 +126,15 @@ export function explorationsView(
       work: exploration.work,
       personas: tagsOf(personas, exploration.personas),
       signals: exploration.signals.length,
-      things: board.things.map((thing) => ({
-        id: thing.id,
-        kind: thing.kind,
-        agreed: thing.agreed,
-        label: labelOf(thing, exploration.problem),
-      })),
+      // Pen marks are on a card, not cards of their own.
+      things: board.things
+        .filter((thing) => thing.kind !== "mark")
+        .map((thing) => ({
+          id: thing.id,
+          kind: thing.kind,
+          agreed: thing.agreed,
+          label: labelOf(thing, exploration.problem),
+        })),
       links: board.links.map(({ from, to }) => ({ from, to })),
       line:
         exploration.status === "exploring"
@@ -225,7 +228,11 @@ function labelOf(thing: Thing, problem: string): string {
         return `${thing.key}: ${thing.name}`;
       case "diagram":
       case "picture":
+      case "link":
         return thing.title;
+      case "sketch":
+      case "mark":
+        return "Drawing";
     }
   })();
   const plain = plainWords(words);

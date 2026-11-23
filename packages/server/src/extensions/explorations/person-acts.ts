@@ -2,15 +2,15 @@
 // or a sketch, choose an option, change a picture's title, remove what they
 // put there, and add a picture (pasted or dragged in). The kobold hears of
 // it with their next words, except a picked option, which is said in the
-// conversation at once. The things they attach to what they say.
-
-import { randomUUID } from "node:crypto";
+// conversation at once. The things they attach to what they say. Notes,
+// links and drawings are theirs too: own-things.ts.
 
 import type { KobbleStore, Thing } from "@software-factory/core";
 import { z } from "zod";
 
 import { Refused } from "../../refused.ts";
 import { type Act, personWords } from "./board-acts.ts";
+import { savePictureData } from "./board-pictures.ts";
 import { newId, thingOf, withThing } from "./board-things.ts";
 import type { ExplorationTalks } from "./talks.ts";
 
@@ -80,46 +80,36 @@ export function attachedIn(body: unknown): string[] {
     : [];
 }
 
-const PICTURE = /^data:image\/(png|jpeg|gif|webp);base64,([A-Za-z0-9+/=]+)$/;
-// Up to 3.75 MB, as Claude takes pictures.
-const MOST_BYTES = (5 * 1024 * 1024 * 3) / 4;
-
 export function addPicture(
   store: KobbleStore,
   talks: ExplorationTalks,
   id: string,
   body: unknown,
 ): Thing {
-  const { title, data } = z
+  const { title, data, x, y } = z
     .object({
       title: z.string().trim().min(1).default("Picture"),
       data: z.string(),
+      // Where on the board it was dropped or pasted (not laid out).
+      x: z.number().optional(),
+      y: z.number().optional(),
     })
     .catch({ title: "Picture", data: "" })
     .parse(body);
-  const found = PICTURE.exec(data);
-  if (!found?.[1] || !found[2])
-    throw new Refused("Only pictures can go on the board.");
-  const bytes = Buffer.from(found[2], "base64");
-  if (bytes.length > MOST_BYTES)
-    throw new Refused("The picture is larger than 3.7 MB: take a smaller one.");
-  const kind = found[1] === "jpeg" ? "jpg" : found[1];
-  const image = store.savePicture(
-    id,
-    `${randomUUID().slice(0, 8)}.${kind}`,
-    bytes,
-  );
+  const image = savePictureData(store, id, data);
   const board = store.board(id);
   const thing: Thing = {
     id: newId(board, "picture"),
     kind: "picture",
     agreed: false,
-    place: null,
+    place: x !== undefined && y !== undefined ? { x, y } : null,
     by: "person",
     title: title.slice(0, 80),
     image,
   };
   store.saveBoard(id, withThing(board, thing));
-  talks.personDid(id, `added a picture, ${thing.id} (“${thing.title}”)`);
+  talks.personDid(id, `added a picture, ${thing.id} (“${thing.title}”)`, [
+    thing.id,
+  ]);
   return thing;
 }
