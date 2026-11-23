@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { admit, lanKey, type Reach } from "../src/app/reach.ts";
+import { admit, lanKey, qrOf, type Reach } from "../src/app/reach.ts";
 
 // Who may reach the factory: this computer by its own name; with --lan, the
 // owner's other devices (an iPad) once they opened the printed address.
@@ -83,4 +83,10 @@ test("the key stays the same from start to start, readable only by the owner", (
   assert.ok(key.length >= 20);
   assert.equal(lanKey(home), key);
   assert.equal(statSync(join(home, ".kobble", "lan-key")).mode & 0o077, 0);
+});
+
+test("the address shows as a QR code the size of its squares", () => {
+  const qr = qrOf(`http://192.0.2.20:4300/?key=${KEY}`);
+  assert.ok(qr.size > 20);
+  assert.match(qr.path, /^M\d+ \d+h1v1h-1z/);
 });

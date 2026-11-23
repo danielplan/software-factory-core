@@ -1,7 +1,8 @@
 // Who may reach the factory. Always this computer, by its own name (so
-// another web page cannot, through a name of its own). With `--lan`, also the
-// owner's other devices on the local network (an iPad): each once it opened
-// the address the factory printed, whose key it then keeps as a cookie. A
+// another web page cannot, through a name of its own). Unless started with
+// `--local`, also the owner's other devices on the local network (an iPad):
+// each once it opened the address the factory printed or showed as a QR code,
+// whose key it then keeps as a cookie. A
 // device without the key gets nothing, since the factory runs agents with
 // this computer's rights.
 
@@ -11,7 +12,9 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { homedir, networkInterfaces } from "node:os";
 import { join } from "node:path";
 
-import { send } from "../http.ts";
+import { encode } from "uqr";
+
+import { type Route, send } from "../http.ts";
 
 export type Reach = {
   // Whether other devices on the local network may reach it too.
@@ -86,10 +89,35 @@ export function lanKey(home = homedir()): string {
   return key;
 }
 
-// The addresses other devices reach this computer at, on the local network.
-export function lanAddresses(): string[] {
-  return Object.values(networkInterfaces())
+// The address another device opens once, with the key: on this computer's
+// first address on the local network. None without --lan or a network.
+export function deviceAddress(reach: Reach, port: number): string | null {
+  const lan = Object.values(networkInterfaces())
     .flat()
-    .filter((one) => one && one.family === "IPv4" && !one.internal)
-    .map((one) => one?.address ?? "");
+    .find((one) => one && one.family === "IPv4" && !one.internal);
+  if (!reach.lan || !lan) return null;
+  return `http://${lan.address}:${String(port)}/?key=${reach.key}`;
+}
+
+// Where the owner's other devices open it, as the sidebar shows it: the
+// address and its QR code (none without a network or with --local).
+export function lanRoutes(reach: Reach, port: number): Record<string, Route> {
+  return {
+    "GET /api/lan": () => {
+      const address = deviceAddress(reach, port);
+      return { address, qr: address ? qrOf(address) : null };
+    },
+  };
+}
+
+// The address as a QR code, for the device's camera: its side, in squares,
+// and the dark squares as an SVG path.
+export function qrOf(text: string): { size: number; path: string } {
+  const { data, size } = encode(text, { border: 2 });
+  const path = data
+    .flatMap((row, y) =>
+      row.map((dark, x) => (dark ? `M${String(x)} ${String(y)}h1v1h-1z` : "")),
+    )
+    .join("");
+  return { size, path };
 }

@@ -22,7 +22,7 @@ import type { ExtensionModule } from "../plugs/extension.ts";
 import { Refused } from "../refused.ts";
 import type { Session } from "../session.ts";
 import { assemble, type TestsRunOn } from "./assemble.ts";
-import { admit, type Reach, THIS_COMPUTER } from "./reach.ts";
+import { admit, lanRoutes, type Reach, THIS_COMPUTER } from "./reach.ts";
 
 export const PAGE_HEADER = "x-software-factory";
 // A picture from the project that a setup card shows.
@@ -78,7 +78,12 @@ export function startServer(options: {
     { ...options, cli: options.cli ?? realCli() },
   );
   reconcile = app.reconcile;
-  const routes = { ...routesFor(session), ...app.routes };
+  const reach = options.reach ?? THIS_COMPUTER;
+  const routes = {
+    ...routesFor(session),
+    ...app.routes,
+    ...lanRoutes(reach, options.port),
+  };
   const server = createServer((incoming, response) => {
     void answer(incoming, response, {
       routes,
@@ -87,7 +92,7 @@ export function startServer(options: {
       supportTools: app.supportTools,
       page: options.page,
       session,
-      reach: options.reach ?? THIS_COMPUTER,
+      reach,
     });
   });
   server.on("listening", () => {
@@ -100,7 +105,7 @@ export function startServer(options: {
     app.start();
   });
   server.on("close", app.close);
-  server.listen(options.port, options.reach?.lan ? "0.0.0.0" : "127.0.0.1");
+  server.listen(options.port, reach.lan ? "0.0.0.0" : "127.0.0.1");
   return { server, changed };
 }
 

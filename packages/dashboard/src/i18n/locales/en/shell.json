@@ -58,5 +58,12 @@
   "opening": "Opening the factory…",
   "misfit": "Something in the factory's files does not fit",
   "unexpected": "The factory answered something this page cannot read. Is the factory up to date?",
-  "noAnswer": "The factory did not answer. Is its window still open?"
+  "noAnswer": "The factory did not answer. Is its window still open?",
+  "devices": {
+    "row": "Open on your iPad",
+    "title": "Open Kobble on your iPad",
+    "intro": "Scan this with the iPad's camera, or send it the link. It has to be on the same network. Open it once, and the iPad stays let in.",
+    "copy": "Copy",
+    "copied": "Copied"
+  }
 }

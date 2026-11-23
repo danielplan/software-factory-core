@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// software-factory [folder] [--port <port>] [--no-open] [--lan]
+// software-factory [folder] [--port <port>] [--no-open] [--local]
 // software-factory new <name>
 // software-factory card … (the board's cards, for planning in a coding agent)
 // software-factory prototype … (a card's prototype, in its own copy of the code)
