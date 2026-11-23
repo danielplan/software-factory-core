@@ -19,6 +19,7 @@ import { topCommand } from "../src/top-commands.ts";
 import { computerTools } from "../src/installables.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/app/server.ts";
+import { lanAddresses, lanKey } from "../src/app/reach.ts";
 import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/extensions/github/board-setup.ts";
 import { addOnModules, KOBBLE_MODULES } from "../src/app/modules.ts";
@@ -66,6 +67,8 @@ const { values, positionals } = parseArgs({
   options: {
     port: { type: "string", default: "4300" },
     "no-open": { type: "boolean", default: false },
+    // Other devices on the local network (an iPad) may open it too.
+    lan: { type: "boolean", default: false },
   },
 });
 const port = Number(values.port);
@@ -97,12 +100,25 @@ const session = new Session({
   },
   tools: computerTools(),
 });
-const started = startServer({ session, page, port, modules, restartFactory });
+const reach = { lan: values.lan, key: values.lan ? lanKey() : "" };
+const started = startServer({
+  session,
+  page,
+  port,
+  modules,
+  restartFactory,
+  reach,
+});
 changed = started.changed;
 resumeParts(process.env[RESUME]);
 
 const address = `http://localhost:${String(port)}`;
 console.log(`The software factory for ${project}: ${address}`);
+if (reach.lan)
+  for (const lan of lanAddresses())
+    console.log(
+      `On your other devices on this network: http://${lan}:${String(port)}/?key=${reach.key}`,
+    );
 console.log(
   "Keep this window open. Closing it stops what the factory started.",
 );

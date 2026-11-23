@@ -17,8 +17,9 @@ import { checkRecordsHere } from "./check-command.ts";
 import { rulesHere } from "./rules-command.ts";
 import { checkFormatHere, verifyHere, verifyPushed } from "./verify-command.ts";
 
-export const USAGE = `software-factory [folder] [--port <port>] [--no-open]
+export const USAGE = `software-factory [folder] [--port <port>] [--no-open] [--lan]
                                              start the project's factory and open it
+                                             (--lan: your other devices on this network too, e.g. an iPad)
 software-factory new <name>                  a folder for a new idea, set up there
 software-factory check [folder]              the checks of Kobble's files (factory/kobble/)
 software-factory check-docs                  the knowledge base's checks (docs/)
