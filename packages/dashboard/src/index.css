@@ -772,10 +772,10 @@
 @keyframes meet-doze {
   0%,
   100% {
-    transform: rotate(-3deg) scale(1);
+    transform: scale(1);
   }
   50% {
-    transform: rotate(3deg) scale(1.03);
+    transform: scale(1.04, 1.03);
   }
 }
 @keyframes meet-zzz {

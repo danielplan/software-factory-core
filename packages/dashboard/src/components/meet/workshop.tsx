@@ -1,13 +1,11 @@
 // PROTOTYPE, "Meet the kobolds": the "Your kobolds" panel as a little
-// workshop. The kobolds stand at their stations along the line work travels
-// (Sieve sorts what comes in, Doodle thinks it through, Tinker makes the
-// screens to try, Bolt builds what you agreed, Mimic tries it as your
-// personas), with what is passed along written on the arrows. Sprocket
-// stands apart. A kobold at work moves in its own way and says what it does
-// and what that means for you; a resting one dozes. A click opens its card.
+// workshop of who they are. Sprocket on top, a bit bigger, looks after the
+// team; below it Sieve, Doodle, Tinker (Doodle's helper), Bolt and Mimic side
+// by side. A kobold at work moves a little and says what it does now; a
+// resting one sleeps, eyes closed, breathing gently. A click opens its card.
 
-import { ArrowDown, ArrowRight, ArrowUp, X } from "lucide-react";
-import { Fragment, type ReactNode, useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { KoboldHead } from "@/components/kobold-face";
@@ -16,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { closeTeam, type Member, memberOf } from "./meet";
 
 const STATIONS = ["sorter", "explorer", "maker", "builder", "tester"];
-const PASSES = ["a signal", "an idea", "a prototype", "a card"];
 const INK = "#1b2236";
 
 function calm(): boolean {
@@ -175,7 +172,7 @@ function Prop({ id, color }: Readonly<{ id: string; color: string }>) {
 }
 
 // A kobold on its own spot, as big as the scene needs: at work it moves
-// with its prop; resting it dozes under a few z.
+// with its prop; resting it sleeps, eyes closed, breathing.
 function Figure({
   member,
   working,
@@ -200,6 +197,7 @@ function Figure({
           size={size}
           hat={hat}
           color={member.color}
+          asleep={!working}
           className={cn(
             working && member.id !== "tester" && "motion-safe:animate-bob",
           )}
@@ -213,60 +211,38 @@ function Figure({
           <Prop id={member.id} color={member.color} />
         </svg>
       )}
-      {!working && (
-        <span className="pointer-events-none absolute -top-1 -right-1 text-[11px] font-semibold text-faint">
-          <span className="meet-zzz inline-block">z</span>
-          <span
-            className="meet-zzz inline-block"
-            style={{ animationDelay: "0.9s" }}
-          >
-            z
-          </span>
-        </span>
-      )}
     </span>
   );
 }
 
-// What the kobold says it does now and what that means for you.
-function Bubble({
+// What the kobold does now, as plain words in its own colour (no box).
+function Now({
   member,
   now,
-  side = false,
-}: Readonly<{ member: Member; now: string; side?: boolean }>) {
+  className,
+}: Readonly<{ member: Member; now: string; className?: string }>) {
   return (
     <span
       className={cn(
-        "relative grid w-full gap-1 rounded-xl bg-card p-2 text-left text-[11.5px] leading-snug shadow-card ring-1 ring-border",
-        side ? "ml-2" : "mt-1.5",
+        "line-clamp-4 text-[12px] leading-snug font-medium break-words [overflow-wrap:anywhere]",
+        className,
       )}
-      style={{ boxShadow: `0 0 0 1px ${member.color}33` }}
+      style={{ color: member.color }}
+      title={now}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "absolute size-2.5 rotate-45 bg-card",
-          side
-            ? "top-1/2 -left-[5px] -translate-y-1/2"
-            : "-top-[5px] left-1/2 -translate-x-1/2",
-        )}
-        style={{
-          borderTop: `1px solid ${member.color}55`,
-          borderLeft: `1px solid ${member.color}55`,
-        }}
-      />
-      <span
-        className="line-clamp-4 font-medium break-words [overflow-wrap:anywhere]"
-        style={{ color: member.color }}
-        title={now}
-      >
-        {now}
-      </span>
-      <span className="line-clamp-3 break-words text-muted-foreground">
-        For you: {member.meanwhile}
-      </span>
+      {now}
     </span>
   );
+}
+
+// Lit: the kobold you came from, shown by a soft glow around its face and
+// its name in blue, never a frame.
+function glow(member: Member, lit: boolean) {
+  return lit
+    ? {
+        filter: `drop-shadow(0 0 7px ${member.color}) drop-shadow(0 0 2px ${member.color})`,
+      }
+    : undefined;
 }
 
 function Station({
@@ -290,52 +266,26 @@ function Station({
       onClick={onPick}
       aria-expanded={open}
       aria-current={lit ? "true" : undefined}
-      className={cn(
-        "group grid min-w-0 cursor-pointer content-start justify-items-center gap-0.5 rounded-2xl px-1.5 pt-3 pb-2.5 text-center transition-colors duration-150 hover:bg-card/70 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none",
-        lit && "bg-picked ring-2 ring-blue/40 hover:bg-picked",
-        open && !lit && "bg-card/70",
-      )}
+      className="group grid min-w-0 cursor-pointer content-start justify-items-center gap-0.5 rounded-lg px-1.5 pt-3 pb-2.5 text-center focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
     >
-      <Figure member={member} working={now !== null} size={size} />
       <span
-        aria-hidden
-        className="mt-0.5 h-1.5 w-16 rounded-full"
-        style={{ background: `${member.color}33` }}
-      />
-      <span className="mt-1 text-[14px] font-semibold">{member.name}</span>
-      <span className="text-[11.5px] text-muted-foreground">{member.step}</span>
-      {now ? (
-        <Bubble member={member} now={now} />
-      ) : (
-        <span className="mt-1.5 text-[11.5px] text-faint italic">resting</span>
-      )}
+        className="transition-transform duration-150 group-hover:-translate-y-0.5"
+        style={glow(member, lit)}
+      >
+        <Figure member={member} working={now !== null} size={size} />
+      </span>
+      <span
+        className={cn(
+          "mt-2 text-[14px] font-semibold group-hover:underline group-hover:underline-offset-4",
+          lit && "text-blue",
+          open && "underline underline-offset-4",
+        )}
+      >
+        {member.name}
+      </span>
+      <span className="text-[11.5px] text-muted-foreground">{member.role}</span>
+      {now && <Now member={member} now={now} className="mt-1" />}
     </button>
-  );
-}
-
-// What is passed from one station to the next, written on its arrow.
-function Pass({ label }: Readonly<{ label: string }>) {
-  return (
-    <div
-      aria-hidden
-      className="flex items-center justify-center gap-1 py-0.5 md:mt-9 md:flex-col md:self-start md:py-0"
-    >
-      <span className="rounded-full bg-card px-2 py-0.5 text-[10.5px] font-medium whitespace-nowrap text-muted-foreground ring-1 ring-border">
-        {label}
-      </span>
-      <ArrowDown className="size-3.5 text-faint md:hidden" />
-      <span className="hidden items-center text-faint md:flex">
-        <span
-          className="meet-flow h-px w-9"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, currentColor 50%, transparent 50%)",
-            backgroundSize: "6px 1px",
-          }}
-        />
-        <ArrowRight className="-ml-1 size-3.5" />
-      </span>
-    </div>
   );
 }
 
@@ -348,8 +298,7 @@ function Card({
   return (
     <section
       aria-label={`${member.name}'s card`}
-      className="meet-in relative flex min-w-0 gap-3.5 rounded-2xl bg-card p-4 pr-10 shadow-card ring-1"
-      style={{ ["--tw-ring-color" as string]: `${member.color}55` }}
+      className="meet-in relative flex min-w-0 gap-3.5 rounded-2xl bg-surface-2/70 p-4 pr-10"
     >
       <KoboldHead size={48} hat={member.hat} color={member.color} />
       <div className="grid min-w-0 gap-1 text-[13px] leading-snug">
@@ -396,8 +345,8 @@ function Card({
   );
 }
 
-// Sprocket stands apart from the line: one wide row of its own.
-function SprocketRow({
+// Sprocket on top, a bit bigger: the supervisor of the team.
+function Supervisor({
   now,
   lit,
   open,
@@ -415,31 +364,29 @@ function SprocketRow({
       onClick={onPick}
       aria-expanded={open}
       aria-current={lit ? "true" : undefined}
-      className={cn(
-        "flex min-w-0 cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-border px-4 py-3 text-left transition-colors hover:bg-surface-2/60 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none",
-        lit && "border-solid bg-picked ring-2 ring-blue/40 hover:bg-picked",
-        open && !lit && "bg-surface-2/60",
-      )}
+      className="group flex min-w-0 cursor-pointer flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-lg px-5 py-2 text-left focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
     >
-      <Figure member={member} working={now !== null} size={52} />
-      <span className="grid min-w-0 flex-none gap-0.5 sm:w-[260px]">
-        <span className="text-[14px] font-semibold">
+      <span
+        className="transition-transform duration-150 group-hover:-translate-y-0.5"
+        style={glow(member, lit)}
+      >
+        <Figure member={member} working={now !== null} size={84} />
+      </span>
+      <span className="grid min-w-0 flex-1 gap-0.5 sm:min-w-[260px] sm:max-w-[560px]">
+        <span
+          className={cn(
+            "text-[16px] font-semibold tracking-[-0.01em]",
+            lit && "text-blue",
+            open && "underline underline-offset-4",
+          )}
+        >
           Sprocket{" "}
-          <span className="text-[12px] font-normal text-muted-foreground">
-            · stands apart
+          <span className="text-[13px] font-normal text-muted-foreground no-underline">
+            · looks after the team and answers you, on every page
           </span>
         </span>
-        <span className="text-[12px] text-muted-foreground">
-          here to answer, on every page
-        </span>
+        {now && <Now member={member} now={now} className="mt-1" />}
       </span>
-      {now ? (
-        <span className="hidden min-w-0 flex-1 sm:block">
-          <Bubble member={member} now={now} side />
-        </span>
-      ) : (
-        <span className="text-[11.5px] text-faint italic">resting</span>
-      )}
     </button>
   );
 }
@@ -462,39 +409,8 @@ export function Workshop({
     />
   );
   return (
-    <div className="grid min-h-0 gap-4 overflow-y-auto bg-ground px-6 pt-5 pb-6">
-      <div className="rounded-2xl border border-border-soft bg-surface-2/60 px-3 pt-1 pb-4">
-        <p className="px-2 pt-2 pb-1 text-[11.5px] font-medium tracking-wide text-muted-foreground uppercase">
-          How work travels
-        </p>
-        <div className="grid items-start md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr_auto_1fr]">
-          {STATIONS.map((id, at) => (
-            <Fragment key={id}>
-              {at > 0 && <Pass label={PASSES[at - 1]} />}
-              <Station
-                member={memberOf(id)}
-                now={now[id] ?? null}
-                lit={focus === id}
-                open={picked === id}
-                onPick={() => {
-                  toggle(id);
-                }}
-              />
-            </Fragment>
-          ))}
-        </div>
-        <div
-          aria-hidden
-          className="relative mx-[9%] mt-1 hidden h-7 rounded-b-2xl border-x border-b border-dashed border-faint/60 md:block"
-        >
-          <ArrowUp className="absolute -top-1 -left-[8px] size-3.5 text-faint" />
-          <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-full bg-card px-2.5 py-0.5 text-[10.5px] font-medium whitespace-nowrap text-muted-foreground ring-1 ring-border">
-            a test: what Mimic finds comes back as signals
-          </span>
-        </div>
-      </div>
-      {cards}
-      <SprocketRow
+    <div className="grid min-h-0 gap-3 overflow-y-auto bg-card px-6 pt-2 pb-6">
+      <Supervisor
         now={now.support ?? null}
         lit={focus === "support"}
         open={picked === "support"}
@@ -502,6 +418,21 @@ export function Workshop({
           toggle("support");
         }}
       />
+      <div className="grid grid-cols-2 items-start gap-1 md:grid-cols-5">
+        {STATIONS.map((id) => (
+          <Station
+            key={id}
+            member={memberOf(id)}
+            now={now[id] ?? null}
+            lit={focus === id}
+            open={picked === id}
+            onPick={() => {
+              toggle(id);
+            }}
+          />
+        ))}
+      </div>
+      {cards}
     </div>
   );
 }

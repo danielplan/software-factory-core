@@ -112,8 +112,7 @@ export function TeamPanel({ doing }: Readonly<{ doing: Doing }>) {
             Your kobolds
           </DialogTitle>
           <DialogDescription>
-            A little workshop: each kobold at its station, along the line your
-            work travels. Click one to meet it.
+            The team that works for you. Click a kobold to meet it.
           </DialogDescription>
         </div>
         <Workshop now={now} focus={focus} />
