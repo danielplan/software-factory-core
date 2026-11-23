@@ -67,7 +67,7 @@ export function assemble(
   session.plugged.plugInto(board.plug);
   const core = coreOf(session, changed, {
     cli: options.cli,
-    tasks: slots.tasks,
+    slots,
     plug: board.plug,
     ...(options.restartFactory
       ? { restartFactory: options.restartFactory }

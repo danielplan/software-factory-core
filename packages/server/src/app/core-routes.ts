@@ -12,6 +12,7 @@ import { connectedCards, type TaskBoards } from "../cards/cards-for.ts";
 import { teamRoutes } from "../coach/setup-team.ts";
 import { putStartOnDesktop } from "../desktop-start.ts";
 import { feedbackRoutes } from "../feedback/routes.ts";
+import type { CodeHosts } from "../code-host.ts";
 import type { Cli } from "../github-cli.ts";
 import type { Route } from "../http.ts";
 import { languageRoutes } from "../language.ts";
@@ -26,19 +27,22 @@ export function coreOf(
   changed: (what: string) => void,
   more: {
     cli: Cli;
-    tasks: TaskBoards;
+    // The slots' fillers: where work is tracked and where the code lives.
+    slots: { tasks: TaskBoards; code: CodeHosts };
     plug: PlugBoard;
     restartFactory?: (resume: string[]) => Promise<void>;
   },
 ) {
   const { project } = session.options;
-  const cards = () => connectedCards(join(project, FACTORY_FOLDER), more.tasks);
+  const cards = () =>
+    connectedCards(join(project, FACTORY_FOLDER), more.slots.tasks);
   const updates = updatesOf(
     session,
     () => {
       changed("updates");
     },
     cards,
+    more.slots.code,
     more.restartFactory,
   );
   const feedback = feedbackRoutes({

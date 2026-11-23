@@ -5,7 +5,9 @@
 import { z } from "zod";
 
 import type { UpdatesView as ServedUpdates } from "../../../../server/src/updates/served.ts";
-import type { WhatsNewView as ServedWhatsNew } from "../../../../server/src/updates/whats-new.ts";
+import type { KobbleNotesView as ServedWhatsNew } from "../../../../server/src/updates/kobble-notes.ts";
+
+import { releaseChangeSchema } from "./releases.ts";
 
 const releaseSchema = z.object({
   newest: z.string().nullable(),
@@ -27,16 +29,10 @@ export const updatesViewSchema = z.object({
   release: releaseSchema,
 }) satisfies z.ZodType<ServedUpdates>;
 
-const whatsNewChangeSchema = z.object({
-  kind: z.enum(["New", "Changed", "Fixed"]),
-  title: z.string(),
-  text: z.string(),
-});
-
 const whatsNewReleaseSchema = z.object({
   version: z.string(),
   date: z.string().nullable(),
-  changes: z.array(whatsNewChangeSchema),
+  changes: z.array(releaseChangeSchema),
 });
 
 export const whatsNewViewSchema = z.object({

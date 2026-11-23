@@ -1,7 +1,8 @@
 // What's new in Kobble (Settings › Updates): the release this factory runs
-// and the ones before it, from the files on this computer, and a newer one
-// on its way when GitHub says so. Each release opens and closes; each
-// change has its tag, its bold title, the first sentence and More.
+// and the ones before it, and a newer one on its way when GitHub says so,
+// with the notes of Kobble's GitHub releases, or of the copy the installed
+// Kobble carries when GitHub cannot be read. Each release opens and closes;
+// each change has its tag, its bold title, the first sentence and More.
 
 import type { TFunction } from "i18next";
 import { ChevronDown, RefreshCw } from "lucide-react";
@@ -88,7 +89,7 @@ export function WhatsNew() {
               m={m}
               version={release.version}
               release={release}
-              kind={release.version === view.current ? "yours" : "older"}
+              kind={kindOf(release.version, view.current)}
               open={index === 0 && !newer}
             />
           </div>
@@ -101,6 +102,14 @@ export function WhatsNew() {
       )}
     </div>
   );
+}
+
+// A release newer than this factory's is on its way (one in between the
+// newest and this factory's too).
+function kindOf(version: string, current: string) {
+  const order = compareVersions(version, current);
+  if (order > 0) return "newer";
+  return order === 0 ? "yours" : "older";
 }
 
 // "You're on Kobble 0.13.2", and, when GitHub could not be asked, a calm

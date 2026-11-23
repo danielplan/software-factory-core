@@ -4,6 +4,7 @@
 
 import {
   CORE_VERSION,
+  FACTORY_FOLDER,
   RELEASE_SOURCE,
   releaseOf,
   run,
@@ -12,15 +13,19 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { Cards } from "../cards/cards.ts";
+import { codeHostFor, type CodeHosts } from "../code-host.ts";
 import { CORE_PACKAGE } from "../pin-core.ts";
 import type { Session } from "../session.ts";
+import { hostNotes, offlineNotes } from "./kobble-notes.ts";
 import { servedUpdates } from "./served.ts";
-import { localWhatsNew, remoteWhatsNew } from "./whats-new.ts";
 
 export function updatesOf(
   session: Session,
   onChange: () => void,
   cards: () => Cards,
+  // The code hosts, by the extension that fills the `code` slot: Kobble's
+  // own releases are read through the one in use.
+  hosts: CodeHosts,
   restartFactory?: (resume: string[]) => Promise<void>,
 ) {
   const { project } = session.options;
@@ -67,8 +72,8 @@ export function updatesOf(
           return null;
         }
       },
-      files: remoteWhatsNew,
-      local: () => localWhatsNew(import.meta.dirname),
+      offline: () => offlineNotes(import.meta.dirname),
+      online: () => hostNotes(kobbleReleases(session, hosts)),
       cards: () => session.plugged.plug("work")?.view()?.cards ?? [],
       create: (title, body) => cards().create(title, body, "todo"),
     },
@@ -100,7 +105,22 @@ function pinnedKobble(project: string): string | null {
   );
 }
 
+// github:owner/name → owner/name
+const KOBBLE_REPOSITORY = RELEASE_SOURCE.replace(/^github:/, "");
+
 // github:owner/name → https://github.com/owner/name.git
 function repositoryUrl(): string {
-  return `https://github.com/${RELEASE_SOURCE.replace(/^github:/, "")}.git`;
+  return `https://github.com/${KOBBLE_REPOSITORY}.git`;
+}
+
+// Kobble's own releases, through the code host of the factory's `code`
+// slot; none before there is a factory, or without a code host.
+function kobbleReleases(session: Session, hosts: CodeHosts) {
+  const host = codeHostFor(
+    join(session.options.project, FACTORY_FOLDER),
+    session.options.available.extensions,
+    hosts,
+    KOBBLE_REPOSITORY,
+  );
+  return "problem" in host ? null : host.releases;
 }

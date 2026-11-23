@@ -37,8 +37,13 @@ the team: changes ready on GitHub, an update running, or a newer Kobble.
 - **A newer Kobble** is looked for once a day. **Prepare the upgrade** puts
   "Upgrade Kobble to <version>" on the board for the builder; its pull
   request, once merged, reaches every computer the same way.
-- **What's new in Kobble** shows what each version changed, from the
-  `WHATS-NEW` files at the root, in the team's language.
+- **What's new in Kobble** shows what each version changed, in the
+  person's language (else in English): the notes of Kobble's GitHub
+  releases, read through the code host of the `code` slot after each look
+  for a newer Kobble, joined with the copy the installed Kobble carries
+  (`release-notes.json`, made at release), so they show offline too. A
+  newer version, and one in between, is shown as on its way
+  ([decision 0016](../../decisions/0016-release-notes-on-github-releases.md)).
 
 ## Smaller settings
 
@@ -56,13 +61,14 @@ the team: changes ready on GitHub, an update running, or a newer Kobble.
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Settings      | `packages/dashboard/src/app/settings-page.tsx`, `packages/dashboard/src/features/settings/`; groups in `packages/core/src/settings/` |
 | Updates       | `packages/server/src/updates/`, `packages/dashboard/src/features/updates/`                                                           |
-| What's new    | `packages/core/src/whats-new.ts`, `packages/server/src/updates/whats-new.ts`                                                         |
+| What's new    | `packages/core/src/release-notes.ts`, `packages/server/src/updates/kobble-notes.ts`, `release-notes.json`                            |
 | Desktop start | `packages/server/src/desktop-start.ts`                                                                                               |
 | Usage log     | `packages/server/src/kobble/usage-log.ts`, `packages/server/src/kobble/usage-pictures.ts`                                            |
 
 ## Checked and not checked
 
 Checked by tests: updates and their safety (`project-updates.test.ts`,
-`updates-served.test.ts`), what's new, the desktop start, the usage log,
+`updates-served.test.ts`), what's new (`release-notes.test.ts`,
+`kobble-notes.test.ts`, `kobble-notes-release.test.ts`), the desktop start, the usage log,
 the settings tabs (`packages/dashboard/test/settings-tabs.test.ts`, on
 `packages/dashboard/src/lib/settings-tabs.ts`).
