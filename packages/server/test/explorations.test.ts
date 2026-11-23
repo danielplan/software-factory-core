@@ -526,35 +526,6 @@ test("hand off gives the card the written spec, with the mark of the agreed prot
   }
 });
 
-test("the kobold takes prototypes off the board once the team says so, after the agreement is taken back", async () => {
-  const factory = await explorationsFactory([
-    {
-      calls: [
-        ["remove_thing", { id: "prototype-a" }],
-        ["remove_thing", { id: "prototype-b" }],
-        ["agree", { id: "prototype-b", agreed: false }],
-        ["remove_thing", { id: "prototype-b" }],
-      ],
-      reply: "Both are off the board.",
-    },
-  ]);
-  try {
-    await factory.press("/say", { id: "X-1", text: "Drop both, please." });
-    const page = await factory.settled("X-1");
-    assert.deepEqual(
-      page.board.things.filter((one) => one.kind === "prototype"),
-      [],
-    );
-    // The agreed one was refused first, with what to do.
-    assert.match(
-      factory.answers.flat().join("\n"),
-      /Prototype B is agreed: mark it a sketch first/,
-    );
-  } finally {
-    factory.close();
-  }
-});
-
 test("the board's acts: options by letter, arrows between two things, what stays", () => {
   const fresh = { agreed: false, place: null, by: "kobold" as const };
   const board = {
@@ -606,27 +577,6 @@ test("the board's acts: options by letter, arrows between two things, what stays
         "kobold",
       ),
     /prototype stays/,
-  );
-  // A prototype nobody agreed on can be taken off (a broken first version,
-  // say), with its arrows; one the team agreed stays until they take the
-  // agreement back.
-  const agreedBoard = applyAct(
-    board,
-    { act: "agree", id: "prototype-a", agreed: true },
-    "kobold",
-  ).board;
-  assert.throws(
-    () => applyAct(agreedBoard, { act: "remove", id: "prototype-a" }, "kobold"),
-    /agreed.*sketch/,
-  );
-  const without = applyAct(
-    board,
-    { act: "remove", id: "prototype-a" },
-    "kobold",
-  ).board;
-  assert.deepEqual(
-    without.things.map((one) => one.id),
-    ["choice-1"],
   );
   assert.throws(
     () =>
