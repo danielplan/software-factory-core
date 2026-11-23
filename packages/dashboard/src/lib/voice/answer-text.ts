@@ -17,11 +17,13 @@ export function sayable(
   return final ? answer.trim() : readyToSay(answer);
 }
 
-// The coach's written reply as it sounds: Markdown marks, links' addresses
-// and emoji are left out, since they are not said.
+// The coach's written reply as it sounds: Markdown marks, links' addresses,
+// emoji and the steps kept between its words are left out, since they are
+// not said.
 export function spoken(text: string): string {
   return (
     text
+      .replace(/<!-- step: [a-z_]+ -->/g, "")
       // A link's address goes; its words stay (the bracket below).
       .replace(/\]\([^)\s]*\)/g, "")
       .replace(/[*_`#>[\]]/g, "")
