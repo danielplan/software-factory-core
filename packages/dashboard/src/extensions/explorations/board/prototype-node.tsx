@@ -6,6 +6,7 @@
 // variant differs, what odd thing happened, and its last persona test.
 // Agreeing (the badge on its bar) agrees to the variant shown.
 
+import { Link } from "react-router";
 import type { TFunction } from "i18next";
 import type { NodeProps } from "@xyflow/react";
 import { Check, Play } from "lucide-react";
@@ -236,15 +237,15 @@ function About({
     <>
       {words && <div className="text-xs text-foreground-2">{words}</div>}
       {test && result && (
-        <a
+        <Link
           className="nodrag flex gap-1.5 text-xs"
-          href={`#personas/${encodeURIComponent(test.persona)}/tests/${test.id}`}
+          to={`/personas/${encodeURIComponent(test.persona)}/tests/${test.id}`}
         >
           <span
             className={cn("mt-[5px] size-2 flex-none rounded-full", result.dot)}
           />
           {result.words}
-        </a>
+        </Link>
       )}
     </>
   );

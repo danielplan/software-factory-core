@@ -31,7 +31,7 @@
   "handOff": "Hand off {{key}}",
   "handOffBoard": "Hand off",
   "handOffMissing": {
-    "prototype": "Agree on the prototype first, with its variant: the factory builds from it.",
+    "prototype": "Agree on the prototype first, with its variant: the factory builds from it. Or ask Doodle to take it off the board if you do not want it built.",
     "variant": "The prototype is agreed, but not which variant to build: choose one.",
     "something": "Nothing is agreed yet: agree on a choice or a note on the board first."
   },

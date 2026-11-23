@@ -79,10 +79,16 @@ export function placeOf(hash: string): Place {
   return page ? { page, open: rest } : { page: FIRST, open: null };
 }
 
-// A persona's page (#personas/<id>), its tests or one of them, or the list.
-export function personaHash(id?: string, tests?: { test?: string }): string {
-  if (!id) return "#personas";
-  const base = `#personas/${encodeURIComponent(id)}`;
+// The router's path for an address written the old way (#explore/X-3), as
+// the server still sends where Sprocket takes the person.
+export function pathOf(address: string): string {
+  return `/${address.replace(/^#?\/?/, "")}`;
+}
+
+// A persona's page (/personas/<id>), its tests or one of them, or the list.
+export function personaPath(id?: string, tests?: { test?: string }): string {
+  if (!id) return "/personas";
+  const base = `/personas/${encodeURIComponent(id)}`;
   if (!tests) return base;
   return tests.test
     ? `${base}/tests/${encodeURIComponent(tests.test)}`

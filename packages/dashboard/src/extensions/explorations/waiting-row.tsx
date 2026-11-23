@@ -4,6 +4,7 @@
 import { CircleAlert, Play } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { type ExplorationRow, messageOf, post } from "@/api/client";
 import { Markdown } from "@/components/markdown";
@@ -14,11 +15,12 @@ import { ROW } from "@/components/page-bits";
 import { Faces } from "./bits";
 import { RemoveRow } from "./remove-row";
 
-export const explorationHash = (id: string) =>
-  `#explore/${encodeURIComponent(id)}`;
+export const explorationPath = (id: string) =>
+  `/explore/${encodeURIComponent(id)}`;
 
 export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const [problem, setProblem] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
   if (gone) return null;
@@ -50,7 +52,7 @@ export function Waiting({ row }: Readonly<{ row: ExplorationRow }>) {
         onClick={() => {
           post("/api/kobble/explorations/start", { id: row.id }).then(
             () => {
-              window.location.hash = explorationHash(row.id);
+              void navigate(explorationPath(row.id));
             },
             (error: unknown) => {
               setProblem(messageOf(error));

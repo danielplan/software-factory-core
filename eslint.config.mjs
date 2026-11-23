@@ -153,6 +153,28 @@ export default tseslint.config(
     },
   },
   {
+    // Moving between pages goes through React Router: a <Link to="/page">
+    // or useNavigate(), never the address written by hand, so the router
+    // knows of every move. An anchor on the same page (href="#…") is
+    // written as an id, not as a page.
+    files: ["packages/dashboard/src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "AssignmentExpression > MemberExpression.left[property.name='hash']",
+          message: "Go to a page with useNavigate() from react-router.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='href'] > Literal[value=/^#/], JSXAttribute[name.name='href'] > JSXExpressionContainer > TemplateLiteral > TemplateElement:first-child[value.raw=/^#/]",
+          message: 'Link to a page with <Link to="/page"> from react-router.',
+        },
+      ],
+    },
+  },
+  {
     // shadcn's generated pieces (npx shadcn add): kept as generated, so later
     // updates stay easy to compare.
     files: ["packages/dashboard/src/components/ui/**/*.tsx"],

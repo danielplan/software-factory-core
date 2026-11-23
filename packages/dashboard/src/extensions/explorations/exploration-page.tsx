@@ -4,6 +4,7 @@
 // it, and its prototype runs on the board by itself. Handed off or dropped,
 // it closes.
 
+import { Link, useNavigate } from "react-router";
 import { Archive, ChevronLeft, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +24,7 @@ import { TalkPanel } from "./talk-panel";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const { data, problem } = useRead(
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
     explorationPageSchema,
@@ -50,7 +52,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
     post(`/api/kobble/explorations/${path}`, { id, ...body })
       .then(() => {
         // Handed off or dropped, it is done: back to the explorations.
-        if (path === "hand-off" || path === "drop") location.hash = "#explore";
+        if (path === "hand-off" || path === "drop") void navigate("/explore");
       })
       .catch((error: unknown) => {
         say(messageOf(error));
@@ -103,13 +105,13 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
 // the explorations.
 function useClosed(status: string | undefined): void {
   const was = useRef(status);
+  const navigate = useNavigate();
   useEffect(() => {
     const open = (one: string | undefined) =>
       one === "waiting" || one === "exploring";
-    if (open(was.current) && status && !open(status))
-      location.hash = "#explore";
+    if (open(was.current) && status && !open(status)) void navigate("/explore");
     was.current = status;
-  }, [status]);
+  }, [status, navigate]);
 }
 
 // Hand off the agreed prototype, or, without one (an idea that changes no
@@ -181,13 +183,13 @@ function TopBar({
   const open = ["waiting", "exploring"].includes(exploration.status);
   return (
     <div className="flex flex-wrap items-center gap-3 border-b border-border bg-card px-6 py-4">
-      <a
-        href="#explore"
+      <Link
+        to="/explore"
         className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
       >
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
         {t("shell.pages.explore")}
-      </a>
+      </Link>
       <span className="text-[12.5px] text-muted-foreground">/</span>
       <span className="min-w-0 flex-1 text-[15px] font-semibold">
         {exploration.title}

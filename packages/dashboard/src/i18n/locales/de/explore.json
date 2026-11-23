@@ -31,7 +31,7 @@
   "handOff": "{{key}} übergeben",
   "handOffBoard": "Übergeben",
   "handOffMissing": {
-    "prototype": "Einigt euch zuerst auf den Prototyp, mit seiner Variante: die Fabrik baut daraus.",
+    "prototype": "Einigt euch zuerst auf den Prototyp, mit seiner Variante: die Fabrik baut daraus. Oder bittet Doodle, ihn vom Board zu nehmen, wenn ihr ihn nicht bauen wollt.",
     "variant": "Der Prototyp ist beschlossen, aber nicht welche Variante gebaut wird: wählt eine.",
     "something": "Noch nichts ist beschlossen: einigt euch zuerst auf eine Wahl oder eine Notiz auf dem Board."
   },

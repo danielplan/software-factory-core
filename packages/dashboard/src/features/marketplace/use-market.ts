@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { type AddOnView, messageOf, post } from "@/api/client";
 import { listIn } from "@/i18n/format";
@@ -39,6 +40,7 @@ function installQuestion(
 
 export function useMarket(addOns: AddOnView[]) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const locale = useLocale();
   const [question, setQuestion] = useState<Question | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function useMarket(addOns: AddOnView[]) {
       lines: [t("market.connections.switchText", { to: nameOf(t, to) })],
       yes: t("market.connections.switchGo"),
       onYes: () => {
-        window.location.hash = "#settings/connections";
+        void navigate("/settings/connections");
       },
     });
   };

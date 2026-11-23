@@ -2,9 +2,11 @@
 // where it takes the person, followed once per move.
 
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 
 import { useRead } from "@/api/query";
 import { type SupportView, supportViewSchema } from "@/api/schemas/support";
+import { pathOf } from "@/lib/routes";
 
 export function useSupport(): SupportView | null {
   return useRead("/api/kobble/support", supportViewSchema).data;
@@ -15,6 +17,7 @@ export function useSupport(): SupportView | null {
 export function useSprocketMoves(): void {
   const support = useSupport();
   const seen = useRef<number | null>(null);
+  const navigate = useNavigate();
   useEffect(() => {
     if (!support) return;
     const n = support.went?.n ?? 0;
@@ -23,6 +26,6 @@ export function useSprocketMoves(): void {
       return;
     }
     seen.current = n;
-    if (support.went) window.location.hash = support.went.to;
-  }, [support]);
+    if (support.went) void navigate(pathOf(support.went.to));
+  }, [support, navigate]);
 }

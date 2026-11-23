@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { FlaskConical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -42,13 +43,13 @@ export function Already({ signal }: Readonly<{ signal: SignalRow }>) {
       </p>
     );
   return (
-    <a
-      href={`#explore/${encodeURIComponent(signal.already?.id ?? "")}`}
+    <Link
+      to={`/explore/${encodeURIComponent(signal.already?.id ?? "")}`}
       className="mb-[18px] flex items-center gap-3.5 rounded-[14px] bg-ground px-5 py-3.5 hover:bg-hover"
     >
       <FlaskConical aria-hidden strokeWidth={2} className="size-4 flex-none" />
       {words}
       <Chevron />
-    </a>
+    </Link>
   );
 }

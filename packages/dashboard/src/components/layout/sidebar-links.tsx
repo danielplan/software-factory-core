@@ -4,6 +4,7 @@
 import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
 import type { Light } from "@/api/client";
 import { StatusLight } from "@/components/status-light";
@@ -31,7 +32,7 @@ export function PageLink({
   const t = useTranslation().t;
   return (
     <SidebarLink
-      href={`#${item.page}`}
+      to={`/${item.page}`}
       label={t(`shell.pages.${item.page}`)}
       color={item.color}
       icon={item.icon}
@@ -48,7 +49,7 @@ export function PageLink({
 // name, lit while it is shown, and what it shows beside. A row that cannot
 // be opened yet is greyed and leads nowhere.
 export function SidebarLink({
-  href,
+  to,
   label,
   color,
   icon,
@@ -58,7 +59,7 @@ export function SidebarLink({
   disabled = false,
   children,
 }: Readonly<{
-  href: string;
+  to: string;
   label: string;
   color: string;
   icon: ReactNode;
@@ -68,26 +69,37 @@ export function SidebarLink({
   disabled?: boolean;
   children?: ReactNode;
 }>) {
-  return (
-    <a
-      href={disabled ? undefined : href}
-      onClick={disabled ? undefined : onGo}
-      aria-current={current ? "page" : undefined}
-      aria-disabled={disabled || undefined}
-      className={cn(
-        "group flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal hover:bg-sidebar-hover [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
-        quiet
-          ? "text-sidebar-muted hover:text-sidebar-strong"
-          : "text-sidebar-foreground",
-        current &&
-          "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
-        disabled && "cursor-default opacity-55 hover:bg-transparent",
-      )}
-    >
+  const className = cn(
+    "group flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal hover:bg-sidebar-hover [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
+    quiet
+      ? "text-sidebar-muted hover:text-sidebar-strong"
+      : "text-sidebar-foreground",
+    current &&
+      "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
+    disabled && "cursor-default opacity-55 hover:bg-transparent",
+  );
+  const inside = (
+    <>
       <Tile color={color}>{icon}</Tile>
       {label}
       {children}
-    </a>
+    </>
+  );
+  if (disabled)
+    return (
+      <a aria-disabled className={className}>
+        {inside}
+      </a>
+    );
+  return (
+    <Link
+      to={to}
+      onClick={onGo}
+      aria-current={current ? "page" : undefined}
+      className={className}
+    >
+      {inside}
+    </Link>
   );
 }
 

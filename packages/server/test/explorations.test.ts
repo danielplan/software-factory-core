@@ -318,7 +318,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
     await agree("prototype-a", false);
     assert.equal(
       (await factory.press("/hand-off", { id: "X-1" })).body.error,
-      "Agree on the prototype to build first (A, B), with its variant: the builder builds from it.",
+      "Agree on the prototype to build first (A, B), with its variant: the builder builds from it. If the team does not want them built (a broken first version, say), have Doodle take them off the board.",
     );
     await agree("prototype-b", true);
     assert.match(
@@ -577,10 +577,6 @@ test("the board's acts: options by letter, arrows between two things, what stays
         "kobold",
       ),
     /prototype stays/,
-  );
-  assert.throws(
-    () => applyAct(board, { act: "remove", id: "prototype-a" }, "kobold"),
-    /stays on the board/,
   );
   assert.throws(
     () =>
