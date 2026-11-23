@@ -1,5 +1,5 @@
-// The sidebar's links (sidebar.tsx): one page with its tile, and beside
-// System the product's light or Open.
+// The sidebar's links (sidebar.tsx): one row with its tile (a page, or a
+// step of setting up), and beside System the product's light or Open.
 
 import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
@@ -30,21 +30,62 @@ export function PageLink({
 }>) {
   const t = useTranslation().t;
   return (
-    <a
+    <SidebarLink
       href={`#${item.page}`}
-      onClick={onGo}
-      aria-current={current === item.page ? "page" : undefined}
+      label={t(`shell.pages.${item.page}`)}
+      color={item.color}
+      icon={item.icon}
+      current={current === item.page}
+      onGo={onGo}
+      quiet={quiet}
+    >
+      {children}
+    </SidebarLink>
+  );
+}
+
+// One row of the sidebar, for a page or a step of setting up: its tile and
+// name, lit while it is shown, and what it shows beside. A row that cannot
+// be opened yet is greyed and leads nowhere.
+export function SidebarLink({
+  href,
+  label,
+  color,
+  icon,
+  current,
+  onGo,
+  quiet = false,
+  disabled = false,
+  children,
+}: Readonly<{
+  href: string;
+  label: string;
+  color: string;
+  icon: ReactNode;
+  current: boolean;
+  onGo?: () => void;
+  quiet?: boolean;
+  disabled?: boolean;
+  children?: ReactNode;
+}>) {
+  return (
+    <a
+      href={disabled ? undefined : href}
+      onClick={disabled ? undefined : onGo}
+      aria-current={current ? "page" : undefined}
+      aria-disabled={disabled || undefined}
       className={cn(
         "group flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-normal hover:bg-sidebar-hover [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
         quiet
           ? "text-sidebar-muted hover:text-sidebar-strong"
           : "text-sidebar-foreground",
-        current === item.page &&
+        current &&
           "bg-sidebar-active text-sidebar-active-foreground hover:bg-sidebar-active",
+        disabled && "cursor-default opacity-55 hover:bg-transparent",
       )}
     >
-      <Tile color={item.color}>{item.icon}</Tile>
-      {t(`shell.pages.${item.page}`)}
+      <Tile color={color}>{icon}</Tile>
+      {label}
       {children}
     </a>
   );

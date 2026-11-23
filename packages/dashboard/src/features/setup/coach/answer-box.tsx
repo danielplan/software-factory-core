@@ -1,5 +1,5 @@
 import { ArrowUp, Mic } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { CoachView } from "@/api/client";
@@ -72,6 +72,7 @@ function Reply({
 }>) {
   const t = useTranslation().t;
   const [text, setText] = useState("");
+  const id = useId();
   const send = () => {
     if (!text.trim() || working) return;
     onSay(text.trim());
@@ -90,11 +91,11 @@ function Reply({
         send();
       }}
     >
-      <label htmlFor="coach-reply" className="sr-only">
+      <label htmlFor={id} className="sr-only">
         {t("setup.coach.answerLabel")}
       </label>
       <textarea
-        id="coach-reply"
+        id={id}
         rows={big ? 3 : 2}
         value={text}
         autoFocus

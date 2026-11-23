@@ -30,13 +30,13 @@ import { screenOf } from "@/lib/screens";
 
 import { blocksOf, pagesOf } from "./extensions";
 import { SettingsPage } from "./settings-page";
-import { Shell } from "./shell";
+import { FactoryShell } from "./factory-shell";
 
 // The dashboard: before there is a company, only the setup page; once there
 // is a factory, its pages.
 export function Dashboard({ state }: Readonly<{ state: State }>) {
-  // Setting up fills the window, with nothing but the coach and the
-  // canvas: the pages come once there is a factory.
+  // Setting up sits in the same frame as the factory's pages, its steps
+  // in the sidebar: the pages come once there is a factory.
   if (state.mode === "setup") return <GuidedSetup state={state} />;
   return <FactoryDashboard state={state} />;
 }
@@ -119,7 +119,7 @@ function Frame({
     : placeShown(placeOf(pathname), pages, state.addOns);
   const extension = pages.find((one) => one.id === place.page);
   return (
-    <Shell
+    <FactoryShell
       state={state}
       pages={pages}
       current={place.page === "connect" ? "settings" : place.page}
@@ -133,7 +133,7 @@ function Frame({
         />
       )}
       {children ?? <Outlet />}
-    </Shell>
+    </FactoryShell>
   );
 }
 

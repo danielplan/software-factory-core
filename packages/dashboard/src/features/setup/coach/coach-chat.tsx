@@ -13,7 +13,7 @@ type Attached = { id: string; name: string };
 
 // Sending the owner's words to the coach, with the pieces of the canvas
 // they are about; why it failed, if it did.
-function useSay(attached: Attached[], onSent: () => void) {
+export function useSay(attached: Attached[], onSent: () => void) {
   const route = use(CoachRouteContext);
   const [problem, setProblem] = useState<string | null>(null);
   const say = (text: string) => {
@@ -29,8 +29,9 @@ function useSay(attached: Attached[], onSent: () => void) {
 }
 
 // Before the first answer: nothing but a box to answer the coach's first
-// question in (or Talk), in the middle of the page. Once the owner answers,
-// the guided setup's steps take over (the folder above).
+// question in (or Talk), under the welcome's head. Once the owner answers,
+// the guided setup's steps take over (the folder above), and what the
+// owner says after goes through Sprocket's window (coach-sprocket.tsx).
 export function CoachStart({
   coach,
   call,

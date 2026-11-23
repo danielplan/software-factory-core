@@ -1,61 +1,35 @@
-// The last step, as in the design: what Kobble writes into the repository,
-// as a list that ticks off once it is done; Set up Kobble to start it (the
-// kobold says when something is still open, but the owner decides), then
-// Open Kobble.
+// Setting up: what Kobble writes into the repository, as a list that ticks
+// off once it is done; Set up Kobble to start it (Sprocket says when
+// something is still open, but the owner decides), then Open Kobble. The
+// step's title and line say how far it is (headOf).
 
 import type { TFunction } from "i18next";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import type { State } from "@/api/client";
+import type { CoachView } from "@/api/client";
 
 import { isApp, isPerson } from "./card-bits";
 import { cardsIn, setUpDone } from "./steps";
 
-type SetupState = Extract<State, { mode: "setup" }>;
-type Coach = SetupState["coach"];
+type Coach = CoachView;
 
-export function SetupStep({
-  state,
-  says,
-  eyebrow,
-}: Readonly<{
-  state: SetupState;
-  says: React.ReactNode;
-  eyebrow: React.ReactNode;
-}>) {
+export function SetupStep({ coach }: Readonly<{ coach: Coach }>) {
   const t = useTranslation().t;
-  const { coach } = state;
-  const words = wordsOf(coach, t);
   return (
-    <>
-      <header className="grid gap-1.5">
-        {eyebrow}
-        <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em]">
-          {words.title}
-        </h1>
-        <p className="text-muted-foreground">{words.lead}</p>
-      </header>
-      {says}
-      <ul className="grid rounded-xl bg-card shadow-card">
-        {plan(coach, t).map((line) => (
-          <li
-            key={line}
-            className="flex items-center gap-3 border-t border-border-soft px-[18px] py-3 first:border-t-0"
-          >
-            <Mark coach={coach} />
-            <span className={setUpDone(coach) ? "" : "text-foreground-2"}>
-              {line}
-            </span>
-          </li>
-        ))}
-      </ul>
-      {coach.phase === "build" && !setUpDone(coach) && coach.activity && (
-        <p className="text-[13px] text-muted-foreground">
-          {t("setup.now", { activity: coach.activity })}
-        </p>
-      )}
-    </>
+    <ul className="grid rounded-xl bg-card shadow-card">
+      {plan(coach, t).map((line) => (
+        <li
+          key={line}
+          className="flex items-center gap-3 border-t border-border-soft px-[18px] py-3 first:border-t-0"
+        >
+          <Mark coach={coach} />
+          <span className={setUpDone(coach) ? "" : "text-foreground-2"}>
+            {line}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -96,7 +70,10 @@ function plan(coach: Coach, m: TFunction): string[] {
   ];
 }
 
-function wordsOf(coach: Coach, m: TFunction): { title: string; lead: string } {
+export function setupWords(
+  coach: Coach,
+  m: TFunction,
+): { title: string; lead: string } {
   if (setUpDone(coach)) return m("setup.done", { returnObjects: true });
   if (coach.phase === "build")
     return m("setup.building", { returnObjects: true });

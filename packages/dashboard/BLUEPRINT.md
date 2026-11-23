@@ -26,11 +26,12 @@ is the module's declaration, not a barrel: it re-exports nothing.
 
 ```text
 src/main.tsx            the start: the company's theme, then the app
-src/app/                the app, the frame around the pages (shell.tsx),
-                        the pages by address (router.tsx, React Router
-                        on the address after the #), the installed
-                        extensions' modules (extensions.ts), and Settings
-                        put together (settings-page.tsx)
+src/app/                the app, the factory's frame around its pages
+                        (factory-shell.tsx), the pages by address
+                        (router.tsx, React Router on the address after
+                        the #), the installed extensions' modules
+                        (extensions.ts), and Settings put together
+                        (settings-page.tsx)
 src/api/                talking to the server: the requests (client.ts),
                         reading through TanStack Query (query.ts), the
                         factory's state and its stream of changes
@@ -38,7 +39,9 @@ src/api/                talking to the server: the requests (client.ts),
                         server answers with, the source of its type
                         (schemas/), the feedback board
 src/components/ui/      shadcn's pieces, as generated
-src/components/layout/  the sidebar, the page's head, a problem's box
+src/components/layout/  the frame every page sits in, setup's too
+                        (shell.tsx), the sidebar, the page's head,
+                        Sprocket's bar, a problem's box
 src/components/         pieces several areas share: the kobolds' faces,
                         Markdown, a block on Home, a settings card, the
                         voice's screens (voice/) …

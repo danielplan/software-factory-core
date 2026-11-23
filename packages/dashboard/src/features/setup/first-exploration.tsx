@@ -1,6 +1,6 @@
-// The last step, after Kobble is set up: "Where shall we start?" The
-// starting points the kobold found, one to pick; the bottom bar opens it
-// with its canvas already started, or Kobble as it is.
+// The last step, after Kobble is set up: the starting points Sprocket
+// found, one to pick; the step's main button opens it with its canvas
+// already started, or Kobble as it is.
 
 import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,17 +11,14 @@ import { cn } from "@/lib/utils";
 import { fromLine, textOf } from "./card-bits";
 import { ICON } from "./icons";
 
-// The picked starting point's title, shared with the bottom bar.
+// The picked starting point's title, shared with the step's main button.
 let picked: string | null = null;
 const listeners = new Set<() => void>();
 function pick(title: string | null): void {
   picked = title;
   for (const listener of listeners) listener();
 }
-export function pickedStart(): string | null {
-  return picked;
-}
-function usePicked(): string | null {
+export function usePicked(): string | null {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener);
