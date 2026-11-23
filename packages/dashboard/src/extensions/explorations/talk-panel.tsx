@@ -19,6 +19,7 @@ import { useVoiceCall } from "@/hooks/voice/use-voice-call";
 import { VoiceView } from "@/components/voice/voice-view";
 
 import { nameOf } from "./board/nodes";
+import { endsWithStep, Said } from "./said";
 import { Who } from "./explorer-header";
 import { useKoboldCall } from "./kobold-call";
 
@@ -223,7 +224,7 @@ function Messages({
       {talk.messages.map((message, at) =>
         message.from === "kobold" ? (
           <div key={at} className="max-w-[94%] self-start">
-            <Markdown text={message.text} />
+            <Said text={message.text} />
           </div>
         ) : (
           <div
@@ -264,17 +265,21 @@ function Problem({
 // The kobold's answer while it writes, or what it is doing before it does.
 function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
   const t = useTranslation().t;
-  if (talk.writing)
-    return (
-      <div className="max-w-[94%] self-start text-muted-foreground">
-        <Markdown text={talk.writing} />
-      </div>
-    );
-  return (
+  const doing = (
     <p className="flex items-center gap-2 self-start text-[12.5px] text-muted-foreground">
       <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
       {talk.activity ?? t("explore.talk.thinking")}
     </p>
+  );
+  if (!talk.writing) return doing;
+  // Its words so far, with the steps it took; after a step, what it does now.
+  return (
+    <div className="grid max-w-[94%] gap-2 self-start">
+      <div className="text-muted-foreground">
+        <Said text={talk.writing} />
+      </div>
+      {endsWithStep(talk.writing) && doing}
+    </div>
   );
 }
 

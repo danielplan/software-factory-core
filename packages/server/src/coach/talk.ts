@@ -19,6 +19,7 @@ import {
   removeCard,
   writeCard,
 } from "./map.ts";
+import { KeptSteps, SHOWN, toolOf } from "./kept-steps.ts";
 import { COACH_HEADER } from "./setup-tools.ts";
 
 // The coach's own tools, in plain words for the owner.
@@ -30,10 +31,6 @@ const TOOL_LINES: Record<string, string> = {
   add_persona: "Adding the persona",
   add_exploration: "Adding the exploration",
 };
-const TOOL_PREFIX = "Using mcp__setup__";
-// What the owner sees while the coach works: its tools, not its words
-// (those are in the reply being written).
-const SHOWN = /^(Reading|Searching|Looking)/;
 
 // How far a turn got, from what Claude Code reported: it starts reading what
 // it was given (0), goes on to look through the code when it reports
@@ -51,13 +48,6 @@ const DRAWING_TOOLS = [
   "link",
   "make_prototype",
 ];
-// The coach's tool a line names: "Using add choice (setup)", as Claude Code's
-// events are put into words (core's activity.ts), or its full name.
-function toolOf(line: string): string | null {
-  if (line.startsWith(TOOL_PREFIX)) return line.slice(TOOL_PREFIX.length);
-  const named = /^Using (.+) \(setup\)$/.exec(line);
-  return named ? (named[1] ?? "").replaceAll(" ", "_") : null;
-}
 function stepOf(line: string): Step {
   if (DRAWING_TOOLS.includes(toolOf(line) ?? "")) return 2;
   return SHOWN.test(line) ? 1 : 0;
@@ -94,6 +84,8 @@ export class Talk {
   private cwd: string;
   private changed: () => void;
   private who: string;
+  // The steps it takes, kept in its words (only when asked for).
+  private kept: KeptSteps | null = null;
 
   constructor(options: {
     claude: Claude;
@@ -130,6 +122,16 @@ export class Talk {
 
   get id(): string {
     return this.conversation;
+  }
+
+  // The coach's words keep the steps it takes between them.
+  keepSteps(): void {
+    this.kept = new KeptSteps();
+  }
+
+  // The next turn's words start with what started it (a step).
+  opensWith(step: string): void {
+    this.kept?.opensWith(step);
   }
 
   // Where the server answers the coach's tools, once it listens.
@@ -207,6 +209,7 @@ export class Talk {
     this.activity = null;
     this.problem = null;
     this.step = 0;
+    this.kept?.start();
     this.last = { spokenIn, rights };
     this.changed();
     const result = await this.claude.run(this.turn(text, spokenIn, rights));
@@ -223,7 +226,9 @@ export class Talk {
     this.wasStopped = stopped;
     const soFar = this.soFar();
     this.keepConversation(result.ok, stopped);
-    const reply = stopped ? soFar.trim() : result.text.trim();
+    const reply = (
+      stopped ? soFar : (this.kept?.answer(result.text) ?? result.text)
+    ).trim();
     if ((result.ok || stopped) && reply)
       this.messages = [...this.messages, { from: "coach", text: reply }];
     if (!result.ok && !stopped)
@@ -295,13 +300,18 @@ export class Talk {
           }
         : {}),
       onText: (reply: string) => {
-        this.writing = reply;
+        this.writing = this.kept?.wrote(reply) ?? reply;
         this.changed();
       },
       onActivity: (line: string) => {
         this.step = Math.max(this.step, stepOf(line)) as Step;
+        const kept = this.kept?.took(line);
+        if (kept) this.writing = kept;
         const shown = plain(line);
-        if (!shown) return;
+        if (!shown) {
+          if (kept) this.changed();
+          return;
+        }
         this.activity = shown;
         this.changed();
       },
@@ -311,8 +321,8 @@ export class Talk {
 
 // A line of what Claude Code does, as the owner sees it; null to skip.
 function plain(line: string): string | null {
-  if (line.startsWith(TOOL_PREFIX))
-    return TOOL_LINES[line.slice(TOOL_PREFIX.length)] ?? null;
+  const tool = toolOf(line);
+  if (tool) return TOOL_LINES[tool] ?? null;
   return SHOWN.test(line) ? line : null;
 }
 

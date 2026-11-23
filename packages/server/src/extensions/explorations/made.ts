@@ -79,7 +79,7 @@ export function reviewWords(key: string, made: MadeReport): string {
   ]
     .filter(Boolean)
     .join("\n\n");
-  return `(Not from the team: ${report}\n\nReview it for the team: is it what the plan and the problem asked for, what is missing or off, and one thing to try or change. Then ask them to try it on the board.)`;
+  return `(Not from the team: ${report}\n\nReview it for the team: is it what the plan and the problem asked for, what is missing or off, and one thing to try or change. Then ask them to try it on the board. A question you asked before that they have not answered yet is not asked again: at most say in a few words that it is still open.)`;
 }
 
 // What the kobold who talks with the team hears of a prototype that could

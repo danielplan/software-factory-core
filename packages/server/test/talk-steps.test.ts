@@ -26,6 +26,7 @@ function reporting() {
   return {
     claude,
     report: (line: string) => options?.onActivity(line),
+    write: (text: string) => options?.onText?.(text),
     end: (result: ClaudeResult) => ending?.(result),
   };
 }
@@ -106,4 +107,74 @@ test("Try again says the last words again once, and the steps start over", async
   } finally {
     factory.close();
   }
+});
+
+test("the explorer's words keep the steps it took between them, in order", async () => {
+  const held = reporting();
+  const talk = new Talk({
+    claude: held.claude,
+    cwd: "/p",
+    onChange: () => {},
+  });
+  talk.keepSteps();
+  const turn = talk.answer("Make it calmer", undefined, RIGHTS);
+  held.write("I'll ask Tinker.");
+  held.report("I'll ask Tinker.");
+  held.report("Using change prototype (setup)");
+  assert.equal(
+    talk.writing,
+    "I'll ask Tinker.\n\n<!-- step: change_prototype -->",
+  );
+  // A new answer after the step starts its words afresh.
+  held.write("Tinker");
+  held.write("Tinker is on it. Looking at A");
+  held.report("Using look at board (setup)");
+  held.report("Using look at board (setup)");
+  held.report("Reading src/pay.ts");
+  held.report("Searching for “card”");
+  held.write("A works.");
+  held.end({ ok: true, text: "A works." });
+  await turn;
+  assert.equal(
+    talk.messages.at(-1)?.text,
+    [
+      "I'll ask Tinker.",
+      "<!-- step: change_prototype -->",
+      "Tinker is on it. Looking at A",
+      "<!-- step: look_at_board -->",
+      "<!-- step: read -->",
+      "A works.",
+    ].join("\n\n"),
+  );
+});
+
+test("without kept steps, the answer is Claude Code's result as before", async () => {
+  const held = reporting();
+  const talk = new Talk({ claude: held.claude, cwd: "/p", onChange: () => {} });
+  const turn = talk.answer("Hi", undefined, RIGHTS);
+  held.write("Hello");
+  held.report("Using look at board (setup)");
+  assert.equal(talk.writing, "Hello");
+  held.end({ ok: true, text: "Hello there." });
+  await turn;
+  assert.equal(talk.messages.at(-1)?.text, "Hello there.");
+});
+
+test("a turn the person did not start opens with what started it", async () => {
+  const held = reporting();
+  const talk = new Talk({ claude: held.claude, cwd: "/p", onChange: () => {} });
+  talk.keepSteps();
+  talk.opensWith("prototype_made");
+  const turn = talk.answer(
+    "(Not from the team: A is made.)",
+    undefined,
+    RIGHTS,
+  );
+  held.write("A is ready to try.");
+  held.end({ ok: true, text: "A is ready to try." });
+  await turn;
+  assert.equal(
+    talk.messages.at(-1)?.text,
+    "<!-- step: prototype_made -->\n\nA is ready to try.",
+  );
 });
