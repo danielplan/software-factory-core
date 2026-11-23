@@ -4,7 +4,10 @@
 // where they put it. Clicking a thing attaches it to what they type next,
 // and clicking it again takes it off. The view fits the things when the
 // board opens and when one is added, and moves to a thing the kobold points
-// at. A picture pasted or dropped on it goes on the board.
+// at. The toolbar at its foot adds the team's own things: pen, note,
+// picture and link (mine/); a picture or a web address pasted or dropped on
+// it goes on the board too, where the pointer is. What the team adds never
+// moves the view.
 
 import "@xyflow/react/dist/style.css";
 
@@ -22,7 +25,7 @@ import type { ExplorationPage } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { useBoardDo } from "./frame";
-import type { ThingNode } from "./nodes";
+import { ownedByPerson, type ThingNode } from "./nodes";
 import { PrototypeNode } from "./prototype-node";
 import { ReadingBoard } from "./reading-board";
 import { readsTheBoard } from "./reading";
@@ -34,6 +37,11 @@ import {
   PictureNode,
   ProblemNode,
 } from "./things";
+import { AddToolbar } from "./mine/add-toolbar";
+import { MineLayer } from "./mine/mine-layer";
+import { MineProvider } from "./mine/mine-state";
+import { ToolLayer } from "./mine/tool-layer";
+import { useAdding, useBoardPoint } from "./use-adding";
 import { useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
@@ -67,7 +75,12 @@ type BoardProps = Readonly<{
 export function Board(props: BoardProps) {
   return (
     <ReactFlowProvider>
-      <Canvas {...props} />
+      <MineProvider
+        exploration={props.page.exploration.id}
+        things={props.page.board.things}
+      >
+        <Canvas {...props} />
+      </MineProvider>
     </ReactFlowProvider>
   );
 }
@@ -80,10 +93,22 @@ function Canvas({ page, attached, onPick }: BoardProps) {
     [pointed, attached],
   );
   const { nodes, edges, onNodesChange, arranged } = useBoardNodes(page, marks);
-  const onMoveStart = useBoardView(nodes, arranged, pointed);
+  // The view re-fits for what Doodle adds, not for what the person puts there.
+  const onMoveStart = useBoardView(
+    nodes.filter((n) => !ownedByPerson(n)),
+    arranged,
+    pointed,
+  );
   const area = useRef<HTMLDivElement>(null);
-  const pictures = usePictureDrop(page.exploration.id, area);
+  const point = useBoardPoint(area);
   const act = useBoardDo(page.exploration.id);
+  const adding = useAdding(nodes, act, point.flowAt);
+  // Pasted or dropped pictures and web addresses land at the pointer.
+  const pictures = usePictureDrop(page.exploration.id, area, {
+    pointer: point.pointer,
+    flowAt: point.flowAt,
+    onLink: adding.addLink,
+  });
   return (
     <div
       ref={area}
@@ -93,14 +118,7 @@ function Canvas({ page, attached, onPick }: BoardProps) {
           "outline-2 -outline-offset-4 outline-blue outline-dashed",
       )}
     >
-      {pictures.refused && (
-        <p
-          role="alert"
-          className="absolute top-3 left-1/2 z-10 -translate-x-1/2 rounded-xl bg-card px-3 py-2 text-[13px] text-destructive shadow-card"
-        >
-          {pictures.refused}
-        </p>
-      )}
+      {pictures.refused && <Refused words={pictures.refused} />}
       {readsTheBoard(page) && (
         <ReadingBoard
           talk={page.talk}
@@ -130,6 +148,12 @@ function Canvas({ page, attached, onPick }: BoardProps) {
             onPick(node.id);
         }}
         onMoveStart={onMoveStart}
+        onPaneClick={adding.deselect}
+        onDoubleClick={adding.onDoubleClick}
+        zoomOnDoubleClick={false}
+        // Only the person's own things come off, by what the toolbar's
+        // layer or the remove buttons do: never Doodle's.
+        deleteKeyCode={null}
         nodesConnectable={false}
         edgesFocusable={false}
         minZoom={0.15}
@@ -138,8 +162,57 @@ function Canvas({ page, attached, onPick }: BoardProps) {
         style={COLOURS}
       >
         <Background gap={16} />
-        <Controls showInteractive={false} position="bottom-left" />
+        <Tools nodes={nodes} adding={adding} pictures={pictures} />
       </ReactFlow>
     </div>
+  );
+}
+
+// What the team adds with: the layer their things are drawn on, the pen's and
+// note's layer over the board, the floating toolbar, and the zoom buttons.
+function Tools({
+  nodes,
+  adding,
+  pictures,
+}: Readonly<{
+  nodes: ThingNode[];
+  adding: ReturnType<typeof useAdding>;
+  pictures: ReturnType<typeof usePictureDrop>;
+}>) {
+  return (
+    <>
+      <MineLayer
+        nodes={nodes}
+        writing={adding.writing}
+        onWritten={adding.stopWriting}
+        drawing={adding.drawing}
+      />
+      <ToolLayer
+        tool={adding.tool}
+        nodes={nodes}
+        onDrawing={adding.setDrawing}
+        onNoteAt={adding.writeAt}
+      />
+      <Controls showInteractive={false} position="bottom-left" />
+      <AddToolbar
+        tool={adding.tool}
+        onTool={adding.setTool}
+        onPicture={pictures.choose}
+        onLink={adding.addLink}
+      />
+    </>
+  );
+}
+
+// Why what was dropped or pasted could not go on the board, for a few
+// seconds.
+function Refused({ words }: Readonly<{ words: string }>) {
+  return (
+    <p
+      role="alert"
+      className="absolute top-3 left-1/2 z-10 -translate-x-1/2 rounded-xl bg-card px-3 py-2 text-[13px] text-destructive shadow-card"
+    >
+      {words}
+    </p>
   );
 }

@@ -24,6 +24,26 @@ export type ThingData = {
 };
 export type ThingNode = Node<ThingData, Thing["kind"]>;
 
+// What the team put on the board themselves is drawn on the board's own
+// layer (mine/), not as cards the layout places: their notes, their links,
+// sketch cards and the pen marks on cards.
+export function onLayer(thing: Thing): boolean {
+  return (
+    thing.kind === "link" ||
+    thing.kind === "sketch" ||
+    thing.kind === "mark" ||
+    (thing.kind === "note" && thing.by === "person")
+  );
+}
+
+// What the person put on the board as a card themselves (a picture dropped
+// where they wanted it) lies over the layout: it is not laid out with the
+// rest, so adding it moves nothing else and the view stays where it is.
+export const ownedByPerson = (n: ThingNode) =>
+  n.data.thing.by === "person" &&
+  n.data.thing.place !== null &&
+  n.data.thing.kind === "picture";
+
 export function widthOf(thing: Thing): number {
   switch (thing.kind) {
     case "prototype":
@@ -56,7 +76,7 @@ export function nodesOf(
   // The problem only once it is said: a new exploration opens on an
   // empty canvas.
   const drawn = page.board.things.filter(
-    (thing) => !(thing.kind === "problem" && unsaid(page)),
+    (thing) => !(thing.kind === "problem" && unsaid(page)) && !onLayer(thing),
   );
   return drawn.map((thing) => {
     const was = before.get(thing.id);
@@ -119,6 +139,9 @@ export function nameOf(thing: Thing, kinds: TFunction = ENGLISH): string {
       return thing.text;
     case "prototype":
       return `${thing.key} · ${thing.name}`;
+    case "sketch":
+    case "mark":
+      return kinds(`explore.kinds.${thing.kind}`);
     default:
       return thing.title;
   }

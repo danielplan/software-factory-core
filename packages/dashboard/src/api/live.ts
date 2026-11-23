@@ -39,9 +39,11 @@ export function useFactoryState(): {
     events.onopen = () => {
       setConnected(true);
       void queryClient.invalidateQueries({ queryKey: STATE_KEY });
-      readAgain();
+      void readAgain();
     };
-    events.addEventListener("kobble-changed", readAgain);
+    events.addEventListener("kobble-changed", () => {
+      void readAgain();
+    });
     events.onerror = () => {
       setConnected(false);
     };

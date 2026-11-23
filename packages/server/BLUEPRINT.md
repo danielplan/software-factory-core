@@ -81,6 +81,7 @@ and `tests` to Personas. Everyone else goes through its plug and copes with
 | ------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | Schemas and their types         | **zod** (`zod`)                                       | the TypeScript package kit's: one schema, check and type |
 | The kobolds' tools              | **MCP SDK** (`@modelcontextprotocol/sdk`)             | the standard way Claude Code reaches tools               |
+| A link's title and preview      | **open-graph-scraper** (`open-graph-scraper`)         | reads the page's Open Graph tags, refusing private nets  |
 | A theme's colours and its CSS   | **culori** (`culori`), **PostCSS** (`postcss`)        | reading colours and contrast, and parsing CSS            |
 | The core, kits and their checks | the repository's own packages (`@software-factory/*`) | the factory's core, shared with every company            |
 

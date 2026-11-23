@@ -13,7 +13,8 @@ import type { Cards } from "../../cards/cards.ts";
 import { Refused } from "../../refused.ts";
 import { FileAnswer } from "../../http.ts";
 import { PICTURE_TYPES } from "../../coach/pictures.ts";
-import { addPicture, personActs } from "./person-acts.ts";
+import type { Look } from "./link-preview.ts";
+import { boardRoutes } from "./board-routes.ts";
 import {
   dropExploration,
   explorationOf,
@@ -52,6 +53,8 @@ type Options = {
   // while Personas is not installed.
   personas: () => PersonasPlug | null;
   missions: () => MissionsPlug | null;
+  // How a link's page is read for its preview (the web, but in tests).
+  look?: Look;
   onChange: () => void;
 };
 
@@ -102,6 +105,7 @@ export function servedExplorations(options: Options) {
       personas: options.personas,
     }),
     ...talkRoutes(store, talks, button),
+    ...boardRoutes(store, button, talks, options),
   };
   return {
     routes,
@@ -288,12 +292,6 @@ function buttonRoutes(
     })),
     "POST /api/kobble/explorations/open": button(async (body) => ({
       run: await prototypes.open(id(body), key(body), persona(body)),
-    })),
-    "POST /api/kobble/explorations/board": button((body) => {
-      personActs(store(), talks, id(body), body);
-    }),
-    "POST /api/kobble/explorations/picture": button((body) => ({
-      thing: addPicture(store(), talks, id(body), body),
     })),
     // Handed off, the exploration is done: its prototypes stop.
     "POST /api/kobble/explorations/hand-off": button(

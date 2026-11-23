@@ -141,7 +141,15 @@ Things on the board, each with an id (`note-1`, `choice-1`):
     off, one thing to try), then ask them to try it. The team agrees to the
     variant it is looking at;
 - a **picture** a person pasted or dragged in, with a short title. Read its
-  file to see it; only people add or remove pictures.
+  file to see it; only people add or remove pictures;
+- what the team draws and adds themselves, marked "the team's own" in the
+  board: a one-line **note**, a **link** (its title, site and preview
+  picture), a **sketch** card and **pen marks** on a card. A sketch and the
+  marks on a card come with a picture of the card: read it to see what they
+  mean (a stroke on its own is only a trail of dots). You may move these and
+  regroup them, but never change or remove them: only the team does. They
+  are shown "taken in" once you answer with them in front of you, so say
+  what you made of them.
 
 **Arrows** (`link`, `unlink`) join things that really belong together, each
 with a short label saying how ("tried in", "decides", "part of"); things

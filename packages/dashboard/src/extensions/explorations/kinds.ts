@@ -7,9 +7,11 @@ import {
   CircleAlert,
   GitFork,
   Image,
+  Link2,
   type LucideIcon,
   MessagesSquare,
   MonitorSmartphone,
+  Pencil,
   StickyNote,
   Workflow,
 } from "lucide-react";
@@ -44,6 +46,10 @@ export const KINDS: Record<Thing["kind"], { Icon: LucideIcon; tint: string }> =
       Icon: Image,
       tint: "bg-[#fdeef3] text-[#a02a55]",
     },
+    // What the team put on the board themselves (blue, as their things are).
+    link: { Icon: Link2, tint: "bg-[#e8f0fe] text-[#2948bc]" },
+    sketch: { Icon: Pencil, tint: "bg-[#e8f0fe] text-[#2948bc]" },
+    mark: { Icon: Pencil, tint: "bg-[#e8f0fe] text-[#2948bc]" },
   };
 
 // Where an exploration is, in words, from what its board holds: its icon

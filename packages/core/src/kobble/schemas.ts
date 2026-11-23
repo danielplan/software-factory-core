@@ -125,9 +125,12 @@ export const PROTOTYPE_BRANCH = /^proto\/X-\d+-[a-z]+\d*$/;
 // arrows, laid out left to right along them. Kinds of things: the problem
 // (from the exploration itself) and what we heard (its signals), notes, a
 // choice (a question and its options, one of which may be chosen), a
-// prototype of an option, a diagram (Mermaid, in plain words) and a picture
-// a person put on it. Each is a sketch until agreed; a place a person
-// dragged it to is kept, the others are laid out on the page.
+// prototype of an option, a diagram (Mermaid, in plain words) and what a
+// person puts on it themselves: a picture, a link (with its preview), a
+// sketch (a drawing card) and the marks drawn on a card (a sketch or any
+// other). Each is a sketch until agreed; a place a person dragged it to is
+// kept, the others are laid out on the page. What a person put there, the
+// kobold may move, never change or remove.
 const optionKey = z
   .string()
   .regex(/^[A-Z]$/, "an option is one capital letter");
@@ -136,6 +139,8 @@ const optionKey = z
 const prototypeKey = z
   .string()
   .regex(/^[A-Z]\d*$/, "a prototype is its option's letter, maybe a number");
+// A picture's file, in the exploration's pictures/ folder.
+const pictureFile = z.string().regex(/^[\w-]+\.(png|jpe?g|gif|webp)$/);
 const thingId = z
   .string()
   .regex(/^[a-z][a-z0-9-]*$/, "small letters, digits and dashes");
@@ -146,6 +151,8 @@ const common = {
   place: z.strictObject({ x: z.number(), y: z.number() }).nullable(),
   // Who put it there: the kobold or a person.
   by: z.enum(["kobold", "person"]),
+  // What a person put there, once the kobold has acted on it.
+  taken: z.boolean().optional(),
 };
 
 const optionSchema = z.strictObject({
@@ -216,8 +223,38 @@ export const thingSchema = z.discriminatedUnion("kind", [
     ...common,
     kind: z.literal("picture"),
     title: text,
-    // Its file, in the exploration's pictures/ folder.
-    image: z.string().regex(/^[\w-]+\.(png|jpe?g|gif|webp)$/),
+    image: pictureFile,
+  }),
+  // A web address a person put there, with what its page shares: the
+  // title, the site's name and the preview picture and small icon (none
+  // when the page shares none, or could not be read).
+  z.strictObject({
+    ...common,
+    kind: z.literal("link"),
+    url: z.url({ protocol: /^https?$/ }),
+    title: text,
+    site: text,
+    preview: pictureFile.optional(),
+    icon: pictureFile.optional(),
+  }),
+  // A card a person draws on. Its drawings are the marks on it; its image is
+  // the card as last drawn, for the kobold to see.
+  z.strictObject({
+    ...common,
+    kind: z.literal("sketch"),
+    image: pictureFile.optional(),
+  }),
+  // A pen stroke on a card, its points from the card's corner. Its image is
+  // the card's marks as last drawn, for the kobold to see.
+  z.strictObject({
+    ...common,
+    kind: z.literal("mark"),
+    on: thingId,
+    points: z
+      .array(z.tuple([z.number(), z.number()]))
+      .min(1)
+      .max(1500),
+    image: pictureFile.optional(),
   }),
 ]);
 

@@ -16,7 +16,7 @@ import { useRead } from "@/api/query";
 import { explorationPageSchema } from "@/api/schemas/explorations";
 
 import { Board } from "./board/canvas";
-import { BoardProblem } from "./board/frame";
+import { BoardProblem } from "./board/board-problem";
 import { useLivePrototype } from "./board/live-prototype";
 import { handOffMissing } from "./hand-off-needs";
 import { HandingOff } from "./handing-off";

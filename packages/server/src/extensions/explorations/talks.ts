@@ -25,6 +25,7 @@ import {
   type MadeReport,
   reviewWords,
 } from "./made.ts";
+import { PersonNews, takenIn } from "./person-news.ts";
 import { type TalkView, viewOf } from "./talk-view.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
@@ -56,7 +57,7 @@ export class ExplorationTalks {
     { thing: string; times: number }
   >();
   // What people did on a board since the kobold last heard, by exploration.
-  private readonly done = new Map<string, string[]>();
+  private readonly news = new PersonNews();
   private toolsUrl = "";
   private readonly options: TalksOptions;
   constructor(options: TalksOptions) {
@@ -108,10 +109,10 @@ export class ExplorationTalks {
   review(id: string, key: string, made: MadeReport): void {
     const talk = this.talk(id);
     if (talk.working) {
-      this.done.set(id, [
-        ...(this.done.get(id) ?? []),
+      this.news.add(
+        id,
         `got prototype ${key} made (the maker says: ${made.said.slice(0, 600)})`,
-      ]);
+      );
       this.tell(
         id,
         `Prototype ${key} is ready (${made.name}). Try it on the board.`,
@@ -137,8 +138,19 @@ export class ExplorationTalks {
     void this.answer(id, talk, failedWords(key, why));
   }
 
-  personDid(id: string, words: string): void {
-    this.done.set(id, [...(this.done.get(id) ?? []), words]);
+  // `things`: what they put on the board by it, taken in once heard.
+  personDid(id: string, words: string, things: string[] = []): void {
+    this.news.add(id, words, things);
+  }
+
+  // Something a person put on the board that the kobold hears at once, said
+  // as their own words; it is taken in once the kobold has answered. While
+  // it is still answering, it hears it with the next words.
+  sayNow(id: string, words: string, things: string[]): void {
+    this.news.hold(id, things);
+    void this.say(id, words).catch(() => {
+      this.personDid(id, `said: ${words}`);
+    });
   }
 
   // A person's words, with the things they attached from the board; the
@@ -254,9 +266,9 @@ export class ExplorationTalks {
     const store = this.options.store();
     const exploration = explorationOf(store, id);
     const heard = exploration.heard.map((one) => `- ${one.text}`);
-    const did = this.done.get(id) ?? [];
+    const news = this.news.take(id);
+    const did = news.words;
     const making = this.maker?.making(id) ?? [];
-    this.done.delete(id);
     const prompt = [
       said,
       ...(did.length > 0
@@ -276,7 +288,7 @@ export class ExplorationTalks {
       "",
       "(Think it through first, as your guide says: what is really asked, what you checked, the ways and what breaks them, what is missing, where the exploration goes next. Then answer in at most 60 words, in short Markdown: what changed in a line, a short list when there is more than one point, then one question on its own line.)",
     ].join("\n");
-    await talk.answer(prompt, spokenIn, {
+    const answered = await talk.answer(prompt, spokenIn, {
       ...RIGHTS,
       instructions: inLanguage(
         [
@@ -285,6 +297,9 @@ export class ExplorationTalks {
         ].join("\n\n"),
       ),
     });
+    if (answered) {
+      if (takenIn(store, id, news.things)) this.options.onChange();
+    } else this.news.giveBack(id, news);
   }
 
   // The conversation about an exploration (its Stop, for one).

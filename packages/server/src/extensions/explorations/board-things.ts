@@ -11,6 +11,7 @@ import type {
 } from "@software-factory/core";
 
 import { Refused } from "../../refused.ts";
+import { ownLine } from "./own-lines.ts";
 
 export type Option = { key: string; name: string; difference: string };
 
@@ -51,7 +52,10 @@ export function withoutThing(board: Board, id: string): Board {
       `Prototype ${thing.key} is agreed: mark it a sketch first, once the team says it is not to be built.`,
     );
   return {
-    things: board.things.filter((one) => one.id !== id),
+    // A card takes its marks with it.
+    things: board.things.filter(
+      (one) => one.id !== id && !(one.kind === "mark" && one.on === id),
+    ),
     links: board.links.filter((one) => one.from !== id && one.to !== id),
   };
 }
@@ -144,30 +148,51 @@ export function completed(exploration: Exploration, board: Board): Board {
   return { ...board, things: [...fixed, ...board.things] };
 }
 
-function line(thing: Thing, exploration: Exploration): string {
+function headOf(thing: Thing): string {
   const state = thing.agreed ? "agreed" : "sketch";
-  const head = `- ${thing.id} (${thing.kind}, ${state})`;
+  const whose = thing.by === "person" ? ", the team's own" : "";
+  return `- ${thing.id} (${thing.kind}, ${state}${whose})`;
+}
+
+// The problem, or what we heard.
+function fixedWords(kind: "problem" | "heard", exploration: Exploration) {
+  if (kind === "problem") return exploration.problem || "not said yet";
+  return exploration.heard.map((one) => one.text).join(" / ");
+}
+
+function choiceLine(head: string, thing: Extract<Thing, { kind: "choice" }>) {
+  const chosen = thing.chosen ? ` (chosen: ${thing.chosen})` : "";
+  const options = thing.options.map((o) => {
+    const recommended =
+      o.key === thing.recommended ? " (you recommend it)" : "";
+    return `    ${o.key}. ${o.name}: ${o.difference || "—"}${recommended}`;
+  });
+  return [`${head}: ${thing.title}${chosen}`, ...options].join("\n");
+}
+
+function line(
+  thing: Thing,
+  exploration: Exploration,
+  all: Thing[] = [],
+): string {
+  const head = headOf(thing);
   switch (thing.kind) {
     case "problem":
-      return `${head}: ${exploration.problem || "not said yet"}`;
     case "heard":
-      return `${head}: ${exploration.heard.map((one) => one.text).join(" / ")}`;
+      return `${head}: ${fixedWords(thing.kind, exploration)}`;
     case "note":
       return `${head}: ${thing.text}`;
     case "choice":
-      return [
-        `${head}: ${thing.title}${thing.chosen ? " (chosen: " + thing.chosen + ")" : ""}`,
-        ...thing.options.map(
-          (o) =>
-            `    ${o.key}. ${o.name}: ${o.difference || "—"}${o.key === thing.recommended ? " (you recommend it)" : ""}`,
-        ),
-      ].join("\n");
+      return choiceLine(head, thing);
     case "prototype":
       return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}${versionWords(thing)}`;
     case "diagram":
       return `${head}: ${thing.title}`;
     case "picture":
-      return `${head}: ${thing.title} (read factory/kobble/explorations/${exploration.id}/pictures/${thing.image} to see it)`;
+    case "link":
+    case "sketch":
+    case "mark":
+      return ownLine(head, thing, exploration, all);
   }
 }
 
@@ -182,13 +207,26 @@ function versionWords(made: Extract<Thing, { kind: "prototype" }>): string {
   return ["; variants:", ...lines].join("\n");
 }
 
+// A sketch card's marks are told with the card, and the marks on any other
+// card in one line (the first of them).
+function hidden(thing: Thing, at: number, things: Thing[]): boolean {
+  if (thing.kind !== "mark") return false;
+  const card = things.find((one) => one.id === thing.on);
+  if (card?.kind === "sketch") return true;
+  return (
+    things.findIndex((one) => one.kind === "mark" && one.on === thing.on) !== at
+  );
+}
+
 // The board in short lines, as the kobold reads it.
 export function boardText(exploration: Exploration, board: Board): string {
   const full = completed(exploration, board);
   return [
     `${exploration.id} · ${exploration.title} (${exploration.status})`,
     "Things:",
-    ...full.things.map((thing) => line(thing, exploration)),
+    ...full.things
+      .filter((thing, at) => !hidden(thing, at, full.things))
+      .map((thing) => line(thing, exploration, full.things)),
     "Arrows:",
     ...full.links.map(
       (one) =>

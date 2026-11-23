@@ -59,7 +59,10 @@
     "choice": "Scelta",
     "prototype": "Prototipo",
     "diagram": "Diagramma",
-    "picture": "Immagine"
+    "picture": "Immagine",
+    "link": "Link",
+    "sketch": "Disegno",
+    "mark": "Segno"
   },
   "talk": {
     "role": "Ci ragiona con te e disegna sulla lavagna",
@@ -119,7 +122,6 @@
     "problemHere": "Il kobold scrive qui il problema.",
     "running": "{{title}}, in funzione",
     "pictureUnreadable": "Non riesco a leggere l'immagine.",
-    "onlyPictures": "Sulla lavagna vanno solo immagini.",
     "pasted": "Immagine incollata",
     "recommended": "Consigliata",
     "recommendsThis": "Il kobold consiglia questa",
@@ -138,7 +140,34 @@
     "tinkerSetUp": "{{name}} ha preparato come avviare la tua app, per tutto il team.",
     "couldNotTitle": "{{name}} non è riuscito ad avviare la tua app.",
     "couldNotNoReason": "{{name}} ha provato diversi modi per avviare la tua app, ma nessuno ha funzionato.",
-    "tryAgain": "Riprova"
+    "tryAgain": "Riprova",
+    "mine": {
+      "label": "Aggiungi alla lavagna",
+      "pen": "Penna",
+      "penHint": "Penna: disegna ovunque: nello spazio vuoto apre una scheda da schizzo attorno al disegno, su una scheda resta dentro di essa (Esc per smettere)",
+      "penOn": "Penna attiva · Esc per smettere",
+      "sketchLabel": "Il tuo schizzo",
+      "note": "Nota",
+      "noteHint": "Nota: scrivi una riga tua, clicca dove va (o fai doppio clic sulla lavagna)",
+      "noteHere": "Clicca sulla lavagna per scrivere una nota",
+      "noteLabel": "La tua nota",
+      "notePlaceholder": "Una riga, poi Invio",
+      "picture": "Immagine",
+      "pictureHint": "Immagine: scegline una dal tuo computer (anche incollare e trascinare funzionano)",
+      "link": "Link",
+      "linkHint": "Link: aggiungi un indirizzo web (anche incollarlo funziona)",
+      "linkLabel": "Indirizzo web",
+      "linkPlaceholder": "Incolla un indirizzo web",
+      "linkAdd": "Aggiungi il link",
+      "linkBad": "Questo non è un indirizzo web.",
+      "linkOpens": "Apri {{site}} in una nuova scheda",
+      "yours": "Tuo",
+      "yoursHint": "L'hai messo tu: puoi spostarlo e toglierlo. Doodle può spostarlo, mai riscriverlo o cancellarlo.",
+      "takenIn": "Preso in carico",
+      "takenInHint": "Doodle l'ha preso in carico. Può spostarlo, ma non lo riscrive né lo cancella mai: solo tu puoi.",
+      "remove": "Toglilo dalla lavagna (solo tu puoi)"
+    },
+    "onlyPicturesAndLinks": "Sulla lavagna possono andare solo immagini e indirizzi web."
   },
   "doing": {
     "start": "Prepararsi",
