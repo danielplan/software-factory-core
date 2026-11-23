@@ -435,3 +435,37 @@ test("a copy that lost its link to git is remade, its old folder kept, and a hea
   assert.equal(existsSync(join(builds.path, "LOST.md")), false);
   assert.equal(kept().length, 2);
 });
+
+test("a project with no origin yet makes its copies from its own branches", async () => {
+  const folder = mkdtempSync(join(tmpdir(), "no-origin-"));
+  const git = (...args: string[]) => run("git", args);
+  const source = join(folder, "project");
+  await git("init", "--quiet", "-b", "main", source);
+  writeFileSync(join(source, "app.txt"), "first\n");
+  await git("-C", source, "add", "app.txt");
+  await git(
+    "-C",
+    source,
+    "-c",
+    "user.name=t",
+    "-c",
+    "user.email=t@t",
+    "commit",
+    "--quiet",
+    "-m",
+    "First",
+  );
+  const copy = new Workspace(
+    { source, workspaces: join(folder, "copies"), baseBranch: "main" },
+    "proto",
+  );
+  await copy.prepareLocalBranch("proto/X-1-a");
+  assert.equal(readFileSync(join(copy.path, "app.txt"), "utf8"), "first\n");
+  assert.equal(
+    (await run("git", ["-C", copy.path, "branch", "--show-current"])).trim(),
+    "proto/X-1-a",
+  );
+  // Made again, it carries on with the same branch.
+  await copy.prepareLocalBranch("proto/X-1-a");
+  rmSync(folder, { recursive: true, force: true });
+});

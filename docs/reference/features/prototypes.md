@@ -28,6 +28,12 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
   otherwise the newest) when none runs, only where the project names a
   prototype start command (`canRun` on the exploration's page); without one
   nothing is asked, and **Open** says why it cannot run.
+- A version's copy starts from origin's base branch, or from this
+  computer's own when the project has no origin yet (a new project, a demo
+  copy).
+- When a prototype cannot be made, Doodle is told why at once and says so
+  in plain words, never that Tinker is still on it, and offers to make it
+  again or hand off from the agreed picture.
 - The branch is pushed to origin once committed, so a teammate's computer
   opens it too; when it cannot be, the board says it is only on this
   computer. **Open** runs it with the product's prototype command, one at a

@@ -68,7 +68,12 @@ prototype in the real app, with variants to switch between: see
 **Hand off** (on the team's yes) needs the prototype **agreed**, with its
 variant chosen. An idea that changes no screen needs no prototype, only its
 choices, notes or diagrams agreed. The button stays off until then, and says
-why.
+why in words beside it (a switched-off button shows no tooltip): which of the
+prototype, its variant or something on the board is still to be agreed
+(`hand-off-needs.ts`, the same rules the server refuses by). A prototype that
+was never made (its copy could not be made, so its branch is nowhere) holds
+nothing to build from: the hand-off leaves it out, and the board's agreed
+choices and notes go instead.
 
 1. A spec writer writes the card from the conversation, the board and the
    agreed prototype, without reading the code: a short card in the plan's

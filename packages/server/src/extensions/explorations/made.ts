@@ -22,6 +22,14 @@ export type MadeReport = {
 export type Ready =
   ((exploration: string, key: string, made: MadeReport) => void) | null;
 
+// Who is told when a prototype could not be made, and why, so nobody keeps
+// saying it is on its way.
+export type Failed =
+  ((exploration: string, key: string, why: string) => void) | null;
+
+// Both, as the prototypes are told them.
+export type Told = { ready: Ready; failed: Failed };
+
 export async function finishMaking(on: {
   mode: PrototypeMode;
   workspace: Workspace;
@@ -30,6 +38,7 @@ export async function finishMaking(on: {
   change: string | undefined;
   result: Awaited<ReturnType<Claude["run"]>>;
   ready: Ready;
+  failed: Failed;
   // Started and photographed, once it is made.
   look: () => Promise<Looks>;
 }): Promise<void> {
@@ -38,13 +47,11 @@ export async function finishMaking(on: {
     commitWords(exploration, made, change, result.ok ? result.text : ""),
   );
   const unshared = notShared(await workspace.pushBranch(made.branch));
-  mode.set(exploration, made.key, {
-    making: false,
-    activity: null,
-    problem: result.ok
-      ? unshared
-      : stopped(result.error, made.branch, unshared),
-  });
+  const problem = result.ok
+    ? unshared
+    : stopped(result.error, made.branch, unshared);
+  mode.set(exploration, made.key, { making: false, activity: null, problem });
+  if (!result.ok) on.failed?.(exploration, made.key, problem ?? "");
   if (result.ok)
     on.ready?.(exploration, made.key, {
       name: change ? `changed: ${change}` : made.name,
@@ -73,4 +80,15 @@ export function reviewWords(key: string, made: MadeReport): string {
     .filter(Boolean)
     .join("\n\n");
   return `(Not from the team: ${report}\n\nReview it for the team: is it what the plan and the problem asked for, what is missing or off, and one thing to try or change. Then ask them to try it on the board.)`;
+}
+
+// What the kobold who talks with the team hears of a prototype that could
+// not be made: why, and that it must not say it is still on its way.
+export function failedWords(key: string, why: string): string {
+  return `(Not from the team: Prototype ${key} could not be made, so there is no preview of it. Why, in the factory's words: ${why.slice(0, 600)}\n\nTell the team in one or two plain lines, without the technical words: there is no preview of ${key}, and what that means for them. Never say the maker is still making it. Then offer what they can do next: have it made again (make_prototype) when the reason may pass, or carry on and hand off from the agreed picture.)`;
+}
+
+// The same, noted for the next turn while the kobold is answering.
+export function failedNote(key: string, why: string): string {
+  return `prototype ${key} could not be made, so there is no preview of it (${why.slice(0, 300)}); never say it is still being made`;
 }

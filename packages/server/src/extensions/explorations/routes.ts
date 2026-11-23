@@ -25,6 +25,8 @@ import {
 import { withThing } from "./board-things.ts";
 import { ExplorationPrototypes } from "./prototypes.ts";
 import { prototypeBranch, prototypeOf } from "./versions.ts";
+import { toldOfPrototypes } from "./told.ts";
+import { unmadeIn, unmadeOf } from "./unmade.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { talkRoutes } from "./talk-routes.ts";
 import { type SpecWriter, specWriter } from "./spec-writer.ts";
@@ -54,14 +56,11 @@ type Options = {
 };
 
 export function servedExplorations(options: Options) {
-  const { store } = options;
+  const { store, project } = options;
   const worlds = new ExplorationWorlds(options);
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
-  // A prototype made: the kobold who talks with the team reviews it.
-  prototypes.whenReady((id, key, made) => {
-    talks.review(id, key, made);
-  });
+  toldOfPrototypes(prototypes, talks);
   // Handed off, by the button or the kobold: the spec written (each step
   // shown on the page), the card made, the prototypes stopped.
   const handOffs = new HandOffs(options.onChange);
@@ -77,7 +76,7 @@ export function servedExplorations(options: Options) {
           stage("card");
           return spec;
         },
-        options.missions(),
+        { missions: options.missions(), unmade: unmadeOf(project) },
       );
       stage("prototypes");
       await prototypes.removeAll(id);
@@ -242,6 +241,7 @@ function readRoutes(
         canRun: prototypes.mode.canStart(),
         talk: talks.view(exploration.id),
         handingOff: handOffs.of(exploration.id),
+        unmade: unmadeIn(options.project, store().board(exploration.id)),
         personas: options.personas(),
         missions: options.missions(),
       });
