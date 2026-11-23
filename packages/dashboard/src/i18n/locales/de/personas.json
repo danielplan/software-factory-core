@@ -46,5 +46,15 @@
     "waitingForTurn": "Wartet, bis er dran ist…",
     "opening": "Der Kobold öffnet die App…",
     "noSteps": "Keine Schritte"
+  },
+  "live": {
+    "on": "{{name}} ist auf einer Mission",
+    "queued": "{{name}} wartet, bis es losgeht",
+    "elapsed": "Zeit auf der Mission",
+    "phases": {
+      "ready": "Die App wird vorbereitet",
+      "using": "{{name}} benutzt die App",
+      "writing": "Aufschreiben, was {{name}} gefunden hat"
+    }
   }
 }

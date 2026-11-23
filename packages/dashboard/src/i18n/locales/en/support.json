@@ -10,10 +10,21 @@
   "persona": {
     "label": "Persona to add",
     "add": "Add {{name}}",
-    "change": "Change something",
     "yes": "Yes, add {{name}}.",
     "added": "{{name}} is in Personas",
-    "open": "Open",
     "notAdded": "Not added"
+  },
+  "proposal": {
+    "waiting": "Waiting for you",
+    "change": "Change something",
+    "open": "Open"
+  },
+  "mission": {
+    "label": "Mission to send",
+    "send": "Send {{name}}",
+    "yes": "Yes, send them.",
+    "sent": "{{name}} is on the mission",
+    "watch": "Watch",
+    "notSent": "Not sent"
   }
 }

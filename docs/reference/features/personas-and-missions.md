@@ -27,6 +27,11 @@ that persona, on this computer only and never the live app.
    `test`, in the person's words), each with the step where it happened,
    through Signals' plug and its "already" check.
 
+While a mission runs, the persona's page shows it live: the persona's
+kobold at work, how long it has been going, its three parts (getting the
+app ready, the persona using it, writing down what they found) with the one
+it is in moving, and each `Step N: …` as it comes, the newest one live.
+
 Up to three missions run at once and the others wait; one at a time for each
 persona. A mission that cannot run says why: no product with a web address,
 the product does not start, no browser, Claude Code missing.
@@ -51,6 +56,7 @@ A mission can also run on a prototype's branch, from the exploration's
 
 ## Checked and not checked
 
-Checked by tests: personas, missions and their queue, mission ideas
-(`personas.test.ts`, `persona-tests.test.ts`, `missions.test.ts`). Not
+Checked by tests: personas, missions and their queue, mission ideas, the
+live panel's parts and clock (`personas.test.ts`, `persona-tests.test.ts`,
+`missions.test.ts`, `mission-live.test.ts`). Not
 checked by a test: what Mimic finds in a real app.

@@ -49,14 +49,15 @@ would do, Sprocket says so and takes them to the Marketplace.
 A team's own extension can bring Sprocket a guide (`"agent": "support"`).
 
 **New persona** and **New exploration** open Sprocket's conversation instead
-of a form. A persona Sprocket proposes shows in the conversation as its own card,
-the way Coval shows a change: a head ("Persona to add"), the persona exactly
-as the Personas page will show it (kobold, first name, who they are and
-where, about), and a strip with **Add** and **Change something** that, once
-answered, says whether it was added. Sprocket writes it as a `persona` block
-(name, place, about). A persona always has a made-up first name, never a
-role; the place line says who they are and where (Startup founder · NOI
-Techpark, Bolzano). **Ask Sprocket** on a stuck card opens the conversation about it.
+of a form. What Sprocket proposes to hand on shows in the conversation as a
+**proposal card**, the way Coval shows a change: a head saying what will
+happen ("Persona to add", "Mission to send"), the thing exactly as its page
+will show it, and a strip with the action and **Change something** that,
+once answered, says what became of it. Sprocket writes it as a block
+(`persona`: name, place, about; `mission`: persona, task). A new kind of
+proposal adds a block and reuses the card. A persona always has a made-up
+first name, never a role; the place line says who they are and where
+(Startup founder · NOI Techpark, Bolzano). **Ask Sprocket** on a stuck card opens the conversation about it.
 The conversation lives while the factory runs; **New conversation** starts
 again.
 
@@ -68,14 +69,14 @@ something wrong goes to [the feedback board](feedback-board.md).
 
 ## Where it lives
 
-| Part             | Where                                                                                                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sprocket         | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts`                                                                              |
-| Its plug         | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`                                                                                         |
-| Its guide        | `packages/skills/guides/support-kobold.md`                                                                                                                          |
-| The window       | `packages/dashboard/src/features/support/`                                                                                                                          |
-| The bar          | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup                                                                                     |
-| A persona's card | `packages/dashboard/src/components/layout/persona-card.tsx`, `packages/dashboard/src/components/persona-tile.tsx`, `packages/dashboard/src/lib/persona-proposal.ts` |
+| Part           | Where                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Sprocket       | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts`                                                |
+| Its plug       | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`                                                           |
+| Its guide      | `packages/skills/guides/support-kobold.md`                                                                                            |
+| The window     | `packages/dashboard/src/features/support/`                                                                                            |
+| The bar        | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup                                                       |
+| Proposal cards | `packages/dashboard/src/components/proposal-card.tsx`; `components/layout/proposals.tsx` (persona, mission); `lib/proposal-blocks.ts` |
 
 The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 `/stop`.
@@ -83,7 +84,7 @@ The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 ## Checked and not checked
 
 Checked by tests: the plug (only installed extensions are heard, removing
-one takes its hand-offs away), the tools and hand-offs, the card look, a proposed persona's block
+one takes its hand-offs away), the tools and hand-offs, the card look, the proposal blocks
 (`support-plug.test.ts`, `support-tools.test.ts`, `card-look.test.ts`,
-`persona-proposal.test.ts`).
+`proposal-blocks.test.ts`).
 Not checked by a test: how well Sprocket routes in a real conversation.

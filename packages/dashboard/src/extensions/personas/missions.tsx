@@ -61,7 +61,7 @@ export function PersonaMissions({
             <Mission
               key={test.id}
               test={test}
-              persona={persona.id}
+              persona={persona}
               found={signals.filter((one) => test.signals.includes(one.id))}
             />
           ))}

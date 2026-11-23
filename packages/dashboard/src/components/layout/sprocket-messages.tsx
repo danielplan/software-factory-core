@@ -1,16 +1,16 @@
 // What Sprocket and the person have said so far in Sprocket's window, with
 // the answer as it is written: the support kobold's conversation, or the
-// setup coach's while Kobble is set up. A persona Sprocket proposes shows as
-// its card (persona-card.tsx); while it is the last thing said, the person
-// can answer it from the card.
+// setup coach's while Kobble is set up. What Sprocket proposes (a persona,
+// a mission) shows as a proposal card (proposals.tsx); while it is the last
+// thing said, the person answers it from the card.
 
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
-import { partsOf } from "@/lib/persona-proposal";
+import { partsOf } from "@/lib/proposal-blocks";
 
-import { PersonaCard } from "./persona-card";
+import { type Answer, Proposal, yesTo } from "./proposals";
 
 export type Said = { mine: boolean; text: string };
 
@@ -53,6 +53,7 @@ export function Messages({
           <SprocketSaid
             key={at}
             text={message.text}
+            next={messages[at + 1]?.text}
             onSay={at === count - 1 && writing == null ? onSay : undefined}
             onChange={focusAnswer}
           />
@@ -70,16 +71,24 @@ export function Messages({
 
 function SprocketSaid({
   text,
+  next,
   onSay,
   onChange,
 }: Readonly<{
   text: string;
+  // What the person said after it, if anything.
+  next: string | undefined;
   onSay: ((text: string) => void) | undefined;
   onChange: () => void;
 }>) {
   const t = useTranslation().t;
   const parts = partsOf(text);
-  const { proposal } = parts;
+  const { block } = parts;
+  const answer = ((): Answer => {
+    if (onSay) return { state: "waiting", onSay, onChange };
+    if (!block || next === undefined) return { state: "shown" };
+    return { state: "answered", yes: next === yesTo(block, t) };
+  })();
   return (
     <div className="grid gap-3 self-stretch">
       {parts.before && (
@@ -87,18 +96,7 @@ function SprocketSaid({
           <Markdown text={parts.before} />
         </div>
       )}
-      {proposal && (
-        <PersonaCard
-          proposal={proposal}
-          onAdd={
-            onSay &&
-            (() => {
-              onSay(t("support.persona.yes", { name: proposal.name }));
-            })
-          }
-          onChange={onChange}
-        />
-      )}
+      {block && <Proposal block={block} answer={answer} />}
       {parts.after && (
         <div className="self-start">
           <Markdown text={parts.after} />
@@ -114,7 +112,9 @@ function Written({ text }: Readonly<{ text: string }>) {
   return (
     <>
       {parts.before && <Markdown text={parts.before} />}
-      {parts.proposal && <PersonaCard proposal={parts.proposal} />}
+      {parts.block && (
+        <Proposal block={parts.block} answer={{ state: "shown" }} />
+      )}
       {parts.after && <Markdown text={parts.after} />}
     </>
   );

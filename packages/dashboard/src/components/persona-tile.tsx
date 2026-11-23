@@ -1,6 +1,6 @@
 // What a persona's card on the Personas page shows: their kobold, their
 // name, who they are and where (the persona's place line, "Bakery owner ·
-// back office"), and a few lines about them. The same on the page and where
+// back office"), and a few lines about them (or, compact, only who). The same on the page and where
 // Sprocket proposes one, so the team sees the card it will get.
 
 import { useTranslation } from "react-i18next";
@@ -16,12 +16,15 @@ export function PersonaTile({
   place,
   about,
   nameClass,
+  compact = false,
 }: Readonly<{
   face: Face;
   name: string;
   place: string;
   about: string;
   nameClass?: string;
+  // Only who they are: their kobold, name and place line.
+  compact?: boolean;
 }>) {
   const t = useTranslation().t;
   return (
@@ -39,15 +42,17 @@ export function PersonaTile({
           )}
         </span>
       </span>
-      <span className="line-clamp-3 text-[14px] leading-normal text-foreground-2">
-        {about ? (
-          <Markdown text={about} inline />
-        ) : (
-          <span className="text-muted-foreground">
-            {t("personas.noDescription")}
-          </span>
-        )}
-      </span>
+      {!compact && (
+        <span className="line-clamp-3 text-[14px] leading-normal text-foreground-2">
+          {about ? (
+            <Markdown text={about} inline />
+          ) : (
+            <span className="text-muted-foreground">
+              {t("personas.noDescription")}
+            </span>
+          )}
+        </span>
+      )}
     </>
   );
 }

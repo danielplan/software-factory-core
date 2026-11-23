@@ -10,10 +10,21 @@
   "persona": {
     "label": "Neue Persona",
     "add": "{{name}} hinzufügen",
-    "change": "Etwas ändern",
     "yes": "Ja, füge {{name}} hinzu.",
     "added": "{{name}} ist bei den Personas",
-    "open": "Öffnen",
     "notAdded": "Nicht hinzugefügt"
+  },
+  "proposal": {
+    "waiting": "Wartet auf dich",
+    "change": "Etwas ändern",
+    "open": "Öffnen"
+  },
+  "mission": {
+    "label": "Mission zum Losschicken",
+    "send": "{{name}} losschicken",
+    "yes": "Ja, schick los.",
+    "sent": "{{name}} ist auf der Mission",
+    "watch": "Zusehen",
+    "notSent": "Nicht losgeschickt"
   }
 }

@@ -10,10 +10,21 @@
   "persona": {
     "label": "Persona da aggiungere",
     "add": "Aggiungi {{name}}",
-    "change": "Cambia qualcosa",
     "yes": "Sì, aggiungi {{name}}.",
     "added": "{{name}} è tra le personas",
-    "open": "Apri",
     "notAdded": "Non aggiunta"
+  },
+  "proposal": {
+    "waiting": "Aspetta te",
+    "change": "Cambia qualcosa",
+    "open": "Apri"
+  },
+  "mission": {
+    "label": "Missione da inviare",
+    "send": "Invia {{name}}",
+    "yes": "Sì, invialo.",
+    "sent": "{{name}} è in missione",
+    "watch": "Guarda",
+    "notSent": "Non inviata"
   }
 }
