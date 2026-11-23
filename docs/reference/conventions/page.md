@@ -19,7 +19,7 @@ promises, folders, extra libraries and what still differs from the kit.
 | talking to the server                                           | `packages/dashboard/src/api/`                                  |
 | a piece several areas share                                     | `packages/dashboard/src/components/`                           |
 | shadcn's pieces, as generated                                   | `packages/dashboard/src/components/ui/`                        |
-| the shell's pieces (sidebar, page head)                         | `packages/dashboard/src/components/layout/`                    |
+| the shell and its pieces (sidebar, page head, Sprocket's bar)   | `packages/dashboard/src/components/layout/`                    |
 | a general hook, or logic without screens                        | `packages/dashboard/src/hooks/`, `packages/dashboard/src/lib/` |
 | a word on a screen                                              | `packages/dashboard/src/i18n/locales/<language>/`              |
 | putting the areas together: routes, the installed extensions    | `packages/dashboard/src/app/`                                  |

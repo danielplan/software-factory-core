@@ -13,6 +13,8 @@ it what they want done. It is their guide: it finds out what they want,
 takes them to the right place, and hands the work on to the kobold whose job
 it is. It does nothing alone
 ([decision 0010](../../decisions/0010-sprocket-is-the-guide.md)).
+While Kobble is set up, the same bar is the setup coach's: it says what the
+coach does, and opened it holds that conversation ([setup](setup.md)).
 
 - **Taking people somewhere** needs no yes: `go_to` a page, or what is open
   in it (`#explore/X-3`). Every hand-off also takes them where that kobold
@@ -65,6 +67,7 @@ something wrong goes to [the feedback board](feedback-board.md).
 | Its plug   | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`            |
 | Its guide  | `packages/skills/guides/support-kobold.md`                                             |
 | The window | `packages/dashboard/src/features/support/`                                             |
+| The bar    | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup        |
 
 The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 `/stop`.
