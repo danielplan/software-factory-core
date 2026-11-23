@@ -18,7 +18,7 @@ import { explorationPageSchema } from "@/api/schemas/explorations";
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
-import { isNoStart, NoStart } from "./board/no-start";
+import { isNoStart, NoStart, showsNoStart } from "./board/no-start";
 import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
 
@@ -49,8 +49,10 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   // A made prototype in a project that does not say how to start it: said
   // at once, not only after Start is pressed.
   const noStart =
-    isNoStart(said) ||
-    (!data.canRun && data.board.things.some((one) => one.kind === "prototype"));
+    showsNoStart() &&
+    (isNoStart(said) ||
+      (!data.canRun &&
+        data.board.things.some((one) => one.kind === "prototype")));
   const press = (path: string, body: object) => {
     say(null);
     setPending(path);

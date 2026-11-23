@@ -51,16 +51,18 @@ function Message() {
 }
 
 // Variant C: nobody has to know what factory.json is.
-function Steps() {
+function Steps({
+  title = TITLE,
+  text = "Kobble does not know how to start your project yet. This is set once, by someone who knows the code, and takes them a few minutes.",
+}: Readonly<{ title?: string; text?: string }>) {
   return (
     <>
-      <ProblemBox
-        title={TITLE}
-        text="Kobble does not know how to start your project yet. This is set once, by someone who knows the code, and takes them a few minutes."
-      >
+      <ProblemBox title={title} text={text}>
         <ol className="mt-2 grid list-decimal gap-1 pl-5 text-[13px] text-foreground/80">
           <li>Copy the message below.</li>
-          <li>Send it to your developer, or to whoever looks after the code.</li>
+          <li>
+            Send it to your developer, or to whoever looks after the code.
+          </li>
           <li>When they say it is done, press Start again on the prototype.</li>
         </ol>
         <Message />
@@ -69,7 +71,8 @@ function Steps() {
   );
 }
 
-type Stage = "ask" | "reading" | "writing" | "trying" | "keep" | "kept" | "problem";
+type Stage =
+  "ask" | "reading" | "writing" | "trying" | "keep" | "kept" | "problem";
 
 const WORKING: Stage[] = ["reading", "writing", "trying"];
 const DOING: Record<string, string> = {
@@ -223,7 +226,19 @@ function Kobold() {
   );
 }
 
+// Variant D shows the box only when Tinker could not work it out.
+export function showsNoStart(): boolean {
+  return VARIANT !== "D" || STATE === "problem";
+}
+
 export function NoStart() {
+  if (VARIANT === "D")
+    return (
+      <Steps
+        title="Tinker could not work out how to start this prototype"
+        text="It read the project but found no way to start it. This is set once, by someone who knows the code, and takes them a few minutes."
+      />
+    );
   return VARIANT === "C" ? <Steps /> : <Kobold />;
 }
 

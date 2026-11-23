@@ -18,6 +18,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { Frame, useBoardDo } from "./frame";
+import {
+  madeUpStart,
+  MadeUpScreen,
+  TinkerLine,
+  useMadeUpStart,
+} from "./made-up-start";
 import { Making, MakingLine } from "./prototype-making";
 import { Starting } from "./prototype-starting";
 import { States } from "./prototype-states";
@@ -138,13 +144,17 @@ function Shown({
   title,
   at,
   start,
+  madeUp = false,
 }: Readonly<{
   run: VersionRun | undefined;
   shown: VersionRun | undefined;
   title: string;
   at: number;
   start: (() => void) | null;
+  // Variant D, running: the made-up screen stands in for the app.
+  madeUp?: boolean;
 }>) {
+  if (madeUp) return <MadeUpScreen style={SCREEN} />;
   const live = run?.state === "running" && run.url !== null;
   if (run?.making && !live) return <Making run={run} />;
   return (
@@ -175,9 +185,13 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const act = useBoardDo(page.exploration.id);
   const [picked, pick] = useState<string | null>(null);
   const [state, setState] = useState("");
+  const made = useMadeUpStart();
   if (thing.kind !== "prototype") return null;
   const { variants, variant, agreed } = variantsOf(thing, picked);
-  const run = page.runs.find((one) => one.version === thing.key);
+  const madeUp = madeUpStart(page.canRun);
+  const run = madeUp
+    ? made.run
+    : page.runs.find((one) => one.version === thing.key);
   const open = ["waiting", "exploring"].includes(page.exploration.status);
   const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);
@@ -210,14 +224,17 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         shown={shownRun}
         title={`${thing.key} · ${thing.name}`}
         at={thing.key.charCodeAt(0) - 65}
+        madeUp={madeUp && made.running}
         start={
           open
             ? () => {
-                act("open", { key: thing.key });
+                if (madeUp) made.start();
+                else act("open", { key: thing.key });
               }
             : null
         }
       />
+      {madeUp && <TinkerLine />}
       <About words={stateWords(run, t)} test={page.tests[thing.key] ?? null} />
     </Frame>
   );
