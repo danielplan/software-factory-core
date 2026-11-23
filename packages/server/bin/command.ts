@@ -19,6 +19,7 @@ import { topCommand } from "../src/top-commands.ts";
 import { computerTools } from "../src/installables.ts";
 import { upgradeCommand } from "../src/upgrade/command.ts";
 import { startServer } from "../src/app/server.ts";
+import { deviceAddress, lanKey } from "../src/app/reach.ts";
 import { Session } from "../src/session.ts";
 import { githubSetup } from "../src/extensions/github/board-setup.ts";
 import { addOnModules, KOBBLE_MODULES } from "../src/app/modules.ts";
@@ -66,6 +67,9 @@ const { values, positionals } = parseArgs({
   options: {
     port: { type: "string", default: "4300" },
     "no-open": { type: "boolean", default: false },
+    // Only this computer may open it, not the owner's other devices on the
+    // local network (an iPad), which otherwise may with the key.
+    local: { type: "boolean", default: false },
   },
 });
 const port = Number(values.port);
@@ -97,12 +101,23 @@ const session = new Session({
   },
   tools: computerTools(),
 });
-const started = startServer({ session, page, port, modules, restartFactory });
+const reach = { lan: !values.local, key: values.local ? "" : lanKey() };
+const started = startServer({
+  session,
+  page,
+  port,
+  modules,
+  restartFactory,
+  reach,
+});
 changed = started.changed;
 resumeParts(process.env[RESUME]);
 
 const address = `http://localhost:${String(port)}`;
 console.log(`The software factory for ${project}: ${address}`);
+const onDevices = deviceAddress(reach, port);
+if (onDevices)
+  console.log(`On your iPad or phone, on this network: ${onDevices}`);
 console.log(
   "Keep this window open. Closing it stops what the factory started.",
 );

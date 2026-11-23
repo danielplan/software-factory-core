@@ -169,6 +169,14 @@ test("a new card lands in the backlog; mistakes are said plainly", async () => {
   );
 });
 
+test("a new card lands in its column on a board that adds new issues by itself", async () => {
+  const github = pretendGitHub({ addsItself: true });
+  assert.match(
+    (await card(project(), github.cli, "new", "Export", "to", "CSV")).said,
+    /^#9 {2}Backlog {2}Export to CSV/,
+  );
+});
+
 test("cards depend on and replace each other; something noticed becomes a card that links back", async () => {
   const github = pretendGitHub();
   const folder = project();

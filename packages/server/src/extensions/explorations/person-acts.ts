@@ -21,7 +21,12 @@ const actSchema = z.discriminatedUnion("act", [
     x: z.number(),
     y: z.number(),
   }),
-  z.object({ act: z.literal("agree"), id: z.string(), agreed: z.boolean() }),
+  z.object({
+    act: z.literal("agree"),
+    id: z.string(),
+    agreed: z.boolean(),
+    variant: z.string().optional(),
+  }),
   z.object({
     act: z.literal("choose"),
     id: z.string(),

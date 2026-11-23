@@ -31,13 +31,26 @@ place, with decisions folded into it, open points marked "?", and few notes
 ([decision 0005](../../decisions/0005-whiteboard-not-pipeline.md)). It uses
 the board's tools: look at the board, add notes, diagrams and choices,
 change and remove things, link them, point at one, mark it agreed or a
-sketch, choose an option, and park another idea as an exploration of its
+sketch (a prototype agreed with the variant it names, or else the one
+shown), choose an option, and park another idea as an exploration of its
 own.
 
 People move things, switch sketch and agreed, choose an option, add pictures
 and click things to attach them to what they type next; Doodle hears what
 they did with their next words. Words sent while it answers join that
 answer, and **Stop** ends it.
+
+## What Doodle did, in the chat
+
+Doodle's words keep the steps it took between them, where they happened:
+each a small grey line in the language shown ("Asked Tinker to change the
+prototype", "Looked at the board"), three or more in a row folded into one
+line ("4 steps") that opens. They show while Doodle works and stay
+afterwards. The server keeps them in its words as `<!-- step: name -->`
+(`coach/kept-steps.ts`; Markdown shows nothing of them elsewhere, the voice
+leaves them out); the page words each step by its name (`explore.steps`). A
+turn Kobble starts itself opens with what started it, as its first step
+("Tinker finished the prototype").
 
 ## While Doodle reads
 
