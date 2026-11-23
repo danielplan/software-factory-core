@@ -20,12 +20,45 @@ import { useLivePrototype } from "./board/live-prototype";
 import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
 
+// Prototype: an exploration with an empty board while the explorer reads,
+// made up, so the change shows without starting a real one.
+const MADE_UP_ID = "X-0";
+const madeUp: Page = {
+  exploration: {
+    id: MADE_UP_ID,
+    title: "Made-up exploration (the explorer is reading)",
+    status: "exploring",
+    personas: [],
+    signals: [],
+    heard: [],
+    problem: "",
+    created: "2026-01-01T09:00:00.000Z",
+    work: null,
+  },
+  personas: [],
+  heard: [],
+  board: { things: [], links: [] },
+  runs: [],
+  canRun: false,
+  tests: {},
+  talk: {
+    messages: [],
+    writing: "",
+    activity: null,
+    problem: null,
+    pointed: null,
+  },
+  handingOff: null,
+};
+
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
-  const { data, problem } = useRead(
+  const read = useRead(
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
     explorationPageSchema,
   );
+  const data = id === MADE_UP_ID ? madeUp : read.data;
+  const problem = read.problem;
   const [said, say] = useState<string | null>(null);
   // The things a person attached to what they type next.
   const [attached, setAttached] = useState<string[]>([]);

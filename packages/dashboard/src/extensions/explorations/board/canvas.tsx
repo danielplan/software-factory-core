@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useBoardDo } from "./frame";
 import type { ThingNode } from "./nodes";
 import { PrototypeNode } from "./prototype-node";
+import { ReadingBoard } from "./reading-board";
 import {
   ChoiceNode,
   DiagramNode,
@@ -99,6 +100,12 @@ function Canvas({ page, attached, onPick }: BoardProps) {
           {pictures.refused}
         </p>
       )}
+      {/* Prototype: while the explorer reads, the board is empty. */}
+      {page.board.things.length === 0 &&
+        page.exploration.status !== "waiting" &&
+        page.talk.writing !== null && (
+          <ReadingBoard activity={page.talk.activity} />
+        )}
       <ReactFlow<ThingNode>
         nodes={nodes}
         edges={edges}
