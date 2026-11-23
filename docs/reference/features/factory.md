@@ -46,7 +46,9 @@ state's colour (see [the design system](../design-system.md#pieces)).
    same branch. It never merges.
 
 Before each build or fix on a branch that exists, the latest main is merged
-in; a clash goes to the builder to settle, or back to the team (Resolve).
+in, and again right before the checks and the pull request, since main moves
+while a card is built (`builder/newest-main.ts`); a clash goes to the
+builder to settle, or back to the team (Resolve).
 When Claude's usage limit stops a job, the card says so and waits where it
 is, and the factory carries on once the limit resets.
 
