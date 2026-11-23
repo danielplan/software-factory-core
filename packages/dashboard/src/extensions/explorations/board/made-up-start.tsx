@@ -4,7 +4,7 @@
 // here: the starting steps and the screen are made up, and say so.
 
 import { Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import type { VersionRun } from "@/api/client";
 
@@ -27,8 +27,40 @@ export function madeUpStart(canRun: boolean): boolean {
   return VARIANT === "D" && !canRun && STATE !== "problem";
 }
 
-export function useMadeUpStart() {
+// Which prototype started first this way: only it carries Tinker's line,
+// since what Tinker set up is kept for the whole team once, not per prototype.
+let first: string | null = null;
+const listeners = new Set<() => void>();
+
+function claim(key: string, byAddress: boolean) {
+  // Started by hand: the first to start. Picked by the address: the first
+  // prototype on the board.
+  if (first === null || (byAddress && key < first)) {
+    first = key;
+    listeners.forEach((one) => {
+      one();
+    });
+  }
+}
+
+function useFirst(): string | null {
+  return useSyncExternalStore(
+    (listen) => {
+      listeners.add(listen);
+      return () => {
+        listeners.delete(listen);
+      };
+    },
+    () => first,
+  );
+}
+
+export function useMadeUpStart(key: string) {
   const [step, setStep] = useState<Step>(firstStep);
+  const shown = useFirst();
+  useEffect(() => {
+    if (firstStep() !== "idle" && madeUpStart(true)) claim(key, true);
+  }, [key]);
   const [since, setSince] = useState(() => new Date().toISOString());
   useEffect(() => {
     // A state picked by the address stays as it is.
@@ -62,7 +94,10 @@ export function useMadeUpStart() {
   return {
     run,
     running: step === "running",
+    // Tinker's line, on the first prototype that started this way.
+    line: shown === key && step !== "idle",
     start: () => {
+      claim(key, false);
       setSince(new Date().toISOString());
       setStep("copy");
     },
@@ -96,8 +131,7 @@ export function TinkerLine() {
   return (
     <p className="flex items-start gap-1.5 text-xs text-foreground-2">
       <Sparkles aria-hidden className="mt-0.5 size-3 flex-none text-blue" />
-      Tinker set up how to start your app; it is kept for the team once a
-      developer checks it.
+      Tinker set up how to start your app, for the whole team.
     </p>
   );
 }

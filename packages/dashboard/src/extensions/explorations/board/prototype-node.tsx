@@ -185,7 +185,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const act = useBoardDo(page.exploration.id);
   const [picked, pick] = useState<string | null>(null);
   const [state, setState] = useState("");
-  const made = useMadeUpStart();
+  const made = useMadeUpStart(thing.kind === "prototype" ? thing.key : "");
   if (thing.kind !== "prototype") return null;
   const { variants, variant, agreed } = variantsOf(thing, picked);
   const madeUp = madeUpStart(page.canRun);
@@ -234,7 +234,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
             : null
         }
       />
-      {madeUp && <TinkerLine />}
+      {madeUp && made.line && <TinkerLine />}
       <About words={stateWords(run, t)} test={page.tests[thing.key] ?? null} />
     </Frame>
   );
