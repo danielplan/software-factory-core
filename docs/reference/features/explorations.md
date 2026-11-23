@@ -72,7 +72,9 @@ The page shows each step of the hand-off while it runs.
 - Only Explorations reads and writes the `explorations` records; others use
   its `ideas` plug.
 - A prototype nobody agreed on, or an agreed one with variants and none
-  chosen, is never handed off.
+  chosen, is never handed off. The way out of a prototype nobody wants
+  (a broken first version, say) is to take it off the board, which Doodle
+  does on the team's word; the refusal says so.
 
 ## Where it lives
 

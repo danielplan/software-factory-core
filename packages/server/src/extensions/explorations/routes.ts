@@ -146,6 +146,9 @@ function makersFor(
       const handed = await handOffNow(id);
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
     },
+    release: (id, prototype) => {
+      prototypes.release(id, prototype);
+    },
     deeper: (id, prototype, keep, ways) => {
       const keys = prototypes.deeper(
         explorationOf(store(), id),

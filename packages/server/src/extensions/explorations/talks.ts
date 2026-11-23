@@ -71,6 +71,9 @@ type Makers = {
   ) => string[];
   // Hands the exploration off, as the Hand off button does.
   handOff: (id: string) => Promise<string>;
+  // A prototype taken off the board: refused while its maker is on it;
+  // else what runs of it stops.
+  release: (id: string, prototype: string) => void;
 };
 
 export class ExplorationTalks {
@@ -258,7 +261,12 @@ export class ExplorationTalks {
     const store = this.options.store();
     const exploration = store.get("explorations", id);
     if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
-    const done = applyAct(completed(exploration, store.board(id)), act, by);
+    const board = completed(exploration, store.board(id));
+    const done = applyAct(board, act, by);
+    if (act.act === "remove") {
+      const gone = board.things.find((one) => one.id === act.id);
+      if (gone?.kind === "prototype") this.makers().release(id, gone.key);
+    }
     store.saveBoard(id, done.board);
     this.options.onChange();
     return { said: `${done.said}\n\n${this.look(id)}` };

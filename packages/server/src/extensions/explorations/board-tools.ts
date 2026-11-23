@@ -132,7 +132,8 @@ const TOOLS: {
   },
   {
     name: "remove_thing",
-    description: "Take a thing off the board, with its arrows.",
+    description:
+      "Take a thing off the board, with its arrows. A prototype too, once the team says it is not to be built (a broken first version, say): not one that is agreed (mark it a sketch first, with `agree`) and not one being made. Its branch stays.",
     input: { id: z.string() },
     act: (a) => ({ act: "remove", id: String(a.id) }),
   },
@@ -218,7 +219,7 @@ function serverFor(on: BoardTools): McpServer {
     "hand_off",
     {
       description:
-        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off. With a prototype on the board, it must be agreed first (agree, with the variant chosen, in an earlier step): the builder builds from its code and look, and a prototype that is not agreed is refused. An idea that changes no screen (how something works, a rule) and has no prototype is handed off from the board's agreed choices, notes and diagrams.",
+        "Hand the exploration off to the factory, as the Hand off button does: the agreed prototype (and its variant) becomes a card in To do, the go-ahead to build it, and the exploration closes. Only after the team said yes to handing it off. With a prototype on the board, it must be agreed first (agree, with the variant chosen, in an earlier step): the builder builds from its code and look, and a prototype that is not agreed is refused, unless the team wants it gone: take it off the board (`remove_thing`) first. An idea that changes no screen (how something works, a rule) and has no prototype is handed off from the board's agreed choices, notes and diagrams.",
     },
     () => toolAnswer(() => on.handOff()),
   );
