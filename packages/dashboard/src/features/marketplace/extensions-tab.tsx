@@ -1,5 +1,6 @@
 // The Marketplace's first tab: a search field and filters, then the
-// extensions as cards, the installed ones first.
+// extensions as cards, the installed ones first, and at the end the way to
+// an extension of the team's own (make-own.tsx).
 
 import { Download, Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +19,10 @@ import {
 import { cn } from "@/lib/utils";
 
 import { Card } from "./card";
+import { MakeOwn } from "./make-own";
+
+// The installed extensions first, then those to install.
+const SECTIONS = ["installed", "available"] as const;
 
 // The installed extensions first, then those to install.
 const SECTIONS = ["installed", "available"] as const;
@@ -68,6 +73,7 @@ export function ExtensionsTab({
           />
         ))
       )}
+      <MakeOwn />
     </>
   );
 }
