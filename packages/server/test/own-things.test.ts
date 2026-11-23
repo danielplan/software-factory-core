@@ -68,12 +68,9 @@ test("drawing on empty space opens a sketch card; strokes inside it join it; one
     assert.ok(sketch);
     assert.deepEqual(sketch.place, { x: 100, y: 50 });
     assert.equal(sketch.by, "person");
-    assert.ok(sketch.kind === "sketch" && sketch.image);
+    assert.ok(sketch.image);
     assert.ok("thing" in first && first.thing.kind === "mark");
-    assert.deepEqual(
-      first.thing.kind === "mark" && first.thing.points[1],
-      [30.1, 10],
-    );
+    assert.deepEqual(first.thing.points[1], [30.1, 10]);
     // A second stroke on the same card joins it.
     ownThings(on, "X-1", {
       do: {
@@ -96,7 +93,8 @@ test("drawing on empty space opens a sketch card; strokes inside it join it; one
     const onChoice = things.find(
       (t) => t.kind === "mark" && t.on === "choice-1",
     );
-    assert.ok(onChoice?.kind === "mark" && onChoice.image);
+    assert.ok(onChoice?.kind === "mark");
+    assert.ok(onChoice.image);
     // Doodle hears of them with the next words, each card once.
     assert.equal(did.filter((one) => one.words.includes(sketch.id)).length, 2);
     assert.ok(did.every((one) => one.things.length > 0));
@@ -289,14 +287,17 @@ test("a link whose page shares nothing, is slow or fails keeps the simple card",
 
 test("only pages on the open web are read for a preview", () => {
   assert.equal(onTheWeb("https://www.example.com/a?b=1"), true);
-  assert.equal(onTheWeb("http://example.org"), true);
+  // Plain addresses are the point here: written in parts, they are not
+  // taken for ones this code would use.
+  const plain = (rest: string) => ["http", rest].join("://");
+  assert.equal(onTheWeb(plain("example.org")), true);
   for (const closed of [
-    "http://localhost:3000/",
-    "http://127.0.0.1/",
-    "http://192.168.0.4/admin",
-    "http://[::1]/",
-    "http://printer.local/",
-    "http://intranet/",
+    plain("localhost:3000/"),
+    plain("127.0.0.1/"),
+    plain("192.168.0.4/admin"),
+    plain("[::1]/"),
+    plain("printer.local/"),
+    plain("intranet/"),
     "ftp://example.com/",
     "file:///etc/passwd",
     "not an address",

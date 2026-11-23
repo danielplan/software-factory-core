@@ -25,6 +25,7 @@ import {
   type MadeReport,
   reviewWords,
 } from "./made.ts";
+import { PersonNews, takenIn } from "./person-news.ts";
 import { type TalkView, viewOf } from "./talk-view.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
@@ -56,10 +57,7 @@ export class ExplorationTalks {
     { thing: string; times: number }
   >();
   // What people did on a board since the kobold last heard, by exploration.
-  private readonly done = new Map<string, string[]>();
-  // The things of theirs among them, to be marked taken in once the kobold
-  // has answered with them in front of it.
-  private readonly hearing = new Map<string, string[]>();
+  private readonly news = new PersonNews();
   private toolsUrl = "";
   private readonly options: TalksOptions;
   constructor(options: TalksOptions) {
@@ -111,10 +109,10 @@ export class ExplorationTalks {
   review(id: string, key: string, made: MadeReport): void {
     const talk = this.talk(id);
     if (talk.working) {
-      this.done.set(id, [
-        ...(this.done.get(id) ?? []),
+      this.news.add(
+        id,
         `got prototype ${key} made (the maker says: ${made.said.slice(0, 600)})`,
-      ]);
+      );
       this.tell(
         id,
         `Prototype ${key} is ready (${made.name}). Try it on the board.`,
@@ -137,17 +135,14 @@ export class ExplorationTalks {
 
   // `things`: what they put on the board by it, taken in once heard.
   personDid(id: string, words: string, things: string[] = []): void {
-    const so = this.done.get(id) ?? [];
-    this.done.set(id, so.includes(words) ? so : [...so, words]);
-    if (things.length > 0)
-      this.hearing.set(id, [...(this.hearing.get(id) ?? []), ...things]);
+    this.news.add(id, words, things);
   }
 
   // Something a person put on the board that the kobold hears at once, said
   // as their own words; it is taken in once the kobold has answered. While
   // it is still answering, it hears it with the next words.
   sayNow(id: string, words: string, things: string[]): void {
-    this.hearing.set(id, [...(this.hearing.get(id) ?? []), ...things]);
+    this.news.hold(id, things);
     void this.say(id, words).catch(() => {
       this.personDid(id, `said: ${words}`);
     });
@@ -266,11 +261,9 @@ export class ExplorationTalks {
     const store = this.options.store();
     const exploration = explorationOf(store, id);
     const heard = exploration.heard.map((one) => `- ${one.text}`);
-    const did = this.done.get(id) ?? [];
+    const news = this.news.take(id);
+    const did = news.words;
     const making = this.maker?.making(id) ?? [];
-    this.done.delete(id);
-    const heardThings = this.hearing.get(id) ?? [];
-    this.hearing.delete(id);
     const prompt = [
       said,
       ...(did.length > 0
@@ -299,24 +292,9 @@ export class ExplorationTalks {
         ].join("\n\n"),
       ),
     });
-    if (answered) this.takenIn(id, heardThings);
-    else if (heardThings.length > 0) {
-      // Not heard: it hears them again with the next words.
-      this.done.set(id, [...did, ...(this.done.get(id) ?? [])]);
-      this.hearing.set(id, [...heardThings, ...(this.hearing.get(id) ?? [])]);
-    }
-  }
-
-  // What the kobold has acted on is marked taken in; never before.
-  private takenIn(id: string, things: string[]): void {
-    if (things.length === 0) return;
-    const store = this.options.store();
-    const board = store.board(id);
-    const fresh = board.things.map((one) =>
-      things.includes(one.id) ? { ...one, taken: true } : one,
-    );
-    store.saveBoard(id, { ...board, things: fresh });
-    this.options.onChange();
+    if (answered) {
+      if (takenIn(store, id, news.things)) this.options.onChange();
+    } else this.news.giveBack(id, news);
   }
 
   // The conversation about an exploration (its Stop, for one).

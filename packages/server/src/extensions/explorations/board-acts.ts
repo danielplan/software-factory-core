@@ -156,6 +156,10 @@ function theirs(board: Board, act: Act): void {
 
 export function applyAct(board: Board, act: Act, by: By): Done {
   if (by === "kobold") theirs(board, act);
+  return applied(board, act, by);
+}
+
+function applied(board: Board, act: Act, by: By): Done {
   switch (act.act) {
     case "note":
       return added(

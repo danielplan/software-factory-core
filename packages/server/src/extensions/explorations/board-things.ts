@@ -11,6 +11,7 @@ import type {
 } from "@software-factory/core";
 
 import { Refused } from "../../refused.ts";
+import { ownLine } from "./own-lines.ts";
 
 export type Option = { key: string; name: string; difference: string };
 
@@ -147,20 +148,26 @@ export function completed(exploration: Exploration, board: Board): Board {
   return { ...board, things: [...fixed, ...board.things] };
 }
 
-// A picture's file, as the kobold is told to read it.
-const seeing = (exploration: Exploration, file: string) =>
-  `read factory/kobble/explorations/${exploration.id}/pictures/${file} to see it`;
+function headOf(thing: Thing): string {
+  const state = thing.agreed ? "agreed" : "sketch";
+  const whose = thing.by === "person" ? ", the team's own" : "";
+  return `- ${thing.id} (${thing.kind}, ${state}${whose})`;
+}
 
-// What the team's marks on a card come to for the kobold: how many, and the
-// card as last drawn.
-function markLine(
-  head: string,
-  marks: Extract<Thing, { kind: "mark" }>[],
-  exploration: Exploration,
-): string {
-  const image = marks.findLast((one) => one.image)?.image;
-  const count = `${String(marks.length)} pen mark${marks.length === 1 ? "" : "s"} on ${marks[0]?.on ?? ""}`;
-  return `${head}: ${count}${image ? ` (${seeing(exploration, image)}: the marks alone, drawn at the card's size and place)` : ""}`;
+// The problem, or what we heard.
+function fixedWords(kind: "problem" | "heard", exploration: Exploration) {
+  if (kind === "problem") return exploration.problem || "not said yet";
+  return exploration.heard.map((one) => one.text).join(" / ");
+}
+
+function choiceLine(head: string, thing: Extract<Thing, { kind: "choice" }>) {
+  const chosen = thing.chosen ? ` (chosen: ${thing.chosen})` : "";
+  const options = thing.options.map((o) => {
+    const recommended =
+      o.key === thing.recommended ? " (you recommend it)" : "";
+    return `    ${o.key}. ${o.name}: ${o.difference || "—"}${recommended}`;
+  });
+  return [`${head}: ${thing.title}${chosen}`, ...options].join("\n");
 }
 
 function line(
@@ -168,43 +175,24 @@ function line(
   exploration: Exploration,
   all: Thing[] = [],
 ): string {
-  const state = thing.agreed ? "agreed" : "sketch";
-  const whose = thing.by === "person" ? ", the team's own" : "";
-  const head = `- ${thing.id} (${thing.kind}, ${state}${whose})`;
+  const head = headOf(thing);
   switch (thing.kind) {
     case "problem":
-      return `${head}: ${exploration.problem || "not said yet"}`;
     case "heard":
-      return `${head}: ${exploration.heard.map((one) => one.text).join(" / ")}`;
+      return `${head}: ${fixedWords(thing.kind, exploration)}`;
     case "note":
       return `${head}: ${thing.text}`;
     case "choice":
-      return [
-        `${head}: ${thing.title}${thing.chosen ? " (chosen: " + thing.chosen + ")" : ""}`,
-        ...thing.options.map(
-          (o) =>
-            `    ${o.key}. ${o.name}: ${o.difference || "—"}${o.key === thing.recommended ? " (you recommend it)" : ""}`,
-        ),
-      ].join("\n");
+      return choiceLine(head, thing);
     case "prototype":
       return `${head}: ${thing.key} · ${thing.name}, on ${thing.branch}${versionWords(thing)}`;
     case "diagram":
       return `${head}: ${thing.title}`;
     case "picture":
-      return `${head}: ${thing.title} (${seeing(exploration, thing.image)})`;
     case "link":
-      return `${head}: ${thing.title}, on ${thing.site}, ${thing.url}${thing.preview ? ` (its preview: ${seeing(exploration, thing.preview)})` : ""}`;
     case "sketch":
-      return `${head}: a drawing${thing.image ? ` (${seeing(exploration, thing.image)})` : ""}`;
     case "mark":
-      return markLine(
-        head,
-        all.filter(
-          (one): one is typeof thing =>
-            one.kind === "mark" && one.on === thing.on,
-        ),
-        exploration,
-      );
+      return ownLine(head, thing, exploration, all);
   }
 }
 
