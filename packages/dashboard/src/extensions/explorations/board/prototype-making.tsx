@@ -70,23 +70,25 @@ function Page() {
       </div>
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent motion-safe:animate-sweep" />
       <div className="absolute right-3 bottom-2">
-        <div className="relative motion-safe:animate-hop">
-          <Face id="maker">
-            <KoboldHead size={34} hat={MAKER.hat} color={MAKER.color} />
-          </Face>
-          {SPARKS.map((spark) => (
-            <span
-              key={spark.delay}
-              className="absolute top-1 left-1 size-1.5 rounded-full bg-[#ffc94d] opacity-0 motion-safe:animate-spark"
-              style={
-                {
-                  "--spark-x": spark.x,
-                  "--spark-y": spark.y,
-                  animationDelay: spark.delay,
-                } as CSSProperties
-              }
-            />
-          ))}
+        <div className="group/tinker -m-3 p-3">
+          <div className="relative motion-safe:animate-hop motion-safe:group-hover/tinker:animate-none">
+            <Face id="maker" className="-m-2 p-2">
+              <KoboldHead size={34} hat={MAKER.hat} color={MAKER.color} />
+            </Face>
+            {SPARKS.map((spark) => (
+              <span
+                key={spark.delay}
+                className="absolute top-1 left-1 size-1.5 rounded-full bg-[#ffc94d] opacity-0 motion-safe:animate-spark"
+                style={
+                  {
+                    "--spark-x": spark.x,
+                    "--spark-y": spark.y,
+                    animationDelay: spark.delay,
+                  } as CSSProperties
+                }
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -103,7 +105,7 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   return (
     <>
       <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
-        <Face id="maker" className="flex-none">
+        <Face id="maker" className="-m-1.5 flex-none p-1.5">
           <KoboldHead
             size={20}
             hat={MAKER.hat}

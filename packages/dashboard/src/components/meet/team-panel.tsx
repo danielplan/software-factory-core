@@ -2,11 +2,13 @@
 // Tinker too: face, job, where it works, what it does right now and what to
 // do meanwhile. A kobold's face opens it (Face, below); the one clicked is lit.
 
+import { Users } from "lucide-react";
 import { Link } from "react-router";
 import type { ReactNode } from "react";
 
 import { KoboldHead } from "@/components/kobold-face";
 import type { Doing } from "@/components/layout/page-kobold";
+import { Tile } from "@/components/layout/sidebar-links";
 import {
   Dialog,
   DialogContent,
@@ -37,7 +39,11 @@ export function Face({
     <button
       type="button"
       aria-label={`Meet ${memberOf(id).name} and the team`}
-      className={cn("cursor-pointer rounded-md", className)}
+      title="Meet your kobolds"
+      className={cn(
+        "cursor-pointer rounded-lg p-0.5 ring-1 ring-foreground/15 transition-shadow duration-150 hover:ring-2 hover:ring-blue/60 focus-visible:ring-2 focus-visible:ring-blue/60 focus-visible:outline-none",
+        className,
+      )}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -45,6 +51,25 @@ export function Face({
       }}
     >
       {children}
+    </button>
+  );
+}
+
+// "Your kobolds", a row in the sidebar's bottom group, beside Send feedback.
+export function KoboldsRow() {
+  if (VARIANT !== "A") return null;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        openTeam();
+      }}
+      className="group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]"
+    >
+      <Tile color="#667085">
+        <Users aria-hidden />
+      </Tile>
+      Your kobolds
     </button>
   );
 }
