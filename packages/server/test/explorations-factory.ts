@@ -1,11 +1,14 @@
 // A factory with the example company's explorations, a pretend Claude
 // that plays the given turns, and short ways to press the explorations'
-// buttons and read their pages.
+// buttons and read their pages. Its prototypes' branches are in the
+// project, as they are once made.
 
 import { cpSync } from "node:fs";
 import { join } from "node:path";
 
 import { KobbleStore } from "@software-factory/core";
+
+import { git } from "../src/prototypes/copies.ts";
 
 import type { ExplorationPage } from "../src/extensions/explorations/views.ts";
 import { pretendClaude } from "./pretend-claude.ts";
@@ -24,6 +27,7 @@ export async function explorationsFactory(turns: Turn[] = []) {
     recursive: true,
   });
   const store = new KobbleStore(root);
+  madeBranches(staged.project, store);
   const read = async <T>(path: string) =>
     (await (await fetch(`${staged.base}${path}`)).json()) as T;
   const press = async (path: string, body: unknown = {}) => {
@@ -58,4 +62,24 @@ export async function explorationsFactory(turns: Turn[] = []) {
     settled,
     close,
   };
+}
+
+// The example's prototypes were made: their branches are in the project
+// (a prototype whose branch is nowhere was never made, unmade.ts).
+function madeBranches(project: string, store: KobbleStore): void {
+  git(project, ["init", "--quiet", "-b", "main"]);
+  git(project, [
+    "-c",
+    "user.name=t",
+    "-c",
+    "user.email=t@t",
+    "commit",
+    "--quiet",
+    "--allow-empty",
+    "-m",
+    "Start",
+  ]);
+  for (const exploration of store.all("explorations"))
+    for (const thing of store.board(exploration.id).things)
+      if (thing.kind === "prototype") git(project, ["branch", thing.branch]);
 }

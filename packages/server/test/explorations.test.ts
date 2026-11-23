@@ -459,13 +459,9 @@ test("hand off writes handoff.md and the issue, with what was learned", async ()
       },
     } as unknown as Cards;
     // The agreed prototype's persona tests come from Personas' plug.
-    const answer = await handOff(
-      factory.store,
-      "X-1",
-      () => cards,
-      undefined,
-      plugsOf(factory.store).missions,
-    );
+    const answer = await handOff(factory.store, "X-1", () => cards, undefined, {
+      missions: plugsOf(factory.store).missions,
+    });
     assert.deepEqual(answer, { issue: 51, url: "https://example.com/51" });
     const [issue] = made;
     assert.ok(issue);
@@ -512,7 +508,7 @@ test("hand off gives the card the written spec, with the mark of the agreed prot
         seen.push(input.branch ?? "", input.summary);
         return Promise.resolve(spec);
       },
-      plugsOf(factory.store).missions,
+      { missions: plugsOf(factory.store).missions },
     );
     assert.equal(seen[0], "proto/X-1-b");
     assert.match(seen[1] ?? "", /\*\*The question:\*\*/);

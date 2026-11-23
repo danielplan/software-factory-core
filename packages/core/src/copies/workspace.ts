@@ -16,6 +16,7 @@ import { dirname, join } from "node:path";
 
 import { run } from "../processes.ts";
 import { freeBranch, heldElsewhere } from "./free-branch.ts";
+import { fetchOrigin, latestOf } from "./origin.ts";
 import { keepsFiles, linkedToGit, setAside, tellRemade } from "./set-aside.ts";
 import {
   EXAMPLE_END,
@@ -92,7 +93,7 @@ export class Workspace {
       "--quiet",
       "--force",
       "--detach",
-      `origin/${this.settings.baseBranch}`,
+      await latestOf(this.settings.source, this.settings.baseBranch),
     );
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
@@ -118,7 +119,7 @@ export class Workspace {
         "--force",
         "-b",
         branch,
-        `origin/${from}`,
+        await latestOf(this.settings.source, from),
       );
     } else await this.git("checkout", "--quiet", "--force", branch);
     await this.git("clean", "--quiet", "-fd");
@@ -151,7 +152,7 @@ export class Workspace {
       "--force",
       "-B",
       branch,
-      `origin/${from}`,
+      await latestOf(this.settings.source, from),
     );
     await this.git("clean", "--quiet", "-fd");
     this.bringLocalFiles();
@@ -175,7 +176,7 @@ export class Workspace {
   // (it is merged next time). A clash leaves the merge open for the agent:
   // the files that clash, none when it went in by itself.
   async bringInMain(): Promise<string[]> {
-    const main = `origin/${this.settings.baseBranch}`;
+    const main = await latestOf(this.settings.source, this.settings.baseBranch);
     if (await this.succeeds("merge-base", "--is-ancestor", main, "HEAD"))
       return [];
     if ((await this.git("status", "--porcelain")).trim() !== "") return [];
@@ -313,7 +314,7 @@ export class Workspace {
     await oneAtATime(() =>
       retryWhileLocked(async () => {
         await this.ensure();
-        await this.git("fetch", "--quiet", "origin");
+        await fetchOrigin(this.settings.source, this.path);
       }),
     );
   }
@@ -336,7 +337,7 @@ export class Workspace {
       "add",
       "--detach",
       this.path,
-      `origin/${this.settings.baseBranch}`,
+      await latestOf(this.settings.source, this.settings.baseBranch),
     ]);
   }
 
