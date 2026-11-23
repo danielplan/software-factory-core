@@ -15,6 +15,7 @@ import { basename, dirname, join } from "node:path";
 import { type Company, readCompany, Workspace } from "@software-factory/core";
 import { GIT } from "@software-factory/knowledge-base";
 
+import { baseBranchOf } from "../base-branch.ts";
 import { Refused } from "../refused.ts";
 
 export type PrototypeCopy = {
@@ -124,7 +125,7 @@ export async function versionWorkspace(
     {
       source: project,
       workspaces: dirname(copy.folder),
-      baseBranch: mainBranch(project),
+      baseBranch: await baseBranchOf(project),
     },
     basename(copy.folder),
   );
@@ -142,17 +143,6 @@ export function companyOf(root: string): Company {
   const read = readCompany(join(root, "factory.json"));
   if ("problem" in read) throw new Refused(read.problem);
   return read.company;
-}
-
-// The project's main branch: what origin calls its head, otherwise main.
-export function mainBranch(project: string): string {
-  try {
-    return git(project, ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"])
-      .trim()
-      .replace(/^origin\//, "");
-  } catch {
-    return "main";
-  }
 }
 
 export function git(cwd: string, args: string[]): string {

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
 import { BlockCard, BlockEmpty } from "@/components/block-card";
+import { Markdown } from "@/components/markdown";
 
 import type { HomeInput } from "@/lib/home-view";
 
@@ -24,7 +25,7 @@ export function SignalsBlock({
             href="#signals"
             className="block truncate border-t border-line-soft px-4 py-2.5 text-[13px] first:border-t-0 hover:bg-surface"
           >
-            {signal.text}
+            <Markdown text={signal.text} inline />
           </a>
         ))
       )}

@@ -209,11 +209,15 @@ test("Fix, Explore, Add to and Dismiss change the signal and its exploration", a
     rmSync(join(factory.store.root, "signals", "S-0004.json"));
     const page = await factory.read<{
       heard: { id: string; personaName: string | null }[];
+      canRun: boolean;
     }>("/api/kobble/exploration?id=X-1");
     assert.deepEqual(
       page.heard.map((one) => [one.id, one.personaName]),
       [["S-0004", "Mia"]],
     );
+    // Acme says no start command: its prototypes cannot run here, so the
+    // board does not ask to start one (it would only be refused).
+    assert.equal(page.canRun, false);
 
     // Nothing found: a new exploration, waiting.
     const made = await factory.press("/api/kobble/signals/explore", {

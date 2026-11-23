@@ -108,6 +108,17 @@ export class PrototypeMode {
     return this.options.copyOf(idea, version);
   }
 
+  // Whether the project says how to start a prototype (its start command
+  // in factory.json); a company file that cannot be read says no.
+  canStart(): boolean {
+    try {
+      return Boolean(companyOf(this.options.root).prototype?.start);
+    } catch (error) {
+      if (error instanceof Refused) return false;
+      throw error;
+    }
+  }
+
   // Starts the version with the project's start command, in its copy (made
   // when it is not there yet). One that runs or starts is left as it is.
   async start(idea: string, version: string): Promise<VersionRun> {

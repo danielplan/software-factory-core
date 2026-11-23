@@ -21,9 +21,10 @@ prototype, and pictures a person pasted or dropped in. Arrows join things,
 with short labels. Each thing is a **sketch** or **agreed**. The board is
 laid out left to right in columns along its arrows (ELK, layered): an arrow
 leaves a thing on its right and comes in on the left of the next, so arrows
-never loop. A thing a person moved stays where they put it; the layout of
-the others does not make room around it. The Explorations overview shows
-each board in small, laid out the same way.
+never loop. A thing a person moved stays where they put it; the others
+keep their column and move down in it where a moved thing is, so none ends
+up under it (`packages/dashboard/src/lib/around-placed.ts`). The
+Explorations overview shows each board in small, laid out the same way.
 
 Doodle thinks before it answers, then keeps **one living picture** changed in
 place, with decisions folded into it, open points marked "?", and few notes
