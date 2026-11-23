@@ -47,10 +47,10 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
 // What Mimic does on this mission, in plain words.
 function mimicNow(test: PersonaTest, who: string): string {
   const done = test.steps.length;
-  if (test.status === "queued") return `waiting its turn to play ${who}`;
+  if (test.status === "queued") return `Waiting its turn to play ${who}`;
   if (test.status === "running")
-    return `playing ${who} on this mission, step ${String(done + 1)}`;
-  return `played ${who} on this mission: ${String(done)} steps`;
+    return `Playing ${who} on this mission, step ${String(done + 1)}`;
+  return `Played ${who} on this mission: ${String(done)} steps`;
 }
 
 const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
@@ -70,8 +70,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
       <NameTag
         id="tester"
         className="mb-3.5"
-        now={mimicNow(test, persona.name)}
-        means="Nothing to do. What it finds shows below and arrives as signals."
+        line={`${mimicNow(test, persona.name)} · nothing to do, what it finds shows below`}
       />
       <div className={cn(CARD, "px-7 py-[26px]")}>
         <div className="mb-3 flex items-center gap-2">

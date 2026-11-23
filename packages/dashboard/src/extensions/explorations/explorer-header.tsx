@@ -60,13 +60,7 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
             {t("explore.talk.yourExplorer")}
           </span>
         </span>
-        <span
-          className={cn(
-            "truncate text-xs",
-            doing ? "font-medium" : "text-muted-foreground",
-          )}
-          style={doing ? { color } : undefined}
-        >
+        <span className="truncate text-xs text-muted-foreground">
           {doing ?? t("explore.talk.role")}
         </span>
       </span>

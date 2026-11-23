@@ -31,6 +31,8 @@ const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 
 function stateWords(run: VersionRun | undefined, t: TFunction): string | null {
   if (!run) return null;
+  // While Tinker makes it, its name tag says it: no "Starting…" under it.
+  if (run.making) return null;
   if (run.state === "starting") return t("explore.starting");
   if (run.startProblem !== null) return null;
   if (run.state === "failed") return run.problem ?? t("explore.board.stopped");

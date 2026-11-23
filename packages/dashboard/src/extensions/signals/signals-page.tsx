@@ -75,15 +75,10 @@ export function SignalsPage({
       />
       <NameTag
         id="sorter"
-        now={
+        line={
           data && data.signals.length > 0
-            ? `sorting ${String(data.signals.length)} new ${data.signals.length === 1 ? "signal" : "signals"}`
-            : "watching for what comes in"
-        }
-        means={
-          data && data.signals.length > 0
-            ? "Nothing to do. Pick a signal below, then Fix it or Explore it."
-            : "Nothing to do. New signals show up here when they come in."
+            ? `Sorting ${String(data.signals.length)} new ${data.signals.length === 1 ? "signal" : "signals"} · nothing to do, pick one below`
+            : "Watching for what comes in · nothing to do until one arrives"
         }
       />
       {problem && <ProblemBox title={t("signals.cannotRead")} text={problem} />}

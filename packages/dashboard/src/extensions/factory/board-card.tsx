@@ -70,8 +70,7 @@ export function Card({
       {building && (
         <NameTag
           id="builder"
-          now={`building card #${String(card.number)} now`}
-          means="Nothing to do. It asks here if it gets stuck."
+          line={`Building card #${String(card.number)} · nothing to do, it asks here if it gets stuck`}
         />
       )}
       {card.hint && !building && (

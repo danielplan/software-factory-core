@@ -1,7 +1,7 @@
 // PROTOTYPE, "Meet the kobolds": the kobolds are always there
 // where they work. A name tag on the thing a kobold works on, every time:
-// its face, "Name · role", what it does now in plain words and what that
-// means for you. A click opens the "Your kobolds" panel with it lit.
+// its face, "Name · role" and one grey line under it. A click opens the
+// "Your kobolds" panel with it lit.
 // The sidebar's group of kobolds is here too (KoboldGroup).
 
 import { KoboldHead } from "@/components/kobold-face";
@@ -13,15 +13,12 @@ import { memberOf, openTeam, useTeamDoing } from "./meet";
 
 export function NameTag({
   id,
-  now,
-  means,
-  detail,
+  line,
   className,
 }: Readonly<{
   id: string;
-  now: string;
-  means: string;
-  detail?: string | null;
+  // The one grey line under the name: what it does, and what it means for you.
+  line: string;
   className?: string;
 }>) {
   const member = memberOf(id);
@@ -53,16 +50,7 @@ export function NameTag({
         <span className="font-semibold break-words text-foreground">
           {member.name} · {member.role}
         </span>
-        <span
-          className="font-medium break-words [overflow-wrap:anywhere]"
-          style={{ color: member.color }}
-        >
-          {now}
-        </span>
-        {detail && (
-          <span className="break-words text-foreground-2">{detail}</span>
-        )}
-        <span className="break-words text-muted-foreground">{means}</span>
+        <span className="break-words text-muted-foreground">{line}</span>
       </span>
     </button>
   );
@@ -109,12 +97,7 @@ export function KoboldGroup({ doing }: Readonly<{ doing: Doing }>) {
               <span className="truncate text-[13px] text-sidebar-strong">
                 {member.name}
               </span>
-              <span
-                className={cn(
-                  "truncate text-[11px]",
-                  line ? "text-sidebar-foreground" : "text-sidebar-muted",
-                )}
-              >
+              <span className="truncate text-[11px] text-sidebar-muted">
                 {line ?? "Resting"}
               </span>
             </span>

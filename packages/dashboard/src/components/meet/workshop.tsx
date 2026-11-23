@@ -211,19 +211,17 @@ function Figure({
   );
 }
 
-// What the kobold does now, as plain words in its own colour (no box).
+// What the kobold does now, in the quiet grey of secondary text (no colour).
 function Now({
-  member,
   now,
   className,
-}: Readonly<{ member: Member; now: string; className?: string }>) {
+}: Readonly<{ now: string; className?: string }>) {
   return (
     <span
       className={cn(
-        "line-clamp-4 text-[12px] leading-snug font-medium break-words [overflow-wrap:anywhere]",
+        "line-clamp-4 text-[11.5px] leading-snug break-words text-muted-foreground [overflow-wrap:anywhere]",
         className,
       )}
-      style={{ color: member.color }}
       title={now}
     >
       {now}
@@ -231,8 +229,8 @@ function Now({
   );
 }
 
-// Lit: the kobold you came from, shown by a faint light behind its face and
-// its name in blue, never a frame.
+// Lit: the kobold you came from, shown by a faint light behind its face,
+// never a frame; its name stays as it is.
 function Lit({
   member,
   lit,
@@ -283,14 +281,13 @@ function Station({
       <span
         className={cn(
           "mt-2 text-[14px] font-semibold group-hover:underline group-hover:underline-offset-4",
-          lit && "text-blue",
           open && "underline underline-offset-4",
         )}
       >
         {member.name}
       </span>
       <span className="text-[11.5px] text-muted-foreground">{member.role}</span>
-      {now && <Now member={member} now={now} className="mt-1" />}
+      {now && <Now now={now} className="mt-1" />}
     </button>
   );
 }
@@ -383,7 +380,6 @@ function Supervisor({
         <span
           className={cn(
             "text-[16px] font-semibold tracking-[-0.01em]",
-            lit && "text-blue",
             open && "underline underline-offset-4",
           )}
         >
@@ -392,7 +388,7 @@ function Supervisor({
             · looks after the team and answers you, on every page
           </span>
         </span>
-        {now && <Now member={member} now={now} className="mt-1" />}
+        {now && <Now now={now} className="mt-1" />}
       </span>
     </button>
   );

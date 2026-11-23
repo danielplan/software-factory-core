@@ -38,8 +38,10 @@ function aboutOf(since: string | null, now: number): string {
   return `about ${String(Math.max(1, 3 - Math.floor(seconds / 60)))} min`;
 }
 
-const WHEN_READY =
-  "Nothing to do. You can switch between the variants here when it's ready.";
+// The one grey line of Tinker's tag.
+function tinkerLine(run: VersionRun, soon: string): string {
+  return `Making variant ${run.version} to try · ${soon} · nothing to do until it's ready`;
+}
 
 export function clockOf(since: string | null, now: number): string | null {
   if (!since) return null;
@@ -109,14 +111,7 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
   useTinkerNow(run);
   const soon = aboutOf(run.since, useNow());
   if (!(run.state === "running" && run.url)) return null;
-  return (
-    <NameTag
-      id="maker"
-      now={`making variant ${run.version} to try, ${soon}`}
-      detail={run.activity}
-      means={WHEN_READY}
-    />
-  );
+  return <NameTag id="maker" line={tinkerLine(run, soon)} />;
 }
 
 // What Tinker does now, for the team panel, while this card makes a version.
@@ -138,12 +133,7 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
   return (
     <div className="grid gap-2.5">
       <Page />
-      <NameTag
-        id="maker"
-        now={`making variant ${run.version} to try, ${soon}`}
-        detail={run.activity}
-        means={WHEN_READY}
-      />
+      <NameTag id="maker" line={tinkerLine(run, soon)} />
     </div>
   );
 }
