@@ -22,12 +22,11 @@ import { withThing } from "./board-things.ts";
 import { MakerDesk } from "./maker-desk.ts";
 import { makeOne } from "./making.ts";
 import type { MakerTools } from "./maker-tools.ts";
-import { beingMadeIn, lookAt, notWhileMade, running } from "./looks.ts";
+import { beingMadeIn, lookAt, notWhileMade } from "./looks.ts";
 import type { Told } from "./made.ts";
 
 import {
   prototypeOf,
-  shownAddress,
   choicePrototype,
   runsShown,
   type Made,
@@ -38,6 +37,8 @@ import {
 import type { Browser } from "../../kobble/browser.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { deeperIn, type Way } from "./deeper.ts";
+import { cutOffAsks } from "./cut-off.ts";
+import { addressOf } from "./address.ts";
 
 // How a change asked for starts: now (a new run), told (to the maker at
 // work, in its run) or waits (for the run after it).
@@ -178,6 +179,7 @@ export class ExplorationPrototypes {
     board: Board,
     key: string,
     change?: string,
+    resumed = false,
   ): void {
     this.mode.set(exploration.id, key, {
       making: true,
@@ -186,7 +188,7 @@ export class ExplorationPrototypes {
       problem: null,
     });
     this.mark(exploration.id, key, { making: true });
-    void this.making(exploration, board, key, change).catch(
+    void this.making(exploration, board, key, change, resumed).catch(
       (error: unknown) => {
         const problem = error instanceof Error ? error.message : String(error);
         this.mark(exploration.id, key, {});
@@ -218,23 +220,10 @@ export class ExplorationPrototypes {
   }
 
   // Where it runs, started and waited for (for a persona test).
-  async address(
-    exploration: string,
-    key: string,
-    persona?: string,
-  ): Promise<string> {
+  async address(exploration: string, key: string, persona?: string) {
     await this.open(exploration, key, persona);
-    const url = await running(this.mode, exploration, key).catch(
-      (error: unknown) => {
-        throw new Refused(
-          `Prototype ${key} did not start: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      },
-    );
-    return shownAddress(
-      url,
-      prototypeOf(this.options.store().board(exploration), key),
-    );
+    const board = this.options.store().board(exploration);
+    return addressOf(this.mode, exploration, key, prototypeOf(board, key));
   }
 
   // A prototype taken off the board: refused while its maker is on it, else
@@ -346,11 +335,19 @@ export class ExplorationPrototypes {
     return "now";
   }
 
+  // Every maker the factory closed on, picked up again (cut-off.ts).
+  pickUpCutOff(): void {
+    const making = (id: string, key: string) => this.mode.runOf(id, key).making;
+    for (const one of cutOffAsks(this.options, making))
+      this.begin(one.exploration, one.board, one.key, one.change, true);
+  }
+
   private async making(
     exploration: Exploration,
     board: Board,
     key: string,
     change?: string,
+    resumed = false,
   ): Promise<void> {
     const made = prototypeOf(board, key);
     if (!made) return;
@@ -363,6 +360,7 @@ export class ExplorationPrototypes {
       board,
       made,
       change,
+      resumed,
       mark: (now) => {
         this.mark(exploration.id, key, now);
       },

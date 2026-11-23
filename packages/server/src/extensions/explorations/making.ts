@@ -22,6 +22,7 @@ import { lookAndFix, type Looks } from "./looks.ts";
 import { type Failed, finishMaking, type Ready } from "./made.ts";
 import { askerFor, type MakerDesk } from "./maker-desk.ts";
 import { askFor } from "./making-words.ts";
+import { dropAsked, keepAsked } from "./cut-off.ts";
 import { codeMaps } from "./product-picture.ts";
 import type { Made } from "./versions.ts";
 
@@ -39,6 +40,8 @@ type MakeOn = {
   board: Board;
   made: Made;
   change: string | undefined;
+  // Picked up after the factory closed on it (cut-off.ts).
+  resumed?: boolean;
   mark: (now: { opens?: string; states?: string[] }) => void;
   look: () => Promise<Looks>;
 };
@@ -51,6 +54,7 @@ export async function makeOne(on: MakeOn): Promise<void> {
     await makeWith(on, browser);
   } finally {
     browser?.close();
+    dropAsked(on.project, on.exploration.id, on.made);
   }
 }
 
@@ -61,25 +65,28 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
   const workspace = await versionWorkspace(on.project, copy);
   // It runs while it is made: the team watches it change.
   mode.start(exploration.id, key).catch(() => undefined);
-  // The conversation is saved beside the copy, so a maker after a restart
-  // of the server continues it instead of starting over.
+  // The conversation and what was asked are saved beside the copy at once,
+  // so a maker the server closed on continues them after its restart.
   const savedAt = `${copy.folder}.maker-session`;
+  const session = sessionKept(on, savedAt);
   const ask = askerFor({
     claude: on.claude,
     folder: copy.folder,
     model: makerModel(on.root),
-    session: desk.sessionFor(exploration.id, key, savedSession(savedAt)),
+    session,
     mcp: desk.mcpFor(exploration.id, key),
     browser: browser
       ? { name: "browser", url: browser.url, headers: {} }
       : undefined,
     onStep: stepsInto(mode, exploration.id, key),
-    onFresh: (session) => {
-      desk.use(exploration.id, key, session);
+    onFresh: (fresh) => {
+      desk.use(exploration.id, key, fresh);
+      saveSession(savedAt, fresh);
     },
   });
   const asked = askFor(exploration, on.board, made, {
     change,
+    resumed: on.resumed === true,
     maps: codeMaps(on.root, on.project),
   });
   let result: Awaited<ReturnType<typeof lookAndFix>>;
@@ -114,6 +121,20 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
     failed: on.failed,
     look: on.look,
   });
+}
+
+// The maker's conversation (the one it had, after a restart) and what it is
+// asked, both saved before it starts.
+function sessionKept(on: MakeOn, savedAt: string) {
+  const { exploration, made } = on;
+  const session = on.desk.sessionFor(
+    exploration.id,
+    made.key,
+    savedSession(savedAt),
+  );
+  saveSession(savedAt, session.id);
+  keepAsked(on.project, exploration.id, made, on.change);
+  return session;
 }
 
 // Each step the maker takes, kept with the prototype's run (the last 60).
