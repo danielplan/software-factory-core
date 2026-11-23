@@ -192,7 +192,7 @@ export function prototypeToHandOff(board: Board): Made | undefined {
   const agreed = made.find((one) => one.agreed);
   if (made.length > 0 && !agreed)
     throw new Refused(
-      `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it.`,
+      `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it. If the team does not want ${made.length === 1 ? "it" : "them"} built (a broken first version, say), have Doodle take ${made.length === 1 ? "it" : "them"} off the board.`,
     );
   if (agreed && (agreed.variants?.length ?? 0) > 1 && !chosenVariant(agreed))
     throw new Refused(

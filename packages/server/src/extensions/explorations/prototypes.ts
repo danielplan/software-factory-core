@@ -235,6 +235,20 @@ export class ExplorationPrototypes {
     );
   }
 
+  // A prototype taken off the board: refused while its maker is on it, else
+  // what runs of it stops. Its branch stays.
+  release(exploration: string, key: string): void {
+    const run = this.mode.runOf(exploration, key);
+    if (run.making)
+      throw new Refused(
+        `Prototype ${key} is still being made: take it off once it is ready.`,
+      );
+    if (["running", "starting"].includes(run.state))
+      this.mode.stop(exploration, key).catch(() => {
+        // It says on its own run why it did not stop.
+      });
+  }
+
   // Handed off or dropped: its prototypes stop and their copies go; the
   // branches stay (the builder builds from the agreed one).
   async removeAll(exploration: string): Promise<void> {

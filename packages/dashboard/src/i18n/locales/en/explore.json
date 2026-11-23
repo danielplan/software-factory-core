@@ -30,7 +30,7 @@
   "dropping": "Dropping…",
   "handOff": "Hand off {{key}}",
   "handOffBoard": "Hand off",
-  "agreePrototypeFirst": "Agree on the prototype and its variant first: the factory builds from it",
+  "agreePrototypeFirst": "Agree on the prototype and its variant first: the factory builds from it. Or ask Doodle to take it off the board if you do not want it built",
   "handingOff": "Handing off…",
   "handOffStep": "Step {{n}} of {{of}}",
   "handOffStages": {

@@ -30,7 +30,7 @@
   "dropping": "Verwerfe…",
   "handOff": "{{key}} übergeben",
   "handOffBoard": "Übergeben",
-  "agreePrototypeFirst": "Einigt euch zuerst auf den Prototyp und seine Variante: die Fabrik baut daraus",
+  "agreePrototypeFirst": "Einigt euch zuerst auf den Prototyp und seine Variante: die Fabrik baut daraus. Oder bittet Doodle, ihn vom Board zu nehmen, wenn ihr ihn nicht bauen wollt",
   "handingOff": "Übergebe…",
   "handOffStep": "Schritt {{n}} von {{of}}",
   "handOffStages": {
