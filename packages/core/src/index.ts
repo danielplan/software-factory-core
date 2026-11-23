@@ -163,6 +163,7 @@ export {
   chooseLanguage,
   isLanguageChoice,
   type Language,
+  LANGUAGES,
   type LanguageChoice,
   languageChoice,
 } from "./agents/language-settings.ts";
@@ -269,12 +270,21 @@ export {
 } from "./version.ts";
 
 export {
-  hasWhatsNewFor,
-  parseWhatsNew,
-  WHATS_NEW_LANGUAGES,
-  type WhatsNewChange,
-  type WhatsNewKind,
-  type WhatsNewRelease,
-  whatsNewFile,
-  whatsNewIn,
-} from "./whats-new.ts";
+  bodySections,
+  changeLine,
+  changesOf,
+  joinReleases,
+  type KeptRelease,
+  keptReleaseSchema,
+  notesIn,
+  notesOfBody,
+  RELEASE_CHANGE_KINDS,
+  RELEASE_NOTES_FILE,
+  type ReleaseChange,
+  releaseBody,
+  releaseChangeSchema,
+  type ReleaseNotes,
+  releaseNotesFileSchema,
+  releaseNotesSchema,
+  versionOfTag,
+} from "./release-notes.ts";

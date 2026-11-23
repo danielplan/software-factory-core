@@ -1,0 +1,355 @@
+{
+  "releases": [
+    {
+      "version": "0.15.0",
+      "date": "2026-11-22",
+      "notes": {
+        "en": [
+          {
+            "kind": "New",
+            "title": "Make your own extensions.",
+            "text": "The Marketplace shows what your factory can do and what it works with: install and remove extensions there, and ask Sprocket for one of your team's own. Arrange Home from the blocks your extensions bring."
+          },
+          {
+            "kind": "New",
+            "title": "Doodle thinks on a whiteboard, Tinker builds.",
+            "text": "Doodle thinks before it answers and keeps one living picture of the idea; Tinker, Doodle's maker, builds the prototypes from your design system."
+          },
+          {
+            "kind": "New",
+            "title": "Sprocket takes you to the right kobold.",
+            "text": "Tell Sprocket what you want: it hands an idea to Doodle, a mission to the tester or a signal to the builder, and takes you there."
+          },
+          {
+            "kind": "New",
+            "title": "Ask about a stuck card.",
+            "text": "Ask Sprocket on a stuck card: it looks at what the builder did, helps you decide, and sends your answer on."
+          },
+          {
+            "kind": "Changed",
+            "title": "Continue when the builder ran out of sessions.",
+            "text": "A card that only needs more time says so, with a Continue button."
+          },
+          {
+            "kind": "Changed",
+            "title": "Only work that passes is pushed.",
+            "text": "The builder commits and pushes through your repository's own checks and opens a pull request only when everything passes; unfinished work stays on this computer, with no draft pull requests."
+          },
+          {
+            "kind": "Changed",
+            "title": "Your knowledge base keeps its shape.",
+            "text": "The checks before a pull request include the knowledge base, and the upgrade adds the sections it lacks."
+          }
+        ],
+        "it": [
+          {
+            "kind": "New",
+            "title": "Crea le tue estensioni.",
+            "text": "Il Marketplace mostra cosa sa fare la tua fabbrica e con cosa lavora: lì installi e togli le estensioni, e a Sprocket chiedi quelle del tuo team. Componi la Home con i blocchi che portano le tue estensioni."
+          },
+          {
+            "kind": "New",
+            "title": "Doodle pensa su una lavagna, Tinker costruisce.",
+            "text": "Doodle pensa prima di rispondere e tiene un unico disegno vivo dell'idea; Tinker, l'aiutante di Doodle, fa i prototipi con il tuo design system."
+          },
+          {
+            "kind": "New",
+            "title": "Sprocket ti porta dal kobold giusto.",
+            "text": "Di' a Sprocket cosa vuoi: passa un'idea a Doodle, una missione al tester o un segnale al costruttore, e ti porta lì."
+          },
+          {
+            "kind": "New",
+            "title": "Chiedi di una scheda bloccata.",
+            "text": "Chiedi a Sprocket su una scheda bloccata: guarda cosa ha fatto il costruttore, ti aiuta a decidere e manda avanti la tua risposta."
+          },
+          {
+            "kind": "Changed",
+            "title": "Continua quando il costruttore ha finito le sessioni.",
+            "text": "Una scheda che ha solo bisogno di più tempo lo dice, con un pulsante Continua."
+          },
+          {
+            "kind": "Changed",
+            "title": "Si carica solo il lavoro che passa.",
+            "text": "Il costruttore fa commit e push attraverso i controlli del tuo repository e apre una pull request solo quando tutto passa; il lavoro non finito resta su questo computer, senza pull request in bozza."
+          },
+          {
+            "kind": "Changed",
+            "title": "La tua base di conoscenza tiene la sua forma.",
+            "text": "I controlli prima di una pull request includono la base di conoscenza, e l'aggiornamento aggiunge le sezioni che le mancano."
+          }
+        ],
+        "de": [
+          {
+            "kind": "New",
+            "title": "Eigene Erweiterungen.",
+            "text": "Der Marketplace zeigt, was deine Fabrik kann und womit sie arbeitet: Dort installierst und entfernst du Erweiterungen, und Sprocket fragst du nach einer eigenen für dein Team. Stell die Startseite aus den Blöcken deiner Erweiterungen zusammen."
+          },
+          {
+            "kind": "New",
+            "title": "Doodle denkt auf einem Whiteboard, Tinker baut.",
+            "text": "Doodle denkt nach, bevor er antwortet, und hält ein einziges lebendiges Bild der Idee; Tinker, Doodles Macher, baut die Prototypen mit deinem Design-System."
+          },
+          {
+            "kind": "New",
+            "title": "Sprocket bringt dich zum richtigen Kobold.",
+            "text": "Sag Sprocket, was du willst: Er gibt eine Idee an Doodle, eine Mission an den Tester oder ein Signal an den Baumeister und bringt dich dorthin."
+          },
+          {
+            "kind": "New",
+            "title": "Frag nach einer festgefahrenen Karte.",
+            "text": "Frag Sprocket bei einer festgefahrenen Karte: Er schaut, was der Baumeister gemacht hat, hilft dir entscheiden und gibt deine Antwort weiter."
+          },
+          {
+            "kind": "Changed",
+            "title": "Weiter, wenn dem Baumeister die Sitzungen ausgehen.",
+            "text": "Eine Karte, die nur mehr Zeit braucht, sagt das, mit einem Weiter-Knopf."
+          },
+          {
+            "kind": "Changed",
+            "title": "Nur was besteht, wird hochgeladen.",
+            "text": "Der Baumeister committet und pusht durch die Prüfungen deines Repositorys und öffnet einen Pull Request erst, wenn alles besteht; Unfertiges bleibt auf diesem Computer, ohne Pull Requests als Entwurf."
+          },
+          {
+            "kind": "Changed",
+            "title": "Deine Wissensbasis behält ihre Form.",
+            "text": "Die Prüfungen vor einem Pull Request umfassen die Wissensbasis, und das Update ergänzt die Abschnitte, die ihr fehlen."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.14.0",
+      "date": "2026-11-22",
+      "notes": {
+        "en": [
+          {
+            "kind": "New",
+            "title": "Releases of your products.",
+            "text": "A Releases page turns what was merged into a numbered release, with notes written for you; the kobold suggests the number only when you press Prepare."
+          },
+          {
+            "kind": "New",
+            "title": "What's new in Kobble.",
+            "text": "Settings › Updates says what each version changed, in your language."
+          },
+          {
+            "kind": "New",
+            "title": "Prototypes in every state, and dig deeper.",
+            "text": "Each variant can be shown empty, loading, with a problem or with many items, switched by chips under it. Pick one variant to refine it with new ones."
+          },
+          {
+            "kind": "Changed",
+            "title": "Built from the prototype you agreed.",
+            "text": "A prototype on the board is handed off only once you agree on it and its variant, and the factory builds from its screens, keeping their look."
+          },
+          {
+            "kind": "Changed",
+            "title": "A shorter hand-off.",
+            "text": "The card says what you planned and decided, without more; Doodle shows which step it is at while it writes it up."
+          },
+          {
+            "kind": "Changed",
+            "title": "One library per job.",
+            "text": "Each kind of product names the library it uses for each job, and the factory checks new work keeps to them."
+          },
+          {
+            "kind": "Changed",
+            "title": "The builder asks instead of going on and on.",
+            "text": "After three build sessions on one card it stops with a draft pull request and asks you to split the card or let it go on."
+          },
+          {
+            "kind": "Fixed",
+            "title": "The builder repairs its working copy",
+            "text": "when its link to git breaks, keeping the old folder."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Resolve stays resolved.",
+            "text": "A card sent back to settle a clash with main no longer asks for Resolve again while the builder works on it."
+          },
+          {
+            "kind": "Fixed",
+            "title": "The prototype maker remembers.",
+            "text": "It goes on in the same conversation about a prototype, also after Kobble restarts."
+          }
+        ],
+        "it": [
+          {
+            "kind": "New",
+            "title": "Rilasci dei tuoi prodotti.",
+            "text": "Una pagina Rilasci trasforma ciò che è stato unito in un rilascio numerato, con note scritte per te; il kobold suggerisce il numero solo quando premi Prepara."
+          },
+          {
+            "kind": "New",
+            "title": "Novità in Kobble.",
+            "text": "Impostazioni › Aggiornamenti dice cosa ha cambiato ogni versione, nella tua lingua."
+          },
+          {
+            "kind": "New",
+            "title": "Prototipi in ogni stato, e approfondisci.",
+            "text": "Ogni variante si può mostrare vuota, in caricamento, con un problema o con molti elementi, con i pulsanti sotto di essa. Scegli una variante per affinarla con nuove varianti."
+          },
+          {
+            "kind": "Changed",
+            "title": "Costruito dal prototipo concordato.",
+            "text": "Un prototipo sulla lavagna si consegna solo dopo che vi siete accordati su di esso e sulla sua variante, e la fabbrica costruisce dalle sue schermate, mantenendone l'aspetto."
+          },
+          {
+            "kind": "Changed",
+            "title": "Una consegna più breve.",
+            "text": "La scheda dice ciò che avete pianificato e deciso, niente di più; Doodle mostra a che passo è mentre la scrive."
+          },
+          {
+            "kind": "Changed",
+            "title": "Una libreria per ogni compito.",
+            "text": "Ogni tipo di prodotto indica la libreria da usare per ogni compito, e la fabbrica controlla che il nuovo lavoro la rispetti."
+          },
+          {
+            "kind": "Changed",
+            "title": "Il costruttore chiede invece di andare avanti all'infinito.",
+            "text": "Dopo tre sessioni su una scheda si ferma con una pull request in bozza e ti chiede di dividere la scheda o di lasciarlo continuare."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Il costruttore ripara la sua copia di lavoro",
+            "text": "quando il collegamento a git si rompe, tenendo la vecchia cartella."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Risolvi resta risolto.",
+            "text": "Una scheda rimandata indietro per un conflitto con main non chiede più Risolvi mentre il costruttore ci lavora."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Chi crea i prototipi ricorda.",
+            "text": "Continua la stessa conversazione su un prototipo, anche dopo un riavvio di Kobble."
+          }
+        ],
+        "de": [
+          {
+            "kind": "New",
+            "title": "Releases eurer Produkte.",
+            "text": "Eine Seite Releases macht aus dem Zusammengeführten ein nummeriertes Release, mit Notizen, die für euch geschrieben werden; der Kobold schlägt die Nummer erst vor, wenn du auf Vorbereiten drückst."
+          },
+          {
+            "kind": "New",
+            "title": "Neu in Kobble.",
+            "text": "Einstellungen › Updates sagt, was jede Version geändert hat, in deiner Sprache."
+          },
+          {
+            "kind": "New",
+            "title": "Prototypen in jedem Zustand, und tiefer gehen.",
+            "text": "Jede Variante lässt sich leer, beim Laden, mit einem Problem oder mit vielen Einträgen zeigen, über die Chips darunter. Wähle eine Variante, um sie mit neuen zu verfeinern."
+          },
+          {
+            "kind": "Changed",
+            "title": "Gebaut aus dem vereinbarten Prototyp.",
+            "text": "Ein Prototyp auf dem Board wird erst übergeben, wenn ihr euch auf ihn und seine Variante geeinigt habt, und die Fabrik baut aus seinen Bildschirmen und behält ihr Aussehen."
+          },
+          {
+            "kind": "Changed",
+            "title": "Eine kürzere Übergabe.",
+            "text": "Die Karte sagt, was ihr geplant und entschieden habt, nicht mehr; Doodle zeigt, bei welchem Schritt es beim Schreiben ist."
+          },
+          {
+            "kind": "Changed",
+            "title": "Eine Bibliothek pro Aufgabe.",
+            "text": "Jede Art von Produkt nennt die Bibliothek für jede Aufgabe, und die Fabrik prüft, dass neue Arbeit dabei bleibt."
+          },
+          {
+            "kind": "Changed",
+            "title": "Der Baumeister fragt, statt endlos weiterzumachen.",
+            "text": "Nach drei Sitzungen an einer Karte hält er mit einem Pull-Request-Entwurf an und fragt, ob ihr die Karte teilt oder er weitermacht."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Der Baumeister repariert seine Arbeitskopie",
+            "text": ", wenn die Verbindung zu git bricht, und behält den alten Ordner."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Lösen bleibt gelöst.",
+            "text": "Eine Karte, die wegen eines Konflikts mit main zurückgeschickt wurde, fragt nicht mehr nach Lösen, während der Baumeister daran arbeitet."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Der Prototyp-Macher erinnert sich.",
+            "text": "Er setzt dasselbe Gespräch über einen Prototyp fort, auch nach einem Neustart von Kobble."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.2",
+      "date": "2026-11-21",
+      "notes": {
+        "en": [
+          {
+            "kind": "New",
+            "title": "Send feedback from anywhere.",
+            "text": "Ask Sprocket or choose \"Send feedback\" and tell the makers what is wrong or what you wish for, in one window. Afterwards you can see whether it was seen, planned or done."
+          },
+          {
+            "kind": "Changed",
+            "title": "Your knowledge stays up to date with the code.",
+            "text": "Before a change goes up for review, the builder makes sure the notes about the product were looked at too."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Italian and German everywhere.",
+            "text": "Words that were still only in English now speak your language, screen reader labels included."
+          },
+          {
+            "kind": "Fixed",
+            "title": "No more blank page",
+            "text": "when Kobble was rebuilt while the page was open. It loads itself again."
+          }
+        ],
+        "it": [
+          {
+            "kind": "New",
+            "title": "Invia un parere da qualsiasi punto.",
+            "text": "Chiedi a Sprocket o scegli \"Invia un parere\" e racconta ai creatori cosa non va o cosa desideri, in un'unica finestra. Poi vedi se è stato letto, pianificato o fatto."
+          },
+          {
+            "kind": "Changed",
+            "title": "Le conoscenze restano allineate al codice.",
+            "text": "Prima che una modifica vada in revisione, il costruttore controlla che anche le note sul prodotto siano state riviste."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Italiano e tedesco ovunque.",
+            "text": "Le parole rimaste solo in inglese ora parlano la tua lingua, comprese le etichette per i lettori di schermo."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Niente più pagina bianca",
+            "text": "quando Kobble veniva ricostruito a pagina aperta. Si ricarica da sola."
+          }
+        ],
+        "de": [
+          {
+            "kind": "New",
+            "title": "Feedback von überall senden.",
+            "text": "Frag Sprocket oder wähle „Feedback senden“ und sag den Machern in einem Fenster, was nicht stimmt oder was du dir wünschst. Danach siehst du, ob es gesehen, geplant oder erledigt wurde."
+          },
+          {
+            "kind": "Changed",
+            "title": "Das Wissen bleibt auf dem Stand des Codes.",
+            "text": "Bevor eine Änderung zur Prüfung geht, achtet der Builder darauf, dass auch die Notizen zum Produkt angeschaut wurden."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Italienisch und Deutsch überall.",
+            "text": "Texte, die nur auf Englisch waren, sprechen jetzt deine Sprache, auch die Beschriftungen für Screenreader."
+          },
+          {
+            "kind": "Fixed",
+            "title": "Keine leere Seite mehr,",
+            "text": "wenn Kobble neu gebaut wurde, während die Seite offen war. Sie lädt sich selbst neu."
+          }
+        ]
+      }
+    }
+  ]
+}
