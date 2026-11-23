@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 import { TypeChip } from "@/components/card-type";
 import { Hello } from "@/components/meet/hello";
+import { NameTag } from "@/components/meet/name-tag";
 import { ConflictBox, ResolvingLine } from "./conflict-box";
 
 // A card on the board: it rises in after the ones above it, lifts under the
@@ -68,6 +69,13 @@ export function Card({
         {card.title}
       </span>
       {building && <Hello id="builder" />}
+      {building && (
+        <NameTag
+          id="builder"
+          now={`building card #${String(card.number)} now`}
+          means="Nothing to do. It asks here if it gets stuck."
+        />
+      )}
       {card.hint && !building && (
         <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
           <MessageCircle

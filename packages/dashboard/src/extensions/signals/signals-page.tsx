@@ -21,6 +21,7 @@ import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
+import { NameTag } from "@/components/meet/name-tag";
 
 import { Already } from "./already";
 import { FeedbackExtras } from "./feedback-extras";
@@ -70,6 +71,19 @@ export function SignalsPage({
               <SyncNow onSaid={say} />
             </>
           ) : undefined
+        }
+      />
+      <NameTag
+        id="sorter"
+        now={
+          data && data.signals.length > 0
+            ? `sorting ${String(data.signals.length)} new ${data.signals.length === 1 ? "signal" : "signals"}`
+            : "watching for what comes in"
+        }
+        means={
+          data && data.signals.length > 0
+            ? "Nothing to do. Pick a signal below, then Fix it or Explore it."
+            : "Nothing to do. New signals show up here when they come in."
         }
       />
       {problem && <ProblemBox title={t("signals.cannotRead")} text={problem} />}

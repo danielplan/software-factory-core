@@ -18,6 +18,7 @@ import { agoOf, stepWords } from "@/lib/signals-view";
 import { useRead } from "@/api/query";
 import { testPageSchema } from "@/api/schemas/personas";
 import { Markdown } from "@/components/markdown";
+import { NameTag } from "@/components/meet/name-tag";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";
@@ -43,6 +44,15 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
   );
 }
 
+// What Mimic does on this mission, in plain words.
+function mimicNow(test: PersonaTest, who: string): string {
+  const done = test.steps.length;
+  if (test.status === "queued") return `waiting its turn to play ${who}`;
+  if (test.status === "running")
+    return `playing ${who} on this mission, step ${String(done + 1)}`;
+  return `played ${who} on this mission: ${String(done)} steps`;
+}
+
 const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
 
 function RunBody({ page }: Readonly<{ page: TestPage }>) {
@@ -57,6 +67,12 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
         {persona.name}
       </Link>
+      <NameTag
+        id="tester"
+        className="mb-3.5"
+        now={mimicNow(test, persona.name)}
+        means="Nothing to do. What it finds shows below and arrives as signals."
+      />
       <div className={cn(CARD, "px-7 py-[26px]")}>
         <div className="mb-3 flex items-center gap-2">
           <StatusChip status={test.status} />

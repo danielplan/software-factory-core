@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
+import { VARIANT, openTeam } from "@/components/meet/meet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,10 @@ export function SprocketDock({
             ? "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]"
             : "w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
-        style={{ height: open ? "auto" : 40, maxHeight: roomy }}
+        style={{
+          height: open ? "auto" : VARIANT === "E" ? 54 : 40,
+          maxHeight: roomy,
+        }}
       >
         {children}
       </section>
@@ -50,8 +54,40 @@ export function SprocketBar({
       onClick={onOpen}
       className="flex h-full w-full flex-none items-center gap-2.5 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground"
     >
-      <KoboldHead size={22} className={cn(working && "animate-breathe")} />
-      <span className="flex-1 truncate">{line}</span>
+      {VARIANT === "E" ? (
+        <span
+          role="button"
+          tabIndex={0}
+          title="Meet your kobolds"
+          onClick={(event) => {
+            event.stopPropagation();
+            openTeam("support");
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.stopPropagation();
+            openTeam("support");
+          }}
+          className="flex-none cursor-pointer rounded-lg p-0.5 ring-1 ring-foreground/15 hover:ring-2 hover:ring-blue/60"
+        >
+          <KoboldHead size={34} className={cn(working && "animate-breathe")} />
+        </span>
+      ) : (
+        <KoboldHead size={22} className={cn(working && "animate-breathe")} />
+      )}
+      {VARIANT === "E" ? (
+        <span className="grid min-w-0 flex-1">
+          <span className="truncate text-[13px] font-semibold text-foreground">
+            Sprocket{" "}
+            <span className="font-normal text-muted-foreground">
+              · your support kobold
+            </span>
+          </span>
+          <span className="truncate text-xs">{line}</span>
+        </span>
+      ) : (
+        <span className="flex-1 truncate">{line}</span>
+      )}
       <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
         ⌘J
       </kbd>

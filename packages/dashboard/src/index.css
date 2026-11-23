@@ -641,3 +641,164 @@
     animation: none !important;
   }
 }
+
+/* PROTOTYPE, "Meet the kobolds": the workshop scene of the Your kobolds
+   panel. Each kobold at work moves in its own way; a resting one dozes.
+   All of it only when the computer allows motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .meet-sketch {
+    animation: meet-sketch 1.4s ease-in-out infinite;
+  }
+  .meet-draw {
+    stroke-dasharray: 16;
+    animation: meet-draw 1.4s ease-in-out infinite;
+  }
+  .meet-hammer {
+    animation: meet-hammer 0.9s ease-in infinite;
+  }
+  .meet-spark {
+    animation: meet-spark 0.9s ease-out infinite;
+  }
+  .meet-block {
+    animation: meet-block 2.4s ease-in infinite backwards;
+  }
+  .meet-shake {
+    animation: meet-shake 0.35s ease-in-out infinite;
+  }
+  .meet-fall {
+    animation: meet-fall 0.9s ease-in infinite;
+  }
+  .meet-dot {
+    animation: meet-dot 1.2s ease-in-out infinite;
+  }
+  .meet-doze {
+    animation: meet-doze 3.6s ease-in-out infinite;
+  }
+  .meet-zzz {
+    animation: meet-zzz 3.6s ease-in-out infinite;
+  }
+  .meet-flow {
+    animation: meet-flow 1.2s linear infinite;
+  }
+  .meet-in {
+    animation: meet-in 0.22s ease-out;
+  }
+}
+@keyframes meet-sketch {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-5px, 1px) rotate(-8deg);
+  }
+}
+@keyframes meet-draw {
+  from {
+    stroke-dashoffset: 16;
+  }
+  60%,
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes meet-hammer {
+  0%,
+  55% {
+    transform: rotate(-38deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+  100% {
+    transform: rotate(-38deg);
+  }
+}
+@keyframes meet-spark {
+  0%,
+  70% {
+    opacity: 0;
+  }
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-3px, -3px);
+  }
+}
+@keyframes meet-block {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  18%,
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes meet-shake {
+  0%,
+  100% {
+    transform: translateX(-2px) rotate(-6deg);
+  }
+  50% {
+    transform: translateX(2px) rotate(6deg);
+  }
+}
+@keyframes meet-fall {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+}
+@keyframes meet-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@keyframes meet-doze {
+  0%,
+  100% {
+    transform: rotate(-3deg) scale(1);
+  }
+  50% {
+    transform: rotate(3deg) scale(1.03);
+  }
+}
+@keyframes meet-zzz {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(5px, -8px);
+  }
+}
+@keyframes meet-flow {
+  to {
+    background-position: 12px 0;
+  }
+}
+@keyframes meet-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

@@ -5,7 +5,7 @@
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
-import { VARIANT } from "@/components/meet/meet";
+import { HAS_PANEL } from "@/components/meet/meet";
 import { Face } from "@/components/meet/team-panel";
 import { type KoboldId, KOBOLDS } from "@/lib/kobolds";
 import type { Page } from "@/lib/routes";
@@ -27,7 +27,7 @@ export function PageKobold({
   return (
     <Face id={kobold.id} className="flex-none">
       <span
-        title={VARIANT === "A" ? undefined : `${kobold.name}: ${job}`}
+        title={HAS_PANEL ? undefined : `${kobold.name}: ${job}`}
         className={cn(
           "relative flex-none transition-opacity",
           now ? "opacity-100" : "opacity-70 group-hover:opacity-100",

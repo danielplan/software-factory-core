@@ -11,7 +11,7 @@ import type { Doing } from "@/components/layout/page-kobold";
 import { KOBOLDS, MAKER } from "@/lib/kobolds";
 import type { Page } from "@/lib/routes";
 
-export type Variant = "A" | "B";
+export type Variant = "A" | "B" | "E";
 
 function fromAddress(key: string): string | null {
   return new URLSearchParams(window.location.search).get(key);
@@ -27,8 +27,13 @@ function kept(key: string, asked: string | null): string | null {
   }
 }
 
-export const VARIANT: Variant =
-  kept("variant", fromAddress("variant"))?.toUpperCase() === "B" ? "B" : "A";
+export const VARIANT: Variant = (() => {
+  const asked = kept("variant", fromAddress("variant"))?.toUpperCase();
+  return asked === "B" || asked === "E" ? asked : "A";
+})();
+
+// A and E both have the "Your kobolds" panel; B has one-time bubbles instead.
+export const HAS_PANEL = VARIANT === "A" || VARIANT === "E";
 
 // quiet: nobody at work · busy: everybody at work · long: everybody, with long
 // names · fresh: nobody met yet (B) · met: everybody met already (B).
@@ -44,6 +49,11 @@ export type Member = {
   name: string;
   hat: PersonaHat | "flop";
   color: string;
+  // What it is in a few words (variant E's name tags).
+  role: string;
+  // Its step in how work travels, and what it did last (the workshop).
+  step: string;
+  last: string;
   // What it does for the person, where it works, what to do meanwhile.
   job: string;
   where: string;
@@ -55,39 +65,60 @@ export type Member = {
 
 const WORDS: Record<
   string,
-  Pick<Member, "job" | "where" | "meanwhile" | "hello">
+  Pick<
+    Member,
+    "role" | "step" | "last" | "job" | "where" | "meanwhile" | "hello"
+  >
 > = {
   support: {
+    role: "your support kobold",
+    step: "here to answer, on every page",
+    last: "Answered a question about the board.",
     job: "Answers your questions and takes your feedback",
     where: "Every page, in the bar at the bottom",
     meanwhile: "Keep going, its answer comes to the bar.",
     hello: "I answer your questions, on every page.",
   },
   explorer: {
+    role: "your explorer",
+    step: "thinks it through with you",
+    last: "Wrote the story behind “The basket is empty when people come back to pay”.",
     job: "Thinks your ideas through and tells the story behind each one",
     where: "Explorations, on the board and in the talk beside it",
     meanwhile: "Talk to it, or move things around on the board.",
     hello: "I think your idea through with you.",
   },
   maker: {
+    role: "Doodle's helper",
+    step: "makes the screens to try",
+    last: "Made version B, “Bring it back by email”, for you to try.",
     job: "Doodle's helper: builds the versions you try",
     where: "Explorations, on each version's card",
     meanwhile: "Nothing to do. The first version opens as soon as it runs.",
     hello: "I'm Doodle's helper. I'm building the versions for you to try.",
   },
   builder: {
+    role: "the builder",
+    step: "builds what you agreed",
+    last: "Built card #127 and opened its pull request.",
     job: "Builds the cards you agreed on, one by one",
     where: "Factory, on the card it works on",
     meanwhile: "Nothing to do. It asks here if it gets stuck.",
     hello: "I build the cards you agreed on. I'm on this one now.",
   },
   tester: {
+    role: "plays your personas",
+    step: "tries it as your personas",
+    last: "Played Mia on “Bring it back by email”: 3 of 3 steps as expected.",
     job: "Uses your app as one of your personas and tells what went wrong",
     where: "Personas, on a mission",
     meanwhile: "Nothing to do. What it finds arrives as signals.",
     hello: "I use your app as one of your personas and tell what goes wrong.",
   },
   sorter: {
+    role: "sorts what comes in",
+    step: "sorts what comes in",
+    last: "Sorted 3 new signals: 2 bugs and 1 request.",
     job: "Sorts what comes in: bugs, requests and feedback",
     where: "Signals, as they arrive",
     meanwhile: "Nothing to do. New signals wait on the Signals page.",
@@ -140,7 +171,7 @@ const MADE_UP_CARD = {
 };
 
 export function withBoltAtWork(view: FactoryView): FactoryView {
-  if (VARIANT !== "B" || view.builder.working) return view;
+  if (VARIANT === "A" || view.builder.working) return view;
   if (view.columns.some((c) => c.id === "building" && c.cards.length > 0))
     return view;
   const titles = {
@@ -248,7 +279,25 @@ export function useTeamDoing(real: Doing): Record<string, string> {
   if (STATE === "quiet") return {};
   if (STATE === "busy" || STATE === "long")
     return madeUpDoing(STATE === "long");
-  return { ...real, ...(maker ? { maker } : {}) };
+  // In E Tinker is always at work on its made-up version, so it is there
+  // under Doodle on every page.
+  const tinkerNow =
+    maker ??
+    (VARIANT === "E" ? "Version A: making the basket page (made up)" : null);
+  // Bolt too: the made-up card on the Factory board is being built.
+  const boltNow =
+    real.builder ??
+    (VARIANT === "E"
+      ? "Card #128: Show the late orders first (made up)"
+      : null);
+  return {
+    ...real,
+    ...(tinkerNow ? { maker: tinkerNow } : {}),
+    ...(boltNow ? { builder: boltNow } : {}),
+    ...(VARIANT === "E" && !real.sorter
+      ? { sorter: "Watching for what comes in" }
+      : {}),
+  };
 }
 
 function madeUpDoing(long: boolean): Record<string, string> {

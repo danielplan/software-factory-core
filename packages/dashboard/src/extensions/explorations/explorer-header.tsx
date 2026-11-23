@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
+import { VARIANT } from "@/components/meet/meet";
 import { Face } from "@/components/meet/team-panel";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
@@ -28,15 +29,20 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
   const t = useTranslation().t;
   const doing = doingOf(page, t);
   const color = explorer?.color ?? "#e9a23b";
+  // A bit bigger in variant E, where the kobolds are always present.
+  const big = VARIANT === "E";
   return (
     <div className="flex items-center gap-3 border-b border-border-soft px-5 py-3.5">
       <Face id="explorer" className="flex-none rounded-[15px]">
         <span
-          className="relative grid size-11 flex-none place-items-center rounded-[13px]"
+          className={cn(
+            "relative grid flex-none place-items-center rounded-[13px]",
+            big ? "size-14" : "size-11",
+          )}
           style={{ background: `${color}24` }}
         >
           <KoboldHead
-            size={34}
+            size={big ? 44 : 34}
             hat={explorer?.hat}
             color={color}
             className={doing ? "motion-safe:animate-bob" : undefined}
