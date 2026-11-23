@@ -18,6 +18,8 @@ import { agoOf, stepWords } from "@/lib/signals-view";
 import { useRead } from "@/api/query";
 import { testPageSchema } from "@/api/schemas/personas";
 import { Markdown } from "@/components/markdown";
+import { NameTag } from "@/components/meet/name-tag";
+import { testerTag } from "@/lib/meet-view";
 
 import { SignalLine } from "./signal-line";
 import { StatusChip, StatusIcon } from "./test-bits";
@@ -48,6 +50,11 @@ const TITLE = "mt-[30px] mb-3 text-[15px] font-semibold tracking-[-0.01em]";
 function RunBody({ page }: Readonly<{ page: TestPage }>) {
   const t = useTranslation().t;
   const { test, persona } = page;
+  const mimic = testerTag(
+    { status: test.status, steps: test.steps.length },
+    persona.name,
+    t,
+  );
   return (
     <>
       <Link
@@ -57,6 +64,7 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
         {persona.name}
       </Link>
+      {mimic && <NameTag id="tester" className="mb-3.5" line={mimic} />}
       <div className={cn(CARD, "px-7 py-[26px]")}>
         <div className="mb-3 flex items-center gap-2">
           <StatusChip status={test.status} />

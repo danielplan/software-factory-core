@@ -80,12 +80,12 @@ of it away.
 The page has the same shape: `packages/dashboard/src/extensions/<id>/index.tsx`
 exports the extension's `PageModule` (`packages/dashboard/src/lib/page-module.ts`).
 
-| Field      | What                                                                                                                                   |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`       | the extension's id, as the server names it                                                                                             |
-| `pages`    | its pages, each by its address (`#<id>`), with its sidebar row (group, icon, colour, what it counts) and whether it `fills` the window |
-| `blocks`   | its Home blocks, by block id, drawn from what Home has read                                                                            |
-| `settings` | its sections in Settings, each with its tab                                                                                            |
+| Field      | What                                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`       | the extension's id, as the server names it                                                                                                                                                        |
+| `pages`    | its pages, each by its address (`#<id>`), with its sidebar row (group, icon, colour, what it counts), whether it `fills` the window and its `Watch` (what its kobolds do now, for "Your kobolds") |
+| `blocks`   | its Home blocks, by block id, drawn from what Home has read                                                                                                                                       |
+| `settings` | its sections in Settings, each with its tab                                                                                                                                                       |
 
 `packages/dashboard/src/app/extensions.ts` lists the modules and puts
 together only the installed ones (the factory state's extensions that are

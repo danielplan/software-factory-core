@@ -88,12 +88,18 @@ The kobolds and the personas are drawn as kobolds
 head, two eyes, and a hat. Each of Kobble's kobolds wears the hat of its job
 (`packages/dashboard/src/lib/kobolds.ts`): Sprocket, the support kobold, its
 blue floppy cap (it carries the factory's kobold name when the team gave
-one); Doodle, the explorer, a beret; Tinker, Doodle's maker, a toque;
+one); Doodle, the explorer, a beret; Tinker, Doodle's helper, a toque;
 Bolt, the builder, a trucker cap; Mimic, the tester, a cap; Sieve, the
 sorter, headphones. A persona has a hat (phones, toque, cap or beret) and a colour
 (pink, amber, blue, teal, violet, green or slate), each a tile, a skin and a
 hat colour; its file may say which (`face`), otherwise they come from its id
 and never change. Someone no persona stands for is an empty grey tile.
+
+A kobold's face stands free: no border, ring or tile, and hovering lifts it a
+little (`face.tsx` in `components/meet/`); a click opens the "Your kobolds"
+panel. Under a kobold's name, everything is in the secondary grey at the same
+size, never in colour. A resting kobold is drawn asleep, eyes closed
+(`asleep` on `KoboldHead`).
 
 ## Motion
 

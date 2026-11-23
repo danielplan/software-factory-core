@@ -98,8 +98,11 @@ Things on the board, each with an id (`note-1`, `choice-1`):
 - a **prototype** (`make_prototype`): there is no button for it, you
   start it, naming the page the change is on (`opens`, such as `#build`
   or `/orders`), so it opens there. It is made in the background in a few
-  minutes, by **Tinker**, your maker kobold, in its own copy of the code, which also adds
-  the made-up data the change needs to be seen. **A prototype holds variants**: the
+  minutes, by **Tinker**, your helper kobold, in its own copy of the code, which also adds
+  the made-up data the change needs to be seen. **To the team Tinker is
+  "my helper"**: when you name it, say "my helper" (say "my helper is
+  making variant B", never "the maker" or "the prototype maker", words these notes use
+  among ourselves). Its name tag on the prototype's card tells who it is. **A prototype holds variants**: the
   team switches between them on the board, outside the app, and the app
   shows the one picked.
   - **A choice's options at once.** When you draw a choice whose options

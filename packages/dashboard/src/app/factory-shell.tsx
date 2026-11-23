@@ -11,7 +11,12 @@ import { teamPagesOf } from "@/lib/screens";
 import { useExplorations } from "@/api/use-explorations";
 import type { Page } from "@/lib/routes";
 import type { ExtensionPage } from "@/lib/page-module";
-import { koboldsDoing, koboldStatus, overallOf } from "@/lib/shell-view";
+import {
+  koboldsDoing,
+  koboldsLast,
+  koboldStatus,
+  overallOf,
+} from "@/lib/shell-view";
 
 import { FeedbackRow } from "@/features/support/feedback-row";
 import { SprocketWindow } from "@/features/support/sprocket-window";
@@ -19,6 +24,8 @@ import { useSprocketMoves, useSupport } from "@/features/support/use-support";
 import { UpdateRow } from "@/features/updates/update-row";
 
 import { FactoryNav } from "@/components/layout/factory-nav";
+import { TeamPanel } from "@/components/meet/team-panel";
+import { useTeam } from "@/components/meet/use-team";
 import { Shell } from "@/components/layout/shell";
 import { Sidebar } from "@/components/layout/sidebar";
 import { StatusLight } from "@/components/status-light";
@@ -40,40 +47,46 @@ export function FactoryShell({
   fill?: boolean;
   children: ReactNode;
 }>) {
-  const { kobold, light, ...rows } = useSidebarParts(state, pages);
+  const { kobold, light, known, ...rows } = useSidebarParts(state, pages);
+  const team = useTeam(known);
   return (
-    <Shell
-      shown={current}
-      fill={fill}
-      sidebar={
-        <Sidebar
-          name={state.company.name || null}
-          status={
-            <span title={kobold.detail} className="ml-auto flex px-3">
-              <StatusLight light={light} />
-            </span>
-          }
-        >
-          {(onGo) => (
-            <FactoryNav
-              current={current}
-              open={open}
-              onGo={onGo}
-              {...rows}
-              rows={
-                <>
-                  <UpdateRow />
-                  <FeedbackRow current={current} />
-                </>
-              }
-            />
-          )}
-        </Sidebar>
-      }
-      sprocket={<SprocketWindow page={current} />}
-    >
-      {children}
-    </Shell>
+    <>
+      {pages.map(({ id, Watch }) => Watch && <Watch key={id} state={state} />)}
+      <TeamPanel now={team.now} last={team.last} />
+      <Shell
+        shown={current}
+        fill={fill}
+        sidebar={
+          <Sidebar
+            name={state.company.name || null}
+            status={
+              <span title={kobold.detail} className="ml-auto flex px-3">
+                <StatusLight light={light} />
+              </span>
+            }
+          >
+            {(onGo) => (
+              <FactoryNav
+                current={current}
+                open={open}
+                onGo={onGo}
+                {...rows}
+                doing={team.now}
+                rows={
+                  <>
+                    <UpdateRow />
+                    <FeedbackRow current={current} />
+                  </>
+                }
+              />
+            )}
+          </Sidebar>
+        }
+        sprocket={<SprocketWindow page={current} />}
+      >
+        {children}
+      </Shell>
+    </>
   );
 }
 
@@ -104,6 +117,9 @@ function useSidebarParts(state: FactoryState, pages: ExtensionPage[]) {
       light: overallOf(products, t).lit,
       link: products.find((part) => part.link)?.link ?? null,
     },
-    doing: koboldsDoing(state.work, all, support?.writing != null, t),
+    known: {
+      now: koboldsDoing(state.work, all, support?.writing != null, t),
+      last: koboldsLast(state.work, [...all, ...(explorations?.done ?? [])], t),
+    },
   };
 }

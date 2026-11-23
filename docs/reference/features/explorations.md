@@ -59,7 +59,7 @@ no words yet it is Doodle's first look again.
 
 ## The prototype
 
-When the idea changes a screen, Doodle asks **Tinker**, its maker, for a
+When the idea changes a screen, Doodle asks **Tinker**, its helper, for a
 prototype in the real app, with variants to switch between: see
 [prototypes](prototypes.md).
 

@@ -40,6 +40,13 @@ export type ExplorationRow = Pick<
   // What the kobold is busy with here right now (making a prototype,
   // thinking), or null.
   busy: string | null;
+  // The version Tinker makes here right now, what it does and since when
+  // (the sidebar's "Your kobolds" shows Tinker while it works), or null.
+  making: {
+    version: string;
+    activity: string | null;
+    since: string | null;
+  } | null;
 };
 
 export type ExplorationsView = {
@@ -138,6 +145,7 @@ export function explorationsView(
           ? lineOf(board, talk(exploration.id))
           : null,
       busy: busyWith(talk(exploration.id), runs(exploration.id)),
+      making: makingOf(runs(exploration.id)),
     };
   });
   return {
@@ -262,6 +270,13 @@ function linksAsWords(text: string): string {
     out += text.slice(at, open) + text.slice(open + 1, middle);
     at = close + 1;
   }
+}
+
+// The version being made in one exploration, as Tinker's name tag needs it.
+function makingOf(runs: VersionRun[]): ExplorationRow["making"] {
+  const run = runs.find((one) => one.making);
+  if (!run) return null;
+  return { version: run.version, activity: run.activity, since: run.since };
 }
 
 // What the kobold is busy with in one exploration.

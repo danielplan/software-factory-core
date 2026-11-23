@@ -1,0 +1,76 @@
+{
+  "title": "I tuoi kobold",
+  "intro": "Il team che lavora per te. Clicca un kobold per conoscerlo.",
+  "meet": "Conosci i tuoi kobold",
+  "meetName": "Conosci {{name}} e il team",
+  "resting": "A riposo",
+  "supervisor": "si occupa del team e ti risponde, in ogni pagina",
+  "roles": {
+    "support": "il tuo kobold di supporto",
+    "explorer": "il tuo esploratore",
+    "maker": "l'aiutante di Doodle",
+    "builder": "il costruttore",
+    "tester": "interpreta i tuoi personaggi",
+    "sorter": "smista ciò che arriva"
+  },
+  "jobs": {
+    "support": "Risponde alle tue domande e raccoglie i tuoi commenti",
+    "explorer": "Approfondisce le tue idee e racconta la storia dietro ognuna",
+    "maker": "L'aiutante di Doodle: prepara le versioni che provi",
+    "builder": "Costruisce le schede che hai approvato, una per una",
+    "tester": "Usa la tua app come uno dei tuoi personaggi e dice cosa non va",
+    "sorter": "Smista ciò che arriva: errori, richieste e commenti"
+  },
+  "where": {
+    "support": "Ogni pagina, nella barra in basso",
+    "explorer": "Esplorazioni, sulla lavagna e nella chat accanto",
+    "maker": "Esplorazioni, sulla scheda di ogni versione",
+    "builder": "Factory, sulla scheda su cui lavora",
+    "tester": "Personaggi, in una missione",
+    "sorter": "Segnali, man mano che arrivano"
+  },
+  "card": {
+    "of": "La scheda di {{name}}",
+    "worksAt": "Lavora qui:",
+    "now": "Ora",
+    "lastDid": "Ultima cosa fatta",
+    "nothingYet": "Ancora niente da raccontare.",
+    "close": "Chiudi la scheda"
+  },
+  "soon": {
+    "minutes_one": "circa {{count}} min",
+    "minutes_many": "circa {{count}} min",
+    "minutes_other": "circa {{count}} min",
+    "longer": "ancora un po'"
+  },
+  "tag": {
+    "maker": "Prepara la variante {{version}} da provare · {{soon}} · niente da fare finché non è pronta",
+    "builder": "Costruisce la scheda #{{number}} · niente da fare, chiede qui se si blocca",
+    "builderAt": "Costruisce la scheda #{{number}}: {{activity}} · niente da fare, chiede qui se si blocca",
+    "testerQueued": "Aspetta il suo turno per interpretare {{persona}} · niente da fare, ciò che trova appare qui sotto",
+    "testerRunning": "Interpreta {{persona}} in questa missione, passo {{step}} · niente da fare, ciò che trova appare qui sotto",
+    "testerDone_one": "Ha interpretato {{persona}} in questa missione: {{count}} passo · niente da fare, ciò che ha trovato appare qui sotto",
+    "testerDone_many": "Ha interpretato {{persona}} in questa missione: {{count}} passi · niente da fare, ciò che ha trovato appare qui sotto",
+    "testerDone_other": "Ha interpretato {{persona}} in questa missione: {{count}} passi · niente da fare, ciò che ha trovato appare qui sotto",
+    "sorter_one": "Smista {{count}} nuovo segnale · niente da fare, sceglierne uno qui sotto",
+    "sorter_many": "Smista {{count}} nuovi segnali · niente da fare, scegline uno qui sotto",
+    "sorter_other": "Smista {{count}} nuovi segnali · niente da fare, scegline uno qui sotto",
+    "sorterQuiet": "Attende ciò che arriva · niente da fare finché non arriva qualcosa"
+  },
+  "now": {
+    "maker": "Versione {{version}}: {{activity}}",
+    "makerAtWork": "Versione {{version}}: al lavoro",
+    "tester": "Interpreta {{persona}} in una missione",
+    "testers_one": "{{count}} missioni in corso",
+    "testers_many": "{{count}} missioni in corso",
+    "testers_other": "{{count}} missioni in corso",
+    "sorter_one": "Smista {{count}} nuovo segnale",
+    "sorter_many": "Smista {{count}} nuovi segnali",
+    "sorter_other": "Smista {{count}} nuovi segnali"
+  },
+  "last": {
+    "builder": "Ha costruito la scheda #{{number}}, «{{title}}»",
+    "explorer": "Ha approfondito «{{title}}»",
+    "maker": "Ha preparato il prototipo «{{label}}»"
+  }
+}

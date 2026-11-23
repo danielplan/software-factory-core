@@ -17,6 +17,8 @@ import type { FactoryCard } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { TypeChip } from "@/components/card-type";
+import { NameTag } from "@/components/meet/name-tag";
+import { builderTag } from "@/lib/meet-view";
 import { ConflictBox, ResolvingLine } from "./conflict-box";
 
 // A card on the board: it rises in after the ones above it, lifts under the
@@ -66,6 +68,9 @@ export function Card({
       <span className="text-[13px] leading-[1.35] font-medium">
         {card.title}
       </span>
+      {building && (
+        <NameTag id="builder" line={builderTag(card.number, now, t)} />
+      )}
       {card.hint && !building && (
         <span className="inline-flex items-center gap-1.5 rounded-md bg-wash px-2 py-1 text-xs leading-snug font-medium text-wash-foreground">
           <MessageCircle
@@ -74,14 +79,6 @@ export function Card({
             className="size-3 flex-none"
           />
           {t("factory.card.hintWithBuilder")}
-        </span>
-      )}
-      {now && (
-        <span
-          title={now}
-          className="line-clamp-2 w-full rounded-md bg-blue/8 px-2 py-1 text-xs leading-snug text-blue"
-        >
-          {now}
         </span>
       )}
       {(card.type ?? card.fix) && (

@@ -128,8 +128,6 @@
     "showArchived": "Die {{n}} anderen Varianten zeigen, archiviert seit eine vereinbart ist",
     "hideArchived": "Die anderen Varianten wieder archivieren",
     "usualState": "normal",
-    "building": "{{name}} baut {{key}}:",
-    "atWork": "der Kobold ist bei der Arbeit",
     "stillMade": "Wird noch gebaut: du kannst es benutzen, und es ändert sich, während der Kobold arbeitet",
     "startingTitle": "Prototyp startet",
     "preparingCopy": "Seine Kopie des Codes wird vorbereitet",

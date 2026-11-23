@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
+import { Face } from "@/components/meet/face";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,7 @@ export function SprocketDock({
             ? "w-[27rem] rounded-2xl bg-card shadow-[0_24px_60px_-20px_rgb(20_24_36/0.35)]"
             : "w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
-        style={{ height: open ? "auto" : 40, maxHeight: roomy }}
+        style={{ height: open ? "auto" : 54, maxHeight: roomy }}
       >
         {children}
       </section>
@@ -44,18 +45,31 @@ export function SprocketBar({
   line,
   onOpen,
 }: Readonly<{ working: boolean; line: string; onOpen: () => void }>) {
+  const t = useTranslation().t;
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="flex h-full w-full flex-none items-center gap-2.5 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground"
-    >
-      <KoboldHead size={22} className={cn(working && "animate-breathe")} />
-      <span className="flex-1 truncate">{line}</span>
-      <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
-        ⌘J
-      </kbd>
-    </button>
+    <div className="flex h-full w-full flex-none items-center gap-1 pl-2">
+      <Face id="support" className="flex-none">
+        <KoboldHead size={34} className={cn(working && "animate-breathe")} />
+      </Face>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex h-full min-w-0 flex-1 items-center gap-2.5 pr-2 pl-1 text-left"
+      >
+        <span className="grid min-w-0 flex-1">
+          <span className="truncate text-[13px] font-semibold text-foreground">
+            Sprocket{" "}
+            <span className="font-normal text-muted-foreground">
+              · {t("meet.roles.support")}
+            </span>
+          </span>
+          <span className="truncate text-xs text-muted-foreground">{line}</span>
+        </span>
+        <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
+          ⌘J
+        </kbd>
+      </button>
+    </div>
   );
 }
 
@@ -68,8 +82,17 @@ export function SprocketHead({
   const t = useTranslation().t;
   return (
     <header className="flex flex-none items-center gap-2 py-3 pr-2.5 pl-4">
-      <KoboldHead size={22} />
-      <span className="text-[13px] font-medium">Sprocket</span>
+      <Face id="support" className="flex-none">
+        <KoboldHead size={30} />
+      </Face>
+      <span className="grid min-w-0">
+        <span className="truncate text-[13px] font-semibold text-foreground">
+          Sprocket{" "}
+          <span className="font-normal text-muted-foreground">
+            · {t("meet.roles.support")}
+          </span>
+        </span>
+      </span>
       <span className="flex-1" />
       {children}
       <Button

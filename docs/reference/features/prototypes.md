@@ -6,7 +6,7 @@
 
 ## What it does
 
-**Tinker**, Doodle's maker, builds an exploration's prototype in the real
+**Tinker**, Doodle's helper, builds an exploration's prototype in the real
 app. Doodle starts it itself (`make_prototype`); there is no button.
 
 - **One prototype per exploration**, on its branch `proto/X-<n>-<key>`, in

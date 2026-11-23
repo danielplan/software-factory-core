@@ -3,9 +3,12 @@
 // The app mounts it only while Signals is installed.
 
 import { Inbox } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useSignals } from "@/api/use-signals";
 import { PageCount } from "@/components/layout/page-count";
+import { useReport } from "@/lib/meet";
+import { sorterNow } from "@/lib/meet-view";
 import type { PageModule, PageProps } from "@/lib/page-module";
 
 import { SignalsBlock } from "./home-block";
@@ -22,6 +25,15 @@ function Count() {
   return <PageCount n={data?.counts.new ?? 0} badge />;
 }
 
+// Sieve: at work while new signals wait to be sorted.
+function Watch() {
+  const t = useTranslation().t;
+  const { data } = useSignals();
+  const now = sorterNow(data?.signals.length ?? 0, t);
+  useReport("sorter", now ? { now, last: null } : null);
+  return null;
+}
+
 export const signals: PageModule = {
   id: "signals",
   pages: [
@@ -34,6 +46,7 @@ export const signals: PageModule = {
         color: "var(--understand)",
         Count,
       },
+      Watch,
     },
   ],
   blocks: ({ state, input }) => ({

@@ -11,6 +11,7 @@ import factoryEn from "./locales/en/factory.json" with { type: "json" };
 import feedbackEn from "./locales/en/feedback.json" with { type: "json" };
 import homeEn from "./locales/en/home.json" with { type: "json" };
 import marketEn from "./locales/en/market.json" with { type: "json" };
+import meetEn from "./locales/en/meet.json" with { type: "json" };
 import personasEn from "./locales/en/personas.json" with { type: "json" };
 import releasesEn from "./locales/en/releases.json" with { type: "json" };
 import settingsEn from "./locales/en/settings.json" with { type: "json" };
@@ -31,6 +32,7 @@ import factoryIt from "./locales/it/factory.json" with { type: "json" };
 import feedbackIt from "./locales/it/feedback.json" with { type: "json" };
 import homeIt from "./locales/it/home.json" with { type: "json" };
 import marketIt from "./locales/it/market.json" with { type: "json" };
+import meetIt from "./locales/it/meet.json" with { type: "json" };
 import personasIt from "./locales/it/personas.json" with { type: "json" };
 import releasesIt from "./locales/it/releases.json" with { type: "json" };
 import settingsIt from "./locales/it/settings.json" with { type: "json" };
@@ -51,6 +53,7 @@ import factoryDe from "./locales/de/factory.json" with { type: "json" };
 import feedbackDe from "./locales/de/feedback.json" with { type: "json" };
 import homeDe from "./locales/de/home.json" with { type: "json" };
 import marketDe from "./locales/de/market.json" with { type: "json" };
+import meetDe from "./locales/de/meet.json" with { type: "json" };
 import personasDe from "./locales/de/personas.json" with { type: "json" };
 import releasesDe from "./locales/de/releases.json" with { type: "json" };
 import settingsDe from "./locales/de/settings.json" with { type: "json" };
@@ -73,6 +76,7 @@ const en = {
   feedback: feedbackEn,
   home: homeEn,
   market: marketEn,
+  meet: meetEn,
   personas: personasEn,
   releases: releasesEn,
   settings: settingsEn,
@@ -95,6 +99,7 @@ const it = {
   feedback: feedbackIt,
   home: homeIt,
   market: marketIt,
+  meet: meetIt,
   personas: personasIt,
   releases: releasesIt,
   settings: settingsIt,
@@ -117,6 +122,7 @@ const de = {
   feedback: feedbackDe,
   home: homeDe,
   market: marketDe,
+  meet: meetDe,
   personas: personasDe,
   releases: releasesDe,
   settings: settingsDe,

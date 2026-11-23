@@ -1,0 +1,71 @@
+{
+  "title": "Deine Kobolde",
+  "intro": "Das Team, das für dich arbeitet. Klicke auf einen Kobold, um ihn kennenzulernen.",
+  "meet": "Lerne deine Kobolde kennen",
+  "meetName": "Lerne {{name}} und das Team kennen",
+  "resting": "Ruht",
+  "supervisor": "kümmert sich um das Team und antwortet dir, auf jeder Seite",
+  "roles": {
+    "support": "dein Support-Kobold",
+    "explorer": "dein Erkunder",
+    "maker": "Doodles Helfer",
+    "builder": "der Bauer",
+    "tester": "spielt deine Personas",
+    "sorter": "sortiert, was hereinkommt"
+  },
+  "jobs": {
+    "support": "Beantwortet deine Fragen und nimmt dein Feedback auf",
+    "explorer": "Denkt deine Ideen durch und erzählt die Geschichte dahinter",
+    "maker": "Doodles Helfer: macht die Versionen, die du ausprobierst",
+    "builder": "Baut die Karten, auf die ihr euch geeinigt habt, eine nach der anderen",
+    "tester": "Nutzt deine App wie eine deiner Personas und sagt, was schiefgeht",
+    "sorter": "Sortiert, was hereinkommt: Fehler, Wünsche und Feedback"
+  },
+  "where": {
+    "support": "Jede Seite, in der Leiste unten",
+    "explorer": "Erkundungen, auf dem Board und im Gespräch daneben",
+    "maker": "Erkundungen, auf der Karte jeder Version",
+    "builder": "Factory, auf der Karte, an der er arbeitet",
+    "tester": "Personas, auf einer Mission",
+    "sorter": "Signale, sobald sie hereinkommen"
+  },
+  "card": {
+    "of": "Karte von {{name}}",
+    "worksAt": "Arbeitet hier:",
+    "now": "Jetzt",
+    "lastDid": "Zuletzt",
+    "nothingYet": "Noch nichts zu erzählen.",
+    "close": "Karte schließen"
+  },
+  "soon": {
+    "minutes_one": "etwa {{count}} Min.",
+    "minutes_other": "etwa {{count}} Min.",
+    "longer": "noch ein bisschen"
+  },
+  "tag": {
+    "maker": "Macht Variante {{version}} zum Ausprobieren · {{soon}} · nichts zu tun, bis sie fertig ist",
+    "builder": "Baut Karte #{{number}} · nichts zu tun, er fragt hier nach, wenn er nicht weiterkommt",
+    "builderAt": "Baut Karte #{{number}}: {{activity}} · nichts zu tun, er fragt hier nach, wenn er nicht weiterkommt",
+    "testerQueued": "Wartet, bis es {{persona}} spielen darf · nichts zu tun, was er findet, steht unten",
+    "testerRunning": "Spielt {{persona}} auf dieser Mission, Schritt {{step}} · nichts zu tun, was er findet, steht unten",
+    "testerDone_one": "Hat {{persona}} auf dieser Mission gespielt: {{count}} Schritt · nichts zu tun, was er gefunden hat, steht unten",
+    "testerDone_other": "Hat {{persona}} auf dieser Mission gespielt: {{count}} Schritte · nichts zu tun, was er gefunden hat, steht unten",
+    "sorter_one": "Sortiert {{count}} neues Signal · nichts zu tun, wähle unten eins aus",
+    "sorter_other": "Sortiert {{count}} neue Signale · nichts zu tun, wähle unten eins aus",
+    "sorterQuiet": "Wartet auf Neues · nichts zu tun, bis etwas hereinkommt"
+  },
+  "now": {
+    "maker": "Version {{version}}: {{activity}}",
+    "makerAtWork": "Version {{version}}: bei der Arbeit",
+    "tester": "Spielt {{persona}} auf einer Mission",
+    "testers_one": "{{count}} Missionen laufen",
+    "testers_other": "{{count}} Missionen laufen",
+    "sorter_one": "Sortiert {{count}} neues Signal",
+    "sorter_other": "Sortiert {{count}} neue Signale"
+  },
+  "last": {
+    "builder": "Hat Karte #{{number}} gebaut, „{{title}}“",
+    "explorer": "Hat „{{title}}“ durchdacht",
+    "maker": "Hat den Prototyp „{{label}}“ gemacht"
+  }
+}
