@@ -50,7 +50,12 @@ export async function finishMaking(on: {
   const problem = result.ok
     ? unshared
     : stopped(result.error, made.branch, unshared);
-  mode.set(exploration, made.key, { making: false, activity: null, problem });
+  mode.set(exploration, made.key, {
+    making: false,
+    activity: null,
+    doing: null,
+    problem,
+  });
   if (!result.ok) on.failed?.(exploration, made.key, problem ?? "");
   if (result.ok)
     on.ready?.(exploration, made.key, {

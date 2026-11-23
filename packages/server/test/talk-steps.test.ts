@@ -4,6 +4,9 @@ import { test } from "node:test";
 import type { Claude, ClaudeResult, RunOptions } from "@software-factory/core";
 
 import { Talk } from "../src/coach/talk.ts";
+import { stepsInto } from "../src/extensions/explorations/making.ts";
+import { viewOf } from "../src/extensions/explorations/talk-view.ts";
+import type { PrototypeMode } from "../src/prototypes/mode.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 
 // The explorer's steps follow what Claude Code reports, never the clock; a
@@ -106,4 +109,44 @@ test("Try again says the last words again once, and the steps start over", async
   } finally {
     factory.close();
   }
+});
+
+test("what the explorer does is sorted into a kind, drawing included, and never turned into words", async () => {
+  const held = reporting();
+  const talk = new Talk({ claude: held.claude, cwd: "/p", onChange: () => {} });
+  const turn = talk.answer("Hello", undefined, RIGHTS);
+  assert.equal(talk.doing, "start", "it opens on a step");
+  held.report("Reading docs/reference/design-system.md");
+  assert.equal(talk.doing, "read-design");
+  assert.equal(talk.step, 1);
+  held.report("Searching for “card”");
+  assert.equal(talk.doing, "search");
+  held.report("Using look at board (setup)");
+  assert.equal(talk.doing, "unknown");
+  assert.equal(talk.step, 1);
+  held.report("Now, how ideas are kept");
+  assert.equal(talk.doing, "unknown", "its own words change nothing");
+  held.report("Using add choice (setup)");
+  assert.equal(talk.doing, "draw-choice", "drawing reaches the page");
+  assert.equal(talk.step, 2);
+  assert.equal(viewOf(talk, [], null).doing, "draw-choice");
+  held.end({ ok: true, text: "Done." });
+  await turn;
+  assert.equal(viewOf(talk, [], null).doing, null);
+});
+
+test("the maker's run keeps the kind of its last action and leaves it for its own words", () => {
+  const sets: Record<string, unknown>[] = [];
+  const mode = {
+    runOf: () => ({ steps: [] as string[] }),
+    set: (_: string, __: string, change: Record<string, unknown>) => {
+      sets.push(change);
+    },
+  } as unknown as PrototypeMode;
+  const step = stepsInto(mode, "X-1", "A");
+  step("Editing src/pay.tsx");
+  step("Let me try the other way");
+  assert.equal(sets[0]?.doing, "edit");
+  assert.equal(sets[1] && "doing" in sets[1], false);
+  assert.equal(sets[1]?.activity, "Let me try the other way");
 });

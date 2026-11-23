@@ -9,15 +9,19 @@ import { KoboldHead } from "@/components/kobold-face";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
+import { useDoing } from "./use-doing";
+
 // What the explorer does now, in a few words: answering or a step of its
 // work; nothing when it waits. A prototype being made shows on its card on
 // the board, with what the maker does, not here a second time.
-function doingOf(page: ExplorationPage, says: TFunction): string | null {
+function doingOf(
+  page: ExplorationPage,
+  says: TFunction,
+  step: string | null,
+): string | null {
   const { talk } = page;
   if (talk.writing === null) return null;
-  return talk.writing
-    ? says("explore.talk.talking")
-    : (talk.activity ?? says("explore.talk.thinking"));
+  return talk.writing ? says("explore.talk.talking") : step;
 }
 
 // Who talks here: the explorer kobold on a tile of its colour, its name and
@@ -25,7 +29,7 @@ function doingOf(page: ExplorationPage, says: TFunction): string | null {
 export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
   const explorer = KOBOLDS.find((kobold) => kobold.id === "explorer");
   const t = useTranslation().t;
-  const doing = doingOf(page, t);
+  const doing = doingOf(page, t, useDoing(page.talk).line);
   const color = explorer?.color ?? "#e9a23b";
   return (
     <div className="flex items-center gap-3 border-b border-border-soft px-5 py-3.5">

@@ -127,7 +127,7 @@ export class StartUp {
     mode.set(exploration, key, {
       startProblem: null,
       ...(mode.runOf(exploration, key).making
-        ? { activity: "Working out how to start the app" }
+        ? { activity: "Working out how to start the app", doing: "start" }
         : {}),
     });
     this.settingUp = this.setUpNow(exploration, key, failed);
