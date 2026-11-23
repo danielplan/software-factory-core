@@ -1,4 +1,5 @@
 import { CircleAlert } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Markdown } from "@/components/markdown";
 
@@ -7,7 +8,8 @@ import { Markdown } from "@/components/markdown";
 export function ProblemBox({
   title,
   text,
-}: Readonly<{ title: string; text?: string }>) {
+  children,
+}: Readonly<{ title: string; text?: string; children?: ReactNode }>) {
   return (
     <div
       role="alert"
@@ -17,13 +19,14 @@ export function ProblemBox({
         className="mt-0.5 size-4 flex-none text-destructive"
         aria-hidden
       />
-      <div className="grid gap-0.5">
+      <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="font-medium text-destructive">{title}</p>
         {text && (
           <div className="text-foreground/80 [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-2">
             <Markdown text={text} inline />
           </div>
         )}
+        {children}
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ import { explorationPageSchema } from "@/api/schemas/explorations";
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
+import { isNoStart, NoStart } from "./board/no-start";
 import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
 
@@ -45,6 +46,11 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
     return problem ? (
       <ProblemBox title={t("explore.cannotRead")} text={problem} />
     ) : null;
+  // A made prototype in a project that does not say how to start it: said
+  // at once, not only after Start is pressed.
+  const noStart =
+    isNoStart(said) ||
+    (!data.canRun && data.board.things.some((one) => one.kind === "prototype"));
   const press = (path: string, body: object) => {
     say(null);
     setPending(path);
@@ -66,8 +72,13 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
         <BoardProblem value={say}>
           {/* What did not work shows over the canvas only, not the talk. */}
-          <div className="relative flex min-h-0 min-w-0 flex-1">
-            {said && (
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+            {noStart && (
+              <div className="max-h-[55%] flex-none overflow-y-auto px-4 pt-4">
+                <NoStart />
+              </div>
+            )}
+            {said && !isNoStart(said) && (
               <div className="absolute inset-x-4 top-4 z-10 rounded-xl bg-card shadow-card">
                 <ProblemBox title={t("explore.didNotWork")} text={said} />
               </div>
