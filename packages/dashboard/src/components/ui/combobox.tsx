@@ -7,6 +7,7 @@
 import { Check, ChevronDown } from "lucide-react";
 import { Popover } from "radix-ui";
 import { type KeyboardEvent, type RefObject, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { FIELD } from "@/lib/field-style";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ export function Combobox({
   value,
   options,
   onChange,
-  placeholder = "Choose…",
+  placeholder,
   label,
   disabled = false,
   className,
@@ -35,6 +36,7 @@ export function Combobox({
   disabled?: boolean;
   className?: string;
 }>) {
+  const t = useTranslation().t;
   const { open, toggle, search, setSearch, list, shown, pick } = useCombo(
     options,
     onChange,
@@ -48,7 +50,7 @@ export function Combobox({
           open={open}
           label={label}
           text={chosen?.label ?? null}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("words.combo.choose")}
           className={className}
         />
       </Popover.Trigger>
@@ -158,6 +160,7 @@ function List({
   onSearch: (text: string) => void;
   onPick: (value: string) => void;
 }>) {
+  const t = useTranslation().t;
   return (
     <div
       ref={list}
@@ -169,7 +172,7 @@ function List({
         <input
           data-search
           value={search}
-          placeholder="Search…"
+          placeholder={t("words.combo.search")}
           onChange={(event) => {
             onSearch(event.target.value);
           }}
@@ -196,7 +199,7 @@ function List({
         </button>
       ))}
       {options.length === 0 && (
-        <p className="px-2 py-2 text-faint">Nothing matches</p>
+        <p className="px-2 py-2 text-faint">{t("words.combo.nothing")}</p>
       )}
     </div>
   );

@@ -69,6 +69,10 @@ at the world and change it (`look_at_world`, `world_rows`, `change_world`,
 - No prototype code reaches the real app.
 - A prototype is handed off only when agreed, with its variant
   ([decision 0003](../../decisions/0003-build-from-the-agreed-prototype.md)).
+  A prototype the team does not want built (a broken first version, say) is
+  taken off the board by Doodle, on their word: never one that is agreed
+  (it is marked a sketch first) or being made. Its branch stays. A board
+  with a prototype nobody agreed on and nobody took off is not handed off.
 
 ## Where it lives
 

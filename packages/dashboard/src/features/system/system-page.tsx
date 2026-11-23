@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { TFunction } from "i18next";
 import { Play, Square } from "lucide-react";
 import { Fragment, useState } from "react";
@@ -84,12 +85,12 @@ export function SystemPage({ state }: Readonly<{ state: FactoryState }>) {
       >
         <p className="py-6 text-center text-[13px] text-muted-foreground">
           {s("system.noPartsBefore")}{" "}
-          <a
-            href="#explore"
+          <Link
+            to="/explore"
             className="text-foreground underline underline-offset-2"
           >
             {t("shell.pages.explore")}
-          </a>
+          </Link>
           {s("system.noPartsAfter")}
         </p>
       </Area>

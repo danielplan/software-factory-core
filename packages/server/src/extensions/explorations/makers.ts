@@ -21,4 +21,7 @@ export type Makers = {
   ) => string[];
   // Hands the exploration off, as the Hand off button does.
   handOff: (id: string) => Promise<string>;
+  // A thing taken off the board, when a prototype: refused while its maker
+  // is on it; else what runs of it stops.
+  release: (id: string, thing: string) => void;
 };

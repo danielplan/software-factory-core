@@ -43,8 +43,13 @@ export function withoutThing(board: Board, id: string): Board {
   const thing = thingOf(board, id);
   if (thing.kind === "problem")
     throw new Refused("The problem stays on the board: change its words.");
-  if (thing.kind === "prototype")
-    throw new Refused("A prototype stays on the board once it is made.");
+  // A prototype the team did not agree on can go (a broken first version
+  // is in nobody's way then); the agreed one is what is built, so it
+  // stays until the agreement is taken back. Its branch stays either way.
+  if (thing.kind === "prototype" && thing.agreed)
+    throw new Refused(
+      `Prototype ${thing.key} is agreed: mark it a sketch first, once the team says it is not to be built.`,
+    );
   return {
     things: board.things.filter((one) => one.id !== id),
     links: board.links.filter((one) => one.from !== id && one.to !== id),

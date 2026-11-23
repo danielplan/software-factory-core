@@ -29,7 +29,7 @@ import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
 import { inLanguage } from "../../language.ts";
 import type { Makers } from "./makers.ts";
-import { parkIdea, renameExploration } from "./actions.ts";
+import { explorationOf, parkIdea, renameExploration } from "./actions.ts";
 
 const RIGHTS = {
   readOnly: true,
@@ -249,9 +249,9 @@ export class ExplorationTalks {
   // board now.
   act(id: string, act: Act, by: "kobold" | "person"): { said: string } {
     const store = this.options.store();
-    const exploration = store.get("explorations", id);
-    if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+    const exploration = explorationOf(store, id);
     const done = applyAct(completed(exploration, store.board(id)), act, by);
+    if (act.act === "remove") this.maker?.release(id, act.id);
     store.saveBoard(id, done.board);
     this.options.onChange();
     return { said: `${done.said}\n\n${this.look(id)}` };
@@ -259,8 +259,7 @@ export class ExplorationTalks {
 
   private look(id: string): string {
     const store = this.options.store();
-    const exploration = store.get("explorations", id);
-    if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+    const exploration = explorationOf(store, id);
     return boardText(exploration, store.board(id));
   }
 
@@ -271,8 +270,7 @@ export class ExplorationTalks {
     spokenIn?: string,
   ): Promise<void> {
     const store = this.options.store();
-    const exploration = store.get("explorations", id);
-    if (!exploration) throw new Refused(`There is no exploration “${id}”.`);
+    const exploration = explorationOf(store, id);
     const heard = exploration.heard.map((one) => `- ${one.text}`);
     const did = this.done.get(id) ?? [];
     const making = this.maker?.making(id) ?? [];

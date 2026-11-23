@@ -3,6 +3,7 @@
 // shows from what Home has read; the app hands them to Home
 // (app/home-blocks.tsx), which arranges them.
 
+import { Link } from "react-router";
 import {
   ArrowRight,
   CircleCheck,
@@ -71,9 +72,9 @@ export function StatusBlock({ state }: Readonly<{ state: FactoryState }>) {
           t,
         )}
       </span>
-      <a href="#system" className="font-medium text-blue hover:underline">
+      <Link to="/system" className="font-medium text-blue hover:underline">
         {t("shell.pages.system")}
-      </a>
+      </Link>
     </div>
   );
 }

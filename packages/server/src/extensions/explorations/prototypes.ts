@@ -23,7 +23,7 @@ import { MakerDesk } from "./maker-desk.ts";
 import { makeOne } from "./making.ts";
 import type { MakerTools } from "./maker-tools.ts";
 import { beingMadeIn, lookAt, notWhileMade, running } from "./looks.ts";
-import type { Failed, Ready } from "./made.ts";
+import type { Told } from "./made.ts";
 
 import {
   prototypeOf,
@@ -195,7 +195,7 @@ export class ExplorationPrototypes {
           activity: null,
           problem,
         });
-        this.failed?.(exploration.id, key, problem);
+        this.told.failed?.(exploration.id, key, problem);
       },
     );
   }
@@ -237,6 +237,20 @@ export class ExplorationPrototypes {
     );
   }
 
+  // A prototype taken off the board: refused while its maker is on it, else
+  // what runs of it stops. Its branch stays.
+  release(exploration: string, key: string): void {
+    const run = this.mode.runOf(exploration, key);
+    if (run.making)
+      throw new Refused(
+        `Prototype ${key} is still being made: take it off once it is ready.`,
+      );
+    if (["running", "starting"].includes(run.state))
+      this.mode.stop(exploration, key).catch(() => {
+        // It says on its own run why it did not stop.
+      });
+  }
+
   // Handed off or dropped: its prototypes stop and their copies go; the
   // branches stay (the builder builds from the agreed one).
   async removeAll(exploration: string): Promise<void> {
@@ -253,12 +267,10 @@ export class ExplorationPrototypes {
   // Who is told when a prototype is made (the conversation, which reviews
   // it and points at it) and when one could not be made (so it stops
   // saying the maker is on it).
-  private ready: Ready = null;
-  private failed: Failed = null;
+  private told: Told = { ready: null, failed: null };
 
-  whenDone(told: { ready: Ready; failed: Failed }): void {
-    this.ready = told.ready;
-    this.failed = told.failed;
+  whenDone(told: Told): void {
+    this.told = told;
   }
 
   // What each prototype of an exploration being made does now, for the
@@ -346,8 +358,7 @@ export class ExplorationPrototypes {
       ...this.options,
       mode: this.mode,
       desk: this.desk,
-      ready: this.ready,
-      failed: this.failed,
+      ...this.told,
       exploration,
       board,
       made,

@@ -4,6 +4,7 @@
 // dropped, which opens. New exploration opens a fresh canvas at once, where
 // the team says its idea to the kobold.
 
+import { Link, useNavigate } from "react-router";
 import type { TFunction } from "i18next";
 import { ChevronDown, ChevronUp, Lightbulb, Plus, Radar } from "lucide-react";
 import { useState } from "react";
@@ -26,17 +27,18 @@ import { Markdown } from "@/components/markdown";
 import { Faces, Preview } from "./bits";
 import { KINDS, whereItIs } from "./kinds";
 import { FromBoard } from "./from-board";
-import { explorationHash, Waiting } from "./waiting-row";
+import { explorationPath, Waiting } from "./waiting-row";
 
 export function ExplorationsPage() {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const { data, problem } = useExplorations();
   const [refused, setRefused] = useState<string | null>(null);
   const adding = () => {
     setRefused(null);
     post<{ exploration: { id: string } }>("/api/kobble/explorations/fresh", {})
       .then(({ exploration }) => {
-        location.hash = explorationHash(exploration.id);
+        void navigate(explorationPath(exploration.id));
       })
       .catch((error: unknown) => {
         setRefused(messageOf(error));
@@ -150,10 +152,10 @@ function NothingYet({ onOwn }: Readonly<{ onOwn: () => void }>) {
         </p>
         <div className="mt-1.5 flex flex-wrap gap-2.5">
           <Button asChild size="pill">
-            <a href="#signals">
+            <Link to="/signals">
               <Radar aria-hidden />
               {t("explore.exploreSignal")}
-            </a>
+            </Link>
           </Button>
           <Button variant="ring" size="pill" onClick={onOwn}>
             <Lightbulb aria-hidden />
@@ -214,8 +216,8 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
   const where = whereItIs(row, t);
   const { tint } = KINDS[where.kind];
   return (
-    <a
-      href={explorationHash(row.id)}
+    <Link
+      to={explorationPath(row.id)}
       className={cn(
         CARD,
         "flex flex-col gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgb(20_24_36/0.35)]",
@@ -242,7 +244,7 @@ function Exploring({ row }: Readonly<{ row: ExplorationRow }>) {
           <Markdown text={row.line} inline />
         </span>
       )}
-    </a>
+    </Link>
   );
 }
 
@@ -269,9 +271,9 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
       {open && rows.length > 0 && (
         <div className={CARD}>
           {rows.map((row) => (
-            <a
+            <Link
               key={row.id}
-              href={explorationHash(row.id)}
+              to={explorationPath(row.id)}
               className={cn(ROW, "hover:bg-surface")}
             >
               <span className="flex-1">{row.title}</span>
@@ -279,7 +281,7 @@ function Done({ rows }: Readonly<{ rows: ExplorationRow[] }>) {
                 {row.work ? `#${String(row.work)}` : t("explore.dropped")}
               </span>
               <Chevron />
-            </a>
+            </Link>
           ))}
         </div>
       )}

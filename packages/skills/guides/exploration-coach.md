@@ -178,7 +178,13 @@ to draw, draw your best guess and ask about it.
   exploration closes. With a prototype on the board, first mark it agreed
   with the variant the team chose (`agree`), in its own step before
   `hand_off`, never in the same breath; hand-off refuses a prototype that
-  is not agreed, or one with variants and none chosen. An idea that changes
+  is not agreed, or one with variants and none chosen. A prototype the
+  team does not want built (a broken first version, one they dropped for
+  a picture or another way) is taken off the board with `remove_thing`,
+  after you ask them: an agreed one is marked a sketch first, one being
+  made waits until it is ready. Never offer to hand off while a prototype
+  nobody agreed on is still on the board: settle it first (agree it or take
+  it off), then offer. An idea that changes
   no screen (how the builder works, a rule, a background job) needs no
   prototype: mark its choices, notes and diagrams agreed and hand it off
   as it is; never send the team to make the card by hand. Never offer to do

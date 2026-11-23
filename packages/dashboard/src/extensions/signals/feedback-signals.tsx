@@ -3,6 +3,7 @@
 // where it stands (sent, seen, planned, done); posts arriving from the board
 // in a factory that reads it are ordinary signals (feedback-extras.tsx).
 
+import { Link } from "react-router";
 import { ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -55,8 +56,8 @@ export function SentItem({
 }: Readonly<{ one: SentSignal; picked: boolean; href: string }>) {
   const t = useTranslation().t;
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       aria-current={picked ? "true" : undefined}
       className={cn(
         "flex items-start gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface",
@@ -79,7 +80,7 @@ export function SentItem({
           <StatePill state={one.state} />
         </span>
       </span>
-    </a>
+    </Link>
   );
 }
 

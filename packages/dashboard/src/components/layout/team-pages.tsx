@@ -1,6 +1,7 @@
 // The pages of the team's own extensions in the sidebar, in a group after
 // Kobble's own.
 
+import { Link } from "react-router";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,9 +35,9 @@ export function TeamPages({
     <nav aria-label={t("shell.groups.team")} className="grid gap-px pt-4">
       <GroupLabel>{t("shell.groups.team")}</GroupLabel>
       {pages.map((page) => (
-        <a
+        <Link
           key={page.id}
-          href={`#team/${encodeURIComponent(page.id)}`}
+          to={`/team/${encodeURIComponent(page.id)}`}
           onClick={onGo}
           aria-current={current === page.id ? "page" : undefined}
           className={cn(
@@ -47,7 +48,7 @@ export function TeamPages({
         >
           <Tile color="#8b5cf6">{iconOf(page.icon)}</Tile>
           <span className="truncate">{page.name}</span>
-        </a>
+        </Link>
       ))}
     </nav>
   );

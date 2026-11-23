@@ -26,7 +26,7 @@ import { withThing } from "./board-things.ts";
 import { ExplorationPrototypes } from "./prototypes.ts";
 import { prototypeBranch, prototypeOf } from "./versions.ts";
 import { toldOfPrototypes } from "./told.ts";
-import { unmadeIn } from "./unmade.ts";
+import { unmadeIn, unmadeOf } from "./unmade.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { talkRoutes } from "./talk-routes.ts";
 import { type SpecWriter, specWriter } from "./spec-writer.ts";
@@ -56,7 +56,7 @@ type Options = {
 };
 
 export function servedExplorations(options: Options) {
-  const { store } = options;
+  const { store, project } = options;
   const worlds = new ExplorationWorlds(options);
   const talks = new ExplorationTalks({ ...options, worlds });
   const prototypes = new ExplorationPrototypes({ ...options, worlds });
@@ -76,10 +76,7 @@ export function servedExplorations(options: Options) {
           stage("card");
           return spec;
         },
-        {
-          missions: options.missions(),
-          unmade: (board) => unmadeIn(options.project, board),
-        },
+        { missions: options.missions(), unmade: unmadeOf(project) },
       );
       stage("prototypes");
       await prototypes.removeAll(id);
@@ -147,6 +144,12 @@ function makersFor(
     handOff: async (id) => {
       const handed = await handOffNow(id);
       return `Handed off as #${String(handed.issue)} (${handed.url}), in To do: the builder takes it from there. The exploration is closed.`;
+    },
+    release: (id, thing) => {
+      const made = store()
+        .board(id)
+        .things.find((one) => one.id === thing);
+      if (made?.kind === "prototype") prototypes.release(id, made.key);
     },
     deeper: (id, prototype, keep, ways) => {
       const keys = prototypes.deeper(

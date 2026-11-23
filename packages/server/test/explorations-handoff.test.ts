@@ -5,6 +5,7 @@ import type { Board, KobbleStore } from "@software-factory/core";
 
 import type { Cards } from "../src/cards/cards.ts";
 import { handOff } from "../src/extensions/explorations/actions.ts";
+import { applyAct } from "../src/extensions/explorations/board-acts.ts";
 import { explorationsFactory } from "./explorations-factory.ts";
 
 // What is handed off: an idea that changes no screen goes without a
@@ -77,6 +78,38 @@ test("a board with a prototype nobody agreed on is not handed off without it", a
     );
     assert.deepEqual(made, []);
     assert.equal(factory.store.get("explorations", "X-1")?.status, "exploring");
+  } finally {
+    factory.close();
+  }
+});
+
+test("a prototype nobody agreed on, taken off the board, no longer stands in the way of what the team agreed", async () => {
+  const factory = await explorationsFactory();
+  try {
+    changeBoard(factory.store, (things) =>
+      things.map((one) =>
+        one.kind === "prototype"
+          ? { ...one, agreed: false }
+          : choiceAgreed(one),
+      ),
+    );
+    const made: string[] = [];
+    // The way out is said in the refusal itself.
+    await assert.rejects(
+      handOff(factory.store, "X-1", cardsInto(made)),
+      /have Doodle take them off the board/,
+    );
+    let board = factory.store.board("X-1");
+    for (const one of board.things)
+      if (one.kind === "prototype")
+        board = applyAct(board, { act: "remove", id: one.id }, "kobold").board;
+    factory.store.saveBoard("X-1", board);
+    await handOff(factory.store, "X-1", cardsInto(made));
+    assert.match(made[0] ?? "", /\*\*Agreed, without a prototype\*\*/);
+    assert.equal(
+      factory.store.get("explorations", "X-1")?.status,
+      "handed-off",
+    );
   } finally {
     factory.close();
   }

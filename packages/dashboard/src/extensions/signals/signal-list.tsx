@@ -3,6 +3,7 @@
 // also says where it stands. What this person sent to the board is in the
 // list too, mixed in by time.
 
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 
 import type { SignalRow } from "@/api/client";
@@ -15,8 +16,8 @@ import { SentItem, type SentSignal } from "./feedback-signals";
 import { StepOf } from "./step";
 import { whoOf } from "@/lib/signals-view";
 
-export const signalHash = (id: string | null) =>
-  id ? `#signals/${encodeURIComponent(id)}` : "#signals";
+export const signalPath = (id: string | null) =>
+  id ? `/signals/${encodeURIComponent(id)}` : "/signals";
 
 // A signal, or a post this person sent.
 export type Listed = SignalRow | SentSignal;
@@ -40,7 +41,7 @@ export function SignalList({
             key={one.id}
             one={one}
             picked={one.id === shown}
-            href={signalHash(one.id)}
+            href={signalPath(one.id)}
           />
         ) : (
           <Item key={one.id} signal={one} picked={one.id === shown} />
@@ -59,8 +60,8 @@ function Item({
   const t = useTranslation().t;
   const board = signal.source === "feedback";
   return (
-    <a
-      href={signalHash(signal.id)}
+    <Link
+      to={signalPath(signal.id)}
       aria-current={picked ? "true" : undefined}
       className={cn(
         "flex items-start gap-3.5 border-t border-border-soft px-5 py-3.5 first:border-t-0 hover:bg-surface",
@@ -93,6 +94,6 @@ function Item({
         </span>
         {board ? <FeedbackLine signal={signal} /> : <StepOf signal={signal} />}
       </span>
-    </a>
+    </Link>
   );
 }

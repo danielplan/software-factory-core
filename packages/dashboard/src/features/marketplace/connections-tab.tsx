@@ -3,6 +3,7 @@
 // one). The one not in use says how to get there: Connect while nothing is
 // connected, otherwise Switch to it, with its question first.
 
+import { Link } from "react-router";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -96,7 +97,9 @@ export function BoardButton({
   if (action.kind === "connect")
     return (
       <Button asChild size="pill">
-        <a href="#settings/connections">{t("market.connections.connect")}</a>
+        <Link to="/settings/connections">
+          {t("market.connections.connect")}
+        </Link>
       </Button>
     );
   const short = (

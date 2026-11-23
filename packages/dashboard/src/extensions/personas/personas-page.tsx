@@ -7,6 +7,7 @@
 // missions (missions.tsx), and every signal from them, whatever became of
 // it. A mission's own page is #personas/<id>/tests/<mission>.
 
+import { Link } from "react-router";
 import { ChevronLeft, Pencil, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +16,7 @@ import { PersonaFace } from "@/components/kobold-face";
 import { PersonaTile } from "@/components/persona-tile";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
-import { personaHash } from "@/lib/routes";
+import { personaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, Head } from "@/components/page-bits";
 import { originWords, personaPlaceOf } from "@/lib/signals-view";
@@ -122,8 +123,8 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
 function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
   const t = useTranslation().t;
   return (
-    <a
-      href={personaHash(persona.id)}
+    <Link
+      to={personaPath(persona.id)}
       className={cn(
         CARD,
         "group flex flex-col gap-3 px-5 py-4 transition-shadow hover:shadow-md",
@@ -141,7 +142,7 @@ function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
           {t("personas.onMission")}
         </span>
       )}
-    </a>
+    </Link>
   );
 }
 
@@ -153,13 +154,13 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
   );
   return (
     <div>
-      <a
-        href={personaHash()}
+      <Link
+        to={personaPath()}
         className="mb-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
       >
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
         {t("shell.pages.personas")}
-      </a>
+      </Link>
       {problem && (
         <ProblemBox title={t("personas.oneCannotRead")} text={problem} />
       )}

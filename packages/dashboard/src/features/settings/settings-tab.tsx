@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
 import { PageHead } from "@/components/layout/page-head";
 import { Tile } from "@/components/layout/sidebar-links";
@@ -19,7 +20,7 @@ import type { Messages } from "@/i18n/messages";
 import {
   type SettingsTabName,
   shownTab,
-  tabHash,
+  tabPath,
   tabsOf,
 } from "@/lib/settings-tabs";
 
@@ -110,8 +111,8 @@ function TabLink({
 }: Readonly<{ name: SettingsTabName; chosen: boolean }>) {
   const t = useTranslation().t;
   return (
-    <a
-      href={tabHash(name)}
+    <Link
+      to={tabPath(name)}
       aria-current={chosen ? "page" : undefined}
       className={cn(
         "flex h-8 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-[13px] font-normal text-sidebar-muted hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]",
@@ -123,6 +124,6 @@ function TabLink({
         {LOOKS[name].icon}
       </Tile>
       {t(`settings.tabs.${LOOKS[name].word}`)}
-    </a>
+    </Link>
   );
 }

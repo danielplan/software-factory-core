@@ -30,3 +30,8 @@ export function unmadeIn(project: string, board: Board): string[] {
       : [],
   );
 }
+
+// The same, for a project: what the hand-off asks of each board.
+export function unmadeOf(project: string): (board: Board) => string[] {
+  return (board) => unmadeIn(project, board);
+}

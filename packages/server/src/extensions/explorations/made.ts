@@ -27,6 +27,9 @@ export type Ready =
 export type Failed =
   ((exploration: string, key: string, why: string) => void) | null;
 
+// Both, as the prototypes are told them.
+export type Told = { ready: Ready; failed: Failed };
+
 export async function finishMaking(on: {
   mode: PrototypeMode;
   workspace: Workspace;

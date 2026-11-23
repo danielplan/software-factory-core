@@ -8,6 +8,7 @@
 import { ArrowUpRight, Check, MessagesSquare, Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
 import { FIELD_AREA } from "@/lib/field-style";
 import { messageOf, post } from "@/api/client";
@@ -31,6 +32,7 @@ export function WaitingCards({ waiting }: Readonly<{ waiting: Waiting[] }>) {
 
 function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   const [picked, pick] = useState<string | null>(null);
   const [own, write] = useState("");
   const [sending, setSending] = useState(false);
@@ -87,9 +89,14 @@ function WaitingCard({ waiting }: Readonly<{ waiting: Waiting }>) {
           size="pill"
           variant="ring"
           onClick={() => {
-            talkItThrough(waiting).catch((error: unknown) => {
-              setProblem(messageOf(error));
-            });
+            talkItThrough(waiting).then(
+              (to) => {
+                if (to) void navigate(to);
+              },
+              (error: unknown) => {
+                setProblem(messageOf(error));
+              },
+            );
           }}
         >
           <MessagesSquare aria-hidden className="size-4" />
@@ -196,8 +203,8 @@ function Answers({
   );
 }
 
-// The question as an exploration, opened with the kobold.
-async function talkItThrough(waiting: Waiting): Promise<void> {
+// The question as an exploration, to open with the kobold: where it is.
+async function talkItThrough(waiting: Waiting): Promise<string | null> {
   const question = waiting.ask?.question ?? waiting.text;
   const made = await post<{ exploration?: { id: string } }>(
     "/api/kobble/explorations",
@@ -208,6 +215,7 @@ async function talkItThrough(waiting: Waiting): Promise<void> {
         .join("\n\n"),
     },
   );
-  if (made.exploration)
-    window.location.hash = `#explore/${encodeURIComponent(made.exploration.id)}`;
+  return made.exploration
+    ? `/explore/${encodeURIComponent(made.exploration.id)}`
+    : null;
 }

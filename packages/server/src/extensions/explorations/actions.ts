@@ -200,10 +200,7 @@ export function prototypeToHandOff(
     (one): one is Made => one.kind === "prototype" && !unmade.includes(one.key),
   );
   const agreed = made.find((one) => one.agreed);
-  if (made.length > 0 && !agreed)
-    throw new Refused(
-      `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it.`,
-    );
+  if (made.length > 0 && !agreed) throw agreeFirst(made);
   if (agreed && (agreed.variants?.length ?? 0) > 1 && !chosenVariant(agreed))
     throw new Refused(
       `Say which variant of prototype ${agreed.key} is to be built first.`,
@@ -213,6 +210,14 @@ export function prototypeToHandOff(
       "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
     );
   return agreed;
+}
+
+// No prototype agreed on: which to agree, or to have Doodle take them off.
+function agreeFirst(made: Made[]): Refused {
+  const them = made.length === 1 ? "it" : "them";
+  return new Refused(
+    `Agree on the prototype to build first (${made.map((one) => one.key).join(", ")}), with its variant: the builder builds from it. If the team does not want ${them} built (a broken first version, say), have Doodle take ${them} off the board.`,
+  );
 }
 
 // The prototype handed off, leaving out those never made.

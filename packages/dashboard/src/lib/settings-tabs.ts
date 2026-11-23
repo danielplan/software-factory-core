@@ -17,7 +17,7 @@ export type SettingsTabOf<T> = { name: SettingsTabName; sections: T[] };
 const slugOf = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 // "This computer" → "#settings/this-computer".
-export const tabHash = (name: SettingsTabName) => `#settings/${slugOf(name)}`;
+export const tabPath = (name: SettingsTabName) => `/settings/${slugOf(name)}`;
 
 // The tabs in their order, each with its sections; a tab with none is left out.
 export function tabsOf<T extends { tab: SettingsTabName }>(

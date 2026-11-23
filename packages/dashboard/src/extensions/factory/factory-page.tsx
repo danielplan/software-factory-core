@@ -7,6 +7,7 @@
 // cards it got stuck on (Stuck). Without a board, the page says so and
 // leads to connecting one.
 
+import { Link } from "react-router";
 import type { TFunction } from "i18next";
 import { ArrowUpRight, LoaderCircle, Plug, RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -296,10 +297,10 @@ function NotConnected() {
         {t("factory.notConnected.text")}
       </p>
       <Button asChild size="pill" className="mt-1">
-        <a href="#connect">
+        <Link to="/connect">
           <Plug aria-hidden />
           {t("factory.notConnected.connect")}
-        </a>
+        </Link>
       </Button>
     </div>
   );

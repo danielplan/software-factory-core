@@ -68,5 +68,10 @@
   "form": {
     "needed": "Schreib hier etwas hinein.",
     "address": "Schreib eine Webadresse, etwa https://your-app/api/kobble/export."
+  },
+  "combo": {
+    "choose": "Auswählen…",
+    "search": "Suchen…",
+    "nothing": "Nichts gefunden"
   }
 }
