@@ -1,20 +1,18 @@
-// Prototype only: whether the made-up explorer has stopped (variant B, state
-// "stopped"), shared by the board's reading card and the made-up page, so the
+// Prototype only: whether the made-up explorer has stopped (state "stopped"), shared by the board's reading card and the made-up page, so the
 // conversation beside the board says the same as the board. Each new try
 // stops with the other reason, so both can be seen.
 
 import { useSyncExternalStore } from "react";
 
-import { stateAsked, variantAsked } from "./prototype-switch";
+import { stateAsked } from "./prototype-switch";
 
 const REASONS = [
   "Claude Code is not signed in",
   "The explorer stopped: no reason given",
 ];
 
-// Only variant B stops, and only in the state "stopped".
-export const canStop = (): boolean =>
-  variantAsked() === "B" && stateAsked() === "stopped";
+// The made-up explorer stops only in the state "stopped".
+export const canStop = (): boolean => stateAsked() === "stopped";
 
 let attempt = 0;
 // The state opens already stopped.
