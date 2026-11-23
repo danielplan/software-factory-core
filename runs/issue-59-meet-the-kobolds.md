@@ -77,13 +77,13 @@ Shown in the browser on this copy's demo project (the example shop). Tinker's
 making, Bolt's building card were made up with a request override in the
 browser, because the demo has no prototype being made or card being built.
 
-![Signals: the sidebar's Your kobolds and Sieve's name tag](runs/issue-59-meet-the-kobolds/01-signals-sidebar-group-and-sieve-tag.png)
-![An exploration: Tinker's name tag under the prototype being made](runs/issue-59-meet-the-kobolds/02-exploration-tinker-tag.png)
-![Tinker's tag opens the panel with Tinker lit](runs/issue-59-meet-the-kobolds/03-panel-tinker-lit.png)
-![Tinker's card: job, where it works, now, last](runs/issue-59-meet-the-kobolds/04-tinker-card.png)
-![Explorations: Tinker under Doodle in the sidebar while it works](runs/issue-59-meet-the-kobolds/05-explorations-sidebar-tinker-under-doodle.png)
-![Factory: Bolt's tag on the card being built](runs/issue-59-meet-the-kobolds/06-factory-bolt-tag.png)
-![A persona test: Mimic's tag](runs/issue-59-meet-the-kobolds/07-persona-test-mimic-tag.png)
+![Signals: the sidebar's Your kobolds and Sieve's name tag](issue-59-meet-the-kobolds/01-signals-sidebar-group-and-sieve-tag.png)
+![An exploration: Tinker's name tag under the prototype being made](issue-59-meet-the-kobolds/02-exploration-tinker-tag.png)
+![Tinker's tag opens the panel with Tinker lit](issue-59-meet-the-kobolds/03-panel-tinker-lit.png)
+![Tinker's card: job, where it works, now, last](issue-59-meet-the-kobolds/04-tinker-card.png)
+![Explorations: Tinker under Doodle in the sidebar while it works](issue-59-meet-the-kobolds/05-explorations-sidebar-tinker-under-doodle.png)
+![Factory: Bolt's tag on the card being built](issue-59-meet-the-kobolds/06-factory-bolt-tag.png)
+![A persona test: Mimic's tag](issue-59-meet-the-kobolds/07-persona-test-mimic-tag.png)
 
 With reduced motion on, no animation runs on the card or in the panel; with
 motion allowed the panel's kobolds move (hammer, sparks, doze).
