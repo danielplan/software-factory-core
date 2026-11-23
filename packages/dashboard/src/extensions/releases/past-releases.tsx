@@ -1,5 +1,6 @@
 // The past releases, newest first: each with its number, its date and the
-// line saying why; it folds open to show its notes.
+// line saying why; it folds open to show its notes, in the page's language
+// when the release has them in it, else in English.
 
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -43,6 +44,7 @@ export function PastReleases({ past }: Readonly<{ past: Past[] }>) {
 function PastRelease({ release }: Readonly<{ release: Past }>) {
   const t = useTranslation().t;
   const locale = useLocale();
+  const notes = release.notes[locale] ?? release.notes.en ?? "";
   return (
     <Collapsible className="group">
       <CollapsibleTrigger
@@ -68,8 +70,8 @@ function PastRelease({ release }: Readonly<{ release: Past }>) {
         )}
       </CollapsibleTrigger>
       <CollapsibleContent className="px-4 pb-4 pl-11 text-[13px]">
-        {release.notes.trim() ? (
-          <Markdown text={release.notes} />
+        {notes.trim() ? (
+          <Markdown text={notes} />
         ) : (
           <p className="text-muted-foreground">{t("releases.noNotes")}</p>
         )}

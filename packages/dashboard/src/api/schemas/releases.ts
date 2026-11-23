@@ -7,6 +7,22 @@ import type { ReleasesView as Served } from "../../../../server/src/extensions/r
 
 const cardTypeSchema = z.enum(["bug", "feature", "improvement"]);
 
+// One change of a release's notes.
+export const releaseChangeSchema = z.object({
+  kind: z.enum(["New", "Changed", "Fixed"]),
+  title: z.string(),
+  text: z.string(),
+});
+
+const changesSchema = z.array(releaseChangeSchema);
+
+// A release's notes by language: English always.
+const notesSchema = z.object({
+  en: changesSchema,
+  it: changesSchema.optional(),
+  de: changesSchema.optional(),
+});
+
 const mergedSchema = z.object({
   number: z.number(),
   title: z.string(),
@@ -19,7 +35,11 @@ const pastSchema = z.object({
   date: z.string(),
   url: z.string(),
   why: z.string().nullable(),
-  notes: z.string(),
+  notes: z.object({
+    en: z.string().optional(),
+    it: z.string().optional(),
+    de: z.string().optional(),
+  }),
 });
 
 export const releasesViewSchema = z.discriminatedUnion("connected", [
@@ -32,9 +52,11 @@ export const releasesViewSchema = z.discriminatedUnion("connected", [
       merged: z.array(mergedSchema),
       next: z.string().nullable(),
       why: z.string().nullable(),
+      notes: notesSchema.nullable(),
     }),
     past: z.array(pastSchema),
   }),
 ]) satisfies z.ZodType<Served>;
 
 export type ReleasesView = z.infer<typeof releasesViewSchema>;
+export type ReleaseChange = z.infer<typeof releaseChangeSchema>;

@@ -8,7 +8,11 @@ import {
   nextNumber,
   numberOfTag,
 } from "../src/extensions/releases/numbers.ts";
-import { type Merged, notesOf } from "../src/extensions/releases/notes.ts";
+import {
+  bodyOf,
+  listedNotes,
+  type Merged,
+} from "../src/extensions/releases/notes.ts";
 
 test("with nothing to act on the last number goes up, new things included", () => {
   assert.equal(nextNumber("1.4.2", false), "1.4.3");
@@ -59,22 +63,24 @@ const merged = (
   url: `https://github.com/acme/shop/pull/${String(number)}`,
 });
 
-test("notes group by the card's type, not by the title, and link each pull request", () => {
-  const notes = notesOf("Only fixes and improvements since 1.4.2", [
+test("without the kobold's draft, each pull request is a change of its card's type, not of its title", () => {
+  const all = [
     merged(1, "Fix the header", "feature"),
-    merged(2, "Invoices in euros", "feature"),
     merged(3, "Crash on empty cart", "bug"),
     merged(4, "Faster search", "improvement"),
     merged(5, "Tidy the readme", null),
-  ]);
+  ];
   assert.equal(
-    notes,
+    bodyOf(listedNotes(all), all),
     [
-      "Only fixes and improvements since 1.4.2",
-      "## Fixes\n\n- Crash on empty cart ([#3](https://github.com/acme/shop/pull/3))",
-      "## New things\n\n- Fix the header ([#1](https://github.com/acme/shop/pull/1))\n- Invoices in euros ([#2](https://github.com/acme/shop/pull/2))",
-      "## Improvements\n\n- Faster search ([#4](https://github.com/acme/shop/pull/4))",
-      "## Other changes\n\n- Tidy the readme ([#5](https://github.com/acme/shop/pull/5))",
-    ].join("\n\n") + "\n",
+      "- New: **Fix the header**",
+      "- Fixed: **Crash on empty cart**",
+      "- Changed: **Faster search**",
+      "- Changed: **Tidy the readme**",
+      "",
+      "Pull requests: [#1](https://github.com/acme/shop/pull/1), [#3](https://github.com/acme/shop/pull/3), [#4](https://github.com/acme/shop/pull/4), [#5](https://github.com/acme/shop/pull/5)",
+      "",
+    ].join("\n"),
   );
+  assert.equal(bodyOf({ en: [] }, []), "\n");
 });

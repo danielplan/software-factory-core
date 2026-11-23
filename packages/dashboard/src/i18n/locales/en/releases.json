@@ -5,7 +5,7 @@
   "releasing": "Releasing…",
   "prepare": "Prepare the release",
   "preparing": "Reading what was merged…",
-  "prepareAbout": "The kobold reads what was merged and suggests the number, only when you press Prepare.",
+  "prepareAbout": "The kobold reads what was merged, suggests the number and drafts the notes, only when you press Prepare.",
   "next": "Next:",
   "change": "Change",
   "numberLabel": "The number of the release",
@@ -31,5 +31,13 @@
     "title": "Releases need a GitHub repository",
     "text": "A release is a tag and a release on GitHub, so a repository has to be connected first.",
     "link": "Connect one in Settings, under Where work is tracked."
+  },
+  "notes": "Notes",
+  "notesAbout": "Written by the kobold from what was merged, in English, Italian and German. They go on the release as they are.",
+  "notesListed": "The kobold wrote no notes, so the release lists the pull requests merged.",
+  "kinds": {
+    "New": "New",
+    "Changed": "Changed",
+    "Fixed": "Fixed"
   }
 }

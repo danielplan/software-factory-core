@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
 
-import type { Claude } from "@software-factory/core";
+import type { Claude, ReleaseNotes } from "@software-factory/core";
 
 import type { Cli } from "../src/github-cli.ts";
 import { githubAddOn } from "../src/extensions/github/index.ts";
@@ -89,7 +89,9 @@ function github(world: World) {
   return { cli, asked };
 }
 
-function kobold(reply: { act: boolean; why: string } | "fails") {
+type Reply = { act: boolean; why: string; notes?: ReleaseNotes };
+
+function kobold(reply: Reply | "fails") {
   const seen: string[] = [];
   const claude: Claude = {
     run: (options) => {
@@ -149,10 +151,13 @@ function routesOf(
   const { cli, asked } = github(world);
   const { claude, seen } = kobold(reply);
   const told: string[] = [];
+  const addOn = githubAddOn(cli);
+  const slots = slotFillers([addOn]);
   const routes = releasesRoutes({
     project: project(connected),
-    cli,
-    boards: slotFillers([githubAddOn(cli)]).tasks,
+    boards: slots.tasks,
+    hosts: slots.code,
+    extensions: [addOn.extension],
     claude,
     changed: (what) => told.push(what),
   });
@@ -173,7 +178,11 @@ function routesOf(
       routes["POST /api/releases/prepare"] as (
         b: unknown,
         u: URL,
-      ) => Promise<{ next: string | null; why: string | null }>
+      ) => Promise<{
+        next: string | null;
+        why: string | null;
+        notes: ReleaseNotes | null;
+      }>
     )({}, url);
   return { get, post, prepare, asked, told, seen };
 }
@@ -189,7 +198,11 @@ test("reading the page asks no kobold; Prepare does, and the page then shows its
   assert.equal(before.coming.next, null);
   assert.equal(before.coming.why, null);
   assert.equal(seen.length, 0, "no kobold before Prepare");
-  assert.deepEqual(await prepare(), { next: "0.1.0", why: "Because." });
+  assert.deepEqual(await prepare(), {
+    next: "0.1.0",
+    why: "Because.",
+    notes: null,
+  });
   assert.deepEqual(told, ["releases"]);
   const view = await get();
   assert.ok(view.connected);
@@ -256,7 +269,7 @@ test("only pull requests merged after the last tag are listed, typed by their ca
       date: "2026-11-01T10:00:00Z",
       url: "https://github.com/acme/shop/releases/tag/v1.4.2",
       why: "Only fixes",
-      notes: "## Fixes\n",
+      notes: { en: "## Fixes" },
     },
   ]);
   assert.ok(
@@ -312,7 +325,7 @@ test("when the kobold cannot judge, Prepare suggests the next patch without a re
     after: ["sha5"],
   };
   const { prepare } = routesOf(world, "fails");
-  assert.deepEqual(await prepare(), { next: "1.4.4", why: null });
+  assert.deepEqual(await prepare(), { next: "1.4.4", why: null, notes: null });
 });
 
 test("Release now makes the tag on the main branch and the release with its notes, and tells the page", async () => {
@@ -348,9 +361,15 @@ test("Release now makes the tag on the main branch and the release with its note
   ]);
   assert.equal(create[8], "1.4.4");
   assert.equal(create[9], "--notes");
-  assert.match(
-    String(create[10]),
-    /^<!-- software-factory:why "Only fixes" -->\nOnly fixes\n\n## Fixes\n\n- Crash on empty cart \(\[#5\]\(https:\/\/github.com\/acme\/shop\/pull\/5\)\)\n$/,
+  assert.equal(
+    create[10],
+    [
+      '<!-- software-factory:why "Only fixes" -->',
+      "- Fixed: **Crash on empty cart**",
+      "",
+      "Pull requests: [#5](https://github.com/acme/shop/pull/5)",
+      "",
+    ].join("\n"),
   );
   assert.deepEqual(told, ["releases", "releases"]);
 });
@@ -394,4 +413,89 @@ test("without a connected repository the Settings message comes back", async () 
     /Connect one in \[Settings\]\(#settings\), under Where work is tracked\./,
   );
   await assert.rejects(post("1.0.0"), /Connect one in \[Settings\]/);
+});
+
+test("Prepare drafts the notes in English, Italian and German; Release now folds them into one text", async () => {
+  const world = {
+    ...empty(),
+    tags: ["v1.4.3"],
+    requests: [request(5, { labels: [{ name: "type: feature" }] })],
+    after: ["sha5"],
+  };
+  const notes: ReleaseNotes = {
+    en: [{ kind: "New", title: "Export.", text: "Save the list." }],
+    it: [{ kind: "New", title: "Esporta.", text: "Salva la lista." }],
+    de: [{ kind: "New", title: "Export.", text: "Liste speichern." }],
+  };
+  const { get, post, prepare, asked, seen } = routesOf(world, {
+    act: false,
+    why: "Only new things",
+    notes,
+  });
+  assert.deepEqual((await prepare()).notes, notes);
+  const view = await get();
+  assert.ok(view.connected);
+  assert.deepEqual(view.coming.notes, notes);
+  await post("1.4.4");
+  assert.equal(seen.length, 1);
+  const body = String(asked.find((args) => args[0] === "release")?.[10]);
+  assert.match(
+    body,
+    /^<!-- software-factory:why "Only new things" -->\n- New: \*\*Export\.\*\* Save the list\.\n\nPull requests: /,
+  );
+  assert.match(
+    body,
+    /<details lang="it">\n<summary>Italiano<\/summary>\n\n- New: \*\*Esporta\.\*\* Salva la lista\./,
+  );
+  assert.match(body, /<details lang="de">/);
+});
+
+test("Release now after a restart asks the kobold for the notes then", async () => {
+  const world = {
+    ...empty(),
+    tags: ["v1.4.3"],
+    requests: [request(5)],
+    after: ["sha5"],
+  };
+  const { post, seen, asked } = routesOf(world, {
+    act: false,
+    why: "Only fixes",
+    notes: { en: [{ kind: "Changed", title: "Faster.", text: "" }] },
+  });
+  await post("1.4.4");
+  assert.equal(seen.length, 1);
+  assert.match(
+    String(asked.find((args) => args[0] === "release")?.[10]),
+    /- Changed: \*\*Faster\.\*\*\n/,
+  );
+});
+
+test("past releases give their notes by language", async () => {
+  const world: World = {
+    ...empty(),
+    tags: ["v1.0.0"],
+    releases: [
+      {
+        tag_name: "v1.0.0",
+        body: '- New: **A.** B.\n\n<details lang="it">\n<summary>Italiano</summary>\n\n- New: **A it.** B.\n\n</details>\n',
+        published_at: "2026-11-01T10:00:00Z",
+        html_url: "u",
+        draft: false,
+      },
+      {
+        tag_name: "v1.1.0",
+        body: "draft",
+        published_at: null,
+        html_url: "u",
+        draft: true,
+      },
+    ],
+  };
+  const { get } = routesOf(world, "fails");
+  const view = await get();
+  assert.ok(view.connected);
+  assert.deepEqual(
+    view.past.map((one) => one.notes),
+    [{ en: "- New: **A.** B.", it: "- New: **A it.** B." }],
+  );
 });

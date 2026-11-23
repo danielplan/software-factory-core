@@ -5,7 +5,7 @@
   "releasing": "Rilascio in corso…",
   "prepare": "Prepara il rilascio",
   "preparing": "Leggo ciò che è stato unito…",
-  "prepareAbout": "Il kobold legge ciò che è stato unito e suggerisce il numero, solo quando premi Prepara.",
+  "prepareAbout": "Il kobold legge ciò che è stato unito, suggerisce il numero e scrive le note, solo quando premi Prepara.",
   "next": "Prossima:",
   "change": "Cambia",
   "numberLabel": "Il numero della release",
@@ -31,5 +31,13 @@
     "title": "Le release hanno bisogno di un repository GitHub",
     "text": "Una release è un tag e una release su GitHub, quindi prima va collegato un repository.",
     "link": "Collegane uno in Impostazioni, sotto Dove si tiene traccia del lavoro."
+  },
+  "notes": "Note",
+  "notesAbout": "Scritte dal kobold a partire da ciò che è stato unito, in inglese, italiano e tedesco. Vanno nel rilascio così come sono.",
+  "notesListed": "Il kobold non ha scritto note, quindi il rilascio elenca le pull request unite.",
+  "kinds": {
+    "New": "Novità",
+    "Changed": "Cambiato",
+    "Fixed": "Corretto"
   }
 }
