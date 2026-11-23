@@ -129,19 +129,7 @@ class GitHubCards {
         ...label,
       ])
     ).trim();
-    const added = JSON.parse(
-      (await this.gh([
-        "project",
-        "item-add",
-        String(this.board.board),
-        "--owner",
-        this.owner,
-        "--url",
-        url,
-        "--format",
-        "json",
-      ])) || "{}",
-    ) as { id?: string };
+    const added = await this.addToBoard(url);
     const number = Number(/\/issues\/(\d+)/.exec(url)?.[1]);
     const project = await this.project();
     const item = added.id ?? (await this.find(number)).item.id;
@@ -265,6 +253,30 @@ class GitHubCards {
   }
 
   // The card with that number, its item and the board.
+  // The issue added to the board: the item GitHub answers with. A board
+  // that adds new issues by itself may have it already; then it is found on
+  // the board instead.
+  private async addToBoard(url: string): Promise<{ id?: string }> {
+    try {
+      return JSON.parse(
+        (await this.gh([
+          "project",
+          "item-add",
+          String(this.board.board),
+          "--owner",
+          this.owner,
+          "--url",
+          url,
+          "--format",
+          "json",
+        ])) || "{}",
+      ) as { id?: string };
+    } catch (error) {
+      if (/already/i.test(String(error))) return {};
+      throw error;
+    }
+  }
+
   private async find(number: number) {
     const project = await this.project();
     for (const item of project.items) {
