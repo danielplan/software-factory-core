@@ -137,7 +137,8 @@ export function dropExploration(store: KobbleStore, id: string): Exploration {
 // board with a prototype on it hands off that prototype, agreed and with
 // its variant, or nothing: a prototype the team worked on is never dropped
 // on the way to the builder. The board is read again before the card is
-// made, so an agreement that changed meanwhile is never lost.
+// made, so an agreement that changed meanwhile is never lost. A prototype
+// that was never made (unmade.ts) is left out: nothing in it to build from.
 export async function handOff(
   store: KobbleStore,
   id: string,
@@ -145,13 +146,18 @@ export async function handOff(
   // Writes the spec the card gets; the short summary when there is none or
   // it cannot.
   write?: SpecWriter,
-  // The agreed prototype's persona tests (Personas' plug); none while
-  // Personas is not installed.
-  missions?: MissionsPlug | null,
+  more: {
+    // The agreed prototype's persona tests (Personas' plug); none while
+    // Personas is not installed.
+    missions?: MissionsPlug | null;
+    // The board's prototypes never made (unmade.ts).
+    unmade?: (board: Board) => string[];
+  } = {},
 ): Promise<{ issue: number; url: string }> {
+  const { missions, unmade } = more;
   const exploration = open(store, id);
   const board = store.board(id);
-  const agreed = prototypeToHandOff(board);
+  const agreed = madeToHandOff(board, unmade);
   const connected = cards();
   const tests = missions?.of(agreed?.tests ?? []) ?? [];
   const summary = handoffText(exploration, board, agreed, tests);
@@ -160,7 +166,7 @@ export async function handOff(
     summary,
     ...(agreed ? { branch: agreed.branch } : {}),
   });
-  if (agreedOf(prototypeToHandOff(store.board(id))) !== agreedOf(agreed))
+  if (agreedOf(madeToHandOff(store.board(id), unmade)) !== agreedOf(agreed))
     throw new Refused(
       "What is agreed on the board changed while the spec was written: hand it off again.",
     );
@@ -183,11 +189,15 @@ export async function handOff(
 type Made = Extract<Board["things"][number], { kind: "prototype" }>;
 
 // The prototype handed off: the agreed one, with its variant when it has
-// several; none only for a board without a prototype that has agreed
-// choices or notes. Anything else is refused, saying what to agree.
-export function prototypeToHandOff(board: Board): Made | undefined {
+// several; none only for a board without a prototype (or only ones never
+// made) that has agreed choices or notes. Anything else is refused, saying
+// what to agree.
+export function prototypeToHandOff(
+  board: Board,
+  unmade: string[] = [],
+): Made | undefined {
   const made = board.things.filter(
-    (one): one is Made => one.kind === "prototype",
+    (one): one is Made => one.kind === "prototype" && !unmade.includes(one.key),
   );
   const agreed = made.find((one) => one.agreed);
   if (made.length > 0 && !agreed)
@@ -203,6 +213,14 @@ export function prototypeToHandOff(board: Board): Made | undefined {
       "Agree to what is to be built first: a prototype, or the choices and notes on the board.",
     );
   return agreed;
+}
+
+// The prototype handed off, leaving out those never made.
+function madeToHandOff(
+  board: Board,
+  unmade: ((board: Board) => string[]) | undefined,
+): Made | undefined {
+  return prototypeToHandOff(board, unmade ? unmade(board) : []);
 }
 
 function agreedOf(made: Made | undefined): string {

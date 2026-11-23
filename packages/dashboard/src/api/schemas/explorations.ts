@@ -144,6 +144,7 @@ export const explorationPageSchema = z.object({
   tests: z.record(z.string(), testResultSchema.nullable()),
   talk: talkSchema,
   handingOff: handingOffSchema.nullable(),
+  unmade: z.array(z.string()),
 }) satisfies z.ZodType<ServedPage>;
 
 export type ExplorationsView = z.infer<typeof explorationsViewSchema>;

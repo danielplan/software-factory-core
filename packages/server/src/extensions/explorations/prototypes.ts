@@ -23,7 +23,7 @@ import { MakerDesk } from "./maker-desk.ts";
 import { makeOne } from "./making.ts";
 import type { MakerTools } from "./maker-tools.ts";
 import { beingMadeIn, lookAt, notWhileMade, running } from "./looks.ts";
-import type { MadeReport, Ready } from "./made.ts";
+import type { Failed, Ready } from "./made.ts";
 
 import {
   prototypeOf,
@@ -188,12 +188,14 @@ export class ExplorationPrototypes {
     this.mark(exploration.id, key, { making: true });
     void this.making(exploration, board, key, change).catch(
       (error: unknown) => {
+        const problem = error instanceof Error ? error.message : String(error);
         this.mark(exploration.id, key, {});
         this.mode.set(exploration.id, key, {
           making: false,
           activity: null,
-          problem: error instanceof Error ? error.message : String(error),
+          problem,
         });
+        this.failed?.(exploration.id, key, problem);
       },
     );
   }
@@ -249,14 +251,14 @@ export class ExplorationPrototypes {
   }
 
   // Who is told when a prototype is made (the conversation, which reviews
-  // it and points at it): what the maker said it did, and the files it
-  // changed.
+  // it and points at it) and when one could not be made (so it stops
+  // saying the maker is on it).
   private ready: Ready = null;
+  private failed: Failed = null;
 
-  whenReady(
-    ready: (exploration: string, key: string, made: MadeReport) => void,
-  ): void {
-    this.ready = ready;
+  whenDone(told: { ready: Ready; failed: Failed }): void {
+    this.ready = told.ready;
+    this.failed = told.failed;
   }
 
   // What each prototype of an exploration being made does now, for the
@@ -345,6 +347,7 @@ export class ExplorationPrototypes {
       mode: this.mode,
       desk: this.desk,
       ready: this.ready,
+      failed: this.failed,
       exploration,
       board,
       made,

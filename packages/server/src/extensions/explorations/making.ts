@@ -19,7 +19,7 @@ import type { PrototypeMode } from "../../prototypes/mode.ts";
 import type { Browser } from "../../kobble/browser.ts";
 import type { Photograph } from "../../kobble/usage-pictures.ts";
 import { lookAndFix, type Looks } from "./looks.ts";
-import { finishMaking, type Ready } from "./made.ts";
+import { type Failed, finishMaking, type Ready } from "./made.ts";
 import { askerFor, type MakerDesk } from "./maker-desk.ts";
 import { askFor } from "./making-words.ts";
 import { codeMaps } from "./product-picture.ts";
@@ -34,6 +34,7 @@ type MakeOn = {
   mode: PrototypeMode;
   desk: MakerDesk;
   ready: Ready;
+  failed: Failed;
   exploration: Exploration;
   board: Board;
   made: Made;
@@ -110,6 +111,7 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
     change,
     result,
     ready: on.ready,
+    failed: on.failed,
     look: on.look,
   });
 }

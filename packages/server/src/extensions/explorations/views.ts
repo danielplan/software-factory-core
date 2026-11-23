@@ -74,6 +74,9 @@ export type ExplorationPage = {
   talk: TalkView;
   // Being handed off: since when, and what the spec writer does now.
   handingOff: HandingOff | null;
+  // Prototypes never made (their copy could not be made): Hand off does
+  // not wait for them (unmade.ts).
+  unmade: string[];
 };
 
 // The personas an exploration is for, as Personas has them (none while it
@@ -153,6 +156,7 @@ export function explorationPage(
     canRun: boolean;
     talk: TalkView;
     handingOff: HandingOff | null;
+    unmade: string[];
     // Who it is for, and its prototypes' tests: Personas' plugs.
     personas: PersonasPlug | null;
     missions: MissionsPlug | null;
@@ -191,6 +195,7 @@ export function explorationPage(
     ),
     talk: more.talk,
     handingOff: more.handingOff,
+    unmade: more.unmade,
   };
 }
 

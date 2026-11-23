@@ -129,3 +129,23 @@ test("a board whose agreement changes while the spec is written is not handed of
     factory.close();
   }
 });
+
+test("prototypes that were never made do not hold up the hand-off: the board's agreed choices go", async () => {
+  const factory = await explorationsFactory();
+  try {
+    changeBoard(factory.store, (things) =>
+      things.map((one) =>
+        one.kind === "prototype"
+          ? { ...one, agreed: false }
+          : choiceAgreed(one),
+      ),
+    );
+    const made: string[] = [];
+    await handOff(factory.store, "X-1", cardsInto(made), undefined, {
+      unmade: () => ["A", "B"],
+    });
+    assert.match(made[0] ?? "", /prototype=none/);
+  } finally {
+    factory.close();
+  }
+});

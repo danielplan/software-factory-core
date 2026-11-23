@@ -130,8 +130,10 @@ function HandOffButton({
   );
   const key = agreed?.kind === "prototype" ? agreed.key : "";
   // A prototype on the board is handed off agreed, or not at all; without
-  // one, the board's agreed choices and notes are.
-  const prototypes = board.things.some((one) => one.kind === "prototype");
+  // one (or only ones never made), the board's agreed choices and notes are.
+  const prototypes = board.things.some(
+    (one) => one.kind === "prototype" && !page.unmade.includes(one.key),
+  );
   const ready =
     agreed !== undefined ||
     (!prototypes && board.things.some((one) => one.agreed));
