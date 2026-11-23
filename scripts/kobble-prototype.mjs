@@ -10,6 +10,7 @@ import {
   cpSync,
   existsSync,
   readdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -20,7 +21,9 @@ const copy = process.env.FACTORY_COPY ?? process.cwd();
 const project = process.env.FACTORY_PROJECT;
 
 // The packages: cloned from the project's (instant on APFS; links stay
-// inside the copy).
+// inside the copy), then brought up to the copy's own lock file when they
+// are not installed from it yet: the project's checkout can be older than
+// the copy, and a package the copy needs would be missing.
 function packages() {
   const pairs = [["node_modules", "node_modules"]];
   for (const name of readdirSync(join(project, "packages")))
@@ -33,6 +36,14 @@ function packages() {
       spawnSync("cp", ["-cR", join(project, from), join(copy, to)], {
         stdio: "inherit",
       });
+  const lock = readFileSync(join(copy, "package-lock.json"), "utf8");
+  const installed = join(copy, "node_modules", ".prototype-lock.json");
+  if (existsSync(installed) && readFileSync(installed, "utf8") === lock) return;
+  const done = spawnSync("npm", ["install", "--no-audit", "--no-fund"], {
+    cwd: copy,
+    stdio: "inherit",
+  });
+  if (done.status === 0) writeFileSync(installed, lock);
 }
 
 function freePort() {
