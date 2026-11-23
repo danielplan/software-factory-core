@@ -160,6 +160,7 @@ export function pretendBoard(kept: Map<number, Kept>) {
       return Promise.resolve();
     },
     create: () => Promise.reject(new Error("not here")),
+    bring: () => Promise.reject(new Error("not here")),
     dependOn: () => Promise.reject(new Error("not here")),
     replace: () => Promise.reject(new Error("not here")),
     markStuck: (number, stuck) => {

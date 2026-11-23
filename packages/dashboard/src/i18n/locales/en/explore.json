@@ -36,6 +36,7 @@
     "something": "Nothing is agreed yet: agree on a choice or a note on the board first."
   },
   "handingOff": "Handing off…",
+  "handOffNotOnBoard": "Issue #{{number}} was made, but it is not on the board after waiting for GitHub to add it. Add it to the board by hand, or hand off again: it carries on with that issue.",
   "handOffStep": "Step {{n}} of {{of}}",
   "handOffStages": {
     "spec": "Writing the spec",

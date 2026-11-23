@@ -6,11 +6,11 @@ import { keptIn, withKept } from "@software-factory/core";
 
 import type { Stage, StageMap } from "../../api.ts";
 import { STAGES } from "../../api.ts";
-import { statusOf } from "./board-setup.ts";
 import { answer, ownerOf } from "../../github-cli.ts";
 import type { Cli } from "../../github-cli.ts";
 import { Refused } from "../../refused.ts";
 import type { Card, CardDetail, Cards, CardType } from "../../cards/cards.ts";
+import { addToBoard, putInColumn, type Waiting, WAITING } from "./on-board.ts";
 import { blockedBy, relationsOf } from "./relations.ts";
 import { type Item, type Project, readProject } from "./items.ts";
 import {
@@ -30,14 +30,20 @@ export type GitHubBoard = {
   stages: StageMap;
 };
 
-export function githubCards(cli: Cli, board: GitHubBoard): Cards {
-  const cards = new GitHubCards(cli, board);
+export function githubCards(
+  cli: Cli,
+  board: GitHubBoard,
+  waiting: Waiting = WAITING,
+): Cards {
+  const cards = new GitHubCards(cli, board, waiting);
   return {
     list: () => cards.list(),
     show: (number) => cards.show(number),
     move: (number, stage) => cards.move(number, stage),
     comment: (number, text) => cards.comment(number, text),
-    create: (title, body, stage) => cards.create(title, body, stage),
+    create: (title, body, stage, made) =>
+      cards.create(title, body, stage, made),
+    bring: (number) => cards.bring(number),
     writePlan: (number, plan) => cards.writePlan(number, plan),
     keepWork: (number, kept, held) => cards.keepWork(number, kept, held),
     dependOn: (number, on) => cards.dependOn(number, on),
@@ -53,10 +59,12 @@ class GitHubCards {
   private readonly board: GitHubBoard;
   private readonly owner: string;
   private readonly repo: string[];
+  private readonly waiting: Waiting;
 
-  constructor(cli: Cli, board: GitHubBoard) {
+  constructor(cli: Cli, board: GitHubBoard, waiting: Waiting) {
     this.cli = cli;
     this.board = board;
+    this.waiting = waiting;
     this.owner = ownerOf(board.repository);
     this.repo = ["--repo", board.repository];
   }
@@ -109,12 +117,12 @@ class GitHubCards {
   }
 
   // A new card in the stage asked for (the backlog unless said): the issue,
-  // added to the board, put in its column by the item GitHub answers with,
-  // since a board read right after adding may not list the new item yet.
+  // told to `made` at once, added to the board and put in its column.
   async create(
     title: string,
     body: string,
     stage: Stage = "backlog",
+    made: (issue: { number: number; url: string }) => void = () => {},
   ): Promise<Card> {
     const label = this.board.label === "*" ? [] : ["--label", this.board.label];
     const url = (
@@ -129,11 +137,10 @@ class GitHubCards {
         ...label,
       ])
     ).trim();
-    const added = await this.addToBoard(url);
     const number = Number(/\/issues\/(\d+)/.exec(url)?.[1]);
-    const project = await this.project();
-    const item = added.id ?? (await this.find(number)).item.id;
-    await this.setColumn(project.id, item, stage);
+    made({ number, url });
+    const { projectId, itemId } = await this.addToBoard(number, url);
+    await this.setColumn(projectId, itemId, stage);
     return {
       number,
       title,
@@ -144,6 +151,31 @@ class GitHubCards {
       closed: false,
       waitsFor: [],
     };
+  }
+
+  // An issue made earlier, to be a card: already on the board, or added now.
+  async bring(number: number): Promise<void> {
+    const project = await this.project();
+    if (project.items.some((item) => this.cardOf(item)?.number === number))
+      return;
+    const { url } = await this.issue<{ url: string }>(number, "url");
+    await this.addToBoard(number, url);
+  }
+
+  // The issue put on the board, its item found there (on-board.ts).
+  private addToBoard(number: number, url: string) {
+    const on = {
+      owner: this.owner,
+      board: this.board.board,
+      waiting: this.waiting,
+    };
+    return addToBoard(this.cli, on, { number, url }, async () => {
+      const project = await this.project();
+      const item = project.items.find(
+        (one) => this.cardOf(one)?.number === number,
+      );
+      return { projectId: project.id, itemId: item?.id ?? null };
+    });
   }
 
   async writePlan(number: number, plan: string): Promise<void> {
@@ -253,30 +285,6 @@ class GitHubCards {
   }
 
   // The card with that number, its item and the board.
-  // The issue added to the board: the item GitHub answers with. A board
-  // that adds new issues by itself may have it already; then it is found on
-  // the board instead.
-  private async addToBoard(url: string): Promise<{ id?: string }> {
-    try {
-      return JSON.parse(
-        (await this.gh([
-          "project",
-          "item-add",
-          String(this.board.board),
-          "--owner",
-          this.owner,
-          "--url",
-          url,
-          "--format",
-          "json",
-        ])) || "{}",
-      ) as { id?: string };
-    } catch (error) {
-      if (/already/i.test(String(error))) return {};
-      throw error;
-    }
-  }
-
   private async find(number: number) {
     const project = await this.project();
     for (const item of project.items) {
@@ -323,23 +331,13 @@ class GitHubCards {
   }
 
   // Puts the item in the column of the stage, as board.json matches them.
-  private async setColumn(projectId: string, itemId: string, stage: Stage) {
-    const column = this.board.stages[stage];
-    if (!column)
-      throw new Refused(
-        `The board has no column for ${stage}: match one on Settings.`,
-      );
-    const status = await statusOf(this.cli, this.owner, this.board.board);
-    const option = status.options.find((o) => o.name === column);
-    if (!option)
-      throw new Refused(`The board has no column “${column}” any more.`);
-    const value = `{singleSelectOptionId: ${JSON.stringify(option.id)}}`;
-    await this.gh([
-      "api",
-      "graphql",
-      "-f",
-      `query=mutation { updateProjectV2ItemFieldValue(input: {projectId: ${JSON.stringify(projectId)}, itemId: ${JSON.stringify(itemId)}, fieldId: ${JSON.stringify(status.id)}, value: ${value}}) { projectV2Item { id } } }`,
-    ]);
+  private setColumn(projectId: string, itemId: string, stage: Stage) {
+    const { board, stages } = this.board;
+    return putInColumn(
+      this.cli,
+      { owner: this.owner, board, column: stages[stage], stage },
+      { projectId, itemId },
+    );
   }
 
   private async gh(args: string[]): Promise<string> {

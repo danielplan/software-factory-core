@@ -47,7 +47,19 @@ export type Cards = {
   move: (number: number, stage: Stage) => Promise<void>;
   comment: (number: number, text: string) => Promise<void>;
   // In the backlog unless a stage is said (To do: the go-ahead to build).
-  create: (title: string, body: string, stage?: Stage) => Promise<Card>;
+  // `made` is told the issue as soon as it exists, before it is put on the
+  // board, so a caller can remember it: a failure later on never loses the
+  // issue, and trying again carries on with it (`bring`) instead of making
+  // a second one.
+  create: (
+    title: string,
+    body: string,
+    stage?: Stage,
+    made?: (issue: { number: number; url: string }) => void,
+  ) => Promise<Card>;
+  // Makes sure the issue is a card on the board, adding it when it is not
+  // (and waiting for a board that adds new issues by itself).
+  bring: (number: number) => Promise<void>;
   // Writes the agreed plan into the card (replacing an earlier one).
   writePlan: (number: number, plan: string) => Promise<void>;
   // The card is built only after the other one (where it is tracked: GitHub's

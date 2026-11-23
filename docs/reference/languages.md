@@ -54,7 +54,7 @@ English.
   `packages/core/src/agents/language-settings.ts`.
 - **The server's words**: the server writes in English. The few the
   dashboard shows often (the launcher's problem titles, the updates' steps
-  and reasons) are matched and said again in `server-texts.ts`; the rest
+  and reasons, a hand-off whose card is not on the board) are matched and said again in `server-texts.ts`; the rest
   stays English.
 - **Not translated**: what people and kobolds write (signals, cards,
   explorations, answers), the names of products, add-ons and kits, and
