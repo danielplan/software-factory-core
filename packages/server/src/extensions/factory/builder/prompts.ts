@@ -91,6 +91,20 @@ ${cardText(card, reviewTimeline(card))}
 ${answer("done", "blocked")}`;
 }
 
+// Main moved while the card was built and now clashes with it: settled
+// before the checks and the pull request.
+export function newestMainPrompt(card: BoardCard): string {
+  return `${SHARED}
+
+## Your task: bring the newest main into card #${String(card.number)}
+
+You are on branch \`${branchOf(card.number)}\`. The card is built, but main moved while you built it, and the two clash. Settle the clash only, keeping what both sides meant, and make sure the card's work still works with main's change. The checks run next.
+
+${cardText(card, reviewTimeline(card))}
+
+${answer("done", "blocked")}`;
+}
+
 // The latest main was merged into the branch and clashed: settled first.
 export function clashPrompt(files: string[]): string {
   const list = files.map((file) => `- \`${file}\``).join("\n");

@@ -1,0 +1,26 @@
+// Main moves while a card is built (other cards are merged): the newest
+// main is brought in again right before the checks, so they run on it and
+// the pull request goes up without clashing. A clash goes to the builder to
+// settle (its turn brings main in again and names the files); what it
+// cannot settle stops the card.
+
+import type { BoardCard } from "./decide.ts";
+import { newestMainPrompt } from "./prompts.ts";
+import type { BuildCopy } from "./turn.ts";
+
+// Null when the newest main is in; otherwise the card stops, with why.
+export async function onNewestMain(
+  copy: BuildCopy,
+  settle: (prompt: string) => Promise<{ status: string; text: string }>,
+  card: BoardCard,
+  onActivity: (line: string) => void,
+): Promise<{ passed: false; report: ""; blocked: string } | null> {
+  const clashes = await copy.bringInMain();
+  if (clashes.length === 0) return null;
+  await copy.abortMerge();
+  onActivity(`Bringing the newest main in: ${clashes.join(", ")} clash`);
+  const settled = await settle(newestMainPrompt(card));
+  return settled.status === "done"
+    ? null
+    : { passed: false, report: "", blocked: settled.text };
+}

@@ -151,8 +151,9 @@ own working copy; it has its own settings files, made from the examples.
 ## Bringing main in
 
 Before each build session or review fix on a branch that exists, the
-factory merges the latest main into it. When that clashes, your prompt
-names the files: settle them first.
+factory merges the latest main into it, and again right before the checks
+and the pull request, since main moves while a card is built. When that
+clashes, your prompt names the files: settle them first.
 
 - Keep both sides' intent: main's change and the card's change both stay.
 - Numbered things (decisions, migrations) that both sides added keep

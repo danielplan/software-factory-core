@@ -30,6 +30,7 @@ import { byHand } from "./by-hand.ts";
 import { guidesFor, withGuides } from "../../../extension-guides.ts";
 import { keepKnowledge } from "./knowledge-kept.ts";
 import { buildPrompt, feedbackPrompt, fixChecksPrompt } from "./prompts.ts";
+import { onNewestMain } from "./newest-main.ts";
 import { markComment, type Note, pausedComment, readNote } from "./protocol.ts";
 import { openOrUpdate } from "./pull-requests.ts";
 import { runSessions } from "./sessions.ts";
@@ -308,12 +309,19 @@ export class Jobs {
     }
   }
 
-  // The checks, with rounds of fixing while any is red (checks.ts).
+  // On the newest main, the checks with fixing rounds while red (checks.ts).
   private async checkAndPush(
     card: BoardCard,
     at: Place,
     onActivity: (line: string) => void,
   ) {
+    const clashed = await onNewestMain(
+      await at.build(),
+      (prompt) => this.agent(card, at, prompt, onActivity),
+      card,
+      onActivity,
+    );
+    if (clashed) return clashed;
     return await checkWithFixes({
       copy: (await at.build()).path,
       available: this.options.available,
