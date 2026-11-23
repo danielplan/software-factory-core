@@ -55,6 +55,29 @@ export function Face({
   );
 }
 
+// Words that name a kobold, as a link that opens the panel with it lit
+// (variant A); plain words in B.
+export function NameLink({
+  id,
+  children,
+}: Readonly<{ id: string; children: ReactNode }>) {
+  if (VARIANT !== "A") return <>{children}</>;
+  return (
+    <button
+      type="button"
+      title={`Meet ${memberOf(id).name} and the team`}
+      className="cursor-pointer underline decoration-current/40 underline-offset-2 hover:decoration-current"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openTeam(id);
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 // "Your kobolds", a row in the sidebar's bottom group, beside Send feedback.
 export function KoboldsRow() {
   if (VARIANT !== "A") return null;

@@ -11,7 +11,7 @@ import type { VersionRun } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
 import { Hello } from "@/components/meet/hello";
 import { reportTinker } from "@/components/meet/meet";
-import { Face } from "@/components/meet/team-panel";
+import { Face, NameLink } from "@/components/meet/team-panel";
 import { MAKER } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
@@ -114,7 +114,12 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
           />
         </Face>
         <span className="flex-none font-medium">
-          {t("explore.board.building", { name: MAKER.name, key: run.version })}
+          <NameLink id="maker">
+            {t("explore.board.building", {
+              name: MAKER.name,
+              key: run.version,
+            })}
+          </NameLink>
         </span>
         <span key={run.activity} className="truncate motion-safe:animate-pop">
           {run.activity ?? t("explore.board.atWork")}
@@ -151,7 +156,9 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
     <div className="grid gap-2.5">
       <Page />
       <div className="flex items-center gap-2 text-xs font-medium text-blue">
-        {t("explore.board.building", { name: MAKER.name, key: run.version })}
+        <NameLink id="maker">
+          {t("explore.board.building", { name: MAKER.name, key: run.version })}
+        </NameLink>
         {clock && (
           <span className="ml-auto font-normal text-muted-foreground tabular-nums">
             {clock}

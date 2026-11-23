@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
+import { Face } from "@/components/meet/team-panel";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
@@ -29,23 +30,25 @@ export function Who({ page }: Readonly<{ page: ExplorationPage }>) {
   const color = explorer?.color ?? "#e9a23b";
   return (
     <div className="flex items-center gap-3 border-b border-border-soft px-5 py-3.5">
-      <span
-        className="relative grid size-11 flex-none place-items-center rounded-[13px]"
-        style={{ background: `${color}24` }}
-      >
-        <KoboldHead
-          size={34}
-          hat={explorer?.hat}
-          color={color}
-          className={doing ? "motion-safe:animate-bob" : undefined}
-        />
-        {doing && (
-          <span
-            className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-card motion-safe:animate-breathe"
-            style={{ background: color }}
+      <Face id="explorer" className="flex-none rounded-[15px]">
+        <span
+          className="relative grid size-11 flex-none place-items-center rounded-[13px]"
+          style={{ background: `${color}24` }}
+        >
+          <KoboldHead
+            size={34}
+            hat={explorer?.hat}
+            color={color}
+            className={doing ? "motion-safe:animate-bob" : undefined}
           />
-        )}
-      </span>
+          {doing && (
+            <span
+              className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-card motion-safe:animate-breathe"
+              style={{ background: color }}
+            />
+          )}
+        </span>
+      </Face>
       <span className="grid min-w-0">
         <span className="flex items-baseline gap-2">
           <span className="text-[15px] font-semibold tracking-[-0.01em]">
