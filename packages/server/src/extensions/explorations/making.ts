@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import {
   type Board,
   type Claude,
+  doingOf,
   type Exploration,
   makerModel,
 } from "@software-factory/core";
@@ -143,11 +144,18 @@ function sessionKept(on: MakeOn, savedAt: string) {
 }
 
 // Each step the maker takes, kept with the prototype's run (the last 60).
-function stepsInto(mode: PrototypeMode, exploration: string, key: string) {
+export function stepsInto(
+  mode: PrototypeMode,
+  exploration: string,
+  key: string,
+) {
   return (line: string) => {
     const { steps } = mode.runOf(exploration, key);
+    // A line that is not an action (the kobold's own words) leaves the kind.
+    const doing = doingOf(line);
     mode.set(exploration, key, {
       activity: line.slice(0, 80),
+      ...(doing ? { doing } : {}),
       steps: [...steps, line.slice(0, 200)].slice(-60),
     });
   };

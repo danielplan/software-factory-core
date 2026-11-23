@@ -2,14 +2,18 @@
 // exploration: what was said, the answer while it is written, what the
 // kobold does, how far it got, why it could not answer, and what it points at.
 
+import type { DoingKind } from "@software-factory/core";
+
 import type { Step, Talk } from "../../coach/talk.ts";
 
 export type TalkView = {
   messages: { from: "kobold" | "you"; text: string }[];
   writing: string | null;
-  activity: string | null;
+  // What the explorer does now, as a kind of action: the page has the words
+  // for it, in each language.
+  doing: DoingKind | null;
   // The step the explorer is at in this turn, from what it reported: 0
-  // reading what it was given, 1 looking through the code, 2 drawing.
+  // reading what it was given, 1 learning how the product works, 2 drawing.
   step: Step;
   problem: string | null;
   // The thing the kobold points at, and how many times it pointed (so the
@@ -28,7 +32,7 @@ export function viewOf(
     return {
       messages: kept,
       writing: null,
-      activity: null,
+      doing: null,
       step: 0,
       problem: null,
       pointed: null,
@@ -39,7 +43,7 @@ export function viewOf(
       text: m.text,
     })),
     writing: talk.writing,
-    activity: talk.activity,
+    doing: talk.doing,
     step: talk.step,
     problem: talk.problem,
     pointed,

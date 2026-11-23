@@ -31,7 +31,8 @@ place, with decisions folded into it, open points marked "?", and few notes
 ([decision 0005](../../decisions/0005-whiteboard-not-pipeline.md)). It uses
 the board's tools: look at the board, add notes, diagrams and choices,
 change and remove things, link them, point at one, mark it agreed or a
-sketch, choose an option, and park another idea as an exploration of its
+sketch (a prototype agreed with the variant it names, or else the one
+shown), choose an option, and park another idea as an exploration of its
 own.
 
 People move things, switch sketch and agreed, choose an option, add pictures
@@ -54,12 +55,35 @@ turn Kobble starts itself opens with what started it, as its first step
 ## While Doodle reads
 
 On an empty board, while Doodle answers, the board shows a **reading card**
-in the middle: three steps (reading the page, looking at the code, drawing),
-each ticked off when Doodle actually reports it. The server says which step
-the turn is at (`talk.step`, from `coach/talk.ts`): reading or searching
-moves it to looking at the code, using a drawing tool to drawing. Nothing
-is timed, and the card says nothing about how long it takes. The card goes
-when the board has something on it, and shows only on an empty board.
+in the middle: three stages (reading your idea, learning how the product
+works, drawing on the board), each ticked off when Doodle actually reports
+it, and under the current stage the plain step it is on ("Getting to know the
+product", "Looking at how the product looks", "Looking for where this
+happens", "Drawing a choice"). The chat and the header say the same step in
+the same words. Nothing is timed, and the card says nothing about how long it
+takes. The card goes when the board has something on it, and shows only on an
+empty board.
+
+How the words get there: the **server sorts, the page words**. For each action
+Claude Code reports, the server (`doingOf` in the core's `kobble/doing.ts`)
+picks a kind from what the action touches (the product's settings, the design
+guide, a search, a drawing tool, anything unknown) and sends only that kind
+(`talk.doing`), never English. The page looks the kind up in its word list
+(`explore.doing` in `i18n/locales/`, English, Italian and German), so a step
+reads the same in every place. The stage moves by the kind too (`talk.step`,
+from `coach/talk.ts`): the first read or search moves it to learning how the
+product works, the first drawing action to drawing. Drawing actions reach the
+page like the others, so "Drawing a choice" is a real step. An action that fits
+no kind reads "Looking around the product". The words are a fixed list, not
+Doodle's own: it costs nothing extra and needs no second model. Each step stays
+on show a few seconds (`use-doing.ts`), so a fast run of reads can be followed.
+The Factory's step list for developers keeps its full details; only what the
+team sees while Doodle works is in everyday words, never "code", "files",
+"page" or "description".
+
+Tinker's line while it makes a prototype is sorted the same way: the run keeps
+the kind of the maker's last action (`doing`, next to the raw `activity` the
+kobold who talks with the team reads), and the board card words it.
 
 When Doodle really stops (Claude Code failed or was cut off), the card puts
 a red cross on the step it stopped at and says why in a red line, in plain
@@ -85,7 +109,9 @@ prototype, its variant or something on the board is still to be agreed
 (`hand-off-needs.ts`, the same rules the server refuses by). A prototype that
 was never made (its copy could not be made, so its branch is nowhere) holds
 nothing to build from: the hand-off leaves it out, and the board's agreed
-choices and notes go instead.
+choices and notes go instead. A GitHub board that adds new issues by itself
+already holds the new card: the hand-off finds it there and puts it in its
+column instead of adding it a second time.
 
 1. A spec writer writes the card from the conversation, the board and the
    agreed prototype, without reading the code: a short card in the plan's

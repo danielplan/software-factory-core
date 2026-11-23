@@ -12,6 +12,7 @@ import { stopWords } from "@/i18n/server-texts";
 import { KOBOLDS } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
+import { useDoing } from "../use-doing";
 import { STEPS, type StepState, stepStates } from "./reading";
 
 type Talk = ExplorationPage["talk"];
@@ -70,18 +71,21 @@ function Steps({
   color,
   onTryAgain,
 }: Readonly<{ talk: Talk; color: string; onTryAgain: () => void }>) {
+  const doing = useDoing(talk);
   return (
     <div className="grid gap-3.5">
       <ol className="grid gap-2.5">
-        {stepStates(talk).map((state, at) => (
-          <StepRow
-            key={STEPS[at]}
-            step={STEPS[at] ?? "page"}
-            state={state}
-            activity={talk.activity}
-            color={color}
-          />
-        ))}
+        {stepStates({ step: doing.stage, problem: talk.problem }).map(
+          (state, at) => (
+            <StepRow
+              key={STEPS[at]}
+              step={STEPS[at] ?? "idea"}
+              state={state}
+              activity={doing.line}
+              color={color}
+            />
+          ),
+        )}
       </ol>
       {talk.problem !== null && (
         <Reason problem={talk.problem} onTryAgain={onTryAgain} />

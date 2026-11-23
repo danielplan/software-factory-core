@@ -1,7 +1,7 @@
 // The factory's local web server: the web interface's files, the state it
 // shows (once, and as a stream of changes), and its buttons. It answers only
-// requests addressed to this computer by name, and buttons only from its own
-// page (which sends PAGE_HEADER), so another web page cannot press them.
+// whom reach.ts lets in, and buttons only from its own page (which sends
+// PAGE_HEADER), so another web page cannot press them.
 
 import { existsSync, readFileSync, statSync } from "node:fs";
 import {
@@ -22,11 +22,11 @@ import type { ExtensionModule } from "../plugs/extension.ts";
 import { Refused } from "../refused.ts";
 import type { Session } from "../session.ts";
 import { assemble, type TestsRunOn } from "./assemble.ts";
+import { admit, lanRoutes, type Reach, THIS_COMPUTER } from "./reach.ts";
 
 export const PAGE_HEADER = "x-software-factory";
 // A picture from the project that a setup card shows.
 const PICTURE = "/api/setup/picture";
-const HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -46,6 +46,8 @@ export function startServer(options: {
   // The built web interface (index.html and its files).
   page: string;
   port: number;
+  // Who besides this computer may reach it (none in the tests).
+  reach?: Reach;
   // The GitHub CLI (a stand-in in the tests).
   cli?: Cli;
   // What persona tests run on (stand-ins in the tests).
@@ -76,7 +78,12 @@ export function startServer(options: {
     { ...options, cli: options.cli ?? realCli() },
   );
   reconcile = app.reconcile;
-  const routes = { ...routesFor(session), ...app.routes };
+  const reach = options.reach ?? THIS_COMPUTER;
+  const routes = {
+    ...routesFor(session),
+    ...app.routes,
+    ...lanRoutes(reach, options.port),
+  };
   const server = createServer((incoming, response) => {
     void answer(incoming, response, {
       routes,
@@ -85,6 +92,7 @@ export function startServer(options: {
       supportTools: app.supportTools,
       page: options.page,
       session,
+      reach,
     });
   });
   server.on("listening", () => {
@@ -97,7 +105,7 @@ export function startServer(options: {
     app.start();
   });
   server.on("close", app.close);
-  server.listen(options.port, "127.0.0.1");
+  server.listen(options.port, reach.lan ? "0.0.0.0" : "127.0.0.1");
   return { server, changed };
 }
 
@@ -164,6 +172,7 @@ type Context = {
   supportTools: Parameters<typeof answerAgentTools>[3]["supportTools"];
   page: string;
   session: Session;
+  reach: Reach;
 };
 
 async function answer(
@@ -171,12 +180,10 @@ async function answer(
   response: ServerResponse,
   context: Context,
 ): Promise<void> {
-  const host = (incoming.headers.host ?? "").replace(/:\d+$/, "");
   const url = new URL(incoming.url ?? "/", "http://localhost");
+  if (!admit(incoming, response, url, context.reach)) return;
   const own = context.answers.find((one) => one.matches(incoming, url));
-  if (!HOSTS.has(host)) {
-    send(response, 403, { error: "Not here." });
-  } else if (url.pathname === "/api/events") {
+  if (url.pathname === "/api/events") {
     stream(response, context);
   } else if (own) {
     await own.answer(incoming, response, url);

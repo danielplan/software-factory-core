@@ -21,6 +21,7 @@ import { VoiceView } from "@/components/voice/voice-view";
 import { nameOf } from "./board/nodes";
 import { endsWithStep, Said } from "./said";
 import { Who } from "./explorer-header";
+import { useDoing } from "./use-doing";
 import { useKoboldCall } from "./kobold-call";
 
 export function TalkPanel({
@@ -264,21 +265,21 @@ function Problem({
 
 // The kobold's answer while it writes, or what it is doing before it does.
 function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
-  const t = useTranslation().t;
-  const doing = (
-    <p className="flex items-center gap-2 self-start text-[12.5px] text-muted-foreground">
-      <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
-      {talk.activity ?? t("explore.talk.thinking")}
+  const doing = useDoing(talk);
+  const line = (
+    <p className="flex items-center gap-2 self-start text-[12.5px] [overflow-wrap:anywhere] text-muted-foreground">
+      <span className="size-1.5 flex-none rounded-full bg-blue motion-safe:animate-breathe" />
+      {doing.line}
     </p>
   );
-  if (!talk.writing) return doing;
+  if (!talk.writing) return line;
   // Its words so far, with the steps it took; after a step, what it does now.
   return (
     <div className="grid max-w-[94%] gap-2 self-start">
       <div className="text-muted-foreground">
         <Said text={talk.writing} />
       </div>
-      {endsWithStep(talk.writing) && doing}
+      {endsWithStep(talk.writing) && line}
     </div>
   );
 }

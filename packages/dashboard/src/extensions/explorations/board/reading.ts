@@ -5,7 +5,7 @@
 import type { ExplorationPage } from "@/api/client";
 
 // The steps, in the order the explorer reaches them.
-export const STEPS = ["page", "code", "draw"] as const;
+export const STEPS = ["idea", "product", "board"] as const;
 
 export type StepState = "done" | "active" | "stopped" | "waiting";
 

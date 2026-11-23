@@ -58,5 +58,12 @@
   "opening": "Apro la fabbrica…",
   "misfit": "Qualcosa nei file della fabbrica non torna",
   "unexpected": "La fabbrica ha risposto qualcosa che questa pagina non sa leggere. La fabbrica è aggiornata?",
-  "noAnswer": "La fabbrica non ha risposto. La sua finestra è ancora aperta?"
+  "noAnswer": "La fabbrica non ha risposto. La sua finestra è ancora aperta?",
+  "devices": {
+    "row": "Apri sull'iPad",
+    "title": "Apri Kobble sull'iPad",
+    "intro": "Inquadra il codice con la fotocamera dell'iPad, o mandagli il link. Deve essere sulla stessa rete. Aprilo una volta e l'iPad resta abilitato.",
+    "copy": "Copia",
+    "copied": "Copiato"
+  }
 }

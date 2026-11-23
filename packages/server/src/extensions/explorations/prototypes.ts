@@ -170,6 +170,7 @@ export class ExplorationPrototypes {
     this.mode.set(exploration.id, key, {
       making: true,
       activity: change ? "Starting the change" : "Starting",
+      doing: "start",
       steps: [],
       problem: null,
     });
@@ -181,6 +182,7 @@ export class ExplorationPrototypes {
         this.mode.set(exploration.id, key, {
           making: false,
           activity: null,
+          doing: null,
           problem,
         });
         this.told.failed?.(exploration.id, key, problem);

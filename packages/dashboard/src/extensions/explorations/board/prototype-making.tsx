@@ -105,8 +105,10 @@ export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
       <span className="flex-none font-medium">
         {t("explore.board.building", { name: MAKER.name, key: run.version })}
       </span>
-      <span key={run.activity} className="truncate motion-safe:animate-pop">
-        {run.activity ?? t("explore.board.atWork")}
+      <span key={run.doing} className="truncate motion-safe:animate-pop">
+        {run.doing
+          ? t(`explore.doing.${run.doing}`)
+          : t("explore.board.atWork")}
       </span>
       {clock && (
         <span className="ml-auto flex-none text-muted-foreground tabular-nums">
@@ -131,12 +133,12 @@ export function Making({ run }: Readonly<{ run: VersionRun }>) {
           </span>
         )}
       </div>
-      {run.activity && (
+      {run.doing && (
         <p
-          key={run.activity}
+          key={run.doing}
           className="text-xs text-foreground-2 motion-safe:animate-pop"
         >
-          {run.activity}
+          {t(`explore.doing.${run.doing}`)}
         </p>
       )}
     </div>
