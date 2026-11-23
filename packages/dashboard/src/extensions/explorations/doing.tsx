@@ -118,7 +118,12 @@ export type Doing = {
   short: string | null;
 };
 
-export function useDoing(talk: Pick<Talk, "step" | "activity">): Doing {
+export function useDoing(
+  talk: Pick<Talk, "step" | "activity" | "writing">,
+): Doing {
+  // A keeps its last plain words while a line has none (the kobold's own).
+  const last = useRef<string | null>(null);
+  if (talk.writing === null) last.current = null;
   // C keeps the kobold's last line until it writes the next one.
   const own = useRef<string | null>(null);
   if (talk.activity && !REPORTED.test(talk.activity))
@@ -127,7 +132,9 @@ export function useDoing(talk: Pick<Talk, "step" | "activity">): Doing {
   if (VARIANT === "B")
     return { stage, line: null, short: STAGES[stage] ?? STAGES[0] };
   if (VARIANT === "C") return { stage, line: own.current, short: own.current };
-  const words = talk.activity ? plainWords(talk.activity) : null;
+  const said = talk.activity ? plainWords(talk.activity) : null;
+  if (said) last.current = said;
+  const words = said ?? last.current;
   // Past the code, what it reports is no longer the thing it does.
   const line = stage === 2 && !words ? STAGES[2] : words;
   return { stage, line, short: line };

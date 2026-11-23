@@ -8,16 +8,22 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { ExplorationPage } from "@/api/client";
 
-import { MADE_UP_STATE } from "./doing";
+import { MADE_UP_STATE, VARIANT } from "./doing";
 
 const LONG =
   "Reading packages/dashboard/src/extensions/explorations/board/prototype-switches-and-the-states-of-every-variant-in-one-long-name.tsx";
 
+// Each step stays a few seconds. The first is a step already, so the page
+// never starts on "Thinking…": in C, the kobold's own line comes first.
 const STEPS: { activity: string | null; step: 0 | 1 | 2 }[] = [
-  { activity: null, step: 0 },
-  { activity: "Let me check how products are described", step: 1 },
+  {
+    activity:
+      VARIANT === "C"
+        ? "Let me check how products are described"
+        : "Reading packages/dashboard/product.json",
+    step: 0,
+  },
   { activity: "Looking for files **/product.json", step: 1 },
-  { activity: "Reading packages/dashboard/product.json", step: 1 },
   { activity: "Now, how ideas are kept", step: 1 },
   { activity: "Searching for “exploration”", step: 1 },
   { activity: "Reading docs/reference/design-system.md", step: 1 },
@@ -25,12 +31,13 @@ const STEPS: { activity: string | null; step: 0 | 1 | 2 }[] = [
   { activity: "I'll draw two ways to say it", step: 2 },
   { activity: "Using add choice (setup)", step: 2 },
 ];
+const EACH = 3600;
 
 function pageAt(at: number, state: string): ExplorationPage {
   const now = STEPS[at] ?? STEPS[0];
   const stopped = state === "problem";
   const activity =
-    state === "long" && at === 3 ? LONG : (now?.activity ?? null);
+    state === "long" && at === 4 ? LONG : (now?.activity ?? null);
   return {
     exploration: {
       id: "X-18",
@@ -65,7 +72,7 @@ function pageAt(at: number, state: string): ExplorationPage {
       writing: "",
       activity,
       step: now?.step ?? 0,
-      problem: stopped && at >= 5 ? "Doodle stopped: made-up problem. Try again." : null,
+      problem: stopped && at >= 4 ? "Doodle stopped: made-up problem. Try again." : null,
       pointed: null,
     },
     handingOff: null,
@@ -81,7 +88,7 @@ export function useMadeUp(): ExplorationPage | null {
     if (!MADE_UP_STATE) return;
     const timer = setInterval(() => {
       setAt((now) => (now + 1) % (STEPS.length + 2));
-    }, 2400);
+    }, EACH);
     return () => {
       clearInterval(timer);
     };
