@@ -49,7 +49,12 @@ would do, Sprocket says so and takes them to the Marketplace.
 A team's own extension can bring Sprocket a guide (`"agent": "support"`).
 
 **New persona** and **New exploration** open Sprocket's conversation instead
-of a form. **Ask Sprocket** on a stuck card opens the conversation about it.
+of a form. A persona Sprocket proposes shows in the conversation as the
+persona's card: Sprocket writes a `persona` block (name, place, about), and
+the chat draws it with the kobold it will get, its first name and where it
+is, and **Add** and **Change something** while it waits for an answer. A
+persona always has a made-up first name that fits it, never a role; the
+role goes in the about. **Ask Sprocket** on a stuck card opens the conversation about it.
 The conversation lives while the factory runs; **New conversation** starts
 again.
 
@@ -61,13 +66,14 @@ something wrong goes to [the feedback board](feedback-board.md).
 
 ## Where it lives
 
-| Part       | Where                                                                                  |
-| ---------- | -------------------------------------------------------------------------------------- |
-| Sprocket   | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts` |
-| Its plug   | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`            |
-| Its guide  | `packages/skills/guides/support-kobold.md`                                             |
-| The window | `packages/dashboard/src/features/support/`                                             |
-| The bar    | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup        |
+| Part             | Where                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| Sprocket         | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts`                        |
+| Its plug         | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`                                   |
+| Its guide        | `packages/skills/guides/support-kobold.md`                                                                    |
+| The window       | `packages/dashboard/src/features/support/`                                                                    |
+| The bar          | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup                               |
+| A persona's card | `packages/dashboard/src/components/layout/persona-card.tsx`, `packages/dashboard/src/lib/persona-proposal.ts` |
 
 The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 `/stop`.
@@ -75,6 +81,7 @@ The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 ## Checked and not checked
 
 Checked by tests: the plug (only installed extensions are heard, removing
-one takes its hand-offs away), the tools and hand-offs, the card look
-(`support-plug.test.ts`, `support-tools.test.ts`, `card-look.test.ts`).
+one takes its hand-offs away), the tools and hand-offs, the card look, a proposed persona's block
+(`support-plug.test.ts`, `support-tools.test.ts`, `card-look.test.ts`,
+`persona-proposal.test.ts`).
 Not checked by a test: how well Sprocket routes in a real conversation.
