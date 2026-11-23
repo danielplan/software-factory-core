@@ -4,8 +4,8 @@
 // reply while it writes, what it is doing, why it could not answer, and a
 // box to talk to it. It changes the board while it talks.
 
-import { Mic } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Check, Mic } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { type ExplorationPage, messageOf, post } from "@/api/client";
@@ -18,6 +18,7 @@ import { showsVoice } from "@/lib/voice/call";
 import { useVoiceCall } from "@/hooks/voice/use-voice-call";
 import { VoiceView } from "@/components/voice/voice-view";
 
+import { type Line, useMine } from "./board/mine/mine-state";
 import { nameOf } from "./board/nodes";
 import { Who } from "./explorer-header";
 import { useKoboldCall } from "./kobold-call";
@@ -220,26 +221,51 @@ function Messages({
       ref={end}
       className="flex flex-1 flex-col gap-4 overflow-auto px-4 py-4 text-[12.5px] leading-relaxed"
     >
-      {talk.messages.map((message, at) =>
-        message.from === "kobold" ? (
-          <div key={at} className="max-w-[94%] self-start">
-            <Markdown text={message.text} />
-          </div>
-        ) : (
-          <div
-            key={at}
-            className="max-w-[85%] self-end rounded-xl rounded-br-md bg-wash px-3 py-1.5 text-foreground"
-          >
-            <Markdown text={message.text} />
-          </div>
-        ),
-      )}
+      <Received after={0} />
+      {talk.messages.map((message, at) => (
+        <Fragment key={at}>
+          {message.from === "kobold" ? (
+            <div className="max-w-[94%] self-start">
+              <Markdown text={message.text} />
+            </div>
+          ) : (
+            <div className="max-w-[85%] self-end rounded-xl rounded-br-md bg-wash px-3 py-1.5 text-foreground">
+              <Markdown text={message.text} />
+            </div>
+          )}
+          <Received after={at + 1} />
+        </Fragment>
+      ))}
       {talk.writing !== null && <Writing talk={talk} />}
       {(talk.problem ?? refused) && (
         <Problem problem={talk.problem} refused={refused} />
       )}
     </div>
   );
+}
+
+// What Doodle received from the toolbar, a small line in the conversation
+// where it happened: a note, a link, or (once, however many strokes) a drawing.
+function Received({ after }: Readonly<{ after: number }>) {
+  const t = useTranslation().t;
+  const lines = useMine().lines.filter((one) => one.after === after);
+  const shown = lines.filter(
+    (one: Line, at) => !(one.kind === "mark" && lines[at - 1]?.kind === "mark"),
+  );
+  return shown.map((line) => (
+    <p
+      key={line.id}
+      className="flex items-start gap-1.5 self-start text-[11.5px] leading-snug break-words text-muted-foreground"
+    >
+      <Check aria-hidden className="mt-0.5 size-3 flex-none text-blue" />
+      <span className="min-w-0">
+        {t(`explore.board.mine.got.${line.kind}`, {
+          text: line.about,
+          site: line.about,
+        })}
+      </span>
+    </p>
+  ));
 }
 
 // Why the kobold could not answer, in the language shown, or why what the

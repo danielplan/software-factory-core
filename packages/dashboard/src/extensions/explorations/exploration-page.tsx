@@ -16,6 +16,7 @@ import { useRead } from "@/api/query";
 import { explorationPageSchema } from "@/api/schemas/explorations";
 
 import { Board } from "./board/canvas";
+import { MineProvider } from "./board/mine/mine-state";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
 import { handOffMissing } from "./hand-off-needs";
@@ -62,6 +63,10 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
       });
   };
   return (
+    <MineProvider
+      exploration={data.exploration.id}
+      said={data.talk.messages.length}
+    >
     <div className="flex h-dvh flex-col">
       <TopBar page={data} press={press} pending={pending} />
       <div className="flex min-h-0 flex-1 max-lg:flex-col">
@@ -98,6 +103,7 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
         />
       </div>
     </div>
+    </MineProvider>
   );
 }
 

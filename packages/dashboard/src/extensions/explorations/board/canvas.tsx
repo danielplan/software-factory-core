@@ -14,8 +14,9 @@ import {
   type NodeTypes,
   ReactFlow,
   ReactFlowProvider,
+  useReactFlow,
 } from "@xyflow/react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
@@ -37,6 +38,11 @@ import {
 import { useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
+import { AddToolbar } from "./mine/add-toolbar";
+import { MineLayer, type Tool, ToolLayer } from "./mine/mine-layer";
+import { type Point, useMine } from "./mine/mine-state";
+import { addressOf, previewOf } from "./mine/preview";
+import { boardState } from "./mine/variant";
 
 const NODE_TYPES: NodeTypes = {
   problem: ProblemNode,
@@ -72,8 +78,17 @@ export function Board(props: BoardProps) {
   );
 }
 
-function Canvas({ page, attached, onPick }: BoardProps) {
+// ?state=empty: the board with nothing on it yet (made-up, chosen by the
+// page address).
+function shownPage(page: ExplorationPage): ExplorationPage {
+  return boardState() === "empty"
+    ? { ...page, board: { things: [], links: [] } }
+    : page;
+}
+
+function Canvas({ page: served, attached, onPick }: BoardProps) {
   const t = useTranslation().t;
+  const page = useMemo(() => shownPage(served), [served]);
   const pointed = page.talk.pointed;
   const marks = useMemo(
     () => ({ pointed: pointed?.thing ?? null, attached }),
@@ -84,6 +99,7 @@ function Canvas({ page, attached, onPick }: BoardProps) {
   const area = useRef<HTMLDivElement>(null);
   const pictures = usePictureDrop(page.exploration.id, area);
   const act = useBoardDo(page.exploration.id);
+  const adding = useAdding(nodes, arranged, area, act);
   return (
     <div
       ref={area}
@@ -130,6 +146,14 @@ function Canvas({ page, attached, onPick }: BoardProps) {
             onPick(node.id);
         }}
         onMoveStart={onMoveStart}
+        onPaneClick={() => {
+          adding.mine.select(null);
+        }}
+        onDoubleClick={adding.onDoubleClick}
+        zoomOnDoubleClick={false}
+        // Only the person's own things come off, by what the toolbar's
+        // layer or the remove buttons do: never Doodle's.
+        deleteKeyCode={null}
         nodesConnectable={false}
         edgesFocusable={false}
         minZoom={0.15}
@@ -138,8 +162,135 @@ function Canvas({ page, attached, onPick }: BoardProps) {
         style={COLOURS}
       >
         <Background gap={16} />
+        <MineLayer
+          nodes={nodes}
+          writing={adding.writing}
+          onWritten={adding.stopWriting}
+          drawing={adding.drawing}
+        />
+        <ToolLayer
+          tool={adding.tool}
+          nodes={nodes}
+          onDrawing={adding.setDrawing}
+          onNoteAt={adding.writeAt}
+        />
         <Controls showInteractive={false} position="bottom-left" />
+        <AddToolbar
+          tool={adding.tool}
+          onTool={adding.setTool}
+          onPicture={pictures.choose}
+          onLink={adding.addLink}
+        />
       </ReactFlow>
     </div>
   );
+}
+
+// What the toolbar does: the tool that is on (the pen or the note), the
+// note being typed (also from a double-click on empty space), the mark
+// being drawn, a pasted web address, the Delete key for what is the
+// person's, and Esc to leave a tool. Doodle hears of a placed thing in the
+// chat.
+function useAdding(
+  nodes: ThingNode[],
+  arranged: number,
+  area: React.RefObject<HTMLDivElement | null>,
+  act: ReturnType<typeof useBoardDo>,
+) {
+  const mine = useMine();
+  const { screenToFlowPosition } = useReactFlow();
+  const [tool, setTool] = useState<Tool>(null);
+  const [writing, setWriting] = useState<{ x: number; y: number } | null>(null);
+  const [drawing, setDrawing] = useState<Point[] | null>(null);
+  const { seed, seeded } = mine;
+
+  // The made-up drawing and note, taken in already, once the board is laid out.
+  useEffect(() => {
+    if (arranged > 0 && !seeded) seed(nodes);
+  }, [arranged, seeded, seed, nodes]);
+
+  const writeAt = (at: { x: number; y: number }) => {
+    setTool(null);
+    setWriting(at);
+  };
+  const addLink = (address: string) => {
+    const box = area.current?.getBoundingClientRect();
+    const middle = box
+      ? screenToFlowPosition({
+          x: box.left + box.width / 2,
+          y: box.top + box.height / 2,
+        })
+      : { x: 0, y: 0 };
+    const more = mine.items.filter((one) => one.kind === "link").length % 5;
+    mine.add(
+      {
+        kind: "link",
+        url: address,
+        x: middle.x - 140 + more * 28,
+        y: middle.y - 40 + more * 28,
+      },
+      previewOf(address).site,
+    );
+  };
+
+  useEffect(() => {
+    const typing = (event: Event) =>
+      event.target instanceof HTMLElement &&
+      event.target.matches("input, textarea, [contenteditable]");
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setTool(null);
+        setWriting(null);
+        return;
+      }
+      if ((event.key !== "Delete" && event.key !== "Backspace") || typing(event))
+        return;
+      if (mine.selected) {
+        event.preventDefault();
+        mine.remove(mine.selected);
+        return;
+      }
+      // A picture the person put there, selected on the board.
+      const picked = nodes.find(
+        (n) =>
+          n.selected &&
+          n.data.thing.by === "person" &&
+          n.data.thing.kind === "picture",
+      );
+      if (picked) act("board", { do: { act: "remove", id: picked.id } });
+    };
+    const onPaste = (event: ClipboardEvent) => {
+      if (typing(event) || (event.clipboardData?.files.length ?? 0) > 0) return;
+      const address = addressOf(event.clipboardData?.getData("text/plain") ?? "");
+      if (!address) return;
+      event.preventDefault();
+      addLink(address);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("paste", onPaste);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("paste", onPaste);
+    };
+  });
+
+  return {
+    mine,
+    tool,
+    setTool,
+    writing,
+    stopWriting: () => {
+      setWriting(null);
+    },
+    writeAt,
+    drawing,
+    setDrawing,
+    addLink,
+    onDoubleClick: (event: React.MouseEvent) => {
+      if (!(event.target as Element).classList.contains("react-flow__pane"))
+        return;
+      setTool(null);
+      writeAt(screenToFlowPosition({ x: event.clientX, y: event.clientY }));
+    },
+  };
 }

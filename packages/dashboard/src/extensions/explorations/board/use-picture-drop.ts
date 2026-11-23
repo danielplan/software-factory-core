@@ -66,7 +66,14 @@ export function usePictureDrop(
       clearTimeout(timer);
     };
   }, [refused]);
-  return { dropping, refused };
+  // A picture chosen with the toolbar's picker.
+  const choose = useCallback(
+    (file: File) => {
+      add(file, file.name.replace(/\.\w+$/, "") || words("explore.board.pasted"));
+    },
+    [add, words],
+  );
+  return { dropping, refused, choose };
 }
 
 type Add = (file: File | null, title: string) => void;
