@@ -20,7 +20,7 @@ import type {
   TestResult as ServedTest,
 } from "../../../../server/src/extensions/explorations/views.ts";
 import type { HandingOff as ServedHandingOff } from "../../../../server/src/extensions/explorations/handing-off.ts";
-import type { TalkView as ServedTalk } from "../../../../server/src/extensions/explorations/talks.ts";
+import type { TalkView as ServedTalk } from "../../../../server/src/extensions/explorations/talk-view.ts";
 import type { BoardIdea as ServedIdea } from "../../../../server/src/plugs/work.ts";
 import type { VersionRun as ServedRun } from "../../../../server/src/prototypes/mode.ts";
 
@@ -117,6 +117,7 @@ const talkSchema = z.object({
   ),
   writing: z.string().nullable(),
   activity: z.string().nullable(),
+  step: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   problem: z.string().nullable(),
   pointed: z.object({ thing: z.string(), times: z.number() }).nullable(),
 }) satisfies z.ZodType<ServedTalk>;

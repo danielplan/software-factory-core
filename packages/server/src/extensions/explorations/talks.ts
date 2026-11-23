@@ -25,6 +25,7 @@ import {
   type MadeReport,
   reviewWords,
 } from "./made.ts";
+import { type TalkView, viewOf } from "./talk-view.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { CHANGE_WORDS } from "./making-words.ts";
 import { inLanguage } from "../../language.ts";
@@ -35,16 +36,6 @@ const RIGHTS = {
   readOnly: true,
   tools: ["Read", "Grep", "Glob"],
   deny: ["Read(**/.env*)"],
-};
-
-export type TalkView = {
-  messages: { from: "kobold" | "you"; text: string }[];
-  writing: string | null;
-  activity: string | null;
-  problem: string | null;
-  // The thing the kobold points at, and how many times it pointed (so the
-  // page moves there again when it points at the same thing).
-  pointed: { thing: string; times: number } | null;
 };
 
 type TalksOptions = {
@@ -79,25 +70,11 @@ export class ExplorationTalks {
   }
 
   view(id: string): TalkView {
-    const talk = this.talks.get(id);
-    if (!talk)
-      return {
-        messages: this.options.store().conversation(id).messages,
-        writing: null,
-        activity: null,
-        problem: null,
-        pointed: null,
-      };
-    return {
-      messages: talk.messages.map((m) => ({
-        from: m.from === "coach" ? "kobold" : "you",
-        text: m.text,
-      })),
-      writing: talk.writing,
-      activity: talk.activity,
-      problem: talk.problem,
-      pointed: this.pointed.get(id) ?? null,
-    };
+    return viewOf(
+      this.talks.get(id),
+      this.options.store().conversation(id).messages,
+      this.pointed.get(id) ?? null,
+    );
   }
 
   // The kobold says a line by itself and points at a thing: a prototype
@@ -316,6 +293,7 @@ export class ExplorationTalks {
     const talk: Talk = new Talk({
       claude: this.options.claude,
       cwd: this.options.project,
+      who: "The explorer",
       onChange: () => {
         this.options.onChange();
         if (!talk.working) this.save(id, talk);

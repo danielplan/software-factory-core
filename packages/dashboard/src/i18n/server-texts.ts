@@ -81,3 +81,34 @@ export function problemTitle(title: string, t: TFunction): string {
   }
   return title;
 }
+
+// Why the explorer could not answer, as the server says it (coach/talk.ts):
+// the reason alone, and what to do about it. Anything else the server
+// wrote stays as it was, without its last full stop.
+export function stopWords(
+  problem: string,
+  t: TFunction,
+): { reason: string; how: string } {
+  if (/^Claude Code is not on this computer\./.test(problem))
+    return {
+      reason: t("explore.stopped.missing"),
+      how: t("explore.stopped.missingHow"),
+    };
+  if (/^Claude Code is not signed in\./.test(problem))
+    return {
+      reason: t("explore.stopped.signedOut"),
+      how: t("explore.stopped.signedOutHow"),
+    };
+  const found = /^.+ stopped: ([\s\S]*)\. Try again\.$/.exec(problem);
+  if (found) {
+    const said = found[1] ?? "";
+    return {
+      reason:
+        said === "no reason given"
+          ? t("explore.stopped.noReason")
+          : t("explore.stopped.other", { reason: said }),
+      how: t("explore.reading.tryAgain"),
+    };
+  }
+  return { reason: problem.replace(/\.$/, ""), how: "" };
+}

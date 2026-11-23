@@ -71,6 +71,36 @@
     "thinking": "Denkt nach…",
     "takeOff": "Abnehmen"
   },
+  "reading": {
+    "title": "{{name}} liest",
+    "stopped": "{{name}} hat angehalten",
+    "hint": "Es wird nichts gezeichnet, bis gelesen ist.",
+    "noneDrawn": "Es wurde nichts gezeichnet.",
+    "stoppedAt": "{{step}}: angehalten",
+    "tryAgain": "Nochmal versuchen",
+    "steps": {
+      "page": {
+        "doing": "Die Seite lesen",
+        "done": "Seite gelesen"
+      },
+      "code": {
+        "doing": "Den Code ansehen",
+        "done": "Code angesehen"
+      },
+      "draw": {
+        "doing": "Das Board zeichnen",
+        "done": "Board gezeichnet"
+      }
+    }
+  },
+  "stopped": {
+    "signedOut": "Claude Code ist nicht angemeldet",
+    "signedOutHow": "Führe claude einmal in einem Terminal aus, um dich anzumelden, und versuche es dann nochmal",
+    "missing": "Claude Code ist nicht auf diesem Computer",
+    "missingHow": "Installiere es von claude.com/code und melde dich an, versuche es dann nochmal",
+    "other": "Der Explorer hat angehalten: {{reason}}",
+    "noReason": "Der Explorer hat angehalten: kein Grund angegeben"
+  },
   "more": "+{{n}} weitere",
   "waysComeHere": "hier kommen die Wege hin",
   "fromBacklog": "eine Idee aus dem Backlog des Boards",
