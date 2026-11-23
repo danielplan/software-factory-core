@@ -18,7 +18,7 @@ import { SprocketWindow } from "@/features/support/sprocket-window";
 import { useSprocketMoves, useSupport } from "@/features/support/use-support";
 import { UpdateRow } from "@/features/updates/update-row";
 
-import { KoboldsRow, TeamPanel } from "@/components/meet/team-panel";
+import { TeamPanel } from "@/components/meet/team-panel";
 import { FactoryNav } from "@/components/layout/factory-nav";
 import { Shell } from "@/components/layout/shell";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -66,7 +66,6 @@ export function FactoryShell({
                 rows={
                   <>
                     <UpdateRow />
-                    <KoboldsRow />
                     <FeedbackRow current={current} />
                   </>
                 }

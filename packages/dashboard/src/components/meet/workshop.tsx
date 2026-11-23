@@ -1,5 +1,5 @@
 // PROTOTYPE, "Meet the kobolds": the "Your kobolds" panel as a little
-// workshop of who they are. Sprocket on top, a bit bigger, looks after the
+// workshop of who they are (on the grey ground, or plain white in variant A). Sprocket on top, a bit bigger, looks after the
 // team; below it Sieve, Doodle, Tinker (Doodle's helper), Bolt and Mimic side
 // by side. A kobold at work moves a little and says what it does now; a
 // resting one sleeps, eyes closed, breathing gently. A click opens its card.
@@ -11,7 +11,10 @@ import { Link } from "react-router";
 import { KoboldHead } from "@/components/kobold-face";
 import { cn } from "@/lib/utils";
 
-import { closeTeam, type Member, memberOf } from "./meet";
+import { closeTeam, type Member, memberOf, VARIANT } from "./meet";
+
+// Variant A: the panel is plain white, with no grey ground or backdrop.
+const WHITE = VARIANT === "A";
 
 const STATIONS = ["sorter", "explorer", "maker", "builder", "tester"];
 const INK = "#1b2236";
@@ -301,7 +304,11 @@ function Card({
   return (
     <section
       aria-label={`${member.name}'s card`}
-      className="meet-in relative flex min-w-0 gap-3.5 rounded-2xl bg-card p-4 pr-10"
+      className={cn(
+        "meet-in relative flex min-w-0 gap-3.5 rounded-2xl p-4 pr-10",
+        // Very light grey on the white panel, white on the grey ground.
+        WHITE ? "bg-surface-2/50" : "bg-card",
+      )}
     >
       <KoboldHead size={48} hat={member.hat} color={member.color} />
       <div className="grid min-w-0 gap-1 text-[13px] leading-snug">
@@ -409,8 +416,18 @@ export function Workshop({
     />
   );
   return (
-    <div className="grid min-h-0 gap-4 overflow-y-auto bg-ground px-6 pt-5 pb-6">
-      <div className="grid gap-2 rounded-2xl bg-surface-2/60 px-3 pt-3 pb-3">
+    <div
+      className={cn(
+        "grid min-h-0 gap-4 overflow-y-auto px-6 pb-6",
+        WHITE ? "bg-card pt-2" : "bg-ground pt-5",
+      )}
+    >
+      <div
+        className={cn(
+          "grid gap-2 rounded-2xl px-3 pt-3 pb-3",
+          !WHITE && "bg-surface-2/60",
+        )}
+      >
         <Supervisor
           now={now.support ?? null}
           lit={focus === "support"}

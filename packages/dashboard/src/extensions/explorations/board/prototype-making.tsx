@@ -5,15 +5,12 @@
 // Motion only when the computer allows it.
 
 import { type CSSProperties, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import type { VersionRun } from "@/api/client";
 import { KoboldHead } from "@/components/kobold-face";
-import { Hello } from "@/components/meet/hello";
 import { reportTinker } from "@/components/meet/meet";
 import { NameTag } from "@/components/meet/name-tag";
-import { VARIANT } from "@/components/meet/meet";
-import { Face, NameLink } from "@/components/meet/team-panel";
+import { Face } from "@/components/meet/team-panel";
 import { MAKER } from "@/lib/kobolds";
 import { cn } from "@/lib/utils";
 
@@ -109,50 +106,16 @@ function Page() {
 // While it runs and is made at once: one line above the live screen, with
 // what the kobold does now and its clock.
 export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
-  const clock = clockOf(run.since, useNow());
-  const t = useTranslation().t;
   useTinkerNow(run);
   const soon = aboutOf(run.since, useNow());
   if (!(run.state === "running" && run.url)) return null;
-  if (VARIANT === "E")
-    return (
-      <NameTag
-        id="maker"
-        now={`making variant ${run.version} to try, ${soon}`}
-        detail={run.activity}
-        means={WHEN_READY}
-      />
-    );
   return (
-    <>
-      <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
-        <Face id="maker" className="-m-1.5 flex-none p-1.5">
-          <KoboldHead
-            size={20}
-            hat={MAKER.hat}
-            color={MAKER.color}
-            className="flex-none motion-safe:animate-bob"
-          />
-        </Face>
-        <span className="flex-none font-medium">
-          <NameLink id="maker">
-            {t("explore.board.building", {
-              name: MAKER.name,
-              key: run.version,
-            })}
-          </NameLink>
-        </span>
-        <span key={run.activity} className="truncate motion-safe:animate-pop">
-          {run.activity ?? t("explore.board.atWork")}
-        </span>
-        {clock && (
-          <span className="ml-auto flex-none text-muted-foreground tabular-nums">
-            {clock}
-          </span>
-        )}
-      </div>
-      <Hello id="maker" />
-    </>
+    <NameTag
+      id="maker"
+      now={`making variant ${run.version} to try, ${soon}`}
+      detail={run.activity}
+      means={WHEN_READY}
+    />
   );
 }
 
@@ -170,44 +133,17 @@ function useTinkerNow(run: VersionRun) {
 }
 
 export function Making({ run }: Readonly<{ run: VersionRun }>) {
-  const t = useTranslation().t;
-  const clock = clockOf(run.since, useNow());
   useTinkerNow(run);
   const soon = aboutOf(run.since, useNow());
-  if (VARIANT === "E")
-    return (
-      <div className="grid gap-2.5">
-        <Page />
-        <NameTag
-          id="maker"
-          now={`making variant ${run.version} to try, ${soon}`}
-          detail={run.activity}
-          means={WHEN_READY}
-        />
-      </div>
-    );
   return (
     <div className="grid gap-2.5">
       <Page />
-      <div className="flex items-center gap-2 text-xs font-medium text-blue">
-        <NameLink id="maker">
-          {t("explore.board.building", { name: MAKER.name, key: run.version })}
-        </NameLink>
-        {clock && (
-          <span className="ml-auto font-normal text-muted-foreground tabular-nums">
-            {clock}
-          </span>
-        )}
-      </div>
-      {run.activity && (
-        <p
-          key={run.activity}
-          className="text-xs text-foreground-2 motion-safe:animate-pop"
-        >
-          {run.activity}
-        </p>
-      )}
-      <Hello id="maker" />
+      <NameTag
+        id="maker"
+        now={`making variant ${run.version} to try, ${soon}`}
+        detail={run.activity}
+        means={WHEN_READY}
+      />
     </div>
   );
 }

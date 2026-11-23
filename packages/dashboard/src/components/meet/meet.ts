@@ -1,8 +1,10 @@
-// PROTOTYPE, "Meet the kobolds": what both ways of meeting the kobolds share.
-// Which way shows is chosen outside the app, by the page address
-// (?variant=A or ?variant=B, A without it), read once when the app loads and
-// kept for the visit. The made-up states (?state=quiet, busy, long, fresh,
-// met) are chosen the same way. Words are written straight in, in English.
+// PROTOTYPE, "Meet the kobolds": what the variants share. The base is "always
+// present at work" (E): name tags where a kobold works, a "Your kobolds" group
+// in the sidebar and a panel any face or tag opens. Which variant shows is
+// chosen outside the app, by the page address (?variant=E, or ?variant=A for
+// the white background; E without it), read once when the app loads and kept
+// for the visit. The made-up states (?state=quiet, busy, long) are chosen the
+// same way. Words are written straight in, in English.
 
 import { useSyncExternalStore } from "react";
 
@@ -11,7 +13,8 @@ import type { Doing } from "@/components/layout/page-kobold";
 import { KOBOLDS, MAKER } from "@/lib/kobolds";
 import type { Page } from "@/lib/routes";
 
-export type Variant = "A" | "B" | "E";
+// E: the base · A: the same with a plain white panel.
+export type Variant = "E" | "A";
 
 function fromAddress(key: string): string | null {
   return new URLSearchParams(window.location.search).get(key);
@@ -27,18 +30,13 @@ function kept(key: string, asked: string | null): string | null {
   }
 }
 
-export const VARIANT: Variant = (() => {
-  const asked = kept("variant", fromAddress("variant"))?.toUpperCase();
-  return asked === "B" || asked === "E" ? asked : "A";
-})();
-
-// A and E both have the "Your kobolds" panel; B has one-time bubbles instead.
-export const HAS_PANEL = VARIANT === "A" || VARIANT === "E";
+export const VARIANT: Variant =
+  kept("variant", fromAddress("variant"))?.toUpperCase() === "A" ? "A" : "E";
 
 // quiet: nobody at work · busy: everybody at work · long: everybody, with long
-// names · fresh: nobody met yet (B) · met: everybody met already (B).
-export type MadeUp = "quiet" | "busy" | "long" | "fresh" | "met" | null;
-const STATES = ["quiet", "busy", "long", "fresh", "met"];
+// names.
+export type MadeUp = "quiet" | "busy" | "long" | null;
+const STATES = ["quiet", "busy", "long"];
 export const STATE: MadeUp = (() => {
   const state = kept("state", fromAddress("state"));
   return STATES.includes(state ?? "") ? (state as MadeUp) : null;
@@ -59,16 +57,11 @@ export type Member = {
   where: string;
   page: Page | null;
   meanwhile: string;
-  // What it says about itself the first time it shows up (variant B).
-  hello: string;
 };
 
 const WORDS: Record<
   string,
-  Pick<
-    Member,
-    "role" | "step" | "last" | "job" | "where" | "meanwhile" | "hello"
-  >
+  Pick<Member, "role" | "step" | "last" | "job" | "where" | "meanwhile">
 > = {
   support: {
     role: "your support kobold",
@@ -77,7 +70,6 @@ const WORDS: Record<
     job: "Answers your questions and takes your feedback",
     where: "Every page, in the bar at the bottom",
     meanwhile: "Keep going, its answer comes to the bar.",
-    hello: "I answer your questions, on every page.",
   },
   explorer: {
     role: "your explorer",
@@ -86,7 +78,6 @@ const WORDS: Record<
     job: "Thinks your ideas through and tells the story behind each one",
     where: "Explorations, on the board and in the talk beside it",
     meanwhile: "Talk to it, or move things around on the board.",
-    hello: "I think your idea through with you.",
   },
   maker: {
     role: "Doodle's helper",
@@ -95,7 +86,6 @@ const WORDS: Record<
     job: "Doodle's helper: builds the versions you try",
     where: "Explorations, on each version's card",
     meanwhile: "Nothing to do. The first version opens as soon as it runs.",
-    hello: "I'm Doodle's helper. I'm building the versions for you to try.",
   },
   builder: {
     role: "the builder",
@@ -104,7 +94,6 @@ const WORDS: Record<
     job: "Builds the cards you agreed on, one by one",
     where: "Factory, on the card it works on",
     meanwhile: "Nothing to do. It asks here if it gets stuck.",
-    hello: "I build the cards you agreed on. I'm on this one now.",
   },
   tester: {
     role: "plays your personas",
@@ -113,7 +102,6 @@ const WORDS: Record<
     job: "Uses your app as one of your personas and tells what went wrong",
     where: "Personas, on a mission",
     meanwhile: "Nothing to do. What it finds arrives as signals.",
-    hello: "I use your app as one of your personas and tell what goes wrong.",
   },
   sorter: {
     role: "sorts what comes in",
@@ -122,7 +110,6 @@ const WORDS: Record<
     job: "Sorts what comes in: bugs, requests and feedback",
     where: "Signals, as they arrive",
     meanwhile: "Nothing to do. New signals wait on the Signals page.",
-    hello: "I sort what comes in.",
   },
 };
 
@@ -152,7 +139,7 @@ export function memberOf(id: string): Member {
   return TEAM.find((one) => one.id === id) ?? TEAM[0];
 }
 
-// --- A made-up card for Bolt (variant B), when the board has none being built.
+// --- A made-up card for Bolt, when the board has none being built.
 
 import type { FactoryView } from "@/api/schemas/factory";
 
@@ -171,7 +158,7 @@ const MADE_UP_CARD = {
 };
 
 export function withBoltAtWork(view: FactoryView): FactoryView {
-  if (VARIANT === "A" || view.builder.working) return view;
+  if (view.builder.working) return view;
   if (view.columns.some((c) => c.id === "building" && c.cards.length > 0))
     return view;
   const titles = {
@@ -279,24 +266,14 @@ export function useTeamDoing(real: Doing): Record<string, string> {
   if (STATE === "quiet") return {};
   if (STATE === "busy" || STATE === "long")
     return madeUpDoing(STATE === "long");
-  // In E Tinker is always at work on its made-up version, so it is there
-  // under Doodle on every page.
-  const tinkerNow =
-    maker ??
-    (VARIANT === "E" ? "Version A: making the basket page (made up)" : null);
-  // Bolt too: the made-up card on the Factory board is being built.
-  const boltNow =
-    real.builder ??
-    (VARIANT === "E"
-      ? "Card #128: Show the late orders first (made up)"
-      : null);
+  // Tinker is always at work on its made-up version, so it is there under
+  // Doodle on every page; Bolt too (the made-up card on the Factory board is
+  // being built), and Sieve watches.
   return {
     ...real,
-    ...(tinkerNow ? { maker: tinkerNow } : {}),
-    ...(boltNow ? { builder: boltNow } : {}),
-    ...(VARIANT === "E" && !real.sorter
-      ? { sorter: "Watching for what comes in" }
-      : {}),
+    maker: maker ?? "Version A: making the basket page (made up)",
+    builder: real.builder ?? "Card #128: Show the late orders first (made up)",
+    sorter: real.sorter ?? "Watching for what comes in",
   };
 }
 
@@ -312,42 +289,4 @@ function madeUpDoing(long: boolean): Record<string, string> {
     tester: "Mission: reorder a basket as Maria",
     sorter: "Sorting 3 new signals",
   };
-}
-
-// --- Having met (variant B): kept on this computer, so a kobold says hello
-// once. ?state=fresh forgets everybody, ?state=met knows everybody.
-
-const MET = "meet-kobolds-met";
-
-function metList(): string[] {
-  if (STATE === "met") return TEAM.map((one) => one.id);
-  try {
-    return JSON.parse(localStorage.getItem(MET) ?? "[]") as string[];
-  } catch {
-    return [];
-  }
-}
-
-let met = metList();
-if (STATE === "fresh") {
-  met = [];
-  try {
-    localStorage.removeItem(MET);
-  } catch {
-    // Nothing kept: it still works for this visit.
-  }
-}
-
-export function meet(id: string) {
-  if (met.includes(id)) return;
-  met = [...met, id];
-  try {
-    localStorage.setItem(MET, JSON.stringify(met));
-  } catch {
-    // Nothing kept: it still works for this visit.
-  }
-  emit();
-}
-export function useMet(id: string): boolean {
-  return useSyncExternalStore(subscribe, () => met.includes(id));
 }

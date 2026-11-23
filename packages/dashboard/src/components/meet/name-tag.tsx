@@ -1,15 +1,15 @@
-// PROTOTYPE, "Meet the kobolds", variant E: the kobolds are always there
+// PROTOTYPE, "Meet the kobolds": the kobolds are always there
 // where they work. A name tag on the thing a kobold works on, every time:
 // its face, "Name · role", what it does now in plain words and what that
 // means for you. A click opens the "Your kobolds" panel with it lit.
-// The sidebar's group of kobolds (KoboldGroup) is variant E's too.
+// The sidebar's group of kobolds is here too (KoboldGroup).
 
 import { KoboldHead } from "@/components/kobold-face";
 import type { Doing } from "@/components/layout/page-kobold";
 import { GroupLabel } from "@/components/layout/team-pages";
 import { cn } from "@/lib/utils";
 
-import { memberOf, openTeam, useTeamDoing, VARIANT } from "./meet";
+import { memberOf, openTeam, useTeamDoing } from "./meet";
 
 export function NameTag({
   id,
@@ -24,7 +24,6 @@ export function NameTag({
   detail?: string | null;
   className?: string;
 }>) {
-  if (VARIANT !== "E") return null;
   const member = memberOf(id);
   return (
     <button
@@ -75,7 +74,6 @@ const ORDER = ["support", "explorer", "maker", "builder", "tester", "sorter"];
 
 export function KoboldGroup({ doing }: Readonly<{ doing: Doing }>) {
   const now = useTeamDoing(doing);
-  if (VARIANT !== "E") return null;
   return (
     <nav aria-label="Your kobolds" className="grid gap-px pt-3">
       <GroupLabel>Your kobolds</GroupLabel>

@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { KoboldHead } from "@/components/kobold-face";
-import { VARIANT, openTeam } from "@/components/meet/meet";
+import { openTeam } from "@/components/meet/meet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ export function SprocketDock({
             : "w-[24rem] rounded-xl shadow-[0_8px_24px_-12px_rgb(20_24_36/0.25)] hover:border-[#d4d4da]",
         )}
         style={{
-          height: open ? "auto" : VARIANT === "E" ? 54 : 40,
+          height: open ? "auto" : 54,
           maxHeight: roomy,
         }}
       >
@@ -54,40 +54,32 @@ export function SprocketBar({
       onClick={onOpen}
       className="flex h-full w-full flex-none items-center gap-2.5 pr-2 pl-2.5 text-left text-[13px] text-muted-foreground"
     >
-      {VARIANT === "E" ? (
-        <span
-          role="button"
-          tabIndex={0}
-          title="Meet your kobolds"
-          onClick={(event) => {
-            event.stopPropagation();
-            openTeam("support");
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "Enter") return;
-            event.stopPropagation();
-            openTeam("support");
-          }}
-          className="flex-none cursor-pointer rounded-lg p-0.5 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
-        >
-          <KoboldHead size={34} className={cn(working && "animate-breathe")} />
-        </span>
-      ) : (
-        <KoboldHead size={22} className={cn(working && "animate-breathe")} />
-      )}
-      {VARIANT === "E" ? (
-        <span className="grid min-w-0 flex-1">
-          <span className="truncate text-[13px] font-semibold text-foreground">
-            Sprocket{" "}
-            <span className="font-normal text-muted-foreground">
-              · your support kobold
-            </span>
+      <span
+        role="button"
+        tabIndex={0}
+        title="Meet your kobolds"
+        onClick={(event) => {
+          event.stopPropagation();
+          openTeam("support");
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") return;
+          event.stopPropagation();
+          openTeam("support");
+        }}
+        className="flex-none cursor-pointer rounded-lg p-0.5 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue/50 focus-visible:outline-none"
+      >
+        <KoboldHead size={34} className={cn(working && "animate-breathe")} />
+      </span>
+      <span className="grid min-w-0 flex-1">
+        <span className="truncate text-[13px] font-semibold text-foreground">
+          Sprocket{" "}
+          <span className="font-normal text-muted-foreground">
+            · your support kobold
           </span>
-          <span className="truncate text-xs">{line}</span>
         </span>
-      ) : (
-        <span className="flex-1 truncate">{line}</span>
-      )}
+        <span className="truncate text-xs">{line}</span>
+      </span>
       <kbd className="rounded-md border border-border px-1.5 py-0.5 font-sans text-[11px] text-faint">
         ⌘J
       </kbd>

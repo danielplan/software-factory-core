@@ -1,12 +1,10 @@
-// PROTOTYPE, "Meet the kobolds", variant A: one panel with all the kobolds,
-// Tinker too: face, job, where it works, what it does right now and what to
-// do meanwhile. A kobold's face opens it (Face, below); the one clicked is lit.
+// PROTOTYPE, "Meet the kobolds": the "Your kobolds" panel, with all of them,
+// Tinker too. A kobold's face (Face, below), a name tag or the words naming it
+// open it; the one clicked is lit.
 
-import { Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { Doing } from "@/components/layout/page-kobold";
-import { Tile } from "@/components/layout/sidebar-links";
 import {
   Dialog,
   DialogContent,
@@ -15,24 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-import {
-  closeTeam,
-  memberOf,
-  openTeam,
-  useTeamDoing,
-  usePanel,
-  HAS_PANEL,
-  VARIANT,
-} from "./meet";
+import { closeTeam, memberOf, openTeam, useTeamDoing, usePanel } from "./meet";
 import { Workshop } from "./workshop";
 
-// A kobold's face that opens the panel (variant A); the face alone in B.
+// A kobold's face that opens the panel.
 export function Face({
   id,
   children,
   className,
 }: Readonly<{ id: string; children: ReactNode; className?: string }>) {
-  if (!HAS_PANEL) return <>{children}</>;
   return (
     <button
       type="button"
@@ -54,12 +43,11 @@ export function Face({
 }
 
 // Words that name a kobold, as a link that opens the panel with it lit
-// (variant A); plain words in B.
+
 export function NameLink({
   id,
   children,
 }: Readonly<{ id: string; children: ReactNode }>) {
-  if (!HAS_PANEL) return <>{children}</>;
   return (
     <button
       type="button"
@@ -76,29 +64,9 @@ export function NameLink({
   );
 }
 
-// "Your kobolds", a row in the sidebar's bottom group, beside Send feedback.
-export function KoboldsRow() {
-  if (VARIANT !== "A") return null;
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        openTeam();
-      }}
-      className="group flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-strong [&_svg]:size-[14px] [&_svg]:flex-none [&_svg]:stroke-[2]"
-    >
-      <Tile color="#667085">
-        <Users aria-hidden />
-      </Tile>
-      Your kobolds
-    </button>
-  );
-}
-
 export function TeamPanel({ doing }: Readonly<{ doing: Doing }>) {
   const { open, focus } = usePanel();
   const now = useTeamDoing(doing);
-  if (!HAS_PANEL) return null;
   return (
     <Dialog
       open={open}

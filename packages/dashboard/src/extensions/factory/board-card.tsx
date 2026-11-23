@@ -17,7 +17,6 @@ import type { FactoryCard } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { TypeChip } from "@/components/card-type";
-import { Hello } from "@/components/meet/hello";
 import { NameTag } from "@/components/meet/name-tag";
 import { ConflictBox, ResolvingLine } from "./conflict-box";
 
@@ -68,7 +67,6 @@ export function Card({
       <span className="text-[13px] leading-[1.35] font-medium">
         {card.title}
       </span>
-      {building && <Hello id="builder" />}
       {building && (
         <NameTag
           id="builder"
