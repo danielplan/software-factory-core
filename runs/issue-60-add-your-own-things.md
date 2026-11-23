@@ -44,10 +44,52 @@ Decisions:
   (`applyAct`, for notes, pictures, links, sketches, marks).
 - Links accept only `http` and `https`.
 
-## Stages
+- **Page.** The team's notes, links, sketch cards and marks are drawn on
+  the board's own layer (`board/mine/`), read from the board's things
+  (`own.ts`), not cards the layout places; a person's picture stays a card
+  but is not laid out (`ownedByPerson`), so adding it never moves the view.
+  What was sent and not yet answered shows at once as pending things
+  (`held.ts`, `sending.ts`) and goes when the board is read again. The
+  Doodle chat shows a note as the person's own message (it is said to Doodle);
+  the prototype's local "Doodle received …" chat lines are left out, as
+  nothing else in the chat is made up. A paste or drop that is a bare word
+  like `report.pdf` is not a link; only the typed link box accepts an address
+  without `https://`.
+- **Differences from the prototype, with why.** No Sketch tool, variant
+  switch, "Draw on a card" hint or made-up drawing and note (the card says
+  so); pen marks on a card that is not a sketch are given to Doodle as the
+  strokes alone (the page cannot photograph another card), with the card's id
+  and size; a note's chat line is Doodle's real answer.
+- **Opens, as the card said:** arrows between two cards and words inside a
+  sketch are not possible; whether a faded "taken in" mark reads clearly is
+  looked at in the screenshots below (marks fade to 45%, cards to 60%).
 
-1. Server: schema, acts, link previews, taken in, Doodle's text. Done, with tests.
-2. Page: the board's own layer (sketch cards, marks, notes, link cards),
-   toolbar, paste and drop, the view that stays still, chat lines, words in
-   en/it/de, its checks. Not started.
-3. Docs, a run in the browser with screenshots, the verify run. Not started.
+## Checked
+
+- Rules (tests): server `own-things.test.ts` (strokes: new sketch card, join,
+  other card, erase, card with its marks removed; note heard at once and
+  taken in after the answer; link preview, no preview, slow or failing page;
+  only the open web; Doodle cannot change or remove, can move; Doodle's text;
+  taken in only after the answer); page `own-things.test.ts` (card grows
+  around strokes, which card the pen is on, what a paste or drop becomes,
+  addresses, the layer, the view's re-fit); the words test.
+- In a browser (headless, on this copy's demo project): pen on empty space
+  opened a sketch card, a stroke inside joined it, one just outside opened a
+  second card, a loop round a card stayed on it, a double-click placed a
+  note, a pasted address and a dropped picture landed where the pointer was,
+  a link to a real page showed its preview, a sketch card dragged with its
+  strokes, a reload kept everything, and Doodle answered about the drawings
+  and the note and they faded to "Taken in". The view did not move for any
+  of it (the transform stayed the same); it did move once when Doodle itself
+  changed the diagram.
+
+![the toolbar on the board](runs/issue-60-add-your-own-things/3-board-toolbar.png)
+![a sketch, a mark on a card and a note](runs/issue-60-add-your-own-things/4-drawn.png)
+![after a reload, taken in, links and pictures](runs/issue-60-add-your-own-things/6-after-reload.png)
+![a link with its preview, a sketch card dragged](runs/issue-60-add-your-own-things/7-link-preview-drag.png)
+
+## Not checked
+
+- Italian and German on screen (the words test checks every key is in all
+  three); small windows; a prototype card marked with the pen (a running
+  prototype is an iframe card, treated like any other card).

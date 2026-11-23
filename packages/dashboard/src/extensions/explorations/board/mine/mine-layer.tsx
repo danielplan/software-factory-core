@@ -108,16 +108,21 @@ function Marks({ targets }: Readonly<{ targets: Target[] }>) {
           );
         })}
       </svg>
-      {marks.map(({ mark, box }) => {
+      {marks.map(({ mark, box }, at) => {
         const selected = mine.selected === mark.id;
-        if (mark.taken !== true && !selected) return null;
+        // "Taken in" once for a card that is not a sketch card (those say it
+        // themselves), not once for each of its marks.
+        const card = targets.find((t) => t.id === mark.on);
+        const first = marks.findIndex((one) => one.mark.on === mark.on) === at;
+        const says = mark.taken === true && first && !card?.sketch;
+        if (!says && !selected) return null;
         return (
           <span
             key={mark.id}
             style={{ left: box.x + box.width - 4, top: box.y - 12 }}
             className="nopan pointer-events-auto absolute flex -translate-x-full items-center gap-1 rounded-full bg-card/90"
           >
-            {mark.taken === true && <TakenIn />}
+            {says && <TakenIn />}
             {selected && (
               <RemoveChip
                 onRemove={() => {
