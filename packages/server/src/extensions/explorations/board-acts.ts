@@ -42,7 +42,7 @@ export type Act =
   | { act: "remove"; id: string }
   | { act: "link"; from: string; to: string; label?: string }
   | { act: "unlink"; from: string; to: string }
-  | { act: "agree"; id: string; agreed: boolean }
+  | { act: "agree"; id: string; agreed: boolean; variant?: string }
   | { act: "choose"; id: string; option: string | null }
   | { act: "show"; id: string; variant: string }
   | { act: "move"; id: string; x: number; y: number };
@@ -201,10 +201,7 @@ function applied(board: Board, act: Act, by: By): Done {
         said: `Unlinked ${act.from} → ${act.to}.`,
       };
     case "agree":
-      return {
-        board: agreed(board, act.id, act.agreed),
-        said: `${act.id} is ${act.agreed ? "agreed" : "a sketch"}.`,
-      };
+      return agreedAct(board, act);
     default:
       return placedOrChosen(board, act);
   }
@@ -229,6 +226,20 @@ function placedOrChosen(
     said: act.option
       ? `Chose ${act.option} on ${act.id}.`
       : `Took back the choice on ${act.id}.`,
+  };
+}
+
+// A thing agreed, or a sketch again; a prototype agreed with a named
+// variant shows that variant first.
+function agreedAct(board: Board, act: Extract<Act, { act: "agree" }>): Done {
+  const on = act.variant
+    ? shown(board, thingOf(board, act.id), act.variant).board
+    : board;
+  const named = act.variant ? ` with variant ${act.variant}` : "";
+  const now = act.agreed ? "agreed" + named : "a sketch";
+  return {
+    board: agreed(on, act.id, act.agreed),
+    said: `${act.id} is ${now}.`,
   };
 }
 

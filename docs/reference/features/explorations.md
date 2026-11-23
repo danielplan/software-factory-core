@@ -32,7 +32,8 @@ place, with decisions folded into it, open points marked "?", and few notes
 ([decision 0005](../../decisions/0005-whiteboard-not-pipeline.md)). It uses
 the board's tools: look at the board, add notes, diagrams and choices,
 change and remove things, link them, point at one, mark it agreed or a
-sketch, choose an option, and park another idea as an exploration of its
+sketch (a prototype agreed with the variant it names, or else the one
+shown), choose an option, and park another idea as an exploration of its
 own.
 
 People move things, switch sketch and agreed, choose an option, add pictures
@@ -75,6 +76,18 @@ person, `by: "person"`), so it survives a reload and Doodle reads it:
   view; it still re-fits for what Doodle adds.
 
 Not possible yet: arrows drawn between two cards, and words inside a sketch.
+
+## What Doodle did, in the chat
+
+Doodle's words keep the steps it took between them, where they happened:
+each a small grey line in the language shown ("Asked Tinker to change the
+prototype", "Looked at the board"), three or more in a row folded into one
+line ("4 steps") that opens. They show while Doodle works and stay
+afterwards. The server keeps them in its words as `<!-- step: name -->`
+(`coach/kept-steps.ts`; Markdown shows nothing of them elsewhere, the voice
+leaves them out); the page words each step by its name (`explore.steps`). A
+turn Kobble starts itself opens with what started it, as its first step
+("Tinker finished the prototype").
 
 ## While Doodle reads
 
@@ -133,7 +146,9 @@ prototype, its variant or something on the board is still to be agreed
 (`hand-off-needs.ts`, the same rules the server refuses by). A prototype that
 was never made (its copy could not be made, so its branch is nowhere) holds
 nothing to build from: the hand-off leaves it out, and the board's agreed
-choices and notes go instead.
+choices and notes go instead. A GitHub board that adds new issues by itself
+already holds the new card: the hand-off finds it there and puts it in its
+column instead of adding it a second time.
 
 1. A spec writer writes the card from the conversation, the board and the
    agreed prototype, without reading the code: a short card in the plan's

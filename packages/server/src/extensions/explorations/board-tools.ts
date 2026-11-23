@@ -169,9 +169,20 @@ const TOOLS: {
   {
     name: "agree",
     description:
-      "Mark a thing agreed (talked through and agreed with the team) or a sketch again. One prototype at most is agreed.",
-    input: { id: z.string(), agreed: z.boolean() },
-    act: (a) => ({ act: "agree", id: String(a.id), agreed: a.agreed === true }),
+      "Mark a thing agreed (talked through and agreed with the team) or a sketch again. One prototype at most is agreed, with one variant: name it (its letter), or the variant shown on the board is the one agreed.",
+    input: {
+      id: z.string(),
+      agreed: z.boolean(),
+      variant: z.string().optional(),
+    },
+    act: (a) => ({
+      act: "agree",
+      id: String(a.id),
+      agreed: a.agreed === true,
+      ...(typeof a.variant === "string" && a.variant
+        ? { variant: a.variant.toUpperCase() }
+        : {}),
+    }),
   },
 ];
 

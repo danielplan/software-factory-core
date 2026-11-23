@@ -58,5 +58,12 @@
   "opening": "Die Fabrik öffnet sich…",
   "misfit": "Etwas in den Dateien der Fabrik passt nicht",
   "unexpected": "Die Fabrik hat etwas geantwortet, das diese Seite nicht lesen kann. Ist die Fabrik auf dem neuesten Stand?",
-  "noAnswer": "Die Fabrik hat nicht geantwortet. Ist ihr Fenster noch offen?"
+  "noAnswer": "Die Fabrik hat nicht geantwortet. Ist ihr Fenster noch offen?",
+  "devices": {
+    "row": "Auf dem iPad öffnen",
+    "title": "Kobble auf dem iPad öffnen",
+    "intro": "Scanne den Code mit der Kamera des iPads oder schick ihm den Link. Es muss im selben Netzwerk sein. Einmal geöffnet, bleibt das iPad zugelassen.",
+    "copy": "Kopieren",
+    "copied": "Kopiert"
+  }
 }

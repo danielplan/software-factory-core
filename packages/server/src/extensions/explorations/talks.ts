@@ -122,6 +122,7 @@ export class ExplorationTalks {
     }
     const times = (this.pointed.get(id)?.times ?? 0) + 1;
     this.pointed.set(id, { thing: made.thing, times });
+    talk.opensWith("prototype_made");
     void this.answer(id, talk, reviewWords(key, made));
   }
 
@@ -129,8 +130,12 @@ export class ExplorationTalks {
   // while the kobold is answering.
   failed(id: string, key: string, why: string): void {
     const talk = this.talk(id);
-    if (talk.working) this.personDid(id, failedNote(key, why));
-    else void this.answer(id, talk, failedWords(key, why));
+    if (talk.working) {
+      this.personDid(id, failedNote(key, why));
+      return;
+    }
+    talk.opensWith("prototype_failed");
+    void this.answer(id, talk, failedWords(key, why));
   }
 
   // `things`: what they put on the board by it, taken in once heard.
@@ -324,6 +329,7 @@ export class ExplorationTalks {
       },
     });
     talk.serveToolsAt(`${this.toolsUrl}/${id}`);
+    talk.keepSteps();
     this.talks.set(id, talk);
     return talk;
   }

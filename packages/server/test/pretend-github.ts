@@ -25,7 +25,9 @@ export const BOARD = {
   stages: STAGES,
 };
 
-export function pretendGitHub() {
+// `addsNewIssues`: a board that adds new issues by itself (a GitHub
+// workflow), so adding one again is refused.
+export function pretendGitHub({ addsNewIssues = false } = {}) {
   const issues = new Map([
     [3, { title: "Invoices in euros", body: "As written.", column: "Backlog" }],
   ]);
@@ -148,6 +150,14 @@ export function pretendGitHub() {
     }
     return says("");
   };
+  const itemAdd = () =>
+    addsNewIssues
+      ? Promise.resolve({
+          code: 1,
+          out: "",
+          err: "Content already exists in this project",
+        })
+      : says(JSON.stringify({ id: "item-9" }));
   const run = (args: string[]) => {
     const [first, second] = args;
     if (first === "api" && second === "user") return says("octo\n");
@@ -173,8 +183,7 @@ export function pretendGitHub() {
       removed.add(Number(/item-(\d+)/.exec(args.join(" "))?.[1]));
       return says("{}");
     }
-    if (first === "project" && second === "item-add")
-      return says(JSON.stringify({ id: "item-9" }));
+    if (first === "project" && second === "item-add") return itemAdd();
     return Promise.resolve({
       code: 1,
       out: "",
