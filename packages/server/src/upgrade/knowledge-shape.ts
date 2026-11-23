@@ -1,4 +1,4 @@
-// The knowledge base keeps its shape (from 0.15.0): a project's docs/ that
+// The knowledge base keeps its shape (from 0.14.1): a project's docs/ that
 // lacks a page of it (the index, a section's index, how the knowledge base
 // is kept) gets that page from the template, as a new company's starts.
 // Nothing there is overwritten; a docs/ that is not there yet comes with

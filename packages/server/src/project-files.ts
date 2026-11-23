@@ -130,8 +130,7 @@ export function writeProjectFiles(
 function keepOwnHooks(project: string, version: string): string | null {
   const text = readText(join(project, HOOKS_FILE));
   if (text === null || text.startsWith(GENERATED)) return null;
-  const [major, minor] = version.split(".");
-  const kept = `${FACTORY_FOLDER}/hooks-before-${major ?? ""}.${minor ?? ""}.yml`;
+  const kept = `${FACTORY_FOLDER}/hooks-before-${version}.yml`;
   renameSync(join(project, HOOKS_FILE), join(project, kept));
   return kept;
 }

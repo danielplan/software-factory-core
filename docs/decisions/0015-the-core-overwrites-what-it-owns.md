@@ -53,5 +53,5 @@ a core-owned file was edited by hand.
 ## More Information
 
 [Setup: the project files the core owns](../reference/features/setup.md#the-project-files-the-core-owns);
-the code is `packages/server/src/project-files.ts`, with its 0.15.0
+the code is `packages/server/src/project-files.ts`, with its 0.14.1
 migration in `packages/server/src/upgrade/migrations.ts`.
