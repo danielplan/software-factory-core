@@ -30,7 +30,11 @@
   "dropping": "Dropping…",
   "handOff": "Hand off {{key}}",
   "handOffBoard": "Hand off",
-  "agreePrototypeFirst": "Agree on the prototype and its variant first: the factory builds from it",
+  "handOffMissing": {
+    "prototype": "Agree on the prototype first, with its variant: the factory builds from it.",
+    "variant": "The prototype is agreed, but not which variant to build: choose one.",
+    "something": "Nothing is agreed yet: agree on a choice or a note on the board first."
+  },
   "handingOff": "Handing off…",
   "handOffStep": "Step {{n}} of {{of}}",
   "handOffStages": {

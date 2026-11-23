@@ -30,7 +30,11 @@
   "dropping": "Lascio…",
   "handOff": "Consegna {{key}}",
   "handOffBoard": "Consegna",
-  "agreePrototypeFirst": "Prima accordatevi sul prototipo e la sua variante: la fabbrica costruisce da quello",
+  "handOffMissing": {
+    "prototype": "Prima accordatevi sul prototipo, con la sua variante: la fabbrica costruisce da quello.",
+    "variant": "Il prototipo è concordato, ma non quale variante costruire: sceglietene una.",
+    "something": "Non c'è ancora nulla di concordato: accordatevi prima su una scelta o una nota della bacheca."
+  },
   "handingOff": "Consegno…",
   "handOffStep": "Passo {{n}} di {{of}}",
   "handOffStages": {

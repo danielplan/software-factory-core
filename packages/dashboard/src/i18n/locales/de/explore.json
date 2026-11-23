@@ -30,7 +30,11 @@
   "dropping": "Verwerfe…",
   "handOff": "{{key}} übergeben",
   "handOffBoard": "Übergeben",
-  "agreePrototypeFirst": "Einigt euch zuerst auf den Prototyp und seine Variante: die Fabrik baut daraus",
+  "handOffMissing": {
+    "prototype": "Einigt euch zuerst auf den Prototyp, mit seiner Variante: die Fabrik baut daraus.",
+    "variant": "Der Prototyp ist beschlossen, aber nicht welche Variante gebaut wird: wählt eine.",
+    "something": "Noch nichts ist beschlossen: einigt euch zuerst auf eine Wahl oder eine Notiz auf dem Board."
+  },
   "handingOff": "Übergebe…",
   "handOffStep": "Schritt {{n}} von {{of}}",
   "handOffStages": {

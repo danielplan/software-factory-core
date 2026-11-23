@@ -17,6 +17,7 @@ import { explorationPageSchema } from "@/api/schemas/explorations";
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
+import { handOffMissing } from "./hand-off-needs";
 import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
 
@@ -112,8 +113,9 @@ function useClosed(status: string | undefined): void {
 }
 
 // Hand off the agreed prototype, or, without one (an idea that changes no
-// screen), the board's agreed choices and notes; busy while it is handed
-// off, also after the page was opened again.
+// screen), the board's agreed choices and notes; off, with the reason in
+// words beside it, until the board has them; busy while it is handed off,
+// also after the page was opened again.
 function HandOffButton({
   page,
   press,
@@ -129,31 +131,38 @@ function HandOffButton({
     (one) => one.kind === "prototype" && one.agreed,
   );
   const key = agreed?.kind === "prototype" ? agreed.key : "";
-  // A prototype on the board is handed off agreed, or not at all; without
-  // one, the board's agreed choices and notes are.
-  const prototypes = board.things.some((one) => one.kind === "prototype");
-  const ready =
-    agreed !== undefined ||
-    (!prototypes && board.things.some((one) => one.agreed));
+  // What the board still lacks, said next to the button: a switched-off
+  // button shows no tooltip, so the words are on the page.
+  const missing = handOffMissing(board.things);
   const busy = pending === "hand-off" || page.handingOff !== null;
   const handOffWords = key
     ? t("explore.handOff", { key })
     : t("explore.handOffBoard");
   return (
-    <Button
-      size="pill-sm"
-      busy={busy}
-      disabled={!ready || pending !== null || page.handingOff !== null}
-      title={
-        prototypes && !agreed ? t("explore.agreePrototypeFirst") : undefined
-      }
-      onClick={() => {
-        press("hand-off", {});
-      }}
-    >
-      <Send aria-hidden />
-      {busy ? t("explore.handingOff") : handOffWords}
-    </Button>
+    <>
+      {missing && !busy && (
+        <span
+          id="hand-off-missing"
+          className="max-w-[320px] text-xs leading-snug text-muted-foreground"
+        >
+          {t(`explore.handOffMissing.${missing}`)}
+        </span>
+      )}
+      <Button
+        size="pill-sm"
+        busy={busy}
+        disabled={
+          missing !== null || pending !== null || page.handingOff !== null
+        }
+        aria-describedby={missing ? "hand-off-missing" : undefined}
+        onClick={() => {
+          press("hand-off", {});
+        }}
+      >
+        <Send aria-hidden />
+        {busy ? t("explore.handingOff") : handOffWords}
+      </Button>
+    </>
   );
 }
 
