@@ -58,7 +58,10 @@
     "choice": "Wahl",
     "prototype": "Prototyp",
     "diagram": "Diagramm",
-    "picture": "Bild"
+    "picture": "Bild",
+    "link": "Link",
+    "sketch": "Zeichnung",
+    "mark": "Markierung"
   },
   "talk": {
     "role": "Denkt es mit dir durch und zeichnet aufs Board",
@@ -118,7 +121,6 @@
     "problemHere": "Der Kobold schreibt das Problem hierher.",
     "running": "{{title}}, läuft",
     "pictureUnreadable": "Das Bild konnte nicht gelesen werden.",
-    "onlyPictures": "Nur Bilder können aufs Board.",
     "pasted": "Eingefügtes Bild",
     "recommended": "Empfohlen",
     "recommendsThis": "Der Kobold empfiehlt diese",
@@ -137,7 +139,34 @@
     "tinkerSetUp": "{{name}} hat eingerichtet, wie deine App startet, für das ganze Team.",
     "couldNotTitle": "{{name}} konnte deine App nicht starten.",
     "couldNotNoReason": "{{name}} hat mehrere Wege versucht, deine App zu starten, aber keiner hat geklappt.",
-    "tryAgain": "Nochmal versuchen"
+    "tryAgain": "Nochmal versuchen",
+    "mine": {
+      "label": "Zum Board hinzufügen",
+      "pen": "Stift",
+      "penHint": "Stift: überall zeichnen: auf freier Fläche öffnet sich eine Skizzenkarte um die Zeichnung, auf einer Karte bleibt sie darin (Esc zum Beenden)",
+      "penOn": "Stift an · Esc zum Beenden",
+      "sketchLabel": "Deine Skizze",
+      "note": "Notiz",
+      "noteHint": "Notiz: eine eigene Zeile schreiben, dorthin klicken, wo sie hin soll (oder das Board doppelt anklicken)",
+      "noteHere": "Auf das Board klicken, um eine Notiz zu schreiben",
+      "noteLabel": "Deine Notiz",
+      "notePlaceholder": "Eine Zeile, dann Enter",
+      "picture": "Bild",
+      "pictureHint": "Bild: eines vom Computer auswählen (Einfügen und Ablegen gehen auch)",
+      "link": "Link",
+      "linkHint": "Link: eine Webadresse hinzufügen (Einfügen geht auch)",
+      "linkLabel": "Webadresse",
+      "linkPlaceholder": "Webadresse einfügen",
+      "linkAdd": "Link hinzufügen",
+      "linkBad": "Das ist keine Webadresse.",
+      "linkOpens": "{{site}} in einem neuen Tab öffnen",
+      "yours": "Deins",
+      "yoursHint": "Du hast das hier abgelegt: du kannst es verschieben und entfernen. Doodle kann es verschieben, aber nie umschreiben oder löschen.",
+      "takenIn": "Aufgenommen",
+      "takenInHint": "Doodle hat das aufgenommen. Es kann es verschieben, aber nie umschreiben oder löschen: nur du kannst das.",
+      "remove": "Vom Board entfernen (nur du kannst das)"
+    },
+    "onlyPicturesAndLinks": "Auf das Board können nur Bilder und Webadressen."
   },
   "doing": {
     "start": "Sich bereit machen",

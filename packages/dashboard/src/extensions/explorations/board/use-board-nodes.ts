@@ -12,7 +12,13 @@ import type { ExplorationPage } from "@/api/client";
 
 import { aroundPlaced } from "@/lib/around-placed";
 import { arrange } from "@/lib/layout";
-import { edgesOf, nodesOf, shapeOf, type ThingNode } from "./nodes";
+import {
+  edgesOf,
+  nodesOf,
+  ownedByPerson,
+  shapeOf,
+  type ThingNode,
+} from "./nodes";
 
 export function useBoardNodes(
   page: ExplorationPage,
@@ -30,23 +36,25 @@ export function useBoardNodes(
     setNodes((earlier) => nodesOf(page, earlier, marks));
   }, [page, marks, setNodes]);
 
+  const laid = nodes.filter((n) => !ownedByPerson(n));
   const shape = [
-    ...nodes.map(shapeOf),
+    ...laid.map(shapeOf),
     ...edges.map((e) => `${e.source}>${e.target}`),
   ].join("|");
   const measured =
-    nodes.length > 0 && nodes.every((n) => n.measured?.height !== undefined);
+    laid.length > 0 && laid.every((n) => n.measured?.height !== undefined);
 
   useEffect(() => {
     if (!measured) return;
     let stale = false;
-    const boxes = latest.current.nodes.map((n) => ({
+    const rest = latest.current.nodes.filter((n) => !ownedByPerson(n));
+    const boxes = rest.map((n) => ({
       id: n.id,
       width: n.measured?.width ?? 0,
       height: n.measured?.height ?? 0,
     }));
     const placed = new Map(
-      latest.current.nodes.flatMap((n) =>
+      rest.flatMap((n) =>
         n.data.thing.place ? [[n.id, n.data.thing.place] as const] : [],
       ),
     );

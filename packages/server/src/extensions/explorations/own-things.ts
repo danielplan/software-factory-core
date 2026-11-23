@@ -36,13 +36,13 @@ const actSchema = z.discriminatedUnion("act", [
     at: z.object(place).optional(),
     points: z.array(point).min(1).max(1500),
     // The card as drawn, with this stroke on it: what the kobold sees.
-    picture: z.string(),
+    picture: z.string().nullish(),
   }),
   z.object({
     act: z.literal("erase"),
     id: z.string(),
     // Its card as drawn now, without the stroke.
-    picture: z.string().nullable(),
+    picture: z.string().nullish(),
   }),
 ]);
 
@@ -170,7 +170,9 @@ function draw(
   act: Extract<Own, { act: "draw" }>,
 ): Thing {
   const board = store.board(id);
-  const picture = savePictureData(store, id, act.picture);
+  const picture = act.picture
+    ? savePictureData(store, id, act.picture)
+    : undefined;
   const opened = act.on === null;
   const card = opened ? newSketch(board, act.at) : thingOf(board, act.on ?? "");
   if (card.kind === "mark")
@@ -184,12 +186,14 @@ function draw(
     on: card.id,
     points: act.points.map(([x, y]) => [tidy(x), tidy(y)]),
     // A sketch keeps its picture on itself; another card on its last mark.
-    ...(card.kind === "sketch" ? {} : { image: picture }),
+    ...(card.kind === "sketch" || !picture ? {} : { image: picture }),
   };
   const drawn = withThing(
     base,
     // A card drawn on again is not taken in: there is more to see.
-    card.kind === "sketch" ? { ...card, image: picture, taken: false } : card,
+    card.kind === "sketch"
+      ? { ...card, image: picture ?? card.image, taken: false }
+      : card,
   );
   store.saveBoard(id, withThing(drawn, mark));
   const things = card.kind === "sketch" ? [mark.id, card.id] : [mark.id];

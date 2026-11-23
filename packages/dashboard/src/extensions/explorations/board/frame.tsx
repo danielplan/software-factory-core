@@ -6,19 +6,16 @@
 
 import { Handle, Position } from "@xyflow/react";
 import { Check, GripVertical, X } from "lucide-react";
-import { createContext, type ReactNode, use } from "react";
+import { type ReactNode, use } from "react";
 import { useTranslation } from "react-i18next";
 
 import { messageOf, post } from "@/api/client";
 import { cn } from "@/lib/utils";
 
 import { KINDS } from "../kinds";
+import { BoardProblem } from "./board-problem";
+import { TakenIn, YoursTag } from "./mine/tags";
 import type { ThingData } from "./nodes";
-
-// Where a button on the board says why it did not work (the page shows it).
-export const BoardProblem = createContext<(problem: string | null) => void>(
-  () => undefined,
-);
 
 // What a person does on the board; why it did not work is said.
 export function useBoardDo(exploration: string) {
@@ -65,24 +62,26 @@ function AgreeTick({ data }: Readonly<{ data: ThingData }>) {
   );
 }
 
-// Solid green once agreed; dashed while a sketch.
-function outlineOf(agreed: boolean, tone: "card" | "note"): string {
+// Solid green once agreed; dashed while a sketch; blue for what the team
+// put there themselves.
+function outlineOf(
+  agreed: boolean,
+  tone: "card" | "note",
+  yours: boolean,
+): string {
   const ground = tone === "note" ? "bg-[#fffbea]" : "bg-card";
   if (agreed) return cn(ground, "border-solid border-[#12a594]");
+  if (yours) return "border-solid border-blue/45 bg-wash";
   const line = tone === "note" ? "border-[#e8d58a]" : "border-[#d3d7e0]";
   return cn(ground, "border-dashed", line);
 }
 
-// The person's own pictures and notes can be taken off.
+// The person's own pictures can be taken off.
 function RemoveButton({ data }: Readonly<{ data: ThingData }>) {
   const t = useTranslation().t;
   const { thing, page } = data;
   const act = useBoardDo(page.exploration.id);
-  if (
-    thing.by !== "person" ||
-    !(thing.kind === "picture" || thing.kind === "note")
-  )
-    return null;
+  if (thing.by !== "person" || thing.kind !== "picture") return null;
   return (
     <button
       type="button"
@@ -117,12 +116,14 @@ export function Frame({
   const t = useTranslation().t;
   const { thing, pointed, attached, placed } = data;
   const kindName = t(`explore.kinds.${thing.kind}`);
+  // A picture the team put there themselves.
+  const yours = thing.by === "person" && thing.kind === "picture";
   return (
     <article
       aria-label={title ? `${kindName}: ${title}` : kindName}
       className={cn(
         "grid gap-2 rounded-[14px] border-[1.5px] p-3 text-left text-[13px] shadow-[0_1px_2px_rgb(20_24_36/0.04)] transition-[opacity,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_-14px_rgb(20_24_36/0.35)]",
-        outlineOf(thing.agreed, tone),
+        outlineOf(thing.agreed, tone, yours),
         pointed && "ring-4 ring-blue/40",
         attached && "ring-2 ring-blue ring-offset-2",
         !placed && "opacity-0",
@@ -130,20 +131,35 @@ export function Frame({
       )}
     >
       <Handle type="target" position={Position.Left} className="opacity-0" />
-      <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
-        <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
-        <KindBadge kind={thing.kind} tag={tag} />
-        <span className="ml-auto flex items-center gap-1">
-          <AgreeTick data={data} />
-          <RemoveButton data={data} />
-        </span>
-      </header>
+      <FrameBar data={data} tag={tag} yours={yours} />
       {title && (
         <div className="text-[13.5px] font-semibold leading-snug">{title}</div>
       )}
       {children}
       <Handle type="source" position={Position.Right} className="opacity-0" />
     </article>
+  );
+}
+
+// The bar on top of a card, to drag it by: its kind, who put it there, and
+// its buttons.
+function FrameBar({
+  data,
+  tag,
+  yours,
+}: Readonly<{ data: ThingData; tag?: string; yours: boolean }>) {
+  const { thing } = data;
+  return (
+    <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
+      <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
+      <KindBadge kind={thing.kind} tag={tag} />
+      {yours && <YoursTag />}
+      <span className="ml-auto flex items-center gap-1">
+        {yours && thing.taken === true && <TakenIn />}
+        <AgreeTick data={data} />
+        <RemoveButton data={data} />
+      </span>
+    </header>
   );
 }
 

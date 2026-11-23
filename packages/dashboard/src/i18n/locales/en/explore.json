@@ -58,7 +58,10 @@
     "choice": "Choice",
     "prototype": "Prototype",
     "diagram": "Diagram",
-    "picture": "Picture"
+    "picture": "Picture",
+    "link": "Link",
+    "sketch": "Drawing",
+    "mark": "Mark"
   },
   "talk": {
     "role": "Thinks it through with you and draws on the board",
@@ -118,7 +121,6 @@
     "problemHere": "The kobold writes the problem here.",
     "running": "{{title}}, running",
     "pictureUnreadable": "The picture could not be read.",
-    "onlyPictures": "Only pictures can go on the board.",
     "pasted": "Pasted picture",
     "recommended": "Recommended",
     "recommendsThis": "The kobold recommends this one",
@@ -137,7 +139,34 @@
     "tinkerSetUp": "{{name}} set up how to start your app, for the whole team.",
     "couldNotTitle": "{{name}} could not get your app to start.",
     "couldNotNoReason": "{{name}} tried a few ways to start your app, but none of them came up.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "mine": {
+      "label": "Add to the board",
+      "pen": "Pen",
+      "penHint": "Pen: draw anywhere: on empty space it opens a sketch card around your drawing, on a card it stays inside it (Esc to stop)",
+      "penOn": "Pen on · Esc to stop",
+      "sketchLabel": "Your sketch",
+      "note": "Note",
+      "noteHint": "Note: write a line of your own, click where it goes (or double-click the board)",
+      "noteHere": "Click on the board to write a note",
+      "noteLabel": "Your note",
+      "notePlaceholder": "One line, then Enter",
+      "picture": "Picture",
+      "pictureHint": "Picture: choose one from your computer (pasting and dropping work too)",
+      "link": "Link",
+      "linkHint": "Link: add a web address (pasting one works too)",
+      "linkLabel": "Web address",
+      "linkPlaceholder": "Paste a web address",
+      "linkAdd": "Add the link",
+      "linkBad": "That is not a web address.",
+      "linkOpens": "Open {{site}} in a new tab",
+      "yours": "Yours",
+      "yoursHint": "You put this here: you can move it and take it off. Doodle can move it, never rewrite or delete it.",
+      "takenIn": "Taken in",
+      "takenInHint": "Doodle has taken this in. It can move it, but never rewrites or deletes it: only you can.",
+      "remove": "Take it off the board (only you can)"
+    },
+    "onlyPicturesAndLinks": "Only pictures and web addresses can go on the board."
   },
   "doing": {
     "start": "Getting ready",

@@ -56,9 +56,10 @@ export function useRead<T>(path: string | null, schema: z.ZodType<T>): Read<T> {
   return { data: query.data ?? null, problem: null };
 }
 
-// Kobble's files changed: every read but the state's is read again.
-export function readAgain(): void {
-  void queryClient.invalidateQueries({
+// Kobble's files changed: every read but the state's is read again (the
+// promise is kept when the new answers are in).
+export function readAgain(): Promise<void> {
+  return queryClient.invalidateQueries({
     predicate: (query) => query.queryKey[0] !== STATE_KEY[0],
   });
 }
