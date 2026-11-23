@@ -51,13 +51,13 @@ function Message() {
 }
 
 // Variant C: nobody has to know what factory.json is.
-function Steps({
-  title = TITLE,
-  text = "Kobble does not know how to start your project yet. This is set once, by someone who knows the code, and takes them a few minutes.",
-}: Readonly<{ title?: string; text?: string }>) {
+function Steps() {
   return (
     <>
-      <ProblemBox title={title} text={text}>
+      <ProblemBox
+        title={TITLE}
+        text="Kobble does not know how to start your project yet. This is set once, by someone who knows the code, and takes them a few minutes."
+      >
         <ol className="mt-2 grid list-decimal gap-1 pl-5 text-[13px] text-foreground/80">
           <li>Copy the message below.</li>
           <li>
@@ -226,19 +226,13 @@ function Kobold() {
   );
 }
 
-// Variant D shows the box only when Tinker could not work it out.
+// Variant D never shows it: Tinker sets the start up itself, and when it
+// cannot, the prototype says so (made-up-start.tsx).
 export function showsNoStart(): boolean {
-  return VARIANT !== "D" || STATE === "problem";
+  return VARIANT !== "D";
 }
 
 export function NoStart() {
-  if (VARIANT === "D")
-    return (
-      <Steps
-        title="Tinker could not work out how to start this prototype"
-        text="It read the project but found no way to start it. This is set once, by someone who knows the code, and takes them a few minutes."
-      />
-    );
   return VARIANT === "C" ? <Steps /> : <Kobold />;
 }
 

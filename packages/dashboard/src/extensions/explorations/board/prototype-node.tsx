@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 import { Frame, useBoardDo } from "./frame";
 import {
+  CouldNot,
   madeUpStart,
   MadeUpScreen,
   TinkerLine,
@@ -226,7 +227,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         at={thing.key.charCodeAt(0) - 65}
         madeUp={madeUp && made.running}
         start={
-          open
+          open && !(madeUp && made.problem)
             ? () => {
                 if (madeUp) made.start();
                 else act("open", { key: thing.key });
@@ -235,6 +236,7 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         }
       />
       {madeUp && made.line && <TinkerLine />}
+      {madeUp && made.problem && <CouldNot retry={made.start} />}
       <About words={stateWords(run, t)} test={page.tests[thing.key] ?? null} />
     </Frame>
   );
