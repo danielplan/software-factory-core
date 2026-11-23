@@ -8,9 +8,12 @@
   "thinking": "Thinking…",
   "question": "Ask a question",
   "persona": {
-    "label": "New persona",
+    "label": "Persona to add",
     "add": "Add {{name}}",
     "change": "Change something",
-    "yes": "Yes, add {{name}}."
+    "yes": "Yes, add {{name}}.",
+    "added": "{{name}} is in Personas",
+    "open": "Open",
+    "notAdded": "Not added"
   }
 }

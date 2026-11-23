@@ -11,6 +11,9 @@
     "label": "Neue Persona",
     "add": "{{name}} hinzufügen",
     "change": "Etwas ändern",
-    "yes": "Ja, füge {{name}} hinzu."
+    "yes": "Ja, füge {{name}} hinzu.",
+    "added": "{{name}} ist bei den Personas",
+    "open": "Öffnen",
+    "notAdded": "Nicht hinzugefügt"
   }
 }

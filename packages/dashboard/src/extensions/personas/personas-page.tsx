@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 
 import type { Face, KobblePersonaPage, PersonaRow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
+import { PersonaTile } from "@/components/persona-tile";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { personaHash } from "@/lib/routes";
@@ -128,28 +129,13 @@ function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
         "group flex flex-col gap-3 px-5 py-4 transition-shadow hover:shadow-md",
       )}
     >
-      <span className="flex items-center gap-3">
-        <PersonaFace face={persona.face} size={44} />
-        <span className="grid min-w-0 gap-0.5">
-          <span className="truncate font-semibold group-hover:underline">
-            {persona.name}
-          </span>
-          {persona.place && (
-            <span className="truncate text-[12.5px] text-muted-foreground">
-              {persona.place}
-            </span>
-          )}
-        </span>
-      </span>
-      <span className="line-clamp-3 text-[14px] leading-normal text-foreground-2">
-        {persona.about ? (
-          <Markdown text={persona.about} inline />
-        ) : (
-          <span className="text-muted-foreground">
-            {t("personas.noDescription")}
-          </span>
-        )}
-      </span>
+      <PersonaTile
+        face={persona.face}
+        name={persona.name}
+        place={persona.place}
+        about={persona.about}
+        nameClass="group-hover:underline"
+      />
       {persona.onMission && (
         <span className="text-[12.5px] font-semibold text-blue">
           {t("personas.onMission")}

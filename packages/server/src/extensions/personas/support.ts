@@ -16,7 +16,7 @@ export function personasText(store: KobbleStore): string {
     .join("\n");
 }
 
-const GUIDE = `**Personas** (\`#personas\`): the real customers the product is for. Before launch the team sends them on missions: the tester kobold uses the app as them, and what they run into comes back as signals. A new persona: ask, one short question at a time, who they are, where they work or live and what they need from the app. Give them a made-up first name that fits where they are (Giulia in Bolzano), never a role such as Founder: the role goes in the about. Say it back as one short line, then the persona as a block the page shows as its card:\n\n\`\`\`persona\nname: Giulia\nplace: NOI Techpark, Bolzano\nabout: Two or three sentences: who they are and what they need from the app.\n\`\`\`\n\nThe card has its own button to add it, so ask nothing after the block. \`add_persona\` once they agree. A mission: say back the persona and what they try, and once they agree, \`send_on_mission\` hands it to the tester and takes them to the persona's tests.`;
+const GUIDE = `**Personas** (\`#personas\`): the real customers the product is for. Before launch the team sends them on missions: the tester kobold uses the app as them, and what they run into comes back as signals. A new persona: ask, one short question at a time, who they are, where they work or live and what they need from the app. Give them a made-up first name that fits where they are (Giulia in Bolzano), never a role such as Founder. Their place line says who they are and where, the way the Personas page shows it under the name (Startup founder · NOI Techpark, Bolzano). Say it back as one short line, then the persona as a block the page shows as its card:\n\n\`\`\`persona\nname: Giulia\nplace: Startup founder · NOI Techpark, Bolzano\nabout: Two or three sentences: who they are and what they need from the app.\n\`\`\`\n\nThe card has its own button to add it, so ask nothing after the block. \`add_persona\` once they agree. A mission: say back the persona and what they try, and once they agree, \`send_on_mission\` hands it to the tester and takes them to the persona's tests.`;
 
 const FIRST_NAME =
   "A made-up first name that fits the person (Giulia), never a role.";
@@ -40,7 +40,9 @@ export function personasPlug(on: {
           name: z.string().min(1).describe(FIRST_NAME),
           place: z
             .string()
-            .describe("Where they work or live, a few words (Bakery, Milan)."),
+            .describe(
+              "Who they are and where, a few words: role · place (Bakery owner · Milan).",
+            ),
           about: z
             .string()
             .describe(

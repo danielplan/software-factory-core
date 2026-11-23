@@ -8,9 +8,12 @@
   "thinking": "Ci penso…",
   "question": "Fai una domanda",
   "persona": {
-    "label": "Nuova persona",
+    "label": "Persona da aggiungere",
     "add": "Aggiungi {{name}}",
     "change": "Cambia qualcosa",
-    "yes": "Sì, aggiungi {{name}}."
+    "yes": "Sì, aggiungi {{name}}.",
+    "added": "{{name}} è tra le personas",
+    "open": "Apri",
+    "notAdded": "Non aggiunta"
   }
 }

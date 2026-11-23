@@ -49,12 +49,14 @@ would do, Sprocket says so and takes them to the Marketplace.
 A team's own extension can bring Sprocket a guide (`"agent": "support"`).
 
 **New persona** and **New exploration** open Sprocket's conversation instead
-of a form. A persona Sprocket proposes shows in the conversation as the
-persona's card: Sprocket writes a `persona` block (name, place, about), and
-the chat draws it with the kobold it will get, its first name and where it
-is, and **Add** and **Change something** while it waits for an answer. A
-persona always has a made-up first name that fits it, never a role; the
-role goes in the about. **Ask Sprocket** on a stuck card opens the conversation about it.
+of a form. A persona Sprocket proposes shows in the conversation as its own card,
+the way Coval shows a change: a head ("Persona to add"), the persona exactly
+as the Personas page will show it (kobold, first name, who they are and
+where, about), and a strip with **Add** and **Change something** that, once
+answered, says whether it was added. Sprocket writes it as a `persona` block
+(name, place, about). A persona always has a made-up first name, never a
+role; the place line says who they are and where (Startup founder · NOI
+Techpark, Bolzano). **Ask Sprocket** on a stuck card opens the conversation about it.
 The conversation lives while the factory runs; **New conversation** starts
 again.
 
@@ -66,14 +68,14 @@ something wrong goes to [the feedback board](feedback-board.md).
 
 ## Where it lives
 
-| Part             | Where                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| Sprocket         | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts`                        |
-| Its plug         | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`                                   |
-| Its guide        | `packages/skills/guides/support-kobold.md`                                                                    |
-| The window       | `packages/dashboard/src/features/support/`                                                                    |
-| The bar          | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup                               |
-| A persona's card | `packages/dashboard/src/components/layout/persona-card.tsx`, `packages/dashboard/src/lib/persona-proposal.ts` |
+| Part             | Where                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sprocket         | `packages/server/src/kobble/support.ts`, `packages/server/src/kobble/support-tools.ts`                                                                              |
+| Its plug         | `packages/server/src/kobble/support-plug.ts`; each extension's `support.ts`                                                                                         |
+| Its guide        | `packages/skills/guides/support-kobold.md`                                                                                                                          |
+| The window       | `packages/dashboard/src/features/support/`                                                                                                                          |
+| The bar          | `packages/dashboard/src/components/layout/sprocket-dock.tsx`, shared with setup                                                                                     |
+| A persona's card | `packages/dashboard/src/components/layout/persona-card.tsx`, `packages/dashboard/src/components/persona-tile.tsx`, `packages/dashboard/src/lib/persona-proposal.ts` |
 
 The routes: `GET /api/kobble/support`, `POST /api/kobble/support`, `/new`,
 `/stop`.
