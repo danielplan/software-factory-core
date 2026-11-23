@@ -1,18 +1,21 @@
 // GitHub as the code host, when the GitHub board fills the `code` slot:
-// its pull requests, where a file on a branch is shown, and whether the
-// project's copy pushes to the board's repository at all.
+// its pull requests and releases, where a file on a branch is shown, and
+// whether the project's copy pushes to the board's repository at all.
 
 import { run } from "@software-factory/core";
 
 import type { CodeHost } from "../../code-host.ts";
 import type { Cli } from "../../github-cli.ts";
 import { githubPullRequests } from "./pull-requests.ts";
+import { githubReleases } from "./releases.ts";
 
 const PICTURE = /\.(png|jpe?g|gif|webp|svg)$/i;
 
 export function githubCodeHost(cli: Cli, repository: string): CodeHost {
+  const pullRequests = githubPullRequests(cli, repository);
   return {
-    ...githubPullRequests(cli, repository),
+    ...pullRequests,
+    releases: githubReleases(cli, repository, pullRequests.baseBranch),
     name: "GitHub",
     originProblem: (folder) => githubOriginProblem(folder, repository),
     fileLink: (branch, path) =>

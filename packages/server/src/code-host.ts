@@ -1,6 +1,7 @@
-// Where a factory's branches and pull requests go: the code host. It comes
-// from the extension that fills the `code` slot (where the code lives), so
-// the builder, the card panel and Resolve never name a host. GitHub is the
+// Where a factory's branches, pull requests and releases go: the code host.
+// It comes from the extension that fills the `code` slot (where the code
+// lives), so the builder, the card panel, Resolve, Releases and the notes
+// of Kobble's own releases never name a host. GitHub is the
 // only one today; another one (GitLab) comes as an add-on that fills the
 // slot and gives its own CodeHost.
 
@@ -49,7 +50,45 @@ export type PullRequests = {
   said: (number: number) => Promise<Message[]>;
 };
 
+// A release on the code host: a tag and the notes on it.
+export type HostRelease = {
+  tag: string;
+  // When it was published (an ISO time); empty for a draft.
+  date: string;
+  url: string;
+  body: string;
+  draft: boolean;
+};
+
+// A pull request merged into the main branch.
+export type MergedRequest = {
+  number: number;
+  title: string;
+  url: string;
+  body: string;
+  // Its own labels, then those of the card its branch was built for.
+  labels: string[];
+};
+
+export type CodeReleases = {
+  // The repository's tags that start with these letters ("v").
+  tags: (start: string) => Promise<string[]>;
+  // Its releases, newest first, drafts too.
+  list: () => Promise<HostRelease[]>;
+  // The pull requests merged into the main branch after this tag, oldest
+  // first; all of them without a tag.
+  mergedSince: (tag: string | null) => Promise<MergedRequest[]>;
+  // A release: the tag on the main branch's latest commit, and the notes
+  // on it.
+  create: (release: {
+    tag: string;
+    title: string;
+    body: string;
+  }) => Promise<void>;
+};
+
 export type CodeHost = PullRequests & {
+  releases: CodeReleases;
   // Its name, in plain words: "GitHub".
   name: string;
   // Why the copy's origin is not this host's repository, so its branch would

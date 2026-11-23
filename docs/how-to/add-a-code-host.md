@@ -4,8 +4,9 @@
 
 **Type:** How-to · Answers: how do I add another place where the code lives, such as GitLab, so the builder pushes and opens merge requests there?
 
-Where branches and pull requests go is the `code` slot. The builder, the card
-panel and Resolve ask the slot for a **code host** and never name one
+Where branches, pull requests and releases go is the `code` slot. The
+builder, the card panel, Resolve, Releases and Settings › Updates ask the
+slot for a **code host** and never name one
 ([decision 0009](../decisions/0009-code-host-from-the-code-slot.md)). GitHub
 is the only filler today. Another host comes as an add-on that fills the
 slot with its own code host.
@@ -14,8 +15,10 @@ slot with its own code host.
 
 1. **Read the contract.** `CodeHost` in `packages/server/src/code-host.ts`:
    find, open and update a pull request, comment on one, check that the copy
-   pushes there, link a file on a branch. GitHub's is
-   `packages/server/src/extensions/github/code-host.ts`.
+   pushes there, link a file on a branch, and its `releases`: list the tags
+   and the releases, the pull requests merged since a tag, make a release.
+   GitHub's is `packages/server/src/extensions/github/code-host.ts` (its
+   releases in `releases.ts` beside it).
 2. **Make the add-on.** `packages/server/src/extensions/<id>/index.ts` (say `gitlab`), after
    `packages/server/src/extensions/github/index.ts`: a function that makes the
    module, so the tests can give it a stand-in for the host's command or API.
@@ -38,7 +41,8 @@ slot with its own code host.
 
 ## What still names GitHub
 
-Releases and the feedback board run the GitHub CLI directly, outside the
-slot (see [the server's blueprint](../../packages/server/BLUEPRINT.md)).
-A second code host makes moving Releases onto the `code` slot part of the
-same work.
+The feedback board and the Factory's webhook signals run the GitHub CLI
+directly, outside the slot (see
+[the server's blueprint](../../packages/server/BLUEPRINT.md)). Kobble's own
+release notes are on GitHub, so a factory whose code host is not GitHub
+shows the copy its Kobble carries.

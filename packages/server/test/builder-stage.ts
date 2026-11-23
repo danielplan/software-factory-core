@@ -192,6 +192,8 @@ export function pretendPullRequests() {
     name: "GitHub",
     originProblem: (folder) => github.originProblem(folder),
     fileLink: (branch, path) => github.fileLink(branch, path),
+    // The builder makes no release.
+    releases: github.releases,
     baseBranch: () => Promise.resolve("main"),
     find: (branch) =>
       Promise.resolve(made.find((p) => p.branch === branch) ?? null),
