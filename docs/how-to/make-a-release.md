@@ -73,7 +73,7 @@ left out of the page.
 
 ## The past releases
 
-The notes of the releases before 0.15.0 were written in files at the root.
+The notes of the releases before 0.14.1 were written in files at the root.
 They are in the offline copy, `release-notes.json`, and
 `node scripts/draft-past-releases.mjs` says which of them it would make as
 **draft** GitHub releases (one per version whose tag `v<version>` is there

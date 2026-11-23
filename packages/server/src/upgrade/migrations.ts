@@ -139,17 +139,17 @@ export const MIGRATIONS: Migration[] = [
       ),
   },
   {
-    version: "0.15.0",
+    version: "0.14.1",
     about:
       "The knowledge base keeps its shape: the pages it lacks come from the template",
     run: ({ root }) => knowledgeShape(root),
   },
   {
-    version: "0.15.0",
+    version: "0.14.1",
     about:
       "The core owns lefthook.yml and its scripts in package.json; the team's own hooks go in factory/hooks.yml",
     run: ({ project, root }) =>
-      projectFilesSaid(project, companyOf(root).name, "0.15.0"),
+      projectFilesSaid(project, companyOf(root).name, "0.14.1"),
   },
 ];
 

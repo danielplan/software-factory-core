@@ -124,7 +124,7 @@ test("an existing project's hooks and scripts: the core's are written again, the
   const project = mkdtempSync(join(tmpdir(), "company-"));
   const root = join(project, "factory");
   createFactoryFolder(root, { name: "Boats" }, templates);
-  // A factory from before 0.15.0, with its own checks at the top.
+  // A factory from before 0.14.1, with its own checks at the top.
   saveCompany(root, { ...companyOf(root), core: "0.14.0" });
   const own = {
     name: "boats-checks",
@@ -154,11 +154,11 @@ test("an existing project's hooks and scripts: the core's are written again, the
     extensions: [],
   });
   assert.equal(readFileSync(join(project, HOOKS_FILE), "utf8"), CORE_HOOKS);
-  const kept = join(root, "hooks-before-0.15.yml");
+  const kept = join(root, "hooks-before-0.14.1.yml");
   assert.equal(readFileSync(kept, "utf8"), hooks);
   assert.match(
     readFileSync(join(project, TEAM_HOOKS), "utf8"),
-    /factory\/hooks-before-0\.15\.yml: bring over/,
+    /factory\/hooks-before-0\.14\.1\.yml: bring over/,
   );
   const data = packageOf(project);
   assert.deepEqual(data.scripts, {
@@ -174,7 +174,7 @@ test("an existing project's hooks and scripts: the core's are written again, the
   const left = upgraded.left.join("\n");
   assert.match(
     left,
-    /lefthook\.yml is kept as factory\/hooks-before-0\.15\.yml/,
+    /lefthook\.yml is kept as factory\/hooks-before-0\.14\.1\.yml/,
   );
   assert.match(
     left,
