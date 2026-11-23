@@ -35,6 +35,8 @@ export default tseslint.config(
       "dist/**",
       "coverage/**",
       "dist-prototype/**",
+      "test-results/**",
+      "playwright-report/**",
       // MSW's service worker, written by `npx msw init`.
       "prototype/public/**",
     ],

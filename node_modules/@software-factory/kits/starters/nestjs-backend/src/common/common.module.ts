@@ -1,9 +1,12 @@
-import { Global, Module, ValidationPipe } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
+import { AccessGuard } from "./access.guard.js";
 import { validateEnvironment } from "./environment.js";
+import { ErrorsFilter } from "./errors.filter.js";
+import { validationPipe } from "./validation.js";
 
-/** Settings and input checks that every feature shares. */
+/** Settings, who may call each route, input checks and error answers: what every feature shares. */
 @Global()
 @Module({
   imports: [
@@ -14,12 +17,9 @@ import { validateEnvironment } from "./environment.js";
     }),
   ],
   providers: [
-    {
-      provide: APP_PIPE,
-      // A failed check answers 400; fields the class does not list are dropped.
-      useFactory: () =>
-        new ValidationPipe({ whitelist: true, transform: true }),
-    },
+    { provide: APP_GUARD, useClass: AccessGuard },
+    { provide: APP_PIPE, useFactory: validationPipe },
+    { provide: APP_FILTER, useClass: ErrorsFilter },
   ],
   exports: [ConfigModule],
 })

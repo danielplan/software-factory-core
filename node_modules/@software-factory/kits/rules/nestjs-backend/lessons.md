@@ -24,3 +24,33 @@ Traps met in NestJS servers, and what to do about them.
   an explicit "not found" answer.
 - When a browser needs privileged data, go through the server and keep keys
   there; public database policies are not authorisation.
+- Drizzle's `sql` template turns an interpolated array into separate SQL
+  pieces, not one list: use the query builder's `inArray`.
+- Queries run through `db.execute` skip Drizzle's type conversion: PostgreSQL
+  timestamps arrive as text like `2026-10-13 09:01:20+00`, not as dates or
+  ISO text, and fail the apps' date checks. Use the query builder, which
+  returns `Date`.
+- drizzle-kit finds only tables exported at the top level of a schema file,
+  puts `./` before its output folder, and exits with code 0 on some errors:
+  check its message, not its exit code (the starter's `db:check` does).
+- A generated JSON file in the backend (the error codes, a snapshot) is read
+  by the format check too: write it through Prettier's `format` with the
+  `json` parser, as the starter's `codes:export` does.
+- Nest turns a request body that is not JSON into a plain 400
+  BadRequestException before any filter sees the parser's error: the error
+  filter cannot tell it from other 400s, so it answers a general code.
+- To choose a database per request (a demo side next to the real one), set
+  the choice in Nest's request context (nestjs-cls, with its middleware
+  mounted) and let the one Drizzle client follow it; the transaction plugin
+  keeps a transaction on the side it began on. Set the choice in a guard,
+  once the route is known, not in a middleware.
+- A test database that a hand-made change touched can hold rows the schema
+  would refuse now (columns made nullable, leftover rows): an odd answer from
+  it may be its data, not the change under test. Compare
+  `information_schema.columns` with the schema first.
+- In Node 24, `localhost` may resolve to the IPv6 address first, which some
+  servers and bridges do not answer: write `127.0.0.1` in addresses meant for
+  this computer.
+- Several backends on one computer share one database server, each with
+  databases of its own, rather than a server (or a container) each: they
+  then never fight over a port.

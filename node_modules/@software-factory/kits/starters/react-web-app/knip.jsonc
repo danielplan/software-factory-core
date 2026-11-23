@@ -1,9 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
-  "entry": ["test/**/*.{ts,tsx}", "scripts/*.ts"],
+  "entry": ["test/**/*.{ts,tsx}", "e2e/**/*.ts", "scripts/*.ts"],
   "project": [
     "src/**/*.{ts,tsx}",
     "test/**/*.{ts,tsx}",
+    "e2e/**/*.ts",
     "prototype/**/*.ts",
     "scripts/*.ts",
   ],

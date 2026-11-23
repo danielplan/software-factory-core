@@ -6,7 +6,7 @@ The React web app kit's starter: React + TypeScript + Vite, shadcn on Tailwind, 
 
 Use Node.js 24.21 or newer. In this folder, run `npm ci`, then:
 
-- `npm run dev` runs the app in development. Copy `.env.example` to `.env` and set `BACKEND_URL` once the app has a backend: Vite then sends `/api` to it. Without a backend, use the live prototype instead.
+- `npm run dev` runs the app in development. Copy `.env.example` to `.env` and set `BACKEND_URL` once the app has a backend: Vite then sends `/api/...` to it unchanged (a backend made from the NestJS kit's starter answers under `/api`, at `http://127.0.0.1:3000` by default). Without a backend, use the live prototype instead.
 - `npm run build` makes the real build in `dist/`. Until the product decides where it is served, Vite's base is `/`.
 
 ## Structure
@@ -17,8 +17,11 @@ The folders follow [Bulletproof React](https://github.com/alan2207/bulletproof-r
 - `src/api/`: `load-items.ts` (GET `/api/items`), its zod schema (`items.schema.ts`), the query hook (`use-items.ts`) and `ApiError` (`api-error.ts`), the one error every request fails with.
 - `src/features/home/`: the home page, its item cards and its empty state.
 - `src/components/layout/`: the top bar, the loading and error states. `src/components/ui/`: shadcn's pieces; add one with `npx shadcn@latest add <name>`, then check that its imports use `@/lib/classes`.
+- `src/hooks/`: hooks several areas use: `use-error-text.ts`, the words for a failed request in the active language.
+- `src/lib/`: logic without screens: `classes.ts` (`cn`, which knows the theme's own type sizes: a new `--text-*` size in `theme.css` goes into its list too).
 - `src/i18n/`: i18next's set-up, the translations (`locales/<language>/<area>.json`) and the date format.
 - `test/`: Vitest with Testing Library, with the pretend backend behind MSW (`test/pretend-server.ts`).
+- `e2e/`: Playwright click-throughs in a real browser (`npm run test:e2e`), see below.
 - `prototype/` and `scripts/`: the pretend backend, the situations, the shared world, the prototype's start, and the scripts that build it, run it live and check the real build.
 
 To add an area: a folder in `src/features/`, its name in `.dependency-cruiser.cjs` (`areas`), a route in `src/app/app.tsx`, and its texts in every language.
@@ -31,12 +34,16 @@ The app speaks English. To add a text, add the key to the area's file in `src/i1
 
 Run `npm run verify`: format, ESLint and import rules, types, unused code (knip), copied code (jscpd), the tests with the coverage floor, the build, and `npm run check:prototypes`. Single test: `npx vitest run test/home.test.tsx`.
 
+### Click-throughs
+
+`npm run test:e2e` builds the real app and the prototype, then clicks through them in Chromium with Playwright (`playwright.config.ts`, `e2e/`): the real build on Vite's preview server with every `/api` request answered by the pretend backend inside the browser (`e2e/pretend.ts`), and the prototype on the next port with its service worker. No backend is needed. Once per computer, `npx playwright install --only-shell chromium` fetches the browser; `E2E_PORT` (4173 by default) moves both ports. Each new journey of the app gets its click-through in `e2e/`, and `npm run test:e2e` runs before a change to a journey is handed over. It is not part of `npm run verify`, which needs no browser.
+
 ## Prototype
 
 A prototype is the real app running in the browser against the pretend backend, with made-up data, so an idea can be used before it is built. The factory shows it in a frame.
 
-- `npm run prototype -- --base /prototype/new-web-app/ --out <folder>` builds it as static files in `<folder>` (emptied first), to be served at that path with `index.html` for unknown paths. The router follows Vite's `BASE_URL`, so the app works under any path.
-- `npm run prototype:live -- --port <port>` runs it live (Vite's development server in `prototype` mode) at `http://127.0.0.1:<port>/`; each change shows within a second.
+- `npm run prototype -- --base /prototype/new-web-app/ --out <folder>` builds it as static files in `<folder>` (emptied first), to be served at that path with `index.html` for unknown paths. Without them, `npm run prototype` builds for `/` into `dist-prototype/`. The router follows Vite's `BASE_URL`, so the app works under any path.
+- `npm run prototype:live -- --port <port>` runs it live (Vite's development server in `prototype` mode) at `http://127.0.0.1:<port>/` (5180 without `--port`); each change shows within a second.
 - `prototype/pretend-backend.ts` is the one pretend backend: the component tests and the prototype both use it, through the MSW handler in `prototype/pretend-handler.ts`. It answers `GET /api/items` and `POST /api/items`; a new request of the app gets its answer here.
 - `prototype/situations.ts` lists the situations, in order: `{ key, name, data }`, typed against the app's own check of the answer (`src/api/items.schema.ts`). Today: "A normal day" (`normal`, the default) and "Empty" (`empty`). To add one, add an entry; `test/situations.test.tsx` opens the app in each.
 - `?situation=<key>` picks a situation. Nothing is kept: a reload starts the situation again.
