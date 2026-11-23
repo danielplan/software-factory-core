@@ -1,42 +1,35 @@
 {
-  "hi": "Hallo, ich bin dein Kobold.",
   "tellMe": "Sag mir, was du bauen willst, und ich richte Kobble mit dir ein.",
   "reading": "Ich lese dein Projekt…",
-  "read": "Ich habe dein Projekt gelesen, du musst nur bestätigen, was ich gefunden habe. Gehen wir es durch.",
-  "stepOf": "Schritt {{n}} von {{of}}",
-  "whereStart": "Wo fangen wir an?",
+  "status": {
+    "reading": "Lese dein Projekt…",
+    "building": "Richte Kobble ein…",
+    "changing": "Ändere die Karten…"
+  },
   "steps": {
     "hello": {
-      "name": "Willkommen",
-      "hint": "Der Kobold liest"
+      "name": "Willkommen"
     },
     "product": {
-      "name": "Dein Produkt",
-      "hint": "Was es ist, wie weit"
+      "name": "Dein Produkt"
     },
     "people": {
-      "name": "Für wen",
-      "hint": "Die Menschen, für die du baust"
+      "name": "Für wen"
     },
     "team": {
-      "name": "Team und Board",
-      "hint": "Wer daran arbeitet, wo"
+      "name": "Team und Board"
     },
     "how": {
-      "name": "Wie Kobble arbeitet",
-      "hint": "Erweiterungen, das Aussehen"
+      "name": "Wie Kobble arbeitet"
     },
     "bring": {
-      "name": "Mitnehmen",
-      "hint": "Was du schon hast"
+      "name": "Mitnehmen"
     },
     "setup": {
-      "name": "Einrichten",
-      "hint": "Kobble schreibt alles"
+      "name": "Einrichten"
     },
     "start": {
-      "name": "Erste Erkundung",
-      "hint": "Mit echter Arbeit anfangen"
+      "name": "Erste Erkundung"
     }
   },
   "leads": {
@@ -44,7 +37,7 @@
     "product": "Was dein Produkt ist, seine Teile, und wie weit es ist.",
     "people": "Die Menschen, für die du baust. Kobble prüft Ideen an ihnen, also sollten sie echt sein. Füge deine eigenen hinzu.",
     "team": "Wer daran arbeitet, und wo die Arbeit verfolgt wird. Alle können alles.",
-    "how": "Die Teile von Kobble, die zu eurer Arbeitsweise passen. Du kannst sie später in den Einstellungen ändern.",
+    "how": "Die Erweiterungen, die zu eurer Arbeitsweise passen, und das Aussehen. Du kannst sie später in den Einstellungen ändern.",
     "bring": "Was du schon hast, und was damit passiert.",
     "start": "Wähle eine, und Kobble öffnet sie mit schon begonnenem Board. Oder schau dich erst um."
   },
@@ -61,23 +54,14 @@
     "yourAnswer": "Deine Antwort",
     "answer": "Antworten"
   },
-  "rail": {
-    "label": "Schritte der Einrichtung",
-    "settingUp": "Richte ein",
-    "minutes": "Etwa 7 Minuten. Du kannst später alles in den Einstellungen und bei den Personas ändern.",
-    "working": "Arbeitet…",
-    "help": "Hier, um zu helfen",
-    "back": "Zurück",
-    "nextWrites": "Als Nächstes schreibt Kobble all das in dein Repository.",
-    "canChange": "Du kannst das später ändern."
-  },
-  "bar": {
+  "actions": {
     "continue": "Weiter",
     "go": "Los geht’s",
     "pickStart": "Wähle, wo es losgeht",
     "setUp": "Kobble einrichten",
     "open": "Öffnen",
-    "look": "Erst umschauen"
+    "look": "Erst umschauen",
+    "back": "Zurück"
   },
   "found": {
     "reading": "Lese…",
@@ -94,7 +78,6 @@
     "guess": "meine Vermutung"
   },
   "connected": "Verbunden",
-  "now": "Jetzt: {{activity}}",
   "cards": {
     "forEveryone": "Für alle",
     "addOns": "Erweiterungen",
@@ -142,7 +125,7 @@
   },
   "building": {
     "title": "Kobble wird eingerichtet",
-    "lead": "Der Kobold schreibt alles, was wir durchgegangen sind, in dein Repository. Das dauert ein paar Minuten."
+    "lead": "Sprocket schreibt alles, was wir durchgegangen sind, in dein Repository. Das dauert ein paar Minuten."
   },
   "before": {
     "title": "Einrichten",
@@ -157,13 +140,14 @@
     "start": "Starte {{n}} Erkundungen"
   },
   "coach": {
-    "answer": "Antworte dem Coach…",
-    "answerLabel": "Antworte dem Coach",
+    "answer": "Antworte Sprocket…",
+    "answerLabel": "Antworte Sprocket",
     "talk": "Sprechen",
     "talkTitle": "Sprechen statt tippen",
     "send": "Senden",
-    "label": "Der Coach",
+    "label": "Sprocket",
     "build": "Was willst du bauen?",
-    "couldNot": "Der Coach konnte nicht antworten"
-  }
+    "couldNot": "Sprocket konnte nicht antworten"
+  },
+  "stepsLabel": "Schritte der Einrichtung"
 }

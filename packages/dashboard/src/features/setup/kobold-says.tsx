@@ -1,6 +1,6 @@
-// The kobold at the top of a step, as in the design: one sentence about the
-// step, or its open questions about it, each with a small field to answer
-// it. There is no chat: the owner corrects cards in place.
+// Sprocket at the top of a step: one sentence about the step, or its open
+// questions about it, each with a small field to answer it. The owner
+// corrects cards in place; anything else goes through Sprocket's window.
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";

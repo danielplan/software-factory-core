@@ -1,42 +1,35 @@
 {
-  "hi": "Hi, I’m your kobold.",
   "tellMe": "Tell me what you want to build, and I’ll set up Kobble with you.",
   "reading": "I’m reading your project…",
-  "read": "I read your project, so you only have to confirm what I found. Let’s go through it.",
-  "stepOf": "Step {{n}} of {{of}}",
-  "whereStart": "Where shall we start?",
+  "status": {
+    "reading": "Reading your project…",
+    "building": "Setting up Kobble…",
+    "changing": "Changing the cards…"
+  },
   "steps": {
     "hello": {
-      "name": "Welcome",
-      "hint": "The kobold reads"
+      "name": "Welcome"
     },
     "product": {
-      "name": "Your product",
-      "hint": "What it is, how far"
+      "name": "Your product"
     },
     "people": {
-      "name": "Who it’s for",
-      "hint": "The people you build for"
+      "name": "Who it’s for"
     },
     "team": {
-      "name": "Team and board",
-      "hint": "Who works on it, where"
+      "name": "Team and board"
     },
     "how": {
-      "name": "How Kobble works",
-      "hint": "Add-ons, the look"
+      "name": "How Kobble works"
     },
     "bring": {
-      "name": "Bring over",
-      "hint": "What you have already"
+      "name": "Bring over"
     },
     "setup": {
-      "name": "Set up",
-      "hint": "Kobble writes it all"
+      "name": "Set up"
     },
     "start": {
-      "name": "First exploration",
-      "hint": "Start with real work"
+      "name": "First exploration"
     }
   },
   "leads": {
@@ -44,7 +37,7 @@
     "product": "What your product is, its parts, and how far it has come.",
     "people": "The people you build for. Kobble tests ideas against them, so they should be real. Add your own.",
     "team": "Who works on it, and where the work is tracked. Everyone can do everything.",
-    "how": "The parts of Kobble that fit how you work. You can change them later in Settings.",
+    "how": "The extensions that fit how you work, and the look. You can change them later in Settings.",
     "bring": "What you have already, and what happens to it.",
     "start": "Pick one and Kobble opens it with the canvas already started. Or look around first."
   },
@@ -61,23 +54,14 @@
     "yourAnswer": "Your answer",
     "answer": "Answer"
   },
-  "rail": {
-    "label": "Setup steps",
-    "settingUp": "Setting up",
-    "minutes": "About 7 minutes. You can change all of it later in Settings and Personas.",
-    "working": "Working…",
-    "help": "Here to help",
-    "back": "Back",
-    "nextWrites": "Next, Kobble writes all of this into your repository.",
-    "canChange": "You can change this later."
-  },
-  "bar": {
+  "actions": {
     "continue": "Continue",
     "go": "Let’s go",
     "pickStart": "Pick where to start",
     "setUp": "Set up Kobble",
     "open": "Open it",
-    "look": "Look around first"
+    "look": "Look around first",
+    "back": "Back"
   },
   "found": {
     "reading": "Reading…",
@@ -94,10 +78,9 @@
     "guess": "my guess"
   },
   "connected": "Connected",
-  "now": "Now: {{activity}}",
   "cards": {
     "forEveryone": "For everyone",
-    "addOns": "Add-ons",
+    "addOns": "Extensions",
     "look": "The look",
     "lookNote": "for everyone",
     "apps": "Apps I found",
@@ -142,7 +125,7 @@
   },
   "building": {
     "title": "Setting up Kobble",
-    "lead": "The kobold writes everything we went through into your repository. This takes a few minutes."
+    "lead": "Sprocket writes everything we went through into your repository. This takes a few minutes."
   },
   "before": {
     "title": "Set up",
@@ -157,13 +140,14 @@
     "start": "Starting {{n}} explorations"
   },
   "coach": {
-    "answer": "Answer the coach…",
-    "answerLabel": "Answer the coach",
+    "answer": "Answer Sprocket…",
+    "answerLabel": "Answer Sprocket",
     "talk": "Talk",
     "talkTitle": "Talk instead of typing",
     "send": "Send",
-    "label": "The coach",
+    "label": "Sprocket",
     "build": "What do you want to build?",
-    "couldNot": "The coach could not answer"
-  }
+    "couldNot": "Sprocket could not answer"
+  },
+  "stepsLabel": "Setup steps"
 }
