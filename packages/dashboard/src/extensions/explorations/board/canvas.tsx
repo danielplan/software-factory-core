@@ -19,6 +19,7 @@ import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { ExplorationPage } from "@/api/client";
+import { variantAsked } from "@/lib/prototype-switch";
 import { cn } from "@/lib/utils";
 
 import { useBoardDo } from "./frame";
@@ -103,8 +104,12 @@ function Canvas({ page, attached, onPick }: BoardProps) {
       {/* Prototype: while the explorer reads, the board is empty. */}
       {page.board.things.length === 0 &&
         page.exploration.status !== "waiting" &&
-        page.talk.writing !== null && (
-          <ReadingBoard activity={page.talk.activity} />
+        (page.talk.writing !== null ||
+          (variantAsked() === "B" && page.talk.problem !== null)) && (
+          <ReadingBoard
+            activity={page.talk.activity}
+            problem={page.talk.problem}
+          />
         )}
       <ReactFlow<ThingNode>
         nodes={nodes}

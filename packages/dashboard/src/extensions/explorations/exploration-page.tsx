@@ -5,7 +5,7 @@
 // it closes.
 
 import { Archive, ChevronLeft, Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { type ExplorationPage as Page, messageOf, post } from "@/api/client";
@@ -13,6 +13,8 @@ import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
 import { useRead } from "@/api/query";
 import { explorationPageSchema } from "@/api/schemas/explorations";
+
+import { useStoppedReason } from "@/lib/prototype-run";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
@@ -23,33 +25,36 @@ import { TalkPanel } from "./talk-panel";
 // Prototype: an exploration with an empty board while the explorer reads,
 // made up, so the change shows without starting a real one.
 const MADE_UP_ID = "X-0";
-const madeUp: Page = {
-  exploration: {
-    id: MADE_UP_ID,
-    title: "Made-up exploration (the explorer is reading)",
-    status: "exploring",
+function madeUpPage(stopped: string | null): Page {
+  return {
+    exploration: {
+      id: MADE_UP_ID,
+      title: "Made-up exploration (the explorer is reading)",
+      status: "exploring",
+      personas: [],
+      signals: [],
+      heard: [],
+      problem: "",
+      created: "2026-01-01T09:00:00.000Z",
+      work: null,
+    },
     personas: [],
-    signals: [],
     heard: [],
-    problem: "",
-    created: "2026-01-01T09:00:00.000Z",
-    work: null,
-  },
-  personas: [],
-  heard: [],
-  board: { things: [], links: [] },
-  runs: [],
-  canRun: false,
-  tests: {},
-  talk: {
-    messages: [],
-    writing: "",
-    activity: null,
-    problem: null,
-    pointed: null,
-  },
-  handingOff: null,
-};
+    board: { things: [], links: [] },
+    runs: [],
+    canRun: false,
+    tests: {},
+    // Reading, or, in variant B's state "stopped", stopped with its reason.
+    talk: {
+      messages: [],
+      writing: stopped === null ? "" : null,
+      activity: null,
+      problem: stopped,
+      pointed: null,
+    },
+    handingOff: null,
+  };
+}
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
@@ -57,6 +62,8 @@ export function ExplorationPage({ id }: Readonly<{ id: string }>) {
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
     explorationPageSchema,
   );
+  const stopped = useStoppedReason();
+  const madeUp = useMemo(() => madeUpPage(stopped), [stopped]);
   const data = id === MADE_UP_ID ? madeUp : read.data;
   const problem = read.problem;
   const [said, say] = useState<string | null>(null);
