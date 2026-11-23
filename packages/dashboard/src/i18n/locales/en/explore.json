@@ -133,6 +133,11 @@
     "stillMade": "Still being made: you can use it, and it changes as the kobold works",
     "startingTitle": "Starting the prototype",
     "preparingCopy": "Preparing its copy of the code",
-    "runningStart": "Running its start command"
+    "runningStart": "Running its start command",
+    "settingUpStart": "{{name}} is working out how to start your app",
+    "tinkerSetUp": "{{name}} set up how to start your app, for the whole team.",
+    "couldNotTitle": "{{name}} could not get your app to start.",
+    "couldNotNoReason": "{{name}} tried a few ways to start your app, but none of them came up.",
+    "tryAgain": "Try again"
   }
 }

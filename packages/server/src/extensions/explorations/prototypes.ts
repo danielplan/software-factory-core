@@ -14,15 +14,23 @@ import type {
   KobbleStore,
 } from "@software-factory/core";
 
-import { removeIdeaCopies, versionCopy } from "../../prototypes/copies.ts";
+import { removeIdeaCopies } from "../../prototypes/copies.ts";
 import { PrototypeMode, type VersionRun } from "../../prototypes/mode.ts";
 import type { Photograph } from "../../kobble/usage-pictures.ts";
 import { Refused } from "../../refused.ts";
 import { withThing } from "./board-things.ts";
 import { MakerDesk } from "./maker-desk.ts";
+import { StartUp } from "./starting-up.ts";
+import { copyOfVersion } from "./version-copy.ts";
 import { makeOne } from "./making.ts";
 import type { MakerTools } from "./maker-tools.ts";
-import { beingMadeIn, lookAt, notWhileMade, running } from "./looks.ts";
+import {
+  beingMadeIn,
+  lookAt,
+  notWhileMade,
+  released,
+  running,
+} from "./looks.ts";
 import type { Told } from "./made.ts";
 
 import {
@@ -62,6 +70,7 @@ export class ExplorationPrototypes {
   readonly desk = new MakerDesk();
   private readonly options: PrototypesOptions;
   private worldUrl = "";
+  private readonly startUp: StartUp;
 
   constructor(options: PrototypesOptions) {
     this.options = options;
@@ -69,27 +78,10 @@ export class ExplorationPrototypes {
       project: options.project,
       root: options.root,
       onChange: options.onChange,
-      copyOf: (exploration, key) => {
-        const made = prototypeOf(options.store().board(exploration), key);
-        if (!made)
-          throw new Refused(`${exploration} has no prototype ${key} yet.`);
-        const copy = versionCopy(
-          options.project,
-          exploration,
-          key,
-          made.branch,
-        );
-        return this.worldUrl && options.worlds.offered()
-          ? {
-              ...copy,
-              env: {
-                ...copy.env,
-                FACTORY_WORLD_URL: `${this.worldUrl}/${exploration}`,
-              },
-            }
-          : copy;
-      },
+      copyOf: (exploration, key) =>
+        copyOfVersion(options, this.worldUrl, exploration, key),
     });
+    this.startUp = new StartUp({ ...options, mode: this.mode });
   }
 
   // Where the server answers the made-up worlds (the exploration's id is
@@ -214,7 +206,7 @@ export class ExplorationPrototypes {
         ["running", "starting"].includes(run.state)
       )
         await this.mode.stop(run.idea, run.version);
-    return this.mode.start(exploration, key);
+    return this.startUp.open(exploration, key);
   }
 
   // Where it runs, started and waited for (for a persona test).
@@ -224,6 +216,7 @@ export class ExplorationPrototypes {
     persona?: string,
   ): Promise<string> {
     await this.open(exploration, key, persona);
+    await this.startUp.pending();
     const url = await running(this.mode, exploration, key).catch(
       (error: unknown) => {
         throw new Refused(
@@ -240,15 +233,7 @@ export class ExplorationPrototypes {
   // A prototype taken off the board: refused while its maker is on it, else
   // what runs of it stops. Its branch stays.
   release(exploration: string, key: string): void {
-    const run = this.mode.runOf(exploration, key);
-    if (run.making)
-      throw new Refused(
-        `Prototype ${key} is still being made: take it off once it is ready.`,
-      );
-    if (["running", "starting"].includes(run.state))
-      this.mode.stop(exploration, key).catch(() => {
-        // It says on its own run why it did not stop.
-      });
+    released(this.mode, exploration, key);
   }
 
   // Handed off or dropped: its prototypes stop and their copies go; the
@@ -363,6 +348,7 @@ export class ExplorationPrototypes {
       board,
       made,
       change,
+      setUp: () => this.startUp.setUp(exploration.id, key),
       mark: (now) => {
         this.mark(exploration.id, key, now);
       },

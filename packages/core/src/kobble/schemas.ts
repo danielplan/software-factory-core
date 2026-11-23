@@ -200,6 +200,9 @@ export const thingSchema = z.discriminatedUnion("kind", [
     // Being made when last saved: when no maker is on it now, the factory
     // closed before it was done.
     making: z.boolean().optional(),
+    // The start of the project's prototypes was worked out while this one was
+    // made: it carries Tinker's line about it, once.
+    startSetUp: z.boolean().optional(),
     // What the team asked to change on it, in order: the handoff says it.
     changes: z.array(z.string()).optional(),
   }),

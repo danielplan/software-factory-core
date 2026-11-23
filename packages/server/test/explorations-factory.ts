@@ -6,7 +6,7 @@
 import { cpSync } from "node:fs";
 import { join } from "node:path";
 
-import { KobbleStore } from "@software-factory/core";
+import { KobbleStore, readCompany, saveCompany } from "@software-factory/core";
 
 import { git } from "../src/prototypes/copies.ts";
 
@@ -18,7 +18,15 @@ const ACME = join(import.meta.dirname, "..", "..", "..", "examples", "acme");
 
 type Turn = Parameters<typeof pretendClaude>[0][number];
 
-export async function explorationsFactory(turns: Turn[] = []) {
+// The start command the example project names unless a test says otherwise
+// (or says none, with `null`): one that stops at once, as a project whose
+// app does not come up.
+const NOT_RUNNING = 'echo "no server here" >&2; exit 1';
+
+export async function explorationsFactory(
+  turns: Turn[] = [],
+  start: string | null = NOT_RUNNING,
+) {
   const pretend = pretendClaude(turns);
   // With Kobble's own extensions, Explorations among them.
   const staged = await kobbleStage(pretend.claude);
@@ -26,6 +34,11 @@ export async function explorationsFactory(turns: Turn[] = []) {
   cpSync(join(ACME, "factory", "kobble"), join(root, "kobble"), {
     recursive: true,
   });
+  if (start !== null) {
+    const read = readCompany(join(root, "factory.json"));
+    if ("problem" in read) throw new Error(read.problem);
+    saveCompany(root, { ...read.company, prototype: { start } });
+  }
   const store = new KobbleStore(root);
   madeBranches(staged.project, store);
   const read = async <T>(path: string) =>
@@ -82,4 +95,13 @@ function madeBranches(project: string, store: KobbleStore): void {
   for (const exploration of store.all("explorations"))
     for (const thing of store.board(exploration.id).things)
       if (thing.kind === "prototype") git(project, ["branch", thing.branch]);
+}
+
+// The same, in a project with no start command where Tinker, asked first to
+// work one out, could not (the turns given are for the makers after it).
+export function factoryWithoutStart(turns: Turn[] = []) {
+  return explorationsFactory(
+    [{ calls: [], reply: "Could not start: Nothing here says how." }, ...turns],
+    null,
+  );
 }

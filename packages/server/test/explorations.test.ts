@@ -12,7 +12,10 @@ import { handOff } from "../src/extensions/explorations/actions.ts";
 import { applyAct } from "../src/extensions/explorations/board-acts.ts";
 import type { ExplorationsView } from "../src/extensions/explorations/views.ts";
 import { inGit } from "./git-project.ts";
-import { explorationsFactory } from "./explorations-factory.ts";
+import {
+  explorationsFactory,
+  factoryWithoutStart,
+} from "./explorations-factory.ts";
 import { plugsOf } from "./plugs.ts";
 
 // Explorations: the list, one exploration's canvas and the conversation
@@ -360,7 +363,7 @@ test("people agree, choose, add pictures and remove their own", async () => {
 });
 
 test("Make builds the option on its branch; Open and Test need the project's start command", async () => {
-  const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
+  const factory = await factoryWithoutStart([{ calls: [], reply: "Made it." }]);
   try {
     const origin = inGit(factory.project);
     await factory.press("/make", { id: "X-1", choice: "choice-1", key: "C" });
@@ -391,7 +394,8 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       }),
       /proto\/X-1-c/,
     );
-    const [making] = factory.seen;
+    // Tinker's try at a start came first (it could not), then the maker.
+    const [, making] = factory.seen;
     assert.ok(making);
     assert.equal(making.readOnly, false);
     assert.match(
@@ -402,7 +406,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
       existsSync(join(factory.project, "..", "project-prototypes", "X-1", "c")),
     );
     const opened = await factory.press("/open", { id: "X-1", key: "C" });
-    assert.match(String(opened.body.error), /cannot run here yet/);
+    assert.equal(opened.body.error, undefined);
     const tested = await factory.press("/test", {
       id: "X-1",
       key: "C",
@@ -414,7 +418,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
     const kept = factory.store.get("tests", id);
     assert.ok(kept);
     assert.equal(kept.on, "proto/X-1-c");
-    assert.match(kept.problem ?? "", /cannot run here yet/);
+    assert.match(kept.problem ?? "", /cannot run yet/);
     assert.equal(
       (await factory.press("/test", { id: "X-3", key: "A", task: "x" })).body
         .error,
@@ -426,7 +430,7 @@ test("Make builds the option on its branch; Open and Test need the project's sta
 });
 
 test("a prototype that cannot be pushed stays on this computer, and the board says so", async () => {
-  const factory = await explorationsFactory([{ calls: [], reply: "Made it." }]);
+  const factory = await factoryWithoutStart([{ calls: [], reply: "Made it." }]);
   try {
     const origin = inGit(factory.project);
     const hook = join(origin, "hooks", "pre-receive");

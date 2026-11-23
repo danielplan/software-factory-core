@@ -151,6 +151,8 @@ export function askerFor(on: {
   browser: Mcp | undefined;
   onStep: (line: string) => void;
   onFresh?: (session: string) => void;
+  // What Tinker is told to do: the explore skill, unless another guide.
+  instructions?: string;
 }) {
   let session = on.session;
   const run = (prompt: string, resume: boolean) =>
@@ -160,10 +162,9 @@ export function askerFor(on: {
       prompt,
       readOnly: false,
       deny: ["Read(**/.env*)"],
-      instructions: readFileSync(
-        join(skillsFolder, "explore", "SKILL.md"),
-        "utf8",
-      ),
+      instructions:
+        on.instructions ??
+        readFileSync(join(skillsFolder, "explore", "SKILL.md"), "utf8"),
       session: { id: session.id, resume },
       ...(on.mcp ? { mcp: on.mcp } : {}),
       ...(on.mcp && on.browser ? { alsoMcp: [on.browser] } : {}),

@@ -39,6 +39,8 @@ type MakeOn = {
   board: Board;
   made: Made;
   change: string | undefined;
+  // Works out how to start the app, when the project has no start command.
+  setUp: () => Promise<void>;
   mark: (now: { opens?: string; states?: string[] }) => void;
   look: () => Promise<Looks>;
 };
@@ -59,8 +61,11 @@ async function makeWith(on: MakeOn, browser: Browser | null): Promise<void> {
   const { key } = made;
   const copy = versionCopy(on.project, exploration.id, key, made.branch);
   const workspace = await versionWorkspace(on.project, copy);
+  // No start command yet: Tinker works one out first (once, for the whole
+  // team), so the prototype can run while it is made.
+  if (!mode.canStart()) await on.setUp();
   // It runs while it is made: the team watches it change.
-  mode.start(exploration.id, key).catch(() => undefined);
+  if (mode.canStart()) mode.start(exploration.id, key).catch(() => undefined);
   // The conversation is saved beside the copy, so a maker after a restart
   // of the server continues it instead of starting over.
   const savedAt = `${copy.folder}.maker-session`;
