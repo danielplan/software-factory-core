@@ -41,10 +41,15 @@ export type VersionRun = {
   steps: string[];
   // Why it stopped or could not start, or what is odd about it.
   problem: string | null;
-  // While it starts: the step it is on (its copy of the code made, then its
-  // start command running), the start command's latest line, and since when.
+  // Why Tinker could not work out how to start the app, in plain words
+  // (the project has no start command); none otherwise.
+  startProblem: string | null;
+  // While it starts: the step it is on (its copy of the code made, Tinker
+  // working out how to start the app when the project has no start command,
+  // then the start command running), the start command's latest line, and
+  // since when.
   start: {
-    step: "copy" | "command";
+    step: "copy" | "setup" | "command";
     line: string | null;
     since: string;
   } | null;
@@ -61,6 +66,19 @@ export type ModeOptions = {
 
 // The last lines a failed command printed, to say why.
 const KEPT_LINES = 6;
+
+// How long a start command Tinker proposes has to come up.
+const TRIAL_WITHIN_MS = 3 * 60_000;
+
+// Whether an address answers with a page.
+async function answers(url: string): Promise<boolean> {
+  try {
+    const reply = await fetch(url, { signal: AbortSignal.timeout(2000) });
+    return reply.status < 500;
+  } catch {
+    return false;
+  }
+}
 
 export class PrototypeMode {
   readonly options: ModeOptions;
@@ -89,6 +107,7 @@ export class PrototypeMode {
         since: null,
         steps: [],
         problem: null,
+        startProblem: null,
         start: null,
       }
     );
@@ -111,10 +130,19 @@ export class PrototypeMode {
   // Whether the project says how to start a prototype (its start command
   // in factory.json); a company file that cannot be read says no.
   canStart(): boolean {
+    return this.startOf() !== null;
+  }
+
+  // The start command the project names (written by the team, or worked
+  // out by Tinker), and who worked it out; none when there is none.
+  startOf(): { command: string; by: "tinker" | null } | null {
     try {
-      return Boolean(companyOf(this.options.root).prototype?.start);
+      const prototype = companyOf(this.options.root).prototype;
+      return prototype
+        ? { command: prototype.start, by: prototype.by ?? null }
+        : null;
     } catch (error) {
-      if (error instanceof Refused) return false;
+      if (error instanceof Refused) return null;
       throw error;
     }
   }
@@ -126,7 +154,7 @@ export class PrototypeMode {
     const start = companyOf(this.options.root).prototype?.start;
     if (!start)
       throw new Refused(
-        "This prototype is made, but it cannot run here yet: the project does not say how to start it. Whoever looks after the factory adds that once (the start command in factory.json).",
+        "This prototype cannot run yet: the project has no start command, and Tinker has not worked one out.",
       );
     const now = this.runOf(idea, version);
     if (now.state === "running" || now.state === "starting") return now;
@@ -135,6 +163,7 @@ export class PrototypeMode {
       state: "starting",
       url: null,
       problem: null,
+      startProblem: null,
       start: { step: "copy", line: null, since },
     });
     try {
@@ -163,6 +192,53 @@ export class PrototypeMode {
     this.set(idea, version, { state: "stopped", url: null, problem: null });
   }
 
+  // Tries a start command in the version's copy, beside whatever else runs:
+  // it must say where it runs (FACTORY_URL=…) and that address must answer.
+  // It is stopped again; nothing of it is kept. Why not, when it fails.
+  async trial(
+    idea: string,
+    version: string,
+    command: string,
+    within = TRIAL_WITHIN_MS,
+  ): Promise<{ ok: true } | { ok: false; why: string }> {
+    const copy = this.copyOf(idea, version);
+    await versionWorkspace(this.options.project, copy);
+    const key = `${keyOf(idea, version)}#trial`;
+    const child = spawnIn(copy, command);
+    this.children.set(key, child);
+    const seen: { url: string | null; over: boolean } = {
+      url: null,
+      over: false,
+    };
+    const ended = this.finished(child, (line) => {
+      seen.url = urlIn(line) ?? seen.url;
+    });
+    void ended.then(() => {
+      seen.over = true;
+    });
+    const until = Date.now() + within;
+    let answered = false;
+    while (!seen.over && !answered && Date.now() < until) {
+      if (seen.url !== null) answered = await answers(seen.url);
+      if (!answered) await new Promise((done) => setTimeout(done, 400));
+    }
+    const ownEnd = seen.over;
+    this.end(key);
+    const { lines } = await ended;
+    if (answered) return { ok: true };
+    if (seen.url !== null)
+      return {
+        ok: false,
+        why: `It said it runs at ${seen.url}, but nothing answered there.`,
+      };
+    return {
+      ok: false,
+      why: ownEnd
+        ? said(lines)
+        : `Nothing said where it runs within ${String(Math.round(within / 60_000))} minutes. ${lines.join("\n")}`.trim(),
+    };
+  }
+
   // What still runs is stopped with the factory.
   close(): void {
     for (const key of [...this.children.keys()]) this.end(key);
@@ -177,6 +253,9 @@ export class PrototypeMode {
     command: string,
   ): void {
     const key = keyOf(idea, version);
+    // One that is still there (a start stopped while its copy was made)
+    // does not stay running unseen.
+    this.end(key);
     const child = spawnIn(copy, command);
     this.children.set(key, child);
     const since = this.runOf(idea, version).start?.since;

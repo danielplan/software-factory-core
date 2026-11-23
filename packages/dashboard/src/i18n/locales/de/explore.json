@@ -99,6 +99,11 @@
     "stillMade": "Wird noch gebaut: du kannst es benutzen, und es ändert sich, während der Kobold arbeitet",
     "startingTitle": "Prototyp startet",
     "preparingCopy": "Seine Kopie des Codes wird vorbereitet",
-    "runningStart": "Sein Startbefehl läuft"
+    "runningStart": "Sein Startbefehl läuft",
+    "settingUpStart": "{{name}} findet heraus, wie deine App startet",
+    "tinkerSetUp": "{{name}} hat eingerichtet, wie deine App startet, für das ganze Team.",
+    "couldNotTitle": "{{name}} konnte deine App nicht starten.",
+    "couldNotNoReason": "{{name}} hat mehrere Wege versucht, deine App zu starten, aber keiner hat geklappt.",
+    "tryAgain": "Nochmal versuchen"
   }
 }

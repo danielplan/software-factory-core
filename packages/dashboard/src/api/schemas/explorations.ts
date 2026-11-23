@@ -101,9 +101,10 @@ const versionRunSchema = z.object({
   since: z.string().nullable(),
   steps: z.array(z.string()),
   problem: z.string().nullable(),
+  startProblem: z.string().nullable(),
   start: z
     .object({
-      step: z.enum(["copy", "command"]),
+      step: z.enum(["copy", "setup", "command"]),
       line: z.string().nullable(),
       since: z.string(),
     })

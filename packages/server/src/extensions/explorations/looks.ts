@@ -17,7 +17,7 @@ import {
 } from "../../kobble/usage-pictures.ts";
 import { type Made, opensIn, statesIn, shownAddress } from "./versions.ts";
 
-const START_WITHIN_MS = 3 * 60_000;
+export const START_WITHIN_MS = 3 * 60_000;
 
 export type Looks = {
   pictures: string[];
@@ -167,5 +167,23 @@ export function beingMadeIn(runs: VersionRun[]): string[] {
     .map((run) => {
       const doing = run.activity ? ` (${run.activity})` : "";
       return `${run.version}: being made${doing}`;
+    });
+}
+
+// A prototype taken off the board: refused while its maker is on it, else
+// what runs of it stops.
+export function released(
+  mode: PrototypeMode,
+  exploration: string,
+  key: string,
+): void {
+  const run = mode.runOf(exploration, key);
+  if (run.making)
+    throw new Refused(
+      `Prototype ${key} is still being made: take it off once it is ready.`,
+    );
+  if (["running", "starting"].includes(run.state))
+    mode.stop(exploration, key).catch(() => {
+      // It says on its own run why it did not stop.
     });
 }

@@ -23,6 +23,7 @@ import { Starting } from "./prototype-starting";
 import { States } from "./prototype-states";
 import { Segment, ShownVariant, SwitchRow } from "./prototype-switches";
 import { LiveScreen, SCREEN } from "./prototype-screen";
+import { StartNotes, startNotes } from "./start-setup";
 import type { ThingNode } from "./nodes";
 
 const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
@@ -30,6 +31,7 @@ const TINTS = ["#cfe0ff", "#ffd6e2", "#d6f2e7"];
 function stateWords(run: VersionRun | undefined, t: TFunction): string | null {
   if (!run) return null;
   if (run.state === "starting") return t("explore.starting");
+  if (run.startProblem !== null) return null;
   if (run.state === "failed") return run.problem ?? t("explore.board.stopped");
   // Running or stopped: what is odd about it (not shared with the team).
   return run.problem;
@@ -181,6 +183,10 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const open = ["waiting", "exploring"].includes(page.exploration.status);
   const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);
+  const tryStart = () => {
+    act("open", { key: thing.key });
+  };
+  const notes = startNotes(thing, run);
   return (
     <Frame
       data={data}
@@ -210,14 +216,9 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
         shown={shownRun}
         title={`${thing.key} · ${thing.name}`}
         at={thing.key.charCodeAt(0) - 65}
-        start={
-          open
-            ? () => {
-                act("open", { key: thing.key });
-              }
-            : null
-        }
+        start={open && notes.reason === null ? tryStart : null}
       />
+      <StartNotes notes={notes} retry={tryStart} />
       <About words={stateWords(run, t)} test={page.tests[thing.key] ?? null} />
     </Frame>
   );

@@ -100,6 +100,11 @@
     "stillMade": "Ancora in lavorazione: puoi usarlo, e cambia mentre il kobold lavora",
     "startingTitle": "Avvio del prototipo",
     "preparingCopy": "Preparo la sua copia del codice",
-    "runningStart": "Eseguo il suo comando di avvio"
+    "runningStart": "Eseguo il suo comando di avvio",
+    "settingUpStart": "{{name}} sta capendo come avviare la tua app",
+    "tinkerSetUp": "{{name}} ha preparato come avviare la tua app, per tutto il team.",
+    "couldNotTitle": "{{name}} non è riuscito ad avviare la tua app.",
+    "couldNotNoReason": "{{name}} ha provato diversi modi per avviare la tua app, ma nessuno ha funzionato.",
+    "tryAgain": "Riprova"
   }
 }
