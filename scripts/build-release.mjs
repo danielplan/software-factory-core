@@ -4,7 +4,8 @@
 // The core's packages, compiled to JavaScript in their own layout (npm does
 // not run TypeScript from node_modules) and bundled inside the package, with
 // the dashboard built, the skills, their templates and guides, the
-// knowledge base's template and the kits' rules and starters. Its own `bin` is the
+// knowledge base's template and the kits' rules and starters, and the
+// release notes (release-notes.json, kobble-notes.mjs). Its own `bin` is the
 // software-factory command. The folder is then committed to the release
 // branch and tagged release-<version> (docs/how-to/make-a-release.md).
 
@@ -19,7 +20,13 @@ import {
 } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { whatsNewFiles } from "./whats-new-files.mjs";
+import { RELEASE_NOTES_FILE } from "../packages/core/src/release-notes.ts";
+import {
+  githubReleases,
+  keptNotes,
+  packageNotes,
+  publishedNotes,
+} from "./kobble-notes.mjs";
 
 const here = resolve(import.meta.dirname, "..");
 const out = resolve(process.argv[2] ?? join(here, "release"));
@@ -54,7 +61,7 @@ for (const name of [
   "node_modules",
   "package.json",
   "README.md",
-  ...whatsNewFiles,
+  RELEASE_NOTES_FILE,
 ])
   rmSync(join(out, name), { recursive: true, force: true });
 
@@ -169,9 +176,20 @@ writeFileSync(
   join(out, "README.md"),
   `# Software factory ${version}\n\nThe core, built to install from this repository: in a project,\n\n    npm install -D github:<owner>/software-factory-core#release-${version}\n\nthen \`npx software-factory\`. Built from the main branch by scripts/build-release.mjs.\n`,
 );
-// What's new, next to the README, so an installed Kobble reads it offline.
-for (const file of whatsNewFiles)
-  if (existsSync(join(here, file))) cpSync(join(here, file), join(out, file));
+// The release notes, next to the README, so an installed Kobble reads them
+// offline: the offline copy with Kobble's GitHub releases.
+let published = [];
+try {
+  published = publishedNotes(githubReleases());
+} catch (error) {
+  process.stderr.write(
+    `Kobble's releases on GitHub could not be read, so the package carries only the offline copy: ${String(error)}\n`,
+  );
+}
+writeFileSync(
+  join(out, RELEASE_NOTES_FILE),
+  `${JSON.stringify(packageNotes(keptNotes(here), published), null, 2)}\n`,
+);
 if (!existsSync(join(out, "bin", "software-factory.js")))
   throw new Error("The release has no command.");
 process.stdout.write(`Built release ${version} in ${out}\n`);

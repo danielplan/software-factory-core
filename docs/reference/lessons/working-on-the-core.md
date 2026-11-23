@@ -25,7 +25,8 @@
   root (`packages/server/src/…`), so the check catches them.
 - **A changelog file made every merge clash.** Every branch wrote at its top.
   Keep: what a company has to do is said in the commit message, and what the
-  team reads is in the `WHATS-NEW` files, written at release.
+  team reads is in the notes of each GitHub release, drafted at release
+  ([decision 0016](../../decisions/0016-release-notes-on-github-releases.md)).
 - **A link in a guide can be read as a heading.** Sprocket's guide wrote the
   Marketplace's address as a Markdown link (`#extensions`), and the docs
   check looked for a heading with that name. Keep: addresses inside the page

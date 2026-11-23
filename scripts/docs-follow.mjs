@@ -32,7 +32,7 @@ const code = changed.filter((file) =>
 const docs = changed.filter(
   (file) =>
     /^docs\//.test(file) ||
-    /(^|\/)(README|AGENTS|BLUEPRINT|WHATS-NEW)[^/]*\.md$/.test(file) ||
+    /(^|\/)(README|AGENTS|BLUEPRINT)[^/]*\.md$/.test(file) ||
     /^packages\/skills\/(guides|skills|templates)\//.test(file),
 );
 const said = git("log", "--format=%B", `${base}..HEAD`)
