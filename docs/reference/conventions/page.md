@@ -42,10 +42,13 @@ promises, folders, extra libraries and what still differs from the kit.
   the type check. The state's stream (`src/api/live.ts`) refreshes the
   reads when Kobble's files change; a failed read shows as a problem, never
   as an empty list.
-- **Addresses:** each page has its address after the # (`#explore/X-1`),
+- **Addresses:** each page has its address after the # (`#/explore/X-1`),
   routed by React Router's hash router in `src/app/router.tsx`. A link is a
-  plain `href="#<page>"`; an old address is listed in `MOVED`
-  (`src/lib/routes.ts`) and leads to its new page.
+  `<Link to="/<page>">`, a move after something is done is `useNavigate()`;
+  the address is never written by hand (lint fails on `location.hash =` and
+  `href="#…"`). An address the server sends (`#explore/X-1`) goes through
+  `pathOf` first. An old address is listed in `MOVED` (`src/lib/routes.ts`)
+  and leads to its new page.
 - **The look:** the variables and pieces in [the design system](../design-system.md);
   every button has an icon; every state holds.
 - **One library per job,** the one the kit's table or the blueprint names;

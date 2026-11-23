@@ -3,6 +3,7 @@
 // that happened) and the signals it found. Missions run on this computer,
 // never on the live app.
 
+import { Link } from "react-router";
 import type { TFunction } from "i18next";
 import { ChevronLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -10,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import type { PersonaTest, TestPage } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/layout/problem-box";
-import { personaHash } from "@/lib/routes";
+import { personaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, ROW } from "@/components/page-bits";
 import { agoOf, stepWords } from "@/lib/signals-view";
@@ -49,13 +50,13 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
   const { test, persona } = page;
   return (
     <>
-      <a
-        href={personaHash(persona.id)}
+      <Link
+        to={personaPath(persona.id)}
         className="mb-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
       >
         <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
         {persona.name}
-      </a>
+      </Link>
       <div className={cn(CARD, "px-7 py-[26px]")}>
         <div className="mb-3 flex items-center gap-2">
           <StatusChip status={test.status} />
@@ -67,13 +68,13 @@ function RunBody({ page }: Readonly<{ page: TestPage }>) {
           <Markdown text={test.task} inline />
         </h1>
         <div className="flex flex-wrap gap-2">
-          <a
-            href={personaHash(persona.id)}
+          <Link
+            to={personaPath(persona.id)}
             className="inline-flex h-[34px] items-center gap-[7px] rounded-full bg-card pr-3.5 pl-1.5 text-[13px] font-medium text-foreground-2 shadow-card"
           >
             <PersonaFace face={persona.face} size={24} />
             {t("personas.run.as", { name: persona.name })}
-          </a>
+          </Link>
           <span className="inline-flex h-[34px] items-center rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground-2 shadow-card">
             {test.on === "main"
               ? t("personas.run.onMain")

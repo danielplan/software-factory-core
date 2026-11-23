@@ -1,6 +1,7 @@
 // Explorations' block on Home: the ideas being explored. The app hands it
 // to Home (app/home-blocks.tsx).
 
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 
 import type { AddOnView } from "@/api/client";
@@ -20,9 +21,9 @@ export function ExploringBlock({
         <BlockEmpty line={t("home.blockEmpty.exploring")} />
       ) : (
         input.exploring.slice(0, 4).map((row) => (
-          <a
+          <Link
             key={row.id}
-            href={`#explore/${encodeURIComponent(row.id)}`}
+            to={`/explore/${encodeURIComponent(row.id)}`}
             className="grid gap-0.5 border-t border-line-soft px-4 py-2.5 first:border-t-0 hover:bg-surface"
           >
             <span className="truncate text-[13px]">{row.title}</span>
@@ -31,7 +32,7 @@ export function ExploringBlock({
                 <Markdown text={row.line} inline />
               </span>
             )}
-          </a>
+          </Link>
         ))
       )}
     </BlockCard>

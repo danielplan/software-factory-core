@@ -4,20 +4,28 @@ import { test } from "node:test";
 import {
   movedHash,
   PAGES,
-  personaHash,
+  pathOf,
+  personaPath,
   placeOf,
   placeShown,
 } from "../src/lib/routes.ts";
 
 test("a persona has its own address", () => {
   assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
-  assert.equal(personaHash(), "#personas");
-  assert.equal(personaHash("gift buyer"), "#personas/gift%20buyer");
-  assert.equal(personaHash("mia", {}), "#personas/mia/tests");
+  assert.equal(personaPath(), "/personas");
+  assert.equal(personaPath("gift buyer"), "/personas/gift%20buyer");
+  assert.equal(personaPath("mia", {}), "/personas/mia/tests");
   assert.equal(
-    personaHash("mia", { test: "T-0001" }),
-    "#personas/mia/tests/T-0001",
+    personaPath("mia", { test: "T-0001" }),
+    "/personas/mia/tests/T-0001",
   );
+});
+
+test("an address written the old way becomes the router's path", () => {
+  assert.equal(pathOf("#explore/X-3"), "/explore/X-3");
+  assert.equal(pathOf("#build"), "/build");
+  assert.equal(pathOf("build"), "/build");
+  assert.equal(pathOf("/system"), "/system");
 });
 
 test("each page has its own address, with what is open in it", () => {

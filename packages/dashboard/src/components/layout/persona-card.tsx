@@ -4,6 +4,7 @@
 // or Change something; afterwards, what became of it: added (and a way to
 // its page) or not added.
 
+import { Link } from "react-router";
 import { Check, ChevronRight, PencilLine, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +15,7 @@ import { CARD } from "@/components/page-bits";
 import { PersonaTile } from "@/components/persona-tile";
 import { Button } from "@/components/ui/button";
 import type { Proposal } from "@/lib/persona-proposal";
-import { personaHash } from "@/lib/routes";
+import { personaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 export function PersonaCard({
@@ -104,13 +105,13 @@ function Decision({
         <Check aria-hidden className="text-blue" />
         {t("support.persona.added", { name })}
       </span>
-      <a
-        href={personaHash(added)}
+      <Link
+        to={personaPath(added)}
         className="ml-auto flex items-center gap-0.5 rounded-full px-2 py-0.5 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground [&_svg]:size-3.5"
       >
         {t("support.persona.open")}
         <ChevronRight aria-hidden />
-      </a>
+      </Link>
     </>
   );
 }

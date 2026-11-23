@@ -6,6 +6,7 @@
 // the live app was last read, with Sync now. On a phone the list and the
 // picked signal are two screens, with a link back to the list.
 
+import { Link, useNavigate } from "react-router";
 import { ChevronLeft, FlaskConical, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,7 +30,7 @@ import {
   type SentSignal,
   useSentSignals,
 } from "./feedback-signals";
-import { isSent, type Listed, signalHash, SignalList } from "./signal-list";
+import { isSent, type Listed, signalPath, SignalList } from "./signal-list";
 import { AllQuiet } from "./empty";
 import { BeforeLaunch } from "./before-launch";
 import { CARD, FaceOf, Head, Toast, TypeChip } from "@/components/page-bits";
@@ -150,6 +151,7 @@ function Board({
   onSaid: (said: string) => void;
 }>) {
   const t = useTranslation().t;
+  const navigate = useNavigate();
   // One list, newest first: the signals and what this person sent, mixed by
   // time.
   const all: Listed[] = [...sent, ...signals].sort(
@@ -163,13 +165,13 @@ function Board({
         <SignalList all={all} shown={shown?.id ?? null} />
       </div>
       <div className={cn("grid gap-3.5", !picked && "max-lg:hidden")}>
-        <a
-          href={signalHash(null)}
+        <Link
+          to={signalPath(null)}
           className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue lg:hidden"
         >
           <ChevronLeft aria-hidden className="size-[15px]" strokeWidth={2.2} />
           {t("shell.pages.signals")}
-        </a>
+        </Link>
         {shown && isSent(shown) && <SentDetail one={shown} />}
         {shown && !isSent(shown) ? (
           <SignalDetail
@@ -177,7 +179,7 @@ function Board({
             signal={shown}
             now={now}
             onDone={(text) => {
-              window.location.hash = signalHash(nextAfter(all, shown.id));
+              void navigate(signalPath(nextAfter(all, shown.id)));
               onSaid(text);
             }}
             onFailed={onSaid}

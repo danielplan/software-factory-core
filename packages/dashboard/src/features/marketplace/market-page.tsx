@@ -5,6 +5,7 @@
 // switching the board work is tracked on asks first, then goes to where it
 // is connected.
 
+import { Link, useNavigate } from "react-router";
 import { Package, Plug, Puzzle } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,8 +36,8 @@ type TabId = (typeof TABS)[number]["id"];
 const tabOf = (open: string | null): TabId =>
   TABS.find((one) => one.id === open)?.id ?? "extensions";
 
-const hashOf = (tab: TabId) =>
-  tab === "extensions" ? "#extensions" : `#extensions/${tab}`;
+const tabPath = (tab: TabId) =>
+  tab === "extensions" ? "/extensions" : `/extensions/${tab}`;
 
 export function MarketPage({
   state,
@@ -63,6 +64,7 @@ export function MarketPage({
   const closeDetails = () => {
     setOpenKey(null);
   };
+  const toConnections = useToConnections(closeDetails);
   const switchBoard = (from: AddOnView, to: AddOnView) => {
     closeDetails();
     market.switchBoard(from, to);
@@ -104,10 +106,8 @@ export function MarketPage({
         }
         onClose={closeDetails}
         onOpen={(to) => {
-          if (to === "connections") {
-            closeDetails();
-            window.location.hash = hashOf("connections");
-          } else setOpenKey(to);
+          if (to === "connections") toConnections();
+          else setOpenKey(to);
         }}
         onRemove={(addOn) => {
           closeDetails();
@@ -117,6 +117,15 @@ export function MarketPage({
       <Confirm question={market.question} onClose={market.closeQuestion} />
     </div>
   );
+}
+
+// From the details to the Connections tab: the details close first.
+function useToConnections(close: () => void): () => void {
+  const navigate = useNavigate();
+  return () => {
+    close();
+    void navigate(tabPath("connections"));
+  };
 }
 
 // The main action in the details: Install for an extension that is not
@@ -180,13 +189,13 @@ function Tabs({ tab }: Readonly<{ tab: TabId }>) {
         className="absolute top-1 bottom-1 hidden rounded-lg bg-card shadow-current transition-[left,width] duration-200 ease-out motion-reduce:transition-none"
       />
       {TABS.map(({ id, icon }) => (
-        <a
+        <Link
           key={id}
           ref={(el) => {
             links.current[id] = el;
           }}
           role="tab"
-          href={hashOf(id)}
+          to={tabPath(id)}
           aria-selected={tab === id}
           className={cn(
             "relative inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-colors duration-200 [&_svg]:size-3.5",
@@ -197,7 +206,7 @@ function Tabs({ tab }: Readonly<{ tab: TabId }>) {
         >
           {icon}
           {t(`market.tabs.${id}`)}
-        </a>
+        </Link>
       ))}
     </div>
   );

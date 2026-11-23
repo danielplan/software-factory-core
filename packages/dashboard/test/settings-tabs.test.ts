@@ -5,7 +5,7 @@ import {
   GROUP_TABS,
   SETTINGS_TABS,
   shownTab,
-  tabHash,
+  tabPath,
   tabsOf,
 } from "../src/lib/settings-tabs.ts";
 
@@ -21,9 +21,9 @@ test("Settings has six tabs, in order", () => {
 });
 
 test("each tab has its own address", () => {
-  assert.equal(tabHash("Connections"), "#settings/connections");
-  assert.equal(tabHash("AI models"), "#settings/ai-models");
-  assert.equal(tabHash("This computer"), "#settings/this-computer");
+  assert.equal(tabPath("Connections"), "/settings/connections");
+  assert.equal(tabPath("AI models"), "/settings/ai-models");
+  assert.equal(tabPath("This computer"), "/settings/this-computer");
 });
 
 test("the sections go in their tabs, in the tabs' order; empty tabs are left out", () => {
