@@ -14,6 +14,14 @@ import { aroundPlaced } from "@/lib/around-placed";
 import { arrange } from "@/lib/layout";
 import { edgesOf, nodesOf, shapeOf, type ThingNode } from "./nodes";
 
+// What the person put on the board themselves (a picture dropped where they
+// wanted it) lies over the layout: it is not laid out with the rest, so adding
+// it moves nothing else and the view stays where it is.
+export const ownedByPerson = (n: ThingNode) =>
+  n.data.thing.by === "person" &&
+  n.data.thing.place !== null &&
+  (n.data.thing.kind === "picture" || n.data.thing.kind === "note");
+
 export function useBoardNodes(
   page: ExplorationPage,
   marks: { pointed: string | null; attached: string[] },
@@ -30,23 +38,25 @@ export function useBoardNodes(
     setNodes((earlier) => nodesOf(page, earlier, marks));
   }, [page, marks, setNodes]);
 
+  const laid = nodes.filter((n) => !ownedByPerson(n));
   const shape = [
-    ...nodes.map(shapeOf),
+    ...laid.map(shapeOf),
     ...edges.map((e) => `${e.source}>${e.target}`),
   ].join("|");
   const measured =
-    nodes.length > 0 && nodes.every((n) => n.measured?.height !== undefined);
+    laid.length > 0 && laid.every((n) => n.measured?.height !== undefined);
 
   useEffect(() => {
     if (!measured) return;
     let stale = false;
-    const boxes = latest.current.nodes.map((n) => ({
+    const rest = latest.current.nodes.filter((n) => !ownedByPerson(n));
+    const boxes = rest.map((n) => ({
       id: n.id,
       width: n.measured?.width ?? 0,
       height: n.measured?.height ?? 0,
     }));
     const placed = new Map(
-      latest.current.nodes.flatMap((n) =>
+      rest.flatMap((n) =>
         n.data.thing.place ? [[n.id, n.data.thing.place] as const] : [],
       ),
     );

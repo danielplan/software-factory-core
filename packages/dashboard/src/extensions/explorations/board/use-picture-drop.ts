@@ -78,19 +78,15 @@ export function usePictureDrop(
         return;
       }
       read(file, words("explore.board.pictureUnreadable"))
-        .then((data) =>
-          post<{ thing: { id: string } }>("/api/kobble/explorations/picture", {
+        .then((data) => {
+          // The picture card goes where it was dropped or pasted.
+          const at = latest.current.flowAt(client);
+          return post("/api/kobble/explorations/picture", {
             id: exploration,
             title,
             data,
-          }),
-        )
-        // The picture card goes where it was dropped or pasted.
-        .then(({ thing }) => {
-          const at = latest.current.flowAt(client);
-          return post("/api/kobble/explorations/board", {
-            id: exploration,
-            do: { act: "move", id: thing.id, x: at.x - 150, y: at.y - 40 },
+            x: at.x - 150,
+            y: at.y - 40,
           });
         })
         .catch((error: unknown) => {

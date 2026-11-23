@@ -35,7 +35,7 @@ import {
   PictureNode,
   ProblemNode,
 } from "./things";
-import { useBoardNodes } from "./use-board-nodes";
+import { ownedByPerson, useBoardNodes } from "./use-board-nodes";
 import { useBoardView } from "./use-board-view";
 import { usePictureDrop } from "./use-picture-drop";
 import { AddToolbar } from "./mine/add-toolbar";
@@ -95,7 +95,12 @@ function Canvas({ page: served, attached, onPick }: BoardProps) {
     [pointed, attached],
   );
   const { nodes, edges, onNodesChange, arranged } = useBoardNodes(page, marks);
-  const onMoveStart = useBoardView(nodes, arranged, pointed);
+  // The view re-fits for what Doodle adds, not for what the person puts there.
+  const onMoveStart = useBoardView(
+    nodes.filter((n) => !ownedByPerson(n)),
+    arranged,
+    pointed,
+  );
   const area = useRef<HTMLDivElement>(null);
   const point = useBoardPoint(area);
   const act = useBoardDo(page.exploration.id);

@@ -90,10 +90,13 @@ export function addPicture(
   id: string,
   body: unknown,
 ): Thing {
-  const { title, data } = z
+  const { title, data, x, y } = z
     .object({
       title: z.string().trim().min(1).default("Picture"),
       data: z.string(),
+      // Where on the board it was dropped or pasted (not laid out).
+      x: z.number().optional(),
+      y: z.number().optional(),
     })
     .catch({ title: "Picture", data: "" })
     .parse(body);
@@ -114,7 +117,7 @@ export function addPicture(
     id: newId(board, "picture"),
     kind: "picture",
     agreed: false,
-    place: null,
+    place: x !== undefined && y !== undefined ? { x, y } : null,
     by: "person",
     title: title.slice(0, 80),
     image,
