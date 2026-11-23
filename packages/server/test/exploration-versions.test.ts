@@ -125,6 +125,13 @@ test("a choice's options are the variants of one prototype, switched outside the
       ).body.error as string,
       /no variant Z/,
     );
+    // Agreed with a named variant: that variant is shown and agreed.
+    await factory.press("/board", {
+      id: "X-1",
+      do: { act: "agree", id: "prototype-a2", agreed: true, variant: "A" },
+    });
+    assert.equal(made().variant, "A");
+    assert.equal(made().agreed, true);
   } finally {
     factory.close();
   }
