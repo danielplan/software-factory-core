@@ -104,11 +104,11 @@ test("a choice's options are the variants of one prototype, switched outside the
     assert.equal(factory.seen[1]?.mcp?.name, "prototype");
     assert.match(
       factory.answers[1]?.[0] ?? "",
-      /could not be looked at: .*cannot run here yet/,
+      /could not be looked at: .*no server here/,
     );
     assert.match(
       factory.seen[2]?.prompt ?? "",
-      /could not be looked at running: .*cannot run here yet/,
+      /could not be looked at running: .*no server here/,
     );
     assert.match(factory.seen[3]?.prompt ?? "", /Add variant D \(“Floating”\)/);
     await factory.press("/board", {

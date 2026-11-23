@@ -277,6 +277,13 @@ export function markedIn(
   });
 }
 
+// The prototype the project's start was worked out for: it carries Tinker's
+// line about it (once, on this one); null when there is no such prototype.
+export function withStartSetUp(board: Board, key: string): Board | null {
+  const made = prototypeOf(board, key);
+  return made ? withThing(board, { ...made, startSetUp: true }) : null;
+}
+
 // The prototypes marked as being made that no maker is on now: the factory
 // closed before they were done.
 export function cutOffIn(

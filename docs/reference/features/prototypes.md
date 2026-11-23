@@ -27,7 +27,30 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
 - Opening an exploration starts its prototype by itself (the agreed one,
   otherwise the newest) when none runs, only where the project names a
   prototype start command (`canRun` on the exploration's page); without one
-  nothing is asked, and **Open** says why it cannot run.
+  nothing is started by itself, and **Start** works as usual (below).
+- **A project with no start command needs no setup.** While Tinker makes the
+  first prototype it works out how to start the app, from its own reading of
+  the project (its guide, `packages/skills/guides/prototype-start.md`), and
+  the factory tries it in the prototype's copy: it must print
+  `FACTORY_URL=…` and that address must answer. Only a start that came up is
+  kept, straight away and for the whole team, in `factory.json` under
+  `prototype.start`, marked `"by": "tinker"` (a start the team wrote has no
+  mark and is never changed). A start that fails goes back to Tinker with
+  what it printed, three tries in all. Logins, passwords and outside
+  services are never the reason: Tinker makes them up. No person is asked
+  for anything.
+- Kobble's own start (`scripts/kobble-prototype.mjs`) clones the packages
+  from the project's folder, then runs `npm install` in the copy whenever
+  they were not installed from the copy's lock file yet: the project's
+  checkout can be older than the prototype's copy, and the page would fail
+  on a package only the copy needs.
+- The prototype it was set up for carries one calm line, "Tinker set up how
+  to start your app, for the whole team." (`startSetUp` on its board
+  thing); later prototypes do not. When Tinker cannot get the app to start,
+  the prototype shows a calm grey box with Tinker's reason in plain words
+  and **Try again**, which runs the starting steps once more (Tinker works
+  it out again). A kept start that stops coming up is noticed when the
+  prototype starts, and Tinker works it out again, once.
 - A version's copy starts from origin's base branch, or from this
   computer's own when the project has no origin yet (a new project, a demo
   copy).
@@ -83,7 +106,7 @@ at the world and change it (`look_at_world`, `world_rows`, `change_world`,
 
 | Part       | Where                                                                                                                                                                          |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tinker     | `packages/server/src/extensions/explorations/`: `prototypes.ts`, `making.ts`, `cut-off.ts`, `maker-tools.ts`, `looks.ts`, `versions.ts`                                        |
+| Tinker     | `packages/server/src/extensions/explorations/`: `prototypes.ts`, `making.ts`, `cut-off.ts`, `maker-tools.ts`, `looks.ts`, `versions.ts`, `starting-up.ts`, `start-setup.ts`    |
 | The worlds | `packages/server/src/extensions/explorations/`: `worlds.ts`, `world-tools.ts`, `world-route.ts`; `packages/core/src/kobble/world.ts`, `packages/core/src/kobble/situations.ts` |
 | The copies | `packages/server/src/prototypes/`                                                                                                                                              |
 | The skill  | `packages/skills/skills/explore/SKILL.md`                                                                                                                                      |

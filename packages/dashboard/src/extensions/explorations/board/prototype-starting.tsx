@@ -6,6 +6,7 @@ import { LoaderCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import type { VersionRun } from "@/api/client";
+import { MAKER } from "@/lib/kobolds";
 
 import { clockOf, useNow } from "./prototype-making";
 
@@ -14,9 +15,11 @@ export function Starting({ run }: Readonly<{ run: VersionRun }>) {
   const clock = clockOf(run.start?.since ?? null, useNow());
   const step =
     run.start?.line ??
-    (run.start?.step === "command"
-      ? t("explore.board.runningStart")
-      : t("explore.board.preparingCopy"));
+    {
+      command: t("explore.board.runningStart"),
+      setup: t("explore.board.settingUpStart", { name: MAKER.name }),
+      copy: t("explore.board.preparingCopy"),
+    }[run.start?.step ?? "copy"];
   return (
     <div
       role="status"

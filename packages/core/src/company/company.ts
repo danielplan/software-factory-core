@@ -41,6 +41,10 @@ export const companySchema = z.object({
   prototype: z
     .object({
       start: z.string().min(1),
+      // Who worked the start out: "tinker" when the maker did, while making
+      // the first prototype, and works it out again when it stops working.
+      // None: the team wrote it, and nobody changes it.
+      by: z.literal("tinker").optional(),
       stop: z.string().min(1).optional(),
       remove: z.string().min(1).optional(),
     })
