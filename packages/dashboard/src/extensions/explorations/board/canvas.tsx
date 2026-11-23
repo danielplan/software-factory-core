@@ -41,7 +41,7 @@ import { usePictureDrop } from "./use-picture-drop";
 import { AddToolbar } from "./mine/add-toolbar";
 import { type Drawing, MineLayer, type Tool, ToolLayer } from "./mine/mine-layer";
 import { useMine } from "./mine/mine-state";
-import { addressOf, previewOf } from "./mine/preview";
+import { previewOf } from "./mine/preview";
 import { boardState } from "./mine/variant";
 
 const NODE_TYPES: NodeTypes = {
@@ -97,9 +97,15 @@ function Canvas({ page: served, attached, onPick }: BoardProps) {
   const { nodes, edges, onNodesChange, arranged } = useBoardNodes(page, marks);
   const onMoveStart = useBoardView(nodes, arranged, pointed);
   const area = useRef<HTMLDivElement>(null);
-  const pictures = usePictureDrop(page.exploration.id, area);
+  const point = useBoardPoint(area);
   const act = useBoardDo(page.exploration.id);
-  const adding = useAdding(nodes, arranged, area, act);
+  const adding = useAdding(nodes, arranged, act, point.flowAt);
+  // Pasted or dropped pictures and web addresses land at the pointer.
+  const pictures = usePictureDrop(page.exploration.id, area, {
+    pointer: point.pointer,
+    flowAt: point.flowAt,
+    onLink: adding.addLink,
+  });
   return (
     <div
       ref={area}
@@ -195,8 +201,8 @@ function Canvas({ page: served, attached, onPick }: BoardProps) {
 function useAdding(
   nodes: ThingNode[],
   arranged: number,
-  area: React.RefObject<HTMLDivElement | null>,
   act: ReturnType<typeof useBoardDo>,
+  flowAt: (client: Client | null) => { x: number; y: number },
 ) {
   const mine = useMine();
   const { screenToFlowPosition } = useReactFlow();
@@ -230,21 +236,18 @@ function useAdding(
     mine.select(id);
     setTool("pen");
   };
-  const addLink = (address: string) => {
-    const box = area.current?.getBoundingClientRect();
-    const middle = box
-      ? screenToFlowPosition({
-          x: box.left + box.width / 2,
-          y: box.top + box.height / 2,
-        })
-      : { x: 0, y: 0 };
-    const more = mine.items.filter((one) => one.kind === "link").length % 5;
+  // A link card at the pointer, or in the middle of the view.
+  const addLink = (address: string, client: Client | null = null) => {
+    const at = flowAt(client);
+    const more = client
+      ? 0
+      : mine.items.filter((one) => one.kind === "link").length % 5;
     mine.add(
       {
         kind: "link",
         url: address,
-        x: middle.x - 140 + more * 28,
-        y: middle.y - 40 + more * 28,
+        x: at.x - 140 + more * 28,
+        y: at.y - 40 + more * 28,
       },
       previewOf(address).site,
     );
@@ -276,18 +279,9 @@ function useAdding(
       );
       if (picked) act("board", { do: { act: "remove", id: picked.id } });
     };
-    const onPaste = (event: ClipboardEvent) => {
-      if (typing(event) || (event.clipboardData?.files.length ?? 0) > 0) return;
-      const address = addressOf(event.clipboardData?.getData("text/plain") ?? "");
-      if (!address) return;
-      event.preventDefault();
-      addLink(address);
-    };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("paste", onPaste);
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("paste", onPaste);
     };
   });
 
@@ -311,4 +305,40 @@ function useAdding(
       writeAt(screenToFlowPosition({ x: event.clientX, y: event.clientY }));
     },
   };
+}
+
+type Client = { x: number; y: number };
+
+// Where the pointer is on the board (null when it is off the board), and how
+// a point on the screen becomes one on the board: the pointer's, or the
+// middle of the view when it is off.
+function useBoardPoint(area: React.RefObject<HTMLDivElement | null>) {
+  const { screenToFlowPosition } = useReactFlow();
+  const pointer = useRef<Client | null>(null);
+  useEffect(() => {
+    const element = area.current;
+    if (!element) return;
+    const move = (event: PointerEvent) => {
+      pointer.current = { x: event.clientX, y: event.clientY };
+    };
+    const leave = () => {
+      pointer.current = null;
+    };
+    element.addEventListener("pointermove", move);
+    element.addEventListener("pointerleave", leave);
+    return () => {
+      element.removeEventListener("pointermove", move);
+      element.removeEventListener("pointerleave", leave);
+    };
+  }, [area]);
+  const flowAt = (client: Client | null) => {
+    const box = area.current?.getBoundingClientRect();
+    return screenToFlowPosition(
+      client ??
+        (box
+          ? { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+          : { x: 0, y: 0 }),
+    );
+  };
+  return { pointer, flowAt };
 }
