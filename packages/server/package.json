@@ -12,6 +12,7 @@
     "@software-factory/skills": "0.1.0",
     "culori": "4.0.2",
     "postcss": "8.5.30",
+    "uqr": "0.1.3",
     "zod": "4.6.5"
   },
   "engines": {
