@@ -43,11 +43,21 @@ export type LinkItem = Taken & {
   y: number;
   url: string;
 };
-export type Item = Mark | NoteItem | LinkItem;
+// The person's own drawing card: plain white, its marks inside it. Grows
+// around what is drawn (fixed: null), or has the size it was placed with.
+export type SketchItem = Taken & {
+  id: string;
+  kind: "sketch";
+  x: number;
+  y: number;
+  fixed: { width: number; height: number } | null;
+};
+export type Item = Mark | NoteItem | LinkItem | SketchItem;
 export type NewItem =
   | Omit<Mark, "id" | "taken">
   | Omit<NoteItem, "id" | "taken">
-  | Omit<LinkItem, "id" | "taken">;
+  | Omit<LinkItem, "id" | "taken">
+  | Omit<SketchItem, "id" | "taken">;
 // A line in the chat: what Doodle received (the note's words, the link's
 // site; nothing for a drawing).
 // `after` is how many of the kobold's and the person's messages came before it.
@@ -65,7 +75,8 @@ type Mine = {
   seeded: boolean;
   selected: string | null;
   lines: Line[];
-  add: (item: NewItem, about: string) => string;
+  // `about` null: nothing is said in the chat.
+  add: (item: NewItem, about: string | null) => string;
   move: (id: string, x: number, y: number) => void;
   remove: (id: string) => void;
   select: (id: string | null) => void;
@@ -136,11 +147,12 @@ export function MineProvider({
   }, []);
 
   const add = useCallback(
-    (item: NewItem, about: string) => {
+    (item: NewItem, about: string | null) => {
       const id = idOf(item.kind);
       change((items) => [...items, { ...item, id, taken: false } as Item]);
       const after = spoken.current;
-      setLines((lines) => [...lines, { id, kind: item.kind, about, after }]);
+      if (about !== null)
+        setLines((lines) => [...lines, { id, kind: item.kind, about, after }]);
       return id;
     },
     [change],
@@ -159,7 +171,12 @@ export function MineProvider({
 
   const remove = useCallback(
     (id: string) => {
-      change((items) => items.filter((one) => one.id !== id));
+      // A card takes its drawings with it.
+      change((items) =>
+        items.filter(
+          (one) => one.id !== id && !(one.kind === "mark" && one.on === id),
+        ),
+      );
       select((now) => (now === id ? null : now));
     },
     [change],

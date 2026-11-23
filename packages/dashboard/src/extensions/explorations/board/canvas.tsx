@@ -173,6 +173,7 @@ function Canvas({ page: served, attached, onPick }: BoardProps) {
           nodes={nodes}
           onDrawing={adding.setDrawing}
           onNoteAt={adding.writeAt}
+          onSketchAt={adding.placeSketch}
         />
         <Controls showInteractive={false} position="bottom-left" />
         <AddToolbar
@@ -212,6 +213,22 @@ function useAdding(
   const writeAt = (at: { x: number; y: number }) => {
     setTool(null);
     setWriting(at);
+  };
+  // An empty sketch card where the person clicked, and the pen to draw in it.
+  const placeSketch = (at: { x: number; y: number }) => {
+    const width = 320;
+    const height = 220;
+    const id = mine.add(
+      {
+        kind: "sketch",
+        x: at.x - width / 2,
+        y: at.y - height / 2,
+        fixed: { width, height },
+      },
+      null,
+    );
+    mine.select(id);
+    setTool("pen");
   };
   const addLink = (address: string) => {
     const box = area.current?.getBoundingClientRect();
@@ -283,6 +300,7 @@ function useAdding(
       setWriting(null);
     },
     writeAt,
+    placeSketch,
     drawing,
     setDrawing,
     addLink,

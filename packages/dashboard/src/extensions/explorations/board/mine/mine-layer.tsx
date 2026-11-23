@@ -1,8 +1,8 @@
-// What the person adds, drawn on the board's viewport: their drawings (a
-// mark that started on a thing is drawn from that thing's corner, so it
-// moves with it), their notes and links, and the one-line box where a note
-// is typed. And the pen / note tool: a layer over the board that catches
-// the pen or the click while the tool is on.
+// What the person adds, drawn on the board's viewport: their sketch cards and
+// the drawings on cards (kept from the card's corner, so they move with it,
+// and cut at its edges), their notes and links, and the one-line box where a
+// note is typed. And the tool layer: over the board while the pen, the note
+// or the sketch tool is on.
 
 import { Panel, ViewportPortal, useReactFlow } from "@xyflow/react";
 import { X } from "lucide-react";
@@ -13,9 +13,19 @@ import { cn } from "@/lib/utils";
 
 import type { ThingNode } from "../nodes";
 import { MineLink, MineNote, TakenIn } from "./mine-cards";
-import { type Mark, type Point, useMine } from "./mine-state";
+import { type Point, useMine } from "./mine-state";
+import { SketchCard } from "./sketch";
+import {
+  type Box,
+  type Drawing,
+  type Target,
+  targetAt,
+  targetsOf,
+} from "./targets";
+import { startVariant } from "./variant";
 
-export type Tool = "pen" | "note" | null;
+export type Tool = "pen" | "note" | "sketch" | null;
+export type { Drawing };
 
 // A smooth line through the points.
 function pathOf(points: readonly Point[]): string {
@@ -33,35 +43,21 @@ function pathOf(points: readonly Point[]): string {
   return d;
 }
 
-export type Drawing = { on: string; points: Point[] };
-
-// A card's box on the board.
-function boxOf(node: ThingNode) {
+// A drawing's points on the board, from its card's corner, with the box to
+// cut them to (nothing when that card is not on the board).
+function placed(drawing: Drawing, targets: Target[]) {
+  const target = targets.find((t) => t.id === drawing.on);
+  if (!target) return null;
   return {
-    x: node.position.x,
-    y: node.position.y,
-    width: node.measured?.width ?? node.width ?? 0,
-    height: node.measured?.height ?? node.height ?? 0,
-  };
-}
-
-// A mark's points on the board: from its card's corner, with the card's box
-// to clip it to (hidden when that card is not on the board).
-function placed(mark: Drawing, nodes: ThingNode[]) {
-  const node = nodes.find((n) => n.id === mark.on);
-  if (!node) return null;
-  const box = boxOf(node);
-  return {
-    box,
-    points: mark.points.map(([x, y]) => [x + box.x, y + box.y] as const),
+    box: target.box,
+    points: drawing.points.map(
+      ([x, y]) => [x + target.ox, y + target.oy] as const,
+    ),
   };
 }
 
 // Everything inside it is cut at the card's edges.
-function Clip({
-  id,
-  box,
-}: Readonly<{ id: string; box: ReturnType<typeof boxOf> }>) {
+function Clip({ id, box }: Readonly<{ id: string; box: Box }>) {
   return (
     <clipPath id={id}>
       <rect x={box.x} y={box.y} width={box.width} height={box.height} />
@@ -88,12 +84,12 @@ function Stroke({
 
 const SVG = "pointer-events-none absolute top-0 left-0 overflow-visible";
 
-function Marks({ nodes }: Readonly<{ nodes: ThingNode[] }>) {
+function Marks({ targets }: Readonly<{ targets: Target[] }>) {
   const t = useTranslation().t;
   const mine = useMine();
   const marks = mine.items.flatMap((item) => {
     if (item.kind !== "mark") return [];
-    const there = placed(item, nodes);
+    const there = placed(item, targets);
     return there ? [{ mark: item, ...there }] : [];
   });
   return (
@@ -165,6 +161,32 @@ function Marks({ nodes }: Readonly<{ nodes: ThingNode[] }>) {
   );
 }
 
+function Drawn({
+  drawing,
+  targets,
+}: Readonly<{ drawing: Drawing; targets: Target[] }>) {
+  const there = placed(
+    {
+      on: drawing.on,
+      // Held from the corner of the card, as the saved ones are.
+      points: drawing.points.map(([x, y]) => {
+        const target = targets.find((t) => t.id === drawing.on);
+        return [x - (target?.ox ?? 0), y - (target?.oy ?? 0)] as const;
+      }),
+    },
+    targets,
+  );
+  if (!there) return null;
+  return (
+    <svg aria-hidden width={1} height={1} className={SVG}>
+      <Clip id="clip-drawing" box={there.box} />
+      <g clipPath="url(#clip-drawing)">
+        <Stroke d={pathOf(there.points)} />
+      </g>
+    </svg>
+  );
+}
+
 // The line where a note is typed: Enter places it; leaving it with words
 // places them too; Esc drops it.
 function NoteBox({
@@ -209,22 +231,6 @@ function NoteBox({
   );
 }
 
-function Drawn({
-  drawing,
-  nodes,
-}: Readonly<{ drawing: Drawing; nodes: ThingNode[] }>) {
-  const there = placed(drawing, nodes);
-  if (!there) return null;
-  return (
-    <svg aria-hidden width={1} height={1} className={SVG}>
-      <Clip id="clip-drawing" box={there.box} />
-      <g clipPath="url(#clip-drawing)">
-        <Stroke d={pathOf(there.points)} />
-      </g>
-    </svg>
-  );
-}
-
 export function MineLayer({
   nodes,
   writing,
@@ -239,10 +245,17 @@ export function MineLayer({
   drawing: Drawing | null;
 }>) {
   const mine = useMine();
+  const targets = targetsOf(nodes, mine.items, drawing);
   return (
     <ViewportPortal>
-      <Marks nodes={nodes} />
-      {drawing && <Drawn drawing={drawing} nodes={nodes} />}
+      {mine.items.map((item) => {
+        const target = targets.find((t) => t.id === item.id);
+        return item.kind === "sketch" && target ? (
+          <SketchCard key={item.id} item={item} target={target} />
+        ) : null;
+      })}
+      <Marks targets={targets} />
+      {drawing && <Drawn drawing={drawing} targets={targets} />}
       {mine.items.map((item) =>
         item.kind === "note" ? (
           <MineNote key={item.id} item={item} />
@@ -255,24 +268,30 @@ export function MineLayer({
   );
 }
 
-// Over the board while the pen or the note tool is on. The pen draws only
-// inside a card: the card under it is lit, a stroke that starts on it is cut
-// at its edges and moves with it, and pressing on empty space draws nothing
-// (the cursor says so, and a short hint). The note tool takes a click as the
-// place of a note.
+// Over the board while the pen, the note or the sketch tool is on. The pen
+// draws inside a card: the card under it is lit, a stroke that starts on it
+// is cut at its edges and moves with it. On empty space, variant A opens a
+// new sketch card around the stroke (it grows as the stroke does; strokes
+// that start inside it join it), and variant B draws nothing (the cursor
+// says so, with a short hint: place a sketch card with the Sketch tool). The
+// note tool takes a click as the place of a note, the sketch tool as the
+// place of an empty sketch card.
 export function ToolLayer({
   tool,
   nodes,
   onDrawing,
   onNoteAt,
+  onSketchAt,
 }: Readonly<{
   tool: Tool;
   nodes: ThingNode[];
   onDrawing: (drawing: Drawing | null) => void;
   onNoteAt: (at: { x: number; y: number }) => void;
+  onSketchAt: (at: { x: number; y: number }) => void;
 }>) {
   const t = useTranslation().t;
   const mine = useMine();
+  const open = startVariant() === "A";
   const { screenToFlowPosition } = useReactFlow();
   const stroke = useRef<Drawing | null>(null);
   const [over, setOver] = useState<string | null>(null);
@@ -294,29 +313,20 @@ export function ToolLayer({
     const p = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     return [p.x, p.y];
   };
-  const cardAt = ([x, y]: Point) =>
-    [...nodes].reverse().find((n) => {
-      const box = boxOf(n);
-      return (
-        x >= box.x &&
-        x <= box.x + box.width &&
-        y >= box.y &&
-        y <= box.y + box.height
-      );
-    });
-  const lit = tool === "pen" && over ? nodes.find((n) => n.id === over) : null;
-  const litBox = lit ? boxOf(lit) : null;
+  const targets = targetsOf(nodes, mine.items, null);
+  const lit =
+    tool === "pen" && over ? targets.find((one) => one.id === over) : null;
   return (
     <>
-      {litBox && (
+      {lit && (
         <ViewportPortal>
           <div
             aria-hidden
             style={{
-              left: litBox.x,
-              top: litBox.y,
-              width: litBox.width,
-              height: litBox.height,
+              left: lit.box.x,
+              top: lit.box.y,
+              width: lit.box.width,
+              height: lit.box.height,
             }}
             className="pointer-events-none absolute rounded-[14px] bg-blue/5 ring-2 ring-blue"
           />
@@ -332,14 +342,23 @@ export function ToolLayer({
         }}
         className={cn(
           tool === "note" && "cursor-text",
-          tool === "pen" && (over ? "cursor-crosshair" : "cursor-not-allowed"),
+          tool === "sketch" && "cursor-copy",
+          tool === "pen" &&
+            (over || open ? "cursor-crosshair" : "cursor-not-allowed"),
         )}
         onPointerDown={(event) => {
           if (event.button !== 0 || tool !== "pen") return;
           mine.select(null);
           const start = at(event);
-          const card = cardAt(start);
-          if (!card) {
+          let on = targetAt(targets, start)?.id;
+          if (!on && open) {
+            // A stroke on empty space opens a card of its own around it.
+            on = mine.add(
+              { kind: "sketch", x: start[0], y: start[1], fixed: null },
+              null,
+            );
+          }
+          if (!on) {
             const area = event.currentTarget.getBoundingClientRect();
             setHint({
               x: event.clientX - area.left,
@@ -348,20 +367,20 @@ export function ToolLayer({
             return;
           }
           event.currentTarget.setPointerCapture(event.pointerId);
-          stroke.current = { on: card.id, points: [start] };
-          onDrawing({ on: card.id, points: [start] });
+          stroke.current = { on, points: [start] };
+          onDrawing({ on, points: [start] });
         }}
         onClick={(event) => {
-          if (tool !== "note") return;
           const place = at(event);
-          onNoteAt({ x: place[0], y: place[1] });
+          if (tool === "note") onNoteAt({ x: place[0], y: place[1] });
+          if (tool === "sketch") onSketchAt({ x: place[0], y: place[1] });
         }}
         onPointerMove={(event) => {
           if (tool !== "pen") return;
           const now = stroke.current;
           const point = at(event);
           if (!now) {
-            setOver(cardAt(point)?.id ?? null);
+            setOver(targetAt(targets, point)?.id ?? null);
             return;
           }
           const last = now.points[now.points.length - 1] ?? point;
@@ -377,14 +396,23 @@ export function ToolLayer({
           stroke.current = null;
           onDrawing(null);
           if (!now) return;
-          const node = nodes.find((n) => n.id === now.on);
-          if (!node) return;
+          const target = targets.find((one) => one.id === now.on);
+          if (!target) return;
+          // A click that drew nothing leaves no new card behind.
+          const empty =
+            now.points.length < 3 &&
+            target.sketch &&
+            !mine.items.some((one) => one.kind === "mark" && one.on === now.on);
+          if (empty) {
+            mine.remove(now.on);
+            return;
+          }
           // Kept from the card's corner, so it moves with the card.
           const points = now.points.map(
-            ([x, y]) => [x - node.position.x, y - node.position.y] as const,
+            ([x, y]) => [x - target.ox, y - target.oy] as const,
           );
-          mine.add({ kind: "mark", on: node.id, points }, "");
-          setOver(cardAt(at(event))?.id ?? null);
+          mine.add({ kind: "mark", on: now.on, points }, "");
+          setOver(targetAt(targets, at(event))?.id ?? null);
         }}
       >
         {hint && (

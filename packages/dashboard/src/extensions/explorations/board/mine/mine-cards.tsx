@@ -6,7 +6,7 @@
 
 import { useStore } from "@xyflow/react";
 import { Check, GripVertical, Link2, StickyNote, UserRound, X } from "lucide-react";
-import { type ReactNode, useRef } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -14,28 +14,16 @@ import { cn } from "@/lib/utils";
 import { type LinkItem, type NoteItem, useMine } from "./mine-state";
 import { previewOf } from "./preview";
 
-function Card({
-  item,
-  width,
-  icon,
-  children,
-}: Readonly<{
-  item: NoteItem | LinkItem;
-  width: number;
-  icon: ReactNode;
-  children: ReactNode;
-}>) {
-  const t = useTranslation().t;
+// Dragging a card of the person's by its bar: it follows the pointer, at the
+// board's zoom.
+export function useDrag(item: { id: string; x: number; y: number }) {
   const mine = useMine();
   const zoom = useStore((s) => s.transform[2]);
-  const selected = mine.selected === item.id;
-  const dragging = useRef(false);
-  const startDrag = (event: React.PointerEvent) => {
+  return (event: React.PointerEvent) => {
     if (event.button !== 0 || (event.target as Element).closest("button"))
       return;
     event.preventDefault();
     mine.select(item.id);
-    dragging.current = true;
     const from = { x: event.clientX, y: event.clientY, ox: item.x, oy: item.y };
     const move = (at: PointerEvent) => {
       mine.move(
@@ -51,6 +39,23 @@ function Card({
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", stop);
   };
+}
+
+function Card({
+  item,
+  width,
+  icon,
+  children,
+}: Readonly<{
+  item: NoteItem | LinkItem;
+  width: number;
+  icon: ReactNode;
+  children: ReactNode;
+}>) {
+  const t = useTranslation().t;
+  const mine = useMine();
+  const selected = mine.selected === item.id;
+  const startDrag = useDrag(item);
   return (
     <article
       aria-label={t("explore.board.mine.yours")}

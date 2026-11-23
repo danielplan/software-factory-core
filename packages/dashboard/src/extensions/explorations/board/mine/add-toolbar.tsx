@@ -1,19 +1,18 @@
-// The toolbar for adding to the board: pen, note, picture, link. Variant A
-// floats centred at the bottom (clear of the zoom buttons bottom-left),
-// variant B sits in the top-left corner like a tool panel; chosen by the
-// page address (variant.ts). Everything else is the same.
+// The toolbar for adding to the board: pen, note, picture, link, floating
+// centred at the bottom (clear of the zoom buttons bottom-left). Variant B
+// of how a drawing starts (variant.ts) adds the Sketch tool, which places an
+// empty sketch card first.
 
 import { Panel } from "@xyflow/react";
-import { Image, Link2, Pencil, StickyNote } from "lucide-react";
+import { Image, Link2, Pencil, Square, StickyNote } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
 import type { Tool } from "./mine-layer";
 import { addressOf } from "./preview";
-import { toolbarVariant } from "./variant";
+import { startVariant } from "./variant";
 
 export function AddToolbar({
   tool,
@@ -27,7 +26,7 @@ export function AddToolbar({
   onLink: (address: string) => void;
 }>) {
   const t = useTranslation().t;
-  const below = toolbarVariant() === "B";
+  const blank = startVariant() === "B";
   const picker = useRef<HTMLInputElement>(null);
   const [linking, setLinking] = useState(false);
   const [bad, setBad] = useState(false);
@@ -36,7 +35,7 @@ export function AddToolbar({
     onTool(tool === now ? null : now);
   };
   return (
-    <Panel position={below ? "top-left" : "bottom-center"}>
+    <Panel position="bottom-center">
       <div
         role="toolbar"
         aria-label={t("explore.board.mine.label")}
@@ -47,7 +46,7 @@ export function AddToolbar({
           size="pill-sm"
           variant={tool === "pen" ? "blue" : "ghost"}
           aria-pressed={tool === "pen"}
-          title={t("explore.board.mine.penHint")}
+          title={t(blank ? "explore.board.mine.penHint" : "explore.board.mine.penHintFree")}
           onClick={() => {
             toggle("pen");
           }}
@@ -55,6 +54,21 @@ export function AddToolbar({
           <Pencil aria-hidden />
           {t("explore.board.mine.pen")}
         </Button>
+        {blank && (
+          <Button
+            type="button"
+            size="pill-sm"
+            variant={tool === "sketch" ? "blue" : "ghost"}
+            aria-pressed={tool === "sketch"}
+            title={t("explore.board.mine.sketchHint")}
+            onClick={() => {
+              toggle("sketch");
+            }}
+          >
+            <Square aria-hidden />
+            {t("explore.board.mine.sketch")}
+          </Button>
+        )}
         <Button
           type="button"
           size="pill-sm"
@@ -112,16 +126,15 @@ export function AddToolbar({
         </Button>
         {tool && (
           <span className="px-2 text-[11.5px] whitespace-nowrap text-muted-foreground">
-            {tool === "pen"
-              ? t("explore.board.mine.penOn")
-              : t("explore.board.mine.noteHere")}
+            {tool === "pen" && t("explore.board.mine.penOn")}
+            {tool === "note" && t("explore.board.mine.noteHere")}
+            {tool === "sketch" && t("explore.board.mine.sketchHere")}
           </span>
         )}
         {linking && (
           <form
             className={cn(
-              "absolute left-0 flex w-[320px] max-w-[80vw] flex-wrap items-center gap-1.5 rounded-xl bg-card p-1.5 shadow-[0_0_0_1px_var(--border),0_6px_20px_-8px_rgb(20_24_36/0.25)]",
-              below ? "top-full mt-2" : "bottom-full mb-2",
+              "absolute bottom-full left-0 mb-2 flex w-[320px] max-w-[80vw] flex-wrap items-center gap-1.5 rounded-xl bg-card p-1.5 shadow-[0_0_0_1px_var(--border),0_6px_20px_-8px_rgb(20_24_36/0.25)]",
             )}
             onSubmit={(event) => {
               event.preventDefault();
