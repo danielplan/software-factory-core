@@ -13,12 +13,14 @@ import { ChatSend } from "@/components/chat-send";
 import { Markdown } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { stopWords } from "@/i18n/server-texts";
+import { cn } from "@/lib/utils";
 
 import { showsVoice } from "@/lib/voice/call";
 import { useVoiceCall } from "@/hooks/voice/use-voice-call";
 import { VoiceView } from "@/components/voice/voice-view";
 
 import { nameOf } from "./board/nodes";
+import { StageTrail, useDoing, VARIANT } from "./doing";
 import { Who } from "./explorer-header";
 import { useKoboldCall } from "./kobold-call";
 
@@ -264,16 +266,25 @@ function Problem({
 // The kobold's answer while it writes, or what it is doing before it does.
 function Writing({ talk }: Readonly<{ talk: ExplorationPage["talk"] }>) {
   const t = useTranslation().t;
+  const doing = useDoing(talk);
   if (talk.writing)
     return (
       <div className="max-w-[94%] self-start text-muted-foreground">
         <Markdown text={talk.writing} />
       </div>
     );
+  if (VARIANT === "B") return <StageTrail stage={doing.stage} />;
   return (
-    <p className="flex items-center gap-2 self-start text-[12.5px] text-muted-foreground">
-      <span className="size-1.5 rounded-full bg-blue motion-safe:animate-breathe" />
-      {talk.activity ?? t("explore.talk.thinking")}
+    <p
+      className={cn(
+        "flex items-center gap-2 self-start text-[12.5px] [overflow-wrap:anywhere]",
+        VARIANT === "C" && doing.line
+          ? "text-foreground"
+          : "text-muted-foreground",
+      )}
+    >
+      <span className="size-1.5 flex-none rounded-full bg-blue motion-safe:animate-breathe" />
+      {doing.line ?? t("explore.talk.thinking")}
     </p>
   );
 }

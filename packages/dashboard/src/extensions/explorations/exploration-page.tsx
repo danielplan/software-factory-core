@@ -20,15 +20,19 @@ import { BoardProblem } from "./board/frame";
 import { useLivePrototype } from "./board/live-prototype";
 import { handOffMissing } from "./hand-off-needs";
 import { HandingOff } from "./handing-off";
+import { useMadeUp } from "./made-up";
 import { TalkPanel } from "./talk-panel";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useTranslation().t;
   const navigate = useNavigate();
-  const { data, problem } = useRead(
-    `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
+  const made = useMadeUp();
+  const read = useRead(
+    made ? null : `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
     explorationPageSchema,
   );
+  const data = made ?? read.data;
+  const problem = read.problem;
   const [said, say] = useState<string | null>(null);
   // The things a person attached to what they type next.
   const [attached, setAttached] = useState<string[]>([]);
