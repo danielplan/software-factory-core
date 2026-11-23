@@ -1,26 +1,37 @@
 // The kobold's judgement of what was merged: do people have to do something
 // (or does something they relied on change or go away)? Yes raises the
 // middle number. It answers with the reason in one line, in the team's
-// language. Asked only when the team prepares a release (never when the
-// page is read), and once for the same work: the answer is kept until the
-// merged pull requests change.
+// language, and drafts the release's notes in the same answer (notes.ts).
+// Asked only when the team prepares a release (never when the page is
+// read), and once for the same work: the answer is kept until the merged
+// pull requests change.
 
 import { randomUUID } from "node:crypto";
 
-import type { Claude } from "@software-factory/core";
+import {
+  type Claude,
+  type ReleaseNotes,
+  releaseNotesSchema,
+} from "@software-factory/core";
 import { z } from "zod";
 
 import { inLanguage } from "../../language.ts";
-import type { Merged } from "./notes.ts";
+import { type Merged, NOTES_RULE } from "./notes.ts";
 
-export type Judgement = { act: boolean; why: string };
+// The notes are null when the kobold drafted none.
+export type Judgement = {
+  act: boolean;
+  why: string;
+  notes: ReleaseNotes | null;
+};
 
 const answerSchema = z.object({
   act: z.boolean(),
   why: z.string().trim().min(1),
+  notes: releaseNotesSchema.nullish().catch(null),
 });
 
-const TIME_LIMIT_MS = 3 * 60_000;
+const TIME_LIMIT_MS = 5 * 60_000;
 const LONGEST_BODY = 800;
 
 const RULE = [
@@ -28,9 +39,10 @@ const RULE = [
   "Most releases raise only the last number (1.4.2 → 1.4.3), and that includes new things.",
   "The middle number goes up (1.4.3 → 1.5.0) only when people have to do something to take the release, or when something they relied on changes or goes away.",
   "Judge by what each pull request does for the people who use the product, not by how its title starts.",
-  'Answer with JSON only: {"act": true or false, "why": "one short sentence in plain words"}.',
   'When act is false, why says it is only fixes and improvements (for example "Only fixes and improvements since 1.4.2, nothing to do for anyone").',
   'When act is true, why says what changes for people (for example "Something changes for people: the old export is gone").',
+  NOTES_RULE,
+  'Answer with JSON only: {"act": true or false, "why": "one short sentence in plain words", "notes": {"en": [{"kind": "New", "title": "…", "text": "…"}], "it": […], "de": […]}}.',
 ].join("\n");
 
 export class Judge {
@@ -100,7 +112,11 @@ export class Judge {
     try {
       const start = result.text.indexOf("{");
       const end = result.text.lastIndexOf("}");
-      return answerSchema.parse(JSON.parse(result.text.slice(start, end + 1)));
+      const answer = answerSchema.parse(
+        JSON.parse(result.text.slice(start, end + 1)),
+      );
+      const drafted = answer.notes && answer.notes.en.length > 0;
+      return { ...answer, notes: drafted ? (answer.notes ?? null) : null };
     } catch {
       return null;
     }

@@ -53,7 +53,7 @@ The tests may import any of it, to check one piece alone.
 | `home`     | each with one | Home (`GET /api/home`)                                                      |
 | `support`  | each with one | Sprocket                                                                    |
 | `tasks`    | GitHub        | Factory, Signals (Fix), Explorations (hand-off), Releases                   |
-| `code`     | GitHub        | Factory (the builder, the card panel)                                       |
+| `code`     | GitHub        | Factory (the builder, the card panel), Releases, updates (Kobble's notes)   |
 
 Each collection of records belongs to one extension, which alone reads and
 writes it: `signals` to Signals, `explorations` to Explorations, `personas`
@@ -95,12 +95,11 @@ added to it.
 - **Types for the page:** the page imports some of the server's types by
   relative path (`packages/dashboard/src/api/client.ts` and a few
   features), not through a package export.
-- **GitHub outside the slots:** the board's cards (`tasks`) and branches
-  and pull requests (`code`) come through the slots, but the GitHub CLI
-  (`src/github-cli.ts`) is also run directly by the core's feedback board,
-  by Releases (tags, releases and merged pull requests; it finds its
-  repository through `tasks`, though it declares only `code`) and by the
-  Factory's webhook signals (`gh webhook forward`).
+- **GitHub outside the slots:** the board's cards (`tasks`) and branches,
+  pull requests and releases (`code`) come through the slots, but the
+  GitHub CLI (`src/github-cli.ts`) is also run directly by the core's
+  feedback board and by the Factory's webhook signals
+  (`gh webhook forward`).
 - **Records read in the core package:** the live sync (Signals) takes
   events in with the core's `takeInEvents`, which reads the personas and
   the explorations itself; the usage log (`src/kobble/logged-store.ts`)

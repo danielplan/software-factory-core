@@ -24,7 +24,10 @@ here reach every company with its next upgrade, so they are made with care.
   its commit message, with what a company has to do, if anything; what a
   company would have to do by hand comes as a migration, or as a line the
   upgrade leaves to the owner. Removing something is announced one release
-  before. There is no changelog file: it made every merge clash.
+  before. There is no changelog file: it made every merge clash. What a
+  release brings for the team is in its GitHub release's notes, drafted on
+  Kobble's Releases page in English, Italian and German
+  ([decision 0016](docs/decisions/0016-release-notes-on-github-releases.md)).
 - **Standards before home-made code**: what the platform provides first, then a
   widely used, maintained library; write your own only when neither fits, and
   say why.

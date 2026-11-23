@@ -10,7 +10,13 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { whatsNewProblems } from "./whats-new-files.mjs";
+import {
+  githubReleases,
+  keptNotes,
+  notesProblems,
+  packageNotes,
+  publishedNotes,
+} from "./kobble-notes.mjs";
 
 const here = resolve(import.meta.dirname, "..");
 const copy = join(here, ".release");
@@ -22,11 +28,16 @@ if (!version)
   throw new Error("No CORE_VERSION in packages/core/src/version.ts");
 const tag = `release-${version}`;
 
-// The plain words of the release come first: no release without them.
-const missing = whatsNewProblems(here, version);
+// The notes of the release come first: no release without them, made on
+// Kobble's Releases page as the GitHub release v<version>, in every
+// language.
+const missing = notesProblems(
+  packageNotes(keptNotes(here), publishedNotes(githubReleases())).releases,
+  version,
+);
 if (missing.length > 0)
   throw new Error(
-    `Write what's new for ${version} first (docs/how-to/make-a-release.md):\n${missing.join("\n")}`,
+    `The notes of ${version} are not ready (docs/how-to/make-a-release.md):\n${missing.join("\n")}`,
   );
 
 const git = (args, cwd = here) =>

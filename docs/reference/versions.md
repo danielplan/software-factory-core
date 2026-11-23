@@ -23,8 +23,9 @@ builds follow the same rule, with the first number too: see
 [Releases](features/releases.md).
 
 What each version brought is in the commits between its `v<version>` tag
-and the one before, and, for the team, in the `WHATS-NEW` files that
-Settings › Updates shows.
+and the one before, and, for the team, in the notes of its GitHub release
+(English, with Italian and German folded in), which Settings › Updates
+shows ([make a release](../how-to/make-a-release.md)).
 
 ## In a project
 

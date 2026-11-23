@@ -22,3 +22,4 @@ one choice each, with the options considered and the reasons.
 - [0013: Every factory's knowledge base keeps its shape](0013-knowledge-base-keeps-its-shape.md)
 - [0014: A team's own extensions are descriptions, never code](0014-team-extensions-are-descriptions.md)
 - [0015: What the core owns, it overwrites; customizations go through a declared place](0015-the-core-overwrites-what-it-owns.md)
+- [0016: Release notes live on GitHub releases](0016-release-notes-on-github-releases.md)

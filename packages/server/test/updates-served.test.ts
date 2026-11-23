@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
 
+import type { KeptRelease } from "@software-factory/core";
+
 import {
   KobbleReleases,
   newerRelease,
@@ -132,8 +134,8 @@ test("the routes show the updates with the release, and prepare it once as a car
     releases: {
       current: "0.11.1",
       tags: () => Promise.resolve(["x\trefs/tags/release-0.12.0"]),
-      local: () => ({}),
-      files: () => Promise.resolve(null),
+      offline: () => [],
+      online: () => Promise.resolve(null),
       cards: () => cards,
       create: (title) => {
         created.push(title);
@@ -166,11 +168,27 @@ test("the routes show the updates with the release, and prepare it once as a car
   served.close();
 });
 
-const EN = "## 0.11.1\n\n- New: **Here.** Now.\n";
-const NEWER = {
-  en: "## 0.12.0\n\n- Fixed: **Gone.** It works.\n",
-  it: "## 0.12.0\n\n- Fixed: **Sparito.** Funziona.\n",
+const HERE: KeptRelease = {
+  version: "0.11.1",
+  date: null,
+  notes: { en: [{ kind: "New", title: "Here.", text: "Now." }] },
 };
+const NEWER: KeptRelease[] = [
+  {
+    version: "0.12.0",
+    date: "2026-11-22",
+    notes: {
+      en: [{ kind: "Fixed", title: "Gone.", text: "It works." }],
+      it: [{ kind: "Fixed", title: "Sparito.", text: "Funziona." }],
+    },
+  },
+  // Made on GitHub, not out as a package yet.
+  {
+    version: "0.13.0",
+    date: null,
+    notes: { en: [{ kind: "New", title: "Later.", text: "" }] },
+  },
+];
 
 function whatsNewRoute(github: { up: boolean }) {
   const project = mkdtempSync(join(tmpdir(), "updates-served-"));
@@ -185,8 +203,8 @@ function whatsNewRoute(github: { up: boolean }) {
       current: "0.11.1",
       tags: () =>
         Promise.resolve(github.up ? ["x\trefs/tags/release-0.12.0"] : null),
-      local: () => ({ en: EN }),
-      files: () => {
+      offline: () => [HERE],
+      online: () => {
         asked += 1;
         return Promise.resolve(github.up ? NEWER : null);
       },
@@ -228,7 +246,7 @@ test("what's new lists the local releases when GitHub fails", async () => {
   assert.equal(asked(), 0);
 });
 
-test("what's new adds the newer release from GitHub, in the language, once", async () => {
+test("what's new adds the newer release from GitHub, in the language, once a look", async () => {
   const { call, asked } = whatsNewRoute({ up: true });
   await call("POST /api/updates/look");
   const view = await call("GET /api/updates/whats-new", "?language=it");
@@ -237,7 +255,16 @@ test("what's new adds the newer release from GitHub, in the language, once", asy
   assert.ok(newest);
   assert.equal(newest.version, "0.12.0");
   assert.equal(newest.release?.changes.at(0)?.title, "Sparito.");
+  assert.deepEqual(
+    view.releases.map((one) => one.version),
+    ["0.11.1"],
+  );
   const german = await call("GET /api/updates/whats-new", "?language=de");
   assert.equal(german.newest?.release?.changes.at(0)?.title, "Gone.");
   assert.equal(asked(), 1);
+  // The next look is at another time.
+  await new Promise((done) => setTimeout(done, 5));
+  await call("POST /api/updates/look");
+  await call("GET /api/updates/whats-new", "?language=de");
+  assert.equal(asked(), 2);
 });

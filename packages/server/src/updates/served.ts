@@ -24,7 +24,7 @@ import {
   upgradeBody,
   upgradeTitle,
 } from "./kobble-release.ts";
-import { WhatsNew, type WhatsNewOptions } from "./whats-new.ts";
+import { KobbleNotes, type KobbleNotesOptions } from "./kobble-notes.ts";
 import {
   type AfterUpdate,
   type Git,
@@ -46,7 +46,7 @@ export type UpdatesOptions = {
   // The factory starting again on the Kobble now installed; none where the
   // factory cannot.
   restartFactory?: () => Promise<void>;
-  releases: WhatsNewOptions & {
+  releases: KobbleNotesOptions & {
     tags: () => Promise<string[] | null>;
     cards: () => {
       number: number;
@@ -111,7 +111,7 @@ export function servedUpdates(options: UpdatesOptions) {
   updates.subscribe(() => {
     options.onChange();
   });
-  const whatsNew = new WhatsNew(options.releases);
+  const notes = new KobbleNotes(options.releases);
   const view = (): UpdatesView => ({
     ...updates.state,
     release: releases.view(),
@@ -121,10 +121,7 @@ export function servedUpdates(options: UpdatesOptions) {
     "GET /api/updates": view,
     // What each Kobble release changed, in the page's language.
     "GET /api/updates/whats-new": (_body, url) =>
-      whatsNew.view(
-        url.searchParams.get("language") ?? "en",
-        releases.status(),
-      ),
+      notes.view(url.searchParams.get("language") ?? "en", releases.status()),
     "POST /api/updates/look": async () => {
       await Promise.all([updates.look(), releases.look()]);
     },

@@ -5,7 +5,7 @@
   "releasing": "Wird veröffentlicht…",
   "prepare": "Release vorbereiten",
   "preparing": "Lese, was zusammengeführt wurde…",
-  "prepareAbout": "Der Kobold liest, was zusammengeführt wurde, und schlägt die Nummer vor, erst wenn du auf Vorbereiten drückst.",
+  "prepareAbout": "Der Kobold liest, was zusammengeführt wurde, schlägt die Nummer vor und schreibt die Notizen, erst wenn du auf Vorbereiten drückst.",
   "next": "Nächste:",
   "change": "Ändern",
   "numberLabel": "Die Nummer des Releases",
@@ -31,5 +31,13 @@
     "title": "Releases brauchen ein GitHub-Repository",
     "text": "Ein Release ist ein Tag und ein Release auf GitHub, darum muss zuerst ein Repository verbunden sein.",
     "link": "Verbinden Sie eines in den Einstellungen, unter Wo die Arbeit verfolgt wird."
+  },
+  "notes": "Notizen",
+  "notesAbout": "Vom Kobold aus dem Zusammengeführten geschrieben, auf Englisch, Italienisch und Deutsch. Sie kommen so, wie sie sind, in die Version.",
+  "notesListed": "Der Kobold hat keine Notizen geschrieben, daher listet die Version die zusammengeführten Pull-Requests auf.",
+  "kinds": {
+    "New": "Neu",
+    "Changed": "Geändert",
+    "Fixed": "Behoben"
   }
 }

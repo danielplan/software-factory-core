@@ -1,7 +1,7 @@
 // Releases: numbers and notes for each release of the products, written
 // from what was merged since the last one. The release is made where the
-// code lives, through the GitHub CLI; the repository is the one the board
-// where work is tracked names.
+// code lives, through the code host of the `code` slot; the repository is
+// the one the board where work is tracked names.
 
 import { defineExtension } from "@software-factory/core";
 
@@ -26,8 +26,9 @@ export function serve(host: Host): Served {
   return {
     routes: releasesRoutes({
       project: host.project,
-      cli: host.cli,
       boards: host.slots.tasks,
+      hosts: host.slots.code,
+      extensions: host.available.extensions,
       claude: host.claude,
       changed: host.changed,
     }),

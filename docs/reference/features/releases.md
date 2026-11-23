@@ -19,16 +19,28 @@ tags and releases.
   among the commits since that tag.
 - **Prepare the release** asks a kobold to judge what was merged: whether
   people have to do something, or something they relied on changes or goes
-  away, with a reason line. Reading the page uses no AI; **Release now** uses
-  the answer Prepare gave.
+  away, with a reason line, and to draft the notes in the same answer.
+  Reading the page uses no AI; **Release now** uses the answer Prepare gave
+  (asked again then only when the factory started again since).
 - **The number** follows [the rule the core uses for itself](../versions.md#which-number-to-raise):
   the last number goes up; the middle one only when people have to do
   something or something they relied on changes or goes away; the first one
   never by itself. Without the kobold's answer, the next patch is suggested.
   The first release is `0.1.0`. The team can change the number; it must be
   `x.y.z`, higher than the last, and not a tag that exists.
-- **The notes** are written from the merged pull requests, grouped by each
-  card's type label, each entry linking its pull request.
+- **The notes** are drafted by the kobold for the people who use the
+  product: one line per change they notice, `New`, `Changed` or `Fixed`, a
+  short title and one or two sentences, in English, with the same notes in
+  Italian and German. The page shows them, in its language, once prepared.
+  The release's text has the English first, then the pull requests merged,
+  each linked, then a folding `<details lang="…">` section per other
+  language ([the shape](../../how-to/make-a-release.md#the-shape-of-the-notes),
+  `packages/core/src/release-notes.ts`). Without the kobold's draft, each
+  pull request is a change of its card's type (bug: Fixed, feature: New,
+  otherwise Changed), in English only.
+- **Past releases** show their notes in the page's language, else in
+  English. Kobble's own release notes are made here too
+  ([decision 0016](../../decisions/0016-release-notes-on-github-releases.md)).
 - With nothing merged since the last release, **Release now** is greyed out
   and the server refuses too.
 
@@ -40,21 +52,23 @@ tags and releases.
 
 ## Where it lives
 
-| Part          | Where                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| The extension | `packages/server/src/extensions/releases/`: `numbers.ts`, `judge.ts`, `notes.ts`, `github-releases.ts`, `routes.ts` |
-| The page      | `packages/dashboard/src/extensions/releases/`                                                                       |
+| Part          | Where                                                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| The extension | `packages/server/src/extensions/releases/`: `numbers.ts`, `judge.ts`, `notes.ts`, `product-releases.ts`, `routes.ts`       |
+| The code host | `CodeHost.releases` in `packages/server/src/code-host.ts`; GitHub's in `packages/server/src/extensions/github/releases.ts` |
+| The notes     | `packages/core/src/release-notes.ts`                                                                                       |
+| The page      | `packages/dashboard/src/extensions/releases/`                                                                              |
 
 The routes: `GET /api/releases`, `POST /api/releases/prepare`,
 `POST /api/releases`.
 
 ## Checked and not checked
 
-Checked by tests: the numbers and the notes (`release-numbers.test.ts`,
-`releases.test.ts`). Not checked: the kobold's judgement on real merged
-work, and a real release on a team's repository. Releases declares the
-slots it uses, `code` and `tasks` (its repository is the one the board
+Checked by tests: the numbers, the notes and their shape
+(`release-numbers.test.ts`, `releases.test.ts`, `release-notes.test.ts`).
+Not checked: the kobold's judgement and its notes and translations on real
+merged work, and a real release on a team's repository. Releases declares
+the slots it uses, `code` and `tasks` (its repository is the one the board
 names); `extension-slots.test.ts` checks that each of Kobble's extensions
-reaches only the slots it declares. It reads GitHub through the GitHub CLI
-directly, not through the `code` slot yet (see
-[the server's blueprint](../../../packages/server/BLUEPRINT.md)).
+reaches only the slots it declares. Releases reaches GitHub only through the
+code host of the `code` slot.

@@ -26,10 +26,10 @@ board (`packages/server/src/app/plug-board.ts`).
 
 ## Slots
 
-| Slot    | What it is                          | Filled by                                                      | Used by                                                                                          | Type                                                                                                           |
-| ------- | ----------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `code`  | where branches and pull requests go | GitHub (`fills: ["code"]`)                                     | Factory (the builder, the card panel, Resolve), Releases                                         | `CodeHost` in `packages/server/src/code-host.ts`                                                               |
-| `tasks` | where work is tracked               | the company's tracker: GitHub board, or Jira (`tracker: true`) | Factory, Signals (Fix makes a card), Explorations (the hand-off card), Releases (its repository) | `Cards` in `packages/server/src/cards/cards.ts`, made by `TasksOf` in `packages/server/src/cards/cards-for.ts` |
+| Slot    | What it is                                    | Filled by                                                      | Used by                                                                                          | Type                                                                                                           |
+| ------- | --------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `code`  | where branches, pull requests and releases go | GitHub (`fills: ["code"]`)                                     | Factory (the builder, the card panel, Resolve), Releases, Settings › Updates (Kobble's notes)    | `CodeHost` in `packages/server/src/code-host.ts`                                                               |
+| `tasks` | where work is tracked                         | the company's tracker: GitHub board, or Jira (`tracker: true`) | Factory, Signals (Fix makes a card), Explorations (the hand-off card), Releases (its repository) | `Cards` in `packages/server/src/cards/cards.ts`, made by `TasksOf` in `packages/server/src/cards/cards-for.ts` |
 
 Only Kobble defines slots (`SLOTS`) and only Kobble's own extensions fill
 one; `packages/core/src/extensions/slots.ts` says who fills each and who is

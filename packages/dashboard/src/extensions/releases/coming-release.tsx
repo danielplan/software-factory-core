@@ -1,7 +1,7 @@
 // The coming release: the work merged since the last release and, until
 // the team prepares it, Prepare the release (the kobold is asked nothing
 // before); once prepared, Release now at the top right, the number
-// suggested (Change turns it into a field) and why.
+// suggested (Change turns it into a field), why, and the notes drafted.
 
 import type { TFunction } from "i18next";
 import { LoaderCircle, Sparkles } from "lucide-react";
@@ -17,13 +17,18 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CARD } from "@/components/page-bits";
 
+import { DraftedNotes } from "./drafted-notes";
 import { problemWith, type Why, whyOf } from "./view";
 
 type Words = TFunction;
 
 type Connected = Extract<ReleasesView, { connected: true }>;
 
-type Suggested = { next: string | null; why: string | null };
+type Suggested = {
+  next: string | null;
+  why: string | null;
+  notes: Connected["coming"]["notes"];
+};
 
 export function ComingRelease({ view }: Readonly<{ view: Connected }>) {
   const t = useTranslation().t;
@@ -65,6 +70,9 @@ export function ComingRelease({ view }: Readonly<{ view: Connected }>) {
             view={at.shownView}
           />
         )}
+        {!nothing && at.suggested !== null && (
+          <DraftedNotes notes={at.shownView.coming.notes} />
+        )}
         {!nothing && <Merged merged={coming.merged} last={last} />}
       </div>
     </section>
@@ -98,7 +106,10 @@ function useComingRelease(view: Connected) {
   };
   const shownView =
     prepared && coming.next === null
-      ? { ...view, coming: { ...coming, why: prepared.why } }
+      ? {
+          ...view,
+          coming: { ...coming, why: prepared.why, notes: prepared.notes },
+        }
       : view;
   return {
     typed,

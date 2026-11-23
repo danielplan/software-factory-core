@@ -5,7 +5,8 @@
 **Type:** Index · Answers: which page has the steps for my task?
 
 - [Make a release of the core](make-a-release.md): migrations, the number,
-  what's new, the pull request, publishing.
+  the pull request, the release and its notes on the Releases page,
+  publishing.
 - [Add one of Kobble's extensions](add-a-kobble-extension.md): the module,
   its plugs, its page, borders and tests.
 - [Add a code host](add-a-code-host.md): another place where the code lives,

@@ -1,8 +1,17 @@
-// The notes of a release: written from the pull requests merged since the
-// last one, grouped by each card's type (never by what a title starts with),
-// each entry linking its pull request.
+// The notes of a release: drafted by the kobold when the team prepares it,
+// from the pull requests merged since the last one, in English with the
+// same notes in Italian and German, folded into one text (the core's
+// release-notes.ts). Without the kobold's draft, the notes list each pull
+// request by its card's type (never by what a title starts with). Either
+// way, the text ends its English part with the pull requests merged.
 
-import { CARD_TYPES, type CardType } from "../../cards/cards.ts";
+import {
+  type ReleaseChange,
+  releaseBody,
+  type ReleaseNotes,
+} from "@software-factory/core";
+
+import type { CardType } from "../../cards/cards.ts";
 
 // One merged pull request. The type is its card's "type: …" label.
 export type Merged = {
@@ -13,28 +22,39 @@ export type Merged = {
   body: string;
 };
 
-const HEADINGS: Record<CardType | "other", string> = {
-  bug: "Fixes",
-  feature: "New things",
-  improvement: "Improvements",
-  other: "Other changes",
+// What the kobold is told about the notes, after the rule for the number.
+export const NOTES_RULE = [
+  "Also draft the release notes, for the people who use the product, in plain words: what changed for them, not how it was built.",
+  "Write one entry per change people notice, and leave out what they do not notice (tests, tidying, the team's own tools).",
+  'Each entry has a kind: "New" (something they can do now), "Changed" (something works differently) or "Fixed" (something that was wrong works now); a short title ending with a full stop; and one or two sentences of text.',
+  "Write the entries in English (notes.en), then the same entries, in the same order, in Italian (notes.it) and in German (notes.de). Keep the kinds New, Changed and Fixed in English in every language.",
+  'The notes are in the languages named, whatever language "why" is in.',
+].join("\n");
+
+const KIND_OF: Record<CardType | "other", ReleaseChange["kind"]> = {
+  bug: "Fixed",
+  feature: "New",
+  improvement: "Changed",
+  other: "Changed",
 };
 
-// The notes in Markdown: the line saying why, then a section per type, in
-// the order of CARD_TYPES, the untyped last. Empty sections are left out.
-export function notesOf(why: string | null, merged: Merged[]): string {
-  const sections = [...CARD_TYPES, "other" as const].flatMap((type) => {
-    const entries = merged.filter((one) => (one.type ?? "other") === type);
-    return entries.length === 0
-      ? []
-      : [
-          `## ${HEADINGS[type]}`,
-          entries
-            .map(
-              (one) => `- ${one.title} ([#${String(one.number)}](${one.url}))`,
-            )
-            .join("\n"),
-        ];
-  });
-  return [...(why ? [why] : []), ...sections].join("\n\n") + "\n";
+// The notes without the kobold: each pull request as a change of its
+// card's type, in English only.
+export function listedNotes(merged: Merged[]): ReleaseNotes {
+  return {
+    en: merged.map((one) => ({
+      kind: KIND_OF[one.type ?? "other"],
+      title: one.title,
+      text: "",
+    })),
+  };
+}
+
+// The release's text: the notes in each language, the English part ending
+// with the pull requests merged, each linked.
+export function bodyOf(notes: ReleaseNotes, merged: Merged[]): string {
+  const links = merged
+    .map((one) => `[#${String(one.number)}](${one.url})`)
+    .join(", ");
+  return releaseBody(notes, links ? `Pull requests: ${links}` : "");
 }

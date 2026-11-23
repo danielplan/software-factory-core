@@ -1,4 +1,4 @@
-import type { WhatsNewChange } from "@software-factory/core";
+import type { ReleaseChange } from "../../api/schemas/releases.ts";
 
 import type { Locale } from "../../i18n/locale.ts";
 
@@ -13,7 +13,7 @@ export function firstSentence(text: string): { first: string; rest: string } {
 }
 
 // What a change shows: its first sentence, and the rest behind More.
-export function shownChange(change: WhatsNewChange) {
+export function shownChange(change: ReleaseChange) {
   return { ...change, ...firstSentence(change.text) };
 }
 

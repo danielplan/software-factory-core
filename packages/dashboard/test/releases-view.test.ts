@@ -27,6 +27,7 @@ const ready = (over: Partial<Ready["coming"]>, last: string | null): Ready => ({
     ],
     next: "1.4.3",
     why: "Only fixes and improvements since 1.4.2",
+    notes: null,
     ...over,
   },
   past: [],
