@@ -88,57 +88,45 @@ function Page() {
   );
 }
 
-// While it runs and is made at once: one line above the live screen, with
-// what the kobold does now and its clock.
-export function MakingLine({ run }: Readonly<{ run: VersionRun }>) {
+// What the kobold does now, in plain words: a raw tool name ("Using
+// mcp__…") says nothing to the team, so then the line stays general.
+function doing(activity: string | null, fallback: string): string {
+  if (!activity || /mcp__/.test(activity)) return fallback;
+  return activity;
+}
+
+// Tinker's status, said once, small: who is at work, what it does now and its
+// clock. Beside the screen it shows in the card's header or its tab bar.
+export function MakingStatus({ run }: Readonly<{ run: VersionRun }>) {
   const clock = clockOf(run.since, useNow());
   const t = useT().explore.board;
-  if (!(run.state === "running" && run.url)) return null;
+  const now = doing(run.activity, t.atWork);
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg bg-blue/8 px-2.5 py-1.5 text-xs text-blue">
+    <span
+      role="status"
+      title={`${t.building(MAKER.name, run.version)} ${now}`}
+      className="flex min-w-0 flex-1 items-center gap-1.5 text-[11px] font-normal text-blue"
+    >
       <KoboldHead
-        size={20}
+        size={16}
         hat={MAKER.hat}
         color={MAKER.color}
         className="flex-none motion-safe:animate-bob"
       />
-      <span className="flex-none font-medium">
-        {t.building(MAKER.name, run.version)}
-      </span>
-      <span key={run.activity} className="truncate motion-safe:animate-pop">
-        {run.activity ?? t.atWork}
+      <span key={now} className="truncate motion-safe:animate-pop">
+        {now}
       </span>
       {clock && (
-        <span className="ml-auto flex-none text-muted-foreground tabular-nums">
+        <span className="flex-none text-muted-foreground tabular-nums">
           {clock}
         </span>
       )}
-    </div>
+    </span>
   );
 }
 
-export function Making({ run }: Readonly<{ run: VersionRun }>) {
-  const t = useT();
-  const clock = clockOf(run.since, useNow());
-  return (
-    <div className="grid gap-2.5">
-      <Page />
-      <div className="flex items-center gap-2 text-xs font-medium text-blue">
-        {t.explore.board.building(MAKER.name, run.version)}
-        {clock && (
-          <span className="ml-auto font-normal text-muted-foreground tabular-nums">
-            {clock}
-          </span>
-        )}
-      </div>
-      {run.activity && (
-        <p
-          key={run.activity}
-          className="text-xs text-foreground-2 motion-safe:animate-pop"
-        >
-          {run.activity}
-        </p>
-      )}
-    </div>
-  );
+// Before it runs: the page drawing itself, nothing written around it (the
+// status says what is going on).
+export function Making() {
+  return <Page />;
 }

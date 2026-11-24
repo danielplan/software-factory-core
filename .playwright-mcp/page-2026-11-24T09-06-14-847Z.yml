@@ -1,0 +1,78 @@
+- main [ref=f2e4]:
+  - generic [ref=f2e5]:
+    - generic [ref=f2e6]:
+      - link "Explorations" [ref=f2e7] [cursor=pointer]:
+        - /url: "#explore"
+      - generic [ref=f2e10]: /
+      - generic [ref=f2e11]: Made-up exploration (to try the prototype card)
+      - button "Drop" [ref=f2e12] [cursor=pointer]
+      - button "Hand off" [disabled]
+    - generic [ref=f2e13]:
+      - application "The exploration's board" [ref=f2e16]:
+        - generic [ref=f2e18]:
+          - generic:
+            - generic:
+              - group [ref=f2e19]:
+                - 'article "Prototype: Made-up page, running" [ref=f2e20]':
+                  - generic [ref=f2e22]:
+                    - generic [ref=f2e30]: Prototype A
+                    - 'button "Sketch: click to agree" [ref=f2e35] [cursor=pointer]': Sketch
+                  - generic [ref=f2e36]: Made-up page, running
+                  - generic [ref=f2e37]:
+                    - generic [ref=f2e39]:
+                      - iframe [ref=f2e40]
+                      - button "Bigger" [ref=f2e41] [cursor=pointer]
+                    - generic [ref=f2e47]:
+                      - tablist "Variant" [ref=f2e48]:
+                        - tab "A" [selected] [ref=f2e49] [cursor=pointer]
+                        - tab "B" [ref=f2e50] [cursor=pointer]
+                        - tab "C" [ref=f2e51] [cursor=pointer]
+                      - 'generic "A · Toolbar under the header: One row of letters and the shown variant''s name" [ref=f2e52]': Toolbar under the header
+                      - generic [ref=f2e53]:
+                        - text: Data
+                        - combobox "Data" [ref=f2e54]:
+                          - option "usual" [selected]
+                          - option "empty"
+                          - option "loading"
+                          - option "problem"
+                          - option "long names"
+              - group [ref=f2e56]:
+                - 'article "Prototype: Made-up page, being made" [ref=f2e57]':
+                  - generic [ref=f2e59]:
+                    - generic [ref=f2e67]: Prototype B
+                    - 'status "Tinker is building B: Changing the toolbar''s spacing" [ref=f2e71]':
+                      - generic [ref=f2e81]: Changing the toolbar's spacing
+                      - generic [ref=f2e82]: 1:35
+                    - 'button "Sketch: click to agree" [ref=f2e84] [cursor=pointer]': Sketch
+                  - generic [ref=f2e85]: Made-up page, being made
+                  - generic [ref=f2e110]:
+                    - tablist "Variant" [ref=f2e111]:
+                      - tab "A" [selected] [ref=f2e112] [cursor=pointer]
+                      - tab "B" [ref=f2e113] [cursor=pointer]
+                      - tab "C" [ref=f2e114] [cursor=pointer]
+                    - 'generic "A · Toolbar under the header: One row of letters and the shown variant''s name" [ref=f2e115]': Toolbar under the header
+                    - generic [ref=f2e116]:
+                      - text: Data
+                      - combobox "Data" [ref=f2e117]:
+                        - option "usual" [selected]
+                        - option "empty"
+        - generic "Control Panel" [ref=f2e119]:
+          - button "Zoom In" [ref=f2e120] [cursor=pointer]
+          - button "Zoom Out" [ref=f2e123] [cursor=pointer]
+          - button "Fit View" [ref=f2e126] [cursor=pointer]
+        - link "React Flow attribution" [ref=f2e130] [cursor=pointer]:
+          - /url: https://reactflow.dev/attribution
+          - text: React Flow
+      - complementary [ref=f2e132]:
+        - generic [ref=f2e145]:
+          - generic [ref=f2e146]:
+            - generic [ref=f2e147]: Doodle
+            - generic [ref=f2e148]: your explorer
+          - generic [ref=f2e149]: Thinks it through with you and draws on the board
+        - paragraph [ref=f2e153]: "Made up: try the prototype cards."
+        - generic [ref=f2e154]:
+          - textbox "Talk to the kobold" [ref=f2e155]:
+            - /placeholder: Talk to the kobold…
+          - generic [ref=f2e156]:
+            - button "Talk out loud" [ref=f2e157] [cursor=pointer]
+            - button "Send" [disabled]

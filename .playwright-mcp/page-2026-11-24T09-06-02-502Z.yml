@@ -1,0 +1,180 @@
+- main [ref=e5]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - link "Explorations" [ref=e8] [cursor=pointer]:
+        - /url: "#explore"
+      - generic [ref=e11]: /
+      - generic [ref=e12]: Made-up exploration (to try the prototype card)
+      - button "Drop" [ref=e13] [cursor=pointer]
+      - button "Hand off" [disabled]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - alert [ref=e17]:
+          - generic [ref=e20]:
+            - paragraph [ref=e21]: That did not work
+            - generic [ref=e22]: There is no exploration “made-up”.
+        - application "The exploration's board" [ref=e25]:
+          - generic [ref=e27]:
+            - generic:
+              - generic:
+                - group [ref=e28]:
+                  - 'article "Prototype: Made-up page, running" [ref=e29]':
+                    - generic [ref=e31]:
+                      - generic [ref=e39]: Prototype A
+                      - 'button "Sketch: click to agree" [ref=e44] [cursor=pointer]': Sketch
+                    - generic [ref=e45]: Made-up page, running
+                    - generic [ref=e46]:
+                      - tablist "Variant" [ref=e47]:
+                        - tab "A" [ref=e48] [cursor=pointer]
+                        - tab "B" [ref=e50] [cursor=pointer]
+                        - tab "C Controls under the prototype" [active] [selected] [ref=e52] [cursor=pointer]:
+                          - generic [ref=e53]: C
+                          - generic [ref=e54]: Controls under the prototype
+                      - generic [ref=e56]:
+                        - text: Data
+                        - combobox "Data" [ref=e57]:
+                          - option "usual" [selected]
+                          - option "empty"
+                          - option "loading"
+                          - option "problem"
+                          - option "long names"
+                    - generic [ref=e59]:
+                      - iframe [ref=e60]:
+                        - generic [ref=f1e4]:
+                          - complementary [ref=f1e5]:
+                            - generic [ref=f1e6]: Acme
+                            - navigation "Overview" [ref=f1e18]:
+                              - link "Home" [ref=f1e19] [cursor=pointer]:
+                                - /url: "#home"
+                              - link [ref=f1e24] [cursor=pointer]:
+                                - /url: "#system"
+                                - text: System
+                                - generic [ref=f1e36]:
+                                  - text: Stopped
+                                  - img "Stopped" [ref=f1e37]
+                            - navigation "Pages" [ref=f1e38]:
+                              - generic [ref=f1e39]:
+                                - generic [ref=f1e40]: Work
+                                - link "Signals Sieve" [ref=f1e41] [cursor=pointer]:
+                                  - /url: "#signals"
+                                  - text: Signals
+                                  - 'generic "Sieve: Sorts the signals that come in" [ref=f1e47]': Sieve
+                                - link "Explorations Doodle 2" [ref=f1e60] [cursor=pointer]:
+                                  - /url: "#explore"
+                                  - text: Explorations
+                                  - generic [ref=f1e64]:
+                                    - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=f1e65]': Doodle
+                                    - generic [ref=f1e77]: "2"
+                                - link "Factory Bolt" [ref=f1e78] [cursor=pointer]:
+                                  - /url: "#build"
+                                  - text: Factory
+                                  - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=f1e83]': Bolt
+                                - link "Releases" [ref=f1e97] [cursor=pointer]:
+                                  - /url: "#releases"
+                              - generic [ref=f1e102]:
+                                - generic [ref=f1e103]: Customers
+                                - link "Personas Mimic" [ref=f1e104] [cursor=pointer]:
+                                  - /url: "#personas"
+                                  - text: Personas
+                                  - 'generic "Mimic: Uses the app as one of your personas" [ref=f1e112]': Mimic
+                            - generic [ref=f1e123]:
+                              - button "Send feedback" [ref=f1e124] [cursor=pointer]
+                              - navigation "The factory" [ref=f1e129]:
+                                - link "Marketplace" [ref=f1e130] [cursor=pointer]:
+                                  - /url: "#extensions"
+                                - link "Settings" [ref=f1e134] [cursor=pointer]:
+                                  - /url: "#settings"
+                          - main [ref=f1e139]:
+                            - generic [ref=f1e140]:
+                              - generic [ref=f1e141]:
+                                - generic [ref=f1e142]:
+                                  - heading "Home" [level=1] [ref=f1e144]
+                                  - button "Arrange Home" [ref=f1e146] [cursor=pointer]
+                                - paragraph [ref=f1e147]: What waits for you, and where the work is.
+                              - generic [ref=f1e148]:
+                                - generic [ref=f1e151]:
+                                  - img "Stopped" [ref=f1e152]
+                                  - generic [ref=f1e153]: The product is stopped · Bolt is resting
+                                  - link "System" [ref=f1e154] [cursor=pointer]:
+                                    - /url: "#system"
+                                - generic [ref=f1e157]:
+                                  - generic [ref=f1e158]:
+                                    - generic [ref=f1e159]: Continue
+                                    - generic [ref=f1e160]:
+                                      - generic [ref=f1e161]: The basket is empty when people come back to pay
+                                      - generic [ref=f1e162]: B is agreed. You can hand it off.
+                                    - link "Continue" [ref=f1e163] [cursor=pointer]:
+                                      - /url: "#explore/X-1"
+                                  - generic [ref=f1e166]:
+                                    - generic [ref=f1e167]: Continue
+                                    - generic [ref=f1e168]:
+                                      - generic [ref=f1e169]: One invoice a month for businesses
+                                      - generic [ref=f1e170]: Does his accountant need one invoice, or is one payment enough?
+                                    - link "Continue" [ref=f1e171] [cursor=pointer]:
+                                      - /url: "#explore/X-2"
+                                - generic [ref=f1e176]:
+                                  - link "Signals 0 new" [ref=f1e177] [cursor=pointer]:
+                                    - /url: "#signals"
+                                    - generic [ref=f1e178]: Signals
+                                    - generic [ref=f1e183]: 0 new
+                                  - link "Explorations 2 being explored The basket is empty when people come back to pay One invoice a month for businesses" [ref=f1e184] [cursor=pointer]:
+                                    - /url: "#explore"
+                                    - generic [ref=f1e185]: Explorations
+                                    - generic [ref=f1e189]: 2 being explored
+                                    - generic [ref=f1e190]: The basket is empty when people come back to pay
+                                    - generic [ref=f1e191]: One invoice a month for businesses
+                                  - link "Factory 0 to build" [ref=f1e192] [cursor=pointer]:
+                                    - /url: "#build"
+                                    - generic [ref=f1e193]: Factory
+                                    - generic [ref=f1e197]: 0 to build
+                                  - link "Done 0 merged" [ref=f1e198] [cursor=pointer]:
+                                    - /url: "#build"
+                                    - generic [ref=f1e199]: Done
+                                    - generic [ref=f1e204]: 0 merged
+                          - region "Sprocket" [ref=f1e205]:
+                            - button "Ask Sprocket anything ⌘J" [ref=f1e206] [cursor=pointer]:
+                              - generic [ref=f1e216]: Ask Sprocket anything
+                              - generic [ref=f1e217]: ⌘J
+                      - button "Bigger" [ref=e61] [cursor=pointer]
+                - group [ref=e68]:
+                  - 'article "Prototype: Made-up page, being made" [ref=e69]':
+                    - generic [ref=e71]:
+                      - generic [ref=e79]: Prototype B
+                      - 'button "Sketch: click to agree" [ref=e84] [cursor=pointer]': Sketch
+                    - generic [ref=e85]: Made-up page, being made
+                    - generic [ref=e86]:
+                      - tablist "Variant" [ref=e87]:
+                        - tab "A Toolbar under the header" [selected] [ref=e88] [cursor=pointer]:
+                          - generic [ref=e89]: A
+                          - generic [ref=e90]: Toolbar under the header
+                        - tab "B" [ref=e91] [cursor=pointer]
+                        - tab "C" [ref=e93] [cursor=pointer]
+                      - generic [ref=e95]:
+                        - 'status "Tinker is building B: Changing the toolbar''s spacing" [ref=e96]':
+                          - generic [ref=e106]: Changing the toolbar's spacing
+                          - generic [ref=e107]: 1:37
+                        - generic [ref=e108]:
+                          - text: Data
+                          - combobox "Data" [ref=e109]:
+                            - option "usual" [selected]
+                            - option "empty"
+          - generic "Control Panel" [ref=e134]:
+            - button "Zoom In" [ref=e135] [cursor=pointer]
+            - button "Zoom Out" [ref=e138] [cursor=pointer]
+            - button "Fit View" [ref=e141] [cursor=pointer]
+          - link "React Flow attribution" [ref=e145] [cursor=pointer]:
+            - /url: https://reactflow.dev/attribution
+            - text: React Flow
+      - complementary [ref=e147]:
+        - generic [ref=e160]:
+          - generic [ref=e161]:
+            - generic [ref=e162]: Doodle
+            - generic [ref=e163]: your explorer
+          - generic [ref=e164]: Thinks it through with you and draws on the board
+        - paragraph [ref=e168]: "Made up: try the prototype cards."
+        - generic [ref=e169]:
+          - textbox "Talk to the kobold" [ref=e170]:
+            - /placeholder: Talk to the kobold…
+          - generic [ref=e171]:
+            - button "Talk out loud" [ref=e172] [cursor=pointer]
+            - button "Send" [disabled]

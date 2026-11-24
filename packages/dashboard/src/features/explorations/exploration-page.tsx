@@ -14,6 +14,7 @@ import { type Read, useRead } from "@/api/use-read";
 
 import { Board } from "./board/canvas";
 import { BoardProblem } from "./board/frame";
+import { MADE_UP_ID, MADE_UP_PAGE } from "./board/made-up-page";
 import { useLivePrototype } from "./board/live-prototype";
 import { HandingOff } from "./handing-off";
 import { TalkPanel } from "./talk-panel";
@@ -21,9 +22,12 @@ import { useT } from "@/i18n/use-t";
 
 export function ExplorationPage({ id }: Readonly<{ id: string }>) {
   const t = useT();
-  const { data, problem } = useRead(
+  const read = useRead(
     `/api/kobble/exploration?id=${encodeURIComponent(id)}`,
   ) as Read<Page>;
+  // The made-up exploration (made-up-page.ts) is read from nowhere.
+  const { data, problem } =
+    id === MADE_UP_ID ? { data: MADE_UP_PAGE, problem: null } : read;
   const [said, say] = useState<string | null>(null);
   // The things a person attached to what they type next.
   const [attached, setAttached] = useState<string[]>([]);

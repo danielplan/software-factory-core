@@ -1,13 +1,14 @@
-// A prototype on the board: its variants (a choice's options, other ways)
-// switched on top, outside the app, and its screen below, always the same
-// size: the live app while it runs (on its branch, on the page the change
+// A prototype on the board: its screen, always the same size, with its
+// variants (a choice's options, other ways) and made-up data switched
+// outside the app, in a toolbar, a tab bar or a row at its foot (see
+// prototype-layout.ts): the live app while it runs (on its branch, on the page the change
 // is on, with the variant picked; at a desktop's size, shrunk; Bigger opens
 // it full size), being made, or a sketch with Start in its middle; how the
 // variant differs, what odd thing happened, and its last persona test.
 // Agreeing (the badge on its bar) agrees to the variant shown.
 
 import type { NodeProps } from "@xyflow/react";
-import { Check, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { useState } from "react";
 
 import type { TestResult, VersionRun } from "@/api/client";
@@ -15,10 +16,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { Frame, useBoardDo } from "./frame";
-import { Making, MakingLine } from "./prototype-making";
+import { MADE_UP_ID } from "./made-up-page";
+import { layoutOf } from "./prototype-layout";
+import { Making, MakingStatus } from "./prototype-making";
 import { Starting } from "./prototype-starting";
-import { States } from "./prototype-states";
-import { Segment, ShownVariant, SwitchRow } from "./prototype-switches";
+import { hasSwitches, TabBar, Toolbar } from "./prototype-switches";
 import { LiveScreen, SCREEN } from "./prototype-screen";
 import type { ThingNode } from "./nodes";
 import { useT } from "@/i18n/use-t";
@@ -31,7 +33,8 @@ function stateWords(
   t: Messages["explore"],
 ): string | null {
   if (!run) return null;
-  if (run.state === "starting") return t.starting;
+  // Starting says itself, on the screen.
+  if (run.state === "starting") return null;
   if (run.state === "failed") return run.problem ?? t.board.stopped;
   // Running or stopped: what is odd about it (not shared with the team).
   return run.problem;
@@ -128,34 +131,46 @@ function variantsOf(made: Made, picked: string | null) {
   return { variants, variant, agreed };
 }
 
-// What the frame shows: the live screen (with what the kobold does, while
-// it is made), the kobold at work before it runs, or Start.
+// What the frame shows: the live screen (usable while it is made), the page
+// drawing itself before it runs, or Start. What the kobold does is said once,
+// in its status, never here.
 function Shown({
   run,
   shown,
   title,
   at,
   start,
+  joined,
 }: Readonly<{
   run: VersionRun | undefined;
   shown: VersionRun | undefined;
   title: string;
   at: number;
   start: (() => void) | null;
+  // The screen is joined to the switches on this side: square corners there.
+  joined?: "top" | "bottom";
 }>) {
   const live = run?.state === "running" && run.url !== null;
-  if (run?.making && !live) return <Making run={run} />;
   return (
-    <>
-      {run?.making && <MakingLine run={run} />}
-      <Screen
-        run={shown}
-        at={at}
-        title={title}
-        start={start}
-        making={run?.making === true}
-      />
-    </>
+    <div
+      className={cn(
+        "grid",
+        joined === "top" && "[&>*]:rounded-t-none",
+        joined === "bottom" && "[&>*]:rounded-b-none",
+      )}
+    >
+      {run?.making && !live ? (
+        <Making />
+      ) : (
+        <Screen
+          run={shown}
+          at={at}
+          title={title}
+          start={start}
+          making={run?.making === true}
+        />
+      )}
+    </div>
   );
 }
 
@@ -179,43 +194,58 @@ export function PrototypeNode({ data }: NodeProps<ThingNode>) {
   const open = ["waiting", "exploring"].includes(page.exploration.status);
   const shownRun = shownOf(run, thing.opens, { variant, state });
   const about = variants.find((one) => one.key === variant);
+  const layout = layoutOf();
+  const switches = {
+    variants,
+    shown: variant,
+    agreed,
+    onPick: (key: string) => {
+      pick(key);
+      // The made-up exploration is not on the server: nothing to tell it.
+      if (page.exploration.id === MADE_UP_ID) return;
+      act("board", { do: { act: "show", id: thing.id, variant: key } });
+    },
+    states: thing.states ?? [],
+    state,
+    onState: setState,
+  };
+  const bar = hasSwitches(switches);
+  const status = run?.making ? <MakingStatus run={run} /> : null;
+  const screen = (joined?: "top" | "bottom") => (
+    <Shown
+      run={run}
+      shown={shownRun}
+      title={`${thing.key} · ${thing.name}`}
+      at={thing.key.charCodeAt(0) - 65}
+      joined={joined}
+      start={
+        open
+          ? () => {
+              act("open", { key: thing.key });
+            }
+          : null
+      }
+    />
+  );
   return (
     <Frame
       data={data}
       title={thing.name}
       tag={thing.key}
       glow={run?.making === true}
+      status={layout === "B" ? null : status}
     >
-      {variants.length > 0 && (
-        <Variants
-          variants={variants}
-          shown={variant}
-          agreed={agreed}
-          onPick={(key) => {
-            pick(key);
-            act("board", { do: { act: "show", id: thing.id, variant: key } });
-          }}
-        />
+      {layout === "A" && bar && <Toolbar {...switches} />}
+      {layout === "B" && bar && <TabBar {...switches} status={status} />}
+      {layout === "B" && !bar && status}
+      {layout === "C" ? (
+        <div className="grid">
+          {screen(bar ? "bottom" : undefined)}
+          {bar && <Toolbar {...switches} joined="bottom" />}
+        </div>
+      ) : (
+        screen(layout === "B" && bar ? "top" : undefined)
       )}
-      <ShownVariant
-        letter={about?.key}
-        name={about?.name}
-        difference={about?.difference ?? thing.difference}
-      />
-      <States states={thing.states ?? []} shown={state} onPick={setState} />
-      <Shown
-        run={run}
-        shown={shownRun}
-        title={`${thing.key} · ${thing.name}`}
-        at={thing.key.charCodeAt(0) - 65}
-        start={
-          open
-            ? () => {
-                act("open", { key: thing.key });
-              }
-            : null
-        }
-      />
       <About
         words={stateWords(run, t.explore)}
         test={page.tests[thing.key] ?? null}
@@ -249,62 +279,5 @@ function About({
         </a>
       )}
     </>
-  );
-}
-
-// The switch between a prototype's variants, outside the app: one short
-// segment each, its letter (its name on hover and under the switch), a tick
-// on the agreed one. Once one is agreed, the others are archived behind a
-// "+N" segment that shows them again; nothing is removed.
-function Variants({
-  variants,
-  shown,
-  agreed,
-  onPick,
-}: Readonly<{
-  variants: NonNullable<Made["variants"]>;
-  shown: string;
-  agreed: string | undefined;
-  onPick: (key: string) => void;
-}>) {
-  const b = useT().explore.board;
-  const [all, showAll] = useState(false);
-  const archived = agreed !== undefined && !all;
-  const listed = archived
-    ? variants.filter((one) => one.key === agreed)
-    : variants;
-  const others = variants.length - 1;
-  return (
-    <SwitchRow label={b.variant} role="tablist">
-      {listed.map((one) => (
-        <Segment
-          key={one.key}
-          role="tab"
-          on={one.key === shown}
-          title={[`${one.key} · ${one.name}`, one.difference]
-            .filter(Boolean)
-            .join(": ")}
-          onPick={() => {
-            onPick(one.key);
-          }}
-        >
-          {one.key}
-          {one.key === agreed && (
-            <Check aria-hidden className="size-3 flex-none text-[#197653]" />
-          )}
-        </Segment>
-      ))}
-      {agreed !== undefined && others > 0 && (
-        <Segment
-          on={false}
-          title={archived ? b.showArchived(others) : b.hideArchived}
-          onPick={() => {
-            showAll(archived);
-          }}
-        >
-          {archived ? `+${String(others)}` : "−"}
-        </Segment>
-      )}
-    </SwitchRow>
   );
 }

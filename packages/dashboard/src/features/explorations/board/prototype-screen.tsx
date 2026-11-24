@@ -2,7 +2,7 @@
 // to fit its card, so a page for a computer shows its real layout and can
 // be used there. Bigger opens it over the board at full size.
 
-import { LoaderCircle, Maximize2 } from "lucide-react";
+import { Maximize2 } from "lucide-react";
 
 import {
   Dialog,
@@ -59,7 +59,6 @@ export function LiveScreen({
             <Maximize2 aria-hidden className="size-3" /> {t.explore.bigger}
           </button>
         </DialogTrigger>
-        {making && <StillMade />}
       </div>
       <DialogContent className="h-[90dvh] w-[94vw] max-w-[94vw] grid-rows-[auto_1fr] gap-2 p-3 sm:max-w-[94vw]">
         <DialogTitle className="flex items-center gap-3 pr-8 text-[13px]">
@@ -77,17 +76,5 @@ export function LiveScreen({
         />
       </DialogContent>
     </Dialog>
-  );
-}
-
-// On a prototype still being made: a note at its foot that it is not done,
-// which lets the clicks through to the app.
-function StillMade() {
-  const t = useT().explore.board;
-  return (
-    <span className="pointer-events-none absolute inset-x-2 bottom-2 flex items-center gap-1.5 rounded-full bg-blue px-2.5 py-1 text-[11px] font-medium text-blue-foreground shadow-card">
-      <LoaderCircle aria-hidden className="size-3 flex-none animate-spin" />
-      <span className="truncate">{t.stillMade}</span>
-    </span>
   );
 }

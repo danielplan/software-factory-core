@@ -1,0 +1,85 @@
+- main [ref=e5]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - link "Explorations" [ref=e8] [cursor=pointer]:
+        - /url: "#explore"
+      - generic [ref=e11]: /
+      - generic [ref=e12]: Made-up exploration (to try the prototype card)
+      - button "Drop" [ref=e13] [cursor=pointer]
+      - button "Hand off" [disabled]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - alert [ref=e17]:
+          - generic [ref=e20]:
+            - paragraph [ref=e21]: That did not work
+            - generic [ref=e22]: There is no exploration “made-up”.
+        - application "The exploration's board" [ref=e25]:
+          - generic [ref=e27]:
+            - generic:
+              - generic:
+                - group [ref=e28]:
+                  - 'article "Prototype: Made-up page, running" [ref=e29]':
+                    - generic [ref=e31]:
+                      - generic [ref=e39]: Prototype A
+                      - 'button "Sketch: click to agree" [ref=e44] [cursor=pointer]': Sketch
+                    - generic [ref=e45]: Made-up page, running
+                    - generic [ref=e46]:
+                      - tablist "Variant" [ref=e47]:
+                        - tab "A" [ref=e48] [cursor=pointer]
+                        - tab "B" [ref=e50] [cursor=pointer]
+                        - tab "C Controls under the prototype" [active] [selected] [ref=e52] [cursor=pointer]:
+                          - generic [ref=e53]: C
+                          - generic [ref=e54]: Controls under the prototype
+                      - generic [ref=e56]:
+                        - text: Data
+                        - combobox "Data" [ref=e57]:
+                          - option "usual"
+                          - option "empty" [selected]
+                          - option "loading"
+                          - option "problem"
+                          - option "long names"
+                    - generic [ref=e59]:
+                      - iframe [ref=e60]
+                      - button "Bigger" [ref=e61] [cursor=pointer]
+                - group [ref=e68]:
+                  - 'article "Prototype: Made-up page, being made" [ref=e69]':
+                    - generic [ref=e71]:
+                      - generic [ref=e79]: Prototype B
+                      - 'button "Sketch: click to agree" [ref=e84] [cursor=pointer]': Sketch
+                    - generic [ref=e85]: Made-up page, being made
+                    - generic [ref=e86]:
+                      - tablist "Variant" [ref=e87]:
+                        - tab "A Toolbar under the header" [selected] [ref=e88] [cursor=pointer]:
+                          - generic [ref=e89]: A
+                          - generic [ref=e90]: Toolbar under the header
+                        - tab "B" [ref=e91] [cursor=pointer]
+                        - tab "C" [ref=e93] [cursor=pointer]
+                      - generic [ref=e95]:
+                        - 'status "Tinker is building B: Changing the toolbar''s spacing" [ref=e96]':
+                          - generic [ref=e106]: Changing the toolbar's spacing
+                          - generic [ref=e107]: 1:37
+                        - generic [ref=e108]:
+                          - text: Data
+                          - combobox "Data" [ref=e109]:
+                            - option "usual" [selected]
+                            - option "empty"
+          - generic "Control Panel" [ref=e134]:
+            - button "Zoom In" [ref=e135] [cursor=pointer]
+            - button "Zoom Out" [ref=e138] [cursor=pointer]
+            - button "Fit View" [ref=e141] [cursor=pointer]
+          - link "React Flow attribution" [ref=e145] [cursor=pointer]:
+            - /url: https://reactflow.dev/attribution
+            - text: React Flow
+      - complementary [ref=e147]:
+        - generic [ref=e160]:
+          - generic [ref=e161]:
+            - generic [ref=e162]: Doodle
+            - generic [ref=e163]: your explorer
+          - generic [ref=e164]: Thinks it through with you and draws on the board
+        - paragraph [ref=e168]: "Made up: try the prototype cards."
+        - generic [ref=e169]:
+          - textbox "Talk to the kobold" [ref=e170]:
+            - /placeholder: Talk to the kobold…
+          - generic [ref=e171]:
+            - button "Talk out loud" [ref=e172] [cursor=pointer]
+            - button "Send" [disabled]

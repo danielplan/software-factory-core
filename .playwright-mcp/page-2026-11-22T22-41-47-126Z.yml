@@ -1,0 +1,52 @@
+- generic [ref=e299]:
+  - complementary [ref=e300]:
+    - generic [ref=e301]: Acme
+    - navigation "Overview" [ref=e313]:
+      - link "Home" [ref=e314] [cursor=pointer]:
+        - /url: "#home"
+      - link [ref=e319] [cursor=pointer]:
+        - /url: "#system"
+        - text: System
+        - generic [ref=e331]:
+          - text: Stopped
+          - img "Stopped" [ref=e332]
+    - navigation "Pages" [ref=e333]:
+      - generic [ref=e334]:
+        - generic [ref=e335]: Work
+        - link "Signals Sieve" [ref=e336] [cursor=pointer]:
+          - /url: "#signals"
+          - text: Signals
+          - 'generic "Sieve: Sorts the signals that come in" [ref=e342]': Sieve
+        - link "Explorations Doodle 2" [ref=e355] [cursor=pointer]:
+          - /url: "#explore"
+          - text: Explorations
+          - generic [ref=e359]:
+            - 'generic "Doodle: Thinks explorations through and makes prototypes" [ref=e360]': Doodle
+            - generic [ref=e372]: "2"
+        - link "Factory Bolt" [ref=e373] [cursor=pointer]:
+          - /url: "#build"
+          - text: Factory
+          - 'generic "Bolt: Builds the agreed cards on the Factory board" [ref=e378]': Bolt
+        - link "Releases" [ref=e392] [cursor=pointer]:
+          - /url: "#releases"
+      - generic [ref=e397]:
+        - generic [ref=e398]: Customers
+        - link "Personas Mimic" [ref=e399] [cursor=pointer]:
+          - /url: "#personas"
+          - text: Personas
+          - 'generic "Mimic: Uses the app as one of your personas" [ref=e407]': Mimic
+    - generic [ref=e418]:
+      - button "Send feedback" [ref=e419] [cursor=pointer]
+      - navigation "The factory" [ref=e424]:
+        - link "Marketplace" [ref=e425] [cursor=pointer]:
+          - /url: "#extensions"
+        - link "Settings" [ref=e429] [cursor=pointer]:
+          - /url: "#settings"
+  - main [ref=e434]:
+    - generic [ref=e436]:
+      - heading "Explorations" [level=1] [ref=e437]
+      - button "New exploration" [ref=e439] [cursor=pointer]
+  - region "Sprocket" [ref=e440]:
+    - button "Ask Sprocket anything ⌘J" [ref=e441] [cursor=pointer]:
+      - generic [ref=e451]: Ask Sprocket anything
+      - generic [ref=e452]: ⌘J

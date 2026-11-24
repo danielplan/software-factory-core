@@ -101,6 +101,7 @@ export function Frame({
   tag,
   tone = "card",
   glow = false,
+  status,
   children,
 }: Readonly<{
   data: ThingData;
@@ -110,6 +111,8 @@ export function Frame({
   tone?: "card" | "note";
   // Glows while the kobold works on it (a prototype being made).
   glow?: boolean;
+  // A small line in the header, after the kind (what the kobold does now).
+  status?: ReactNode;
   children: ReactNode;
 }>) {
   const t = useT();
@@ -134,6 +137,7 @@ export function Frame({
       <header className="thing-handle flex min-w-0 cursor-grab items-center gap-1.5 text-[12px] text-muted-foreground active:cursor-grabbing">
         <GripVertical aria-hidden className="size-3.5 flex-none text-faint" />
         <KindBadge kind={thing.kind} tag={tag} />
+        {status}
         <span className="ml-auto flex items-center gap-1">
           <AgreeTick data={data} />
           <RemoveButton data={data} />

@@ -1,0 +1,56 @@
+- main [ref=e453]:
+  - generic [ref=e454]:
+    - generic [ref=e455]:
+      - link "Explorations" [ref=e456] [cursor=pointer]:
+        - /url: "#explore"
+      - generic [ref=e459]: /
+      - generic [ref=e460]: One invoice a month for businesses
+      - button "Drop" [ref=e461] [cursor=pointer]
+      - button "Hand off" [disabled]
+    - generic [ref=e462]:
+      - application "The exploration's board" [ref=e465]:
+        - generic [ref=e467]:
+          - generic:
+            - generic:
+              - img:
+                - img "Edge from problem to choice-1" [ref=e468] [cursor=pointer]
+            - generic:
+              - group [ref=e471]:
+                - article "The problem" [ref=e472]:
+                  - generic [ref=e474]:
+                    - generic [ref=e482]: The problem
+                    - 'button "Sketch: click to agree" [ref=e486] [cursor=pointer]': Sketch
+                  - paragraph [ref=e489]: Bakeries and cafés order every week but pay their suppliers once a month. Today each order is paid on its own.
+                  - generic [ref=e490]: Bruno
+              - group [ref=e503]:
+                - 'article "Choice: How do businesses pay once a month?" [ref=e504]':
+                  - generic [ref=e506]:
+                    - generic [ref=e514]: Choice
+                    - 'button "Sketch: click to agree" [ref=e521] [cursor=pointer]': Sketch
+                  - generic [ref=e522]: How do businesses pay once a month?
+                  - button "A A monthly invoice" [ref=e524] [cursor=pointer]:
+                    - generic [ref=e525]: A
+                    - generic [ref=e526]: A monthly invoice
+                  - button "B Pay later at checkout" [ref=e529] [cursor=pointer]:
+                    - generic [ref=e530]: B
+                    - generic [ref=e531]: Pay later at checkout
+        - generic "Control Panel" [ref=e534]:
+          - button "Zoom In" [ref=e535] [cursor=pointer]
+          - button "Zoom Out" [ref=e538] [cursor=pointer]
+          - button "Fit View" [ref=e541] [cursor=pointer]
+        - link "React Flow attribution" [ref=e545] [cursor=pointer]:
+          - /url: https://reactflow.dev/attribution
+          - text: React Flow
+      - complementary [ref=e547]:
+        - generic [ref=e560]:
+          - generic [ref=e561]:
+            - generic [ref=e562]: Doodle
+            - generic [ref=e563]: your explorer
+          - generic [ref=e564]: Thinks it through with you and draws on the board
+        - paragraph [ref=e568]: Bruno orders every Monday and pays his suppliers once a month. I put two ways on the board. Does his accountant need one invoice, or is one payment enough?
+        - generic [ref=e569]:
+          - textbox "Talk to the kobold" [ref=e570]:
+            - /placeholder: Talk to the kobold…
+          - generic [ref=e571]:
+            - button "Talk out loud" [ref=e572] [cursor=pointer]
+            - button "Send" [disabled]
