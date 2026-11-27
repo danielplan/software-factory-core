@@ -1,14 +1,15 @@
 // What Sprocket and the person have said so far in Sprocket's window, with
 // the answer as it is written: the support kobold's conversation, or the
-// setup coach's while Kobble is set up. A persona Sprocket proposes shows as
-// its card (persona-card.tsx); while it is the last thing said, the person
-// can answer it from the card.
+// setup coach's while Kobble is set up. Each persona Sprocket proposes shows
+// as its card (persona-card.tsx); the cards of its latest answer with cards
+// can be answered from the card, so with several, adding one leaves the
+// others' buttons (each card says once its persona is in Personas).
 
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Markdown } from "@/components/markdown";
-import { partsOf } from "@/lib/persona-proposal";
+import { partsOf, proposalsIn } from "@/lib/persona-proposal";
 
 import { PersonaCard } from "./persona-card";
 
@@ -30,6 +31,10 @@ export function Messages({
 }>) {
   const end = useRef<HTMLDivElement>(null);
   const count = messages.length;
+  // Sprocket's latest answer that proposed personas: its cards wait.
+  const proposing = messages.findLastIndex(
+    (message) => !message.mine && proposalsIn(message.text).length > 0,
+  );
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
   }, [count, writing]);
@@ -53,7 +58,7 @@ export function Messages({
           <SprocketSaid
             key={at}
             text={message.text}
-            onSay={at === count - 1 && writing == null ? onSay : undefined}
+            onSay={at === proposing && writing == null ? onSay : undefined}
             onChange={focusAnswer}
           />
         ),
@@ -78,44 +83,42 @@ function SprocketSaid({
   onChange: () => void;
 }>) {
   const t = useTranslation().t;
-  const parts = partsOf(text);
-  const { proposal } = parts;
   return (
     <div className="grid gap-3 self-stretch">
-      {parts.before && (
-        <div className="self-start">
-          <Markdown text={parts.before} />
-        </div>
-      )}
-      {proposal && (
-        <PersonaCard
-          proposal={proposal}
-          onAdd={
-            onSay &&
-            (() => {
-              onSay(t("support.persona.yes", { name: proposal.name }));
-            })
-          }
-          onChange={onChange}
-        />
-      )}
-      {parts.after && (
-        <div className="self-start">
-          <Markdown text={parts.after} />
-        </div>
+      {partsOf(text).map((part, at) =>
+        "proposal" in part ? (
+          <PersonaCard
+            key={at}
+            proposal={part.proposal}
+            onAdd={
+              onSay &&
+              (() => {
+                onSay(t("support.persona.yes", { name: part.proposal.name }));
+              })
+            }
+            onChange={onChange}
+          />
+        ) : (
+          <div key={at} className="self-start">
+            <Markdown text={part.text} />
+          </div>
+        ),
       )}
     </div>
   );
 }
 
-// The answer while it is written: a proposal's card once its block is done.
+// The answer while it is written: each proposal's card once its block is done.
 function Written({ text }: Readonly<{ text: string }>) {
-  const parts = partsOf(text);
   return (
     <>
-      {parts.before && <Markdown text={parts.before} />}
-      {parts.proposal && <PersonaCard proposal={parts.proposal} />}
-      {parts.after && <Markdown text={parts.after} />}
+      {partsOf(text).map((part, at) =>
+        "proposal" in part ? (
+          <PersonaCard key={at} proposal={part.proposal} />
+        ) : (
+          <Markdown key={at} text={part.text} />
+        ),
+      )}
     </>
   );
 }

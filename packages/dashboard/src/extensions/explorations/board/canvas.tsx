@@ -29,8 +29,8 @@ import { ownedByPerson, type ThingNode } from "./nodes";
 import { PrototypeNode } from "./prototype-node";
 import { ReadingBoard } from "./reading-board";
 import { readsTheBoard } from "./reading";
+import { ChoiceNode } from "./choice-node";
 import {
-  ChoiceNode,
   DiagramNode,
   HeardNode,
   NoteNode,

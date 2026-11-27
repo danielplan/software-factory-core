@@ -161,6 +161,14 @@ const optionSchema = z.strictObject({
   difference: z.string(),
 });
 
+// A point a choice's options are compared on (what it costs, how much work
+// it is, where the data lives): a row of the choice's table, with each
+// option's cell by its letter.
+const pointSchema = z.strictObject({
+  label: text,
+  cells: z.record(optionKey, z.string()),
+});
+
 export const thingSchema = z.discriminatedUnion("kind", [
   z.strictObject({ ...common, kind: z.literal("problem") }),
   z.strictObject({ ...common, kind: z.literal("heard") }),
@@ -170,6 +178,8 @@ export const thingSchema = z.discriminatedUnion("kind", [
     kind: z.literal("choice"),
     title: text,
     options: z.array(optionSchema),
+    // The trade-offs, side by side: a row per point, a cell per option.
+    points: z.array(pointSchema).max(6).optional(),
     chosen: optionKey.nullable(),
     // The option the kobold recommends, when it does.
     recommended: optionKey.optional(),

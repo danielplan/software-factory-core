@@ -16,11 +16,12 @@ import { z } from "zod";
 import { COACH_HEADER } from "../../coach/setup-tools.ts";
 import { answerMcp, toolAnswer } from "../../mcp.ts";
 import type { Act } from "./board-acts.ts";
-import type { Option } from "./board-things.ts";
+import type { Option, Point } from "./board-things.ts";
 import { addWorldTools } from "./world-tools.ts";
 import type { ExplorationWorlds } from "./worlds.ts";
 import { addDeeperTool, type Way } from "./deeper.ts";
 import { addIdeaTool } from "./idea-tool.ts";
+import { option, points } from "./choice-input.ts";
 
 export type BoardTools = {
   token: string;
@@ -42,15 +43,6 @@ export type BoardTools = {
   // The made-up world its prototypes share, and the exploration's id.
   world: { worlds: ExplorationWorlds; id: string };
 };
-
-const option = z.object({
-  key: z
-    .string()
-    .optional()
-    .describe("An option to change (A, B…); none: a new one."),
-  name: z.string().optional().describe("A few words."),
-  difference: z.string().optional().describe("How it differs, in one line."),
-});
 
 // The arrow a new thing comes with: from the thing it follows on the board.
 const FROM = {
@@ -95,10 +87,13 @@ const TOOLS: {
   {
     name: "add_choice",
     description:
-      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference, and the one you recommend (its letter), which the board marks.",
+      "A real choice: the question that has to be decided and its options (A, B, C), each a few words with a one-line difference, and the one you recommend (its letter), which the board marks. When the options trade things off, add the points they differ on (at most six): the card shows them side by side as a table, a row per point and a cell per option.",
     input: {
       title: z.string().min(1),
       options: z.array(option),
+      points: points
+        .optional()
+        .describe("The trade-offs: a row per point, a short cell per option."),
       recommended: z
         .string()
         .optional()
@@ -109,6 +104,7 @@ const TOOLS: {
       act: "choice",
       title: String(a.title),
       options: a.options as Partial<Option>[],
+      ...(Array.isArray(a.points) ? { points: a.points as Point[] } : {}),
       ...(typeof a.recommended === "string"
         ? { recommended: a.recommended }
         : {}),
@@ -118,7 +114,7 @@ const TOOLS: {
   {
     name: "change_thing",
     description:
-      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter) or the option you recommend.",
+      "Change a thing by its id: a note's text, a title, a diagram, a choice's options (change by letter, add without one, removeOptions by letter), its points (the whole table again; [] takes it off) or the option you recommend.",
     input: {
       id: z.string(),
       text: z.string().optional(),
@@ -126,6 +122,7 @@ const TOOLS: {
       diagram: z.string().optional(),
       options: z.array(option).optional(),
       removeOptions: z.array(z.string()).optional(),
+      points: points.optional(),
       recommended: z.string().optional(),
     },
     act: (a) => ({ act: "change", ...(a as { id: string }) }),

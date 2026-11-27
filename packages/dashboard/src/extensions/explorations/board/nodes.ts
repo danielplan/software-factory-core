@@ -53,7 +53,10 @@ export function widthOf(thing: Thing): number {
     case "picture":
       return 300;
     case "choice":
-      return 260;
+      // With its trade-offs, a column per option beside the points' labels.
+      return thing.points?.length
+        ? Math.min(680, 110 + 150 * thing.options.length)
+        : 260;
     default:
       return 240;
   }

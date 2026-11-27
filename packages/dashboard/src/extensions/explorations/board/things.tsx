@@ -1,21 +1,18 @@
 // The things on the board, drawn in their frame (frame.tsx): the problem
 // (a yellow note with its personas), what we heard (its signals with their
 // persona's face), a note, a choice (the question and its options: click
-// one to pick it, and the kobold goes on, making its prototype when that
-// helps; the one the kobold recommends and those with a prototype say so),
+// one to pick it; choice-node.tsx),
 // a diagram (drawn
 // from Mermaid) and a picture a person put there.
 
 import type { NodeProps } from "@xyflow/react";
-import { Check, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { PersonaFace } from "@/components/kobold-face";
-import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { useDiagram } from "./diagram";
-import { Frame, useBoardDo } from "./frame";
+import { Frame } from "./frame";
 import type { ThingNode } from "./nodes";
 
 export function ProblemNode({ data }: NodeProps<ThingNode>) {
@@ -71,87 +68,6 @@ export function NoteNode({ data }: NodeProps<ThingNode>) {
   return (
     <Frame data={data} tone="note">
       <Markdown text={thing.text} />
-    </Frame>
-  );
-}
-
-export function ChoiceNode({ data }: NodeProps<ThingNode>) {
-  const t = useTranslation().t;
-  const { thing, page } = data;
-  const act = useBoardDo(page.exploration.id);
-  if (thing.kind !== "choice") return null;
-  // This choice's options that have a prototype: the variants of the
-  // prototypes its arrows lead to, or (older boards) the arrows' labels.
-  const made = new Set(
-    page.board.links.flatMap((link) => {
-      if (link.from !== thing.id) return [];
-      const to = page.board.things.find((one) => one.id === link.to);
-      if (to?.kind !== "prototype") return [];
-      return to.variants?.map((one) => one.key) ?? [link.label];
-    }),
-  );
-  return (
-    <Frame data={data} title={thing.title}>
-      {thing.options.map((option) => {
-        const chosen = thing.chosen === option.key;
-        return (
-          <div
-            key={option.key}
-            className={cn(
-              "nodrag flex min-w-0 items-center gap-2 rounded-[10px] px-2 py-[7px]",
-              chosen
-                ? "bg-[#e3f5ee] shadow-[inset_0_0_0_1.5px_#12a594]"
-                : "bg-ground",
-            )}
-          >
-            <button
-              type="button"
-              aria-pressed={chosen}
-              title={option.difference}
-              className="flex min-w-0 flex-1 items-center gap-2 text-left"
-              onClick={() => {
-                act("board", {
-                  do: {
-                    act: "choose",
-                    id: thing.id,
-                    option: chosen ? null : option.key,
-                  },
-                });
-              }}
-            >
-              <span
-                className={cn(
-                  "grid size-5 flex-none place-items-center rounded-md text-[11px] font-semibold",
-                  chosen
-                    ? "bg-[#12a594] text-white"
-                    : "bg-card text-wash-foreground",
-                )}
-              >
-                {chosen ? <Check aria-hidden className="size-3" /> : option.key}
-              </span>
-              <span className="grid min-w-0 flex-1">
-                <span className={cn(chosen && "font-semibold")}>
-                  {option.name}
-                </span>
-                {thing.recommended === option.key && (
-                  <span
-                    title={t("explore.board.recommendsThis")}
-                    className="inline-flex items-center gap-1 text-[11px] font-medium text-wash-foreground"
-                  >
-                    <Sparkles aria-hidden className="size-3 flex-none" />
-                    {t("explore.board.recommended")}
-                  </span>
-                )}
-              </span>
-            </button>
-            {made.has(option.key) && (
-              <span className="flex-none text-[11px] font-medium text-muted-foreground">
-                {t("explore.kinds.prototype")}
-              </span>
-            )}
-          </div>
-        );
-      })}
     </Frame>
   );
 }

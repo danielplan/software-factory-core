@@ -14,6 +14,45 @@ import { Refused } from "../../refused.ts";
 import { ownLine } from "./own-lines.ts";
 
 export type Option = { key: string; name: string; difference: string };
+// A row of a choice's table: a point the options are compared on, each
+// option's cell by its letter.
+export type Point = { label: string; cells: Record<string, string> };
+
+const MOST_POINTS = 6;
+
+// A choice's points, checked against its options: each with a label, its
+// cells only for options the choice has (by their letter, any case), at
+// most six. A cell of an option that is gone goes with it.
+export function withPoints(options: Option[], points: Point[]): Point[] {
+  if (points.length > MOST_POINTS)
+    throw new Refused(
+      `A choice compares its options on at most ${String(MOST_POINTS)} points.`,
+    );
+  const keys = new Set(options.map((one) => one.key));
+  return points.map((point) => {
+    const label = point.label.trim();
+    if (!label) throw new Refused("A point needs a label.");
+    const cells: Record<string, string> = {};
+    for (const [key, cell] of Object.entries(point.cells)) {
+      const letter = key.trim().toUpperCase();
+      if (!keys.has(letter))
+        throw new Refused(`There is no option ${letter} for “${label}”.`);
+      cells[letter] = cell.trim();
+    }
+    return { label, cells };
+  });
+}
+
+// The cells of options still on the choice (after options were taken off).
+export function pointsFor(options: Option[], points: Point[]): Point[] {
+  const keys = new Set(options.map((one) => one.key));
+  return points.map((point) => ({
+    label: point.label,
+    cells: Object.fromEntries(
+      Object.entries(point.cells).filter(([key]) => keys.has(key)),
+    ),
+  }));
+}
 
 // A new id for a thing of this kind: note-1, note-2…
 export function newId(board: Board, kind: string): string {
@@ -167,7 +206,13 @@ function choiceLine(head: string, thing: Extract<Thing, { kind: "choice" }>) {
       o.key === thing.recommended ? " (you recommend it)" : "";
     return `    ${o.key}. ${o.name}: ${o.difference || "—"}${recommended}`;
   });
-  return [`${head}: ${thing.title}${chosen}`, ...options].join("\n");
+  const points = (thing.points ?? []).map((point) => {
+    const cells = thing.options.map(
+      (o) => o.key + " " + (point.cells[o.key] || "—"),
+    );
+    return `    ${point.label}: ${cells.join("; ")}`;
+  });
+  return [`${head}: ${thing.title}${chosen}`, ...options, ...points].join("\n");
 }
 
 function line(

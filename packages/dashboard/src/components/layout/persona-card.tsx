@@ -80,7 +80,8 @@ function Decision({
   onChange: (() => void) | undefined;
 }>) {
   const t = useTranslation().t;
-  if (onAdd)
+  // Once its persona is in Personas the card says so, waiting or not.
+  if (onAdd && !added)
     return (
       <>
         <Button size="pill-sm" onClick={onAdd}>
