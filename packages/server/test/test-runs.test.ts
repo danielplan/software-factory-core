@@ -154,7 +154,11 @@ test("the days are lived one after another, each knowing the days before, with t
               expected: "It works",
               asExpected: true,
               note: day === 1 ? "That's how I work." : undefined,
-              shot: `d${String(day)}-1.png`,
+              // A whole path on day 1, as the browser was told.
+              shot:
+                day === 1
+                  ? join(store.testShots("T-0004"), "d1-1.png")
+                  : `d${String(day)}-1.png`,
             },
           ],
         }),
@@ -200,7 +204,11 @@ test("the days are lived one after another, each knowing the days before, with t
   assert.match(prompts[0] ?? "", /Day 1 of 2: Monday/);
   assert.match(prompts[0] ?? "", /Mia gardens on weekends\./);
   assert.match(prompts[0] ?? "", /This is your first day with the app\./);
-  assert.match(prompts[0] ?? "", /d1-1\.png/);
+  assert.ok(
+    (prompts[0] ?? "").includes(
+      join(folder, "kobble", "test-shots", "T-0004", "d1-<step>.png"),
+    ),
+  );
   assert.match(prompts[1] ?? "", /Day 2 of 2\. What happens:\n- Orders gloves/);
   assert.match(prompts[1] ?? "", /- Day 1: Day 1 work/);
   assert.match(

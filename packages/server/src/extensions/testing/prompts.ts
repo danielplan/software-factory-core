@@ -88,12 +88,16 @@ export function dayPrompt(today: {
   test: PersonaTest;
   persona: KobblePersona;
   app: string;
+  // The folder the screenshots go to, as a whole path: the browser saves
+  // a bare name beside the agent's own folder, not there.
+  shots: string;
   number: number;
   day: TestDay;
   before: TestStep[];
 }): string {
-  const { test, persona, app, number, day, before } = today;
+  const { test, persona, app, shots, number, day, before } = today;
   const name = `d${String(number)}`;
+  const where = join(shots, `${name}-<step>.png`);
   const kind = day.title ? `: ${day.title}` : "";
   const done = before.map((step) => `Day ${String(step.day)}: ${step.did}`);
   return [
@@ -104,7 +108,7 @@ export function dayPrompt(today: {
     before.length > 0
       ? `What you did on the days before:\n${lines(done)}`
       : "This is your first day with the app.",
-    `The app runs at ${app}. Open it in the browser. After every step, call browser_take_screenshot with filename ${name}-<step>.png (${name}-1.png, ${name}-2.png …) and put that name in the step's shot.`,
+    `The app runs at ${app}. Open it in the browser. After every step, call browser_take_screenshot with filename ${where} (${name}-1.png, ${name}-2.png …, always in that folder), and put the file's name (${name}-1.png) in the step's shot.`,
   ].join("\n\n");
 }
 

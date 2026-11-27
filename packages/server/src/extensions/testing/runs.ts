@@ -6,6 +6,7 @@
 // others wait; one at a time for each persona.
 
 import { randomUUID } from "node:crypto";
+import { basename } from "node:path";
 
 import {
   type Claude,
@@ -198,6 +199,7 @@ export class TestRuns {
       for (const [index, day] of test.days.entries()) {
         const number = index + 1;
         const lived = await this.live(test, persona, app, browser.url, {
+          shots,
           number,
           day,
           before: steps,
@@ -249,12 +251,17 @@ export class TestRuns {
     persona: KobblePersona,
     app: string,
     browser: string,
-    today: { number: number; day: TestDay; before: TestStep[] },
+    today: {
+      shots: string;
+      number: number;
+      day: TestDay;
+      before: TestStep[];
+    },
   ): Promise<{ steps: TestStep[]; stuck: boolean }> {
     let doing: string | null = null;
-    const { number, day, before } = today;
+    const { shots, number, day, before } = today;
     const said = await this.ask(
-      dayPrompt({ test, persona, app, number, day, before }),
+      dayPrompt({ test, persona, app, shots, number, day, before }),
       {
         mcp: { name: "browser", url: browser, headers: {} },
         onText: (text) => {
@@ -268,16 +275,19 @@ export class TestRuns {
     );
     const store = this.options.store();
     const diary = answerOf(said, diarySchema, "diary");
-    const steps = diary.steps.map((step) => ({
-      day: number,
-      time: step.time ?? null,
-      did: step.did,
-      expected: step.expected,
-      asExpected: step.asExpected,
-      ...(step.note ? { note: step.note } : {}),
-      shot:
-        step.shot && store.testShotFile(test.id, step.shot) ? step.shot : null,
-    }));
+    const steps = diary.steps.map((step) => {
+      // The file's name, also when the diary gives its whole path.
+      const shot = step.shot ? basename(step.shot) : null;
+      return {
+        day: number,
+        time: step.time ?? null,
+        did: step.did,
+        expected: step.expected,
+        asExpected: step.asExpected,
+        ...(step.note ? { note: step.note } : {}),
+        shot: shot && store.testShotFile(test.id, shot) ? shot : null,
+      };
+    });
     return { steps, stuck: diary.stuck === true };
   }
 
