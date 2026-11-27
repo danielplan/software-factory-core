@@ -1,6 +1,48 @@
 {
   "releases": [
     {
+      "version": "0.14.2",
+      "date": "2026-11-27",
+      "notes": {
+        "en": [
+          {
+            "kind": "Fixed",
+            "title": "Installing a project without git works again.",
+            "text": "Where a project is installed without git, such as a server the built code is copied to, `npm install` no longer fails. The git hooks are now set up only in a copy that uses git."
+          },
+          {
+            "kind": "Changed",
+            "title": "Your own hooks file is kept under the full version number.",
+            "text": "When an upgrade replaces a team's own `lefthook.yml`, the old one is now kept as `factory/hooks-before-<version>.yml` with the full version, for example `hooks-before-0.14.1.yml`."
+          }
+        ],
+        "it": [
+          {
+            "kind": "Fixed",
+            "title": "Installare un progetto senza git funziona di nuovo.",
+            "text": "Dove un progetto viene installato senza git, per esempio su un server dove si copia il codice già pronto, `npm install` non fallisce più. Gli hook di git vengono ora impostati solo in una copia che usa git."
+          },
+          {
+            "kind": "Changed",
+            "title": "Il vostro file degli hook viene conservato con il numero di versione completo.",
+            "text": "Quando un aggiornamento sostituisce il `lefthook.yml` di un team, quello vecchio viene ora conservato come `factory/hooks-before-<versione>.yml` con la versione completa, per esempio `hooks-before-0.14.1.yml`."
+          }
+        ],
+        "de": [
+          {
+            "kind": "Fixed",
+            "title": "Ein Projekt ohne git zu installieren funktioniert wieder.",
+            "text": "Wo ein Projekt ohne git installiert wird, etwa auf einem Server, auf den der fertige Code kopiert wird, schlägt `npm install` nicht mehr fehl. Die git-Hooks werden jetzt nur in einer Kopie eingerichtet, die git nutzt."
+          },
+          {
+            "kind": "Changed",
+            "title": "Eure eigene Hook-Datei wird mit der vollen Versionsnummer aufbewahrt.",
+            "text": "Wenn ein Upgrade die eigene `lefthook.yml` eines Teams ersetzt, wird die alte jetzt als `factory/hooks-before-<Version>.yml` mit der vollen Version aufbewahrt, zum Beispiel `hooks-before-0.14.1.yml`."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.14.1",
       "date": "2026-11-23",
       "notes": {
