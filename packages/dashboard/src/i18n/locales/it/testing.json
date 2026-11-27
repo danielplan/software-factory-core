@@ -71,6 +71,8 @@
     "notLived": "Non vissuto: il test di {{name}} si è fermato il giorno {{day}}.",
     "errors": "Il browser ha segnalato",
     "more": "Mostra tutta la storia",
-    "less": "Mostra meno"
+    "less": "Mostra meno",
+    "earlier": "Prima",
+    "later": "Dopo"
   }
 }

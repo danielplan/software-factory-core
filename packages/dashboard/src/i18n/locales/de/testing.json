@@ -67,6 +67,8 @@
     "notLived": "Nicht gelebt: {{name}} kam an Tag {{day}} nicht weiter.",
     "errors": "Der Browser meldete",
     "more": "Ganze Geschichte zeigen",
-    "less": "Weniger zeigen"
+    "less": "Weniger zeigen",
+    "earlier": "Früher",
+    "later": "Später"
   }
 }

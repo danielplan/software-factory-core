@@ -10,11 +10,11 @@ import { ChevronLeft, Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { Face, SignalRow, TestMoment, TestPage } from "@/api/client";
+import type { TestMoment, TestPage } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
 import { ProblemBox } from "@/components/layout/problem-box";
 import { Button } from "@/components/ui/button";
-import { CARD, TypeChip } from "@/components/page-bits";
+import { CARD } from "@/components/page-bits";
 import { Markdown } from "@/components/markdown";
 import { useRead } from "@/api/query";
 import { testPageSchema } from "@/api/schemas/testing";
@@ -24,7 +24,8 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/i18n/use-t";
 import { momentIn } from "@/i18n/format";
 
-import { CountChip, Counts, StatusIcon } from "./test-bits";
+import { Found, Moment, Slider } from "./moment-card";
+import { Counts, StatusIcon } from "./test-bits";
 
 const TITLE = "mt-7 mb-3 text-[17px] font-semibold tracking-[-0.01em]";
 
@@ -35,7 +36,7 @@ export function TestRun({ id }: Readonly<{ id: string }>) {
     testPageSchema,
   );
   return (
-    <div>
+    <div className="min-w-0">
       <Link
         to={testingPath()}
         className="mb-3.5 inline-flex items-center gap-1 text-[13px] font-semibold text-blue"
@@ -199,7 +200,7 @@ function Day({
   const errors = test.errors.filter((error) => error.day === number);
   const skipped = test.stuck !== null && number > test.stuck;
   return (
-    <section aria-label={t("testing.run.day", { number })}>
+    <section className="relative" aria-label={t("testing.run.day", { number })}>
       <h2 className={TITLE}>
         {[t("testing.run.day", { number }), title].filter(Boolean).join(" · ")}
       </h2>
@@ -224,16 +225,11 @@ function Day({
             : t("testing.run.noMoments")}
         </p>
       ) : (
-        <div className="flex snap-x gap-3 overflow-x-auto px-0.5 pt-0.5 pb-3">
+        <Slider>
           {moments.map((moment) => (
-            <Moment
-              key={moment.number}
-              test={test.id}
-              moment={moment}
-              face={test.persona?.face ?? null}
-            />
+            <Moment key={moment.number} test={test.id} moment={moment} />
           ))}
-        </div>
+        </Slider>
       )}
       {test.stuck === number && (
         <p className="mt-1 text-[13px] font-medium text-foreground-2">
@@ -241,83 +237,5 @@ function Day({
         </p>
       )}
     </section>
-  );
-}
-
-function Moment({
-  test,
-  moment,
-  face,
-}: Readonly<{
-  test: string;
-  moment: TestMoment;
-  face: Face | null;
-}>) {
-  const t = useTranslation().t;
-  const bug = moment.signals.some((signal) => signal.type === "bug");
-  return (
-    <article
-      className={cn(
-        CARD,
-        "flex w-[280px] flex-none snap-start flex-col",
-        bug &&
-          "shadow-[0_0_0_1px_color-mix(in_srgb,var(--type-bug)_35%,var(--border))]",
-      )}
-    >
-      <div className="flex items-baseline justify-between gap-2 px-4 pt-3 pb-2">
-        <span className="font-semibold">
-          {moment.time ?? `#${String(moment.number)}`}
-        </span>
-        <span className="truncate text-[12.5px] text-muted-foreground">
-          {moment.did}
-        </span>
-      </div>
-      {moment.shot ? (
-        <img
-          src={`/api/kobble/testing/shot?id=${encodeURIComponent(test)}&name=${encodeURIComponent(moment.shot)}`}
-          alt={moment.did}
-          className="h-[150px] w-full border-y border-line-soft object-cover object-top-left"
-        />
-      ) : (
-        <div className="h-[150px] w-full border-y border-line-soft bg-surface" />
-      )}
-      <div className="flex items-end gap-2 px-4 pt-3">
-        {face && <PersonaFace face={face} size={26} />}
-        <p className="rounded-[12px_12px_12px_4px] bg-surface-2 px-[11px] py-2 text-[13px] leading-snug">
-          {moment.note ?? t("testing.run.expected", { what: moment.expected })}
-        </p>
-      </div>
-      <div className="grid gap-1.5 px-4 pt-3 pb-4">
-        {moment.signals.length === 0 ? (
-          <span>
-            {moment.asExpected ? (
-              <CountChip kind="ok">{t("testing.moment.ok")}</CountChip>
-            ) : (
-              <CountChip kind="surprise">
-                {t("testing.moment.surprise")}
-              </CountChip>
-            )}
-          </span>
-        ) : (
-          moment.signals.map((signal) => (
-            <Found key={signal.id} signal={signal} />
-          ))
-        )}
-      </div>
-    </article>
-  );
-}
-
-function Found({ signal }: Readonly<{ signal: SignalRow }>) {
-  return (
-    <Link
-      to={`/signals/${encodeURIComponent(signal.id)}`}
-      className="group -mx-1 flex items-start gap-2 rounded-[8px] px-1 py-0.5 text-[12.5px] text-foreground-2 hover:bg-surface"
-    >
-      <TypeChip type={signal.type} />
-      <span className="group-hover:underline">
-        <Markdown text={signal.text} inline />
-      </span>
-    </Link>
   );
 }

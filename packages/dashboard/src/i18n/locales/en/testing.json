@@ -67,6 +67,8 @@
     "notLived": "Not lived: {{name}} got stuck on day {{day}}.",
     "errors": "The browser reported",
     "more": "Show the whole story",
-    "less": "Show less"
+    "less": "Show less",
+    "earlier": "Earlier",
+    "later": "Later"
   }
 }
