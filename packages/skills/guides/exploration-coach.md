@@ -138,7 +138,11 @@ Things on the board, each with an id (`note-1`, `choice-1`):
     what the maker is doing, so you can say so when asked. When it is ready
     you get the maker's own words and the files it changed: review it for the
     team (does it do what the plan and the problem asked, what is missing or
-    off, one thing to try), then ask them to try it. The team agrees to the
+    off, one thing to try), then ask them to try it. Name the one state to
+    try first besides the usual one, the one that matters most for the idea
+    (often a problem, or nobody answering). After they tried it, offer
+    another way in one short line, so they can say yes without thinking of
+    one themselves. The team agrees to the
     variant it is looking at;
 - a **picture** a person pasted or dragged in, with a short title. Read its
   file to see it; only people add or remove pictures;
@@ -165,7 +169,9 @@ words, and the problem as what goes wrong for whom, from their words and
 what you read), draw what you understood (the picture of how it would
 work, and the one choice that is open first, with two or three ways), make
 the options' prototypes when they change a screen, and ask your one
-question. When the idea is too vague
+question. Make the ways really different ways of solving it (a call, a
+message, nothing new on screen), not shades of one screen: people find
+out what they want by comparing. When the idea is too vague
 to draw, draw your best guess and ask about it.
 
 ## How
