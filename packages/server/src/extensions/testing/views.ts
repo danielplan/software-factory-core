@@ -22,8 +22,9 @@ export type TestPersona = Pick<
   "id" | "name" | "place" | "about"
 > & { face: Face };
 
-// How one moment went: the kind of the worst signal filed at it, or ok.
-export type MomentKind = "ok" | "idea" | "question" | "bug";
+// How one moment went: the kind of the worst signal filed at it; with none,
+// ok when it went as the persona expected, else a surprise.
+export type MomentKind = "ok" | "surprise" | "idea" | "question" | "bug";
 
 export type TestRow = {
   id: string;
@@ -36,6 +37,8 @@ export type TestRow = {
   doing: string | null;
   problem: string | null;
   days: number;
+  // The day the persona got stuck on, when they did.
+  stuck: number | null;
   moments: MomentKind[];
   counts: { bug: number; idea: number; question: number };
 };
@@ -46,7 +49,11 @@ export type TestMoment = TestStep & {
 };
 
 export type TestPage = {
-  test: TestRow & { story: string; dayTitles: string[] };
+  test: TestRow & {
+    story: string;
+    dayTitles: string[];
+    errors: { day: number; text: string }[];
+  };
   moments: TestMoment[];
   // Signals filed for the whole test, not at a moment.
   other: SignalRow[];
@@ -67,9 +74,14 @@ function filedBy(test: PersonaTest, signals: KobbleSignal[]): KobbleSignal[] {
   return signals.filter((signal) => test.signals.includes(signal.id));
 }
 
-function kindAt(number: number, filed: KobbleSignal[]): MomentKind {
+function kindAt(
+  step: TestStep,
+  number: number,
+  filed: KobbleSignal[],
+): MomentKind {
   const here = filed.filter((signal) => signal.step?.number === number);
-  return WORST.find((kind) => here.some((one) => one.type === kind)) ?? "ok";
+  const worst = WORST.find((kind) => here.some((one) => one.type === kind));
+  return worst ?? (step.asExpected ? "ok" : "surprise");
 }
 
 function rowOf(
@@ -91,7 +103,8 @@ function rowOf(
     doing: test.doing ?? null,
     problem: test.problem,
     days: test.days.length,
-    moments: test.steps.map((_, index) => kindAt(index + 1, filed)),
+    stuck: test.stuck ?? null,
+    moments: test.steps.map((step, index) => kindAt(step, index + 1, filed)),
     counts: {
       bug: count("bug"),
       idea: count("idea"),
@@ -155,6 +168,7 @@ export function testPage(
       ...rowOf(test, personas, signals),
       story: test.story,
       dayTitles: test.days.map((day) => day.title),
+      errors: test.errors ?? [],
     },
     moments: test.steps.map((step, index) => ({
       ...step,

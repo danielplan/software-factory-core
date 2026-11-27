@@ -350,6 +350,13 @@ export const personaTestSchema = z.preprocess(
     signals: z.array(fileId),
     // Why it failed, in plain words.
     problem: z.string().nullable(),
+    // The day the persona got stuck on and could not go on, as the person
+    // would; the days after it were not lived.
+    stuck: z.number().int().positive().nullable().optional(),
+    // What the browser reported as errors, day by day (its console).
+    errors: z
+      .array(z.strictObject({ day: z.number().int().positive(), text }))
+      .optional(),
   }),
 );
 

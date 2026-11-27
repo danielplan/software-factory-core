@@ -28,7 +28,8 @@
     "ok": "Went fine",
     "idea": "Idea",
     "question": "Question",
-    "bug": "Bug"
+    "bug": "Bug",
+    "surprise": "Didn't go as expected"
   },
   "new": {
     "line": "Pick who. Mimic writes their story and their days; change anything before you send them off.",
@@ -61,6 +62,11 @@
     "noMoments": "Nothing happened yet.",
     "expected": "Expected: {{what}}",
     "whole": "For the whole test",
-    "inSignals": "Every bug and idea is also on the Signals page, linked to its moment."
+    "inSignals": "Every bug and idea is also on the Signals page, linked to its moment.",
+    "stuck": "{{name}} got stuck here and stopped.",
+    "notLived": "Not lived: {{name}} got stuck on day {{day}}.",
+    "errors": "The browser reported",
+    "more": "Show the whole story",
+    "less": "Show less"
   }
 }

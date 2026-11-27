@@ -26,6 +26,7 @@ import {
 import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { SignalsPlug } from "../../plugs/signals.ts";
 import { inLanguage } from "../../language.ts";
+import { BrowserConsole } from "./browser-console.ts";
 import { askedOf, newTest, type TestDraft } from "./new-test.ts";
 import {
   analystPrompt,
@@ -185,23 +186,33 @@ export class TestRuns {
       const persona = this.options.personas()?.get(test.persona);
       if (!persona) throw new TestProblem("Its persona is gone.");
       const app = await this.appFor(test);
+      const shots = this.options.store().testShots(test.id);
+      const reported = new BrowserConsole(shots);
       browser = await this.options.browser({
-        shots: this.options.store().testShots(test.id),
+        shots,
         locale: test.locale ?? null,
         timeZone: test.timeZone ?? null,
       });
       const steps: TestStep[] = [];
+      const errors: { day: number; text: string }[] = [];
       for (const [index, day] of test.days.entries()) {
+        const number = index + 1;
         const lived = await this.live(test, persona, app, browser.url, {
-          number: index + 1,
+          number,
           day,
           before: steps,
         });
-        steps.push(...lived);
-        this.update(id, { steps: [...steps] });
+        steps.push(...lived.steps);
+        errors.push(
+          ...reported.errors().map((text) => ({ day: number, text })),
+        );
+        const stuck = lived.stuck ? number : null;
+        this.update(id, { steps: [...steps], errors: [...errors], stuck });
+        // Stuck as the person would be: the days after would only repeat it.
+        if (stuck) break;
       }
-      this.update(id, { doing: null });
-      const signals = await this.analyse(test, persona, steps);
+      const lived = this.update(id, { doing: null });
+      const signals = await this.analyse(lived, persona, steps);
       this.update(id, { status: "done", ended: this.now(), signals });
     } catch (error) {
       this.update(id, {
@@ -239,7 +250,7 @@ export class TestRuns {
     app: string,
     browser: string,
     today: { number: number; day: TestDay; before: TestStep[] },
-  ): Promise<TestStep[]> {
+  ): Promise<{ steps: TestStep[]; stuck: boolean }> {
     let doing: string | null = null;
     const { number, day, before } = today;
     const said = await this.ask(
@@ -256,7 +267,8 @@ export class TestRuns {
       },
     );
     const store = this.options.store();
-    return answerOf(said, diarySchema, "diary").steps.map((step) => ({
+    const diary = answerOf(said, diarySchema, "diary");
+    const steps = diary.steps.map((step) => ({
       day: number,
       time: step.time ?? null,
       did: step.did,
@@ -266,6 +278,7 @@ export class TestRuns {
       shot:
         step.shot && store.testShotFile(test.id, step.shot) ? step.shot : null,
     }));
+    return { steps, stuck: diary.stuck === true };
   }
 
   // Part 2: the analyst turns the diary into signals, each at its moment.

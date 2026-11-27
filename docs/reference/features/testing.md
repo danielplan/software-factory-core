@@ -25,16 +25,22 @@ live app. Bugs and ideas come out of the same days.
    what it did on the days before, writes a `Step N: …` line before each
    step so the page follows it, and keeps a diary of each moment: the time,
    what it did, what it expected, whether that happened, what the persona
-   said, and a screenshot.
+   said, and a screenshot. When the persona cannot go on, as the person
+   would not (no way in, nothing works), the day ends as **stuck** and the
+   days after are not lived. What the browser's console reports as errors
+   is kept, day by day.
 3. **The findings.** An analyst turns the whole diary into signals (bug,
    idea or question, source `test`, in the person's words), each at the
    moment where it happened, through Signals' plug and its "already" check.
+   The browser's errors back a bug up where the diary shows it.
 
 The Testing page (`#testing`) lists the tests, newest first, with their
-persona, days, a bar per moment (went fine, idea, question, bug) and what
+persona, days, a bar per moment (went fine, not as expected with nothing
+filed, idea, question, bug) and what
 they found; with none yet, it shows the personas to pick one. A test's page
-(`#testing/<test>`) shows the story and each day as a strip of moments, with
-the screenshot, the persona's words and what was filed there. **Test again**
+(`#testing/<test>`) shows the story's first paragraph (the rest on request)
+and each day as a strip of moments, with the screenshot, the persona's words
+and what was filed there, the browser's errors, and where they got stuck. **Test again**
 starts a new test for the same persona.
 
 Up to three tests run at once and the others wait; one at a time for each

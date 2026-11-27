@@ -13,6 +13,7 @@ import { test } from "node:test";
 import { type Claude, KobbleStore } from "@software-factory/core";
 
 import { browserOptions } from "../src/kobble/browser.ts";
+import { testPage } from "../src/extensions/testing/views.ts";
 import { stepNow } from "../src/extensions/testing/prompts.ts";
 import { TestRuns } from "../src/extensions/testing/runs.ts";
 import { standIn } from "./pretend-claude.ts";
@@ -209,6 +210,63 @@ test("the days are lived one after another, each knowing the days before, with t
   assert.equal(store.testShotFile("T-0004", "d1-1.png") !== null, true);
   assert.equal(store.testShotFile("T-0004", "../d1-1.png"), null);
   assert.equal(store.testShotFile("mia", "d1-1.png"), null);
+});
+
+test("a persona stuck on a day lives no more days; what the browser reported goes to the analyst", async () => {
+  const { folder, store } = acmeStore();
+  const prompts: string[] = [];
+  const claude: Claude = {
+    run: (options) => {
+      prompts.push(options.prompt);
+      if (options.prompt.startsWith("Part 2"))
+        return Promise.resolve({ ok: true, text: '{"signals":[]}' });
+      const shots = store.testShots("T-0004");
+      writeFileSync(
+        join(shots, "console-1.log"),
+        [
+          "[   1200ms] [LOG] Opened",
+          "[  19478ms] [ERROR] Failed to load resource: 401 @ /api/sign-in",
+          "[  19480ms] [ERROR] Failed to load resource: 401 @ /api/sign-in",
+        ].join("\n"),
+      );
+      return Promise.resolve({
+        ok: true,
+        text: JSON.stringify({
+          stuck: true,
+          steps: [
+            {
+              did: "Tried to sign in",
+              expected: "My account",
+              asExpected: false,
+            },
+          ],
+        }),
+      });
+    },
+  };
+  const runs = runsOf(store, folder, { claude });
+  runs.start({
+    persona: "mia",
+    title: "Mia's week",
+    days: [
+      { title: "Monday", situations: ["Signs in"] },
+      { title: "Tuesday", situations: ["Orders gloves"] },
+    ],
+  });
+  await runs.settled();
+  const done = store.get("tests", "T-0004");
+  assert.equal(done?.status, "done");
+  assert.equal(done.stuck, 1);
+  assert.deepEqual(done.errors, [
+    { day: 1, text: "Failed to load resource: 401 @ /api/sign-in" },
+  ]);
+  // Day 1 and the analyst: Tuesday was not lived.
+  assert.equal(prompts.length, 2);
+  assert.match(prompts[1] ?? "", /Day 1: Failed to load resource: 401/);
+  // A moment that surprised the persona, with nothing filed at it.
+  const page = testPage(store, "T-0004", store.all("personas"), []);
+  assert.deepEqual(page.test.moments, ["surprise"]);
+  assert.equal(page.test.stuck, 1);
 });
 
 test("a test needs a persona and what happens on their days; one at a time for each", () => {

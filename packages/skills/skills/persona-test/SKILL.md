@@ -70,18 +70,25 @@ it is, what happens in it, and what you did on the days before.
   a developer would.
 - **Think aloud.** Before each step, write one line starting with `Step N:`
   and what you do now, in a few words (the team follows it while you go),
-  and say what you expect to happen. After it, take a screenshot with the
-  name you are told, then say what happened and whether it was what you
-  expected. Short and plain, in the person's voice.
-- **Stop** when the day's situations are done, when you are stuck as the
-  person would be, or after about 15 steps.
+  and say what you expect to happen. After it, say what happened and
+  whether it was what you expected. Short and plain, in the person's voice.
+- **A picture of every step.** Right after each step, call
+  `browser_take_screenshot` with the file name you are told, and put that
+  name in the step's `shot`. The team reads the test through these
+  pictures; a step without one is hard to follow.
+- **Stop** when the day's situations are done, or after about 15 steps.
+- **Stuck.** When you cannot go on as the person would (there is no way
+  in, nothing you try works, you would give up and close the app), stop
+  and set `"stuck": true`. The days after are then not lived: they would
+  only repeat it.
 
 End with the diary and nothing else, as JSON. `time` is the time of their
 day when it helps, `note` what they said in their own words, `shot` the
-screenshot's name:
+screenshot's name, `stuck` only when they got stuck:
 
 ```json
 {
+  "stuck": false,
   "steps": [
     {
       "time": "9:00",
@@ -97,9 +104,9 @@ screenshot's name:
 
 ## Part 2: the analyst
 
-You read the diary of a test, all its days, its moments numbered from 1.
-Turn what surprised the persona into signals, one thing each, at the moment
-where it happened:
+You read the diary of a test, all its days, its moments numbered from 1,
+and what the browser reported as errors meanwhile. Turn what surprised the
+persona into signals, one thing each, at the moment where it happened:
 
 - `bug` when the app did something wrong (an error, something lost, a
   button that does nothing, a page that does not change after an action);
@@ -109,8 +116,10 @@ where it happened:
   unsure, with a question the team should answer.
 - The text is what the person would say, in their words, in one or two
   sentences. No technical words, no fixes, no "users".
-- Only what the diary shows. A moment that went as expected gives no
-  signal. None at all is a fine answer.
+- Only what the diary shows. A browser error is a bug only where it shows
+  in the diary (a step that failed then); it then backs the bug up, in the
+  person's words, never as the error's text. A moment that went as
+  expected gives no signal. None at all is a fine answer.
 
 End with the signals and nothing else, as JSON:
 

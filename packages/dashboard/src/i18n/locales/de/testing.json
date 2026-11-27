@@ -28,7 +28,8 @@
     "ok": "Lief gut",
     "idea": "Idee",
     "question": "Frage",
-    "bug": "Fehler"
+    "bug": "Fehler",
+    "surprise": "Lief anders als erwartet"
   },
   "new": {
     "line": "Wähle, wer. Mimic schreibt die Geschichte und die Tage; ändere, was du willst, bevor du sie losschickst.",
@@ -61,6 +62,11 @@
     "noMoments": "Noch ist nichts passiert.",
     "expected": "Erwartet: {{what}}",
     "whole": "Für den ganzen Test",
-    "inSignals": "Jeder Fehler und jede Idee steht auch auf der Seite Signale, mit dem Moment, in dem es passierte."
+    "inSignals": "Jeder Fehler und jede Idee steht auch auf der Seite Signale, mit dem Moment, in dem es passierte.",
+    "stuck": "Hier kam {{name}} nicht weiter und hörte auf.",
+    "notLived": "Nicht gelebt: {{name}} kam an Tag {{day}} nicht weiter.",
+    "errors": "Der Browser meldete",
+    "more": "Ganze Geschichte zeigen",
+    "less": "Weniger zeigen"
   }
 }

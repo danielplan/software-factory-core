@@ -32,7 +32,8 @@
     "ok": "Andato bene",
     "idea": "Idea",
     "question": "Domanda",
-    "bug": "Bug"
+    "bug": "Bug",
+    "surprise": "Non è andato come previsto"
   },
   "new": {
     "line": "Scegli chi. Mimic scrive la sua storia e le sue giornate; cambia quello che vuoi prima di mandarla.",
@@ -65,6 +66,11 @@
     "noMoments": "Non è ancora successo niente.",
     "expected": "Si aspettava: {{what}}",
     "whole": "Per tutto il test",
-    "inSignals": "Ogni bug e idea è anche nella pagina Segnali, collegato al suo momento."
+    "inSignals": "Ogni bug e idea è anche nella pagina Segnali, collegato al suo momento.",
+    "stuck": "Qui il test di {{name}} si è fermato: non si poteva andare avanti.",
+    "notLived": "Non vissuto: il test di {{name}} si è fermato il giorno {{day}}.",
+    "errors": "Il browser ha segnalato",
+    "more": "Mostra tutta la storia",
+    "less": "Mostra meno"
   }
 }

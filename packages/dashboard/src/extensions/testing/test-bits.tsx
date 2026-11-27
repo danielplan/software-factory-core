@@ -71,9 +71,11 @@ export function StatusIcon({
   );
 }
 
-// The colour of a moment: went fine, an idea, an open question, a bug.
+// The colour of a moment: went fine, not as expected (with nothing filed),
+// an idea, an open question, a bug.
 const MOMENT_COLORS: Record<TestRow["moments"][number], string> = {
   ok: "bg-success",
+  surprise: "bg-stopped",
   idea: "bg-type-request",
   question: "bg-type-feedback",
   bug: "bg-type-bug",
@@ -100,6 +102,7 @@ const COUNT_TONES = {
   idea: "bg-type-request/10 text-type-request",
   question: "bg-type-feedback/10 text-type-feedback",
   ok: "bg-success/10 text-success",
+  surprise: "bg-surface-2 text-foreground-2",
 } as const;
 
 // One count as a chip: "3 bugs", "5 went fine".

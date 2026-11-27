@@ -34,6 +34,9 @@ const draftSchema = z.object({
 });
 
 export const diarySchema = z.object({
+  // The persona could not go on, as the person would (no way in, nothing
+  // works): the days after this one are not lived.
+  stuck: z.boolean().optional(),
   steps: z.array(
     z.object({
       time: z.string().nullable().optional(),
@@ -101,7 +104,7 @@ export function dayPrompt(today: {
     before.length > 0
       ? `What you did on the days before:\n${lines(done)}`
       : "This is your first day with the app.",
-    `The app runs at ${app}. Open it in the browser. After each step, take a screenshot named ${name}-<step>.png (${name}-1.png, ${name}-2.png …).`,
+    `The app runs at ${app}. Open it in the browser. After every step, call browser_take_screenshot with filename ${name}-<step>.png (${name}-1.png, ${name}-2.png …) and put that name in the step's shot.`,
   ].join("\n\n");
 }
 
@@ -111,11 +114,17 @@ export function analystPrompt(
   persona: KobblePersona,
   steps: TestStep[],
 ): string {
+  const errors = (test.errors ?? []).map(
+    (error) => `Day ${String(error.day)}: ${error.text}`,
+  );
   return [
     "Part 2: the analyst.",
     who(persona),
     `Their story:\n${test.story}`,
     `The diary, its moments numbered from 1 over all the days:\n${JSON.stringify({ steps }, null, 2)}`,
+    errors.length > 0
+      ? `What the browser reported as errors meanwhile:\n${lines(errors)}`
+      : "The browser reported no errors.",
   ].join("\n\n");
 }
 

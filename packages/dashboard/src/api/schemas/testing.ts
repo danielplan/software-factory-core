@@ -41,7 +41,8 @@ const testRowSchema = z.object({
   doing: z.string().nullable(),
   problem: z.string().nullable(),
   days: z.number(),
-  moments: z.array(z.enum(["ok", "idea", "question", "bug"])),
+  stuck: z.number().nullable(),
+  moments: z.array(z.enum(["ok", "surprise", "idea", "question", "bug"])),
   counts: z.object({ bug: z.number(), idea: z.number(), question: z.number() }),
 }) satisfies z.ZodType<ServedRow>;
 
@@ -55,6 +56,7 @@ export const testPageSchema = z.object({
     ...testRowSchema.shape,
     story: z.string(),
     dayTitles: z.array(z.string()),
+    errors: z.array(z.object({ day: z.number(), text: z.string() })),
   }),
   moments: z.array(
     z.object({
