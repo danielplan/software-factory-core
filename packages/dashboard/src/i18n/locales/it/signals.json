@@ -44,5 +44,22 @@
     "noCustomers": "Ancora nessun cliente. Manda le tue personas a vivere qualche giorno nell'app: quello che trovano compare qui.",
     "send": "Metti alla prova una persona",
     "inTest": "In test"
+  },
+  "fixPlan": {
+    "title": "Sistema questo",
+    "looking": "Bolt sta guardando il codice…",
+    "lookingLine": "Uno sguardo veloce, senza toccare nulla, prima che vada sulla bacheca.",
+    "happens": "Cosa succede",
+    "cause": "Causa probabile",
+    "change": "Cosa cambierei",
+    "check": "Come sapremo che va",
+    "make": "Va bene, crea la scheda",
+    "making": "Creo la scheda…",
+    "correct": "Cambia",
+    "correctLabel": "Cosa deve cambiare Bolt nel piano?",
+    "redo": "Cambia il piano",
+    "cancel": "Annulla",
+    "tryAgain": "Riprova",
+    "cardTitle": "La scheda: {{title}}"
   }
 }

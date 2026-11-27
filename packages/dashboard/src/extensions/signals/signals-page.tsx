@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { Markdown } from "@/components/markdown";
 
 import { Already } from "./already";
+import { FixDialog } from "./fix-dialog";
 import { FeedbackExtras } from "./feedback-extras";
 import {
   Filter,
@@ -201,17 +202,13 @@ function Board({
   );
 }
 
-function SignalDetail({
-  signal,
-  now,
-  onDone,
-  onFailed,
-}: Readonly<{
-  signal: SignalRow;
-  now: Date;
-  onDone: (said: string) => void;
-  onFailed: (said: string) => void;
-}>) {
+// A button pressed on a signal: busy meanwhile, then what it did, or why
+// it could not.
+function useAct(
+  signal: SignalRow,
+  onDone: (said: string) => void,
+  onFailed: (said: string) => void,
+) {
   const [busy, setBusy] = useState<Act | null>(null);
   const t = useTranslation().t;
   const act = (what: Act) => {
@@ -226,6 +223,23 @@ function SignalDetail({
       },
     );
   };
+  return { busy, act };
+}
+
+function SignalDetail({
+  signal,
+  now,
+  onDone,
+  onFailed,
+}: Readonly<{
+  signal: SignalRow;
+  now: Date;
+  onDone: (said: string) => void;
+  onFailed: (said: string) => void;
+}>) {
+  const { busy, act } = useAct(signal, onDone, onFailed);
+  const [fixing, setFixing] = useState(false);
+  const t = useTranslation().t;
   const primary = primaryOf(signal);
   const button = (what: Act, words: string, dark: boolean) => (
     <Button
@@ -235,7 +249,8 @@ function SignalDetail({
       disabled={busy !== null}
       className={cn(what === "dismiss" && "ml-auto")}
       onClick={() => {
-        act(what);
+        if (what === "fix") setFixing(true);
+        else act(what);
       }}
     >
       {what === "fix" && <Wrench aria-hidden />}
@@ -265,6 +280,14 @@ function SignalDetail({
       </div>
       {signal.source === "feedback" && <FeedbackExtras signal={signal} />}
       <Already signal={signal} />
+      {fixing && (
+        <FixDialog
+          signal={signal}
+          onClose={setFixing}
+          onDone={onDone}
+          onFailed={onFailed}
+        />
+      )}
       <div className="flex flex-wrap gap-2.5">
         {button("fix", t("signals.fix"), primary === "fix")}
         {button("explore", exploreWords(signal, t), primary === "explore")}

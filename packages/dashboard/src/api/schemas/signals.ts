@@ -10,6 +10,7 @@ import {
   TEST_STATUSES,
 } from "../../../../core/src/kobble/schemas.ts";
 import type { TestNow as ServedNow } from "../../../../server/src/plugs/tests.ts";
+import type { FixPlan as ServedPlan } from "../../../../server/src/extensions/signals/fix-plan.ts";
 import type { SyncView as ServedSync } from "../../../../server/src/extensions/signals/sync.ts";
 import type {
   handledView,
@@ -61,3 +62,16 @@ export type SignalsView = z.infer<typeof signalsViewSchema>;
 export type TestNow = z.infer<typeof testNowSchema>;
 export type SignalRow = z.infer<typeof signalRowSchema>;
 export type SyncView = z.infer<typeof syncViewSchema>;
+
+// What the builder would do before Fix makes the card (POST
+// /api/kobble/signals/fix-plan).
+const fixPlanSchema = z.object({
+  title: z.string(),
+  happens: z.string(),
+  cause: z.string(),
+  change: z.array(z.string()),
+  check: z.string(),
+}) satisfies z.ZodType<ServedPlan>;
+
+export const fixPlanAnswerSchema = z.object({ plan: fixPlanSchema });
+export type FixPlan = z.infer<typeof fixPlanSchema>;

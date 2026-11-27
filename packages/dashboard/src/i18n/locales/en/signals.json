@@ -44,5 +44,22 @@
     "noCustomers": "No customers yet. Send your personas to live a few days in the app, and what they find shows up here.",
     "send": "Test a persona",
     "inTest": "In a test"
+  },
+  "fixPlan": {
+    "title": "Fix this",
+    "looking": "Bolt is looking at the code…",
+    "lookingLine": "A quick, read-only look before anything goes to the board.",
+    "happens": "What happens",
+    "cause": "Likely cause",
+    "change": "What I'd change",
+    "check": "How we'll know",
+    "make": "Looks right, make the card",
+    "making": "Making the card…",
+    "correct": "Change",
+    "correctLabel": "What should Bolt change in the plan?",
+    "redo": "Change the plan",
+    "cancel": "Cancel",
+    "tryAgain": "Try again",
+    "cardTitle": "The card: {{title}}"
   }
 }

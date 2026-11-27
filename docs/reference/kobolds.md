@@ -45,7 +45,8 @@ kobold its own name; Sprocket then carries it (`packages/dashboard/src/lib/brand
 
 Some kobold runs have no face: the setup coach
 (`packages/skills/guides/setup-coach.md`), the spec writer that writes the
-hand-off card (`packages/skills/guides/handoff-spec.md`), the analyst that
+hand-off card (`packages/skills/guides/handoff-spec.md`), Bolt's quick look
+before Fix makes a card (`packages/skills/guides/fix-plan.md`), the analyst that
 turns a test's diary into signals, and the judge that suggests a release's
 number. There is no
 planner ([decision 0002](../decisions/0002-no-planning-stage.md)).
