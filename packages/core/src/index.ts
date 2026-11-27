@@ -230,6 +230,7 @@ export {
   type PersonaTest,
   type SignalStep,
   type SyncState,
+  type TestDay,
   type TestStep,
   type Thing,
 } from "./kobble/schemas.ts";

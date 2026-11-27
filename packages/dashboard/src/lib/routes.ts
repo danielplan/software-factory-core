@@ -17,6 +17,7 @@ export const PAGES = [
   "signals",
   "explore",
   "build",
+  "testing",
   "releases",
   "personas",
   "extensions",
@@ -85,14 +86,21 @@ export function pathOf(address: string): string {
   return `/${address.replace(/^#?\/?/, "")}`;
 }
 
-// A persona's page (/personas/<id>), its tests or one of them, or the list.
-export function personaPath(id?: string, tests?: { test?: string }): string {
-  if (!id) return "/personas";
-  const base = `/personas/${encodeURIComponent(id)}`;
-  if (!tests) return base;
-  return tests.test
-    ? `${base}/tests/${encodeURIComponent(tests.test)}`
-    : `${base}/tests`;
+// A persona's page (/personas/<id>), or the list.
+export function personaPath(id?: string): string {
+  return id ? `/personas/${encodeURIComponent(id)}` : "/personas";
+}
+
+// A test's page (/testing/<id>), a new test (/testing/new, for a persona
+// when given), or the list.
+export function testingPath(
+  open?: { test: string } | { new: string | null },
+): string {
+  if (!open) return "/testing";
+  if ("test" in open) return `/testing/${encodeURIComponent(open.test)}`;
+  return open.new
+    ? `/testing/new/${encodeURIComponent(open.new)}`
+    : "/testing/new";
 }
 
 // The pages of the core, always there; an extension's are there only while

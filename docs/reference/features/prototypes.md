@@ -65,7 +65,7 @@ app. Doodle starts it itself (`make_prototype`); there is no button.
 - The branch is pushed to origin once committed, so a teammate's computer
   opens it too; when it cannot be, the board says it is only on this
   computer. **Open** runs it with the product's prototype command, one at a
-  time; **Test** sends a persona on a mission on that branch.
+  time; **Test** sends a persona to try it on that branch (a test of one day, [Testing](testing.md)).
 
 A kit gives the prototype mode and the starter for a brand-new app. The React
 web app and Expo app starters have the prototype mode, the shared world's
@@ -85,7 +85,7 @@ A product may name a folder of situations as its `world` in `product.json`
 
 Each exploration's prototypes share one world, kept as `world.json` beside
 the exploration. It starts from the first situation, or from a persona's
-when a mission or a prototype opened for it starts it, with every time moved
+when a test or a prototype opened for it starts it, with every time moved
 to now. It is versioned: a change made on an older version is refused. The
 prototypes' start command gets `FACTORY_WORLD_URL`, where they `GET` the
 world and `POST` changes, so tabs and devices share it live. Doodle can look

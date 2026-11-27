@@ -19,6 +19,7 @@ import shellEn from "./locales/en/shell.json" with { type: "json" };
 import signalsEn from "./locales/en/signals.json" with { type: "json" };
 import supportEn from "./locales/en/support.json" with { type: "json" };
 import systemEn from "./locales/en/system.json" with { type: "json" };
+import testingEn from "./locales/en/testing.json" with { type: "json" };
 import updatesEn from "./locales/en/updates.json" with { type: "json" };
 import voiceEn from "./locales/en/voice.json" with { type: "json" };
 import whatsNewEn from "./locales/en/whatsNew.json" with { type: "json" };
@@ -39,6 +40,7 @@ import shellIt from "./locales/it/shell.json" with { type: "json" };
 import signalsIt from "./locales/it/signals.json" with { type: "json" };
 import supportIt from "./locales/it/support.json" with { type: "json" };
 import systemIt from "./locales/it/system.json" with { type: "json" };
+import testingIt from "./locales/it/testing.json" with { type: "json" };
 import updatesIt from "./locales/it/updates.json" with { type: "json" };
 import voiceIt from "./locales/it/voice.json" with { type: "json" };
 import whatsNewIt from "./locales/it/whatsNew.json" with { type: "json" };
@@ -59,6 +61,7 @@ import shellDe from "./locales/de/shell.json" with { type: "json" };
 import signalsDe from "./locales/de/signals.json" with { type: "json" };
 import supportDe from "./locales/de/support.json" with { type: "json" };
 import systemDe from "./locales/de/system.json" with { type: "json" };
+import testingDe from "./locales/de/testing.json" with { type: "json" };
 import updatesDe from "./locales/de/updates.json" with { type: "json" };
 import voiceDe from "./locales/de/voice.json" with { type: "json" };
 import whatsNewDe from "./locales/de/whatsNew.json" with { type: "json" };
@@ -81,6 +84,7 @@ const en = {
   signals: signalsEn,
   support: supportEn,
   system: systemEn,
+  testing: testingEn,
   updates: updatesEn,
   voice: voiceEn,
   whatsNew: whatsNewEn,
@@ -103,6 +107,7 @@ const it = {
   signals: signalsIt,
   support: supportIt,
   system: systemIt,
+  testing: testingIt,
   updates: updatesIt,
   voice: voiceIt,
   whatsNew: whatsNewIt,
@@ -125,6 +130,7 @@ const de = {
   signals: signalsDe,
   support: supportDe,
   system: systemDe,
+  testing: testingDe,
   updates: updatesDe,
   voice: voiceDe,
   whatsNew: whatsNewDe,

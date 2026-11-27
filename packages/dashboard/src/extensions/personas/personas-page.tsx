@@ -1,11 +1,9 @@
 // Personas: the made-up people who stand for the app's customers, each
 // with their kobold, where they are, whether someone on the team added them
 // or they were found in how the app is used, and how many signals came from
-// them. Send everyone sends each on the mission the kobold suggests; New
-// persona asks the support kobold, who adds one with the team. A persona's
-// page (#personas/<id>) shows who they are, Send on a mission and their
-// missions (missions.tsx), and every signal from them, whatever became of
-// it. A mission's own page is #personas/<id>/tests/<mission>.
+// them. New persona asks the support kobold, who adds one with the team. A
+// persona's page (#personas/<id>) shows who they are and the signals from
+// real customers like them. Testing sends them into the app.
 
 import { Link } from "react-router";
 import { ChevronLeft, Pencil, Plus } from "lucide-react";
@@ -19,22 +17,17 @@ import { Button } from "@/components/ui/button";
 import { personaPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { CARD, Head } from "@/components/page-bits";
-import { originWords, personaPlaceOf } from "@/lib/signals-view";
+import { originWords } from "@/lib/signals-view";
 import { useRead } from "@/api/query";
 import { personaPageSchema, personasSchema } from "@/api/schemas/personas";
 import { Markdown } from "@/components/markdown";
 import { askSupport } from "@/lib/ask-support";
 
-import { PersonaMissions } from "./missions";
-import { SendEveryone } from "./send-everyone";
 import { SignalLine } from "./signal-line";
-import { TestRun } from "./tests";
 
 export function PersonasPage({ open }: Readonly<{ open: string | null }>) {
   if (!open) return <PersonaList />;
-  const place = personaPlaceOf(open);
-  if (place.test) return <TestRun id={place.test} />;
-  return <PersonaView id={place.persona} />;
+  return <PersonaView id={decodeURIComponent(open.split("/")[0] ?? "")} />;
 }
 
 function PersonaList() {
@@ -48,19 +41,14 @@ function PersonaList() {
       <Head
         title={t("shell.pages.personas")}
         right={
-          <>
-            {data && data.personas.length > 0 && (
-              <SendEveryone personas={data.personas} />
-            )}
-            <Button
-              variant={data?.personas.length === 0 ? "default" : "ring"}
-              size="pill"
-              onClick={adding}
-            >
-              <Plus aria-hidden strokeWidth={2.2} />
-              {t("personas.newPersona")}
-            </Button>
-          </>
+          <Button
+            variant={data?.personas.length === 0 ? "default" : "ring"}
+            size="pill"
+            onClick={adding}
+          >
+            <Plus aria-hidden strokeWidth={2.2} />
+            {t("personas.newPersona")}
+          </Button>
         }
       />
       {problem && (
@@ -118,10 +106,9 @@ function NoPersonas({ onNew }: Readonly<{ onNew: () => void }>) {
   );
 }
 
-// A persona's card: who they are, read only, and a quiet line while they
-// are on a mission. The whole card opens the persona's page.
+// A persona's card: who they are, read only. The whole card opens the
+// persona's page.
 function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
-  const t = useTranslation().t;
   return (
     <Link
       to={personaPath(persona.id)}
@@ -137,11 +124,6 @@ function PersonaCard({ persona }: Readonly<{ persona: PersonaRow }>) {
         about={persona.about}
         nameClass="group-hover:underline"
       />
-      {persona.onMission && (
-        <span className="text-[12.5px] font-semibold text-blue">
-          {t("personas.onMission")}
-        </span>
-      )}
     </Link>
   );
 }
@@ -169,8 +151,8 @@ function PersonaView({ id }: Readonly<{ id: string }>) {
   );
 }
 
-// Who the persona is, their missions, and, once there are any (after
-// launch), the signals from real customers like them.
+// Who the persona is and, once there are any (after launch), the signals
+// from real customers like them.
 function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
   const t = useTranslation().t;
   const { persona } = page;
@@ -204,7 +186,6 @@ function PersonaBody({ page }: Readonly<{ page: KobblePersonaPage }>) {
           {t("personas.edit")}
         </Button>
       </div>
-      <PersonaMissions page={page} />
       {customers.length > 0 && (
         <>
           <h2 className="mt-7 mb-3 text-[17px] font-semibold tracking-[-0.01em]">

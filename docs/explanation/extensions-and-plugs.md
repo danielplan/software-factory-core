@@ -40,7 +40,8 @@ An extension uses another only through a **plug** that one offers:
 
 - `ideas` (Explorations): take an idea, hear a signal, list explorations.
 - `signals` (Signals): report signals, read them.
-- `personas` and `missions` (Personas): the personas, and missions to start.
+- `personas` (Personas): the personas, and a new one.
+- `tests` (Testing): the tests, those going on, and a new one.
 - `work` (Factory): the board's work, an answer on a stuck card.
 - `home` (each with Home blocks): the data its blocks show.
 - `support` (each with a kobold Sprocket hands to): its hand-offs.

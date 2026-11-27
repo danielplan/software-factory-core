@@ -32,6 +32,7 @@ const HERE: Record<Page, Kind | "ask"> = {
   signals: "wish",
   explore: "bug",
   build: "bug",
+  testing: "bug",
   releases: "bug",
   personas: "wish",
   extensions: "wish",

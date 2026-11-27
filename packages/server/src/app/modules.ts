@@ -14,6 +14,7 @@ import { jiraAddOn } from "../extensions/jira/index.ts";
 import * as personas from "../extensions/personas/index.ts";
 import * as releases from "../extensions/releases/index.ts";
 import * as signals from "../extensions/signals/index.ts";
+import * as testing from "../extensions/testing/index.ts";
 import type { Cli } from "../github-cli.ts";
 import type { ExtensionModule } from "../plugs/extension.ts";
 
@@ -22,6 +23,7 @@ export const KOBBLE_MODULES: ExtensionModule[] = [
   explorations,
   signals,
   personas,
+  testing,
   releases,
 ];
 

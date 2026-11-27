@@ -132,6 +132,10 @@
         "text": "Der Baumeister hat angehalten? Melde es",
         "said": "Der Baumeister hat angehalten"
       },
+      "testing": {
+        "text": "Ein Test hat angehalten oder ging schief? Melde es",
+        "said": "Ein Test hat nicht geklappt"
+      },
       "releases": {
         "text": "Ein Release ging schief? Melde es",
         "said": "Das Release hat nicht geklappt"

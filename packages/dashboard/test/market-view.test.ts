@@ -54,7 +54,7 @@ const signals = addOn("signals", {
 });
 const personas = addOn("personas", {
   needs: ["signals"],
-  brings: { ...none, pages: ["personas"], kobolds: ["tester"] },
+  brings: { ...none, pages: ["personas"] },
 });
 const releases = addOn("releases", {
   needs: ["factory"],
@@ -104,10 +104,10 @@ test("the extensions leave the boards out, and the filters and search narrow the
     "releases",
   ]);
   assert.deepEqual(ids(matching(all, words, "team", "")), ["standup"]);
-  assert.deepEqual(ids(matching(all, words, "kobble", "made-up")), [
+  assert.deepEqual(ids(matching(all, words, "kobble", "real customers")), [
     "personas",
   ]);
-  assert.deepEqual(ids(matching(all, words, "all", "  MADE-UP customers ")), [
+  assert.deepEqual(ids(matching(all, words, "all", "  REAL customers ")), [
     "personas",
   ]);
   assert.deepEqual(ids(matching(all, words, "kobble", "morning")), []);
@@ -158,8 +158,8 @@ test("one that others need cannot go, and the line says why", () => {
 
 test("removing says what goes and what stays", () => {
   assert.deepEqual(removing(words, personas, list), [
-    "Goes: its page and its kobold.",
-    "Stays in the factory's files: its personas and their missions.",
+    "Goes: its page.",
+    "Stays in the factory's files: its personas.",
   ]);
   assert.deepEqual(removing(words, mine, list), [
     "Stays in the factory's files: what it made.",

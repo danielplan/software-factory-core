@@ -11,7 +11,7 @@ import type { Cli } from "../github-cli.ts";
 import { guidesFor } from "../extension-guides.ts";
 import { homeLayoutRoutes } from "../home-layout.ts";
 import type { Route } from "../http.ts";
-import type { App, Browser } from "../kobble/browser.ts";
+import type { App, Browser, BrowserWish } from "../kobble/browser.ts";
 import { SupportTalk, supportRoutes } from "../kobble/support.ts";
 import type { SupportTools } from "../kobble/support-tools.ts";
 import { type ExtensionModule, slotFillers } from "../plugs/extension.ts";
@@ -26,7 +26,7 @@ import { servePlugged } from "./plug-board.ts";
 export type TestsRunOn = {
   apps: () => App[];
   app: (product: string | null) => Promise<string>;
-  browser: () => Promise<Browser>;
+  browser: (wish?: BrowserWish) => Promise<Browser>;
 };
 
 type Options = {

@@ -1,8 +1,8 @@
 // Signals before launch (the live app not connected): no customers yet, so
-// the first signals come from the personas, sent on missions from Personas.
-// While nothing came in yet: the personas' face tiles beside a plain app
-// screen, one sentence and one button to Personas. The personas on a
-// mission now, each with the step it is on. Connecting the live app is a
+// the first signals come from the personas, sent to live a few days in the
+// app from Testing. While nothing came in yet: the personas' face tiles
+// beside a plain app screen, one sentence and one button to Testing. The
+// personas in a test now, each with the moment they are at. Connecting the live app is a
 // line for after launch, which opens how to connect it.
 
 import { Link } from "react-router";
@@ -10,32 +10,32 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { Face, MissionNow } from "@/api/client";
+import type { Face, TestNow } from "@/api/client";
 import { PersonaFace } from "@/components/kobold-face";
 import { Button } from "@/components/ui/button";
-import { personaPath } from "@/lib/routes";
+import { testingPath } from "@/lib/routes";
 import { useRead } from "@/api/query";
 import { personasSchema } from "@/api/schemas/personas";
 import { cn } from "@/lib/utils";
 
 import { CARD } from "@/components/page-bits";
 import { ConnectSignals } from "./empty";
-import { missionWords } from "@/lib/signals-view";
+import { testWords } from "@/lib/signals-view";
 
-// Before launch: the personas on a mission now, or (with no signal yet)
+// Before launch: the personas in a test now, or (with no signal yet)
 // the empty page; then the line about connecting the live app, which opens
 // how to connect it.
 export function BeforeLaunch({
   app,
-  missions,
+  tests,
   empty,
-}: Readonly<{ app: string; missions: MissionNow[]; empty: boolean }>) {
+}: Readonly<{ app: string; tests: TestNow[]; empty: boolean }>) {
   const [connecting, setConnecting] = useState(false);
   if (connecting) return <ConnectSignals app={app} />;
   return (
     <div className="grid gap-4">
-      {missions.length > 0 && <OnMissions missions={missions} />}
-      {missions.length === 0 && empty && <NoCustomersYet />}
+      {tests.length > 0 && <InTests tests={tests} />}
+      {tests.length === 0 && empty && <NoCustomersYet />}
       <ConnectLater
         app={app}
         more={!empty}
@@ -59,7 +59,7 @@ function ConnectLater({
     <p className="mx-1 mt-2 text-[12.5px] text-muted-foreground">
       {more && (
         <>
-          <Link to={personaPath()} className="font-semibold text-blue">
+          <Link to={testingPath()} className="font-semibold text-blue">
             {t("signals.before.sendMore")}
           </Link>{" "}
           {t("signals.before.toImprove")}{" "}
@@ -78,20 +78,20 @@ function ConnectLater({
   );
 }
 
-function OnMissions({ missions }: Readonly<{ missions: MissionNow[] }>) {
+function InTests({ tests }: Readonly<{ tests: TestNow[] }>) {
   const t = useTranslation().t;
   return (
-    <section aria-label={t("signals.before.onMission")} className={CARD}>
-      {missions.map((mission) => (
+    <section aria-label={t("signals.before.inTest")} className={CARD}>
+      {tests.map((test) => (
         <Link
-          key={mission.id}
-          to={personaPath(mission.persona)}
+          key={test.id}
+          to={testingPath({ test: test.id })}
           className="flex items-center gap-3 border-t border-border-soft px-5 py-3 text-[13px] text-foreground-2 first:border-t-0 hover:bg-surface"
         >
-          <PersonaFace face={mission.face} size={26} />
-          <span className="font-semibold">{mission.name}</span>
+          <PersonaFace face={test.face} size={26} />
+          <span className="font-semibold">{test.name}</span>
           <span aria-live="polite" className="truncate text-muted-foreground">
-            {t("signals.before.onMission")} · {missionWords(mission, t)}
+            {t("signals.before.inTest")} · {testWords(test, t)}
           </span>
         </Link>
       ))}
@@ -124,7 +124,7 @@ function NoCustomersYet() {
         {t("signals.before.noCustomers")}
       </p>
       <Button asChild size="pill" className="mt-1.5">
-        <Link to={personaPath()}>
+        <Link to={testingPath()}>
           <Send aria-hidden strokeWidth={2} className="size-[15px]" />
           {t("signals.before.send")}
         </Link>

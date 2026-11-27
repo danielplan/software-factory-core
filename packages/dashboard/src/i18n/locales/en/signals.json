@@ -36,13 +36,13 @@
     "nothingHandled": "Nothing handled yet"
   },
   "before": {
-    "sendMore": "Send more personas",
+    "sendMore": "Test more personas",
     "toImprove": "to find what to improve.",
     "afterLaunch": "After launch,",
     "connectApp": "connect {{app}}",
     "toHear": "to hear from customers.",
-    "onMission": "On a mission",
-    "noCustomers": "No customers yet. Send your personas to try the app, and what they find shows up here.",
-    "send": "Send a persona"
+    "noCustomers": "No customers yet. Send your personas to live a few days in the app, and what they find shows up here.",
+    "send": "Test a persona",
+    "inTest": "In a test"
   }
 }

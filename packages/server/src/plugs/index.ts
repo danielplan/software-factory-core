@@ -8,9 +8,9 @@
 
 import type { HomePlug } from "./home.ts";
 import type { IdeasPlug } from "./ideas.ts";
-import type { MissionsPlug } from "./missions.ts";
 import type { PersonasPlug } from "./personas.ts";
 import type { SignalsPlug } from "./signals.ts";
+import type { TestsPlug } from "./tests.ts";
 import type { WorkPlug } from "./work.ts";
 
 // The plugs one extension offers, each by one extension at most.
@@ -18,7 +18,7 @@ export type Plugs = {
   ideas: IdeasPlug;
   signals: SignalsPlug;
   personas: PersonasPlug;
-  missions: MissionsPlug;
+  tests: TestsPlug;
   work: WorkPlug;
 };
 

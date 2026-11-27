@@ -2,7 +2,8 @@
 // on a whiteboard; Tinker, its maker, builds prototypes of it, and the one
 // the team agrees on is handed off as a card (the `tasks` slot). It owns
 // the `explorations` records and offers them through its plug (`ideas`);
-// who an idea is for and a prototype's tests come from Personas' plugs,
+// who an idea is for comes from Personas' plug, a prototype's tests from
+// Testing's (`tests`),
 // the board's ideas from the Factory's (`work`).
 
 import { defineExtension } from "@software-factory/core";
@@ -49,7 +50,7 @@ export function serve(host: Host): Served {
     cards: host.cards,
     ideas: () => host.plug("work")?.ideas() ?? [],
     personas,
-    missions: () => host.plug("missions"),
+    testing: () => host.plug("tests"),
     onChange: () => {
       host.changed("explorations");
     },

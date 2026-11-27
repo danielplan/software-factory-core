@@ -24,7 +24,7 @@ import type { CodeHostOf, CodeHosts } from "../code-host.ts";
 import type { Board } from "../connect/board-file.ts";
 import type { Cli } from "../github-cli.ts";
 import type { Route } from "../http.ts";
-import type { App, Browser } from "../kobble/browser.ts";
+import type { App, Browser, BrowserWish } from "../kobble/browser.ts";
 import type { SupportPlug } from "../kobble/support-plug.ts";
 import type { Offers, PlugBoard } from "./index.ts";
 
@@ -101,7 +101,7 @@ export type Host = {
   // product), and a browser.
   apps: () => App[];
   app: (product: string | null) => Promise<string>;
-  browser: () => Promise<Browser>;
+  browser: (wish?: BrowserWish) => Promise<Browser>;
   // The builder's browser, when it has one.
   builderBrowser?: () => Promise<Browser>;
   // The extensions and kits Kobble ships with.

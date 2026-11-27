@@ -26,20 +26,20 @@ test("Kobble's own extensions are installed until the company removes one", () =
 });
 
 test("removing one takes it out, and installing it again brings it back with what it needs", () => {
-  const bare = switched(
-    switched(company, KOBBLE_EXTENSIONS, "personas", false),
-    KOBBLE_EXTENSIONS,
-    "signals",
-    false,
+  const bare = ["testing", "personas", "signals"].reduce(
+    (now, id) => switched(now, KOBBLE_EXTENSIONS, id, false),
+    company,
   );
-  assert.deepEqual(bare.without, ["personas", "signals"]);
-  // Personas needs Signals, which is not installed: both come back.
-  assert.deepEqual(ids(toInstall(bare, KOBBLE_EXTENSIONS, "personas")), [
+  assert.deepEqual(bare.without, ["testing", "personas", "signals"]);
+  // Testing needs Personas and Signals, which are not installed: all
+  // three come back.
+  assert.deepEqual(ids(toInstall(bare, KOBBLE_EXTENSIONS, "testing")), [
+    "testing",
     "personas",
     "signals",
   ]);
   assert.deepEqual(
-    switched(bare, KOBBLE_EXTENSIONS, "personas", true).without,
+    switched(bare, KOBBLE_EXTENSIONS, "testing", true).without,
     [],
   );
 });
@@ -49,7 +49,7 @@ test("one that others need is refused, with why; Factory cannot go", () => {
     () => switched(company, KOBBLE_EXTENSIONS, "signals", false),
     (error) =>
       error instanceof Refused &&
-      error.message === "Personas needs Signals. Remove it first.",
+      error.message === "Personas and Testing need Signals. Remove them first.",
   );
   assert.throws(
     () => switched(company, KOBBLE_EXTENSIONS, "factory", false),
@@ -74,6 +74,7 @@ test("a factory where something is missing does not start, and says why", () => 
     "Factory is always needed, so it cannot be removed",
     "Explorations needs Factory, which is not installed",
     "Personas needs Signals, which is not installed",
+    "Testing needs Signals, which is not installed",
     "Releases needs Factory, which is not installed",
   ]);
 });

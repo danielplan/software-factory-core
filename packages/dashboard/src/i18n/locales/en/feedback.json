@@ -132,6 +132,10 @@
         "text": "Builder stopped? Report it",
         "said": "The builder stopped"
       },
+      "testing": {
+        "text": "A test stopped or went wrong? Report it",
+        "said": "A test did not work"
+      },
       "releases": {
         "text": "Release went wrong? Report it",
         "said": "The release did not work"

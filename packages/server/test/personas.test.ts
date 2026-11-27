@@ -46,10 +46,6 @@ test("personas: listed with their signals, one with all of theirs, a new one", a
         ["S-0002", "new"],
       ],
     );
-    assert.deepEqual(
-      mia.tests.map((t) => t.id),
-      ["T-0003", "T-0002", "T-0001"],
-    );
     const none = await fetch(`${factory.base}/api/kobble/persona?id=zoe`);
     assert.equal(none.status, 409);
 

@@ -1,6 +1,5 @@
-// What the Personas pages show, worked out from the personas and their
-// tests, with the signals from each (Signals' plug: none while Signals is
-// not installed).
+// What the Personas pages show, worked out from the personas, with the
+// signals from each (Signals' plug: none while Signals is not installed).
 
 import {
   type Face,
@@ -8,7 +7,6 @@ import {
   type KobblePersona,
   type KobbleSignal,
   type KobbleStore,
-  type PersonaTest,
 } from "@software-factory/core";
 
 import {
@@ -16,61 +14,27 @@ import {
   type SignalRow,
   signalRows,
 } from "../../kobble/signal-rows.ts";
-import type { MissionNow } from "../../plugs/missions.ts";
 import { Refused } from "../../refused.ts";
 
 // A persona always has a face here: its own, or the one from its id.
 type WithFace = KobblePersona & { face: Face };
 
-export type PersonaRow = WithFace & { signals: number; onMission: boolean };
+export type PersonaRow = WithFace & { signals: number };
 
 export type PersonaPage = {
   persona: WithFace;
   signals: SignalRow[];
-  tests: PersonaTest[];
 };
-
-export type TestPage = {
-  test: PersonaTest;
-  persona: WithFace;
-  signals: SignalRow[];
-};
-
-const going = (test: PersonaTest) =>
-  test.status === "queued" || test.status === "running";
-
-export function missionsNow(store: KobbleStore): MissionNow[] {
-  const personas = new Map(store.all("personas").map((one) => [one.id, one]));
-  return store
-    .all("tests")
-    .filter(going)
-    .flatMap((test) => {
-      const persona = personas.get(test.persona);
-      if (!persona) return [];
-      return [
-        {
-          id: test.id,
-          persona: persona.id,
-          name: persona.name,
-          face: faceOf(persona),
-          status: test.status,
-          doing: test.doing ?? null,
-        },
-      ];
-    });
-}
 
 export function personasView(
   store: KobbleStore,
   signals: KobbleSignal[],
 ): { personas: PersonaRow[] } {
-  const busy = new Set(missionsNow(store).map((one) => one.persona));
   return {
     personas: store.all("personas").map((persona) => ({
       ...persona,
       face: faceOf(persona),
       signals: signals.filter((signal) => signal.persona === persona.id).length,
-      onMission: busy.has(persona.id),
     })),
   };
 }
@@ -87,32 +51,5 @@ export function personaPage(
   return {
     persona: { ...persona, face: faceOf(persona) },
     signals: signalRows(newestFirst(theirs), [persona]),
-    tests: testsOf(store, persona.id),
-  };
-}
-
-// A persona's tests, the last one first.
-export function testsOf(store: KobbleStore, persona: string): PersonaTest[] {
-  return store
-    .all("tests")
-    .filter((test) => test.persona === persona)
-    .reverse();
-}
-
-// One test, its persona, and the signals it filed.
-export function testPage(
-  store: KobbleStore,
-  id: string,
-  signals: KobbleSignal[],
-): TestPage {
-  const test = store.get("tests", id);
-  if (!test) throw new Refused(`There is no test “${id}”.`);
-  const persona = store.get("personas", test.persona);
-  if (!persona) throw new Refused(`There is no persona “${test.persona}”.`);
-  const filed = signals.filter((signal) => test.signals.includes(signal.id));
-  return {
-    test,
-    persona: { ...persona, face: faceOf(persona) },
-    signals: signalRows(filed, [persona]),
   };
 }

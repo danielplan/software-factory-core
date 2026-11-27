@@ -43,17 +43,17 @@ The tests may import any of it, to check one piece alone.
 
 ## Plugs and records
 
-| Plug       | Offered by    | Used by                                                                     |
-| ---------- | ------------- | --------------------------------------------------------------------------- |
-| `ideas`    | Explorations  | Signals (Explore, the "already" check), setup, Personas, the Factory's page |
-| `signals`  | Signals       | Personas (a mission's findings), the feedback board, the Factory's page     |
-| `personas` | Personas      | Explorations, Signals, the feedback board, setup                            |
-| `missions` | Personas      | Explorations (a prototype's tests), Signals (missions going on)             |
-| `work`     | Factory       | the session's state, updates, Explorations, Signals                         |
-| `home`     | each with one | Home (`GET /api/home`)                                                      |
-| `support`  | each with one | Sprocket                                                                    |
-| `tasks`    | GitHub        | Factory, Signals (Fix), Explorations (hand-off), Releases                   |
-| `code`     | GitHub        | Factory (the builder, the card panel), Releases, updates (Kobble's notes)   |
+| Plug       | Offered by    | Used by                                                                    |
+| ---------- | ------------- | -------------------------------------------------------------------------- |
+| `ideas`    | Explorations  | Signals (Explore, the "already" check), setup, Testing, the Factory's page |
+| `signals`  | Signals       | Testing (a test's findings), the feedback board, the Factory's page        |
+| `personas` | Personas      | Explorations, Signals, Testing, the feedback board, setup                  |
+| `tests`    | Testing       | Explorations (a prototype's tests), Signals (tests going on)               |
+| `work`     | Factory       | the session's state, updates, Explorations, Signals                        |
+| `home`     | each with one | Home (`GET /api/home`)                                                     |
+| `support`  | each with one | Sprocket                                                                   |
+| `tasks`    | GitHub        | Factory, Signals (Fix), Explorations (hand-off), Releases                  |
+| `code`     | GitHub        | Factory (the builder, the card panel), Releases, updates (Kobble's notes)  |
 
 Each collection of records belongs to one extension, which alone reads and
 writes it: `signals` to Signals, `explorations` to Explorations, `personas`

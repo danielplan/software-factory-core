@@ -36,13 +36,13 @@
     "nothingHandled": "Ancora niente di gestito"
   },
   "before": {
-    "sendMore": "Manda altre personas",
+    "sendMore": "Metti alla prova altre personas",
     "toImprove": "per trovare cosa migliorare.",
     "afterLaunch": "Dopo il lancio,",
     "connectApp": "collega {{app}}",
     "toHear": "per sentire i clienti.",
-    "onMission": "In missione",
-    "noCustomers": "Ancora nessun cliente. Manda le tue personas a provare l'app: quello che trovano compare qui.",
-    "send": "Manda una persona"
+    "noCustomers": "Ancora nessun cliente. Manda le tue personas a vivere qualche giorno nell'app: quello che trovano compare qui.",
+    "send": "Metti alla prova una persona",
+    "inTest": "In test"
   }
 }

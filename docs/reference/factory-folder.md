@@ -42,12 +42,13 @@ reads `productSchema` (`packages/core/src/products/product.ts`) and
 
 ## Kobble's records
 
-| Records      | Where in `factory/kobble/`                                                                           | In git                         |
-| ------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------ |
-| Signals      | `signals/S-0001.json`                                                                                | no: they stay on this computer |
-| Explorations | `explorations/X-1/` (`exploration.json`, `board.json`, `conversation.md`, `pictures/`, `handoff.md`) | yes                            |
-| Personas     | `personas/<id>.json`                                                                                 | yes                            |
-| Missions     | `tests/T-0001.json`                                                                                  | yes                            |
+| Records          | Where in `factory/kobble/`                                                                           | In git                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Signals          | `signals/S-0001.json`                                                                                | no: they stay on this computer |
+| Explorations     | `explorations/X-1/` (`exploration.json`, `board.json`, `conversation.md`, `pictures/`, `handoff.md`) | yes                            |
+| Personas         | `personas/<id>.json`                                                                                 | yes                            |
+| Tests            | `tests/T-0001.json`                                                                                  | yes                            |
+| Test screenshots | `test-shots/T-0001/`                                                                                 | no: they stay on this computer |
 
 Each record is JSON, checked against its schema
 (`packages/core/src/kobble/schemas.ts`) when it is read and written, and

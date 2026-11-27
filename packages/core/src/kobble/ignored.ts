@@ -8,6 +8,8 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const IGNORED_SIGNALS = "kobble/signals/";
+// The pictures a test takes of the app on this computer.
+export const IGNORED_TEST_SHOTS = "kobble/test-shots/";
 
 // Adds the line to the factory's .gitignore when it is missing; true when
 // it had to.

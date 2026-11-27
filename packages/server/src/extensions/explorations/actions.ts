@@ -14,7 +14,7 @@ import {
 import { z } from "zod";
 
 import type { Cards } from "../../cards/cards.ts";
-import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { TestsPlug } from "../../plugs/tests.ts";
 import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { SpecWriter } from "./spec-writer.ts";
 import { Refused } from "../../refused.ts";
@@ -147,19 +147,19 @@ export async function handOff(
   // it cannot.
   write?: SpecWriter,
   more: {
-    // The agreed prototype's persona tests (Personas' plug); none while
-    // Personas is not installed.
-    missions?: MissionsPlug | null;
+    // The agreed prototype's tests (Testing's plug); none while
+    // Testing is not installed.
+    testing?: TestsPlug | null;
     // The board's prototypes never made (unmade.ts).
     unmade?: (board: Board) => string[];
   } = {},
 ): Promise<{ issue: number; url: string }> {
-  const { missions, unmade } = more;
+  const { testing, unmade } = more;
   const exploration = open(store, id);
   const board = store.board(id);
   const agreed = madeToHandOff(board, unmade);
   const connected = cards();
-  const tests = missions?.of(agreed?.tests ?? []) ?? [];
+  const tests = testing?.of(agreed?.tests ?? []) ?? [];
   const summary = handoffText(exploration, board, agreed, tests);
   const spec = await write?.({
     exploration,

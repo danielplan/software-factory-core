@@ -43,14 +43,14 @@
     "new": "New",
     "dismissed": "Dismissed"
   },
-  "mission": {
+  "test": {
     "queued": "Waits for its turn",
     "opening": "Opening the app…"
   },
   "step": "At step {{number}}: {{did}}",
   "tests": {
     "queued": "Waiting",
-    "running": "On a mission",
+    "running": "In a test",
     "done": "Done",
     "failed": "Failed"
   },

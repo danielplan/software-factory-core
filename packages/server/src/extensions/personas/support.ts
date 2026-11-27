@@ -1,6 +1,5 @@
-// Personas' plug into Sprocket: the personas there are, a new one the team
-// describes, and a mission handed to the tester. Heard only while Personas
-// is installed.
+// Personas' plug into Sprocket: the personas there are, and a new one the
+// team describes. Heard only while Personas is installed.
 
 import type { KobbleStore } from "@software-factory/core";
 import { z } from "zod";
@@ -16,14 +15,13 @@ export function personasText(store: KobbleStore): string {
     .join("\n");
 }
 
-const GUIDE = `**Personas** (\`#personas\`): the real customers the product is for. Before launch the team sends them on missions: the tester kobold uses the app as them, and what they run into comes back as signals. A new persona: ask, one short question at a time, who they are, where they work or live and what they need from the app. Give them a made-up first name that fits where they are (Giulia in Bolzano), never a role such as Founder. Their place line says who they are and where, the way the Personas page shows it under the name (Startup founder · NOI Techpark, Bolzano). Say it back as one short line, then the persona as a block the page shows as its card:\n\n\`\`\`persona\nname: Giulia\nplace: Startup founder · NOI Techpark, Bolzano\nabout: Two or three sentences: who they are and what they need from the app.\n\`\`\`\n\nThe card has its own button to add it, so ask nothing after the block. \`add_persona\` once they agree. A mission: say back the persona and what they try, and once they agree, \`send_on_mission\` hands it to the tester and takes them to the persona's tests.`;
+const GUIDE = `**Personas** (\`#personas\`): the real customers the product is for; Testing sends them to live a few days in the app. A new persona: ask, one short question at a time, who they are, where they work or live and what they need from the app. Give them a made-up first name that fits where they are (Giulia in Bolzano), never a role such as Founder. Their place line says who they are and where, the way the Personas page shows it under the name (Startup founder · NOI Techpark, Bolzano). Say it back as one short line, then the persona as a block the page shows as its card:\n\n\`\`\`persona\nname: Giulia\nplace: Startup founder · NOI Techpark, Bolzano\nabout: Two or three sentences: who they are and what they need from the app.\n\`\`\`\n\nThe card has its own button to add it, so ask nothing after the block. \`add_persona\` once they agree.`;
 
 const FIRST_NAME =
   "A made-up first name that fits the person (Giulia), never a role.";
 
 export function personasPlug(on: {
   store: () => KobbleStore;
-  tests: { start: (body: unknown) => { persona: string } };
   changed: (what: string) => void;
 }): SupportPlug {
   return {
@@ -54,26 +52,6 @@ export function personasPlug(on: {
           on.changed("personas");
           return {
             said: `Added ${persona.name} (${persona.id}): #personas/${persona.id}`,
-          };
-        },
-      }),
-      handOff({
-        name: "send_on_mission",
-        description:
-          "Hands a persona's mission to the tester, who uses the app as that persona; takes the person to the persona's tests. Only once they agreed to the mission.",
-        input: {
-          persona: z.string().describe("A persona's id from list_personas."),
-          task: z
-            .string()
-            .min(1)
-            .describe("What the persona tries, in a sentence or two."),
-        },
-        run: ({ persona, task }) => {
-          const test = on.tests.start({ persona, task });
-          on.changed("tests");
-          return {
-            said: "Handed to the tester.",
-            to: `#personas/${encodeURIComponent(test.persona)}/tests`,
           };
         },
       }),

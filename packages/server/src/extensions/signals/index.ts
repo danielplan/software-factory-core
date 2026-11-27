@@ -117,7 +117,7 @@ export function serve(host: Host): Served {
   };
 }
 
-// The new signals (with the personas' names and the missions going on),
+// The new signals (with the personas' names and the tests going on),
 // the handled ones, and a sync now.
 function readRoutes(host: Host, sync: LiveSync): Record<string, Route> {
   const personas = () => host.plug("personas")?.all() ?? [];
@@ -126,7 +126,7 @@ function readRoutes(host: Host, sync: LiveSync): Record<string, Route> {
       kept(() =>
         signalsView(host.store(), sync.view(), {
           personas: personas(),
-          missions: host.plug("missions")?.now() ?? [],
+          tests: host.plug("tests")?.now() ?? [],
           column: (issue) => host.plug("work")?.column(issue) ?? null,
         }),
       ),

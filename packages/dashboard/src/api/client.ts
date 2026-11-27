@@ -27,12 +27,17 @@ export type { FactoryState, State } from "./schemas/state.ts";
 export type { Board, CardView, StageMap, WorkView } from "./schemas/work.ts";
 export type { SignalRow, SignalsView, SyncView } from "./schemas/signals.ts";
 export type {
-  MissionNow,
   PersonaPage as KobblePersonaPage,
   PersonaRow,
-  PersonaTest,
-  TestPage,
 } from "./schemas/personas.ts";
+export type {
+  TestDraft,
+  TestMoment,
+  TestPage,
+  TestPersona,
+  TestRow,
+} from "./schemas/testing.ts";
+export type { TestNow } from "./schemas/signals.ts";
 export type { ReleasesView } from "./schemas/releases.ts";
 export type { FactoryCard, FactoryView } from "./schemas/factory.ts";
 export type {

@@ -17,8 +17,8 @@ Signals come from:
   most one signal, typed by its kind; its persona is the one whose customers
   include the event's anonymous customer. How the app offers the export and
   how it is connected: [the live export](../live-export.md).
-- **Missions.** What a persona finds in the app: see
-  [Personas and missions](personas-and-missions.md).
+- **Tests.** What a persona finds while living a few days in the app: see
+  [Testing](testing.md).
 - **The feedback board.** In the factory that reads it, the posts other
   teams sent: see [the feedback board](feedback-board.md).
 

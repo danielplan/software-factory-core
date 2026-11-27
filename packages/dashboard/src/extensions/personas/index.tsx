@@ -1,6 +1,6 @@
-// Personas on the page: its page (#personas, #personas/<id> and a
-// persona's tests), in the sidebar's Customers group. The app mounts it
-// only while Personas is installed.
+// Personas on the page: its page (#personas and #personas/<id>), in the
+// sidebar's Customers group. The app mounts it only while Personas is
+// installed.
 
 import { Users } from "lucide-react";
 

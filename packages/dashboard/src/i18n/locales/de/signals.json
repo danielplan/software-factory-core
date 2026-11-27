@@ -36,13 +36,13 @@
     "nothingHandled": "Noch nichts erledigt"
   },
   "before": {
-    "sendMore": "Schicke mehr Personas los,",
+    "sendMore": "Weitere Personas testen",
     "toImprove": "um zu finden, was besser werden kann.",
     "afterLaunch": "Nach dem Start:",
     "connectApp": "verbinde {{app}},",
     "toHear": "um von Kunden zu hören.",
-    "onMission": "Auf Mission",
-    "noCustomers": "Noch keine Kunden. Schicke deine Personas los, um die App auszuprobieren: Was sie finden, erscheint hier.",
-    "send": "Eine Persona losschicken"
+    "noCustomers": "Noch keine Kunden. Schick deine Personas ein paar Tage in die App: Was sie finden, erscheint hier.",
+    "send": "Eine Persona testen",
+    "inTest": "Im Test"
   }
 }

@@ -31,7 +31,7 @@ import { unmadeIn, unmadeOf } from "./unmade.ts";
 import { ExplorationTalks } from "./talks.ts";
 import { talkRoutes } from "./talk-routes.ts";
 import { type SpecWriter, specWriter } from "./spec-writer.ts";
-import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { TestsPlug } from "../../plugs/tests.ts";
 import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { BoardIdea } from "../../plugs/work.ts";
 import { explorationPage, explorationsView } from "./views.ts";
@@ -49,10 +49,10 @@ type Options = {
   cards: () => Cards;
   // The board's ideas (its Backlog), as the builder last read them.
   ideas?: () => BoardIdea[];
-  // Personas' plugs: who an idea is for, and the prototypes' tests; none
-  // while Personas is not installed.
+  // Who an idea is for (Personas' plug) and the prototypes' tests
+  // (Testing's); none while that extension is not installed.
   personas: () => PersonasPlug | null;
-  missions: () => MissionsPlug | null;
+  testing: () => TestsPlug | null;
   // How a link's page is read for its preview (the web, but in tests).
   look?: Look;
   onChange: () => void;
@@ -81,7 +81,7 @@ export function servedExplorations(options: Options) {
           stage("card");
           return spec;
         },
-        { missions: options.missions(), unmade: unmadeOf(project) },
+        { testing: options.testing(), unmade: unmadeOf(project) },
       );
       stage("prototypes");
       await prototypes.removeAll(id);
@@ -112,10 +112,10 @@ export function servedExplorations(options: Options) {
     talks,
     prototypes,
     worlds,
-    // Test: a persona test on the prototype's branch, as the exploration's
+    // Test: a test on the prototype's branch, as the exploration's
     // first persona; it shows on the prototype's card.
     testRoute: button((body) => ({
-      test: testPrototype(store(), options.missions(), body),
+      test: testPrototype(store(), options.testing(), body),
     })),
     close: () => {
       prototypes.close();
@@ -179,11 +179,11 @@ function makersFor(
   };
 }
 
-// Test: a persona test on the prototype's branch, as the exploration's
+// Test: a test on the prototype's branch, as the exploration's
 // first persona; it shows on the prototype's card.
 function testPrototype(
   store: KobbleStore,
-  missions: MissionsPlug | null,
+  testing: TestsPlug | null,
   body: unknown,
 ): PersonaTest {
   const exploration = explorationOf(store, field(body, "id"));
@@ -194,11 +194,11 @@ function testPrototype(
   if (!made) throw new Refused(`${exploration.id} has no prototype ${key}.`);
   if (!persona)
     throw new Refused("Testing needs a persona: this exploration has none.");
-  if (!missions)
+  if (!testing)
     throw new Refused(
-      "Personas is not installed: install it in the Marketplace (#extensions) to test a prototype.",
+      "Testing is not installed: install it in the Marketplace (#extensions) to test a prototype.",
     );
-  const test = missions.start({
+  const test = testing.start({
     persona,
     task: field(body, "task"),
     on: prototypeBranch(exploration.id, key),
@@ -249,7 +249,7 @@ function readRoutes(
         handingOff: handOffs.of(exploration.id),
         unmade: unmadeIn(options.project, store().board(exploration.id)),
         personas: options.personas(),
-        missions: options.missions(),
+        testing: options.testing(),
       });
     },
   };

@@ -5,7 +5,7 @@
 // on its own.
 
 import type { TFunction } from "i18next";
-import type { MissionNow, SignalRow, SyncView } from "../api/client.ts";
+import type { SignalRow, SyncView, TestNow } from "../api/client.ts";
 import { ENGLISH } from "../i18n/messages.ts";
 
 type Words = TFunction;
@@ -137,16 +137,16 @@ export function statusWords(
     : m("words.status.dismissed");
 }
 
-// A mission running or waiting, in a few words: the step it is on.
-export function missionWords(
-  mission: Pick<MissionNow, "status" | "doing">,
+// A test running or waiting, in a few words: the moment it is at.
+export function testWords(
+  test: Pick<TestNow, "status" | "doing">,
   m: Words = W,
 ): string {
-  if (mission.status === "queued") return m("words.mission.queued");
-  return mission.doing ?? m("words.mission.opening");
+  if (test.status === "queued") return m("words.test.queued");
+  return test.doing ?? m("words.test.opening");
 }
 
-// Where a signal from a mission happened: "At step 2: Opened the basket".
+// Where a signal from a test happened: "At step 2: Opened the basket".
 export function stepWords(
   signal: Pick<SignalRow, "step">,
   m: Words = W,
@@ -154,23 +154,6 @@ export function stepWords(
   return signal.step
     ? m("words.step", { number: signal.step.number, did: signal.step.did })
     : null;
-}
-
-// On a persona's page, what is open: their signals (#personas/<id>), their
-// tests (#personas/<id>/tests) or one test (#personas/<id>/tests/<test>).
-export function personaPlaceOf(open: string): {
-  persona: string;
-  tab: "signals" | "tests";
-  test: string | null;
-} {
-  const [persona = "", tab, test] = open
-    .split("/")
-    .map((part) => decodeURIComponent(part));
-  return {
-    persona,
-    tab: tab === "tests" ? "tests" : "signals",
-    test: tab === "tests" && test ? test : null,
-  };
 }
 
 // When the kobold reads the live app again, in words.

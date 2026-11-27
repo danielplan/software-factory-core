@@ -410,7 +410,7 @@ test("Fix makes an issue in To do and the signal goes to it; the Factory board s
       { connected: true, address: null, last: null, next: null, problem: null },
       {
         personas: plugs.personas.all(),
-        missions: plugs.missions.now(),
+        tests: plugs.tests.now(),
         column: (issue) => columnOf(issue, work),
       },
     );

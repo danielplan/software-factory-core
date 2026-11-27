@@ -17,9 +17,9 @@ const fileId = z
 const text = z.string().trim().min(1);
 const time = z.iso.datetime({ offset: true });
 
-// From the live app: bug, request or feedback. From a mission (a persona
-// sent to try the app before launch): bug, idea or question (an open
-// question).
+// From the live app: bug, request or feedback. From a test (a persona
+// living a few days in the app before launch): bug, idea or question (an
+// open question).
 export const SIGNAL_TYPES = [
   "bug",
   "request",
@@ -73,8 +73,8 @@ export const kobbleSignalSchema = z.strictObject({
   at: time,
   text,
   status: z.enum(SIGNAL_STATUSES),
-  // Where it happened, for a signal from a persona test: the test, the
-  // step's number (from 1) and what the persona did there.
+  // Where it happened, for a signal from a test: the test, the moment's
+  // number (from 1, over all its days) and what the persona did there.
   step: stepOfSchema.optional(),
   // The exploration or factory item it went to.
   to: text.nullable(),
@@ -297,38 +297,82 @@ export const kobblePersonaSchema = z.strictObject({
 
 export const TEST_STATUSES = ["queued", "running", "done", "failed"] as const;
 
-// One step of a persona test, from the persona agent's diary: what it did,
-// what it expected, whether that happened, and a note in its own words.
-const stepSchema = z.strictObject({
+// One moment of a test, from the persona's diary: on which day and at what
+// time of their day, what they did, what they expected, whether that
+// happened, what they said in their own words, and the picture of the
+// screen then (a file in the test's folder).
+export const testStepSchema = z.strictObject({
+  day: z.number().int().positive().default(1),
+  time: z.string().nullable().optional(),
   did: text,
   expected: text,
   asExpected: z.boolean(),
   note: z.string().optional(),
+  shot: z.string().nullable().optional(),
 });
 
-// A persona test: an agent uses the app as the persona would, on this
-// computer only (never the live app), and what surprised it becomes
-// signals.
-export const personaTestSchema = z.strictObject({
-  id: fileId.regex(/^T-\d{4,}$/, "a test's id is T- and four digits"),
-  persona: fileId,
-  task: text,
-  // What it ran on: the app as it is now (main), or a prototype's branch.
-  on: z.union([z.literal("main"), z.string().regex(PROTOTYPE_BRANCH)]),
-  // The product (app) it tried, when the factory has more than one; none
-  // for the first product with a web address.
-  product: fileId.nullable().optional(),
-  status: z.enum(TEST_STATUSES),
-  started: time.nullable(),
-  ended: time.nullable(),
-  steps: z.array(stepSchema),
-  // While it runs: the step the persona is on, in its words ("Step 3:
-  // choosing a delivery slot").
-  doing: z.string().nullable().optional(),
-  signals: z.array(fileId),
-  // Why it failed, in plain words.
-  problem: z.string().nullable(),
+// A day of a test: what kind of day it is ("Monday evening", "An ordinary
+// Tuesday") and what happens to the persona in it, in plain words, never
+// which buttons to press.
+export const testDaySchema = z.strictObject({
+  title: z.string(),
+  situations: z.array(text).min(1),
 });
+
+// A test: a persona lives a few days in the app, following a story written
+// for this test (who they are, how they work without the app, what they
+// bring), on this computer only (never the live app); what surprised them
+// becomes signals.
+export const personaTestSchema = z.preprocess(
+  fromOneTask,
+  z.strictObject({
+    id: fileId.regex(/^T-\d{4,}$/, "a test's id is T- and four digits"),
+    persona: fileId,
+    title: text,
+    story: z.string(),
+    days: z.array(testDaySchema).min(1),
+    // What it ran on: the app as it is now (main), or a prototype's branch.
+    on: z.union([z.literal("main"), z.string().regex(PROTOTYPE_BRANCH)]),
+    // The product (app) it tried, when the factory has more than one; none
+    // for the first product with a web address.
+    product: fileId.nullable().optional(),
+    // The language and time zone the persona's browser uses (it-IT,
+    // Europe/Rome); the browser's own when not given.
+    locale: z.string().nullable().optional(),
+    timeZone: z.string().nullable().optional(),
+    status: z.enum(TEST_STATUSES),
+    started: time.nullable(),
+    ended: time.nullable(),
+    steps: z.array(testStepSchema),
+    // While it runs: the moment the persona is on, in their words ("Step
+    // 3: choosing a delivery slot").
+    doing: z.string().nullable().optional(),
+    signals: z.array(fileId),
+    // Why it failed, in plain words.
+    problem: z.string().nullable(),
+    // The day the persona got stuck on and could not go on, as the person
+    // would; the days after it were not lived.
+    stuck: z.number().int().positive().nullable().optional(),
+    // What the browser reported as errors, day by day (its console).
+    errors: z
+      .array(z.strictObject({ day: z.number().int().positive(), text }))
+      .optional(),
+  }),
+);
+
+// A test written before tests had days (a mission: one task) reads as a
+// test of one day with that task as its only situation.
+function fromOneTask(value: unknown): unknown {
+  if (typeof value !== "object" || value === null || !("task" in value))
+    return value;
+  const { task, ...rest } = value as Record<string, unknown>;
+  return {
+    title: task,
+    story: "",
+    days: [{ title: "", situations: [task] }],
+    ...rest,
+  };
+}
 
 // When the live app was last read, and where to go on from next time.
 export const syncStateSchema = z.strictObject({
@@ -343,7 +387,8 @@ export type KobblePersona = z.infer<typeof kobblePersonaSchema>;
 export type SyncState = z.infer<typeof syncStateSchema>;
 export type Already = z.infer<typeof alreadySchema>;
 export type PersonaTest = z.infer<typeof personaTestSchema>;
-export type TestStep = z.infer<typeof stepSchema>;
+export type TestStep = z.infer<typeof testStepSchema>;
+export type TestDay = z.infer<typeof testDaySchema>;
 export type SignalStep = z.infer<typeof stepOfSchema>;
 export type Board = z.infer<typeof boardSchema>;
 export type Thing = z.infer<typeof thingSchema>;

@@ -41,7 +41,8 @@ would do, Sprocket says so and takes them to the Marketplace.
 | Extension    | Hand-offs                                                                                                                               |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Explorations | `explore_with_doodle`, `add_exploration`, `tell_doodle`, `list_explorations`                                                            |
-| Personas     | `add_persona`, `send_on_mission`, `list_personas`                                                                                       |
+| Personas     | `add_persona`, `list_personas`                                                                                                          |
+| Testing      | `start_test`                                                                                                                            |
 | Signals      | `send_signal` (to the builder or Doodle), `list_new_signals`                                                                            |
 | Factory      | `look_at_card` (the card, and on its branch the commits, changed files and run file), `answer_card` (the agreed answer on a stuck card) |
 | Releases     | what Sprocket should know about releases                                                                                                |

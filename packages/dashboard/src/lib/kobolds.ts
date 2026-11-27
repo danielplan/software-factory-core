@@ -53,7 +53,7 @@ export const KOBOLDS: Kobold[] = [
     name: "Mimic",
     hat: "cap",
     color: "#e64f86",
-    page: "personas",
+    page: "testing",
   },
   {
     id: "sorter",
