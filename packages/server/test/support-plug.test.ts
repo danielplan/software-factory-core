@@ -70,22 +70,28 @@ test("Sprocket hears only the plugs of the extensions installed now", () => {
     "explorations",
     "signals",
     "personas",
+    "testing",
     "releases",
   ]);
   for (const name of [
     "answer_card",
     "explore_with_doodle",
-    "send_on_mission",
+    "add_persona",
+    "start_test",
     "send_signal",
   ])
     assert.ok(all.includes(name), name);
-  // Personas and Explorations removed: their hand-offs and words go with them.
+  // Personas, Testing and Explorations removed: their hand-offs and words
+  // go with them.
   const fewer = sprocket(["factory", "signals"]).support.tools().plugs;
   const names = fewer.flatMap((plug) => plug.handOffs.map((one) => one.name));
-  assert.ok(!names.includes("send_on_mission"));
+  assert.ok(!names.includes("start_test"));
   assert.ok(!names.includes("explore_with_doodle"));
   assert.ok(names.includes("send_signal"));
-  assert.doesNotMatch(plugsGuide(fewer), /Personas|Doodle, the explorer/);
+  assert.doesNotMatch(
+    plugsGuide(fewer),
+    /Personas|Testing|Doodle, the explorer/,
+  );
   assert.match(plugsGuide([]), /no extension that hands work on is installed/);
 });
 

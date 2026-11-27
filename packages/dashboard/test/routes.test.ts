@@ -8,17 +8,24 @@ import {
   personaPath,
   placeOf,
   placeShown,
+  testingPath,
 } from "../src/lib/routes.ts";
 
 test("a persona has its own address", () => {
   assert.deepEqual(placeOf("#personas/mia"), { page: "personas", open: "mia" });
   assert.equal(personaPath(), "/personas");
   assert.equal(personaPath("gift buyer"), "/personas/gift%20buyer");
-  assert.equal(personaPath("mia", {}), "/personas/mia/tests");
-  assert.equal(
-    personaPath("mia", { test: "T-0001" }),
-    "/personas/mia/tests/T-0001",
-  );
+});
+
+test("Testing has its tests and a new test at their own addresses", () => {
+  assert.deepEqual(placeOf("#testing/T-0001"), {
+    page: "testing",
+    open: "T-0001",
+  });
+  assert.equal(testingPath(), "/testing");
+  assert.equal(testingPath({ test: "T-0001" }), "/testing/T-0001");
+  assert.equal(testingPath({ new: null }), "/testing/new");
+  assert.equal(testingPath({ new: "gift buyer" }), "/testing/new/gift%20buyer");
 });
 
 test("an address written the old way becomes the router's path", () => {

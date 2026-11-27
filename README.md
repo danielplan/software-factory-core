@@ -14,7 +14,7 @@ repository and installs a released version of this core there.
 ## What you can do with it
 
 - **Collect signals.** Write down what customers say, connect your live app,
-  or send AI personas into your apps on missions. They report the bugs,
+  or send AI personas to live a few days in your apps. They report the bugs,
   ideas and open questions they run into.
 - **Explore an idea before building it.** Talk an idea through with Doodle,
   the explorer. It draws the problem, the choices and their options on a
@@ -149,15 +149,15 @@ run it for you. [AGENTS.md](AGENTS.md) has the conventions, and
 [your first change to Kobble](docs/tutorials/first-change-to-kobble.md)
 walks through one.
 
-| Folder                     | What is in it                                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `packages/core/`           | Products, the company file, extensions, parts, settings, the AI agents, working copies                                  |
-| `packages/server/`         | The local server and the `software-factory` command: explorations, prototypes, the builder, missions, updates, trackers |
-| `packages/dashboard/`      | Kobble's page, in English, Italian and German                                                                           |
-| `packages/kits/`           | One kit per kind of product, with its starter and rules                                                                 |
-| `packages/launcher/`       | Starts, watches and stops your product's parts                                                                          |
-| `packages/skills/`         | The skills and guides the AI agents follow                                                                              |
-| `packages/knowledge-base/` | The template for a project's knowledge pages, and their checks                                                          |
-| `factory/`                 | Kobble's own factory                                                                                                    |
-| `examples/acme/`           | An example company, used by the tests                                                                                   |
-| `scripts/`                 | Building and publishing releases, starting Kobble's prototypes                                                          |
+| Folder                     | What is in it                                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `packages/core/`           | Products, the company file, extensions, parts, settings, the AI agents, working copies                               |
+| `packages/server/`         | The local server and the `software-factory` command: explorations, prototypes, the builder, tests, updates, trackers |
+| `packages/dashboard/`      | Kobble's page, in English, Italian and German                                                                        |
+| `packages/kits/`           | One kit per kind of product, with its starter and rules                                                              |
+| `packages/launcher/`       | Starts, watches and stops your product's parts                                                                       |
+| `packages/skills/`         | The skills and guides the AI agents follow                                                                           |
+| `packages/knowledge-base/` | The template for a project's knowledge pages, and their checks                                                       |
+| `factory/`                 | Kobble's own factory                                                                                                 |
+| `examples/acme/`           | An example company, used by the tests                                                                                |
+| `scripts/`                 | Building and publishing releases, starting Kobble's prototypes                                                       |

@@ -15,7 +15,7 @@ import {
   type Thing,
 } from "@software-factory/core";
 
-import type { MissionsPlug } from "../../plugs/missions.ts";
+import type { TestsPlug } from "../../plugs/tests.ts";
 import type { PersonasPlug } from "../../plugs/personas.ts";
 import type { BoardIdea } from "../../plugs/work.ts";
 import type { VersionRun } from "../../prototypes/mode.ts";
@@ -163,14 +163,14 @@ export function explorationPage(
     talk: TalkView;
     handingOff: HandingOff | null;
     unmade: string[];
-    // Who it is for, and its prototypes' tests: Personas' plugs.
+    // Who it is for (Personas' plug), and its prototypes' tests (Testing's).
     personas: PersonasPlug | null;
-    missions: MissionsPlug | null;
+    testing: TestsPlug | null;
   },
 ): ExplorationPage {
   const board = completed(exploration, store.board(exploration.id));
   const tests =
-    more.missions?.of(
+    more.testing?.of(
       board.things.flatMap((made) =>
         made.kind === "prototype" ? made.tests : [],
       ),

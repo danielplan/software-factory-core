@@ -43,14 +43,14 @@
     "new": "Neu",
     "dismissed": "Verworfen"
   },
-  "mission": {
+  "test": {
     "queued": "Wartet, bis es dran ist",
     "opening": "Öffne die App…"
   },
   "step": "Bei Schritt {{number}}: {{did}}",
   "tests": {
     "queued": "Wartet",
-    "running": "Auf Mission",
+    "running": "Im Test",
     "done": "Erledigt",
     "failed": "Fehlgeschlagen"
   },

@@ -1,29 +1,42 @@
 {
   "id": "T-0001",
   "persona": "mia",
-  "task": "Fill the basket on the way home and pay later in the evening",
+  "title": "Fill the basket on the way home and pay later in the evening",
+  "story": "Mia gardens on weekends and orders what she needs on her phone on the way home from work. She pays in the evening, when she is back at her laptop.",
+  "days": [
+    {
+      "title": "An ordinary evening",
+      "situations": [
+        "Fill the basket on the way home and pay later in the evening"
+      ]
+    }
+  ],
   "on": "main",
   "status": "done",
   "started": "2026-11-15T19:30:00.000Z",
   "ended": "2026-11-15T19:42:00.000Z",
   "steps": [
     {
+      "day": 1,
       "did": "Opened the shop on the phone",
       "expected": "I see the garden tools",
       "asExpected": true
     },
     {
+      "day": 1,
       "did": "Put a pair of gloves in the basket",
       "expected": "The basket shows the gloves",
       "asExpected": true
     },
     {
+      "day": 1,
       "did": "Closed the shop and opened it again later",
       "expected": "The gloves are still in the basket",
       "asExpected": false,
       "note": "The basket was empty."
     },
     {
+      "day": 1,
       "did": "Looked for when the delivery comes",
       "expected": "I can pick the evening",
       "asExpected": false,

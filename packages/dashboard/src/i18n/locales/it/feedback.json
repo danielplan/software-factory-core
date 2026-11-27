@@ -133,6 +133,10 @@
         "text": "Il costruttore si è fermato? Segnalalo",
         "said": "Il costruttore si è fermato"
       },
+      "testing": {
+        "text": "Un test si è fermato o è andato storto? Segnalalo",
+        "said": "Un test non ha funzionato"
+      },
       "releases": {
         "text": "La release è andata storta? Segnalalo",
         "said": "La release non è riuscita"

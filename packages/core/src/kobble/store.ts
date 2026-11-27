@@ -40,7 +40,11 @@ import {
   writeAtomically,
   writeText,
 } from "./files.ts";
-import { ignoreSignals } from "./ignored.ts";
+import {
+  addToGitignore,
+  IGNORED_TEST_SHOTS,
+  ignoreSignals,
+} from "./ignored.ts";
 import { readPosition, savePosition } from "./read-position.ts";
 import {
   type Board,
@@ -251,6 +255,22 @@ export class KobbleStore {
   pictureFile(id: string, name: string): string | null {
     if (!/^[\w-]+\.(png|jpe?g|gif|webp)$/.test(name)) return null;
     const file = join(this.root, "explorations", id, "pictures", name);
+    return existsSync(file) ? file : null;
+  }
+
+  // The folder for the pictures of a test's screens. They stay on this
+  // computer, like the signals: the factory's .gitignore names the folder.
+  testShots(id: string): string {
+    addToGitignore(this.factory, IGNORED_TEST_SHOTS);
+    const folder = join(this.root, "test-shots", id);
+    mkdirSync(folder, { recursive: true });
+    return folder;
+  }
+
+  testShotFile(id: string, name: string): string | null {
+    if (!/^T-\d{4,}$/.test(id) || !/^[\w-]+\.(png|jpe?g)$/.test(name))
+      return null;
+    const file = join(this.root, "test-shots", id, name);
     return existsSync(file) ? file : null;
   }
 

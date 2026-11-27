@@ -52,7 +52,7 @@ described as views, and fewer rights: see
 | `offers`        | the [plugs](plugs-and-slots.md) it offers, and `home` for its blocks' data                                                                                                |
 | `support`       | its plug into Sprocket, made again each time                                                                                                                              |
 | `listen`        | told the server's address, for its kobolds' tools and webhooks                                                                                                            |
-| `start`, `stop` | its background work: the live sync, missions to pick up, the builder's board work                                                                                         |
+| `start`, `stop` | its background work: the live sync, tests to pick up, the builder's board work                                                                                            |
 
 Beside `serve`, an add-on that fills a slot gives `codeHost` (for `code`)
 or `tasks` (for `tasks`).

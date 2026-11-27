@@ -1,6 +1,6 @@
 // What the Signals page shows, worked out from the signals, with the
-// personas' names and faces (Personas' plug), the missions going on
-// (Personas' too) and the column a fix is in (the Factory's).
+// personas' names and faces (Personas' plug), the tests going on
+// (Testing's) and the column a fix is in (the Factory's).
 
 import type { KobblePersona, KobbleStore } from "@software-factory/core";
 
@@ -9,7 +9,7 @@ import {
   type SignalRow,
   signalRows,
 } from "../../kobble/signal-rows.ts";
-import type { MissionNow } from "../../plugs/missions.ts";
+import type { TestNow } from "../../plugs/tests.ts";
 import type { SyncView } from "./sync.ts";
 
 export type SignalsView = {
@@ -17,15 +17,15 @@ export type SignalsView = {
   signals: SignalRow[];
   counts: { new: number };
   sync: SyncView;
-  // The missions running or waiting.
-  missions: MissionNow[];
+  // The tests running or waiting.
+  tests: TestNow[];
 };
 
 // What the page shows beside the signals, from the other extensions: none
 // of it while they are not installed.
 export type Around = {
   personas: KobblePersona[];
-  missions: MissionNow[];
+  tests: TestNow[];
   // The column of an issue ("#41") on the board, in words.
   column: (issue: string) => string | null;
 };
@@ -46,7 +46,7 @@ export function signalsView(
     })),
     counts: { new: fresh.length },
     sync,
-    missions: around.missions,
+    tests: around.tests,
   };
 }
 

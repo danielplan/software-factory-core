@@ -1,4 +1,4 @@
-// What a kobold that looks at an app works with (the persona tests, the
+// What a kobold that looks at an app works with (the tests, the
 // maker, the builder): the products as the factory starts them on this
 // computer (the launcher, with the kit's command and port), and a browser:
 // Playwright's MCP server, the browser Claude Code's own Playwright
@@ -6,7 +6,9 @@
 // on a free port.
 
 import { spawn } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import { type AddressInfo, createServer } from "node:net";
+import { join } from "node:path";
 
 import type { Launcher } from "@software-factory/launcher";
 
@@ -17,6 +19,15 @@ export class TestProblem extends Error {}
 
 // A browser a kobold uses through MCP, at its address.
 export type Browser = { url: string; close: () => void };
+
+// How a test wants its browser: the folder its screenshots go to, and the
+// language and time zone of the person using it (it-IT, Europe/Rome), so
+// dates, numbers and "today" look the way they would to them.
+export type BrowserWish = {
+  shots?: string;
+  locale?: string | null;
+  timeZone?: string | null;
+};
 
 // An app a persona can be sent into: a product the factory starts with a
 // web address.
@@ -56,8 +67,8 @@ export async function appAddress(
   if (!app?.link)
     throw new TestProblem(
       product
-        ? `Missions need the app “${product}”, and the factory has no app by that name.`
-        : "Missions need an app the factory starts with a web address; there is none.",
+        ? `Tests need the app “${product}”, and the factory has no app by that name.`
+        : "Tests need an app the factory starts with a web address; there is none.",
     );
   if (app.light !== "running") {
     await launcher().start(app.id);
@@ -67,14 +78,16 @@ export async function appAddress(
     if (now?.light !== "running") {
       const why = now?.problem ? `: ${now.problem.title}` : ".";
       throw new TestProblem(
-        `Missions need ${app.name} running on this computer, and it did not start${why}`,
+        `Tests need ${app.name} running on this computer, and it did not start${why}`,
       );
     }
   }
   return app.link;
 }
 
-export async function playwrightBrowser(): Promise<Browser> {
+export async function playwrightBrowser(
+  wish: BrowserWish = {},
+): Promise<Browser> {
   const port = await freePort();
   const child = spawn(
     NPX,
@@ -85,6 +98,7 @@ export async function playwrightBrowser(): Promise<Browser> {
       "--isolated",
       "--port",
       String(port),
+      ...browserOptions(wish),
     ],
     { stdio: "ignore" },
   );
@@ -105,10 +119,28 @@ export async function playwrightBrowser(): Promise<Browser> {
   } catch (error) {
     close();
     throw new TestProblem(
-      `Missions need a browser (Playwright's MCP server, via npx ${PLAYWRIGHT_MCP}) and it did not start: ${error instanceof Error ? error.message : String(error)}.`,
+      `Tests need a browser (Playwright's MCP server, via npx ${PLAYWRIGHT_MCP}) and it did not start: ${error instanceof Error ? error.message : String(error)}.`,
     );
   }
   return { url, close };
+}
+
+// The options for the wish: the screenshots' folder, and a configuration
+// file (written in that folder) with the language and time zone.
+export function browserOptions(wish: BrowserWish): string[] {
+  if (!wish.shots) return [];
+  const options = ["--output-dir", wish.shots];
+  const context = {
+    ...(wish.locale ? { locale: wish.locale } : {}),
+    ...(wish.timeZone ? { timezoneId: wish.timeZone } : {}),
+  };
+  if (Object.keys(context).length === 0) return options;
+  const config = join(wish.shots, "browser.json");
+  writeFileSync(
+    config,
+    JSON.stringify({ browser: { contextOptions: context } }, null, 2),
+  );
+  return [...options, "--config", config];
 }
 
 async function answering(url: string): Promise<void> {

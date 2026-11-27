@@ -9,16 +9,15 @@ import {
   countWords,
   doneWords,
   exploreWords,
-  missionWords,
   nextAfter,
   lookAgainWords,
   originWords,
-  personaPlaceOf,
   primaryOf,
   shownOf,
   statusWords,
   stepWords,
   syncLine,
+  testWords,
   TYPE_WORDS,
   tintIndexOf,
   whoOf,
@@ -161,24 +160,6 @@ test("the kobold's card says what it does, or Idle", () => {
   );
 });
 
-test("a persona's page opens on their signals, their tests or one test", () => {
-  assert.deepEqual(personaPlaceOf("mia"), {
-    persona: "mia",
-    tab: "signals",
-    test: null,
-  });
-  assert.deepEqual(personaPlaceOf("mia/tests"), {
-    persona: "mia",
-    tab: "tests",
-    test: null,
-  });
-  assert.deepEqual(personaPlaceOf("mia/tests/T-0001"), {
-    persona: "mia",
-    tab: "tests",
-    test: "T-0001",
-  });
-});
-
 test("when the kobold looks again, in words", () => {
   assert.equal(lookAgainWords(null, NOW), "The kobold looks again soon.");
   assert.equal(
@@ -191,17 +172,17 @@ test("when the kobold looks again, in words", () => {
   );
 });
 
-test("a mission says the step it is on; its signals, where they happened", () => {
+test("a test says the moment it is at; its signals, where they happened", () => {
   assert.equal(
-    missionWords({ status: "queued", doing: null }),
+    testWords({ status: "queued", doing: null }),
     "Waits for its turn",
   );
   assert.equal(
-    missionWords({ status: "running", doing: null }),
+    testWords({ status: "running", doing: null }),
     "Opening the app…",
   );
   assert.equal(
-    missionWords({ status: "running", doing: "Step 2: Paying" }),
+    testWords({ status: "running", doing: "Step 2: Paying" }),
     "Step 2: Paying",
   );
   assert.equal(

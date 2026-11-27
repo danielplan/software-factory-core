@@ -91,7 +91,7 @@ export function SignalsPage({
   );
 }
 
-// The new signals; before launch, the personas on a mission and, with no
+// The new signals; before launch, the personas in a test and, with no
 // signal yet, where the first come from; after it, with none, that all is
 // quiet.
 function Shown({
@@ -114,7 +114,7 @@ function Shown({
   const before = !data.sync.connected && (
     <BeforeLaunch
       app={app}
-      missions={data.missions}
+      tests={data.tests}
       empty={data.signals.length + sent.length === 0}
     />
   );

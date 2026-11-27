@@ -1,5 +1,5 @@
 // What the Signals page reads: the new signals with the sync and the
-// missions going on (GET /api/kobble/signals), and the signals already
+// tests going on (GET /api/kobble/signals), and the signals already
 // handled (GET /api/kobble/handled). A signal row is also read on the
 // Personas pages (personas.ts).
 
@@ -7,9 +7,9 @@ import { z } from "zod";
 
 import {
   kobbleSignalSchema,
-  personaTestSchema,
+  TEST_STATUSES,
 } from "../../../../core/src/kobble/schemas.ts";
-import type { MissionNow as ServedMission } from "../../../../server/src/plugs/missions.ts";
+import type { TestNow as ServedNow } from "../../../../server/src/plugs/tests.ts";
 import type { SyncView as ServedSync } from "../../../../server/src/extensions/signals/sync.ts";
 import type {
   handledView,
@@ -35,22 +35,22 @@ const syncViewSchema = z.object({
   problem: z.string().nullable(),
 }) satisfies z.ZodType<ServedSync>;
 
-// A persona on a mission now (or waiting), and the step it is on. Offered
-// by Personas; kept here because the Signals page reads it too.
-export const missionNowSchema = z.object({
+// A persona in a test now (or waiting), and the moment they are at.
+// Offered by Testing; kept here because the Signals page reads it too.
+export const testNowSchema = z.object({
   id: z.string(),
   persona: z.string(),
   name: z.string(),
   face: faceSchema,
-  status: personaTestSchema.shape.status,
+  status: z.enum(TEST_STATUSES),
   doing: z.string().nullable(),
-}) satisfies z.ZodType<ServedMission>;
+}) satisfies z.ZodType<ServedNow>;
 
 export const signalsViewSchema = z.object({
   signals: z.array(signalRowSchema),
   counts: z.object({ new: z.number() }),
   sync: syncViewSchema,
-  missions: z.array(missionNowSchema),
+  tests: z.array(testNowSchema),
 }) satisfies z.ZodType<Served>;
 
 export const handledSchema = z.object({
@@ -58,5 +58,6 @@ export const handledSchema = z.object({
 }) satisfies z.ZodType<ReturnType<typeof handledView>>;
 
 export type SignalsView = z.infer<typeof signalsViewSchema>;
+export type TestNow = z.infer<typeof testNowSchema>;
 export type SignalRow = z.infer<typeof signalRowSchema>;
 export type SyncView = z.infer<typeof syncViewSchema>;

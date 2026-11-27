@@ -10,6 +10,7 @@
     "signals": "Segnali",
     "explore": "Esplorazioni",
     "build": "Fabbrica",
+    "testing": "Test",
     "releases": "Release",
     "personas": "Personas",
     "extensions": "Marketplace",
@@ -51,7 +52,7 @@
     "support": "Risponde alle tue domande, su ogni pagina",
     "explorer": "Ragiona sulle esplorazioni e crea prototipi",
     "builder": "Costruisce le schede concordate sulla bacheca della Fabbrica",
-    "tester": "Usa l'app come una delle tue personas",
+    "tester": "Vive qualche giorno nell'app come una delle tue personas",
     "sorter": "Smista i segnali in arrivo"
   },
   "closed": "La finestra della fabbrica sembra chiusa. Riavviala con software-factory.",

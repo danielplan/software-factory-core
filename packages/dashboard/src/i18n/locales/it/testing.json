@@ -1,0 +1,70 @@
+{
+  "cannotRead": "Non riesco a leggere i test",
+  "line": "Le personas vivono qualche giorno nell'app, come farebbe un cliente.",
+  "newTest": "Nuovo test",
+  "empty": "Ancora nessun test. Scegli una persona che viva qualche giorno nell'app: quello in cui si imbatte compare qui.",
+  "noPersonas": "Ancora nessuna persona. Aggiungine una, poi mandala a vivere qualche giorno nell'app.",
+  "addPersonas": "Vai a Personas",
+  "row": {
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni",
+    "days_many": "{{count}} giorni",
+    "onMain": "l'app com'è ora",
+    "onPrototype": "un prototipo",
+    "waiting": "Aspetta il suo turno",
+    "stopped": "Interrotto: {{why}}",
+    "noReason": "nessun motivo indicato",
+    "nothing": "Niente trovato"
+  },
+  "counts": {
+    "bug_one": "{{count}} bug",
+    "bug_other": "{{count}} bug",
+    "bug_many": "{{count}} bug",
+    "idea_one": "{{count}} idea",
+    "idea_other": "{{count}} idee",
+    "idea_many": "{{count}} idee",
+    "question_one": "{{count}} domanda",
+    "question_other": "{{count}} domande",
+    "question_many": "{{count}} domande",
+    "wentFine": "{{count}} andati bene"
+  },
+  "moment": {
+    "ok": "Andato bene",
+    "idea": "Idea",
+    "question": "Domanda",
+    "bug": "Bug"
+  },
+  "new": {
+    "line": "Scegli chi. Mimic scrive la sua storia e le sue giornate; cambia quello che vuoi prima di mandarla.",
+    "who": "Chi",
+    "story": "La storia di {{name}}",
+    "days": "Le giornate di {{name}}",
+    "writtenBy": "Scritto da Mimic",
+    "inApp": "in {{app}}",
+    "writing": "Mimic sta scrivendo la storia di {{name}}…",
+    "tryAgain": "Riprova",
+    "titleLabel": "Il nome del test",
+    "storyHint": "Chi è, come lavora senza l'app e cosa porta con sé: i suoi clienti, i suoi numeri.",
+    "dayTitle": "Giorno {{number}}",
+    "dayKind": "Che giornata è (lunedì sera)",
+    "situations": "Cosa succede il giorno {{number}}, una riga per cosa",
+    "daysHint": "Cosa le succede, non quali pulsanti premere.",
+    "addDay": "Aggiungi un giorno",
+    "removeDay": "Togli il giorno {{number}}",
+    "send": "Manda {{name}}",
+    "about": "Circa 20 minuti al giorno · su questo computer, mai sull'app dal vivo"
+  },
+  "run": {
+    "cannotRead": "Non riesco a leggere questo test",
+    "on": "{{place}} · {{when}} · su {{on}}",
+    "again": "Rimetti alla prova {{name}}",
+    "day": "Giorno {{number}}",
+    "couldNotFinish": "Il test non è riuscito a finire",
+    "waiting": "Aspetta il suo turno…",
+    "opening": "Mimic sta aprendo l'app…",
+    "noMoments": "Non è ancora successo niente.",
+    "expected": "Si aspettava: {{what}}",
+    "whole": "Per tutto il test",
+    "inSignals": "Ogni bug e idea è anche nella pagina Segnali, collegato al suo momento."
+  }
+}

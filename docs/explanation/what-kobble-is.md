@@ -21,11 +21,11 @@ flowchart LR
   E -->|hand-off: a card in To do| F[Factory board<br/>Bolt builds]
   F -->|pull request| R[Review<br/>the team]
   R -->|merged| L[Releases<br/>numbers and notes]
-  P[Personas<br/>Mimic on missions] --> S
+  P[Testing<br/>Mimic lives a few days as a persona] --> S
 ```
 
 1. **Signals.** What the live app reports, what people post on the feedback
-   board, and what made-up customers find on their missions. Each signal is
+   board, and what personas find while living a few days in the app. Each signal is
    a bug, an idea or a question. See [Signals](../reference/features/signals.md).
 2. **Explorations.** The team thinks an idea through with **Doodle**, the
    explorer, on a whiteboard. **Tinker**, Doodle's maker, builds it as a
@@ -43,16 +43,18 @@ flowchart LR
    release, with notes written from the pull requests. See
    [Releases](../reference/features/releases.md).
 
-**Personas** feed the loop before there are real customers: **Mimic**, the
-tester, plays one of them in the app on a mission and reports what it finds
-as signals. See [Personas and missions](../reference/features/personas-and-missions.md).
+**Testing** feeds the loop before there are real customers: **Mimic**, the
+tester, lives a few days in the app as one of the personas, following a
+story with their own material, and reports what it finds as signals. See
+[Testing](../reference/features/testing.md) and
+[Personas](../reference/features/personas.md).
 
 ## Sprocket, the guide
 
 **Sprocket** is at the bottom of every page. People ask it how Kobble works,
 or tell it what they want done. It finds out what they want, takes them to
 the right page, and hands the work on to the kobold whose job it is: an idea
-to Doodle, a mission to Mimic, an answer on a stuck card to Bolt. It does
+to Doodle, a test to Mimic, an answer on a stuck card to Bolt. It does
 nothing alone ([decision 0010](../decisions/0010-sprocket-is-the-guide.md)).
 See [Sprocket](../reference/features/sprocket.md).
 

@@ -108,7 +108,11 @@
     },
     "personas": {
       "name": "Personas",
-      "about": "Erfundene Kundinnen und Kunden, die die App benutzen und dir sagen, was kaputt ist."
+      "about": "Die echten Kunden, für die die App ist."
+    },
+    "testing": {
+      "name": "Tests",
+      "about": "Personas leben ein paar Tage in der App und sagen dir, was nicht geht."
     },
     "releases": {
       "name": "Releases",
@@ -126,7 +130,8 @@
   "staysIn": {
     "explorations": "ihre Erkundungen",
     "signals": "ihre Signale",
-    "personas": "ihre Personas und deren Aufträge",
+    "personas": "seine Personas",
+    "testing": "seine Tests",
     "releases": "ihre Releases"
   },
   "connections": {

@@ -1,6 +1,6 @@
 // Explorations' plug (`ideas`): the explorations there are, an idea taken
 // in (a new one, or a signal heard), where one is on the page, a
-// prototype's address for a persona's mission, and the cards explorations
+// prototype's address for a persona's test, and the cards explorations
 // were handed off as.
 
 import {

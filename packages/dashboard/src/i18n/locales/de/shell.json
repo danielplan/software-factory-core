@@ -10,6 +10,7 @@
     "signals": "Signale",
     "explore": "Erkundungen",
     "build": "Fabrik",
+    "testing": "Tests",
     "releases": "Releases",
     "personas": "Personas",
     "extensions": "Marktplatz",
@@ -51,7 +52,7 @@
     "support": "Beantwortet deine Fragen, auf jeder Seite",
     "explorer": "Denkt Erkundungen durch und baut Prototypen",
     "builder": "Baut die vereinbarten Karten auf dem Board der Fabrik",
-    "tester": "Nutzt die App als eine deiner Personas",
+    "tester": "Lebt ein paar Tage in der App als eine deiner Personas",
     "sorter": "Sortiert die eingehenden Signale"
   },
   "closed": "Das Fenster der Fabrik scheint geschlossen. Starte sie neu mit software-factory.",

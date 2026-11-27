@@ -14,7 +14,7 @@ const OWNERS: Record<string, string> = {
   signals: "signals",
   explorations: "explorations",
   personas: "personas",
-  tests: "personas",
+  tests: "testing",
 };
 
 // A store call naming a collection: store.all("signals"), .put(\n"tests" …

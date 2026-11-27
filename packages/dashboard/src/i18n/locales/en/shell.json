@@ -10,6 +10,7 @@
     "signals": "Signals",
     "explore": "Explorations",
     "build": "Factory",
+    "testing": "Testing",
     "releases": "Releases",
     "personas": "Personas",
     "extensions": "Marketplace",
@@ -51,7 +52,7 @@
     "support": "Answers your questions, on every page",
     "explorer": "Thinks explorations through and makes prototypes",
     "builder": "Builds the agreed cards on the Factory board",
-    "tester": "Uses the app as one of your personas",
+    "tester": "Lives a few days in the app as one of your personas",
     "sorter": "Sorts the signals that come in"
   },
   "closed": "The factory's window seems closed. Start it again with software-factory.",

@@ -1,23 +1,35 @@
 {
   "id": "T-0003",
   "persona": "mia",
-  "task": "Try “Bring it back by email”: fill the basket on the phone and pay on the laptop",
+  "title": "Try “Bring it back by email”: fill the basket on the phone and pay on the laptop",
+  "story": "Shops on her phone on the way home and pays at night, when the kids are asleep.",
+  "days": [
+    {
+      "title": "An ordinary evening",
+      "situations": [
+        "Try “Bring it back by email”: fill the basket on the phone and pay on the laptop"
+      ]
+    }
+  ],
   "on": "proto/X-1-b",
   "status": "done",
   "started": "2026-11-16T19:00:00.000Z",
   "ended": "2026-11-16T19:09:00.000Z",
   "steps": [
     {
+      "day": 1,
       "did": "Put gloves in the basket on the phone",
       "expected": "The basket shows the gloves",
       "asExpected": true
     },
     {
+      "day": 1,
       "did": "Tapped “Send me this basket”",
       "expected": "An email with a link",
       "asExpected": true
     },
     {
+      "day": 1,
       "did": "Opened the link on the laptop",
       "expected": "The gloves are in the basket",
       "asExpected": true

@@ -11,6 +11,7 @@ import { factory } from "@/extensions/factory/index";
 import { personas } from "@/extensions/personas/index";
 import { releases } from "@/extensions/releases/index";
 import { signals } from "@/extensions/signals/index";
+import { testing } from "@/extensions/testing/index";
 import {
   type ExtensionPage,
   type HomeBlocks,
@@ -22,6 +23,7 @@ const MODULES: readonly PageModule[] = [
   signals,
   explorations,
   factory,
+  testing,
   releases,
   personas,
 ];
