@@ -13,6 +13,9 @@ import {
   thingOf,
   unlinked,
   withOptions,
+  withPoints,
+  pointsFor,
+  type Point,
   withoutThing,
   withThing,
 } from "./board-things.ts";
@@ -28,6 +31,7 @@ export type Act =
       title: string;
       options: Partial<Option>[];
       recommended?: string;
+      points?: Point[];
     } & From)
   | {
       act: "change";
@@ -38,6 +42,8 @@ export type Act =
       options?: Partial<Option>[];
       removeOptions?: string[];
       recommended?: string;
+      // The whole table again: every point, each with its cells.
+      points?: Point[];
     }
   | { act: "remove"; id: string }
   | { act: "link"; from: string; to: string; label?: string }
@@ -99,14 +105,27 @@ function changed(board: Board, act: Change): Done {
   )
     next.title = act.title.trim();
   if (next.kind === "diagram" && act.diagram) next.diagram = act.diagram;
-  if (next.kind === "choice") {
-    next.options = choiceOptions(board, next.options, act);
-    const recommended = recommendedOf(next.options, act.recommended);
-    if (recommended) next.recommended = recommended;
-    else if (!next.options.some((one) => one.key === next.recommended))
-      delete next.recommended;
-  }
+  if (next.kind === "choice") changedChoice(board, next, act);
   return { board: withThing(board, next), said: `Changed ${act.id}.` };
+}
+
+// A choice's options, its points (the whole table again, or the cells of
+// options still there) and the option recommended, changed in place.
+function changedChoice(
+  board: Board,
+  next: Extract<Thing, { kind: "choice" }>,
+  act: Change,
+): void {
+  next.options = choiceOptions(board, next.options, act);
+  const points = act.points
+    ? withPoints(next.options, act.points)
+    : pointsFor(next.options, next.points ?? []);
+  if (points.length > 0) next.points = points;
+  else delete next.points;
+  const recommended = recommendedOf(next.options, act.recommended);
+  if (recommended) next.recommended = recommended;
+  else if (!next.options.some((one) => one.key === next.recommended))
+    delete next.recommended;
 }
 
 function newChoice(
@@ -116,12 +135,14 @@ function newChoice(
 ): Thing {
   const options = withOptions([], act.options);
   const recommended = recommendedOf(options, act.recommended);
+  const points = withPoints(options, act.points ?? []);
   return {
     id: newId(board, "choice"),
     kind: "choice",
     ...fresh(by),
     title: act.title.trim(),
     options,
+    ...(points.length > 0 ? { points } : {}),
     chosen: null,
     ...(recommended ? { recommended } : {}),
   };

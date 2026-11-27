@@ -16,7 +16,8 @@ Explorations until someone explores it.
 
 Each exploration has one board, a **whiteboard** to think on (React Flow, pan
 and zoom). On it: the problem, what was heard, choices with options A, B,
-C and Doodle's recommendation, one living diagram (Mermaid), rare notes, the
+C and Doodle's recommendation (with their trade-offs, the options side by
+side in a table: a row per point, such as cost or work, a cell per option), one living diagram (Mermaid), rare notes, the
 prototype, and what the team adds themselves (pictures, links, notes, sketch
 cards and pen marks, below). Arrows join things,
 with short labels. Each thing is a **sketch** or **agreed**. The board is
