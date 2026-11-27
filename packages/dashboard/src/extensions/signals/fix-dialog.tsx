@@ -186,7 +186,8 @@ function Choices({
       {ready && correcting && (
         <Correction value={correction} onChange={setCorrection} />
       )}
-      <div className="flex flex-wrap items-center gap-2.5">
+      {/* Always in view at the bottom, however long the plan is. */}
+      <div className="sticky -bottom-6 -mx-6 -mb-6 flex flex-wrap items-center gap-2.5 border-t border-line-soft bg-card px-6 py-4">
         {correcting ? (
           <Button
             size="pill"
