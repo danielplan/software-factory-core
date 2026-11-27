@@ -14,7 +14,10 @@ type Issue = {
 };
 export type Item = { id: string; status: string; issue: Issue | null };
 
-export const ITEMS = `id items(first: 100) { nodes { id
+// One page of the board's items: a board shows at most 100 at a time, so
+// the next page starts after the last one read (`after`).
+const itemsAfter = (after: string | null) =>
+  `id items(${after ? "first: 100, after: " + JSON.stringify(after) : "first: 100"}) { pageInfo { hasNextPage endCursor } nodes { id
   fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
   content { ... on Issue { number title url state repository { nameWithOwner } labels(first: 20) { nodes { name } } blockedBy(first: 20) { nodes { number state } } } } } }`;
 
@@ -34,7 +37,13 @@ type Node = {
 export type ProjectAnswer = {
   data?: {
     repositoryOwner?: {
-      projectV2?: { id: string; items: { nodes: Node[] } } | null;
+      projectV2?: {
+        id: string;
+        items: {
+          nodes: Node[];
+          pageInfo?: { hasNextPage: boolean; endCursor: string | null };
+        };
+      } | null;
     };
   };
 };
@@ -64,22 +73,30 @@ function issueOf(content: Node["content"]): Issue | null {
 
 export type Project = { id: string; items: Item[] };
 
-// The board's id and its items, each with its column and issue.
+// The board's id and all its items, each with its column and issue, read a
+// page of 100 at a time.
 export async function readProject(
   gh: (args: string[]) => Promise<string>,
   owner: string,
   board: number,
 ): Promise<Project> {
   const number = String(board);
-  const read = JSON.parse(
-    await gh([
-      "api",
-      "graphql",
-      "-f",
-      `query={ repositoryOwner(login: ${JSON.stringify(owner)}) { ... on User { projectV2(number: ${number}) { ${ITEMS} } } ... on Organization { projectV2(number: ${number}) { ${ITEMS} } } } }`,
-    ]),
-  ) as ProjectAnswer;
-  const found = read.data?.repositoryOwner?.projectV2;
-  if (!found) throw new Refused(`There is no board ${number} of ${owner}.`);
-  return { id: found.id, items: found.items.nodes.map(itemOf) };
+  const items: Item[] = [];
+  for (let after: string | null = null; ;) {
+    const page = itemsAfter(after);
+    const read = JSON.parse(
+      await gh([
+        "api",
+        "graphql",
+        "-f",
+        `query={ repositoryOwner(login: ${JSON.stringify(owner)}) { ... on User { projectV2(number: ${number}) { ${page} } } ... on Organization { projectV2(number: ${number}) { ${page} } } } }`,
+      ]),
+    ) as ProjectAnswer;
+    const found = read.data?.repositoryOwner?.projectV2;
+    if (!found) throw new Refused(`There is no board ${number} of ${owner}.`);
+    items.push(...found.items.nodes.map(itemOf));
+    const next = found.items.pageInfo;
+    if (!next?.hasNextPage || !next.endCursor) return { id: found.id, items };
+    after = next.endCursor;
+  }
 }
