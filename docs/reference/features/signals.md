@@ -36,9 +36,16 @@ posts to personas.
 
 ## What the team does with one
 
-- **Fix:** a card on the team's board, in To do, through the `tasks` slot,
-  with the signal's id in a hidden mark; the signal goes with it. The row
-  then shows the card's column.
+- **Fix:** first a popup where Bolt, the builder, takes a quick read-only
+  look at the code (`fix-plan.ts`, guide `packages/skills/guides/fix-plan.md`)
+  and says what it would do: what happens, the likely cause, what it would
+  change, how we will know. **Looks right** makes a card on the team's
+  board, in To do, through the `tasks` slot, with that plan as the card's
+  agreed plan (so the builder does not plan again) and the signal's id in a
+  hidden mark; **Change** asks Bolt to change the plan; **Cancel** makes
+  nothing. A card is made once: a second Fix while the first is still being
+  made is refused. The signal goes with the card, and the row then shows
+  its column.
 - **Explore:** added to the exploration the check found, or a new one that
   waits, through Explorations' `ideas` plug.
 - **Dismiss.**
@@ -56,11 +63,11 @@ Sprocket can also send a signal on, to the builder or to Doodle.
 
 ## Where it lives
 
-| Part             | Where                                                                                                                                                 |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The extension    | `packages/server/src/extensions/signals/`: `sync.ts` and `live-source.ts` (the live app), `actions.ts` (Fix, Explore, Dismiss), `index.ts` (its plug) |
-| Taking events in | `packages/core/src/kobble/take-in.ts`, `packages/core/src/kobble/live.ts` (the export's schema)                                                       |
-| The page         | `packages/dashboard/src/extensions/signals/`                                                                                                          |
+| Part             | Where                                                                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The extension    | `packages/server/src/extensions/signals/`: `sync.ts` and `live-source.ts` (the live app), `actions.ts` (Fix, Explore, Dismiss), `fix-plan.ts` (Bolt's plan before Fix), `index.ts` (its plug) |
+| Taking events in | `packages/core/src/kobble/take-in.ts`, `packages/core/src/kobble/live.ts` (the export's schema)                                                                                               |
+| The page         | `packages/dashboard/src/extensions/signals/`                                                                                                                                                  |
 
 ## Checked and not checked
 

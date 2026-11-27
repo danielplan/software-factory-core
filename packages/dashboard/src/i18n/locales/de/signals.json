@@ -44,5 +44,22 @@
     "noCustomers": "Noch keine Kunden. Schick deine Personas ein paar Tage in die App: Was sie finden, erscheint hier.",
     "send": "Eine Persona testen",
     "inTest": "Im Test"
+  },
+  "fixPlan": {
+    "title": "Das beheben",
+    "looking": "Bolt schaut sich den Code an…",
+    "lookingLine": "Ein kurzer Blick, ohne etwas zu ändern, bevor etwas aufs Board kommt.",
+    "happens": "Was passiert",
+    "cause": "Wahrscheinliche Ursache",
+    "change": "Was ich ändern würde",
+    "check": "Woran wir es merken",
+    "make": "Passt, Karte anlegen",
+    "making": "Lege die Karte an…",
+    "correct": "Ändern",
+    "correctLabel": "Was soll Bolt am Plan ändern?",
+    "redo": "Plan ändern",
+    "cancel": "Abbrechen",
+    "tryAgain": "Nochmal versuchen",
+    "cardTitle": "Die Karte: {{title}}"
   }
 }

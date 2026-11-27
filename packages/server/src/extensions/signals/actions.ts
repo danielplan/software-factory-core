@@ -9,12 +9,12 @@ import {
   titleOf,
 } from "@software-factory/core";
 
-import type { Cards } from "../../cards/cards.ts";
+import { type Cards, withPlan } from "../../cards/cards.ts";
 import type { IdeasPlug } from "../../plugs/ideas.ts";
 import { Refused } from "../../refused.ts";
 
 // A new signal, not handled yet.
-function fresh(store: KobbleStore, id: string): KobbleSignal {
+export function fresh(store: KobbleStore, id: string): KobbleSignal {
   const signal = store.get("signals", id);
   if (!signal) throw new Refused(`There is no signal “${id}”.`);
   if (signal.status !== "new")
@@ -22,31 +22,45 @@ function fresh(store: KobbleStore, id: string): KobbleSignal {
   return signal;
 }
 
+// The signals a card is being made for now: a second Fix while GitHub is
+// still making the first card is refused, so no card is made twice.
+const fixing = new Set<string>();
+
 // Fix: a GitHub issue on the connected board, in To do, with what the
-// signal says and where it came from; the signal goes to it.
+// signal says and where it came from, and the plan the team agreed to (the
+// card's agreed plan, so the builder does not plan again); the signal goes
+// to it.
 export async function fixSignal(
   store: KobbleStore,
   id: string,
   cards: () => Cards,
+  plan: { title: string; text: string } | null = null,
 ): Promise<KobbleSignal> {
   const signal = fresh(store, id);
-  const board = cards();
-  const card = await board.create(
-    titleOf(signal.text),
-    [
+  if (fixing.has(id))
+    throw new Refused(`A card for signal ${id} is being made already.`);
+  fixing.add(id);
+  try {
+    const body = [
       signal.text,
       "",
       `From ${[signal.source === "app" ? "the app" : signal.source, signal.persona, signal.at.slice(0, 10)].filter(Boolean).join(", ")}.`,
       "",
       `<!-- factory:kobble signal=${signal.id} -->`,
-    ].join("\n"),
-    "todo",
-  );
-  return store.put("signals", {
-    ...fresh(store, id),
-    status: "fixed",
-    to: `#${String(card.number)}`,
-  });
+    ].join("\n");
+    const card = await cards().create(
+      plan?.title ?? titleOf(signal.text),
+      plan ? withPlan(body, plan.text) : body,
+      "todo",
+    );
+    return store.put("signals", {
+      ...fresh(store, id),
+      status: "fixed",
+      to: `#${String(card.number)}`,
+    });
+  } finally {
+    fixing.delete(id);
+  }
 }
 
 export function dismissSignal(store: KobbleStore, id: string): KobbleSignal {

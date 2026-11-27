@@ -17,7 +17,13 @@ import type { Host, Served } from "../../plugs/extension.ts";
 import type { IdeasPlug } from "../../plugs/ideas.ts";
 import type { SignalsPlug } from "../../plugs/signals.ts";
 import { field } from "../../asked.ts";
-import { dismissSignal, exploreSignal, fixSignal } from "./actions.ts";
+import {
+  dismissSignal,
+  exploreSignal,
+  fixSignal,
+  fresh as signalOf,
+} from "./actions.ts";
+import { fixAskedSchema, planFix, planText } from "./fix-plan.ts";
 import { connect, disconnect } from "./connect.ts";
 import { liveSettings } from "./live-source.ts";
 import { signalsPlug as supportPlug } from "./support.ts";
@@ -168,9 +174,37 @@ function buttonRoutes(host: Host): Record<string, Route> {
       return answer;
     };
   return {
-    "POST /api/kobble/signals/fix": changing(async (body) => ({
-      signal: await fixSignal(host.store(), field(body, "id"), host.cards),
-    })),
+    // What the builder would do, before Fix makes the card (fix-plan.ts).
+    "POST /api/kobble/signals/fix-plan": (body) =>
+      kept(async () => {
+        const signal = signalOf(host.store(), field(body, "id"));
+        const test = signal.step
+          ? (host.plug("tests")?.of([signal.step.test])[0] ?? null)
+          : null;
+        const asked = fixAskedSchema.parse(body);
+        return {
+          plan: await planFix(
+            { claude: host.claude, project: host.project },
+            {
+              signal,
+              test,
+              before: asked.before,
+              correction: asked.correction,
+            },
+          ),
+        };
+      }),
+    "POST /api/kobble/signals/fix": changing(async (body) => {
+      const { plan } = fixAskedSchema.parse(body);
+      return {
+        signal: await fixSignal(
+          host.store(),
+          field(body, "id"),
+          host.cards,
+          plan ? { title: plan.title, text: planText(plan) } : null,
+        ),
+      };
+    }),
     "POST /api/kobble/signals/explore": changing((body) =>
       exploreSignal(host.store(), field(body, "id"), host.plug("ideas")),
     ),
