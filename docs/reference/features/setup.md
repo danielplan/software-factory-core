@@ -74,7 +74,8 @@ a place of its own, never by editing the core's
   is missing and never changed by the core.
 
 - **In `package.json`** (made when missing): the core pinned, lefthook at
-  the core's version, and the scripts `prepare` (`lefthook install`),
+  the core's version, and the scripts `prepare` (`lefthook install`, only in a git copy of the
+  project, so an install without git, as on a server, still finishes),
   `verify` (every product's `verify`, then the knowledge base's checks),
   `check:docs` and `check:format`. Every other key and script is the
   team's.

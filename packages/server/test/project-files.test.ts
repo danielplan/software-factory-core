@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -367,4 +367,20 @@ test("before a push, verify checks only the products the commits no remote has y
     ),
   );
   assert.deepEqual([deleted.code, deleted.ran], [0, []]);
+});
+
+test("the core's prepare script finishes where the project is installed without git, as on a server", () => {
+  const server = mkdtempSync(join(tmpdir(), "server-"));
+  const { prepare } = CORE_SCRIPTS;
+  assert.ok(prepare);
+  // No git copy and no lefthook installed: it does nothing, and npm install goes on
+  const result = spawnSync("/bin/sh", ["-c", prepare], {
+    cwd: server,
+    env: {
+      PATH: `${dirname(process.execPath)}:/usr/bin:/bin`,
+      GIT_CEILING_DIRECTORIES: tmpdir(),
+    },
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr);
 });
